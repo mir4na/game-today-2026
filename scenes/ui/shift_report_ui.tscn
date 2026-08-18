@@ -1,0 +1,197 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/shift_report_ui.gd" id="1"]
+[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
+
+[sub_resource type="StyleBoxFlat" id="ReportPanelStyle"]
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+bg_color = Color(0.0901961, 0.129412, 0.176471, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.772549, 0.639216, 0.423529, 1)
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+corner_radius_bottom_left = 9
+
+[sub_resource type="StyleBoxFlat" id="MetricCardStyle"]
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+bg_color = Color(0.133333, 0.184314, 0.239216, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.384314, 0.458824, 0.545098, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="ShiftReportUI" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+theme = ExtResource("2")
+script = ExtResource("1")
+merit_value_template = "%d / %d"
+service_point_template = "SP %d"
+ledger_entry_template = "• %s"
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.01, 0.016, 0.027, 0.97)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(820, 610)
+layout_mode = 2
+theme_override_styles/panel = SubResource("ReportPanelStyle")
+
+[node name="Outer" type="VBoxContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 13
+
+[node name="Title" type="Label" parent="Center/Panel/Outer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_font_sizes/font_size = 29
+text = "DAY SHIFT REPORT"
+horizontal_alignment = 1
+
+[node name="SuccessStatus" type="Label" parent="Center/Panel/Outer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.560784, 0.827451, 0.658824, 1)
+theme_override_font_sizes/font_size = 23
+text = "PAYCHECK CLEARED"
+horizontal_alignment = 1
+
+[node name="FailureStatus" type="Label" parent="Center/Panel/Outer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.87451, 0.552941, 0.517647, 1)
+theme_override_font_sizes/font_size = 23
+text = "PAYCHECK THRESHOLD MISSED — SP 1 ISSUED"
+horizontal_alignment = 1
+
+[node name="Metrics" type="GridContainer" parent="Center/Panel/Outer"]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+columns = 3
+
+[node name="MeritCard" type="PanelContainer" parent="Center/Panel/Outer/Metrics"]
+custom_minimum_size = Vector2(245, 96)
+layout_mode = 2
+theme_override_styles/panel = SubResource("MetricCardStyle")
+
+[node name="Box" type="VBoxContainer" parent="Center/Panel/Outer/Metrics/MeritCard"]
+layout_mode = 2
+
+[node name="Caption" type="Label" parent="Center/Panel/Outer/Metrics/MeritCard/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.666667, 0.701961, 0.741176, 1)
+theme_override_font_sizes/font_size = 13
+text = "MERIT"
+horizontal_alignment = 1
+
+[node name="MeritValue" type="Label" parent="Center/Panel/Outer/Metrics/MeritCard/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_font_sizes/font_size = 25
+horizontal_alignment = 1
+
+[node name="PenaltyCard" type="PanelContainer" parent="Center/Panel/Outer/Metrics"]
+custom_minimum_size = Vector2(245, 96)
+layout_mode = 2
+theme_override_styles/panel = SubResource("MetricCardStyle")
+
+[node name="Box" type="VBoxContainer" parent="Center/Panel/Outer/Metrics/PenaltyCard"]
+layout_mode = 2
+
+[node name="Caption" type="Label" parent="Center/Panel/Outer/Metrics/PenaltyCard/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.666667, 0.701961, 0.741176, 1)
+theme_override_font_sizes/font_size = 13
+text = "PENALTY POINTS"
+horizontal_alignment = 1
+
+[node name="PenaltyValue" type="Label" parent="Center/Panel/Outer/Metrics/PenaltyCard/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_font_sizes/font_size = 25
+horizontal_alignment = 1
+
+[node name="ServicePointCard" type="PanelContainer" parent="Center/Panel/Outer/Metrics"]
+custom_minimum_size = Vector2(245, 96)
+layout_mode = 2
+theme_override_styles/panel = SubResource("MetricCardStyle")
+
+[node name="Box" type="VBoxContainer" parent="Center/Panel/Outer/Metrics/ServicePointCard"]
+layout_mode = 2
+
+[node name="Caption" type="Label" parent="Center/Panel/Outer/Metrics/ServicePointCard/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.666667, 0.701961, 0.741176, 1)
+theme_override_font_sizes/font_size = 13
+text = "WARNING STATUS"
+horizontal_alignment = 1
+
+[node name="ServicePointValue" type="Label" parent="Center/Panel/Outer/Metrics/ServicePointCard/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_font_sizes/font_size = 25
+horizontal_alignment = 1
+
+[node name="Rule" type="HSeparator" parent="Center/Panel/Outer"]
+layout_mode = 2
+
+[node name="DetailTitle" type="Label" parent="Center/Panel/Outer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_font_sizes/font_size = 17
+text = "SHIFT LEDGER"
+
+[node name="Breakdown" type="RichTextLabel" parent="Center/Panel/Outer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.866667, 0.839216, 0.792157, 1)
+theme_override_font_sizes/normal_font_size = 16
+bbcode_enabled = true
+
+[node name="ContinueButton" type="Button" parent="Center/Panel/Outer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+text = "ENTER NIGHT SERVICE"
+
+[connection signal="pressed" from="Center/Panel/Outer/ContinueButton" to="." method="_on_continue_button_pressed"]

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passenger_name = "Bima Sena"
+short_name = "Bima"
+age = 41
+occupation = "Surveyor"
+origin_station = "Dunmere"
+destination_station = "Brambleford"
+ticket_owner = "Bima Sena"
+is_dead = true
+anomaly_type = "impossible_ticket"
+current_carriage = 4
+initially_on_train = false
+ai_behavior = "wander"
+ai_interval_seconds = 15.0
+body_color = Color(0.25, 0.52, 0.62, 1)

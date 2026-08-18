@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passenger_name = "Kala Sen"
+short_name = "Kala"
+age = 45
+occupation = "Archivist"
+origin_station = "Dunmere"
+destination_station = "Dawnreach"
+ticket_owner = "Kala Sen"
+is_dead = false
+anomaly_type = "none"
+current_carriage = 2
+initially_on_train = false
+ai_behavior = "carriage_roamer"
+ai_interval_seconds = 13.0
+body_color = Color(0.48, 0.42, 0.66, 1)

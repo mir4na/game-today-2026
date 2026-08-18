@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/interactables/station_door.gd" id="1"]
+
+[sub_resource type="RectangleShape2D" id="DoorShape"]
+size = Vector2(90, 190)
+
+[node name="StationDoor" type="Area2D"]
+script = ExtResource("1")
+prompt_text = "Execute Next-Station Assignment"
+interaction_distance = 115.0
+enabled = false
+station_prompt_format = "Execute %s Assignment"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -75)
+shape = SubResource("DoorShape")

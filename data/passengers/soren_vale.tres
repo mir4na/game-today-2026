@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passenger_name = "Soren Vale"
+short_name = "Soren"
+age = 33
+occupation = "Courier"
+origin_station = "Brambleford"
+destination_station = "Mistvale"
+ticket_owner = "Soren Vale"
+is_dead = false
+anomaly_type = "none"
+current_carriage = 2
+initially_on_train = false
+ai_behavior = "restless"
+ai_interval_seconds = 8.0
+body_color = Color(0.36, 0.63, 0.59, 1)

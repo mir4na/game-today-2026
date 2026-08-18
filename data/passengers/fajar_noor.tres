@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passenger_name = "Fajar Noor"
+short_name = "Fajar"
+age = 49
+occupation = "Clockmaker"
+origin_station = "Alderwick"
+destination_station = "Cinderfield"
+ticket_owner = "Fajar Noor"
+is_dead = false
+anomaly_type = "none"
+current_carriage = 3
+ai_behavior = "wander"
+ai_interval_seconds = 15.0
+body_color = Color(0.68, 0.52, 0.28, 1)

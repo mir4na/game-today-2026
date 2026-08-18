@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passenger_name = "Oren Pike"
+short_name = "Oren"
+age = 52
+occupation = "Lamplighter"
+origin_station = "Alderwick"
+destination_station = "Eastmere"
+ticket_owner = "Oren Pike"
+is_dead = false
+anomaly_type = "none"
+current_carriage = 3
+ai_behavior = "wander"
+ai_interval_seconds = 14.0
+body_color = Color(0.46, 0.57, 0.67, 1)

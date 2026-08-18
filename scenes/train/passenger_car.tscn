@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/train/carriage.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/vector/passenger_car.svg" id="2"]
+
+[node name="PassengerCar" type="Node2D"]
+script = ExtResource("1")
+carriage_type = "passenger"
+carriage_number = 1
+
+[node name="ArtRoot" type="Node2D" parent="."]
+unique_name_in_owner = true
+
+[node name="BaseArt" type="Sprite2D" parent="ArtRoot"]
+texture = ExtResource("2")
+centered = false
+
+[node name="NightOverlay" type="Polygon2D" parent="ArtRoot"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+polygon = PackedVector2Array(6, 78, 954, 78, 954, 588, 6, 588)
+color = Color(0.0431373, 0.0705882, 0.12549, 0.68)

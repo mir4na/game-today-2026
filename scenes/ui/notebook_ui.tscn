@@ -1,0 +1,117 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/notebook_ui.gd" id="1"]
+[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
+
+[sub_resource type="StyleBoxFlat" id="NotebookPanelStyle"]
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+bg_color = Color(0.12549, 0.113725, 0.101961, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.694118, 0.545098, 0.329412, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="NotebookUI" type="Control"]
+visible = false
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+theme = ExtResource("2")
+script = ExtResource("1")
+route_stations = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere")
+passenger_empty_document = "[font_size=24][b]PASSENGERS[/b][/font_size]\n\nNo passenger records yet. Inspect people in the carriages to add their public details here."
+passenger_header_template = "[font_size=24][b]PASSENGER RECORDS — %d[/b][/font_size]\n"
+passenger_line_template = "[b]%s[/b]\nAge %d  •  %s → %s\n"
+route_document_template = "[font_size=24][b]DAY ROUTE[/b][/font_size]\n\n[font_size=26]%s[/font_size]\n\n[color=#746f69]Passed[/color]    [color=#e4bc72]Current[/color]    [color=#e7ded0]Upcoming[/color]\n\nThe playable shift begins at Alderwick and ends at Eastmere. Every station-to-station leg takes exactly one minute of unpaused play.\n\n[b]SHIFT POLICY[/b]\nApproach and inspect a passenger, then assign who will get off at the next station. At every stop, the number getting off must equal the number boarding. Earn 180 Merit before night to clear the daily paycheck threshold. Station mistakes and incorrect identities are sealed during the shift; Merit deductions, Penalty Points, and SP warnings are revealed at the day-to-night transition."
+evidence_document_template = "[font_size=24][b]EVIDENCE — THE AFTERNOON DISPATCH[/b][/font_size]\n\n%s"
+evidence_empty_document = "[font_size=24][b]EVIDENCE[/b][/font_size]\n\nNo documents collected.\n\nVisual observations are not recorded automatically."
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.025, 0.035, 0.82)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(960, 600)
+layout_mode = 2
+theme_override_styles/panel = SubResource("NotebookPanelStyle")
+
+[node name="Outer" type="VBoxContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Center/Panel/Outer"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Center/Panel/Outer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_font_sizes/font_size = 28
+text = "CONDUCTOR'S NOTEBOOK"
+
+[node name="CloseButton" type="Button" parent="Center/Panel/Outer/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "CLOSE  [TAB / ESC]"
+
+[node name="Tabs" type="HBoxContainer" parent="Center/Panel/Outer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PassengerButton" type="Button" parent="Center/Panel/Outer/Tabs"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "PASSENGERS"
+
+[node name="RouteButton" type="Button" parent="Center/Panel/Outer/Tabs"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "ROUTE"
+
+[node name="EvidenceButton" type="Button" parent="Center/Panel/Outer/Tabs"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "EVIDENCE"
+
+[node name="Content" type="RichTextLabel" parent="Center/Panel/Outer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.87451, 0.831373, 0.74902, 1)
+theme_override_font_sizes/normal_font_size = 18
+theme_override_font_sizes/bold_font_size = 20
+bbcode_enabled = true
+
+[connection signal="pressed" from="Center/Panel/Outer/Header/CloseButton" to="." method="request_close"]
+[connection signal="pressed" from="Center/Panel/Outer/Tabs/PassengerButton" to="." method="_show_passengers"]
+[connection signal="pressed" from="Center/Panel/Outer/Tabs/RouteButton" to="." method="_show_route"]
+[connection signal="pressed" from="Center/Panel/Outer/Tabs/EvidenceButton" to="." method="_show_evidence"]

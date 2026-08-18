@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640">
+  <rect x="6" y="78" width="948" height="510" fill="#272a31"/><rect x="17" y="105" width="926" height="438" fill="#b7a27d"/><rect x="17" y="105" width="926" height="20" fill="#6f4935"/>
+  <g fill="#75b7d6" stroke="#3e3330" stroke-width="8"><path d="M40 155h225v184H20z"/><rect x="292" y="170" width="174" height="145"/><rect x="650" y="180" width="176" height="124"/></g>
+  <g fill="#66899a"><path d="M26 334l65-82 68 53 79-92 24 121z"/><path d="M296 311l58-69 54 46 54-67v90z"/><path d="M654 300l58-66 54 43 56-63v86z"/></g>
+  <path d="M42 157L18 340" stroke="#403835" stroke-width="10"/><text x="55" y="370" fill="#8a6145" font-size="16" font-family="sans-serif">← FRONT</text>
+  <path d="M44 548V438l48-56h186l48 86v80z" fill="#262b30"/><g fill="#d8b35f" stroke="#161c21" stroke-width="5"><circle cx="125" cy="414" r="14"/><circle cx="175" cy="414" r="14"/><circle cx="225" cy="414" r="14"/></g>
+  <g transform="translate(342 457) scale(1.95) translate(-342 -457)" fill="#334b5b"><circle cx="342" cy="371" r="18" fill="#b98b68"/><rect x="326" y="389" width="34" height="68"/><rect x="319" y="351" width="46" height="10"/><rect x="326" y="344" width="34" height="10"/></g><text x="306" y="500" fill="#d7c89f" font-size="13" font-family="sans-serif">DRIVER</text>
+  <rect x="500" y="125" width="18" height="423" fill="#262b30"/><rect x="518" y="220" width="82" height="328" fill="#594233"/><rect x="533" y="250" width="52" height="96" fill="#263f4d"/>
+  <rect x="620" y="180" width="212" height="118" fill="#d8cba7" stroke="#47352d" stroke-width="6"/><text x="635" y="205" fill="#4b4238" font-size="13" font-family="sans-serif">ROUTE &amp; DUTY BOARD</text><path d="M646 238H805" stroke="#8b6045" stroke-width="4"/><g fill="#9e6445"><circle cx="657" cy="238" r="6"/><circle cx="700" cy="238" r="6"/><circle cx="746" cy="238" r="6"/><circle cx="792" cy="238" r="6"/></g>
+  <g fill="#654635"><rect x="625" y="322" width="255" height="25"/><rect x="644" y="347" width="26" height="201"/><rect x="846" y="347" width="26" height="201"/></g><rect x="690" y="306" width="94" height="11" fill="#d8cba7"/><text x="690" y="385" fill="#d7c89f" font-size="13" font-family="sans-serif">CONDUCTOR</text>
+  <rect x="17" y="540" width="926" height="40" fill="#593928"/><path d="M18 548H942" stroke="#d7be82" stroke-width="3"/>
+  <g stroke="#29282b" stroke-width="3" fill="#f4cf75"><path d="M250 108v35"/><circle cx="250" cy="148" r="8"/><path d="M480 108v35"/><circle cx="480" cy="148" r="8"/><path d="M710 108v35"/><circle cx="710" cy="148" r="8"/></g>
+</svg>

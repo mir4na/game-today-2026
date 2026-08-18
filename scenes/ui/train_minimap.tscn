@@ -1,0 +1,283 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/train_minimap.gd" id="1"]
+
+[node name="TrainMinimap" type="Control"]
+custom_minimum_size = Vector2(290, 64)
+mouse_filter = 2
+script = ExtResource("1")
+selected_fill = Color(0.847059, 0.709804, 0.431373, 1)
+normal_fill = Color(0.223529, 0.266667, 0.317647, 1)
+selected_marker_color = Color(0.0941176, 0.12549, 0.168627, 1)
+normal_marker_color = Color(0.941176, 0.811765, 0.552941, 1)
+
+[node name="Connectors" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Connector0" type="ColorRect" parent="Connectors"]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 19.0
+offset_right = 63.0
+offset_bottom = 21.0
+color = Color(0.54902, 0.509804, 0.454902, 1)
+
+[node name="Connector1" type="ColorRect" parent="Connectors"]
+layout_mode = 0
+offset_left = 99.0
+offset_top = 19.0
+offset_right = 106.0
+offset_bottom = 21.0
+color = Color(0.54902, 0.509804, 0.454902, 1)
+
+[node name="Connector2" type="ColorRect" parent="Connectors"]
+layout_mode = 0
+offset_left = 142.0
+offset_top = 19.0
+offset_right = 149.0
+offset_bottom = 21.0
+color = Color(0.54902, 0.509804, 0.454902, 1)
+
+[node name="Connector3" type="ColorRect" parent="Connectors"]
+layout_mode = 0
+offset_left = 185.0
+offset_top = 19.0
+offset_right = 192.0
+offset_bottom = 21.0
+color = Color(0.54902, 0.509804, 0.454902, 1)
+
+[node name="Connector4" type="ColorRect" parent="Connectors"]
+layout_mode = 0
+offset_left = 228.0
+offset_top = 19.0
+offset_right = 235.0
+offset_bottom = 21.0
+color = Color(0.54902, 0.509804, 0.454902, 1)
+
+[node name="Slot0" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 20.0
+offset_top = 8.0
+offset_right = 56.0
+offset_bottom = 60.0
+
+[node name="Box" type="ColorRect" parent="Slot0"]
+layout_mode = 0
+offset_right = 36.0
+offset_bottom = 24.0
+color = Color(0.847059, 0.709804, 0.431373, 1)
+
+[node name="MarkerLabel" type="Label" parent="Slot0/Box"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/line_spacing = -7
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Label" type="Label" parent="Slot0"]
+layout_mode = 0
+offset_top = 30.0
+offset_right = 36.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
+theme_override_font_sizes/font_size = 14
+text = "C"
+horizontal_alignment = 1
+
+[node name="Slot1" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 63.0
+offset_top = 8.0
+offset_right = 99.0
+offset_bottom = 60.0
+
+[node name="Box" type="ColorRect" parent="Slot1"]
+layout_mode = 0
+offset_right = 36.0
+offset_bottom = 24.0
+color = Color(0.223529, 0.266667, 0.317647, 1)
+
+[node name="MarkerLabel" type="Label" parent="Slot1/Box"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/line_spacing = -7
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Label" type="Label" parent="Slot1"]
+layout_mode = 0
+offset_top = 30.0
+offset_right = 36.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
+theme_override_font_sizes/font_size = 14
+text = "4"
+horizontal_alignment = 1
+
+[node name="Slot2" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 106.0
+offset_top = 8.0
+offset_right = 142.0
+offset_bottom = 60.0
+
+[node name="Box" type="ColorRect" parent="Slot2"]
+layout_mode = 0
+offset_right = 36.0
+offset_bottom = 24.0
+color = Color(0.223529, 0.266667, 0.317647, 1)
+
+[node name="MarkerLabel" type="Label" parent="Slot2/Box"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/line_spacing = -7
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Label" type="Label" parent="Slot2"]
+layout_mode = 0
+offset_top = 30.0
+offset_right = 36.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
+theme_override_font_sizes/font_size = 14
+text = "3"
+horizontal_alignment = 1
+
+[node name="Slot3" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 149.0
+offset_top = 8.0
+offset_right = 185.0
+offset_bottom = 60.0
+
+[node name="Box" type="ColorRect" parent="Slot3"]
+layout_mode = 0
+offset_right = 36.0
+offset_bottom = 24.0
+color = Color(0.223529, 0.266667, 0.317647, 1)
+
+[node name="MarkerLabel" type="Label" parent="Slot3/Box"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/line_spacing = -7
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Label" type="Label" parent="Slot3"]
+layout_mode = 0
+offset_top = 30.0
+offset_right = 36.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
+theme_override_font_sizes/font_size = 14
+text = "2"
+horizontal_alignment = 1
+
+[node name="Slot4" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 192.0
+offset_top = 8.0
+offset_right = 228.0
+offset_bottom = 60.0
+
+[node name="Box" type="ColorRect" parent="Slot4"]
+layout_mode = 0
+offset_right = 36.0
+offset_bottom = 24.0
+color = Color(0.223529, 0.266667, 0.317647, 1)
+
+[node name="MarkerLabel" type="Label" parent="Slot4/Box"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/line_spacing = -7
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Label" type="Label" parent="Slot4"]
+layout_mode = 0
+offset_top = 30.0
+offset_right = 36.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
+theme_override_font_sizes/font_size = 14
+text = "1"
+horizontal_alignment = 1
+
+[node name="Slot5" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 235.0
+offset_top = 8.0
+offset_right = 271.0
+offset_bottom = 60.0
+
+[node name="Box" type="ColorRect" parent="Slot5"]
+layout_mode = 0
+offset_right = 36.0
+offset_bottom = 24.0
+color = Color(0.223529, 0.266667, 0.317647, 1)
+
+[node name="MarkerLabel" type="Label" parent="Slot5/Box"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/line_spacing = -7
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Label" type="Label" parent="Slot5"]
+layout_mode = 0
+offset_top = 30.0
+offset_right = 36.0
+offset_bottom = 52.0
+theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
+theme_override_font_sizes/font_size = 14
+text = "K"
+horizontal_alignment = 1

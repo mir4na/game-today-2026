@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passenger_name = "Damar Vey"
+short_name = "Damar"
+age = 58
+occupation = "Shopkeeper"
+origin_station = "Alderwick"
+destination_station = "Eastmere"
+ticket_owner = "Damar Vey"
+is_dead = true
+anomaly_type = "newspaper_death"
+current_carriage = 4
+ai_behavior = "carriage_roamer"
+ai_interval_seconds = 18.0
+body_color = Color(0.47, 0.53, 0.35, 1)

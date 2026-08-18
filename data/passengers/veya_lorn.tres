@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passenger_name = "Veya Lorn"
+short_name = "Veya"
+age = 47
+occupation = "Innkeeper"
+origin_station = "Eastmere"
+destination_station = "Dawnreach"
+ticket_owner = "Veya Lorn"
+is_dead = false
+anomaly_type = "none"
+current_carriage = 3
+initially_on_train = false
+ai_behavior = "wander"
+ai_interval_seconds = 13.0
+body_color = Color(0.63, 0.56, 0.34, 1)

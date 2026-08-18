@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="DeparturePuzzleData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/departure_puzzle_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+night_stations = PackedStringArray("Mistvale", "Ashmoor", "Hearth", "Dawnreach")
+night_stop_clues = "1. The passenger whose journey should have been impossible leaves beside the passenger whose body contradicts their records.\n\n2. The passenger whose death had already been printed does not leave beside the passenger whose body contradicts their records.\n\n3. The passenger without a shadow leaves before the passenger whose ending had already been written.\n\n4. The passenger without a shadow does not leave beside the passenger carrying an impossible journey.\n\n5. The passenger whose body contradicts their records leaves before the passenger without a shadow."
+correct_passenger_by_station = {
+"Ashmoor": "Citra",
+"Dawnreach": "Damar",
+"Hearth": "Aruna",
+"Mistvale": "Bima"
+}

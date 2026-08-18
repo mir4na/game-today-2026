@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/train_ambience.gd" id="1"]
+
+[sub_resource type="AudioStreamGenerator" id="TrainAudioGenerator"]
+mix_rate = 22050.0
+buffer_length = 0.25
+
+[node name="TrainAmbience" type="AudioStreamPlayer"]
+stream = SubResource("TrainAudioGenerator")
+volume_db = -13.0
+autoplay = false
+script = ExtResource("1")

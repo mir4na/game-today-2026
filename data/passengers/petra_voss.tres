@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passenger_name = "Petra Voss"
+short_name = "Petra"
+age = 44
+occupation = "Glassworker"
+origin_station = "Alderwick"
+destination_station = "Mistvale"
+ticket_owner = "Petra Voss"
+is_dead = false
+anomaly_type = "none"
+current_carriage = 1
+ai_behavior = "still"
+body_color = Color(0.65, 0.47, 0.36, 1)

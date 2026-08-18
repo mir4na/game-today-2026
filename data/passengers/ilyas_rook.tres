@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+passenger_name = "Ilyas Rook"
+short_name = "Ilyas"
+age = 63
+occupation = "Carpenter"
+origin_station = "Alderwick"
+destination_station = "Dunmere"
+ticket_owner = "Ilyas Rook"
+is_dead = false
+anomaly_type = "none"
+current_carriage = 4
+ai_behavior = "still"
+body_color = Color(0.56, 0.43, 0.31, 1)

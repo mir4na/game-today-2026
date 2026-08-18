@@ -1,0 +1,45 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/interactables/newspaper.gd" id="1"]
+
+[sub_resource type="RectangleShape2D" id="PaperShape"]
+size = Vector2(90, 55)
+
+[node name="Newspaper" type="Area2D"]
+script = ExtResource("1")
+prompt_text = "Read Newspaper"
+interaction_distance = 105.0
+
+[node name="Visual" type="Node2D" parent="."]
+rotation = -0.08
+
+[node name="Paper" type="Polygon2D" parent="Visual"]
+polygon = PackedVector2Array(-35, -20, 35, -20, 35, 22, -35, 22)
+color = Color(0.870588, 0.827451, 0.717647, 1)
+
+[node name="Headline" type="Polygon2D" parent="Visual"]
+polygon = PackedVector2Array(-29, -14, 29, -14, 29, -7, -29, -7)
+color = Color(0.258824, 0.239216, 0.223529, 1)
+
+[node name="Line0" type="Line2D" parent="Visual"]
+points = PackedVector2Array(-28, -2, 26, -2)
+width = 2.0
+default_color = Color(0.505882, 0.47451, 0.423529, 1)
+
+[node name="Line1" type="Line2D" parent="Visual"]
+points = PackedVector2Array(-28, 4, 26, 4)
+width = 2.0
+default_color = Color(0.505882, 0.47451, 0.423529, 1)
+
+[node name="Line2" type="Line2D" parent="Visual"]
+points = PackedVector2Array(-28, 10, 26, 10)
+width = 2.0
+default_color = Color(0.505882, 0.47451, 0.423529, 1)
+
+[node name="Line3" type="Line2D" parent="Visual"]
+points = PackedVector2Array(-28, 16, 26, 16)
+width = 2.0
+default_color = Color(0.505882, 0.47451, 0.423529, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("PaperShape")

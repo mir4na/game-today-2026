@@ -1,0 +1,90 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/player/player.gd" id="1"]
+
+[sub_resource type="CapsuleShape2D" id="Capsule"]
+radius = 30.0
+height = 205.0
+
+[node name="Player" type="CharacterBody2D"]
+script = ExtResource("1")
+collision_layer = 1
+collision_mask = 0
+move_speed = 320.0
+min_x = 70.0
+max_x = 5690.0
+use_placeholder_art = true
+movement_enabled = true
+interaction_enabled = true
+
+[node name="GroundShadow" type="Polygon2D" parent="."]
+scale = Vector2(1.6, 1)
+polygon = PackedVector2Array(-24, 22, -17, 18, 17, 18, 24, 22, 17, 26, -17, 26)
+color = Color(0.03, 0.03, 0.04, 0.42)
+
+[node name="CharacterScale" type="Node2D" parent="."]
+position = Vector2(0, -13)
+scale = Vector2(1.6, 1.6)
+
+[node name="PlaceholderVisual" type="Node2D" parent="CharacterScale"]
+unique_name_in_owner = true
+
+[node name="Coat" type="Polygon2D" parent="CharacterScale/PlaceholderVisual"]
+polygon = PackedVector2Array(-20, -70, 20, -70, 20, 0, -20, 0)
+color = Color(0.141176, 0.223529, 0.290196, 1)
+
+[node name="Head" type="Polygon2D" parent="CharacterScale/PlaceholderVisual"]
+polygon = PackedVector2Array(-14, -88, -10, -101, 0, -107, 10, -101, 14, -88, 10, -75, 0, -69, -10, -75)
+color = Color(0.737255, 0.556863, 0.407843, 1)
+
+[node name="HatBrim" type="Polygon2D" parent="CharacterScale/PlaceholderVisual"]
+polygon = PackedVector2Array(-25, -108, 25, -108, 25, -97, -25, -97)
+color = Color(0.117647, 0.184314, 0.239216, 1)
+
+[node name="HatCrown" type="Polygon2D" parent="CharacterScale/PlaceholderVisual"]
+polygon = PackedVector2Array(-17, -115, 17, -115, 17, -105, -17, -105)
+color = Color(0.141176, 0.223529, 0.290196, 1)
+
+[node name="LeftArm" type="Line2D" parent="CharacterScale/PlaceholderVisual"]
+points = PackedVector2Array(-14, -61, -26, -24)
+width = 9.0
+default_color = Color(0.168627, 0.258824, 0.333333, 1)
+
+[node name="RightArm" type="Line2D" parent="CharacterScale/PlaceholderVisual"]
+points = PackedVector2Array(14, -61, 27, -28)
+width = 9.0
+default_color = Color(0.168627, 0.258824, 0.333333, 1)
+
+[node name="LeftLeg" type="Line2D" parent="CharacterScale/PlaceholderVisual"]
+points = PackedVector2Array(-9, -2, -11, 22)
+width = 10.0
+default_color = Color(0.0901961, 0.113725, 0.141176, 1)
+
+[node name="RightLeg" type="Line2D" parent="CharacterScale/PlaceholderVisual"]
+points = PackedVector2Array(9, -2, 11, 22)
+width = 10.0
+default_color = Color(0.0901961, 0.113725, 0.141176, 1)
+
+[node name="GoldTrim" type="Line2D" parent="CharacterScale/PlaceholderVisual"]
+points = PackedVector2Array(-15, -63, 15, -63)
+width = 4.0
+default_color = Color(0.839216, 0.72549, 0.427451, 1)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="CharacterScale"]
+unique_name_in_owner = true
+visible = false
+# Placeholder drawing lives on Player; replace this node's SpriteFrames for final art.
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -78)
+shape = SubResource("Capsule")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(0, -150)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+limit_left = 0
+limit_top = 0
+limit_right = 5760
+limit_bottom = 720
+enabled = true

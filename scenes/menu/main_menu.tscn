@@ -1,0 +1,308 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/menu/main_menu.gd" id="1"]
+[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
+[ext_resource type="Texture2D" path="res://assets/vector/main_menu_backdrop.svg" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/main/main.tscn" id="4"]
+
+[sub_resource type="StyleBoxFlat" id="MenuPanelStyle"]
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+bg_color = Color(0.055, 0.075, 0.105, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.705882, 0.580392, 0.384314, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="SettingsPanelStyle"]
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+bg_color = Color(0.055, 0.075, 0.105, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.529412, 0.607843, 0.698039, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2")
+script = ExtResource("1")
+game_scene = ExtResource("4")
+volume_value_template = "%d%%"
+default_volume = 80.0
+default_fullscreen = true
+default_vsync = true
+
+[node name="Backdrop" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="SafeMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 64
+theme_override_constants/margin_top = 54
+theme_override_constants/margin_right = 64
+theme_override_constants/margin_bottom = 50
+
+[node name="Layout" type="HBoxContainer" parent="SafeMargin"]
+layout_mode = 2
+theme_override_constants/separation = 70
+
+[node name="TitleBlock" type="VBoxContainer" parent="SafeMargin/Layout"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Eyebrow" type="Label" parent="SafeMargin/Layout/TitleBlock"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.682353, 0.592157, 0.454902, 1)
+theme_override_font_sizes/font_size = 16
+text = "A CONDUCTOR'S LAST ROUTE"
+
+[node name="GameTitle" type="Label" parent="SafeMargin/Layout/TitleBlock"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.937255, 0.839216, 0.623529, 1)
+theme_override_constants/line_spacing = -8
+theme_override_font_sizes/font_size = 70
+text = "WHERE DO\nYOU BELONG"
+
+[node name="Subtitle" type="Label" parent="SafeMargin/Layout/TitleBlock"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.772549, 0.756863, 0.721569, 1)
+theme_override_font_sizes/font_size = 20
+text = "The dead do not always know\nwhere they are meant to leave."
+
+[node name="Route" type="Label" parent="SafeMargin/Layout/TitleBlock"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.505882, 0.490196, 0.466667, 1)
+theme_override_font_sizes/font_size = 13
+text = "MISTVALE  ·  ASHMOOR  ·  HEARTH  ·  DAWNREACH"
+
+[node name="RightStack" type="Control" parent="SafeMargin/Layout"]
+custom_minimum_size = Vector2(450, 590)
+layout_mode = 2
+
+[node name="MenuPanel" type="PanelContainer" parent="SafeMargin/Layout/RightStack"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("MenuPanelStyle")
+
+[node name="MenuBox" type="VBoxContainer" parent="SafeMargin/Layout/RightStack/MenuPanel"]
+layout_mode = 2
+theme_override_constants/separation = 17
+alignment = 1
+
+[node name="Header" type="Label" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_font_sizes/font_size = 24
+text = "BEGIN YOUR SHIFT"
+horizontal_alignment = 1
+
+[node name="Rule" type="HSeparator" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+
+[node name="StartButton" type="Button" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+focus_neighbor_top = NodePath("../QuitButton")
+focus_neighbor_bottom = NodePath("../SettingsButton")
+theme_override_font_sizes/font_size = 20
+text = "START"
+
+[node name="SettingsButton" type="Button" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+focus_neighbor_top = NodePath("../StartButton")
+focus_neighbor_bottom = NodePath("../QuitButton")
+theme_override_font_sizes/font_size = 20
+text = "SETTINGS"
+
+[node name="QuitButton" type="Button" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+focus_neighbor_top = NodePath("../SettingsButton")
+focus_neighbor_bottom = NodePath("../StartButton")
+theme_override_font_sizes/font_size = 20
+text = "QUIT"
+
+[node name="Hint" type="Label" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.556863, 0.576471, 0.6, 1)
+theme_override_font_sizes/font_size = 13
+text = "Use mouse, arrows, or Tab to navigate."
+horizontal_alignment = 1
+
+[node name="SettingsPanel" type="PanelContainer" parent="SafeMargin/Layout/RightStack"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("SettingsPanelStyle")
+
+[node name="SettingsBox" type="VBoxContainer" parent="SafeMargin/Layout/RightStack/SettingsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 17
+
+[node name="Header" type="Label" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_font_sizes/font_size = 26
+text = "SETTINGS"
+horizontal_alignment = 1
+
+[node name="Description" type="Label" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.905882, 0.878431, 0.823529, 1)
+theme_override_font_sizes/font_size = 14
+text = "Audio and display settings are saved automatically."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="VolumeTitle" type="Label" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_font_sizes/font_size = 16
+text = "MASTER VOLUME"
+
+[node name="VolumeRow" type="HBoxContainer" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="VolumeSlider" type="HSlider" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox/VolumeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_neighbor_top = NodePath("../../SettingsBackButton")
+focus_neighbor_bottom = NodePath("../../DisplayMode")
+max_value = 100.0
+step = 1.0
+value = 80.0
+
+[node name="VolumeValue" type="Label" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox/VolumeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(55, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.905882, 0.878431, 0.823529, 1)
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 2
+
+[node name="DisplayTitle" type="Label" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_font_sizes/font_size = 16
+text = "DISPLAY MODE"
+
+[node name="DisplayMode" type="OptionButton" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+focus_neighbor_top = NodePath("VolumeRow/VolumeSlider")
+focus_neighbor_bottom = NodePath("VsyncToggle")
+item_count = 2
+popup/item_0/text = "Windowed"
+popup/item_0/id = 0
+popup/item_1/text = "Fullscreen"
+popup/item_1/id = 1
+
+[node name="VsyncToggle" type="CheckButton" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+focus_neighbor_top = NodePath("DisplayMode")
+focus_neighbor_bottom = NodePath("SettingsBackButton")
+text = "Vertical Sync"
+button_pressed = true
+
+[node name="Spacer" type="Control" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SettingsBackButton" type="Button" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+focus_neighbor_top = NodePath("VsyncToggle")
+focus_neighbor_bottom = NodePath("VolumeRow/VolumeSlider")
+text = "SAVE & BACK  [ESC]"
+
+[node name="Version" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -38.0
+offset_right = 390.0
+offset_bottom = -12.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.466667, 0.486275, 0.517647, 1)
+theme_override_font_sizes/font_size = 12
+text = "VERTICAL SLICE  ·  GODOT 4.7"
+
+[node name="Fade" type="ColorRect" parent="."]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[connection signal="pressed" from="SafeMargin/Layout/RightStack/MenuPanel/MenuBox/StartButton" to="." method="_start_game"]
+[connection signal="pressed" from="SafeMargin/Layout/RightStack/MenuPanel/MenuBox/SettingsButton" to="." method="_show_settings"]
+[connection signal="pressed" from="SafeMargin/Layout/RightStack/MenuPanel/MenuBox/QuitButton" to="." method="_quit_game"]
+[connection signal="value_changed" from="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox/VolumeRow/VolumeSlider" to="." method="_on_volume_changed"]
+[connection signal="item_selected" from="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox/DisplayMode" to="." method="_on_display_mode_selected"]
+[connection signal="toggled" from="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox/VsyncToggle" to="." method="_on_vsync_toggled"]
+[connection signal="pressed" from="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox/SettingsBackButton" to="." method="_save_and_close_settings"]
