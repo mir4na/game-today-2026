@@ -78,7 +78,8 @@ grow_vertical = 2
 mouse_filter = 0
 theme = ExtResource("2")
 script = ExtResource("1")
-instruction_template = "%d passengers remain aboard. Enter one suspected abnormal passenger per line.\nType a short name, then press SPACE to continue. Up to five entries are checked before paycheck review."
+notes_instruction_template = "%d passengers are currently aboard. Keep a private list of suspected abnormal passengers.\nType one SHORT NAME per line and press SPACE to move to the next line. ESC returns to the train; your notes are kept."
+review_instruction_template = "%d passengers remain aboard. Review your five-line abnormal passenger note before paycheck evaluation.\nPress SPACE after each short name, then submit the report when ready."
 
 [node name="Shade" type="ColorRect" parent="."]
 layout_mode = 1
@@ -110,7 +111,7 @@ theme_override_constants/separation = 13
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 30
-text = "ABNORMAL PASSENGER REPORT"
+text = "ABNORMAL PASSENGER NOTES"
 horizontal_alignment = 1
 
 [node name="InstructionLabel" type="Label" parent="Center/Panel/Outer"]
@@ -263,10 +264,11 @@ layout_mode = 2
 theme_override_constants/separation = 12
 
 [node name="CancelButton" type="Button" parent="Center/Panel/Outer/ActionRow"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 54)
 layout_mode = 2
 size_flags_horizontal = 3
-text = "CLOSE TYPEWRITER"
+text = "BACK TO TRAIN  [ESC]"
 
 [node name="ConfirmButton" type="Button" parent="Center/Panel/Outer/ActionRow"]
 unique_name_in_owner = true

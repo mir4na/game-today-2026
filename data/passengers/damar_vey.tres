@@ -4,13 +4,13 @@
 
 [resource]
 script = ExtResource("1")
-passenger_name = "Damar Vey"
+passenger_name = "Damar"
 short_name = "Damar"
 age = 58
 occupation = "Shopkeeper"
 origin_station = "Alderwick"
 destination_station = "Eastmere"
-ticket_owner = "Damar Vey"
+ticket_owner = "Damar"
 is_dead = true
 anomaly_type = "newspaper_death"
 current_carriage = 4

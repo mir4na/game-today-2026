@@ -14,7 +14,6 @@ signal station_assignment_toggled(passenger_name: String, should_assign: bool)
 @export var assignment_status_template: String
 @export var assign_button_text: String
 @export var remove_assignment_text: String
-@export var assignment_limit_text: String
 
 var _data: PassengerData
 @onready var _title: Label = %Title
@@ -58,14 +57,14 @@ func show_newspaper(document: String) -> void:
 	_content.text = document
 	show()
 
-func configure_station_assignment(next_station: String, is_assigned: bool, assigned_count: int, maximum_assignments: int) -> void:
+func configure_station_assignment(next_station: String, is_assigned: bool, assigned_count: int) -> void:
 	if _data == null:
 		return
 	_is_assigned_to_next_station = is_assigned
-	_assignment_status.text = assignment_status_template % [next_station.to_upper(), assigned_count, maximum_assignments]
+	_assignment_status.text = assignment_status_template % [next_station.to_upper(), assigned_count]
 	_assignment_button.text = remove_assignment_text if is_assigned else assign_button_text
-	_assignment_button.disabled = not is_assigned and assigned_count >= maximum_assignments
-	_assignment_error.text = assignment_limit_text if _assignment_button.disabled else ""
+	_assignment_button.disabled = false
+	_assignment_error.text = ""
 	_assignment_panel.show()
 
 func show_assignment_error(message: String) -> void:

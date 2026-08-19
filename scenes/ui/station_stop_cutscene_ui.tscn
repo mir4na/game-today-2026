@@ -1,7 +1,170 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/station_stop_cutscene_ui.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/ui/station_cutscene_actor.tscn" id="2"]
+
+[sub_resource type="Animation" id="Animation_letterbox_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TopBar:scale:y")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("BottomBar:scale:y")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("HeadingLabel:modulate:a")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("StatusLabel:modulate:a")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_letterbox_in"]
+resource_name = "letterbox_in"
+length = 0.35
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TopBar:scale:y")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.09, 0.18, 0.27, 0.35),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [0.0, 0.59, 0.885, 0.988, 1.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("BottomBar:scale:y")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.09, 0.18, 0.27, 0.35),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [0.0, 0.59, 0.885, 0.988, 1.0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("HeadingLabel:modulate:a")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.08, 0.24, 0.35),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [0.0, 0.0, 0.68, 1.0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("StatusLabel:modulate:a")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.08, 0.24, 0.35),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [0.0, 0.0, 0.68, 1.0]
+}
+
+[sub_resource type="Animation" id="Animation_letterbox_out"]
+resource_name = "letterbox_out"
+length = 0.35
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TopBar:scale:y")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.08, 0.17, 0.26, 0.35),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [1.0, 0.988, 0.885, 0.59, 0.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("BottomBar:scale:y")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.08, 0.17, 0.26, 0.35),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [1.0, 0.988, 0.885, 0.59, 0.0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("HeadingLabel:modulate:a")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.12, 0.22),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [1.0, 0.32, 0.0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("StatusLabel:modulate:a")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.12, 0.22),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [1.0, 0.32, 0.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_letterbox"]
+_data = {
+&"RESET": SubResource("Animation_letterbox_reset"),
+&"letterbox_in": SubResource("Animation_letterbox_in"),
+&"letterbox_out": SubResource("Animation_letterbox_out")
+}
 
 [node name="StationStopCutsceneUI" type="Control"]
 visible = false
@@ -16,8 +179,10 @@ mouse_filter = 0
 script = ExtResource("1")
 opening_heading_template = "%s • INITIAL BOARDING"
 exchange_heading_template = "%s • PASSENGER EXCHANGE"
-opening_status_template = "%d BOARDING     [E / SPACE] SKIP"
-exchange_status_template = "%d OFF  •  %d ON     [E / SPACE] SKIP"
+opening_status_template = "%d BOARDING     [E / SPACE / ESC] SKIP"
+exchange_status_template = "%d OFF  •  %d ON     [E / SPACE / ESC] SKIP"
+letterbox_in_animation = &"letterbox_in"
+letterbox_out_animation = &"letterbox_out"
 fallback_actor_color = Color(0.721569, 0.666667, 0.568627, 1)
 
 [node name="Streaks" type="Node2D" parent="."]
@@ -104,25 +269,14 @@ unique_name_in_owner = true
 
 [node name="TopBar" type="ColorRect" parent="."]
 unique_name_in_owner = true
-layout_mode = 0
-offset_right = 1280.0
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
 offset_bottom = 68.0
+grow_horizontal = 2
+scale = Vector2(1, 0)
 mouse_filter = 2
 color = Color(0.0235294, 0.0313725, 0.0470588, 1)
-
-[node name="HeadingLabel" type="Label" parent="TopBar"]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.941176, 0.811765, 0.552941, 1)
-theme_override_font_sizes/font_size = 23
-text = "ALDERWICK • INITIAL BOARDING"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="BottomBar" type="ColorRect" parent="."]
 unique_name_in_owner = true
@@ -134,19 +288,42 @@ offset_top = -68.0
 grow_horizontal = 2
 grow_vertical = 0
 pivot_offset = Vector2(0, 68)
+scale = Vector2(1, 0)
 mouse_filter = 2
 color = Color(0.0235294, 0.0313725, 0.0470588, 1)
 
-[node name="StatusLabel" type="Label" parent="BottomBar"]
+[node name="HeadingLabel" type="Label" parent="."]
 unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = 10
 anchor_right = 1.0
-anchor_bottom = 1.0
+offset_bottom = 68.0
 grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.847059, 0.815686, 0.760784, 1)
-theme_override_font_sizes/font_size = 15
-text = "10 BOARDING     [E / SPACE] SKIP"
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.941176, 0.811765, 0.552941, 1)
+theme_override_font_sizes/font_size = 23
+text = "ALDERWICK • INITIAL BOARDING"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="."]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 12
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -68.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.847059, 0.815686, 0.760784, 1)
+theme_override_font_sizes/font_size = 15
+text = "10 BOARDING     [E / SPACE / ESC] SKIP"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LetterboxAnimation" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries/ = SubResource("AnimationLibrary_letterbox")

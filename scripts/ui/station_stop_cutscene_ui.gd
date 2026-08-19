@@ -13,8 +13,11 @@ const OPENING_DEPARTURE_START: float = 4.9
 @export_category("Scene Copy")
 @export var opening_heading_template: String = "%s • INITIAL BOARDING"
 @export var exchange_heading_template: String = "%s • PASSENGER EXCHANGE"
-@export var opening_status_template: String = "%d BOARDING     [E / SPACE] SKIP"
-@export var exchange_status_template: String = "%d OFF  •  %d ON     [E / SPACE] SKIP"
+@export var opening_status_template: String = "%d BOARDING     [E / SPACE / ESC] SKIP"
+@export var exchange_status_template: String = "%d OFF  •  %d ON     [E / SPACE / ESC] SKIP"
+@export_category("Letterbox Animation")
+@export var letterbox_in_animation: StringName = &"letterbox_in"
+@export var letterbox_out_animation: StringName = &"letterbox_out"
 @export_category("Runtime Presentation")
 @export var fallback_actor_color: Color
 
@@ -28,16 +31,17 @@ var _opening_mode: bool = false
 var _duration: float = STOP_DURATION
 var _arrival_end: float = STOP_ARRIVAL_END
 var _departure_start: float = STOP_DEPARTURE_START
+var _letterbox_exit_started: bool = false
+var _letterbox_exit_lead_time: float = 0.0
 
 @onready var _actor_slots: Array[Node2D] = [
 	%Actor0, %Actor1, %Actor2, %Actor3, %Actor4,
 	%Actor5, %Actor6, %Actor7, %Actor8, %Actor9,
 ]
 @onready var _streaks: Array[Line2D] = [%Streak0, %Streak1, %Streak2, %Streak3, %Streak4, %Streak5]
-@onready var _top_bar: ColorRect = %TopBar
-@onready var _bottom_bar: ColorRect = %BottomBar
 @onready var _heading_label: Label = %HeadingLabel
 @onready var _status_label: Label = %StatusLabel
+@onready var _letterbox_animation: AnimationPlayer = %LetterboxAnimation
 
 func play_stop(station_name: String, departing_actors: Array[Dictionary], boarding_actors: Array[Dictionary], door_positions: PackedVector2Array = PackedVector2Array()) -> void:
 	_opening_mode = false
@@ -60,8 +64,12 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 	_door_screen_positions = door_positions.duplicate()
 	_elapsed = 0.0
 	_finished = false
+	_letterbox_exit_started = false
+	_letterbox_exit_lead_time = _get_animation_duration(letterbox_out_animation)
+	_update_scene_copy()
 	show()
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_play_letterbox_animation(letterbox_in_animation)
 	_update_visuals()
 
 func skip_sequence() -> void:
@@ -71,6 +79,9 @@ func skip_sequence() -> void:
 func _process(delta: float) -> void:
 	_elapsed += delta
 	_update_visuals()
+	if not _letterbox_exit_started and _elapsed >= maxf(_duration - _letterbox_exit_lead_time, 0.0):
+		_letterbox_exit_started = true
+		_play_letterbox_animation(letterbox_out_animation)
 	if _elapsed >= _duration:
 		_finish_sequence()
 
@@ -85,6 +96,7 @@ func _finish_sequence() -> void:
 	if _finished:
 		return
 	_finished = true
+	_letterbox_animation.stop()
 	process_mode = Node.PROCESS_MODE_DISABLED
 	hide()
 	sequence_finished.emit()
@@ -92,7 +104,22 @@ func _finish_sequence() -> void:
 func _update_visuals() -> void:
 	_update_exchange_actors()
 	_update_departure_streaks()
-	_update_letterbox()
+
+func _update_scene_copy() -> void:
+	_heading_label.text = opening_heading_template % _station_name.to_upper() if _opening_mode else exchange_heading_template % _station_name.to_upper()
+	_status_label.text = opening_status_template % _boarding_actors.size() if _opening_mode else exchange_status_template % [_departing_actors.size(), _boarding_actors.size()]
+
+func _play_letterbox_animation(animation_name: StringName) -> void:
+	if not _letterbox_animation.has_animation(animation_name):
+		push_warning("Missing cutscene animation: %s" % animation_name)
+		return
+	_letterbox_animation.play(animation_name)
+
+func _get_animation_duration(animation_name: StringName) -> float:
+	if not _letterbox_animation.has_animation(animation_name):
+		return 0.0
+	var animation: Animation = _letterbox_animation.get_animation(animation_name)
+	return animation.length
 
 func _update_exchange_actors() -> void:
 	for slot: Node2D in _actor_slots:
@@ -144,17 +171,6 @@ func _update_departure_streaks() -> void:
 		var streak: Line2D = _streaks[line_index]
 		streak.position.x = fmod(_elapsed * 410.0 + line_index * 173.0, size.x + 260.0) - 260.0
 		streak.modulate.a = alpha
-
-func _update_letterbox() -> void:
-	var enter_progress: float = clampf(_elapsed / 0.35, 0.0, 1.0)
-	var exit_progress: float = clampf((_duration - _elapsed) / 0.35, 0.0, 1.0)
-	var bar_progress: float = minf(enter_progress, exit_progress)
-	_top_bar.scale.y = bar_progress
-	_bottom_bar.scale.y = bar_progress
-	_heading_label.modulate.a = bar_progress
-	_status_label.modulate.a = bar_progress
-	_heading_label.text = opening_heading_template % _station_name.to_upper() if _opening_mode else exchange_heading_template % _station_name.to_upper()
-	_status_label.text = opening_status_template % _boarding_actors.size() if _opening_mode else exchange_status_template % [_departing_actors.size(), _boarding_actors.size()]
 
 func _ease_out_cubic(value: float) -> float:
 	var clamped: float = clampf(value, 0.0, 1.0)

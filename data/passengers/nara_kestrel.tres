@@ -4,13 +4,13 @@
 
 [resource]
 script = ExtResource("1")
-passenger_name = "Nara Kestrel"
+passenger_name = "Nara"
 short_name = "Nara"
 age = 38
 occupation = "Bookbinder"
 origin_station = "Alderwick"
 destination_station = "Eastmere"
-ticket_owner = "Nara Kestrel"
+ticket_owner = "Nara"
 is_dead = false
 anomaly_type = "none"
 current_carriage = 4

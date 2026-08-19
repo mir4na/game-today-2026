@@ -4,13 +4,13 @@
 
 [resource]
 script = ExtResource("1")
-passenger_name = "Luma Orin"
+passenger_name = "Luma"
 short_name = "Luma"
 age = 29
 occupation = "Cook"
 origin_station = "Eastmere"
 destination_station = "Hearth"
-ticket_owner = "Luma Orin"
+ticket_owner = "Luma"
 is_dead = false
 anomaly_type = "none"
 current_carriage = 4

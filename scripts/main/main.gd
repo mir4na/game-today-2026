@@ -11,7 +11,6 @@ enum NewspaperEditionMode { RANDOM, FORCE_RELEVANT, FORCE_UNRELATED }
 @export var passenger_scene: PackedScene
 @export_category("Station Service")
 @export_range(1, 8, 1) var unlisted_destination_penalty_units: int = 1
-@export var incomplete_assignment_message: String = "Assign exactly %d passengers before operating the station door."
 @export_category("Newspaper")
 @export_enum("Random", "Force Relevant", "Force Unrelated") var newspaper_edition_mode: int = NewspaperEditionMode.RANDOM
 @export_range(0.0, 1.0, 0.01) var newspaper_relevant_chance: float = 0.5
@@ -31,10 +30,8 @@ const MISSED_STOP_MERIT_PENALTY: int = 10
 const MISSED_STOP_POINTS: int = 12
 const LOW_COAL_MERIT_PENALTY: int = 10
 const LOW_COAL_POINTS: int = 8
-const STATION_BOARDING_COUNT: int = 2
 const DAY_ROUTE: Array[String] = ["Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere"]
 const LEG_DEPARTURE_STATION: String = "Alderwick"
-const ROUTE_DISPLAY: String = "Alderwick → Brambleford → Cinderfield → Dunmere → Eastmere"
 const CARRIAGE_BASE_X: Dictionary = {
 	1: 3840.0,
 	2: 2880.0,
@@ -111,7 +108,7 @@ func _ready() -> void:
 	_station_door.set_station(_next_day_station())
 	_set_passenger_ai_enabled(false)
 	_active_modal = _day_intro_ui
-	_day_intro_ui.play_intro(1, LEG_DEPARTURE_STATION)
+	_day_intro_ui.play_intro(1)
 
 func _process(delta: float) -> void:
 	_set_passenger_ai_enabled(_active_modal == null and state in [GameState.DAY, GameState.SUNSET])
@@ -212,24 +209,26 @@ func _spawn_initial_passengers() -> void:
 		push_warning("The playable day roster should start with exactly ten passengers.")
 
 func _prepare_newspaper_edition() -> void:
-	var subject: PassengerData = _find_newspaper_subject()
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var subject: PassengerData = _find_newspaper_subject(rng)
 	match newspaper_edition_mode:
 		NewspaperEditionMode.FORCE_RELEVANT:
 			_newspaper_has_relevant_name = subject != null
 		NewspaperEditionMode.FORCE_UNRELATED:
 			_newspaper_has_relevant_name = false
 		_:
-			var rng := RandomNumberGenerator.new()
-			rng.randomize()
 			_newspaper_has_relevant_name = subject != null and rng.randf() < newspaper_relevant_chance
 	_newspaper_document = _inspect_ui.compose_newspaper_document(subject if _newspaper_has_relevant_name else null)
 
-func _find_newspaper_subject() -> PassengerData:
-	for resource: Resource in passenger_resources:
-		var data := resource as PassengerData
-		if data != null and data.is_dead and data.anomaly_type == "newspaper_death":
-			return data
-	return null
+func _find_newspaper_subject(rng: RandomNumberGenerator) -> PassengerData:
+	var candidates: Array[PassengerData] = []
+	for passenger: Passenger in _passengers:
+		if _is_active_passenger(passenger) and passenger.data.is_dead and passenger.data.anomaly_type == "newspaper_death":
+			candidates.append(passenger.data)
+	if candidates.is_empty():
+		return null
+	return candidates[rng.randi_range(0, candidates.size() - 1)]
 
 func _spawn_passenger(data: PassengerData, spawn_position: Vector2) -> Passenger:
 	var passenger := passenger_scene.instantiate() as Passenger
@@ -285,7 +284,7 @@ func _on_passenger_inspection(passenger: Passenger) -> void:
 	_hud.set_prompt("")
 	_inspect_ui.show_passenger(passenger.data)
 	if state in [GameState.DAY, GameState.SUNSET] and _has_next_day_station() and not _station_exchange_processed:
-		_inspect_ui.configure_station_assignment(_next_day_station(), _station_assignment.has(passenger.data.passenger_name), _station_assignment.size(), STATION_BOARDING_COUNT)
+		_inspect_ui.configure_station_assignment(_next_day_station(), _station_assignment.has(passenger.data.passenger_name), _station_assignment.size())
 
 func _on_station_assignment_toggled(passenger_name: String, should_assign: bool) -> void:
 	if state not in [GameState.DAY, GameState.SUNSET] or not _has_next_day_station() or _station_exchange_processed:
@@ -298,17 +297,14 @@ func _on_station_assignment_toggled(passenger_name: String, should_assign: bool)
 	var canonical_name: String = passenger.data.passenger_name
 	var assignment_index: int = _station_assignment.find(canonical_name)
 	if should_assign:
-		if assignment_index < 0 and _station_assignment.size() >= STATION_BOARDING_COUNT:
-			_inspect_ui.show_assignment_error("Only %d passengers can be assigned. Remove another assignment first." % STATION_BOARDING_COUNT)
-			return
 		if assignment_index < 0:
 			_station_assignment.append(canonical_name)
 	else:
 		if assignment_index >= 0:
 			_station_assignment.remove_at(assignment_index)
 	var next_station: String = _next_day_station()
-	_inspect_ui.configure_station_assignment(next_station, _station_assignment.has(canonical_name), _station_assignment.size(), STATION_BOARDING_COUNT)
-	_hud.notify("%s\n%s FOR %s • %d / %d" % [canonical_name.to_upper(), "ASSIGNED" if should_assign else "REMOVED", next_station.to_upper(), _station_assignment.size(), STATION_BOARDING_COUNT], 2.0)
+	_inspect_ui.configure_station_assignment(next_station, _station_assignment.has(canonical_name), _station_assignment.size())
+	_hud.notify("%s\n%s FOR %s • %d SELECTED" % [canonical_name.to_upper(), "ASSIGNED" if should_assign else "REMOVED", next_station.to_upper(), _station_assignment.size()], 2.0)
 	_refresh_objective()
 
 func _on_newspaper_read() -> void:
@@ -330,9 +326,6 @@ func _on_coal_added(amount: float) -> void:
 
 func _on_station_door_activated() -> void:
 	if _station_exchange_processed or not _station_arrival_announced or not _has_next_day_station():
-		return
-	if _station_assignment.size() != STATION_BOARDING_COUNT:
-		_hud.notify(incomplete_assignment_message % STATION_BOARDING_COUNT, 3.0)
 		return
 	var arrival_station: String = _next_day_station()
 	_station_exchange_processed = true
@@ -364,11 +357,6 @@ func _on_station_door_activated() -> void:
 	var boarding_actors: Array[Dictionary] = []
 	for departing_passenger: Passenger in departing:
 		var departure_carriage: int = departing_passenger.get_runtime_carriage()
-		var boarder_index: int = _find_boarder_for_carriage(available_boarders, departure_carriage)
-		if boarder_index < 0:
-			break
-		var boarder_data: PassengerData = available_boarders[boarder_index]
-		available_boarders.remove_at(boarder_index)
 		var vacated_position: Vector2 = departing_passenger.position
 		departing_actors.append({
 			"name": departing_passenger.data.passenger_name,
@@ -380,6 +368,11 @@ func _on_station_door_activated() -> void:
 			_current_station_mistake_count += distance_units
 			_performance_log.append("%s left at %s, %d stop%s from %s" % [departing_passenger.data.passenger_name, arrival_station, distance_units, "s" if distance_units != 1 else "", departing_passenger.data.destination_station])
 		departing_passenger.depart_train()
+		var boarder_index: int = _find_boarder_for_carriage(available_boarders, departure_carriage)
+		if boarder_index < 0:
+			continue
+		var boarder_data: PassengerData = available_boarders[boarder_index]
+		available_boarders.remove_at(boarder_index)
 		var boarder := _spawn_passenger(boarder_data, vacated_position)
 		_interactables.append(boarder)
 		boarding_actors.append({
@@ -439,7 +432,7 @@ func _on_station_stop_finished() -> void:
 	if finished_context == &"opening":
 		state = GameState.DAY
 		_hud.set_day_hud_visible(true)
-		_hud.notify("DEPARTING %s\nNEXT: %s • TRAVEL 01:00\nInspect passengers and assign %d exits" % [_current_day_station().to_upper(), _next_day_station().to_upper(), STATION_BOARDING_COUNT], 5.0)
+		_hud.notify("DEPARTING %s\nNEXT: %s • TRAVEL 01:00\nInspect passengers and assign departures" % [_current_day_station().to_upper(), _next_day_station().to_upper()], 5.0)
 		_update_passenger_minimap()
 		_refresh_objective()
 		_set_passenger_ai_enabled(true)
@@ -514,7 +507,7 @@ func _on_desk_interacted() -> void:
 	elif state == GameState.DEAD_SELECTION:
 		_open_dead_selection_tool()
 	elif state in [GameState.DAY, GameState.SUNSET]:
-		_hud.notify("DAY ROUTE\n%s\nCurrent: %s • Next: %s" % [ROUTE_DISPLAY, _current_day_station(), _next_day_station()], 4.0)
+		_open_abnormal_notes(false)
 
 func _open_notebook() -> void:
 	_active_modal = _notebook_ui
@@ -554,13 +547,18 @@ func _begin_dead_selection() -> void:
 	_set_player_control_for_state()
 
 func _open_dead_selection_tool() -> void:
-	if state != GameState.DEAD_SELECTION or _active_modal != null:
+	if state != GameState.DEAD_SELECTION:
+		return
+	_open_abnormal_notes(true)
+
+func _open_abnormal_notes(submission_enabled: bool) -> void:
+	if _active_modal != null:
 		return
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
 	_active_modal = _dead_selection_ui
-	_dead_selection_ui.open_selection(_get_active_passenger_data())
+	_dead_selection_ui.open_notes(_get_active_passenger_data(), submission_enabled)
 
 func _on_dead_selection_confirmed(selected_names: PackedStringArray) -> void:
 	var expected_by_name: Dictionary = {}
@@ -726,10 +724,10 @@ func _refresh_objective() -> void:
 	elif not _station_arrival_announced:
 		var next_station: String = _next_day_station()
 		var seconds_remaining: int = maxi(0, int(ceil(_next_arrival_minutes() - _day_minutes)))
-		if _station_assignment.size() == STATION_BOARDING_COUNT:
-			lines.append("✓ %d exits assigned for %s" % [STATION_BOARDING_COUNT, next_station])
+		if _station_assignment.is_empty():
+			lines.append("• Assign departures for %s [Inspect]" % next_station)
 		else:
-			lines.append("• Assign %d exits for %s [Inspect]" % [STATION_BOARDING_COUNT, next_station])
+			lines.append("• %d departure%s assigned for %s [Inspect]" % [_station_assignment.size(), "s" if _station_assignment.size() != 1 else "", next_station])
 		lines.append("• Stop %d / %d: %s  %02d:%02d" % [_route_index + 1, DAY_ROUTE.size() - 1, next_station, seconds_remaining / 60, seconds_remaining % 60])
 	elif not _station_duty_done:
 		lines.append("• Execute assignment at %s door" % _next_day_station())

@@ -13,20 +13,16 @@ const FADE_OUT_START: float = 2.25
 
 var _elapsed: float = 0.0
 var _day_number: int = 1
-var _station_name: String = "Alderwick"
 var _finished: bool = false
 
 @onready var _content: VBoxContainer = %Content
 @onready var _day_label: Label = %DayLabel
-@onready var _station_label: Label = %StationLabel
 
-func play_intro(day_number: int, station_name: String) -> void:
+func play_intro(day_number: int) -> void:
 	_day_number = maxi(1, day_number)
-	_station_name = station_name
 	_elapsed = 0.0
 	_finished = false
 	_day_label.text = day_title_template % _day_number
-	_station_label.text = _station_name.to_upper()
 	show()
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_apply_fade()

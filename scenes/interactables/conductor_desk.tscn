@@ -7,9 +7,9 @@ size = Vector2(220, 120)
 
 [node name="ConductorDesk" type="Area2D"]
 script = ExtResource("1")
-prompt_text = "Review Crew Route Ledger"
+prompt_text = "Open Abnormal Passenger Notes"
 interaction_distance = 145.0
-day_prompt = "Review Crew Route Ledger"
+day_prompt = "Open Abnormal Passenger Notes"
 manifest_prompt = "Use Abnormal Passenger Typewriter"
 night_prompt = "Open Night Drop-Off Ledger"
 

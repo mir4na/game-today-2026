@@ -41,7 +41,6 @@ passenger_resources = Array[Resource]([ExtResource("11"), ExtResource("12"), Ext
 puzzle_resource = ExtResource("17")
 passenger_scene = ExtResource("34")
 unlisted_destination_penalty_units = 1
-incomplete_assignment_message = "Assign exactly %d passengers before operating the station door."
 newspaper_edition_mode = 0
 newspaper_relevant_chance = 0.5
 

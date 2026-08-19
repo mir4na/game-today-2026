@@ -4,13 +4,13 @@
 
 [resource]
 script = ExtResource("1")
-passenger_name = "Fajar Noor"
+passenger_name = "Fajar"
 short_name = "Fajar"
 age = 49
 occupation = "Clockmaker"
 origin_station = "Alderwick"
 destination_station = "Cinderfield"
-ticket_owner = "Fajar Noor"
+ticket_owner = "Fajar"
 is_dead = false
 anomaly_type = "none"
 current_carriage = 3

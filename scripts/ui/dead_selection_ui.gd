@@ -1,6 +1,6 @@
 class_name DeadSelectionUI
 extends Control
-## Final daytime abnormal-passenger report typed from the player's own notes.
+## Persistent five-line abnormal-passenger notebook, submitted at the end of day.
 
 signal selection_confirmed(selected_names: PackedStringArray)
 signal closed
@@ -8,20 +8,28 @@ signal closed
 const MAX_IDENTIFICATIONS: int = 5
 
 @export_category("Inspector Copy")
-@export_multiline var instruction_template: String
+@export_multiline var notes_instruction_template: String
+@export_multiline var review_instruction_template: String
 
 @onready var _entries: Array[LineEdit] = [%NameEntry1, %NameEntry2, %NameEntry3, %NameEntry4, %NameEntry5]
 @onready var _instruction_label: Label = %InstructionLabel
 @onready var _error_label: Label = %ErrorLabel
+@onready var _close_button: Button = %CancelButton
 @onready var _confirm_button: Button = %ConfirmButton
+var _submission_enabled: bool = false
 
-func open_selection(passengers: Array[PassengerData]) -> void:
-	for entry: LineEdit in _entries:
-		entry.clear()
+func open_notes(passengers: Array[PassengerData], submission_enabled: bool) -> void:
+	_submission_enabled = submission_enabled
 	_error_label.text = ""
-	_instruction_label.text = instruction_template % passengers.size()
+	_instruction_label.text = (review_instruction_template if submission_enabled else notes_instruction_template) % passengers.size()
+	_confirm_button.visible = submission_enabled
 	show()
-	_entries[0].grab_focus()
+	_focus_first_available_line()
+
+func _input(event: InputEvent) -> void:
+	if visible and event.is_action_pressed(&"ui_cancel"):
+		request_close()
+		get_viewport().set_input_as_handled()
 
 func show_error(message: String) -> void:
 	_error_label.text = message
@@ -38,7 +46,7 @@ func _on_name_submitted(_text: String, index: int) -> void:
 	if index < _entries.size() - 1:
 		_entries[index + 1].grab_focus()
 	else:
-		_confirm()
+		_focus_final_action()
 
 func _advance_after_space(new_text: String, index: int) -> void:
 	if index < 0 or index >= _entries.size() or not new_text.ends_with(" "):
@@ -51,7 +59,21 @@ func _advance_after_space(new_text: String, index: int) -> void:
 	if index < _entries.size() - 1:
 		_entries[index + 1].grab_focus()
 	else:
+		_focus_final_action()
+
+func _focus_first_available_line() -> void:
+	for entry: LineEdit in _entries:
+		if entry.text.strip_edges().is_empty():
+			entry.grab_focus()
+			return
+	_entries[0].grab_focus()
+	_entries[0].caret_column = _entries[0].text.length()
+
+func _focus_final_action() -> void:
+	if _submission_enabled:
 		_confirm_button.grab_focus()
+	else:
+		_close_button.grab_focus()
 
 func _on_name_entry_1_text_changed(text: String) -> void:
 	_advance_after_space(text, 0)
@@ -84,6 +106,8 @@ func _on_name_entry_5_submitted(text: String) -> void:
 	_on_name_submitted(text, 4)
 
 func _confirm() -> void:
+	if not _submission_enabled:
+		return
 	var selected := PackedStringArray()
 	for entry: LineEdit in _entries:
 		var typed_name: String = entry.text.strip_edges()

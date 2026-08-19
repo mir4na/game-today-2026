@@ -4,13 +4,13 @@
 
 [resource]
 script = ExtResource("1")
-passenger_name = "Bima Sena"
+passenger_name = "Bima"
 short_name = "Bima"
 age = 41
 occupation = "Surveyor"
 origin_station = "Dunmere"
 destination_station = "Brambleford"
-ticket_owner = "Bima Sena"
+ticket_owner = "Bima"
 is_dead = true
 anomaly_type = "impossible_ticket"
 current_carriage = 4

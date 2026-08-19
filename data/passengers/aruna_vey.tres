@@ -4,13 +4,13 @@
 
 [resource]
 script = ExtResource("1")
-passenger_name = "Aruna Vey"
+passenger_name = "Aruna"
 short_name = "Aruna"
 age = 34
 occupation = "Tailor"
 origin_station = "Brambleford"
 destination_station = "Eastmere"
-ticket_owner = "Aruna Vey"
+ticket_owner = "Aruna"
 is_dead = true
 anomaly_type = "shadowless"
 current_carriage = 1

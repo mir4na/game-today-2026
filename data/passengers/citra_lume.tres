@@ -4,13 +4,13 @@
 
 [resource]
 script = ExtResource("1")
-passenger_name = "Citra Lume"
+passenger_name = "Citra"
 short_name = "Citra"
 age = 93
 occupation = "Retired Teacher"
 origin_station = "Cinderfield"
 destination_station = "Eastmere"
-ticket_owner = "Citra Lume"
+ticket_owner = "Citra"
 is_dead = true
 anomaly_type = "age_mismatch"
 current_carriage = 3

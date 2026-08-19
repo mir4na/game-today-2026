@@ -54,10 +54,9 @@ relevant_newspaper_template = "[font_size=28][b]LOCAL %s DIES IN MORNING FIRE[/b
 unrelated_newspaper_document = "[font_size=28][b]RETIRED HARBORMASTER DIES AT COASTAL HOME[/b][/font_size]\n\nMara Ellison, 71, was found dead at her coastal home early this morning. No passengers or railway staff were connected to the incident.\n\nAuthorities described the death as natural and closed the investigation.\n\n[font_size=15][color=#9c9386]Edition printed before the afternoon service left Alderwick.[/color][/font_size]"
 biodata_template = "[font_size=30][b]%s[/b][/font_size]\n\n[b]Age:[/b] %d\n[b]Occupation:[/b] %s\n\n[color=#c9ad79]BOARDED AT / NAIK DARI[/color]\n%s\n\n[color=#c9ad79]DESTINATION / TURUN DI[/color]\n%s"
 ticket_template = "[font_size=20][color=#c9ad79]PASSENGER TICKET[/color][/font_size]\n\n[font_size=30][b]%s[/b][/font_size]\n\n[color=#c9ad79]FROM / NAIK DARI[/color]\n%s\n\n[color=#c9ad79]TO / TURUN DI[/color]\n%s\n\n[font_size=15][color=#9c9386]Ticket holder: %s[/color][/font_size]"
-assignment_status_template = "NEXT STOP: %s   •   SELECTED %d / %d"
+assignment_status_template = "NEXT STOP: %s   •   SELECTED %d"
 assign_button_text = "ASSIGN TO DISEMBARK"
 remove_assignment_text = "CANCEL DISEMBARK"
-assignment_limit_text = "Assignment limit reached. Remove another passenger first."
 
 [node name="Shade" type="ColorRect" parent="."]
 layout_mode = 1

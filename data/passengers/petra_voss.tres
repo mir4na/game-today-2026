@@ -4,13 +4,13 @@
 
 [resource]
 script = ExtResource("1")
-passenger_name = "Petra Voss"
+passenger_name = "Petra"
 short_name = "Petra"
 age = 44
 occupation = "Glassworker"
 origin_station = "Alderwick"
 destination_station = "Mistvale"
-ticket_owner = "Petra Voss"
+ticket_owner = "Petra"
 is_dead = false
 anomaly_type = "none"
 current_carriage = 1
