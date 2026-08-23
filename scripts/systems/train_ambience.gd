@@ -1,6 +1,6 @@
 class_name TrainAmbience
 extends AudioStreamPlayer
-## Tiny procedural placeholder: low rail rumble by day, thinner wind at night.
+## Procedural rail rumble by day, blended with a thinner night wind.
 
 var night_strength: float = 0.0
 var _playback: AudioStreamGeneratorPlayback

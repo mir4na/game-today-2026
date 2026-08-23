@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c02262t1xgvem"
-path="res://.godot/imported/exterior_passenger_closed.svg-cda6e67486cf534b13c0d1978f59de23.ctex"
+uid="uid://bnios2cwcllit"
+path="res://.godot/imported/Antar kertea.png-7b3681383f56b48652797af3d105c0e3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/vector/exterior_passenger_closed.svg"
-dest_files=["res://.godot/imported/exterior_passenger_closed.svg-cda6e67486cf534b13c0d1978f59de23.ctex"]
+source_file="res://assets/kereta/Antar kertea.png"
+dest_files=["res://.godot/imported/Antar kertea.png-7b3681383f56b48652797af3d105c0e3.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

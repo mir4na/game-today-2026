@@ -411,7 +411,8 @@ func _on_nearby_interactable_changed(interactable: Interactable) -> void:
 func _update_floating_interaction_prompt() -> void:
 	if not is_instance_valid(_nearby_interactable):
 		return
-	var target_screen_position: Vector2 = get_viewport().get_canvas_transform() * _nearby_interactable.global_position
+	var target_world_position: Vector2 = _player.get_interaction_prompt_global_position()
+	var target_screen_position: Vector2 = get_viewport().get_canvas_transform() * target_world_position
 	_hud.set_prompt_target_screen_position(target_screen_position)
 
 func _on_passenger_inspection(passenger: Passenger) -> void:

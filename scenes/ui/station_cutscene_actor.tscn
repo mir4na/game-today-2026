@@ -4,12 +4,13 @@
 visible = false
 
 [node name="Shadow" type="Polygon2D" parent="."]
+position = Vector2(0, -21)
 polygon = PackedVector2Array(-43.2, 21, -24, 16, 24, 16, 43.2, 21, 24, 26, -24, 26)
 color = Color(0.035, 0.04, 0.05, 0.38)
 
 [node name="TintedVisual" type="Node2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(0, -57.5)
+position = Vector2(0, -80.5)
 
 [node name="Body" type="Polygon2D" parent="TintedVisual"]
 polygon = PackedVector2Array(-31.5, -77, 31.5, -77, 31.5, 31.5, -31.5, 31.5)

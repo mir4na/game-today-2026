@@ -1,9 +1,10 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/passenger/passenger.gd" id="1"]
+[ext_resource type="ShaderMaterial" path="res://resources/materials/interactable_outline.tres" id="2_outline"]
 
 [sub_resource type="RectangleShape2D" id="InteractionShape"]
-size = Vector2(110, 220)
+size = Vector2(110, 224)
 
 [node name="Passenger" type="Area2D"]
 script = ExtResource("1")
@@ -11,7 +12,8 @@ collision_layer = 0
 collision_mask = 0
 prompt_text = "Inspect Passenger"
 interaction_distance = 105.0
-use_placeholder_art = true
+focus_visual_path = NodePath("CharacterScale")
+focus_z_index = 100
 minimum_activity_spacing = 90.0
 baby_visual_scale = 0.68
 
@@ -20,53 +22,53 @@ unique_name_in_owner = true
 polygon = PackedVector2Array(-48, 0, -36, -6, 36, -6, 48, 0, 36, 7, -36, 7)
 color = Color(0.05, 0.05, 0.06, 0.8)
 
-[node name="CharacterScale" type="Node2D" parent="."]
-position = Vector2(0, -12.5)
+[node name="CharacterScale" type="CanvasGroup" parent="."]
+position = Vector2(0, -33.75)
+scale = Vector2(0.9, 0.9)
+material = ExtResource("2_outline")
+clear_margin = 8.0
+fit_margin = 8.0
 
-[node name="PlaceholderVisual" type="Node2D" parent="CharacterScale"]
+[node name="PassengerVisual" type="Node2D" parent="CharacterScale"]
 unique_name_in_owner = true
 
-[node name="BodyTint" type="Node2D" parent="CharacterScale/PlaceholderVisual"]
+[node name="BodyTint" type="Node2D" parent="CharacterScale/PassengerVisual"]
 unique_name_in_owner = true
 
-[node name="Body" type="Polygon2D" parent="CharacterScale/PlaceholderVisual/BodyTint"]
+[node name="Body" type="Polygon2D" parent="CharacterScale/PassengerVisual/BodyTint"]
 polygon = PackedVector2Array(-33, -132, 33, -132, 33, 0, -33, 0)
 color = Color(1, 1, 1, 1)
 
-[node name="Head" type="Polygon2D" parent="CharacterScale/PlaceholderVisual/BodyTint"]
+[node name="Head" type="Polygon2D" parent="CharacterScale/PassengerVisual/BodyTint"]
 polygon = PackedVector2Array(-21, -160.5, -15, -180, 0, -189, 15, -180, 21, -160.5, 15, -141, 0, -132, -15, -141)
 color = Color(1, 1, 1, 1)
 
-[node name="LeftArm" type="Line2D" parent="CharacterScale/PlaceholderVisual/BodyTint"]
+[node name="LeftArm" type="Line2D" parent="CharacterScale/PassengerVisual/BodyTint"]
 points = PackedVector2Array(-22.5, -66, -45, -37.5)
 width = 13.5
 default_color = Color(0.86, 0.86, 0.86, 1)
 
-[node name="RightArm" type="Line2D" parent="CharacterScale/PlaceholderVisual/BodyTint"]
+[node name="RightArm" type="Line2D" parent="CharacterScale/PassengerVisual/BodyTint"]
 points = PackedVector2Array(22.5, -66, 45, -37.5)
 width = 13.5
 default_color = Color(0.86, 0.86, 0.86, 1)
 
-[node name="LeftLeg" type="Line2D" parent="CharacterScale/PlaceholderVisual"]
+[node name="LeftLeg" type="Line2D" parent="CharacterScale/PassengerVisual"]
 points = PackedVector2Array(-18, -6, -22.5, 37.5)
 width = 15.0
 default_color = Color(0.164706, 0.160784, 0.188235, 1)
 
-[node name="RightLeg" type="Line2D" parent="CharacterScale/PlaceholderVisual"]
+[node name="RightLeg" type="Line2D" parent="CharacterScale/PassengerVisual"]
 points = PackedVector2Array(18, -6, 22.5, 37.5)
 width = 15.0
 default_color = Color(0.164706, 0.160784, 0.188235, 1)
 
-[node name="BabyMark" type="Polygon2D" parent="CharacterScale/PlaceholderVisual"]
+[node name="BabyMark" type="Polygon2D" parent="CharacterScale/PassengerVisual"]
 unique_name_in_owner = true
 visible = false
 polygon = PackedVector2Array(-9, -195, -6, -204, 0, -208.5, 6, -204, 9, -195, 6, -186, 0, -181.5, -6, -186)
 color = Color(0.847059, 0.752941, 0.607843, 1)
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="CharacterScale"]
-unique_name_in_owner = true
-visible = false
-
 [node name="InteractionShape" type="CollisionShape2D" parent="."]
-position = Vector2(0, -85)
+position = Vector2(0, -112)
 shape = SubResource("InteractionShape")

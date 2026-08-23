@@ -1,63 +1,67 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://dg5g8fm8dx45y"]
 
-[ext_resource type="Script" path="res://scripts/interactables/conductor_desk.gd" id="1"]
+[ext_resource type="Script" uid="uid://blvbwtbleinyx" path="res://scripts/interactables/conductor_desk.gd" id="1"]
+[ext_resource type="Material" path="res://resources/materials/interactable_outline.tres" id="2_outline"]
 
 [sub_resource type="RectangleShape2D" id="DeskShape"]
 size = Vector2(220, 120)
 
-[node name="ConductorDesk" type="Area2D"]
+[node name="ConductorDesk" type="Area2D" unique_id=1581011509]
 script = ExtResource("1")
-prompt_text = "Open Abnormal Passenger Notes"
-interaction_distance = 145.0
 day_prompt = "Open Abnormal Passenger Notes"
 night_prompt = "Open Night Drop-Off Ledger"
+prompt_text = "Open Abnormal Passenger Notes"
+interaction_distance = 145.0
+focus_visual_path = NodePath("AbnormalPassengerTypewriter")
 
-[node name="AbnormalPassengerTypewriter" type="Node2D" parent="."]
-position = Vector2(-5, -185)
+[node name="AbnormalPassengerTypewriter" type="CanvasGroup" parent="." unique_id=1347730817]
+material = ExtResource("2_outline")
+fit_margin = 8.0
+clear_margin = 8.0
 
-[node name="Paper" type="Polygon2D" parent="AbnormalPassengerTypewriter"]
-polygon = PackedVector2Array(-43, -84, 41, -84, 41, -34, -43, -34)
+[node name="Paper" type="Polygon2D" parent="AbnormalPassengerTypewriter" unique_id=1129371167]
 color = Color(0.901961, 0.854902, 0.737255, 1)
+polygon = PackedVector2Array(-43, -84, 41, -84, 41, -34, -43, -34)
 
-[node name="PaperLine1" type="Line2D" parent="AbnormalPassengerTypewriter"]
+[node name="PaperLine1" type="Line2D" parent="AbnormalPassengerTypewriter" unique_id=2089350316]
 points = PackedVector2Array(-34, -70, 32, -70)
 width = 2.0
 default_color = Color(0.411765, 0.360784, 0.294118, 0.75)
 
-[node name="PaperLine2" type="Line2D" parent="AbnormalPassengerTypewriter"]
+[node name="PaperLine2" type="Line2D" parent="AbnormalPassengerTypewriter" unique_id=745254870]
 points = PackedVector2Array(-34, -60, 22, -60)
 width = 2.0
 default_color = Color(0.411765, 0.360784, 0.294118, 0.75)
 
-[node name="PaperLine3" type="Line2D" parent="AbnormalPassengerTypewriter"]
+[node name="PaperLine3" type="Line2D" parent="AbnormalPassengerTypewriter" unique_id=1631743179]
 points = PackedVector2Array(-34, -50, 29, -50)
 width = 2.0
 default_color = Color(0.411765, 0.360784, 0.294118, 0.75)
 
-[node name="Frame" type="Polygon2D" parent="AbnormalPassengerTypewriter"]
-polygon = PackedVector2Array(-62, -40, 58, -40, 73, 13, -75, 13)
+[node name="Frame" type="Polygon2D" parent="AbnormalPassengerTypewriter" unique_id=597074177]
 color = Color(0.105882, 0.133333, 0.160784, 1)
+polygon = PackedVector2Array(-62, -40, 58, -40, 73, 13, -75, 13)
 
-[node name="TopTrim" type="Line2D" parent="AbnormalPassengerTypewriter"]
+[node name="TopTrim" type="Line2D" parent="AbnormalPassengerTypewriter" unique_id=1944718312]
 points = PackedVector2Array(-55, -35, 51, -35)
 width = 5.0
 default_color = Color(0.643137, 0.533333, 0.34902, 1)
 
-[node name="KeyBed" type="Polygon2D" parent="AbnormalPassengerTypewriter"]
-polygon = PackedVector2Array(-53, -23, 49, -23, 58, 4, -62, 4)
+[node name="KeyBed" type="Polygon2D" parent="AbnormalPassengerTypewriter" unique_id=950551621]
 color = Color(0.211765, 0.243137, 0.270588, 1)
+polygon = PackedVector2Array(-53, -23, 49, -23, 58, 4, -62, 4)
 
-[node name="Keys1" type="Line2D" parent="AbnormalPassengerTypewriter"]
+[node name="Keys1" type="Line2D" parent="AbnormalPassengerTypewriter" unique_id=441474517]
 points = PackedVector2Array(-43, -15, 39, -15)
 width = 4.0
 default_color = Color(0.784314, 0.729412, 0.619608, 1)
 
-[node name="Keys2" type="Line2D" parent="AbnormalPassengerTypewriter"]
+[node name="Keys2" type="Line2D" parent="AbnormalPassengerTypewriter" unique_id=796053609]
 points = PackedVector2Array(-35, -5, 32, -5)
 width = 4.0
 default_color = Color(0.784314, 0.729412, 0.619608, 1)
 
-[node name="Title" type="Label" parent="AbnormalPassengerTypewriter"]
+[node name="Title" type="Label" parent="AbnormalPassengerTypewriter" unique_id=1525877739]
 offset_left = -90.0
 offset_top = -116.0
 offset_right = 90.0
@@ -67,6 +71,6 @@ theme_override_font_sizes/font_size = 12
 text = "ABNORMALITY LOG"
 horizontal_alignment = 1
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=433162877]
 position = Vector2(0, -35)
 shape = SubResource("DeskShape")

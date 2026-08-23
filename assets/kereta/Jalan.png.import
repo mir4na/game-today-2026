@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cmwjljomt17h0"
-path="res://.godot/imported/exterior_passenger_open.svg-b790c1d24d39a1c251c364bc77c41025.ctex"
+uid="uid://d3kh2a47g41ko"
+path="res://.godot/imported/Jalan.png-197eb1c6710163b3959d6945f0c4c08e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/vector/exterior_passenger_open.svg"
-dest_files=["res://.godot/imported/exterior_passenger_open.svg-b790c1d24d39a1c251c364bc77c41025.ctex"]
+source_file="res://assets/kereta/Jalan.png"
+dest_files=["res://.godot/imported/Jalan.png-197eb1c6710163b3959d6945f0c4c08e.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dcl7yk7biqtlt"
-path="res://.godot/imported/exterior_crew_open.svg-0b1b396da0ab626ac0f1e167a45e1886.ctex"
+uid="uid://cxa3lskemwyal"
+path="res://.godot/imported/Lantai.png-620eb7b677c6911c6f448a2bb9eb8f5a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/vector/exterior_crew_open.svg"
-dest_files=["res://.godot/imported/exterior_crew_open.svg-0b1b396da0ab626ac0f1e167a45e1886.ctex"]
+source_file="res://assets/kereta/Lantai.png"
+dest_files=["res://.godot/imported/Lantai.png-620eb7b677c6911c6f448a2bb9eb8f5a.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

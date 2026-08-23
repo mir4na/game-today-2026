@@ -5,7 +5,6 @@ extends Interactable
 signal inspection_requested(passenger: Passenger)
 
 @export var data: PassengerData
-@export var use_placeholder_art: bool = true
 @export_category("Passenger AI")
 @export_range(50.0, 140.0, 5.0) var minimum_activity_spacing: float = 90.0
 @export_category("Visual Scale")
@@ -28,12 +27,12 @@ var _carriage_ranges: Dictionary = {}
 const PASSENGER_WALK_SPEED: float = 92.0
 
 @onready var _shadow: Polygon2D = %Shadow
-@onready var _placeholder_visual: Node2D = %PlaceholderVisual
+@onready var _passenger_visual: Node2D = %PassengerVisual
 @onready var _body_tint: Node2D = %BodyTint
 @onready var _baby_mark: Polygon2D = %BabyMark
-@onready var _animated_sprite: AnimatedSprite2D = %AnimatedSprite2D
 
 func _ready() -> void:
+	super._ready()
 	runtime_carriage = _carriage_from_world_x(position.x)
 	_ai_target_x = position.x
 	_rng.seed = absi(hash(data.passenger_name)) if data != null else 1
@@ -173,8 +172,7 @@ func _carriage_from_world_x(world_x: float) -> int:
 	return nearest_carriage
 
 func _update_visual() -> void:
-	_placeholder_visual.visible = data != null and not departed and use_placeholder_art
-	_animated_sprite.visible = data != null and not departed and not use_placeholder_art
+	_passenger_visual.visible = data != null and not departed
 	if data == null or departed:
 		return
 	var is_baby: bool = data.anomaly_type == "age_mismatch"
@@ -182,8 +180,8 @@ func _update_visual() -> void:
 	var body_tint: Color = data.body_color
 	body_tint.a = ghost_alpha
 	_body_tint.modulate = body_tint
-	_placeholder_visual.scale = Vector2.ONE * baby_visual_scale if is_baby else Vector2.ONE
-	_placeholder_visual.position.y = (10.0 if is_baby else 0.0) + (sin(_walk_phase) * 1.8 if _ai_walking else 0.0)
+	_passenger_visual.scale = Vector2.ONE * baby_visual_scale if is_baby else Vector2.ONE
+	_passenger_visual.position.y = (10.0 if is_baby else 0.0) + (sin(_walk_phase) * 1.8 if _ai_walking else 0.0)
 	_baby_mark.visible = is_baby
 	_shadow.visible = data.anomaly_type != "shadowless"
 	_shadow.modulate.a = 0.52 if not night_mode else 0.28

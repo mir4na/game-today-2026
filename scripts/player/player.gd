@@ -5,9 +5,14 @@ signal nearby_interactable_changed(interactable: Interactable)
 signal interaction_pressed(interactable: Interactable)
 
 @export var move_speed: float = 320.0
-@export var use_placeholder_art: bool = true
 @export var movement_enabled: bool = true
-@export var interaction_enabled: bool = true
+@export var interaction_enabled: bool = true:
+	set(value):
+		interaction_enabled = value
+		if not interaction_enabled and is_inside_tree():
+			_set_nearest(null)
+@export_category("Interaction Presentation")
+@export_node_path("Marker2D") var interaction_prompt_anchor_path: NodePath
 @export_category("Artwork Direction")
 @export var artwork_faces_left: bool = true
 @export_category("Camera Transitions")
@@ -18,10 +23,9 @@ var _nearest: Interactable
 var _facing: float = 1.0
 var _walk_time: float = 0.0
 
-@onready var animated_sprite: AnimatedSprite2D = %AnimatedSprite2D
 @onready var _static_sprite: Sprite2D = %MCVisual
-@onready var _placeholder_visual: Node2D = %PlaceholderVisual
 @onready var _camera_transition: AnimationPlayer = %CameraTransition
+@onready var _interaction_prompt_anchor: Marker2D = get_node_or_null(interaction_prompt_anchor_path) as Marker2D
 @onready var _gravity: float = float(ProjectSettings.get_setting("physics/2d/default_gravity"))
 @onready var _static_sprite_base_y: float = _static_sprite.position.y
 
@@ -51,8 +55,10 @@ func set_interactables(nodes: Array[Interactable]) -> void:
 	_update_nearest()
 
 func clear_interactable() -> void:
-	_nearest = null
-	nearby_interactable_changed.emit(null)
+	_set_nearest(null)
+
+func get_interaction_prompt_global_position() -> Vector2:
+	return _interaction_prompt_anchor.global_position if is_instance_valid(_interaction_prompt_anchor) else global_position
 
 func begin_station_cutscene_camera() -> void:
 	_play_camera_transition(cutscene_zoom_out_animation)
@@ -77,24 +83,20 @@ func _update_nearest() -> void:
 			if distance <= interactable.interaction_distance and distance < closest_distance:
 				candidate = interactable
 				closest_distance = distance
-	if candidate != _nearest:
-		_nearest = candidate
-		nearby_interactable_changed.emit(_nearest)
+	_set_nearest(candidate)
 
-func _update_visual(direction: float) -> void:
+func _set_nearest(candidate: Interactable) -> void:
+	if candidate == _nearest:
+		return
+	if is_instance_valid(_nearest):
+		_nearest.set_interaction_focus(false)
+	_nearest = candidate
+	if is_instance_valid(_nearest):
+		_nearest.set_interaction_focus(true)
+	nearby_interactable_changed.emit(_nearest)
+
+func _update_visual(_direction: float) -> void:
 	var bob: float = sin(_walk_time) * 2.0 if absf(velocity.x) > 1.0 else 0.0
-	var has_animated_art: bool = animated_sprite.sprite_frames != null
 	var flip_horizontally: bool = _facing > 0.0 if artwork_faces_left else _facing < 0.0
-	_placeholder_visual.visible = use_placeholder_art
-	_placeholder_visual.position.y = bob
-	_placeholder_visual.scale.x = -1.0 if flip_horizontally else 1.0
-	_static_sprite.visible = not use_placeholder_art and not has_animated_art
 	_static_sprite.position.y = _static_sprite_base_y + bob
 	_static_sprite.flip_h = flip_horizontally
-	animated_sprite.visible = not use_placeholder_art and has_animated_art
-	if use_placeholder_art or not has_animated_art:
-		return
-	animated_sprite.flip_h = flip_horizontally
-	var target_animation: StringName = &"walk" if absf(direction) > 0.01 else &"idle"
-	if animated_sprite.sprite_frames.has_animation(target_animation) and animated_sprite.animation != target_animation:
-		animated_sprite.play(target_animation)

@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/interactables/arrival_clock.gd" id="1"]
+[ext_resource type="ShaderMaterial" path="res://resources/materials/interactable_outline.tres" id="2_outline"]
 
 [sub_resource type="RectangleShape2D" id="ArrivalClockShape"]
 size = Vector2(214, 138)
@@ -9,10 +10,15 @@ size = Vector2(214, 138)
 script = ExtResource("1")
 prompt_text = "Check Station Arrival Clock"
 interaction_distance = 155.0
+focus_visual_path = NodePath("ConsoleClock")
+focus_z_index = 100
 clock_template = "%02d:%02d %s"
 
-[node name="ConsoleClock" type="Node2D" parent="."]
+[node name="ConsoleClock" type="CanvasGroup" parent="."]
 position = Vector2(0, -124)
+material = ExtResource("2_outline")
+clear_margin = 8.0
+fit_margin = 8.0
 
 [node name="OuterFrame" type="Polygon2D" parent="ConsoleClock"]
 polygon = PackedVector2Array(-102, -69, 102, -69, 102, 69, -102, 69)

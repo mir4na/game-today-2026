@@ -36,13 +36,13 @@ MainMenu                         application entry
 
 Main                             gameplay scene
 ├── Train                         one continuous 5,760 px level, moving left
-│   ├── ConductorCar             left/front spawn; driver controls, route ledger, and abnormal-passenger typewriter
+│   ├── ConductorCar             far left/front spawn; passenger-coach body, driver controls, route clock, and abnormal-passenger typewriter
 │   ├── PassengerCoach4..1       modular cutaway coach scenes
-│   ├── CoalCar                  far right/rear; furnace + mechanical props
-│   └── ExteriorBody             temporary world-space cutscene occluder
+│   ├── CoalCar                  far right/rear
+│   └── ExteriorSequence         scene-authored station transition controller
 ├── Passengers                   ten active Passenger instances; two replacements spawn at every day stop
-├── Player                       CharacterBody2D + Camera2D + AnimatedSprite2D hook
-├── TrainAmbience                procedural placeholder rail/night ambience
+├── Player                       CharacterBody2D + Camera2D + final conductor texture
+├── TrainAmbience                procedural rail/night ambience
 ├── HUD                          duties, live passenger-dot minimap, prompt, clock, notifications
 └── ModalLayer
 	├── DayIntroUI                 full-black DAY 1 fade title card
@@ -58,23 +58,17 @@ Main                             gameplay scene
 
 Reusable world scenes live in `scenes/train`, `scenes/player`, `scenes/passengers`, and `scenes/interactables`. UI screens live in `scenes/ui`; the ending presentation lives in `scenes/night`.
 
-Every static hierarchy and visual is scene-owned: menu panels and backdrop, HUD widgets, modal layouts, manifest rows, report cards, night-puzzle slots, train bodies, carriage interiors, cutscene actors, player/passenger placeholder geometry, interactable art, and minimap slots are visible and editable through `.tscn` nodes or scene-assigned vector textures. Button signals, focus neighbors, initial visibility/process modes, prompt copy, themes, colors, and audio-stream configuration are stored in scenes/Inspector data. Scripts bind those scene nodes and update runtime state only. Runtime `add_child()` is reserved for passenger instances created from the `passenger_scene` PackedScene assigned on `Main` in the Inspector.
+Every static hierarchy and visual is scene-owned: menu panels and backdrop, HUD widgets, modal layouts, manifest rows, report cards, night-puzzle slots, train bodies, carriage interiors, cutscene actors, player/passenger visuals, interactable art, and minimap slots are visible and editable through `.tscn` nodes or scene-assigned textures. Button signals, focus neighbors, initial visibility/process modes, prompt copy, themes, colors, and audio-stream configuration are stored in scenes/Inspector data. Scripts bind those scene nodes and update runtime state only. Runtime `add_child()` is reserved for passenger instances created from the `passenger_scene` PackedScene assigned on `Main` in the Inspector.
 
 ## Main scripts
 
 - `scripts/menu/main_menu.gd` binds the scene-authored responsive menu, applies and saves settings, and transitions into gameplay.
-- `scripts/main/main.gd` owns the `OPENING → DAY → SUNSET → DEAD_SELECTION → SHIFT_REPORT → NIGHT → NIGHT_PUZZLE → COMPLETE` state flow, the complete named daytime route, four 60-second station legs, repeated exit assignments, equal station exchanges, cutscenes, live minimap population, deferred transition penalties, Merit/SP, time, coal, and validation.
+- `scripts/main/main.gd` owns the `OPENING → DAY → SUNSET → DEAD_SELECTION → SHIFT_REPORT → NIGHT → NIGHT_PUZZLE → COMPLETE` state flow, the complete named daytime route, four 60-second station legs, repeated exit assignments, equal station exchanges, cutscenes, live minimap population, deferred transition penalties, Merit/SP, time, and validation.
 - `scripts/player/player.gd` handles horizontal `CharacterBody2D` movement, camera follow, facing, and nearest-interactable selection.
 - `scripts/train/carriage.gd` and `scripts/train/train.gd` animate the scene-authored modular carriages, day/night overlay, underframe, and train sway; their geometry and palette live in train scenes and assigned SVG textures.
 - `scripts/passenger/passenger_data.gd` is the designer-facing passenger Resource. `passenger.gd` presents it, emits inspection requests, and runs the selected ambient AI profile inside safe passenger-coach boundaries.
 - `scripts/systems/departure_puzzle_data.gd` stores the night-stop order, relational clues, and internal deceased-passenger solution. “Night drop-off” means the station where a deceased passenger leaves the night train; it is separate from their daytime ticket destination.
 - Scripts in `scripts/ui` project state into responsive Control/Container layouts and signal decisions back to `Main`.
-
-## Replacing placeholder art
-
-Player and Passenger scenes already contain scene-authored placeholder polygons plus `AnimatedSprite2D` hooks. Assign final `SpriteFrames`, provide `idle` and `walk` animations for the player, then turn off `use_placeholder_art` on the scene root. Facing and animation switching are already wired.
-
-For a train car, replace the `BaseArt` texture on its scene-owned `Sprite2D`. Furnace and newspaper placeholder parts are ordinary `Polygon2D`, `Line2D`, and `Label` children that can be hidden or replaced directly in the scene. Keep the existing roots and interaction shapes so gameplay coordinates do not change. Replace the procedural ambience by assigning a normal stream on `TrainAmbience` or replacing that scene instance.
 
 ## Adding a passenger
 

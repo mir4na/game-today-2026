@@ -95,7 +95,7 @@ corner_radius_bottom_left = 7
 layer = 10
 script = ExtResource("1")
 clock_template = "%02d:%02d %s"
-floating_prompt_screen_offset = Vector2(0, -132)
+floating_prompt_screen_offset = Vector2(0, 0)
 floating_prompt_screen_margin = Vector2(230, 64)
 
 [node name="Root" type="Control" parent="."]

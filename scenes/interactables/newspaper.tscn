@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/interactables/newspaper.gd" id="1"]
+[ext_resource type="ShaderMaterial" path="res://resources/materials/interactable_outline.tres" id="2_outline"]
 
 [sub_resource type="RectangleShape2D" id="PaperShape"]
 size = Vector2(90, 55)
@@ -9,9 +10,14 @@ size = Vector2(90, 55)
 script = ExtResource("1")
 prompt_text = "Read Newspaper"
 interaction_distance = 105.0
+focus_visual_path = NodePath("Visual")
+focus_z_index = 100
 
-[node name="Visual" type="Node2D" parent="."]
+[node name="Visual" type="CanvasGroup" parent="."]
 rotation = -0.08
+material = ExtResource("2_outline")
+clear_margin = 8.0
+fit_margin = 8.0
 
 [node name="Paper" type="Polygon2D" parent="Visual"]
 polygon = PackedVector2Array(-35, -20, 35, -20, 35, 22, -35, 22)
