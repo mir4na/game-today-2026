@@ -16,3 +16,11 @@ extends Resource
 @export_enum("still", "wander", "carriage_roamer", "window_watcher", "restless") var ai_behavior: String = "still"
 @export_range(4.0, 30.0, 1.0) var ai_interval_seconds: float = 15.0
 @export var body_color: Color = Color("8eb7c8")
+
+func get_anomaly_traits(route_stations: PackedStringArray) -> Array[StringName]:
+	var traits: Array[StringName] = []
+	if anomaly_type != "none":
+		traits.append(StringName(anomaly_type))
+	if not route_stations.has(destination_station):
+		traits.append(&"unlisted_destination")
+	return traits

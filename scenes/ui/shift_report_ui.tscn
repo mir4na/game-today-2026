@@ -46,9 +46,10 @@ grow_vertical = 2
 mouse_filter = 0
 theme = ExtResource("2")
 script = ExtResource("1")
-merit_value_template = "%d / %d"
-service_point_template = "SP %d"
-ledger_entry_template = "• %s"
+correct_drop_off_template = "%d PASSENGERS"
+penalty_total_template = "%d PTS"
+penalty_entry_template = "• %s"
+no_penalties_text = "No penalties issued."
 
 [node name="Shade" type="ColorRect" parent="."]
 layout_mode = 1
@@ -68,7 +69,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Panel" type="PanelContainer" parent="Center"]
-custom_minimum_size = Vector2(820, 610)
+custom_minimum_size = Vector2(820, 560)
 layout_mode = 2
 theme_override_styles/panel = SubResource("ReportPanelStyle")
 
@@ -80,55 +81,38 @@ theme_override_constants/separation = 13
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 29
-text = "DAY SHIFT REPORT"
-horizontal_alignment = 1
-
-[node name="SuccessStatus" type="Label" parent="Center/Panel/Outer"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.827451, 0.658824, 1)
-theme_override_font_sizes/font_size = 23
-text = "PAYCHECK CLEARED"
-horizontal_alignment = 1
-
-[node name="FailureStatus" type="Label" parent="Center/Panel/Outer"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-theme_override_colors/font_color = Color(0.87451, 0.552941, 0.517647, 1)
-theme_override_font_sizes/font_size = 23
-text = "PAYCHECK THRESHOLD MISSED — SP 1 ISSUED"
+text = "DAYLIGHT PAYCHECK"
 horizontal_alignment = 1
 
 [node name="Metrics" type="GridContainer" parent="Center/Panel/Outer"]
 layout_mode = 2
 theme_override_constants/h_separation = 12
-columns = 3
+columns = 2
 
-[node name="MeritCard" type="PanelContainer" parent="Center/Panel/Outer/Metrics"]
-custom_minimum_size = Vector2(245, 96)
+[node name="CorrectDropOffCard" type="PanelContainer" parent="Center/Panel/Outer/Metrics"]
+custom_minimum_size = Vector2(365, 96)
 layout_mode = 2
 theme_override_styles/panel = SubResource("MetricCardStyle")
 
-[node name="Box" type="VBoxContainer" parent="Center/Panel/Outer/Metrics/MeritCard"]
+[node name="Box" type="VBoxContainer" parent="Center/Panel/Outer/Metrics/CorrectDropOffCard"]
 layout_mode = 2
 
-[node name="Caption" type="Label" parent="Center/Panel/Outer/Metrics/MeritCard/Box"]
+[node name="Caption" type="Label" parent="Center/Panel/Outer/Metrics/CorrectDropOffCard/Box"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.666667, 0.701961, 0.741176, 1)
 theme_override_font_sizes/font_size = 13
-text = "MERIT"
+text = "CORRECT DROP-OFFS"
 horizontal_alignment = 1
 
-[node name="MeritValue" type="Label" parent="Center/Panel/Outer/Metrics/MeritCard/Box"]
+[node name="CorrectDropOffValue" type="Label" parent="Center/Panel/Outer/Metrics/CorrectDropOffCard/Box"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_colors/font_color = Color(0.560784, 0.827451, 0.658824, 1)
 theme_override_font_sizes/font_size = 25
 horizontal_alignment = 1
 
 [node name="PenaltyCard" type="PanelContainer" parent="Center/Panel/Outer/Metrics"]
-custom_minimum_size = Vector2(245, 96)
+custom_minimum_size = Vector2(365, 96)
 layout_mode = 2
 theme_override_styles/panel = SubResource("MetricCardStyle")
 
@@ -139,32 +123,10 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.666667, 0.701961, 0.741176, 1)
 theme_override_font_sizes/font_size = 13
-text = "PENALTY POINTS"
+text = "TOTAL PENALTY"
 horizontal_alignment = 1
 
 [node name="PenaltyValue" type="Label" parent="Center/Panel/Outer/Metrics/PenaltyCard/Box"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_font_sizes/font_size = 25
-horizontal_alignment = 1
-
-[node name="ServicePointCard" type="PanelContainer" parent="Center/Panel/Outer/Metrics"]
-custom_minimum_size = Vector2(245, 96)
-layout_mode = 2
-theme_override_styles/panel = SubResource("MetricCardStyle")
-
-[node name="Box" type="VBoxContainer" parent="Center/Panel/Outer/Metrics/ServicePointCard"]
-layout_mode = 2
-
-[node name="Caption" type="Label" parent="Center/Panel/Outer/Metrics/ServicePointCard/Box"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.666667, 0.701961, 0.741176, 1)
-theme_override_font_sizes/font_size = 13
-text = "WARNING STATUS"
-horizontal_alignment = 1
-
-[node name="ServicePointValue" type="Label" parent="Center/Panel/Outer/Metrics/ServicePointCard/Box"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
@@ -178,7 +140,7 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 17
-text = "SHIFT LEDGER"
+text = "PENALTY LIST"
 
 [node name="Breakdown" type="RichTextLabel" parent="Center/Panel/Outer"]
 unique_name_in_owner = true
@@ -192,6 +154,6 @@ bbcode_enabled = true
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 54)
 layout_mode = 2
-text = "ENTER NIGHT SERVICE"
+text = "ENTER NIGHT SERVICE  [SPACE / ENTER]"
 
 [connection signal="pressed" from="Center/Panel/Outer/ContinueButton" to="." method="_on_continue_button_pressed"]

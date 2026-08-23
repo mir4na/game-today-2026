@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3]
+[gd_scene load_steps=37 format=3]
 
 [ext_resource type="Script" path="res://scripts/main/main.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/train/train.tscn" id="2"]
@@ -34,15 +34,43 @@
 [ext_resource type="Resource" path="res://data/passengers/talia_reed.tres" id="32"]
 [ext_resource type="Resource" path="res://data/passengers/veya_lorn.tres" id="33"]
 [ext_resource type="PackedScene" path="res://scenes/passengers/passenger.tscn" id="34"]
+[ext_resource type="PackedScene" path="res://scenes/ui/arrival_clock_ui.tscn" id="35"]
+[ext_resource type="PackedScene" path="res://scenes/systems/travel_foreground.tscn" id="36"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1")
 passenger_resources = Array[Resource]([ExtResource("11"), ExtResource("12"), ExtResource("13"), ExtResource("14"), ExtResource("15"), ExtResource("16"), ExtResource("19"), ExtResource("20"), ExtResource("21"), ExtResource("22"), ExtResource("23"), ExtResource("24"), ExtResource("28"), ExtResource("29"), ExtResource("30"), ExtResource("31"), ExtResource("32"), ExtResource("33")])
 puzzle_resource = ExtResource("17")
 passenger_scene = ExtResource("34")
+day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere")
 unlisted_destination_penalty_units = 1
 newspaper_edition_mode = 0
 newspaper_relevant_chance = 0.5
+max_passengers_per_anomaly_trait = 2
+debug_print_anomaly_roster = true
+
+[node name="TravelSky" type="CanvasLayer" parent="."]
+layer = -10
+
+[node name="DaySky" type="ColorRect" parent="TravelSky"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.819608, 0.929412, 0.976471, 1)
+
+[node name="NightSkyOverlay" type="ColorRect" parent="TravelSky"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.025, 0.047, 0.094, 1)
 
 [node name="Train" parent="." instance=ExtResource("2")]
 unique_name_in_owner = true
@@ -59,6 +87,9 @@ interaction_enabled = false
 [node name="TrainAmbience" parent="." instance=ExtResource("18")]
 unique_name_in_owner = true
 
+[node name="TravelForeground" parent="." instance=ExtResource("36")]
+unique_name_in_owner = true
+
 [node name="HUD" parent="." instance=ExtResource("4")]
 unique_name_in_owner = true
 
@@ -69,6 +100,9 @@ layer = 20
 unique_name_in_owner = true
 
 [node name="NotebookUI" parent="ModalLayer" instance=ExtResource("6")]
+unique_name_in_owner = true
+
+[node name="ArrivalClockUI" parent="ModalLayer" instance=ExtResource("35")]
 unique_name_in_owner = true
 
 [node name="DayIntroUI" parent="ModalLayer" instance=ExtResource("27")]
@@ -94,15 +128,16 @@ unique_name_in_owner = true
 
 [connection signal="interaction_pressed" from="Player" to="." method="_on_interaction_pressed"]
 [connection signal="nearby_interactable_changed" from="Player" to="." method="_on_nearby_interactable_changed"]
-[connection signal="coal_added" from="Train/CoalCar/Furnace" to="." method="_on_coal_added"]
-[connection signal="newspaper_read" from="Train/PassengerCar2/Newspaper" to="." method="_on_newspaper_read"]
-[connection signal="door_activated" from="Train/PassengerCar4/StationDoor" to="." method="_on_station_door_activated"]
+[connection signal="newspaper_read" from="Train/Cars/PassengerCoach2/Newspaper" to="." method="_on_newspaper_read"]
+[connection signal="clock_read" from="Train/Cars/ConductorCar/ArrivalClock" to="." method="_on_arrival_clock_read"]
 [connection signal="closed" from="ModalLayer/PassengerInspectUI" to="." method="_on_modal_closed"]
 [connection signal="station_assignment_toggled" from="ModalLayer/PassengerInspectUI" to="." method="_on_station_assignment_toggled"]
 [connection signal="closed" from="ModalLayer/NotebookUI" to="." method="_on_modal_closed"]
+[connection signal="closed" from="ModalLayer/ArrivalClockUI" to="." method="_on_modal_closed"]
 [connection signal="intro_finished" from="ModalLayer/DayIntroUI" to="." method="_on_day_intro_finished"]
+[connection signal="camera_return_started" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_camera_return_started"]
 [connection signal="sequence_finished" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_stop_finished"]
-[connection signal="selection_confirmed" from="ModalLayer/DeadSelectionUI" to="." method="_on_dead_selection_confirmed"]
+[connection signal="sequence_timeline_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_timeline_changed"]
 [connection signal="closed" from="ModalLayer/DeadSelectionUI" to="." method="_on_modal_closed"]
 [connection signal="continue_requested" from="ModalLayer/ShiftReportUI" to="." method="_on_shift_report_continue"]
 [connection signal="departures_confirmed" from="ModalLayer/NightPuzzleUI" to="." method="_on_departures_confirmed"]

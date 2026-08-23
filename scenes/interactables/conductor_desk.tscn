@@ -10,7 +10,6 @@ script = ExtResource("1")
 prompt_text = "Open Abnormal Passenger Notes"
 interaction_distance = 145.0
 day_prompt = "Open Abnormal Passenger Notes"
-manifest_prompt = "Use Abnormal Passenger Typewriter"
 night_prompt = "Open Night Drop-Off Ledger"
 
 [node name="AbnormalPassengerTypewriter" type="Node2D" parent="."]

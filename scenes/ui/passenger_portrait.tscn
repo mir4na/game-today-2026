@@ -6,6 +6,7 @@
 custom_minimum_size = Vector2(255, 350)
 mouse_filter = 2
 script = ExtResource("1")
+baby_visual_scale = 0.68
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1

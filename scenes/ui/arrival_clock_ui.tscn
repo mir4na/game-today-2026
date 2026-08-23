@@ -1,0 +1,164 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/arrival_clock_ui.gd" id="1"]
+[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
+
+[sub_resource type="StyleBoxFlat" id="ArrivalClockPanelStyle"]
+content_margin_left = 26.0
+content_margin_top = 22.0
+content_margin_right = 26.0
+content_margin_bottom = 22.0
+bg_color = Color(0.0509804, 0.0627451, 0.0784314, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.694118, 0.545098, 0.329412, 1)
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+corner_radius_bottom_left = 9
+
+[node name="ArrivalClockUI" type="Control"]
+visible = false
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+theme = ExtResource("2")
+script = ExtResource("1")
+route_template = "%s  →  %s"
+completed_route_template = "%s  •  DAY ROUTE COMPLETE"
+clock_template = "%02d:%02d %s"
+countdown_template = "%02d:%02d"
+travel_status = "The next station cutscene begins automatically on arrival."
+completed_status = "No further daytime stations are scheduled."
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0117647, 0.0156863, 0.0235294, 0.78)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(620, 430)
+layout_mode = 2
+theme_override_styles/panel = SubResource("ArrivalClockPanelStyle")
+
+[node name="Box" type="VBoxContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 13
+
+[node name="Eyebrow" type="Label" parent="Center/Panel/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.619608, 0.596078, 0.545098, 1)
+theme_override_font_sizes/font_size = 13
+text = "DRIVER + CONDUCTOR CAB"
+horizontal_alignment = 1
+
+[node name="Title" type="Label" parent="Center/Panel/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.941176, 0.811765, 0.552941, 1)
+theme_override_font_sizes/font_size = 28
+text = "STATION ARRIVAL CLOCK"
+horizontal_alignment = 1
+
+[node name="Rule" type="HSeparator" parent="Center/Panel/Box"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+
+[node name="RouteLabel" type="Label" parent="Center/Panel/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.917647, 0.854902, 0.721569, 1)
+theme_override_font_sizes/font_size = 22
+text = "ALDERWICK  →  BRAMBLEFORD"
+horizontal_alignment = 1
+
+[node name="Times" type="GridContainer" parent="Center/Panel/Box"]
+layout_mode = 2
+theme_override_constants/h_separation = 26
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="CurrentTimeTitle" type="Label" parent="Center/Panel/Box/Times"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.619608, 0.596078, 0.545098, 1)
+theme_override_font_sizes/font_size = 14
+text = "CURRENT TRAIN TIME"
+
+[node name="CurrentTimeValue" type="Label" parent="Center/Panel/Box/Times"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.917647, 0.854902, 0.721569, 1)
+theme_override_font_sizes/font_size = 19
+text = "02:00 PM"
+horizontal_alignment = 2
+
+[node name="ArrivalTimeTitle" type="Label" parent="Center/Panel/Box/Times"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.619608, 0.596078, 0.545098, 1)
+theme_override_font_sizes/font_size = 14
+text = "SCHEDULED ARRIVAL"
+
+[node name="ArrivalTimeValue" type="Label" parent="Center/Panel/Box/Times"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.917647, 0.854902, 0.721569, 1)
+theme_override_font_sizes/font_size = 19
+text = "03:00 PM"
+horizontal_alignment = 2
+
+[node name="CountdownTitle" type="Label" parent="Center/Panel/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.619608, 0.596078, 0.545098, 1)
+theme_override_font_sizes/font_size = 13
+text = "TIME UNTIL NEXT STATION"
+horizontal_alignment = 1
+
+[node name="CountdownValue" type="Label" parent="Center/Panel/Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.941176, 0.811765, 0.552941, 1)
+theme_override_font_sizes/font_size = 46
+text = "01:00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="Center/Panel/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.741176, 0.721569, 0.67451, 1)
+theme_override_font_sizes/font_size = 14
+text = "The next station cutscene begins automatically on arrival."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="CloseButton" type="Button" parent="Center/Panel/Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+text = "CLOSE  [ESC]"
+
+[connection signal="pressed" from="Center/Panel/Box/CloseButton" to="." method="request_close"]

@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://dbsovo76klh2o"]
+
+[ext_resource type="Texture2D" uid="uid://7xawqpx1ctkv" path="res://assets/kereta/Outdoor Gerbong.png" id="1_body"]
+[ext_resource type="Texture2D" uid="uid://bh86nkwa5wa2l" path="res://assets/kereta/Bagian bawah.png" id="2_underframe"]
+[ext_resource type="PackedScene" path="res://scenes/train/train_car_wheels.tscn" id="3_wheels"]
+
+[node name="TrainCarBody" type="Node2D" unique_id=558200894]
+texture_filter = 4
+
+[node name="ExteriorSprite" type="Sprite2D" parent="." unique_id=734696414]
+position = Vector2(0, 205.7474)
+scale = Vector2(0.384924, 0.384924)
+texture = ExtResource("1_body")
+centered = false
+
+[node name="ExteriorUnderframeSprite" type="Sprite2D" parent="." unique_id=1867824025]
+position = Vector2(0, 521)
+scale = Vector2(0.374415, 0.374415)
+texture = ExtResource("2_underframe")
+centered = false
+
+[node name="Wheels" parent="." unique_id=969266541 instance=ExtResource("3_wheels")]

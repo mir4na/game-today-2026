@@ -78,8 +78,7 @@ grow_vertical = 2
 mouse_filter = 0
 theme = ExtResource("2")
 script = ExtResource("1")
-notes_instruction_template = "%d passengers are currently aboard. Keep a private list of suspected abnormal passengers.\nType one SHORT NAME per line and press SPACE to move to the next line. ESC returns to the train; your notes are kept."
-review_instruction_template = "%d passengers remain aboard. Review your five-line abnormal passenger note before paycheck evaluation.\nPress SPACE after each short name, then submit the report when ready."
+notes_instruction_template = "%d passengers are currently aboard. Keep a private list of suspected abnormal passengers.\nType one SHORT NAME per line and press SPACE for the next line. Your notes are automatically filed when daylight service ends. ESC returns to the train."
 
 [node name="Shade" type="ColorRect" parent="."]
 layout_mode = 1
@@ -251,14 +250,6 @@ theme_override_styles/normal = SubResource("EntryNormalStyle")
 theme_override_styles/focus = SubResource("EntryFocusStyle")
 placeholder_text = "Type a short name, then press Space..."
 
-[node name="ErrorLabel" type="Label" parent="Center/Panel/Outer"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.862745, 0.552941, 0.513725, 1)
-theme_override_font_sizes/font_size = 16
-horizontal_alignment = 1
-autowrap_mode = 2
-
 [node name="ActionRow" type="HBoxContainer" parent="Center/Panel/Outer"]
 layout_mode = 2
 theme_override_constants/separation = 12
@@ -269,13 +260,6 @@ custom_minimum_size = Vector2(0, 54)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "BACK TO TRAIN  [ESC]"
-
-[node name="ConfirmButton" type="Button" parent="Center/Panel/Outer/ActionRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 54)
-layout_mode = 2
-size_flags_horizontal = 3
-text = "SUBMIT REPORT & REVIEW PAYCHECK"
 
 [connection signal="text_submitted" from="Center/Panel/Outer/Paper/Lines/Row1/NameEntry1" to="." method="_on_name_entry_1_submitted"]
 [connection signal="text_changed" from="Center/Panel/Outer/Paper/Lines/Row1/NameEntry1" to="." method="_on_name_entry_1_text_changed"]
@@ -288,4 +272,3 @@ text = "SUBMIT REPORT & REVIEW PAYCHECK"
 [connection signal="text_submitted" from="Center/Panel/Outer/Paper/Lines/Row5/NameEntry5" to="." method="_on_name_entry_5_submitted"]
 [connection signal="text_changed" from="Center/Panel/Outer/Paper/Lines/Row5/NameEntry5" to="." method="_on_name_entry_5_text_changed"]
 [connection signal="pressed" from="Center/Panel/Outer/ActionRow/CancelButton" to="." method="request_close"]
-[connection signal="pressed" from="Center/Panel/Outer/ActionRow/ConfirmButton" to="." method="_confirm"]

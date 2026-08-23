@@ -6,6 +6,10 @@ signal inspection_requested(passenger: Passenger)
 
 @export var data: PassengerData
 @export var use_placeholder_art: bool = true
+@export_category("Passenger AI")
+@export_range(50.0, 140.0, 5.0) var minimum_activity_spacing: float = 90.0
+@export_category("Visual Scale")
+@export_range(0.3, 1.0, 0.01) var baby_visual_scale: float = 0.68
 var inspected: bool = false
 var night_mode: bool = false
 var departed: bool = false
@@ -17,13 +21,10 @@ var _ai_target_x: float = 0.0
 var _ai_walking: bool = false
 var _walk_phase: float = 0.0
 var _rng := RandomNumberGenerator.new()
+var _assigned_seat_position: Vector2
+var _activity_points := PackedVector2Array()
+var _carriage_ranges: Dictionary = {}
 
-const CARRIAGE_BASE_X: Dictionary = {
-	1: 3840.0,
-	2: 2880.0,
-	3: 1920.0,
-	4: 960.0,
-}
 const PASSENGER_WALK_SPEED: float = 92.0
 
 @onready var _shadow: Polygon2D = %Shadow
@@ -67,11 +68,20 @@ func depart_train() -> void:
 func set_ai_enabled(value: bool) -> void:
 	ai_enabled = value and not departed and not night_mode
 
+func configure_seat_navigation(seat_position: Vector2, activity_points: PackedVector2Array, carriage_ranges: Dictionary) -> void:
+	_assigned_seat_position = seat_position
+	_activity_points = activity_points.duplicate()
+	_carriage_ranges = carriage_ranges.duplicate(true)
+	runtime_carriage = _carriage_from_world_x(position.x)
+
 func get_runtime_carriage() -> int:
 	return runtime_carriage
 
 func get_ai_behavior() -> String:
 	return data.ai_behavior if data != null else "still"
+
+func get_navigation_target_x() -> float:
+	return _ai_target_x if _ai_walking else position.x
 
 func _update_day_ai(delta: float) -> void:
 	if data.ai_behavior == "still":
@@ -90,29 +100,57 @@ func _update_day_ai(delta: float) -> void:
 
 func _choose_next_ai_target() -> void:
 	var carriage: int = runtime_carriage
-	var base_x: float = float(CARRIAGE_BASE_X.get(carriage, 3840.0))
+	var target_carriage: int = carriage
 	match data.ai_behavior:
-		"wander":
-			_ai_target_x = base_x + _rng.randf_range(145.0, 815.0)
 		"carriage_roamer":
-			var candidates: Array[int] = []
+			var carriage_candidates: Array[int] = []
 			if carriage > 1:
-				candidates.append(carriage - 1)
+				carriage_candidates.append(carriage - 1)
 			if carriage < 4:
-				candidates.append(carriage + 1)
-			var destination_carriage: int = candidates[_rng.randi_range(0, candidates.size() - 1)]
-			_ai_target_x = float(CARRIAGE_BASE_X[destination_carriage]) + _rng.randf_range(230.0, 730.0)
-		"window_watcher":
-			var window_positions: Array[float] = [235.0, 480.0, 725.0]
-			_ai_target_x = base_x + window_positions[_rng.randi_range(0, window_positions.size() - 1)]
-		"restless":
-			_ai_target_x = clampf(position.x + _rng.randf_range(-125.0, 125.0), base_x + 145.0, base_x + 815.0)
+				carriage_candidates.append(carriage + 1)
+			if not carriage_candidates.is_empty():
+				target_carriage = carriage_candidates[_rng.randi_range(0, carriage_candidates.size() - 1)]
+		"wander", "window_watcher", "restless":
+			pass
 		_:
 			_ai_timer = _next_ai_wait()
 			return
-	if absf(_ai_target_x - position.x) < 28.0:
-		_ai_target_x = clampf(_ai_target_x + 85.0, base_x + 145.0, base_x + 815.0)
+
+	var candidates: PackedVector2Array = _available_activity_points(target_carriage)
+	var assigned_carriage: int = _carriage_from_world_x(_assigned_seat_position.x)
+	if target_carriage == carriage and assigned_carriage == carriage and absf(position.x - _assigned_seat_position.x) > 28.0 and _rng.randf() < 0.25:
+		if not _is_navigation_target_claimed(_assigned_seat_position.x):
+			candidates.append(_assigned_seat_position)
+	if candidates.is_empty():
+		_ai_timer = _next_ai_wait()
+		return
+	var target: Vector2 = candidates[_rng.randi_range(0, candidates.size() - 1)]
+	_ai_target_x = target.x
 	_ai_walking = true
+
+func _available_activity_points(carriage: int) -> PackedVector2Array:
+	var result := PackedVector2Array()
+	for point: Vector2 in _activity_points:
+		if _carriage_from_world_x(point.x) != carriage:
+			continue
+		if absf(point.x - position.x) < 28.0 or _is_navigation_target_claimed(point.x):
+			continue
+		result.append(point)
+	return result
+
+func _is_navigation_target_claimed(target_x: float) -> bool:
+	var parent: Node = get_parent()
+	if parent == null:
+		return false
+	for sibling: Node in parent.get_children():
+		if sibling == self or not sibling is Passenger:
+			continue
+		var other := sibling as Passenger
+		if other.departed or not other.visible:
+			continue
+		if absf(other.get_navigation_target_x() - target_x) < minimum_activity_spacing:
+			return true
+	return false
 
 func _next_ai_wait() -> float:
 	if data == null or data.ai_behavior == "still":
@@ -120,8 +158,19 @@ func _next_ai_wait() -> float:
 	return maxf(3.0, data.ai_interval_seconds + _rng.randf_range(-1.5, 1.5))
 
 func _carriage_from_world_x(world_x: float) -> int:
-	var horizontal_segment: int = clampi(int(floor(world_x / 960.0)), 1, 4)
-	return clampi(5 - horizontal_segment, 1, 4)
+	var fallback_carriage: int = clampi(data.current_carriage, 1, 4) if data != null else 1
+	var nearest_carriage: int = fallback_carriage
+	var nearest_distance: float = INF
+	for carriage_key: Variant in _carriage_ranges:
+		var carriage_number: int = int(carriage_key)
+		var carriage_range: Vector2 = _carriage_ranges[carriage_key]
+		if world_x >= carriage_range.x and world_x <= carriage_range.y:
+			return carriage_number
+		var distance: float = absf(world_x - clampf(world_x, carriage_range.x, carriage_range.y))
+		if distance < nearest_distance:
+			nearest_distance = distance
+			nearest_carriage = carriage_number
+	return nearest_carriage
 
 func _update_visual() -> void:
 	_placeholder_visual.visible = data != null and not departed and use_placeholder_art
@@ -133,7 +182,7 @@ func _update_visual() -> void:
 	var body_tint: Color = data.body_color
 	body_tint.a = ghost_alpha
 	_body_tint.modulate = body_tint
-	_placeholder_visual.scale = Vector2(0.78, 0.62) if is_baby else Vector2.ONE
+	_placeholder_visual.scale = Vector2.ONE * baby_visual_scale if is_baby else Vector2.ONE
 	_placeholder_visual.position.y = (10.0 if is_baby else 0.0) + (sin(_walk_phase) * 1.8 if _ai_walking else 0.0)
 	_baby_mark.visible = is_baby
 	_shadow.visible = data.anomaly_type != "shadowless"

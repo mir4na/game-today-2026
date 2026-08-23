@@ -4,29 +4,27 @@
 visible = false
 
 [node name="Shadow" type="Polygon2D" parent="."]
-scale = Vector2(2.4, 1)
-polygon = PackedVector2Array(-18, 21, -10, 16, 10, 16, 18, 21, 10, 26, -10, 26)
+polygon = PackedVector2Array(-43.2, 21, -24, 16, 24, 16, 43.2, 21, 24, 26, -24, 26)
 color = Color(0.035, 0.04, 0.05, 0.38)
 
 [node name="TintedVisual" type="Node2D" parent="."]
 unique_name_in_owner = true
 position = Vector2(0, -57.5)
-scale = Vector2(3.5, 3.5)
 
 [node name="Body" type="Polygon2D" parent="TintedVisual"]
-polygon = PackedVector2Array(-9, -22, 9, -22, 9, 9, -9, 9)
+polygon = PackedVector2Array(-31.5, -77, 31.5, -77, 31.5, 31.5, -31.5, 31.5)
 color = Color(1, 1, 1, 1)
 
 [node name="Head" type="Polygon2D" parent="TintedVisual"]
-polygon = PackedVector2Array(-7, -31, -5, -37, 0, -40, 5, -37, 7, -31, 5, -25, 0, -22, -5, -25)
+polygon = PackedVector2Array(-24.5, -108.5, -17.5, -129.5, 0, -140, 17.5, -129.5, 24.5, -108.5, 17.5, -87.5, 0, -77, -17.5, -87.5)
 color = Color(1, 1, 1, 1)
 
 [node name="LeftLeg" type="Line2D" parent="TintedVisual"]
-points = PackedVector2Array(-5, 6, -8, 23)
-width = 5.0
+points = PackedVector2Array(-17.5, 21, -28, 80.5)
+width = 17.5
 default_color = Color(0.72, 0.72, 0.72, 1)
 
 [node name="RightLeg" type="Line2D" parent="TintedVisual"]
-points = PackedVector2Array(5, 6, 8, 23)
-width = 5.0
+points = PackedVector2Array(17.5, 21, 28, 80.5)
+width = 17.5
 default_color = Color(0.72, 0.72, 0.72, 1)

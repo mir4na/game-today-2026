@@ -1,6 +1,9 @@
 class_name PassengerPortrait
 extends Control
 
+@export_category("Visual Scale")
+@export_range(0.3, 1.0, 0.01) var baby_visual_scale: float = 0.68
+
 var passenger_data: PassengerData
 
 @onready var _portrait_visual: Node2D = %PortraitVisual
@@ -16,7 +19,7 @@ func set_passenger(value: PassengerData) -> void:
 		return
 	var is_baby: bool = passenger_data.anomaly_type == "age_mismatch"
 	_portrait_visual.visible = true
-	_portrait_visual.scale = Vector2(0.78, 0.62) if is_baby else Vector2.ONE
+	_portrait_visual.scale = Vector2.ONE * baby_visual_scale if is_baby else Vector2.ONE
 	_portrait_visual.position.y = 286.0 if is_baby else 270.0
 	_body_tint.modulate = passenger_data.body_color
 	_baby_mark.visible = is_baby

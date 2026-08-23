@@ -1,13 +1,26 @@
 [gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/train/carriage.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/interactables/furnace.tscn" id="2"]
 [ext_resource type="Texture2D" path="res://assets/vector/coal_car.svg" id="3"]
+
+[sub_resource type="RectangleShape2D" id="CoalFloorShape"]
+size = Vector2(960, 64)
 
 [node name="CoalCar" type="Node2D"]
 script = ExtResource("1")
 carriage_type = "coal"
 carriage_number = 5
+carriage_width = 960.0
+sway_root_path = NodePath("ArtRoot")
+night_overlay_path = NodePath("ArtRoot/NightOverlay")
+
+[node name="StaticBody" type="StaticBody2D" parent="."]
+collision_layer = 2
+collision_mask = 1
+
+[node name="FloorCollision" type="CollisionShape2D" parent="StaticBody"]
+position = Vector2(480, 553)
+shape = SubResource("CoalFloorShape")
 
 [node name="ArtRoot" type="Node2D" parent="."]
 unique_name_in_owner = true
@@ -36,7 +49,3 @@ theme_override_font_sizes/font_size = 15
 text = "COAL CAR"
 horizontal_alignment = 1
 vertical_alignment = 1
-
-[node name="Furnace" parent="." instance=ExtResource("2")]
-position = Vector2(440, 548)
-unique_name_in_owner = true

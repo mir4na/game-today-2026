@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/kereta/Satu Roda.png" id="1_wheel"]
+
+[node name="TrainWheel" type="Node2D"]
+texture_filter = 4
+
+[node name="SpinPivot" type="Node2D" parent="."]
+
+[node name="WheelSprite" type="Sprite2D" parent="SpinPivot"]
+scale = Vector2(0.374415, 0.374415)
+texture = ExtResource("1_wheel")
+
+[node name="RotationBolt" type="Polygon2D" parent="SpinPivot"]
+polygon = PackedVector2Array(0, -29.2044, 1.87208, -28.4555, 2.99532, -26.9579, 3.36974, -25.4602, 2.99532, -23.5881, 1.87208, -22.4649, 0, -22.0905, -1.87208, -22.4649, -2.99532, -23.5881, -3.36974, -25.4602, -2.99532, -26.9579, -1.87208, -28.4555)
+color = Color(0.117647, 0.152941, 0.184314, 0.9)

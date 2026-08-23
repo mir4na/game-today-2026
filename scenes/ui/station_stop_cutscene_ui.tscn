@@ -9,26 +9,26 @@ length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("TopBar:scale:y")
+tracks/0/path = NodePath("TopBar:position:y")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [0.0]
+"values": [-68.0]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("BottomBar:scale:y")
+tracks/1/path = NodePath("BottomBar:position:y")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [0.0]
+"values": [720.0]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -61,26 +61,26 @@ length = 0.35
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("TopBar:scale:y")
+tracks/0/path = NodePath("TopBar:position:y")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.09, 0.18, 0.27, 0.35),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [0.0, 0.59, 0.885, 0.988, 1.0]
+"values": [-68.0, -27.88, -7.82, -0.816, 0.0]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("BottomBar:scale:y")
+tracks/1/path = NodePath("BottomBar:position:y")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
 "times": PackedFloat32Array(0, 0.09, 0.18, 0.27, 0.35),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [0.0, 0.59, 0.885, 0.988, 1.0]
+"values": [720.0, 679.88, 659.82, 652.816, 652.0]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -113,26 +113,26 @@ length = 0.35
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("TopBar:scale:y")
+tracks/0/path = NodePath("TopBar:position:y")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.08, 0.17, 0.26, 0.35),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [1.0, 0.988, 0.885, 0.59, 0.0]
+"values": [0.0, -0.816, -7.82, -27.88, -68.0]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("BottomBar:scale:y")
+tracks/1/path = NodePath("BottomBar:position:y")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
 "times": PackedFloat32Array(0, 0.08, 0.17, 0.26, 0.35),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [1.0, 0.988, 0.885, 0.59, 0.0]
+"values": [652.0, 652.816, 659.82, 679.88, 720.0]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -184,6 +184,19 @@ exchange_status_template = "%d OFF  •  %d ON     [E / SPACE / ESC] SKIP"
 letterbox_in_animation = &"letterbox_in"
 letterbox_out_animation = &"letterbox_out"
 fallback_actor_color = Color(0.721569, 0.666667, 0.568627, 1)
+camera_return_lead_time = 0.75
+platform_vertical_offset = 138.0
+platform_horizontal_offset = 52.0
+door_visibility_margin = 48.0
+departing_start_time = 0.55
+departing_stagger = 0.26
+departing_walk_duration = 1.35
+opening_boarding_start_time = 0.65
+opening_boarding_stagger = 0.28
+opening_boarding_walk_duration = 1.45
+exchange_boarding_start_time = 2.15
+exchange_boarding_stagger = 0.1
+exchange_boarding_walk_duration = 1.2
 
 [node name="Streaks" type="Node2D" parent="."]
 
@@ -267,14 +280,43 @@ unique_name_in_owner = true
 [node name="Actor9" parent="ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
+[node name="Actor10" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor11" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor12" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor13" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor14" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor15" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor16" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor17" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor18" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor19" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
 [node name="TopBar" type="ColorRect" parent="."]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 68.0
+offset_top = -68.0
 grow_horizontal = 2
-scale = Vector2(1, 0)
 mouse_filter = 2
 color = Color(0.0235294, 0.0313725, 0.0470588, 1)
 
@@ -284,11 +326,9 @@ layout_mode = 1
 anchors_preset = 12
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -68.0
+offset_bottom = 68.0
 grow_horizontal = 2
 grow_vertical = 0
-pivot_offset = Vector2(0, 68)
-scale = Vector2(1, 0)
 mouse_filter = 2
 color = Color(0.0235294, 0.0313725, 0.0470588, 1)
 

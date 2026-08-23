@@ -5,30 +5,38 @@ extends Control
 signal continue_requested
 
 @export_category("Inspector Copy")
-@export var merit_value_template: String = "%d / %d"
-@export var service_point_template: String = "SP %d"
-@export var ledger_entry_template: String = "• %s"
+@export var correct_drop_off_template: String
+@export var penalty_total_template: String
+@export var penalty_entry_template: String
+@export_multiline var no_penalties_text: String
 
-@onready var _success_status: Label = %SuccessStatus
-@onready var _failure_status: Label = %FailureStatus
-@onready var _merit_label: Label = %MeritValue
+@onready var _correct_drop_off_label: Label = %CorrectDropOffValue
 @onready var _penalty_label: Label = %PenaltyValue
-@onready var _sp_label: Label = %ServicePointValue
 @onready var _breakdown: RichTextLabel = %Breakdown
 @onready var _continue_button: Button = %ContinueButton
+var _continue_sent: bool = false
 
-func open_report(merit: int, threshold: int, penalty_points: int, service_points: int, threshold_met: bool, entries: PackedStringArray) -> void:
-	_success_status.visible = threshold_met
-	_failure_status.visible = not threshold_met
-	_merit_label.text = merit_value_template % [merit, threshold]
-	_penalty_label.text = str(penalty_points)
-	_sp_label.text = service_point_template % service_points
+func open_report(correct_drop_offs: int, penalty_points: int, penalties: PackedStringArray) -> void:
+	_continue_sent = false
+	_correct_drop_off_label.text = correct_drop_off_template % correct_drop_offs
+	_penalty_label.text = penalty_total_template % penalty_points
 	var lines := PackedStringArray()
-	for entry: String in entries:
-		lines.append(ledger_entry_template % entry)
-	_breakdown.text = "\n".join(lines)
+	for penalty: String in penalties:
+		lines.append(penalty_entry_template % penalty)
+	_breakdown.text = "\n".join(lines) if not lines.is_empty() else no_penalties_text
 	show()
 	_continue_button.grab_focus()
 
+func _unhandled_input(event: InputEvent) -> void:
+	if visible and (event.is_action_pressed(&"ui_accept") or event.is_action_pressed(&"interact")):
+		_request_continue()
+		get_viewport().set_input_as_handled()
+
 func _on_continue_button_pressed() -> void:
+	_request_continue()
+
+func _request_continue() -> void:
+	if _continue_sent:
+		return
+	_continue_sent = true
 	continue_requested.emit()

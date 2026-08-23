@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
@@ -20,21 +20,44 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[sub_resource type="StyleBoxFlat" id="PromptStyle"]
-content_margin_left = 18.0
-content_margin_top = 14.0
-content_margin_right = 18.0
-content_margin_bottom = 14.0
-bg_color = Color(0.04, 0.05, 0.07, 0.88)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.698039, 0.556863, 0.345098, 1)
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
+[sub_resource type="Animation" id="Animation_prompt_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("FloatMotion:position:y")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_prompt_float"]
+resource_name = "float"
+length = 1.6
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("FloatMotion:position:y")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.8, 1.6),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.0, -6.0, 0.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_prompt"]
+_data = {
+&"RESET": SubResource("Animation_prompt_reset"),
+&"float": SubResource("Animation_prompt_float")
+}
 
 [sub_resource type="StyleBoxFlat" id="ClockStyle"]
 content_margin_left = 18.0
@@ -71,11 +94,9 @@ corner_radius_bottom_left = 7
 [node name="HUD" type="CanvasLayer"]
 layer = 10
 script = ExtResource("1")
-normal_duties_tint = Color(1, 1, 1, 1)
-low_coal_duties_tint = Color(1, 0.827451, 0.631373, 1)
 clock_template = "%02d:%02d %s"
-coal_template = "FURNACE %d%%"
-performance_template = "MERIT %d / %d   •   REVIEW AT TRANSITION"
+floating_prompt_screen_offset = Vector2(0, -132)
+floating_prompt_screen_margin = Vector2(230, 64)
 
 [node name="Root" type="Control" parent="."]
 unique_name_in_owner = true
@@ -87,59 +108,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 theme = ExtResource("2")
-
-[node name="DutiesPanel" type="PanelContainer" parent="Root"]
-unique_name_in_owner = true
-visible = false
-offset_left = 24.0
-offset_top = 24.0
-offset_right = 374.0
-offset_bottom = 229.0
-theme_override_styles/panel = SubResource("HudPanelStyle")
-
-[node name="DutiesBox" type="VBoxContainer" parent="Root/DutiesPanel"]
-layout_mode = 2
-theme_override_constants/separation = 7
-
-[node name="DutiesTitle" type="Label" parent="Root/DutiesPanel/DutiesBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_font_sizes/font_size = 19
-text = "DUTIES"
-
-[node name="PerformanceLabel" type="Label" parent="Root/DutiesPanel/DutiesBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.847059, 0.72549, 0.470588, 1)
-theme_override_font_sizes/font_size = 12
-text = "MERIT 10 / 180   •   REVIEW AT TRANSITION"
-
-[node name="ObjectiveLabel" type="Label" parent="Root/DutiesPanel/DutiesBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.905882, 0.878431, 0.823529, 1)
-theme_override_font_sizes/font_size = 15
-text = "• Inspect the passengers\n• Maintain the furnace"
-
-[node name="CoalRow" type="HBoxContainer" parent="Root/DutiesPanel/DutiesBox"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-
-[node name="CoalLabel" type="Label" parent="Root/DutiesPanel/DutiesBox/CoalRow"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.905882, 0.878431, 0.823529, 1)
-theme_override_font_sizes/font_size = 12
-text = "FURNACE"
-
-[node name="CoalBar" type="ProgressBar" parent="Root/DutiesPanel/DutiesBox/CoalRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(165, 15)
-layout_mode = 2
-max_value = 100.0
-value = 100.0
-show_percentage = false
 
 [node name="MinimapPanel" type="PanelContainer" parent="Root"]
 layout_mode = 1
@@ -166,21 +134,36 @@ text = "TRAIN"
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="PromptLabel" type="Label" parent="Root"]
+[node name="FloatingPrompt" type="Control" parent="Root"]
 unique_name_in_owner = true
 visible = false
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 28.0
-offset_top = -72.0
-offset_right = 430.0
-offset_bottom = -26.0
-grow_vertical = 0
-theme_override_colors/font_color = Color(0.905882, 0.878431, 0.823529, 1)
+layout_mode = 0
+mouse_filter = 2
+
+[node name="FloatMotion" type="Control" parent="Root/FloatingPrompt"]
+layout_mode = 0
+mouse_filter = 2
+
+[node name="PromptLabel" type="Label" parent="Root/FloatingPrompt/FloatMotion"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -190.0
+offset_top = -20.0
+offset_right = 190.0
+offset_bottom = 20.0
+theme_override_colors/font_color = Color(0.968627, 0.92549, 0.815686, 1)
+theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.95)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.72)
+theme_override_constants/outline_size = 4
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 3
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("PromptStyle")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PromptFloatAnimation" type="AnimationPlayer" parent="Root/FloatingPrompt"]
+libraries/ = SubResource("AnimationLibrary_prompt")
+autoplay = &"float"
 
 [node name="ClockPanel" type="PanelContainer" parent="Root"]
 unique_name_in_owner = true

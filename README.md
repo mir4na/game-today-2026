@@ -37,7 +37,7 @@ MainMenu                         application entry
 Main                             gameplay scene
 ├── Train                         one continuous 5,760 px level, moving left
 │   ├── ConductorCar             left/front spawn; driver controls, route ledger, and abnormal-passenger typewriter
-│   ├── PassengerCar4..1         modular cutaway car scenes
+│   ├── PassengerCoach4..1       modular cutaway coach scenes
 │   ├── CoalCar                  far right/rear; furnace + mechanical props
 │   └── ExteriorBody             temporary world-space cutscene occluder
 ├── Passengers                   ten active Passenger instances; two replacements spawn at every day stop
@@ -66,7 +66,7 @@ Every static hierarchy and visual is scene-owned: menu panels and backdrop, HUD 
 - `scripts/main/main.gd` owns the `OPENING → DAY → SUNSET → DEAD_SELECTION → SHIFT_REPORT → NIGHT → NIGHT_PUZZLE → COMPLETE` state flow, the complete named daytime route, four 60-second station legs, repeated exit assignments, equal station exchanges, cutscenes, live minimap population, deferred transition penalties, Merit/SP, time, coal, and validation.
 - `scripts/player/player.gd` handles horizontal `CharacterBody2D` movement, camera follow, facing, and nearest-interactable selection.
 - `scripts/train/carriage.gd` and `scripts/train/train.gd` animate the scene-authored modular carriages, day/night overlay, underframe, and train sway; their geometry and palette live in train scenes and assigned SVG textures.
-- `scripts/passenger/passenger_data.gd` is the designer-facing passenger Resource. `passenger.gd` presents it, emits inspection requests, and runs the selected ambient AI profile inside safe passenger-car boundaries.
+- `scripts/passenger/passenger_data.gd` is the designer-facing passenger Resource. `passenger.gd` presents it, emits inspection requests, and runs the selected ambient AI profile inside safe passenger-coach boundaries.
 - `scripts/systems/departure_puzzle_data.gd` stores the night-stop order, relational clues, and internal deceased-passenger solution. “Night drop-off” means the station where a deceased passenger leaves the night train; it is separate from their daytime ticket destination.
 - Scripts in `scripts/ui` project state into responsive Control/Container layouts and signal decisions back to `Main`.
 

@@ -1,42 +1,30 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3 uid="uid://jjmypdgegc27"]
 
-[ext_resource type="Script" path="res://scripts/train/carriage.gd" id="1"]
+[ext_resource type="Script" uid="uid://bmwxkbeqlovb" path="res://scripts/train/carriage.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/interactables/conductor_desk.tscn" id="2"]
-[ext_resource type="Texture2D" path="res://assets/vector/conductor_car.svg" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/arrival_clock.tscn" id="4"]
 
-[node name="ConductorCar" type="Node2D"]
+[sub_resource type="RectangleShape2D" id="ConductorFloorShape"]
+size = Vector2(1008, 64)
+
+[node name="ConductorCar" type="Node2D" unique_id=46181340]
 script = ExtResource("1")
 carriage_type = "conductor"
 carriage_number = 0
+carriage_width = 960.0
 
-[node name="ArtRoot" type="Node2D" parent="."]
+[node name="StaticBody" type="StaticBody2D" parent="." unique_id=1111659534]
+collision_layer = 2
+collision_mask = 1
+
+[node name="FloorCollision" type="CollisionShape2D" parent="StaticBody" unique_id=116024723]
+position = Vector2(504, 553)
+shape = SubResource("ConductorFloorShape")
+
+[node name="ConductorDesk" parent="." unique_id=2005621347 instance=ExtResource("2")]
 unique_name_in_owner = true
-
-[node name="BaseArt" type="Sprite2D" parent="ArtRoot"]
-texture = ExtResource("3")
-centered = false
-
-[node name="NightOverlay" type="Polygon2D" parent="ArtRoot"]
-unique_name_in_owner = true
-modulate = Color(1, 1, 1, 0)
-polygon = PackedVector2Array(6, 78, 954, 78, 954, 588, 6, 588)
-color = Color(0.0431373, 0.0705882, 0.12549, 0.68)
-
-[node name="LabelPlaque" type="Polygon2D" parent="ArtRoot"]
-polygon = PackedVector2Array(325, 83, 635, 83, 635, 113, 325, 113)
-color = Color(0.06, 0.07, 0.09, 0.9)
-
-[node name="CarLabel" type="Label" parent="ArtRoot"]
-offset_left = 335.0
-offset_top = 84.0
-offset_right = 625.0
-offset_bottom = 113.0
-theme_override_colors/font_color = Color(0.917647, 0.854902, 0.721569, 1)
-theme_override_font_sizes/font_size = 15
-text = "DRIVER + CONDUCTOR CAB"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="ConductorDesk" parent="." instance=ExtResource("2")]
 position = Vector2(750, 548)
+
+[node name="ArrivalClock" parent="." unique_id=152194416 instance=ExtResource("4")]
 unique_name_in_owner = true
+position = Vector2(255, 520)

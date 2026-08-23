@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://bcul17jlwm0lh"]
+
+[ext_resource type="PackedScene" uid="uid://dbsovo76klh2o" path="res://scenes/train/train_car_body.tscn" id="3_body"]
+
+[node name="TrainCarExteriorOpen" type="Node2D" unique_id=2104436195]
+texture_filter = 4
+
+[node name="DoorwayInterior" type="Polygon2D" parent="." unique_id=82843934]
+color = Color(0.0352941, 0.054902, 0.0705882, 1)
+polygon = PackedVector2Array(393, 235, 563, 235, 563, 521, 393, 521)
+
+[node name="DoorwayFloor" type="Polygon2D" parent="." unique_id=902128422]
+color = Color(0.101961, 0.133333, 0.152941, 1)
+polygon = PackedVector2Array(393, 476, 563, 476, 563, 521, 393, 521)
+
+[node name="Body" parent="." unique_id=1187309133 instance=ExtResource("3_body")]

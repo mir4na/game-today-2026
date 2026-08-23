@@ -52,17 +52,9 @@ default_volume = 80.0
 default_fullscreen = true
 default_vsync = true
 
-[node name="Backdrop" type="TextureRect" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
+[node name="BackdropSprite" type="Sprite2D" parent="."]
 texture = ExtResource("3")
-expand_mode = 1
-stretch_mode = 6
+centered = false
 
 [node name="SafeMargin" type="MarginContainer" parent="."]
 layout_mode = 1
