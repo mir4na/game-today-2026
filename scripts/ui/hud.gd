@@ -4,9 +4,6 @@ extends CanvasLayer
 
 @export_category("Inspector Copy")
 @export var clock_template: String = "%02d:%02d %s"
-@export_category("Floating Interaction Prompt")
-@export var floating_prompt_screen_offset: Vector2
-@export var floating_prompt_screen_margin: Vector2
 
 @onready var _root: Control = %Root
 @onready var _minimap: TrainMinimap = %TrainMinimap
@@ -36,14 +33,6 @@ func set_passenger_counts(counts: PackedInt32Array) -> void:
 func set_prompt(text: String) -> void:
 	_prompt_label.text = text
 	_floating_prompt.visible = not text.is_empty()
-
-func set_prompt_target_screen_position(target_screen_position: Vector2) -> void:
-	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
-	var desired_position: Vector2 = target_screen_position + floating_prompt_screen_offset
-	_floating_prompt.position = Vector2(
-		clampf(desired_position.x, floating_prompt_screen_margin.x, viewport_size.x - floating_prompt_screen_margin.x),
-		clampf(desired_position.y, floating_prompt_screen_margin.y, viewport_size.y - floating_prompt_screen_margin.y)
-	)
 
 func set_day_hud_visible(value: bool) -> void:
 	_clock_panel.visible = value

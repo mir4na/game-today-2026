@@ -196,20 +196,11 @@ centered = false
 [node name="Exterior" type="Node2D" parent="ArtRoot" unique_id=1207132285]
 unique_name_in_owner = true
 process_mode = 4
-visible = false
 z_index = 4
 
-[node name="DoorwayInterior" type="Polygon2D" parent="ArtRoot/Exterior" unique_id=946478145]
-color = Color(0.0352941, 0.054902, 0.0705882, 1)
-polygon = PackedVector2Array(393, 235, 563, 235, 563, 521, 393, 521)
-
-[node name="DoorwayFloor" type="Polygon2D" parent="ArtRoot/Exterior" unique_id=1434245415]
-color = Color(0.101961, 0.133333, 0.152941, 1)
-polygon = PackedVector2Array(393, 476, 563, 476, 563, 521, 393, 521)
-
 [node name="ExteriorSprite" type="Sprite2D" parent="ArtRoot/Exterior" unique_id=192217061]
-position = Vector2(13.1045, 214.7504)
-scale = Vector2(0.374415, 0.374415)
+position = Vector2(11.999999, 214.7504)
+scale = Vector2(0.37449878, 0.374415)
 texture = ExtResource("4")
 centered = false
 
@@ -223,14 +214,14 @@ centered = false
 unique_name_in_owner = true
 
 [node name="LeftDoorSprite" type="Sprite2D" parent="ArtRoot/Exterior/ClosedDoors" unique_id=1510576987]
-position = Vector2(397.6287, 308.3542)
-scale = Vector2(0.374415, 0.374415)
+position = Vector2(399, 308)
+scale = Vector2(0.36363637, 0.3653061)
 texture = ExtResource("6")
 centered = false
 
 [node name="RightDoorSprite" type="Sprite2D" parent="ArtRoot/Exterior/ClosedDoors" unique_id=437425803]
-position = Vector2(480, 308.3542)
-scale = Vector2(0.374415, 0.374415)
+position = Vector2(475, 308)
+scale = Vector2(0.3772728, 0.36530608)
 texture = ExtResource("7")
 centered = false
 
@@ -310,8 +301,10 @@ autoplay = &"wheel_spin"
 
 [node name="NightOverlay" type="Polygon2D" parent="ArtRoot" unique_id=1585746021]
 unique_name_in_owner = true
+visible = false
 modulate = Color(1, 1, 1, 0)
 z_index = 6
+position = Vector2(83, -5)
 color = Color(0.0431373, 0.0705882, 0.12549, 0.68)
 polygon = PackedVector2Array(0, 100, 960, 100, 960, 640, 0, 640)
 

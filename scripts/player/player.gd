@@ -11,8 +11,6 @@ signal interaction_pressed(interactable: Interactable)
 		interaction_enabled = value
 		if not interaction_enabled and is_inside_tree():
 			_set_nearest(null)
-@export_category("Interaction Presentation")
-@export_node_path("Marker2D") var interaction_prompt_anchor_path: NodePath
 @export_category("Artwork Direction")
 @export var artwork_faces_left: bool = true
 @export_category("Camera Transitions")
@@ -25,7 +23,6 @@ var _walk_time: float = 0.0
 
 @onready var _static_sprite: Sprite2D = %MCVisual
 @onready var _camera_transition: AnimationPlayer = %CameraTransition
-@onready var _interaction_prompt_anchor: Marker2D = get_node_or_null(interaction_prompt_anchor_path) as Marker2D
 @onready var _gravity: float = float(ProjectSettings.get_setting("physics/2d/default_gravity"))
 @onready var _static_sprite_base_y: float = _static_sprite.position.y
 
@@ -56,9 +53,6 @@ func set_interactables(nodes: Array[Interactable]) -> void:
 
 func clear_interactable() -> void:
 	_set_nearest(null)
-
-func get_interaction_prompt_global_position() -> Vector2:
-	return _interaction_prompt_anchor.global_position if is_instance_valid(_interaction_prompt_anchor) else global_position
 
 func begin_station_cutscene_camera() -> void:
 	_play_camera_transition(cutscene_zoom_out_animation)

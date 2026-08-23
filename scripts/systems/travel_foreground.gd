@@ -8,7 +8,6 @@ extends CanvasLayer
 @export_category("Cable Timing")
 @export_range(0.5, 30.0, 0.5) var minimum_cable_interval: float = 3.5
 @export_range(0.5, 30.0, 0.5) var maximum_cable_interval: float = 8.0
-@export_range(0.0, 30.0, 1.0) var cable_vertical_jitter: float = 10.0
 @export_category("Scene Animation")
 @export var pole_pass_animation: StringName = &"pole_pass"
 @export var cable_pass_animation: StringName = &"cable_pass"
@@ -68,7 +67,6 @@ func _on_pole_timer_timeout() -> void:
 func _on_cable_timer_timeout() -> void:
 	if not _traveling:
 		return
-	_passing_cables.position.y = _rng.randf_range(-cable_vertical_jitter, cable_vertical_jitter)
 	_passing_cables.show()
 	_cable_animation.play(cable_pass_animation)
 

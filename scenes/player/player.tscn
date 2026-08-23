@@ -1,11 +1,11 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene format=3 uid="uid://cq24ye24eom3u"]
 
-[ext_resource type="Script" path="res://scripts/player/player.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/characters/conductor_mc.png" id="2"]
+[ext_resource type="Script" uid="uid://dg3q4jbt287eb" path="res://scripts/player/player.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://jnthmrwogkms" path="res://assets/characters/conductor_mc.png" id="2"]
 
 [sub_resource type="CapsuleShape2D" id="Capsule"]
 radius = 27.5
-height = 190.0
+height = 136.0
 
 [sub_resource type="Animation" id="Animation_camera_reset"]
 resource_name = "RESET"
@@ -62,48 +62,33 @@ _data = {
 &"gameplay_camera_return": SubResource("Animation_camera_return")
 }
 
-[node name="Player" type="CharacterBody2D"]
-script = ExtResource("1")
-collision_layer = 1
+[node name="Player" type="CharacterBody2D" unique_id=2030105969]
 collision_mask = 2
 floor_snap_length = 12.0
-move_speed = 320.0
-movement_enabled = true
-interaction_enabled = true
-interaction_prompt_anchor_path = NodePath("InteractionPromptAnchor")
-artwork_faces_left = true
-cutscene_zoom_out_animation = &"cutscene_zoom_out"
-gameplay_camera_return_animation = &"gameplay_camera_return"
+script = ExtResource("1")
 
-[node name="BodyCollision" type="CollisionShape2D" parent="."]
-position = Vector2(0, -95)
+[node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=2014097555]
 shape = SubResource("Capsule")
 
-[node name="GroundShadow" type="Polygon2D" parent="."]
-position = Vector2(0, -22)
-polygon = PackedVector2Array(-38.4, 22, -27.2, 18, 27.2, 18, 38.4, 22, 27.2, 26, -27.2, 26)
+[node name="GroundShadow" type="Polygon2D" parent="." unique_id=1435860278]
+position = Vector2(0, 58)
 color = Color(0.03, 0.03, 0.04, 0.42)
+polygon = PackedVector2Array(-38.4, 22, -27.2, 18, 27.2, 18, 38.4, 22, 27.2, 26, -27.2, 26)
 
-[node name="MCVisual" type="Sprite2D" parent="."]
+[node name="MCVisual" type="Sprite2D" parent="." unique_id=1053191898]
 unique_name_in_owner = true
-position = Vector2(0, -102.85)
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.371, 0.371)
 texture = ExtResource("2")
 
-[node name="InteractionPromptAnchor" type="Marker2D" parent="."]
-position = Vector2(0, -240)
-
-[node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(0, -150)
+[node name="Camera2D" type="Camera2D" parent="." unique_id=406153284]
 zoom = Vector2(1.35, 1.35)
-position_smoothing_enabled = true
-position_smoothing_speed = 8.0
 limit_left = 0
 limit_top = 0
 limit_right = 6000
 limit_bottom = 720
-enabled = true
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
 
-[node name="CameraTransition" type="AnimationPlayer" parent="."]
+[node name="CameraTransition" type="AnimationPlayer" parent="." unique_id=543915875]
 unique_name_in_owner = true
 libraries/ = SubResource("AnimationLibrary_camera")
