@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3 uid="uid://d1llapidnrg01"]
 
-[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://c3dttyunbsxl3" path="res://assets/characters/Where Do You Belong_/NPC2 - Morgan.png" id="2"]
 
 [resource]
 script = ExtResource("1")
@@ -8,13 +9,8 @@ passenger_name = "Bima"
 short_name = "Bima"
 age = 41
 occupation = "Surveyor"
-origin_station = "Dunmere"
-destination_station = "Brambleford"
-ticket_owner = "Bima"
-is_dead = true
-anomaly_type = "impossible_ticket"
-current_carriage = 4
-initially_on_train = false
-ai_behavior = "wander"
-ai_interval_seconds = 15.0
 body_color = Color(0.25, 0.52, 0.62, 1)
+id_photo = ExtResource("2")
+identity_number = "B-002"
+birth_place = "Brambleford"
+date_of_birth = "07 SEP 1985"

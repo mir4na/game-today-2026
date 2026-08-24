@@ -183,20 +183,48 @@ exterior_visual_path = NodePath("ArtRoot/Exterior")
 closed_doors_path = NodePath("ArtRoot/Exterior/ClosedDoors")
 
 [node name="PassengerSeatSlots" type="Node2D" parent="." unique_id=141957282]
+editor_description = "One Marker2D for each of the 12 visible passenger seats. Move these markers in the Inspector to adjust passenger placement."
 
 [node name="Seat1" type="Marker2D" parent="PassengerSeatSlots" unique_id=1173216612]
-position = Vector2(145, 520)
+position = Vector2(67, 440)
 
 [node name="Seat2" type="Marker2D" parent="PassengerSeatSlots" unique_id=2075857442]
-position = Vector2(310, 520)
+position = Vector2(124, 440)
 
 [node name="Seat3" type="Marker2D" parent="PassengerSeatSlots" unique_id=1040894170]
-position = Vector2(690, 520)
+position = Vector2(180, 440)
+
+[node name="Seat4" type="Marker2D" parent="PassengerSeatSlots"]
+position = Vector2(236, 440)
+
+[node name="Seat5" type="Marker2D" parent="PassengerSeatSlots"]
+position = Vector2(292, 440)
+
+[node name="Seat6" type="Marker2D" parent="PassengerSeatSlots"]
+position = Vector2(349, 440)
+
+[node name="Seat7" type="Marker2D" parent="PassengerSeatSlots"]
+position = Vector2(604, 440)
+
+[node name="Seat8" type="Marker2D" parent="PassengerSeatSlots"]
+position = Vector2(661, 440)
+
+[node name="Seat9" type="Marker2D" parent="PassengerSeatSlots"]
+position = Vector2(717, 440)
+
+[node name="Seat10" type="Marker2D" parent="PassengerSeatSlots"]
+position = Vector2(774, 440)
+
+[node name="Seat11" type="Marker2D" parent="PassengerSeatSlots"]
+position = Vector2(830, 440)
+
+[node name="Seat12" type="Marker2D" parent="PassengerSeatSlots"]
+position = Vector2(887, 440)
 
 [node name="PassengerActivitySlots" type="Node2D" parent="." unique_id=1069195525]
 
 [node name="DoorWatch" type="Marker2D" parent="PassengerActivitySlots" unique_id=999687608]
-position = Vector2(90, 520)
+position = Vector2(434, 504)
 
 [node name="AisleLeft" type="Marker2D" parent="PassengerActivitySlots" unique_id=736964388]
 position = Vector2(350, 520)
@@ -231,7 +259,7 @@ centered = false
 unique_name_in_owner = true
 process_mode = 4
 visible = false
-z_index = 4
+z_index = 5
 
 [node name="DoorwayInterior" type="Polygon2D" parent="ArtRoot/Exterior" unique_id=979262317]
 color = Color(0.0352941, 0.054902, 0.0705882, 1)
@@ -269,7 +297,7 @@ texture = ExtResource("7")
 centered = false
 
 [node name="Wheels" type="Node2D" parent="ArtRoot" unique_id=1283830032]
-z_index = 5
+z_index = 6
 texture_filter = 4
 
 [node name="Wheel1" type="Node2D" parent="ArtRoot/Wheels" unique_id=122458058]
@@ -345,7 +373,7 @@ autoplay = &"wheel_spin"
 [node name="NightOverlay" type="Polygon2D" parent="ArtRoot" unique_id=2125477584]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0)
-z_index = 6
+z_index = 7
 color = Color(0.0431373, 0.0705882, 0.12549, 0.68)
 polygon = PackedVector2Array(0, 100, 960, 100, 960, 640, 0, 640)
 

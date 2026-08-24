@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3 uid="uid://cx6ttdmtj4lgd"]
 
-[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://biw0f3wxnqss1" path="res://assets/characters/Where Do You Belong_/NPC1.png" id="2"]
 
 [resource]
 script = ExtResource("1")
@@ -8,12 +9,8 @@ passenger_name = "Aruna"
 short_name = "Aruna"
 age = 34
 occupation = "Tailor"
-origin_station = "Brambleford"
-destination_station = "Eastmere"
-ticket_owner = "Aruna"
-is_dead = true
-anomaly_type = "shadowless"
-current_carriage = 1
-initially_on_train = false
-ai_behavior = "still"
 body_color = Color(0.78, 0.43, 0.34, 1)
+id_photo = ExtResource("2")
+identity_number = "A-001"
+birth_place = "Alderwick"
+date_of_birth = "18 APR 1992"

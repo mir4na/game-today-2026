@@ -1,20 +1,16 @@
-[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3 uid="uid://j3f80mwvqkci"]
 
-[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://cf0it5tvjm3lo" path="res://assets/characters/Where Do You Belong_/NPC3.png" id="2"]
 
 [resource]
 script = ExtResource("1")
 passenger_name = "Citra"
 short_name = "Citra"
-age = 93
+age = 43
 occupation = "Retired Teacher"
-origin_station = "Cinderfield"
-destination_station = "Eastmere"
-ticket_owner = "Citra"
-is_dead = true
-anomaly_type = "age_mismatch"
-current_carriage = 3
-initially_on_train = false
-ai_behavior = "window_watcher"
-ai_interval_seconds = 12.0
 body_color = Color(0.74, 0.57, 0.76, 1)
+id_photo = ExtResource("2")
+identity_number = "C-003"
+birth_place = "Cinderfield"
+date_of_birth = "12 JAN 1983"

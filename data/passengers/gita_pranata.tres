@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3 uid="uid://r6fnaxd52bp4"]
 
-[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://o6j8ceilbdjc" path="res://assets/characters/Where Do You Belong_/NPC7.png" id="2"]
 
 [resource]
 script = ExtResource("1")
@@ -8,12 +9,8 @@ passenger_name = "Gita"
 short_name = "Gita"
 age = 36
 occupation = "Nurse"
-origin_station = "Alderwick"
-destination_station = "Brambleford"
-ticket_owner = "Gita"
-is_dead = false
-anomaly_type = "none"
-current_carriage = 2
-ai_behavior = "carriage_roamer"
-ai_interval_seconds = 16.0
 body_color = Color(0.68, 0.39, 0.48, 1)
+id_photo = ExtResource("2")
+identity_number = "G-007"
+birth_place = "Brambleford"
+date_of_birth = "15 MAY 1990"

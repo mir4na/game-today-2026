@@ -32,6 +32,7 @@ centered = false
 [node name="NightOverlay" type="Polygon2D" parent="ArtRoot"]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0)
+z_index = 7
 polygon = PackedVector2Array(6, 78, 954, 78, 954, 588, 6, 588)
 color = Color(0.0431373, 0.0705882, 0.12549, 0.68)
 

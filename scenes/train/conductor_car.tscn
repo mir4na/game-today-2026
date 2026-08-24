@@ -196,7 +196,7 @@ centered = false
 [node name="Exterior" type="Node2D" parent="ArtRoot" unique_id=1207132285]
 unique_name_in_owner = true
 process_mode = 4
-z_index = 4
+z_index = 5
 
 [node name="ExteriorSprite" type="Sprite2D" parent="ArtRoot/Exterior" unique_id=192217061]
 position = Vector2(11.999999, 214.7504)
@@ -226,7 +226,7 @@ texture = ExtResource("7")
 centered = false
 
 [node name="Wheels" type="Node2D" parent="ArtRoot" unique_id=1207599172]
-z_index = 5
+z_index = 6
 texture_filter = 4
 
 [node name="Wheel1" type="Node2D" parent="ArtRoot/Wheels" unique_id=824154010]
@@ -303,7 +303,7 @@ autoplay = &"wheel_spin"
 unique_name_in_owner = true
 visible = false
 modulate = Color(1, 1, 1, 0)
-z_index = 6
+z_index = 7
 position = Vector2(83, -5)
 color = Color(0.0431373, 0.0705882, 0.12549, 0.68)
 polygon = PackedVector2Array(0, 100, 960, 100, 960, 640, 0, 640)

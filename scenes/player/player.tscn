@@ -63,6 +63,7 @@ _data = {
 }
 
 [node name="Player" type="CharacterBody2D" unique_id=2030105969]
+z_index = 3
 collision_mask = 2
 floor_snap_length = 12.0
 script = ExtResource("1")
@@ -71,9 +72,9 @@ script = ExtResource("1")
 shape = SubResource("Capsule")
 
 [node name="GroundShadow" type="Polygon2D" parent="." unique_id=1435860278]
-position = Vector2(0, 58)
+position = Vector2(0, 80)
 color = Color(0.03, 0.03, 0.04, 0.42)
-polygon = PackedVector2Array(-38.4, 22, -27.2, 18, 27.2, 18, 38.4, 22, 27.2, 26, -27.2, 26)
+polygon = PackedVector2Array(-38.4, 0, -35.477, -2.296, -27.153, -4.243, -14.695, -5.543, 0, -6, 14.695, -5.543, 27.153, -4.243, 35.477, -2.296, 38.4, 0, 35.477, 2.296, 27.153, 4.243, 14.695, 5.543, 0, 6, -14.695, 5.543, -27.153, 4.243, -35.477, 2.296)
 
 [node name="MCVisual" type="Sprite2D" parent="." unique_id=1053191898]
 unique_name_in_owner = true

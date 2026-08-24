@@ -10,6 +10,10 @@ signal departures_confirmed(assignments: Dictionary)
 @export var station_slot_template: String = "%s\n%s"
 @export var no_passenger_error: String
 @export var incomplete_assignment_error: String
+@export_multiline var statement_entry_template: String
+@export_multiline var missing_statement_template: String
+@export_multiline var no_collected_statements_text: String
+@export_multiline var missing_statements_error: String
 
 var _puzzle: DeparturePuzzleData
 var _selected_passenger: String = ""
@@ -25,8 +29,9 @@ var _passenger_buttons: Dictionary = {}
 var _station_buttons: Dictionary = {}
 var _slot_passenger_names := PackedStringArray()
 var _slot_station_names := PackedStringArray()
+var _all_statements_collected: bool = false
 
-func open_puzzle(passengers: Array[PassengerData], puzzle: DeparturePuzzleData) -> void:
+func open_puzzle(passengers: Array[PassengerData], puzzle: DeparturePuzzleData, collected_statements: Dictionary) -> void:
 	_puzzle = puzzle
 	_selected_passenger = ""
 	_assignments.clear()
@@ -61,7 +66,11 @@ func open_puzzle(passengers: Array[PassengerData], puzzle: DeparturePuzzleData) 
 		_station_buttons[station] = button
 		if i < puzzle.night_stations.size() - 1:
 			_station_arrows[i].show()
-	_statement_label.text = puzzle.night_stop_clues
+	_statement_label.text = _compose_statement_document(passengers, collected_statements)
+	_all_statements_collected = _has_every_statement(passengers, puzzle, collected_statements)
+	_confirm_button.disabled = not _all_statements_collected
+	if not _all_statements_collected:
+		_error_label.text = missing_statements_error
 	_selection_label.text = selection_instruction
 	show()
 	if not passengers.is_empty():
@@ -131,7 +140,32 @@ func _update_station_buttons() -> void:
 		(_station_buttons[station] as Button).text = station_slot_template % [station.to_upper(), passenger_name]
 
 func _confirm() -> void:
+	if not _all_statements_collected:
+		_error_label.text = missing_statements_error
+		return
 	if _puzzle == null or _assignments.size() != _puzzle.night_stations.size():
 		_error_label.text = incomplete_assignment_error
 		return
 	departures_confirmed.emit(_assignments.duplicate())
+
+func _compose_statement_document(passengers: Array[PassengerData], collected_statements: Dictionary) -> String:
+	var lines := PackedStringArray()
+	for data: PassengerData in passengers:
+		var statement: String = str(collected_statements.get(data.short_name, "")).strip_edges()
+		if statement.is_empty():
+			lines.append(missing_statement_template % data.short_name.to_upper())
+		else:
+			lines.append(statement_entry_template % [data.short_name.to_upper(), statement])
+	if lines.is_empty():
+		return no_collected_statements_text
+	return "\n\n".join(lines)
+
+func _has_every_statement(passengers: Array[PassengerData], puzzle: DeparturePuzzleData, collected_statements: Dictionary) -> bool:
+	if passengers.is_empty():
+		return false
+	for data: PassengerData in passengers:
+		if puzzle.get_statement_for_passenger(data.short_name).is_empty():
+			return false
+		if str(collected_statements.get(data.short_name, "")).strip_edges().is_empty():
+			return false
+	return true

@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3 uid="uid://dleig4f4cwhd"]
 
-[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://cd48rc6fhar0b" path="res://assets/characters/Where Do You Belong_/NPC8.png" id="2"]
 
 [resource]
 script = ExtResource("1")
@@ -8,12 +9,8 @@ passenger_name = "Hana"
 short_name = "Hana"
 age = 22
 occupation = "Student"
-origin_station = "Alderwick"
-destination_station = "Cinderfield"
-ticket_owner = "Hana"
-is_dead = false
-anomaly_type = "none"
-current_carriage = 1
-ai_behavior = "window_watcher"
-ai_interval_seconds = 14.0
 body_color = Color(0.42, 0.58, 0.76, 1)
+id_photo = ExtResource("2")
+identity_number = "H-008"
+birth_place = "Cinderfield"
+date_of_birth = "08 AUG 2004"

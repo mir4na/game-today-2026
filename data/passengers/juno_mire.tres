@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3 uid="uid://dj737v4w8qg3u"]
 
-[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://6pmi1hwtwk7j" path="res://assets/characters/Where Do You Belong_/NPC10.png" id="2"]
 
 [resource]
 script = ExtResource("1")
@@ -8,12 +9,8 @@ passenger_name = "Juno"
 short_name = "Juno"
 age = 31
 occupation = "Florist"
-origin_station = "Alderwick"
-destination_station = "Dunmere"
-ticket_owner = "Juno"
-is_dead = false
-anomaly_type = "none"
-current_carriage = 2
-ai_behavior = "wander"
-ai_interval_seconds = 15.0
 body_color = Color(0.51, 0.64, 0.42, 1)
+id_photo = ExtResource("2")
+identity_number = "J-010"
+birth_place = "Eastmere"
+date_of_birth = "19 OCT 1995"

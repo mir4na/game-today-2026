@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3 uid="uid://bd0i86h8bavjo"]
 
-[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://dwrgww2j8xgv4" path="res://assets/characters/Where Do You Belong_/NPC11.png" id="2"]
 
 [resource]
 script = ExtResource("1")
@@ -8,13 +9,8 @@ passenger_name = "Kala"
 short_name = "Kala"
 age = 45
 occupation = "Archivist"
-origin_station = "Dunmere"
-destination_station = "Eastmere"
-ticket_owner = "Kala"
-is_dead = false
-anomaly_type = "none"
-current_carriage = 2
-initially_on_train = false
-ai_behavior = "carriage_roamer"
-ai_interval_seconds = 13.0
 body_color = Color(0.48, 0.42, 0.66, 1)
+id_photo = ExtResource("2")
+identity_number = "K-011"
+birth_place = "Alderwick"
+date_of_birth = "25 JUL 1981"

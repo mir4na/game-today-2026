@@ -36,6 +36,10 @@ empty_station_text = "— empty —"
 station_slot_template = "%s\n%s"
 no_passenger_error = "Select a passenger first."
 incomplete_assignment_error = "Every night stop requires one deceased passenger."
+statement_entry_template = "[color=#c9ad79][b]%s[/b][/color]\n\"%s\""
+missing_statement_template = "[color=#756f68][b]%s[/b] — statement not collected[/color]"
+no_collected_statements_text = "[color=#756f68]No departure statements have been collected. Interview the deceased passengers first.[/color]"
+missing_statements_error = "Interview every deceased passenger before confirming the night route."
 
 [node name="Shade" type="ColorRect" parent="."]
 layout_mode = 1
@@ -207,7 +211,7 @@ theme_override_constants/separation = 9
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 18
-text = "NIGHT STOP CLUES"
+text = "COLLECTED DEPARTURE STATEMENTS"
 horizontal_alignment = 1
 
 [node name="StatementLabel" type="RichTextLabel" parent="Margin/Outer/Columns/CluePanel/Box"]

@@ -46,7 +46,7 @@ Main                             gameplay scene
 ├── HUD                          duties, live passenger-dot minimap, prompt, clock, notifications
 └── ModalLayer
 	├── DayIntroUI                 full-black DAY 1 fade title card
-    ├── PassengerInspectUI       biodata/ticket plus next-stop assignment control
+    ├── DocumentOverlayUI        ID and ticket documents; newspaper/statement reader
     ├── NotebookUI              passengers/route/evidence
     ├── StationStopCutsceneUI    letterbox + passenger staging over the gameplay camera
     ├── DeadSelectionUI          five typed abnormal-passenger report fields

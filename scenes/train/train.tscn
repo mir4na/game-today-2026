@@ -144,7 +144,7 @@ position = Vector2(3840, 0)
 position = Vector2(4800, 0)
 
 [node name="CarConnections" type="Node2D" parent="Cars" unique_id=2071011326]
-z_index = 8
+z_index = 4
 
 [node name="FloorConnection" type="Node2D" parent="Cars/CarConnections" unique_id=131007500]
 

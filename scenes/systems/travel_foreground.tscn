@@ -1,8 +1,8 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene format=3 uid="uid://drn1e0xhyylll"]
 
-[ext_resource type="Script" path="res://scripts/systems/travel_foreground.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/environment/overhead_wire.png" id="2"]
-[ext_resource type="Texture2D" path="res://assets/environment/trackside_pole.png" id="3"]
+[ext_resource type="Script" uid="uid://cg0g2mscin2qk" path="res://scripts/systems/travel_foreground.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://ds56u14lnmuuh" path="res://assets/environment/overhead_wire.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://c73lnyvswmfpt" path="res://assets/environment/trackside_pole.png" id="3"]
 
 [sub_resource type="Animation" id="Animation_pole_reset"]
 resource_name = "RESET"
@@ -80,60 +80,55 @@ _data = {
 &"cable_pass": SubResource("Animation_cable_pass")
 }
 
-[node name="TravelForeground" type="CanvasLayer"]
+[node name="TravelForeground" type="CanvasLayer" unique_id=1003968708]
 layer = 9
 script = ExtResource("1")
-minimum_pole_interval = 5.0
-maximum_pole_interval = 11.0
-minimum_cable_interval = 3.5
-maximum_cable_interval = 8.0
-pole_pass_animation = &"pole_pass"
-cable_pass_animation = &"cable_pass"
 
-[node name="TravelScenery" type="Node2D" parent="."]
+[node name="TravelScenery" type="Node2D" parent="." unique_id=926456186]
 unique_name_in_owner = true
 editor_description = "Scene-owned travel decorations. Adjust the cable and pole sprites here; runtime only controls when their scene animations play."
 
-[node name="PassingCables" type="Node2D" parent="TravelScenery"]
+[node name="PassingCables" type="Node2D" parent="TravelScenery" unique_id=328679427]
 unique_name_in_owner = true
 editor_description = "Move this node to position both overhead wires. Edit each Sprite2D below it for individual art placement."
+position = Vector2(-2000, 0)
 
-[node name="RearOverheadWire" type="Sprite2D" parent="TravelScenery/PassingCables"]
+[node name="RearOverheadWire" type="Sprite2D" parent="TravelScenery/PassingCables" unique_id=1254690009]
 modulate = Color(0.78, 0.72, 0.65, 0.55)
 position = Vector2(500, -4)
-scale = Vector2(0.45, 0.45)
+scale = Vector2(0.374415, 0.374415)
 texture = ExtResource("2")
 centered = false
 
-[node name="FrontOverheadWire" type="Sprite2D" parent="TravelScenery/PassingCables"]
+[node name="FrontOverheadWire" type="Sprite2D" parent="TravelScenery/PassingCables" unique_id=597990151]
 modulate = Color(1, 1, 1, 0.9)
 position = Vector2(0, -4)
-scale = Vector2(0.45, 0.45)
+scale = Vector2(0.374415, 0.374415)
 texture = ExtResource("2")
 centered = false
 
-[node name="PassingPole" type="Sprite2D" parent="TravelScenery"]
+[node name="PassingPole" type="Sprite2D" parent="TravelScenery" unique_id=1118944331]
 unique_name_in_owner = true
 visible = false
+z_index = 10
 position = Vector2(-100, 0)
 scale = Vector2(0.52, 0.52)
-z_index = 10
 texture = ExtResource("3")
 centered = false
 
-[node name="PoleTimer" type="Timer" parent="."]
+[node name="PoleTimer" type="Timer" parent="." unique_id=1078138346]
 unique_name_in_owner = true
 one_shot = true
 
-[node name="CableTimer" type="Timer" parent="."]
+[node name="CableTimer" type="Timer" parent="." unique_id=2134118922]
 unique_name_in_owner = true
 one_shot = true
 
-[node name="PoleAnimation" type="AnimationPlayer" parent="."]
+[node name="PoleAnimation" type="AnimationPlayer" parent="." unique_id=1368531899]
 unique_name_in_owner = true
 libraries/ = SubResource("AnimationLibrary_pole")
 
-[node name="CableAnimation" type="AnimationPlayer" parent="."]
+[node name="CableAnimation" type="AnimationPlayer" parent="." unique_id=1518753713]
 unique_name_in_owner = true
 libraries/ = SubResource("AnimationLibrary_cable")
 

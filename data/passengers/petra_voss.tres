@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3 uid="uid://diyhq8nh7l86r"]
 
-[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://c0wxp7pf8kf2k" path="res://assets/characters/Where Do You Belong_/NPC15.png" id="2"]
 
 [resource]
 script = ExtResource("1")
@@ -8,11 +9,8 @@ passenger_name = "Petra"
 short_name = "Petra"
 age = 44
 occupation = "Glassworker"
-origin_station = "Alderwick"
-destination_station = "Mistvale"
-ticket_owner = "Petra"
-is_dead = false
-anomaly_type = "none"
-current_carriage = 1
-ai_behavior = "still"
 body_color = Color(0.65, 0.47, 0.36, 1)
+id_photo = ExtResource("2")
+identity_number = "P-015"
+birth_place = "Eastmere"
+date_of_birth = "17 SEP 1982"

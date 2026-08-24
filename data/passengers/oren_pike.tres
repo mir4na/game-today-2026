@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="PassengerData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3 uid="uid://cj3r8yb3lqr2s"]
 
-[ext_resource type="Script" path="res://scripts/passenger/passenger_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://8bniec8mrj2" path="res://assets/characters/Where Do You Belong_/NPC14.png" id="2"]
 
 [resource]
 script = ExtResource("1")
@@ -8,12 +9,8 @@ passenger_name = "Oren"
 short_name = "Oren"
 age = 52
 occupation = "Lamplighter"
-origin_station = "Alderwick"
-destination_station = "Eastmere"
-ticket_owner = "Oren"
-is_dead = false
-anomaly_type = "none"
-current_carriage = 3
-ai_behavior = "wander"
-ai_interval_seconds = 14.0
 body_color = Color(0.46, 0.57, 0.67, 1)
+id_photo = ExtResource("2")
+identity_number = "O-014"
+birth_place = "Dunmere"
+date_of_birth = "06 JUN 1974"

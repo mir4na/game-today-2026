@@ -32,10 +32,10 @@ mouse_filter = 0
 theme = ExtResource("2")
 script = ExtResource("1")
 route_stations = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere")
-passenger_empty_document = "[font_size=24][b]PASSENGERS[/b][/font_size]\n\nNo passenger records yet. Inspect people in the carriages to add their public details here."
+passenger_empty_document = "[font_size=24][b]PASSENGERS[/b][/font_size]\n\nNo passenger documents checked yet. Approach someone and review their ID and ticket."
 passenger_header_template = "[font_size=24][b]PASSENGER RECORDS — %d[/b][/font_size]\n"
 passenger_line_template = "[b]%s[/b]\nAge %d  •  %s → %s\n"
-route_document_template = "[font_size=24][b]DAY ROUTE[/b][/font_size]\n\n[font_size=26]%s[/font_size]\n\n[color=#746f69]Passed[/color]    [color=#e4bc72]Current[/color]    [color=#e7ded0]Upcoming[/color]\n\nThe playable shift begins at Alderwick and ends at Eastmere. Every station-to-station leg takes exactly one minute of unpaused play.\n\n[b]SHIFT POLICY[/b]\nApproach and inspect a passenger, then assign who will get off at the next station. At every stop, the number getting off must equal the number boarding. Earn 180 Merit before night to clear the daily paycheck threshold. Station mistakes and incorrect identities are sealed during the shift; Merit deductions, Penalty Points, and SP warnings are revealed at the day-to-night transition."
+route_document_template = "[font_size=24][b]DAY ROUTE[/b][/font_size]\n\n[font_size=26]%s[/font_size]\n\n[color=#746f69]Passed[/color]    [color=#e4bc72]Current[/color]    [color=#e7ded0]Upcoming[/color]\n\nThe playable shift follows the route shown above. Every station-to-station leg takes exactly one minute of unpaused play.\n\n[b]SHIFT POLICY[/b]\nApproach a passenger and check their ID and ticket, then stamp the ticket to assign their next-stop departure. At every stop, the number getting off must equal the number boarding. Station mistakes and incorrect identities are sealed during the shift and revealed at the day-to-night transition."
 evidence_document_template = "[font_size=24][b]EVIDENCE — THE AFTERNOON DISPATCH[/b][/font_size]\n\n%s"
 evidence_empty_document = "[font_size=24][b]EVIDENCE[/b][/font_size]\n\nNo documents collected.\n\nVisual observations are not recorded automatically."
 

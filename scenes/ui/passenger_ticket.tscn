@@ -1,0 +1,532 @@
+[gd_scene format=3 uid="uid://d4majvc8ogbfm"]
+
+[ext_resource type="Script" uid="uid://cbng2bcxwuplp" path="res://scripts/ui/passenger_ticket.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://lkud6gnp6bf3" path="res://assets/ui/passenger_ticket.png" id="2_ticket"]
+[ext_resource type="Texture2D" uid="uid://bgy7eu24yyr0x" path="res://assets/ui/ticket_stempel.png" id="3_stamp"]
+[ext_resource type="FontFile" uid="uid://f6svvsvs8ti1" path="res://fonts/Josefin_Sans/static/JosefinSans-Regular.ttf" id="4_regular"]
+[ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="5_bold"]
+
+[sub_resource type="Animation" id="Animation_stamp_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TicketSurface:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("TicketSurface:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("TicketSurface:rotation")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("TicketSurface:self_modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("TicketSurface/ValidationStamp:visible")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("TicketSurface/ValidationStamp:self_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("TicketSurface/ValidationStamp:scale")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.94, 0.94)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("TicketSurface/ValidationStamp:rotation")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [-0.015]
+}
+
+[sub_resource type="Animation" id="Animation_apply_stamp"]
+resource_name = "apply_disembark_stamp"
+length = 0.52
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TicketSurface:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.32, 0.52),
+"transitions": PackedFloat32Array(1.6, 0.55, 1.8, 0.7, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, -6), Vector2(0, 7), Vector2(0, -2), Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("TicketSurface:scale")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.32, 0.52),
+"transitions": PackedFloat32Array(1.6, 0.55, 1.8, 0.7, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1.012, 1.012), Vector2(1.018, 0.965), Vector2(0.997, 1.006), Vector2(1, 1)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("TicketSurface:rotation")
+tracks/2/interp = 2
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.32, 0.52),
+"transitions": PackedFloat32Array(1.6, 0.55, 1.8, 0.7, 1),
+"update": 0,
+"values": [0.0, -0.008, 0.006, -0.0025, 0.0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("TicketSurface:self_modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.16, 0.2, 0.29, 0.52),
+"transitions": PackedFloat32Array(1, 1, 2, 0.8, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(0.94, 0.9, 0.84, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 1)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("TicketSurface/ValidationStamp:visible")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.199, 0.2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [false, false, true]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("TicketSurface/ValidationStamp:self_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 0.199, 0.2, 0.27, 0.4, 0.52),
+"transitions": PackedFloat32Array(1, 1, 1, 1.8, 0.8, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 0.56), Color(1, 1, 1, 0.96), Color(1, 1, 1, 0.9), Color(1, 1, 1, 0.92)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("TicketSurface/ValidationStamp:scale")
+tracks/6/interp = 2
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0.2, 0.27, 0.4, 0.52),
+"transitions": PackedFloat32Array(0.55, 1.8, 0.8, 1),
+"update": 0,
+"values": [Vector2(0.94, 0.94), Vector2(1.025, 1.025), Vector2(0.995, 0.995), Vector2(1, 1)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("TicketSurface/ValidationStamp:rotation")
+tracks/7/interp = 2
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0.2, 0.29, 0.44, 0.52),
+"transitions": PackedFloat32Array(0.7, 1.7, 0.8, 1),
+"update": 0,
+"values": [-0.015, 0.006, -0.002, 0.0]
+}
+
+[sub_resource type="Animation" id="Animation_stamp_applied"]
+resource_name = "STAMPED"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TicketSurface:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("TicketSurface:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("TicketSurface:rotation")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("TicketSurface:self_modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("TicketSurface/ValidationStamp:visible")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("TicketSurface/ValidationStamp:self_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0.92)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("TicketSurface/ValidationStamp:scale")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("TicketSurface/ValidationStamp:rotation")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_remove_stamp"]
+resource_name = "remove_disembark_stamp"
+length = 0.22
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TicketSurface/ValidationStamp:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.219, 0.22),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [true, true, false]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("TicketSurface/ValidationStamp:self_modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.22),
+"transitions": PackedFloat32Array(1.5, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0.92), Color(1, 1, 1, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("TicketSurface/ValidationStamp:scale")
+tracks/2/interp = 2
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.22),
+"transitions": PackedFloat32Array(1.4, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1.04, 1.04)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("TicketSurface/ValidationStamp:rotation")
+tracks/3/interp = 2
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.22),
+"transitions": PackedFloat32Array(1.4, 1),
+"update": 0,
+"values": [0.0, -0.02]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("TicketSurface:scale")
+tracks/4/interp = 2
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.22),
+"transitions": PackedFloat32Array(1.4, 0.7, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(0.996, 1.004), Vector2(1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_stamp"]
+_data = {
+&"RESET": SubResource("Animation_stamp_reset"),
+&"STAMPED": SubResource("Animation_stamp_applied"),
+&"apply_disembark_stamp": SubResource("Animation_apply_stamp"),
+&"remove_disembark_stamp": SubResource("Animation_remove_stamp")
+}
+
+[node name="PassengerTicket" type="Control" unique_id=1006645324]
+custom_minimum_size = Vector2(620, 321)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 620.0
+offset_bottom = 321.0
+size_flags_vertical = 0
+mouse_filter = 2
+script = ExtResource("1_script")
+service_date_text = "07 JUNE"
+train_number_text = "505"
+missing_value_text = "NOT RECORDED"
+reset_stamp_animation = &"RESET"
+stamped_state_animation = &"STAMPED"
+apply_stamp_animation = &"apply_disembark_stamp"
+remove_stamp_animation = &"remove_disembark_stamp"
+unstamped_tooltip = "STAMP FOR NEXT-STOP DISEMBARK"
+stamped_tooltip = "REMOVE DISEMBARK STAMP"
+
+[node name="TicketSurface" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(310, 160.5)
+mouse_filter = 2
+
+[node name="TicketArtwork" type="TextureRect" parent="TicketSurface" unique_id=331054234]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_ticket")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PrintedFields" type="Control" parent="TicketSurface" unique_id=1274851657]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PassengerName" type="Label" parent="TicketSurface/PrintedFields" unique_id=1879227113]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 45.0
+offset_top = 151.0
+offset_right = 250.0
+offset_bottom = 178.0
+theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
+theme_override_fonts/font = ExtResource("4_regular")
+theme_override_font_sizes/font_size = 18
+text = "PASSENGER"
+text_overrun_behavior = 3
+
+[node name="Origin" type="Label" parent="TicketSurface/PrintedFields" unique_id=2105467530]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 45.0
+offset_top = 210.0
+offset_right = 250.0
+offset_bottom = 237.0
+theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
+theme_override_fonts/font = ExtResource("4_regular")
+theme_override_font_sizes/font_size = 18
+text = "ORIGIN"
+text_overrun_behavior = 3
+
+[node name="Destination" type="Label" parent="TicketSurface/PrintedFields" unique_id=1667167916]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 45.0
+offset_top = 266.0
+offset_right = 250.0
+offset_bottom = 293.0
+theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
+theme_override_fonts/font = ExtResource("4_regular")
+theme_override_font_sizes/font_size = 18
+text = "DESTINATION"
+text_overrun_behavior = 3
+
+[node name="ServiceDate" type="Label" parent="TicketSurface/PrintedFields" unique_id=1285225902]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 256.0
+offset_top = 86.0
+offset_right = 398.0
+offset_bottom = 113.0
+theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
+theme_override_fonts/font = ExtResource("4_regular")
+theme_override_font_sizes/font_size = 18
+text = "07 JUNE"
+horizontal_alignment = 1
+text_overrun_behavior = 3
+
+[node name="TrainNumber" type="Label" parent="TicketSurface/PrintedFields" unique_id=543350826]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 362.0
+offset_top = 255.0
+offset_right = 410.0
+offset_bottom = 280.0
+theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
+theme_override_fonts/font = ExtResource("5_bold")
+theme_override_font_sizes/font_size = 15
+text = "505"
+horizontal_alignment = 1
+text_overrun_behavior = 3
+
+[node name="TicketNumber" type="Label" parent="TicketSurface/PrintedFields" unique_id=1248637873]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 472.0
+offset_top = 220.0
+offset_right = 600.0
+offset_bottom = 248.0
+theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
+theme_override_fonts/font = ExtResource("5_bold")
+theme_override_font_sizes/font_size = 17
+text = "00000000000"
+horizontal_alignment = 1
+text_overrun_behavior = 3
+
+[node name="ValidationStamp" type="TextureRect" parent="TicketSurface" unique_id=625880236]
+unique_name_in_owner = true
+visible = false
+z_index = 4
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(310, 160.5)
+mouse_filter = 2
+texture = ExtResource("3_stamp")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StampAnimation" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries/ = SubResource("AnimationLibrary_stamp")
+
+[connection signal="animation_finished" from="StampAnimation" to="." method="_on_stamp_animation_finished"]

@@ -3,32 +3,31 @@ extends Node2D
 ## Owns the vertical-slice state and coordinates data, world presentation and UI.
 
 enum GameState { OPENING, DAY, SUNSET, SHIFT_REPORT, NIGHT, NIGHT_PUZZLE, COMPLETE }
-enum NewspaperEditionMode { RANDOM, FORCE_RELEVANT, FORCE_UNRELATED }
+enum NewspaperCase { NON_DEATH_NEWS, EXTERNAL_DEATH, MATCHING_PASSENGER_DEATH }
+enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_EXTERNAL_DEATH, FORCE_MATCHING_DEATH }
 
 @export_category("Data & Scenes")
-@export var passenger_resources: Array[Resource] = []
+@export var passenger_identity_profiles: Array[PassengerIdentityProfile] = []
 @export var puzzle_resource: Resource
 @export var passenger_scene: PackedScene
+@export var manifest_config: DailyManifestConfig
 @export_category("Day Route")
 @export var day_route: PackedStringArray
 @export_category("Station Service")
 @export_range(1, 8, 1) var unlisted_destination_penalty_units: int = 1
 @export_category("Newspaper")
-@export_enum("Random", "Force Relevant", "Force Unrelated") var newspaper_edition_mode: int = NewspaperEditionMode.RANDOM
-@export_range(0.0, 1.0, 0.01) var newspaper_relevant_chance: float = 0.5
-@export_category("Anomaly Balance")
-@export_range(1, 4, 1) var max_passengers_per_anomaly_trait: int = 2
+@export_enum("Random", "Force Non-Death", "Force External Death", "Force Matching Death") var newspaper_edition_mode: int = NewspaperEditionMode.RANDOM
 @export_category("Debug")
 @export var debug_print_anomaly_roster: bool = false
+@export_category("Inspector Copy")
+@export_multiline var night_shift_instruction: String
+@export var departure_statement_recorded_template: String
 
-const MAX_ACTIVE_PASSENGERS: int = 10
-const MAX_NIGHT_PASSENGERS: int = 4
 const ABNORMAL_NOTE_PENALTY: int = 10
 const WRONG_STOP_PENALTY: int = 12
 const START_MINUTES: float = 14.0 * 60.0
 const STATION_TRAVEL_SECONDS: float = 60.0
 const SUNSET_MINUTES: float = 17.5 * 60.0
-const FINAL_ARRIVAL_MINUTES: float = START_MINUTES + STATION_TRAVEL_SECONDS * 4.0
 
 var state: GameState = GameState.OPENING
 var _day_minutes: float = START_MINUTES
@@ -36,15 +35,20 @@ var _station_arrival_announced: bool = false
 var _station_exchange_processed: bool = false
 var _station_assignment := PackedStringArray()
 var _newspaper_read: bool = false
-var _newspaper_has_relevant_name: bool = false
+var _newspaper_case: NewspaperCase = NewspaperCase.NON_DEATH_NEWS
 var _newspaper_subject_name: String = ""
 var _newspaper_document: String = ""
 var _route_index: int = 0
 var _passengers: Array[Passenger] = []
+var _daily_manifest: Array[PassengerData] = []
 var _seat_occupant_by_slot: Dictionary = {}
 var _seat_slot_by_passenger: Dictionary = {}
-var _inspected_data: Array[PassengerData] = []
+var _checked_passenger_data: Array[PassengerData] = []
 var _interactables: Array[Interactable] = []
+var _collected_departure_statements: Dictionary = {}
+var _runtime_puzzle: DeparturePuzzleData
+var _daily_rng := RandomNumberGenerator.new()
+var _daily_seed: int = 0
 var _penalized_wrong_names: Dictionary = {}
 var _shift_report_finalized: bool = false
 var _correct_drop_offs: int = 0
@@ -61,7 +65,8 @@ var _station_cutscene_context: StringName = &""
 @onready var _player: ConductorPlayer = %Player
 @onready var _passenger_container: Node2D = %Passengers
 @onready var _hud: GameHUD = %HUD
-@onready var _inspect_ui: PassengerInspectUI = %PassengerInspectUI
+# Avoid coupling main-scene parsing to the editor's global-class registration order.
+@onready var _document_overlay: Variant = %DocumentOverlayUI
 @onready var _notebook_ui: NotebookUI = %NotebookUI
 @onready var _arrival_clock_ui: Control = %ArrivalClockUI
 @onready var _day_intro_ui: DayIntroUI = %DayIntroUI
@@ -78,6 +83,21 @@ var _station_cutscene_context: StringName = &""
 func _ready() -> void:
 	if day_route.size() < 2:
 		push_error("Main/Day Route requires at least an opening and final station.")
+		return
+	if manifest_config == null:
+		push_error("Main/Manifest Config must reference a DailyManifestConfig resource.")
+		return
+	_configure_daily_rng()
+	_choose_newspaper_case()
+	_daily_manifest = DailyManifestGenerator.generate(
+		passenger_identity_profiles,
+		day_route,
+		manifest_config,
+		_daily_rng,
+		_newspaper_case == NewspaperCase.MATCHING_PASSENGER_DEATH
+	)
+	if _daily_manifest.is_empty():
+		push_error("The daily passenger manifest could not be generated.")
 		return
 	_validate_passenger_resource_constraints()
 	_spawn_initial_passengers()
@@ -107,7 +127,7 @@ func _process(delta: float) -> void:
 		_day_minutes = minf(_day_minutes + delta, _next_arrival_minutes())
 	_hud.set_clock(int(_day_minutes))
 	_set_arrival_clock_display(int(_day_minutes))
-	var night_strength: float = clampf((_day_minutes - 990.0) / maxf(FINAL_ARRIVAL_MINUTES - 990.0, 1.0), 0.0, 1.0)
+	var night_strength: float = clampf((_day_minutes - 990.0) / maxf(_final_arrival_minutes() - 990.0, 1.0), 0.0, 1.0)
 	_train.set_night_strength(night_strength)
 	_ambience.night_strength = night_strength
 	_night_sky_overlay.modulate.a = night_strength
@@ -142,7 +162,10 @@ func _next_day_station() -> String:
 	return day_route[clampi(_route_index + 1, 0, day_route.size() - 1)]
 
 func _next_arrival_minutes() -> float:
-	return minf(START_MINUTES + float(_route_index + 1) * STATION_TRAVEL_SECONDS, FINAL_ARRIVAL_MINUTES)
+	return minf(START_MINUTES + float(_route_index + 1) * STATION_TRAVEL_SECONDS, _final_arrival_minutes())
+
+func _final_arrival_minutes() -> float:
+	return START_MINUTES + STATION_TRAVEL_SECONDS * float(day_route.size() - 1)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"notebook"):
@@ -156,8 +179,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if _day_intro_ui.visible:
 		_day_intro_ui.skip_intro()
-	elif _inspect_ui.visible:
-		_inspect_ui.request_close()
+	elif _document_overlay.visible:
+		_document_overlay.request_close()
 	elif _notebook_ui.visible:
 		_notebook_ui.request_close()
 	elif _arrival_clock_ui.visible:
@@ -176,17 +199,16 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _spawn_initial_passengers() -> void:
 	var dead_count: int = 0
-	for resource: Resource in passenger_resources:
-		var data := resource as PassengerData
-		if data == null or not data.initially_on_train:
+	for data: PassengerData in _daily_manifest:
+		if not data.initially_on_train:
 			continue
-		if _active_passenger_count() >= MAX_ACTIVE_PASSENGERS:
-			push_warning("Passenger roster exceeds the ten-passenger capacity; extra entries were skipped.")
+		if _active_passenger_count() >= manifest_config.initial_passenger_count:
+			push_warning("Passenger roster exceeds the configured opening capacity; extra entries were skipped.")
 			break
-		if data.is_dead and dead_count >= MAX_NIGHT_PASSENGERS:
-			push_warning("Night roster exceeds four deceased passengers; %s was skipped." % data.passenger_name)
+		if data.is_dead and dead_count >= manifest_config.deceased_passenger_count:
+			push_warning("Night roster exceeds the configured deceased-passenger count; %s was skipped." % data.passenger_name)
 			continue
-		var carriage: int = clampi(data.current_carriage, 1, 4)
+		var carriage: int = clampi(data.current_carriage, 1, manifest_config.passenger_carriage_count)
 		var seat_slot: Marker2D = _find_available_seat(carriage)
 		if seat_slot == null:
 			push_warning("No unoccupied passenger seat is available in carriage %d; %s was skipped." % [carriage, data.passenger_name])
@@ -196,32 +218,83 @@ func _spawn_initial_passengers() -> void:
 			continue
 		if data.is_dead:
 			dead_count += 1
-	if _active_passenger_count() != MAX_ACTIVE_PASSENGERS:
-		push_warning("The playable day roster should start with exactly ten passengers.")
+	if _active_passenger_count() != manifest_config.initial_passenger_count:
+		push_warning("The opening roster does not match Daily Manifest Config/Initial Passenger Count.")
 	_validate_active_passenger_constraints("initial boarding")
 
-func _prepare_newspaper_edition() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
-	var subject: PassengerData = _find_newspaper_subject(rng)
+func _configure_daily_rng() -> void:
+	if manifest_config.use_random_seed:
+		_daily_rng.randomize()
+		_daily_seed = _daily_rng.seed
+	else:
+		_daily_seed = manifest_config.debug_seed
+		_daily_rng.seed = _daily_seed
+	if debug_print_anomaly_roster:
+		print("[DAILY MANIFEST] seed=%d" % _daily_seed)
+
+func _choose_newspaper_case() -> void:
 	match newspaper_edition_mode:
-		NewspaperEditionMode.FORCE_RELEVANT:
-			_newspaper_has_relevant_name = subject != null
-		NewspaperEditionMode.FORCE_UNRELATED:
-			_newspaper_has_relevant_name = false
+		NewspaperEditionMode.FORCE_NON_DEATH:
+			_newspaper_case = NewspaperCase.NON_DEATH_NEWS
+		NewspaperEditionMode.FORCE_EXTERNAL_DEATH:
+			_newspaper_case = NewspaperCase.EXTERNAL_DEATH
+		NewspaperEditionMode.FORCE_MATCHING_DEATH:
+			_newspaper_case = NewspaperCase.MATCHING_PASSENGER_DEATH
 		_:
-			_newspaper_has_relevant_name = subject != null and rng.randf() < newspaper_relevant_chance
-	_newspaper_subject_name = subject.passenger_name if _newspaper_has_relevant_name else ""
-	_newspaper_document = _inspect_ui.compose_newspaper_document(subject if _newspaper_has_relevant_name else null)
+			_newspaper_case = _roll_random_newspaper_case()
+
+func _roll_random_newspaper_case() -> NewspaperCase:
+	var non_death_weight: float = maxf(0.0, manifest_config.non_death_news_weight)
+	var external_death_weight: float = maxf(0.0, manifest_config.external_death_news_weight)
+	var matching_death_weight: float = maxf(0.0, manifest_config.matching_death_news_weight)
+	var total_weight: float = non_death_weight + external_death_weight + matching_death_weight
+	if total_weight <= 0.0:
+		push_warning("All newspaper case weights are zero; using the non-death edition.")
+		return NewspaperCase.NON_DEATH_NEWS
+	var roll: float = _daily_rng.randf() * total_weight
+	if roll < non_death_weight:
+		return NewspaperCase.NON_DEATH_NEWS
+	roll -= non_death_weight
+	if roll < external_death_weight:
+		return NewspaperCase.EXTERNAL_DEATH
+	return NewspaperCase.MATCHING_PASSENGER_DEATH
+
+func _prepare_newspaper_edition() -> void:
+	var excluded_passenger_names: PackedStringArray = _get_generated_passenger_names()
+	if _newspaper_case == NewspaperCase.MATCHING_PASSENGER_DEATH:
+		var subject: PassengerData = _find_newspaper_subject(_daily_rng)
+		if subject != null:
+			_newspaper_subject_name = subject.passenger_name
+			_newspaper_document = _document_overlay.compose_matching_death_newspaper(subject, day_route[0])
+			return
+		push_error("Matching-death newspaper has no generated newspaper anomaly; using the external-death edition instead.")
+		_newspaper_case = NewspaperCase.EXTERNAL_DEATH
+
+	if _newspaper_case == NewspaperCase.EXTERNAL_DEATH:
+		_newspaper_subject_name = _document_overlay.get_random_external_death_subject(_daily_rng, excluded_passenger_names)
+		_newspaper_document = _document_overlay.compose_external_death_newspaper(_newspaper_subject_name, day_route[0])
+		return
+
+	_newspaper_subject_name = _document_overlay.get_random_non_death_subject(_daily_rng, excluded_passenger_names)
+	_newspaper_document = _document_overlay.compose_non_death_newspaper(_newspaper_subject_name, day_route[0])
 
 func _find_newspaper_subject(rng: RandomNumberGenerator) -> PassengerData:
 	var candidates: Array[PassengerData] = []
-	for passenger: Passenger in _passengers:
-		if _is_active_passenger(passenger) and passenger.data.is_dead and passenger.data.anomaly_type == "newspaper_death":
-			candidates.append(passenger.data)
+	for data: PassengerData in _daily_manifest:
+		if data.is_dead and data.initially_on_train and data.anomaly_type == String(manifest_config.newspaper_anomaly_type):
+			candidates.append(data)
 	if candidates.is_empty():
 		return null
 	return candidates[rng.randi_range(0, candidates.size() - 1)]
+
+func _get_generated_passenger_names() -> PackedStringArray:
+	var result := PackedStringArray()
+	for data: PassengerData in _daily_manifest:
+		for configured_name: String in [data.passenger_name, data.short_name]:
+			var normalized_name: String = configured_name.strip_edges().to_lower()
+			if not normalized_name.is_empty() and not result.has(normalized_name):
+				result.append(normalized_name)
+	return result
 
 func _spawn_passenger(data: PassengerData, seat_slot: Marker2D) -> Passenger:
 	if seat_slot == null or not is_instance_valid(seat_slot):
@@ -232,7 +305,7 @@ func _spawn_passenger(data: PassengerData, seat_slot: Marker2D) -> Passenger:
 		push_error("Seat %s is already occupied; %s was not spawned." % [seat_slot.name, data.passenger_name])
 		return null
 	if not _can_add_passenger_without_trait_overflow(data):
-		push_warning("%s was skipped because an anomaly trait already has %d active passengers." % [data.passenger_name, max_passengers_per_anomaly_trait])
+		push_warning("%s was skipped because an anomaly trait already has %d active passengers." % [data.passenger_name, manifest_config.max_passengers_per_anomaly_trait])
 		return null
 	var passenger := passenger_scene.instantiate() as Passenger
 	if passenger == null:
@@ -241,7 +314,7 @@ func _spawn_passenger(data: PassengerData, seat_slot: Marker2D) -> Passenger:
 	passenger.name = data.short_name
 	passenger.data = data
 	passenger.position = _passenger_container.to_local(seat_slot.global_position)
-	passenger.inspection_requested.connect(_on_passenger_inspection)
+	passenger.documents_requested.connect(_on_passenger_documents_requested)
 	_passenger_container.add_child(passenger)
 	_passengers.append(passenger)
 	_seat_occupant_by_slot[seat_slot] = passenger
@@ -283,7 +356,7 @@ func _get_passenger_carriage_ranges() -> Dictionary:
 func _can_add_passenger_without_trait_overflow(data: PassengerData) -> bool:
 	var trait_counts: Dictionary = _get_active_anomaly_trait_counts()
 	for anomaly_key: StringName in data.get_anomaly_traits(day_route):
-		if int(trait_counts.get(anomaly_key, 0)) >= max_passengers_per_anomaly_trait:
+		if int(trait_counts.get(anomaly_key, 0)) >= manifest_config.max_passengers_per_anomaly_trait:
 			return false
 	return true
 
@@ -298,16 +371,56 @@ func _get_active_anomaly_trait_counts() -> Dictionary:
 
 func _validate_passenger_resource_constraints() -> void:
 	var trait_counts: Dictionary = {}
-	for resource: Resource in passenger_resources:
-		var data := resource as PassengerData
-		if data == null:
-			continue
-		for anomaly_key: StringName in data.get_anomaly_traits(day_route):
+	var deceased_count: int = 0
+	var wrong_train_boarder_count: int = 0
+	var observed_ticket_numbers: Dictionary = {}
+	var service_train_number: String = manifest_config.service_train_number.strip_edges()
+	for data: PassengerData in _daily_manifest:
+		if data.is_dead:
+			deceased_count += 1
+		var traits: Array[StringName] = data.get_anomaly_traits(day_route)
+		var is_anomalous: bool = data.anomaly_type != "none" or not traits.is_empty()
+		if data.is_dead != is_anomalous:
+			push_error("Manifest invariant failed for %s: anomaly passengers and night passengers must be the same roster." % data.passenger_name)
+		if data.is_dead and traits.is_empty():
+			push_error("Generated deceased passenger %s has no anomaly evidence." % data.passenger_name)
+		if not data.is_dead and not traits.is_empty():
+			push_error("Generated living passenger %s incorrectly has anomaly evidence: %s." % [data.passenger_name, str(traits)])
+		if not data.is_dead:
+			var origin_index: int = day_route.find(data.origin_station)
+			var destination_index: int = day_route.find(data.destination_station)
+			if origin_index < 0 or destination_index <= origin_index:
+				push_error("Generated living passenger %s has an invalid route: %s -> %s." % [data.passenger_name, data.origin_station, data.destination_station])
+		if data.ticket_number.is_empty():
+			push_error("Generated passenger %s has no ticket number." % data.passenger_name)
+		elif observed_ticket_numbers.has(data.ticket_number):
+			push_error("Generated ticket number %s is assigned to more than one passenger." % data.ticket_number)
+		else:
+			observed_ticket_numbers[data.ticket_number] = data
+		if data.is_wrong_train_boarder():
+			wrong_train_boarder_count += 1
+			var origin_index: int = day_route.find(data.origin_station)
+			var expected_immediate_station: String = day_route[origin_index + 1] if origin_index >= 0 and origin_index + 1 < day_route.size() else ""
+			if data.is_dead:
+				push_error("Wrong-train boarder %s must remain a living operational case, not a night passenger." % data.passenger_name)
+			if data.ticket_train_number == service_train_number:
+				push_error("Wrong-train boarder %s carries the active service number." % data.passenger_name)
+			if data.required_dropoff_station != expected_immediate_station:
+				push_error("Wrong-train boarder %s must leave at the first stop after boarding." % data.passenger_name)
+		elif data.ticket_issue_type != PassengerData.TICKET_ISSUE_NONE:
+			push_error("Passenger %s has an unsupported ticket issue: %s." % [data.passenger_name, String(data.ticket_issue_type)])
+		elif data.ticket_train_number != service_train_number:
+			push_error("Regular passenger %s carries train number %s instead of %s." % [data.passenger_name, data.ticket_train_number, service_train_number])
+		for anomaly_key: StringName in traits:
 			trait_counts[anomaly_key] = int(trait_counts.get(anomaly_key, 0)) + 1
+	if deceased_count != manifest_config.deceased_passenger_count:
+		push_error("Generated manifest contains %d deceased passengers; Daily Manifest Config expects %d." % [deceased_count, manifest_config.deceased_passenger_count])
+	if wrong_train_boarder_count != manifest_config.wrong_train_boarder_count:
+		push_error("Generated manifest contains %d wrong-train boarders; Daily Manifest Config expects %d." % [wrong_train_boarder_count, manifest_config.wrong_train_boarder_count])
 	for anomaly_key: StringName in trait_counts:
 		var count: int = int(trait_counts[anomaly_key])
-		if count > max_passengers_per_anomaly_trait:
-			push_error("Passenger resources contain %d instances of anomaly trait '%s'; the configured maximum is %d." % [count, anomaly_key, max_passengers_per_anomaly_trait])
+		if count > manifest_config.max_passengers_per_anomaly_trait:
+			push_error("Passenger resources contain %d instances of anomaly trait '%s'; the configured maximum is %d." % [count, anomaly_key, manifest_config.max_passengers_per_anomaly_trait])
 
 func _validate_active_passenger_constraints(context: String) -> void:
 	var observed_seats: Dictionary = {}
@@ -324,46 +437,66 @@ func _validate_active_passenger_constraints(context: String) -> void:
 	var trait_counts: Dictionary = _get_active_anomaly_trait_counts()
 	for anomaly_key: StringName in trait_counts:
 		var count: int = int(trait_counts[anomaly_key])
-		if count > max_passengers_per_anomaly_trait:
+		if count > manifest_config.max_passengers_per_anomaly_trait:
 			push_error("%s: anomaly trait '%s' is used by %d active passengers." % [context, anomaly_key, count])
 
 func _debug_print_configured_anomaly_roster() -> void:
 	if not debug_print_anomaly_roster:
 		return
 	var anomaly_rows := PackedStringArray()
-	for resource: Resource in passenger_resources:
-		var data := resource as PassengerData
-		if data == null:
-			continue
+	var wrong_train_rows := PackedStringArray()
+	for data: PassengerData in _daily_manifest:
 		var traits: Array[StringName] = data.get_anomaly_traits(day_route)
-		if traits.is_empty() and not data.is_dead:
-			continue
-		anomaly_rows.append(_format_anomaly_debug_row(data, traits))
+		if not traits.is_empty() or data.is_dead:
+			anomaly_rows.append(_format_anomaly_debug_row(data, traits))
+		if data.is_wrong_train_boarder():
+			wrong_train_rows.append(_format_wrong_train_debug_row(data))
 	print("\n========== ANOMALY DEBUG: CONFIGURED DAY ROSTER (%d) ==========" % anomaly_rows.size())
 	for debug_line: String in anomaly_rows:
 		print(debug_line)
-	var newspaper_status: String = "RELEVANT: %s" % _newspaper_subject_name if _newspaper_has_relevant_name else "UNRELATED EDITION"
-	print("[NEWSPAPER] %s" % newspaper_status)
+	print("[NEWSPAPER] %s: %s" % [_newspaper_case_debug_label(), _newspaper_subject_name])
+	print("[TICKET DEBUG] ACTIVE SERVICE %s | WRONG-TRAIN BOARDERS (%d)" % [manifest_config.service_train_number, wrong_train_rows.size()])
+	for debug_line: String in wrong_train_rows:
+		print(debug_line)
 	print("===============================================================\n")
+
+func _newspaper_case_debug_label() -> String:
+	match _newspaper_case:
+		NewspaperCase.NON_DEATH_NEWS:
+			return "NON-DEATH NEWS / NOT AN ANOMALY CLUE"
+		NewspaperCase.EXTERNAL_DEATH:
+			return "EXTERNAL DEATH / NAME NOT ON TRAIN"
+		NewspaperCase.MATCHING_PASSENGER_DEATH:
+			return "MATCHING DEATH / ANOMALY + NIGHT PASSENGER"
+		_:
+			return "UNKNOWN CASE"
 
 func _debug_print_active_anomaly_roster(context: String) -> void:
 	if not debug_print_anomaly_roster:
 		return
 	var anomaly_rows := PackedStringArray()
+	var wrong_train_rows := PackedStringArray()
 	for passenger: Passenger in _passengers:
 		if not _is_active_passenger(passenger):
 			continue
 		var data: PassengerData = passenger.data
 		var traits: Array[StringName] = data.get_anomaly_traits(day_route)
-		if traits.is_empty() and not data.is_dead:
-			continue
-		anomaly_rows.append(_format_anomaly_debug_row(data, traits))
+		if not traits.is_empty() or data.is_dead:
+			anomaly_rows.append(_format_anomaly_debug_row(data, traits))
+		if data.is_wrong_train_boarder():
+			wrong_train_rows.append(_format_wrong_train_debug_row(data))
 	print("[ANOMALY DEBUG] ACTIVE AFTER %s (%d)" % [context, anomaly_rows.size()])
 	if anomaly_rows.is_empty():
 		print("  - NONE")
-		return
-	for debug_line: String in anomaly_rows:
-		print(debug_line)
+	else:
+		for debug_line: String in anomaly_rows:
+			print(debug_line)
+	print("[TICKET DEBUG] ACTIVE WRONG-TRAIN BOARDERS (%d)" % wrong_train_rows.size())
+	if wrong_train_rows.is_empty():
+		print("  - NONE")
+	else:
+		for debug_line: String in wrong_train_rows:
+			print(debug_line)
 
 func _format_anomaly_debug_row(data: PassengerData, traits: Array[StringName]) -> String:
 	var trait_names := PackedStringArray()
@@ -376,6 +509,16 @@ func _format_anomaly_debug_row(data: PassengerData, traits: Array[StringName]) -
 		data.origin_station,
 		data.destination_station,
 		data.current_carriage,
+		"DAY START" if data.initially_on_train else data.origin_station,
+	]
+
+func _format_wrong_train_debug_row(data: PassengerData) -> String:
+	return "  - %s | ticket_train=%s | active_train=%s | printed_destination=%s | required_dropoff=%s | boards=%s" % [
+		data.passenger_name,
+		data.ticket_train_number,
+		manifest_config.service_train_number,
+		data.destination_station,
+		data.required_dropoff_station,
 		"DAY START" if data.initially_on_train else data.origin_station,
 	]
 
@@ -406,26 +549,49 @@ func _on_nearby_interactable_changed(interactable: Interactable) -> void:
 	_nearby_interactable = interactable
 	_hud.set_prompt(interactable.get_prompt() if interactable != null else "")
 
-func _on_passenger_inspection(passenger: Passenger) -> void:
+func _on_passenger_documents_requested(passenger: Passenger) -> void:
 	if passenger.departed:
 		return
-	if not _inspected_data.has(passenger.data):
-		_inspected_data.append(passenger.data)
-	_active_modal = _inspect_ui
+	if state == GameState.NIGHT:
+		_on_night_passenger_interacted(passenger)
+		return
+	if not _checked_passenger_data.has(passenger.data):
+		_checked_passenger_data.append(passenger.data)
+	_active_modal = _document_overlay
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
-	_inspect_ui.show_passenger(passenger.data)
+	_document_overlay.show_passenger(passenger.data)
 	if state in [GameState.DAY, GameState.SUNSET] and _has_next_day_station() and not _station_exchange_processed:
-		_inspect_ui.configure_station_assignment(_next_day_station(), _station_assignment.has(passenger.data.passenger_name), _station_assignment.size())
+		_document_overlay.configure_station_assignment(_station_assignment.has(passenger.data.passenger_name))
+
+func _on_night_passenger_interacted(passenger: Passenger) -> void:
+	if passenger.data == null or not passenger.data.is_dead:
+		return
+	var puzzle: DeparturePuzzleData = _get_departure_puzzle()
+	if puzzle == null:
+		push_error("The configured departure puzzle resource is invalid.")
+		return
+	var passenger_name: String = passenger.data.short_name
+	var statement: String = puzzle.get_statement_for_passenger(passenger_name)
+	var newly_recorded: bool = not statement.is_empty() and not _collected_departure_statements.has(passenger_name)
+	if newly_recorded:
+		_collected_departure_statements[passenger_name] = statement
+	_active_modal = _document_overlay
+	_player.movement_enabled = false
+	_player.interaction_enabled = false
+	_hud.set_prompt("")
+	_document_overlay.show_departure_statement(passenger.data, statement, newly_recorded)
+	if newly_recorded:
+		_hud.notify(departure_statement_recorded_template % [_collected_departure_statements.size(), _get_departure_statement_total()], 3.0)
 
 func _on_station_assignment_toggled(passenger_name: String, should_assign: bool) -> void:
 	if state not in [GameState.DAY, GameState.SUNSET] or not _has_next_day_station() or _station_exchange_processed:
-		_inspect_ui.show_assignment_error("The current station service record is already sealed.")
+		_hud.notify("THE CURRENT STATION SERVICE RECORD IS ALREADY SEALED", 2.0)
 		return
 	var passenger: Passenger = _find_active_passenger_by_name(passenger_name)
 	if passenger == null:
-		_inspect_ui.show_assignment_error("This passenger is no longer aboard.")
+		_hud.notify("THIS PASSENGER IS NO LONGER ABOARD", 2.0)
 		return
 	var canonical_name: String = passenger.data.passenger_name
 	var assignment_index: int = _station_assignment.find(canonical_name)
@@ -436,16 +602,16 @@ func _on_station_assignment_toggled(passenger_name: String, should_assign: bool)
 		if assignment_index >= 0:
 			_station_assignment.remove_at(assignment_index)
 	var next_station: String = _next_day_station()
-	_inspect_ui.configure_station_assignment(next_station, _station_assignment.has(canonical_name), _station_assignment.size())
+	_document_overlay.configure_station_assignment(_station_assignment.has(canonical_name), true)
 	_hud.notify("%s\n%s FOR %s • %d SELECTED" % [canonical_name.to_upper(), "ASSIGNED" if should_assign else "REMOVED", next_station.to_upper(), _station_assignment.size()], 2.0)
 
 func _on_newspaper_read() -> void:
 	_newspaper_read = true
-	_active_modal = _inspect_ui
+	_active_modal = _document_overlay
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
-	_inspect_ui.show_newspaper(_newspaper_document)
+	_document_overlay.show_newspaper(_newspaper_document)
 
 func _on_arrival_clock_read() -> void:
 	if _active_modal != null:
@@ -476,7 +642,7 @@ func _process_station_arrival() -> void:
 
 	var departing: Array[Passenger] = []
 	if is_terminal_arrival:
-		# Eastmere ends daylight service: every living passenger leaves automatically.
+		# The final configured stop ends daylight service: every living passenger leaves automatically.
 		for passenger: Passenger in _passengers:
 			if _is_active_passenger(passenger) and not passenger.data.is_dead:
 				departing.append(passenger)
@@ -496,9 +662,8 @@ func _process_station_arrival() -> void:
 
 	var available_boarders: Array[PassengerData] = []
 	if not is_terminal_arrival:
-		for resource: Resource in passenger_resources:
-			var data := resource as PassengerData
-			if data != null and not data.initially_on_train and data.origin_station == arrival_station:
+		for data: PassengerData in _daily_manifest:
+			if not data.initially_on_train and data.origin_station == arrival_station:
 				available_boarders.append(data)
 
 	var boarded: int = 0
@@ -512,13 +677,14 @@ func _process_station_arrival() -> void:
 			"color": departing_passenger.data.body_color,
 			"carriage": departure_carriage,
 		})
-		var distance_units: int = _station_distance_units(departing_passenger.data.destination_station, arrival_station)
+		var required_dropoff_station: String = departing_passenger.data.get_required_day_dropoff_station()
+		var distance_units: int = _station_distance_units(required_dropoff_station, arrival_station)
 		if distance_units == 0:
 			_correct_drop_offs += 1
 		else:
 			_add_penalty(
 				WRONG_STOP_PENALTY * distance_units,
-				"%s left at %s, %d stop%s from %s" % [departing_passenger.data.passenger_name, arrival_station, distance_units, "s" if distance_units != 1 else "", departing_passenger.data.destination_station]
+				"%s left at %s, %d stop%s from %s" % [departing_passenger.data.passenger_name, arrival_station, distance_units, "s" if distance_units != 1 else "", required_dropoff_station]
 			)
 		departing_passenger.depart_train()
 		if is_terminal_arrival:
@@ -595,7 +761,7 @@ func _on_station_stop_finished() -> void:
 	if finished_context == &"opening":
 		state = GameState.DAY
 		_hud.set_day_hud_visible(true)
-		_hud.notify("DEPARTING %s\nNEXT: %s • TRAVEL 01:00\nInspect passengers and assign departures" % [_current_day_station().to_upper(), _next_day_station().to_upper()], 5.0)
+		_hud.notify("DEPARTING %s\nNEXT: %s • TRAVEL 01:00\nCheck ID and ticket, then assign departures" % [_current_day_station().to_upper(), _next_day_station().to_upper()], 5.0)
 		_update_passenger_minimap()
 		_set_passenger_ai_enabled(true)
 		_set_player_control_for_state()
@@ -611,7 +777,7 @@ func _on_station_stop_finished() -> void:
 	_station_exchange_processed = false
 	if state in [GameState.DAY, GameState.SUNSET]:
 		_hud.set_day_hud_visible(true)
-	_hud.notify("DEPARTING %s\nNEXT: %s • TRAVEL 01:00\n%d / %d passengers aboard" % [serviced_station.to_upper(), _next_day_station().to_upper(), _active_passenger_count(), MAX_ACTIVE_PASSENGERS], 4.0)
+	_hud.notify("DEPARTING %s\nNEXT: %s • TRAVEL 01:00\n%d / %d passengers aboard" % [serviced_station.to_upper(), _next_day_station().to_upper(), _active_passenger_count(), manifest_config.initial_passenger_count], 4.0)
 	_update_passenger_minimap()
 	_set_player_control_for_state()
 
@@ -656,7 +822,7 @@ func _open_notebook() -> void:
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
-	_notebook_ui.open_notebook(_inspected_data, _newspaper_document if _newspaper_read else "", _route_index)
+	_notebook_ui.open_notebook(_checked_passenger_data, _newspaper_document if _newspaper_read else "", _route_index)
 
 func _on_modal_closed() -> void:
 	_active_modal = null
@@ -754,6 +920,12 @@ func _on_shift_report_continue() -> void:
 	_enter_night()
 
 func _enter_night() -> void:
+	var puzzle_template := puzzle_resource as DeparturePuzzleData
+	if puzzle_template == null:
+		push_error("The configured departure puzzle resource is invalid.")
+		return
+	_runtime_puzzle = puzzle_template.create_runtime(_get_dead_passenger_data(), _daily_rng)
+	_collected_departure_statements.clear()
 	state = GameState.NIGHT
 	_train.set_night_strength(1.0)
 	_ambience.night_strength = 1.0
@@ -763,7 +935,7 @@ func _enter_night() -> void:
 			passenger.set_night_mode(true)
 	_desk.set_night_mode(true)
 	_hud.set_night_walk_mode()
-	_hud.notify("NIGHT SHIFT\nRETURN TO THE FRONT CREW CAB", 4.0)
+	_hud.notify(night_shift_instruction, 5.0)
 	_set_player_control_for_state()
 
 func _open_night_puzzle() -> void:
@@ -772,7 +944,17 @@ func _open_night_puzzle() -> void:
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
 	_active_modal = _night_puzzle_ui
-	_night_puzzle_ui.open_puzzle(_get_dead_passenger_data(), puzzle_resource as DeparturePuzzleData)
+	_night_puzzle_ui.open_puzzle(_get_dead_passenger_data(), _get_departure_puzzle(), _collected_departure_statements)
+
+func _get_departure_statement_total() -> int:
+	var puzzle: DeparturePuzzleData = _get_departure_puzzle()
+	if puzzle == null:
+		return 0
+	var total: int = 0
+	for data: PassengerData in _get_dead_passenger_data():
+		if not puzzle.get_statement_for_passenger(data.short_name).is_empty():
+			total += 1
+	return total
 
 func _close_night_puzzle() -> void:
 	_night_puzzle_ui.hide()
@@ -781,7 +963,10 @@ func _close_night_puzzle() -> void:
 	_set_player_control_for_state()
 
 func _on_departures_confirmed(assignments: Dictionary) -> void:
-	var puzzle := puzzle_resource as DeparturePuzzleData
+	var puzzle: DeparturePuzzleData = _get_departure_puzzle()
+	if puzzle == null:
+		_night_puzzle_ui.show_error("The night departure manifest is unavailable.")
+		return
 	for station: String in puzzle.night_stations:
 		if assignments.get(station, "") != puzzle.correct_passenger_by_station.get(station, ""):
 			_night_puzzle_ui.show_error("Something is wrong with the night drop-off assignments.")
@@ -790,6 +975,9 @@ func _on_departures_confirmed(assignments: Dictionary) -> void:
 	_active_modal = _sequence_ui
 	state = GameState.COMPLETE
 	_sequence_ui.start_sequence(assignments, puzzle)
+
+func _get_departure_puzzle() -> DeparturePuzzleData:
+	return _runtime_puzzle if _runtime_puzzle != null else puzzle_resource as DeparturePuzzleData
 
 func _add_penalty(points: int, reason: String) -> void:
 	var applied_points: int = maxi(0, points)
@@ -852,7 +1040,7 @@ func _get_active_passenger_data() -> Array[PassengerData]:
 func _get_dead_passenger_data() -> Array[PassengerData]:
 	var result: Array[PassengerData] = []
 	for passenger: Passenger in _passengers:
-		if _is_active_passenger(passenger) and passenger.data.is_dead and result.size() < MAX_NIGHT_PASSENGERS:
+		if _is_active_passenger(passenger) and passenger.data.is_dead:
 			result.append(passenger.data)
 	return result
 

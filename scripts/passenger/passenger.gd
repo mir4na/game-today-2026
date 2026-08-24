@@ -2,14 +2,18 @@ class_name Passenger
 extends Interactable
 ## Visual passenger shell. All identity and mystery facts live in PassengerData.
 
-signal inspection_requested(passenger: Passenger)
+signal documents_requested(passenger: Passenger)
 
 @export var data: PassengerData
 @export_category("Passenger AI")
 @export_range(50.0, 140.0, 5.0) var minimum_activity_spacing: float = 90.0
+@export_range(0.0, 1.0, 0.05) var initial_seated_chance: float = 0.25
+@export_range(0.0, 1.0, 0.05) var initial_idle_at_activity_chance: float = 0.35
+@export_category("Interaction Copy")
+@export var night_prompt_text: String = "Hear Departure Statement"
 @export_category("Visual Scale")
 @export_range(0.3, 1.0, 0.01) var baby_visual_scale: float = 0.68
-var inspected: bool = false
+var documents_checked: bool = false
 var night_mode: bool = false
 var departed: bool = false
 var ai_enabled: bool = true
@@ -23,6 +27,7 @@ var _rng := RandomNumberGenerator.new()
 var _assigned_seat_position: Vector2
 var _activity_points := PackedVector2Array()
 var _carriage_ranges: Dictionary = {}
+var _day_prompt_text: String = ""
 
 const PASSENGER_WALK_SPEED: float = 92.0
 
@@ -35,8 +40,9 @@ func _ready() -> void:
 	super._ready()
 	runtime_carriage = _carriage_from_world_x(position.x)
 	_ai_target_x = position.x
-	_rng.seed = absi(hash(data.passenger_name)) if data != null else 1
-	_ai_timer = 2.5 if data != null and not data.initially_on_train else _next_ai_wait()
+	_rng.randomize()
+	_day_prompt_text = prompt_text
+	_ai_timer = _next_ai_wait()
 	_update_visual()
 
 func _process(delta: float) -> void:
@@ -48,12 +54,13 @@ func _process(delta: float) -> void:
 func interact() -> void:
 	if data == null or departed:
 		return
-	inspected = true
-	inspection_requested.emit(self)
+	documents_checked = true
+	documents_requested.emit(self)
 
 func set_night_mode(value: bool) -> void:
 	night_mode = value
 	ai_enabled = not value
+	prompt_text = night_prompt_text if value and data != null and data.is_dead else _day_prompt_text
 	if data != null and not data.is_dead:
 		visible = not value
 	_update_visual()
@@ -72,6 +79,28 @@ func configure_seat_navigation(seat_position: Vector2, activity_points: PackedVe
 	_activity_points = activity_points.duplicate()
 	_carriage_ranges = carriage_ranges.duplicate(true)
 	runtime_carriage = _carriage_from_world_x(position.x)
+	randomize_initial_activity()
+
+func randomize_initial_activity() -> void:
+	if data == null or departed:
+		return
+	_ai_walking = false
+	_ai_target_x = position.x
+	var candidates: PackedVector2Array = _available_activity_points(runtime_carriage)
+	if candidates.is_empty() or _rng.randf() < initial_seated_chance:
+		_ai_timer = _next_ai_wait()
+		return
+	var target: Vector2 = candidates[_rng.randi_range(0, candidates.size() - 1)]
+	if _rng.randf() < initial_idle_at_activity_chance:
+		position.x = target.x
+		runtime_carriage = _carriage_from_world_x(position.x)
+		_ai_target_x = position.x
+		_ai_timer = _next_ai_wait()
+		return
+	_ai_target_x = target.x
+	_ai_walking = not is_equal_approx(position.x, _ai_target_x)
+	if not _ai_walking:
+		_ai_timer = _next_ai_wait()
 
 func get_runtime_carriage() -> int:
 	return runtime_carriage
@@ -83,8 +112,6 @@ func get_navigation_target_x() -> float:
 	return _ai_target_x if _ai_walking else position.x
 
 func _update_day_ai(delta: float) -> void:
-	if data.ai_behavior == "still":
-		return
 	if _ai_walking:
 		position.x = move_toward(position.x, _ai_target_x, PASSENGER_WALK_SPEED * delta)
 		_walk_phase += delta * 9.0
@@ -92,6 +119,8 @@ func _update_day_ai(delta: float) -> void:
 		if is_equal_approx(position.x, _ai_target_x):
 			_ai_walking = false
 			_ai_timer = _next_ai_wait()
+		return
+	if data.ai_behavior == "still":
 		return
 	_ai_timer -= delta
 	if _ai_timer <= 0.0:
@@ -103,10 +132,12 @@ func _choose_next_ai_target() -> void:
 	match data.ai_behavior:
 		"carriage_roamer":
 			var carriage_candidates: Array[int] = []
-			if carriage > 1:
-				carriage_candidates.append(carriage - 1)
-			if carriage < 4:
-				carriage_candidates.append(carriage + 1)
+			var configured_carriages: Array[int] = _get_configured_carriages()
+			var carriage_index: int = configured_carriages.find(carriage)
+			if carriage_index > 0:
+				carriage_candidates.append(configured_carriages[carriage_index - 1])
+			if carriage_index >= 0 and carriage_index < configured_carriages.size() - 1:
+				carriage_candidates.append(configured_carriages[carriage_index + 1])
 			if not carriage_candidates.is_empty():
 				target_carriage = carriage_candidates[_rng.randi_range(0, carriage_candidates.size() - 1)]
 		"wander", "window_watcher", "restless":
@@ -157,7 +188,7 @@ func _next_ai_wait() -> float:
 	return maxf(3.0, data.ai_interval_seconds + _rng.randf_range(-1.5, 1.5))
 
 func _carriage_from_world_x(world_x: float) -> int:
-	var fallback_carriage: int = clampi(data.current_carriage, 1, 4) if data != null else 1
+	var fallback_carriage: int = data.current_carriage if data != null else 1
 	var nearest_carriage: int = fallback_carriage
 	var nearest_distance: float = INF
 	for carriage_key: Variant in _carriage_ranges:
@@ -170,6 +201,15 @@ func _carriage_from_world_x(world_x: float) -> int:
 			nearest_distance = distance
 			nearest_carriage = carriage_number
 	return nearest_carriage
+
+func _get_configured_carriages() -> Array[int]:
+	var result: Array[int] = []
+	for carriage_key: Variant in _carriage_ranges:
+		result.append(int(carriage_key))
+	result.sort()
+	if result.is_empty():
+		result.append(runtime_carriage)
+	return result
 
 func _update_visual() -> void:
 	_passenger_visual.visible = data != null and not departed

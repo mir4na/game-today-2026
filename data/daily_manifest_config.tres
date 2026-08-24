@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="DailyManifestConfig" format=3 uid="uid://b37vfh7cgqlw5"]
+
+[ext_resource type="Script" uid="uid://damtsuj4cdl67" path="res://scripts/systems/daily_manifest_config.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+service_train_number = "505"
+alternate_train_numbers = PackedStringArray("318", "742", "901")
+ticket_day_code = "01"
+anomaly_types = PackedStringArray("shadowless", "impossible_ticket", "unlisted_destination", "age_mismatch", "newspaper_death")
+unlisted_destination_names = PackedStringArray("Mistvale", "Greyhaven", "Hollowfen")
+ai_behaviors = PackedStringArray("still", "wander", "carriage_roamer", "window_watcher", "restless")
