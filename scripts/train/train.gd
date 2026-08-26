@@ -14,8 +14,6 @@ func _ready() -> void:
 		if child is CarriageVisual:
 			_carriages.append(child as CarriageVisual)
 	_carriages.sort_custom(func(left: CarriageVisual, right: CarriageVisual) -> bool: return left.position.x < right.position.x)
-	_exterior_sequence.transition_in_finished.connect(_on_exterior_transition_in_finished)
-	_exterior_sequence.transition_out_started.connect(_on_exterior_transition_out_started)
 	_exterior_sequence.doors_open_changed.connect(_on_exterior_doors_open_changed)
 	_exterior_sequence.hide()
 
@@ -25,7 +23,11 @@ func _process(delta: float) -> void:
 	for carriage: CarriageVisual in _carriages:
 		carriage.set_environment(_scroll, _night_strength, _sway_time)
 		if _exterior_sequence.visible:
-			carriage.set_exterior_transition(_exterior_sequence.modulate.a, _exterior_sequence.position.y)
+			carriage.set_exterior_transition(
+				_exterior_sequence.modulate.a,
+				_exterior_sequence.position.y,
+				_exterior_sequence.wipe_progress
+			)
 
 func set_night_strength(value: float) -> void:
 	_night_strength = clampf(value, 0.0, 1.0)
@@ -45,16 +47,6 @@ func set_exterior_sequence_elapsed(value: float) -> void:
 
 func is_exterior_body_visible() -> bool:
 	return _exterior_sequence.visible
-
-func _on_exterior_transition_in_finished() -> void:
-	if not _exterior_sequence.visible:
-		return
-	for carriage: CarriageVisual in _carriages:
-		carriage.finish_exterior_transition()
-
-func _on_exterior_transition_out_started() -> void:
-	for carriage: CarriageVisual in _carriages:
-		carriage.begin_interior_transition()
 
 func _on_exterior_doors_open_changed(is_open: bool) -> void:
 	for carriage: CarriageVisual in _carriages:

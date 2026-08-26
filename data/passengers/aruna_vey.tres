@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3 uid="uid://cx6ttdmtj4lgd"]
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" load_steps=4 format=3 uid="uid://cx6ttdmtj4lgd"]
 
 [ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://biw0f3wxnqss1" path="res://assets/characters/Where Do You Belong_/NPC1.png" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/passengers/npc_1.tscn" id="3_scene"]
 
 [resource]
 script = ExtResource("1")
@@ -10,6 +11,7 @@ short_name = "Aruna"
 age = 34
 occupation = "Tailor"
 body_color = Color(0.78, 0.43, 0.34, 1)
+passenger_scene = ExtResource("3_scene")
 id_photo = ExtResource("2")
 identity_number = "A-001"
 birth_place = "Alderwick"

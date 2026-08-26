@@ -3,8 +3,11 @@
 [ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://8bniec8mrj2" path="res://assets/characters/Where Do You Belong_/NPC14.png" id="2"]
 
+[ext_resource type="PackedScene" path="res://scenes/passengers/npc_14.tscn" id="3_scene"]
+
 [resource]
 script = ExtResource("1")
+passenger_scene = ExtResource("3_scene")
 passenger_name = "Oren"
 short_name = "Oren"
 age = 52

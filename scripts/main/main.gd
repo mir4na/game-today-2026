@@ -43,6 +43,7 @@ var _passengers: Array[Passenger] = []
 var _daily_manifest: Array[PassengerData] = []
 var _seat_occupant_by_slot: Dictionary = {}
 var _seat_slot_by_passenger: Dictionary = {}
+var _boarding_passengers: Array[Passenger] = []
 var _checked_passenger_data: Array[PassengerData] = []
 var _interactables: Array[Interactable] = []
 var _collected_departure_statements: Dictionary = {}
@@ -60,6 +61,7 @@ var _arrival_clock: Interactable
 var _nearby_interactable: Interactable
 var _active_modal: Control
 var _station_cutscene_context: StringName = &""
+var _inspected_passenger: Passenger
 
 @onready var _train: TrainWorld = %Train
 @onready var _player: ConductorPlayer = %Player
@@ -115,12 +117,13 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_update_travel_foreground()
-	_set_passenger_ai_enabled(_active_modal == null and state in [GameState.DAY, GameState.SUNSET])
+	var world_simulation_active: bool = _is_world_simulation_active()
+	_set_passenger_ai_enabled(world_simulation_active and state in [GameState.DAY, GameState.SUNSET])
 	_update_passenger_minimap()
 	_update_carriage_indicator()
 	if state != GameState.DAY and state != GameState.SUNSET:
 		return
-	if _active_modal != null:
+	if not world_simulation_active:
 		return
 
 	if not _station_arrival_announced:
@@ -140,7 +143,7 @@ func _process(delta: float) -> void:
 		_hud.notify("THE LAST LIGHT IS FADING", 3.0)
 
 func _update_travel_foreground() -> void:
-	var is_traveling: bool = _active_modal == null and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
+	var is_traveling: bool = _is_world_simulation_active() and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
 	if state in [GameState.DAY, GameState.SUNSET]:
 		is_traveling = is_traveling and not _station_arrival_announced
 	_travel_foreground.set_traveling(is_traveling)
@@ -149,6 +152,8 @@ func _update_travel_foreground() -> void:
 func _announce_next_station() -> void:
 	if not _has_next_day_station() or _station_arrival_announced:
 		return
+	if _is_passenger_inspection_active():
+		_document_overlay.request_close()
 	_station_arrival_announced = true
 	_process_station_arrival()
 
@@ -199,6 +204,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _spawn_initial_passengers() -> void:
 	var dead_count: int = 0
+	var boarding_index: int = 0
 	for data: PassengerData in _daily_manifest:
 		if not data.initially_on_train:
 			continue
@@ -216,6 +222,8 @@ func _spawn_initial_passengers() -> void:
 		var passenger: Passenger = _spawn_passenger(data, seat_slot)
 		if passenger == null:
 			continue
+		_stage_passenger_for_boarding(passenger, boarding_index)
+		boarding_index += 1
 		if data.is_dead:
 			dead_count += 1
 	if _active_passenger_count() != manifest_config.initial_passenger_count:
@@ -307,9 +315,15 @@ func _spawn_passenger(data: PassengerData, seat_slot: Marker2D) -> Passenger:
 	if not _can_add_passenger_without_trait_overflow(data):
 		push_warning("%s was skipped because an anomaly trait already has %d active passengers." % [data.passenger_name, manifest_config.max_passengers_per_anomaly_trait])
 		return null
-	var passenger := passenger_scene.instantiate() as Passenger
+	var configured_scene: PackedScene = passenger_scene
+	if data.identity_profile != null and data.identity_profile.passenger_scene != null:
+		configured_scene = data.identity_profile.passenger_scene
+	if configured_scene == null:
+		push_error("Passenger %s has no configured passenger scene or fallback scene." % data.passenger_name)
+		return null
+	var passenger := configured_scene.instantiate() as Passenger
 	if passenger == null:
-		push_error("The configured passenger scene does not instantiate Passenger.")
+		push_error("The configured scene for %s does not instantiate Passenger." % data.passenger_name)
 		return null
 	passenger.name = data.short_name
 	passenger.data = data
@@ -322,13 +336,39 @@ func _spawn_passenger(data: PassengerData, seat_slot: Marker2D) -> Passenger:
 	passenger.configure_seat_navigation(passenger.position, _get_passenger_activity_positions(), _get_passenger_carriage_ranges())
 	return passenger
 
+func _stage_passenger_for_boarding(passenger: Passenger, actor_index: int) -> void:
+	if not _is_active_passenger(passenger):
+		return
+	var door_markers: Dictionary = _train.get_passenger_door_markers()
+	var carriage_markers: Array = door_markers.get(passenger.get_runtime_carriage(), [])
+	if carriage_markers.is_empty():
+		push_warning("Passenger carriage %d has no scene-authored boarding marker." % passenger.get_runtime_carriage())
+		passenger.randomize_initial_activity()
+		return
+	var door_marker := carriage_markers[actor_index % carriage_markers.size()] as Marker2D
+	if not is_instance_valid(door_marker):
+		push_warning("Passenger carriage %d has an invalid boarding marker." % passenger.get_runtime_carriage())
+		passenger.randomize_initial_activity()
+		return
+	passenger.stage_boarding(_passenger_container.to_local(door_marker.global_position))
+	_boarding_passengers.append(passenger)
+
+func _finish_staged_boarding() -> void:
+	for passenger: Passenger in _boarding_passengers:
+		if _is_active_passenger(passenger):
+			passenger.finish_boarding()
+	_boarding_passengers.clear()
+
 func _find_available_seat(carriage: int) -> Marker2D:
+	var available_seats: Array[Marker2D] = []
 	for seat_slot: Marker2D in _train.get_passenger_seat_slots(carriage):
 		var occupant := _seat_occupant_by_slot.get(seat_slot) as Passenger
 		if not _is_active_passenger(occupant):
 			_seat_occupant_by_slot.erase(seat_slot)
-			return seat_slot
-	return null
+			available_seats.append(seat_slot)
+	if available_seats.is_empty():
+		return null
+	return available_seats[_daily_rng.randi_range(0, available_seats.size() - 1)]
 
 func _release_passenger_seat(passenger: Passenger) -> Marker2D:
 	var seat_slot := _seat_slot_by_passenger.get(passenger) as Marker2D
@@ -557,6 +597,8 @@ func _on_passenger_documents_requested(passenger: Passenger) -> void:
 		return
 	if not _checked_passenger_data.has(passenger.data):
 		_checked_passenger_data.append(passenger.data)
+	_inspected_passenger = passenger
+	_inspected_passenger.set_inspection_paused(true)
 	_active_modal = _document_overlay
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
@@ -671,10 +713,10 @@ func _process_station_arrival() -> void:
 	var boarding_actors: Array[Dictionary] = []
 	for departing_passenger: Passenger in departing:
 		var departure_carriage: int = departing_passenger.get_runtime_carriage()
-		var vacated_seat: Marker2D = _release_passenger_seat(departing_passenger)
+		_release_passenger_seat(departing_passenger)
 		departing_actors.append({
 			"name": departing_passenger.data.passenger_name,
-			"color": departing_passenger.data.body_color,
+			"texture": departing_passenger.data.id_photo,
 			"carriage": departure_carriage,
 		})
 		var required_dropoff_station: String = departing_passenger.data.get_required_day_dropoff_station()
@@ -689,20 +731,22 @@ func _process_station_arrival() -> void:
 		departing_passenger.depart_train()
 		if is_terminal_arrival:
 			continue
-		if vacated_seat == null:
-			vacated_seat = _find_available_seat(departure_carriage)
+		var boarding_seat: Marker2D = _find_available_seat(departure_carriage)
+		if boarding_seat == null:
+			continue
 		var boarder_index: int = _find_boarder_for_carriage(available_boarders, departure_carriage)
 		if boarder_index < 0:
 			continue
 		var boarder_data: PassengerData = available_boarders[boarder_index]
 		available_boarders.remove_at(boarder_index)
-		var boarder: Passenger = _spawn_passenger(boarder_data, vacated_seat)
+		var boarder: Passenger = _spawn_passenger(boarder_data, boarding_seat)
 		if boarder == null:
 			continue
+		_stage_passenger_for_boarding(boarder, boarded)
 		_interactables.append(boarder)
 		boarding_actors.append({
 			"name": boarder_data.passenger_name,
-			"color": boarder_data.body_color,
+			"texture": boarder_data.id_photo,
 			"carriage": boarder.get_runtime_carriage(),
 		})
 		boarded += 1
@@ -728,7 +772,8 @@ func _start_station_stop_cutscene(station_name: String, departing_actors: Array[
 	_hud.set_cutscene_hidden(true)
 	_set_passenger_ai_enabled(false)
 	_player.begin_station_cutscene_camera()
-	_train.show_exterior_body(StationStopCutsceneUI.STOP_DURATION, StationStopCutsceneUI.STOP_ARRIVAL_END, StationStopCutsceneUI.STOP_DEPARTURE_START)
+	var stop_timeline: Vector3 = _station_stop_ui.get_stop_timeline()
+	_train.show_exterior_body(stop_timeline.x, stop_timeline.y, stop_timeline.z)
 	_station_stop_ui.play_stop(station_name, departing_actors, boarding_actors, _train.get_passenger_door_markers())
 
 func _on_day_intro_finished() -> void:
@@ -742,11 +787,20 @@ func _on_day_intro_finished() -> void:
 	_active_modal = _station_stop_ui
 	_hud.set_cutscene_hidden(true)
 	_player.begin_station_cutscene_camera()
-	_train.show_exterior_body(StationStopCutsceneUI.OPENING_DURATION, 0.0, StationStopCutsceneUI.OPENING_DEPARTURE_START)
+	var opening_timeline: Vector3 = _station_stop_ui.get_opening_timeline()
+	_train.show_exterior_body(opening_timeline.x, opening_timeline.y, opening_timeline.z)
 	_station_stop_ui.play_opening(day_route[0], boarding_actors, _train.get_passenger_door_markers())
 
 func _on_station_cutscene_timeline_changed(elapsed: float) -> void:
 	_train.set_exterior_sequence_elapsed(elapsed)
+
+func _on_station_cutscene_boarding_actor_entered(actor_index: int, door_screen_position: Vector2) -> void:
+	if actor_index < 0 or actor_index >= _boarding_passengers.size():
+		return
+	var passenger: Passenger = _boarding_passengers[actor_index]
+	if _is_active_passenger(passenger):
+		var door_world_position: Vector2 = get_viewport().get_canvas_transform().affine_inverse() * door_screen_position
+		passenger.finish_boarding_at(_passenger_container.to_local(door_world_position))
 
 func _on_station_cutscene_camera_return_started() -> void:
 	_player.begin_gameplay_camera_return()
@@ -755,6 +809,7 @@ func _on_station_stop_finished() -> void:
 	var finished_context: StringName = _station_cutscene_context
 	_station_cutscene_context = &""
 	_train.hide_exterior_body()
+	_finish_staged_boarding()
 	_hud.set_cutscene_hidden(false)
 	if _active_modal == _station_stop_ui:
 		_active_modal = null
@@ -784,7 +839,7 @@ func _on_station_stop_finished() -> void:
 func _passenger_cutscene_actor(passenger: Passenger) -> Dictionary:
 	return {
 		"name": passenger.data.passenger_name,
-		"color": passenger.data.body_color,
+		"texture": passenger.data.id_photo,
 		"carriage": passenger.get_runtime_carriage(),
 	}
 
@@ -825,6 +880,9 @@ func _open_notebook() -> void:
 	_notebook_ui.open_notebook(_checked_passenger_data, _newspaper_document if _newspaper_read else "", _route_index)
 
 func _on_modal_closed() -> void:
+	if is_instance_valid(_inspected_passenger):
+		_inspected_passenger.set_inspection_paused(false)
+	_inspected_passenger = null
 	_active_modal = null
 	_set_player_control_for_state()
 
@@ -1009,7 +1067,17 @@ func _update_passenger_minimap() -> void:
 
 func _set_passenger_ai_enabled(value: bool) -> void:
 	for passenger: Passenger in _passengers:
-		passenger.set_ai_enabled(value)
+		passenger.set_ai_enabled(value and passenger != _inspected_passenger)
+
+func _is_passenger_inspection_active() -> bool:
+	return (
+		_active_modal == _document_overlay
+		and is_instance_valid(_document_overlay)
+		and bool(_document_overlay.call(&"is_showing_passenger_documents"))
+	)
+
+func _is_world_simulation_active() -> bool:
+	return _active_modal == null or _is_passenger_inspection_active()
 
 func _is_active_passenger(passenger: Passenger) -> bool:
 	return is_instance_valid(passenger) and not passenger.departed

@@ -31,6 +31,7 @@ var _is_assigned_to_next_station: bool = false
 
 # These scene-owned children stay dynamic so a cold import can register their scripts in any order.
 @onready var _documents: Variant = %PassengerDocuments
+@onready var _passenger_close_button: Button = %PassengerCloseButton
 @onready var _reader_panel: PanelContainer = %ReaderPanel
 @onready var _reader_title: Label = %ReaderTitle
 @onready var _reader_content: RichTextLabel = %ReaderContent
@@ -41,6 +42,7 @@ func show_passenger(data: PassengerData) -> void:
 	_view_mode = ViewMode.PASSENGER_DOCUMENTS
 	_is_assigned_to_next_station = false
 	_reader_panel.hide()
+	_passenger_close_button.show()
 	_documents.show()
 	_documents.set_passenger(data)
 	_documents.reset_to_id_card()
@@ -104,14 +106,19 @@ func request_close() -> void:
 	closed.emit()
 
 
+func is_showing_passenger_documents() -> bool:
+	return visible and _view_mode == ViewMode.PASSENGER_DOCUMENTS and _data != null
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible or _view_mode != ViewMode.PASSENGER_DOCUMENTS or _data == null:
 		return
-	if event.is_action_pressed(&"interact") and _documents.request_primary_action():
+	var key_event := event as InputEventKey
+	if key_event != null and key_event.echo:
+		return
+	if event.is_action_pressed(&"switch_document") and _documents.toggle_document():
 		get_viewport().set_input_as_handled()
-	elif event.is_action_pressed(&"ui_left") and _documents.show_id_card():
-		get_viewport().set_input_as_handled()
-	elif event.is_action_pressed(&"ui_right") and _documents.show_ticket():
+	elif event.is_action_pressed(&"interact") and _documents.request_stamp_action():
 		get_viewport().set_input_as_handled()
 
 
@@ -124,6 +131,7 @@ func _toggle_station_assignment() -> void:
 func _show_reader(title: String, document: String) -> void:
 	_view_mode = ViewMode.READER
 	_documents.hide()
+	_passenger_close_button.hide()
 	_reader_title.text = title
 	_reader_content.text = document
 	_reader_panel.show()

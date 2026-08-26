@@ -2,14 +2,14 @@ class_name TrainExteriorBody
 extends Node2D
 ## Drives scene-authored exterior layers inside each carriage prefab.
 
-signal transition_in_finished
-signal transition_out_started
 signal doors_open_changed(is_open: bool)
 
 @export_category("Scene Animations")
 @export var transition_in_animation: StringName = &"exterior_fade_in"
 @export var transition_out_animation: StringName = &"exterior_fade_out"
+@export_range(0.0, 2.0, 0.05) var door_close_duration: float = 0.55
 @export_range(0.0, 3.0, 0.05) var closed_hold_before_exit: float = 1.0
+@export_range(0.0, 1.0, 0.01) var wipe_progress: float = 0.0
 
 var _elapsed: float = 0.0
 var _duration: float = 1.0
@@ -20,15 +20,13 @@ var _doors_open: bool = false
 
 @onready var _transition_animation: AnimationPlayer = %ExteriorTransition
 
-func _ready() -> void:
-	_transition_animation.animation_finished.connect(_on_transition_animation_finished)
-
 func begin_sequence(duration: float, arrival_end: float, departure_start: float) -> void:
 	_duration = maxf(duration, 0.01)
 	_arrival_end = maxf(arrival_end, 0.0)
 	_departure_start = clampf(departure_start, 0.0, _duration)
 	_elapsed = 0.0
 	_transition_out_started = false
+	wipe_progress = 0.0
 	show()
 	process_mode = Node.PROCESS_MODE_INHERIT
 	_update_door_state()
@@ -36,6 +34,7 @@ func begin_sequence(duration: float, arrival_end: float, departure_start: float)
 
 func end_sequence() -> void:
 	_transition_animation.stop()
+	wipe_progress = 0.0
 	_set_doors_open(false)
 	process_mode = Node.PROCESS_MODE_DISABLED
 	hide()
@@ -58,11 +57,10 @@ func _set_doors_open(value: bool) -> void:
 func _update_exit_transition() -> void:
 	if _transition_out_started:
 		return
-	var exit_start: float = _departure_start + closed_hold_before_exit
+	var exit_start: float = _departure_start + door_close_duration + closed_hold_before_exit
 	if _elapsed < exit_start:
 		return
 	_transition_out_started = true
-	transition_out_started.emit()
 	_play_transition(transition_out_animation)
 
 func _play_transition(animation_name: StringName) -> void:
@@ -70,7 +68,3 @@ func _play_transition(animation_name: StringName) -> void:
 		push_warning("Missing exterior transition animation: %s" % animation_name)
 		return
 	_transition_animation.play(animation_name)
-
-func _on_transition_animation_finished(animation_name: StringName) -> void:
-	if animation_name == transition_in_animation:
-		transition_in_finished.emit()

@@ -3,8 +3,11 @@
 [ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://6pmi1hwtwk7j" path="res://assets/characters/Where Do You Belong_/NPC10.png" id="2"]
 
+[ext_resource type="PackedScene" path="res://scenes/passengers/npc_18.tscn" id="3_scene"]
+
 [resource]
 script = ExtResource("1")
+passenger_scene = ExtResource("3_scene")
 passenger_name = "Veya"
 short_name = "Veya"
 age = 47

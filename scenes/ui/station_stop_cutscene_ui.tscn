@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/station_stop_cutscene_ui.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/ui/station_cutscene_actor.tscn" id="2"]
@@ -33,22 +33,10 @@ tracks/1/keys = {
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("HeadingLabel:modulate:a")
+tracks/2/path = NodePath("StatusLabel:modulate:a")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [0.0]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("StatusLabel:modulate:a")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
@@ -85,22 +73,10 @@ tracks/1/keys = {
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("HeadingLabel:modulate:a")
+tracks/2/path = NodePath("StatusLabel:modulate:a")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.08, 0.24, 0.35),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [0.0, 0.0, 0.68, 1.0]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("StatusLabel:modulate:a")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
 "times": PackedFloat32Array(0, 0.08, 0.24, 0.35),
 "transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
@@ -137,22 +113,10 @@ tracks/1/keys = {
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("HeadingLabel:modulate:a")
+tracks/2/path = NodePath("StatusLabel:modulate:a")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.12, 0.22),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [1.0, 0.32, 0.0]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("StatusLabel:modulate:a")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
 "times": PackedFloat32Array(0, 0.12, 0.22),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
@@ -166,6 +130,68 @@ _data = {
 &"letterbox_out": SubResource("Animation_letterbox_out")
 }
 
+[sub_resource type="Animation" id="Animation_title_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("CinematicTitle:modulate:a")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CinematicTitle:position:y")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [10.0]
+}
+
+[sub_resource type="Animation" id="Animation_title_reveal"]
+resource_name = "title_reveal"
+length = 1.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("CinematicTitle:modulate:a")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.22, 0.92, 1.5),
+"transitions": PackedFloat32Array(1.6, 1, 0.75, 1),
+"update": 0,
+"values": [0.0, 1.0, 1.0, 0.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CinematicTitle:position:y")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.32, 1.5),
+"transitions": PackedFloat32Array(1.35, 1, 0.85),
+"update": 0,
+"values": [10.0, 0.0, -8.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_title"]
+_data = {
+&"RESET": SubResource("Animation_title_reset"),
+&"title_reveal": SubResource("Animation_title_reveal")
+}
+
 [node name="StationStopCutsceneUI" type="Control"]
 visible = false
 process_mode = 4
@@ -177,20 +203,27 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
 script = ExtResource("1")
-opening_heading_template = "%s • INITIAL BOARDING"
-exchange_heading_template = "%s • PASSENGER EXCHANGE"
+opening_heading_template = "%s"
+exchange_heading_template = "%s"
+opening_subtitle_text = "INITIAL BOARDING"
+exchange_subtitle_text = "PASSENGER EXCHANGE"
 opening_status_template = "%d BOARDING     [E / SPACE / ESC] SKIP"
 exchange_status_template = "%d OFF  •  %d ON     [E / SPACE / ESC] SKIP"
 letterbox_in_animation = &"letterbox_in"
 letterbox_out_animation = &"letterbox_out"
-fallback_actor_color = Color(0.721569, 0.666667, 0.568627, 1)
+title_reveal_animation = &"title_reveal"
 camera_return_lead_time = 0.75
 platform_vertical_offset = 138.0
 platform_horizontal_offset = 52.0
 door_visibility_margin = 48.0
-departing_start_time = 0.55
+departing_start_time = 1.0
 departing_stagger = 0.26
 departing_walk_duration = 1.35
+stop_duration = 7.1
+stop_arrival_end = 0.35
+stop_departure_start = 4.35
+opening_duration = 7.65
+opening_departure_start = 4.9
 opening_boarding_start_time = 0.65
 opening_boarding_stagger = 0.28
 opening_boarding_walk_duration = 1.45
@@ -312,6 +345,7 @@ unique_name_in_owner = true
 
 [node name="TopBar" type="ColorRect" parent="."]
 unique_name_in_owner = true
+z_index = 20
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
@@ -322,6 +356,7 @@ color = Color(0.0235294, 0.0313725, 0.0470588, 1)
 
 [node name="BottomBar" type="ColorRect" parent="."]
 unique_name_in_owner = true
+z_index = 20
 layout_mode = 1
 anchors_preset = 12
 anchor_right = 1.0
@@ -332,24 +367,60 @@ grow_vertical = 0
 mouse_filter = 2
 color = Color(0.0235294, 0.0313725, 0.0470588, 1)
 
-[node name="HeadingLabel" type="Label" parent="."]
+[node name="CinematicTitle" type="Control" parent="."]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0)
+z_index = 10
 layout_mode = 1
-anchors_preset = 10
+anchors_preset = 15
 anchor_right = 1.0
-offset_bottom = 68.0
+anchor_bottom = 1.0
 grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="HeadingLabel" type="Label" parent="CinematicTitle"]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -48.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.941176, 0.811765, 0.552941, 1)
-theme_override_font_sizes/font_size = 23
-text = "ALDERWICK • INITIAL BOARDING"
+theme_override_colors/font_outline_color = Color(0.0117647, 0.0156863, 0.0235294, 0.98)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 36
+text = "ALDERWICK"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="CinematicTitle"]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = 12.0
+offset_bottom = 44.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.847059, 0.815686, 0.760784, 1)
+theme_override_colors/font_outline_color = Color(0.0117647, 0.0156863, 0.0235294, 0.98)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 16
+text = "INITIAL BOARDING"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StatusLabel" type="Label" parent="."]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0)
+z_index = 21
 layout_mode = 1
 anchors_preset = 12
 anchor_right = 1.0
@@ -367,3 +438,7 @@ vertical_alignment = 1
 [node name="LetterboxAnimation" type="AnimationPlayer" parent="."]
 unique_name_in_owner = true
 libraries/ = SubResource("AnimationLibrary_letterbox")
+
+[node name="CinematicTitleAnimation" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries/ = SubResource("AnimationLibrary_title")

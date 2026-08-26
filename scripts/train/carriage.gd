@@ -12,15 +12,18 @@ extends Node2D
 @export_category("Scene Visuals")
 @export_node_path("Node2D") var sway_root_path: NodePath
 @export_node_path("CanvasItem") var night_overlay_path: NodePath
-@export_node_path("Node2D") var interior_visual_path: NodePath
 @export_node_path("Node2D") var exterior_visual_path: NodePath
-@export_node_path("CanvasItem") var closed_doors_path: NodePath
+@export_node_path("AnimationPlayer") var door_animation_path: NodePath
+@export var exterior_wipe_parameter: StringName = &"wipe_progress"
+@export_category("Door Animations")
+@export var door_reset_animation: StringName = &"RESET"
+@export var door_open_animation: StringName = &"door_open"
+@export var door_close_animation: StringName = &"door_close"
 
 @onready var _sway_root: Node2D = _get_optional_node(sway_root_path) as Node2D
 @onready var _night_overlay: CanvasItem = _get_optional_node(night_overlay_path) as CanvasItem
-@onready var _interior_visual: Node2D = _get_optional_node(interior_visual_path) as Node2D
 @onready var _exterior_visual: Node2D = _get_optional_node(exterior_visual_path) as Node2D
-@onready var _closed_doors: CanvasItem = _get_optional_node(closed_doors_path) as CanvasItem
+@onready var _door_animation: AnimationPlayer = _get_optional_node(door_animation_path) as AnimationPlayer
 
 func _ready() -> void:
 	end_exterior_mode()
@@ -36,41 +39,29 @@ func begin_exterior_mode() -> void:
 		return
 	_exterior_visual.show()
 	_exterior_visual.process_mode = Node.PROCESS_MODE_INHERIT
-	_exterior_visual.modulate.a = 0.0
-	_exterior_visual.position.y = 10.0
-	if is_instance_valid(_interior_visual):
-		_interior_visual.show()
-		_interior_visual.process_mode = Node.PROCESS_MODE_INHERIT
+	_exterior_visual.modulate.a = 1.0
+	_exterior_visual.position.y = 0.0
+	_set_exterior_wipe_progress(0.0)
+	_reset_exterior_doors()
 
-func set_exterior_transition(alpha: float, vertical_offset: float) -> void:
+func set_exterior_transition(alpha: float, vertical_offset: float, wipe_progress: float) -> void:
 	if not is_instance_valid(_exterior_visual) or not _exterior_visual.visible:
 		return
 	_exterior_visual.modulate.a = clampf(alpha, 0.0, 1.0)
 	_exterior_visual.position.y = vertical_offset
-
-func finish_exterior_transition() -> void:
-	if is_instance_valid(_exterior_visual) and is_instance_valid(_interior_visual):
-		_interior_visual.hide()
-		_interior_visual.process_mode = Node.PROCESS_MODE_DISABLED
-
-func begin_interior_transition() -> void:
-	if is_instance_valid(_interior_visual):
-		_interior_visual.show()
-		_interior_visual.process_mode = Node.PROCESS_MODE_INHERIT
+	_set_exterior_wipe_progress(wipe_progress)
 
 func end_exterior_mode() -> void:
 	if is_instance_valid(_exterior_visual):
 		_exterior_visual.hide()
 		_exterior_visual.process_mode = Node.PROCESS_MODE_DISABLED
-		_exterior_visual.modulate.a = 0.0
+		_exterior_visual.modulate.a = 1.0
 		_exterior_visual.position.y = 0.0
-	if is_instance_valid(_interior_visual):
-		_interior_visual.show()
-		_interior_visual.process_mode = Node.PROCESS_MODE_INHERIT
+		_set_exterior_wipe_progress(0.0)
+	_reset_exterior_doors()
 
 func set_exterior_doors_open(value: bool) -> void:
-	if is_instance_valid(_closed_doors):
-		_closed_doors.visible = not value
+	_play_door_animation(door_open_animation if value else door_close_animation)
 
 func get_passenger_seat_slots() -> Array[Marker2D]:
 	return _get_marker_children(passenger_seat_slots_path)
@@ -97,3 +88,28 @@ func _get_optional_node(node_path: NodePath) -> Node:
 	if node_path.is_empty():
 		return null
 	return get_node_or_null(node_path)
+
+func _set_exterior_wipe_progress(value: float) -> void:
+	if not is_instance_valid(_exterior_visual):
+		return
+	var shader_material := _exterior_visual.material as ShaderMaterial
+	if shader_material == null:
+		return
+	shader_material.set_shader_parameter(exterior_wipe_parameter, clampf(value, 0.0, 1.0))
+
+func _reset_exterior_doors() -> void:
+	if not is_instance_valid(_door_animation):
+		return
+	if not _door_animation.has_animation(door_reset_animation):
+		push_warning("Missing carriage door reset animation: %s" % door_reset_animation)
+		return
+	_door_animation.play(door_reset_animation)
+	_door_animation.advance(0.0)
+
+func _play_door_animation(animation_name: StringName) -> void:
+	if not is_instance_valid(_door_animation):
+		return
+	if not _door_animation.has_animation(animation_name):
+		push_warning("Missing carriage door animation: %s" % animation_name)
+		return
+	_door_animation.play(animation_name)

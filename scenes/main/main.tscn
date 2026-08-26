@@ -156,6 +156,7 @@ unique_name_in_owner = true
 [connection signal="closed" from="ModalLayer/NotebookUI" to="." method="_on_modal_closed"]
 [connection signal="closed" from="ModalLayer/ArrivalClockUI" to="." method="_on_modal_closed"]
 [connection signal="intro_finished" from="ModalLayer/DayIntroUI" to="." method="_on_day_intro_finished"]
+[connection signal="boarding_actor_entered" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_boarding_actor_entered"]
 [connection signal="camera_return_started" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_camera_return_started"]
 [connection signal="sequence_finished" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_stop_finished"]
 [connection signal="sequence_timeline_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_timeline_changed"]

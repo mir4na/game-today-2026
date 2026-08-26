@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/document_overlay_ui.gd" id="1"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
@@ -19,6 +19,42 @@ corner_radius_top_left = 9
 corner_radius_top_right = 9
 corner_radius_bottom_right = 9
 corner_radius_bottom_left = 9
+
+[sub_resource type="StyleBoxFlat" id="CloseButtonNormal"]
+bg_color = Color(0.0352941, 0.0470588, 0.0666667, 0.82)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.819608, 0.678431, 0.439216, 0.82)
+corner_radius_top_left = 27
+corner_radius_top_right = 27
+corner_radius_bottom_right = 27
+corner_radius_bottom_left = 27
+
+[sub_resource type="StyleBoxFlat" id="CloseButtonHover"]
+bg_color = Color(0.141176, 0.101961, 0.0901961, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.933333, 0.827451, 0.607843, 1)
+corner_radius_top_left = 27
+corner_radius_top_right = 27
+corner_radius_bottom_right = 27
+corner_radius_bottom_left = 27
+
+[sub_resource type="StyleBoxFlat" id="CloseButtonPressed"]
+bg_color = Color(0.239216, 0.129412, 0.105882, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.933333, 0.827451, 0.607843, 1)
+corner_radius_top_left = 27
+corner_radius_top_right = 27
+corner_radius_bottom_right = 27
+corner_radius_bottom_left = 27
 
 [node name="DocumentOverlayUI" type="Control"]
 visible = false
@@ -52,7 +88,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.01, 0.015, 0.025, 0.78)
+color = Color(0.01, 0.015, 0.025, 0.58)
 
 [node name="PassengerDocumentCenter" type="CenterContainer" parent="."]
 layout_mode = 1
@@ -66,6 +102,34 @@ mouse_filter = 2
 [node name="PassengerDocuments" parent="PassengerDocumentCenter" instance=ExtResource("3")]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="PassengerCloseButton" type="Button" parent="."]
+unique_name_in_owner = true
+z_index = 50
+custom_minimum_size = Vector2(54, 54)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -78.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 78.0
+grow_horizontal = 0
+focus_neighbor_bottom = NodePath("../PassengerDocumentCenter/PassengerDocuments")
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_colors/font_hover_color = Color(1, 0.929412, 0.772549, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.929412, 0.772549, 1)
+theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.95)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 31
+theme_override_styles/normal = SubResource("CloseButtonNormal")
+theme_override_styles/hover = SubResource("CloseButtonHover")
+theme_override_styles/pressed = SubResource("CloseButtonPressed")
+theme_override_styles/focus = SubResource("CloseButtonHover")
+text = "×"
+tooltip_text = "Close passenger documents [ESC]"
 
 [node name="ReaderCenter" type="CenterContainer" parent="."]
 layout_mode = 1
@@ -114,4 +178,5 @@ fit_content = false
 scroll_active = true
 
 [connection signal="pressed" from="ReaderCenter/ReaderPanel/ReaderLayout/Header/CloseButton" to="." method="request_close"]
+[connection signal="pressed" from="PassengerCloseButton" to="." method="request_close"]
 [connection signal="stamp_toggle_requested" from="PassengerDocumentCenter/PassengerDocuments" to="." method="_toggle_station_assignment"]

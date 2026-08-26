@@ -12,6 +12,9 @@ extends Resource
 @export var occupation: String = "Unknown"
 @export var body_color: Color = Color("8eb7c8")
 
+@export_category("Passenger Scene")
+@export var passenger_scene: PackedScene
+
 @export_category("Identification Card")
 @export var id_photo: Texture2D
 @export var identity_number: String = ""

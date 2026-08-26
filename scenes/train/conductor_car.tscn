@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://bd3gsinxrrynl" path="res://assets/kereta/Pintu kanan.png" id="7"]
 [ext_resource type="PackedScene" uid="uid://dg5g8fm8dx45y" path="res://scenes/interactables/conductor_desk.tscn" id="8_desk"]
 [ext_resource type="PackedScene" path="res://scenes/interactables/arrival_clock.tscn" id="9_clock"]
+[ext_resource type="ShaderMaterial" path="res://resources/materials/exterior_top_down_fade.tres" id="10_fade"]
 
 [sub_resource type="Animation" id="Animation_wheel_reset"]
 resource_name = "RESET"
@@ -169,6 +170,97 @@ _data = {
 &"wheel_spin": SubResource("Animation_wheel_spin")
 }
 
+[sub_resource type="Animation" id="Animation_door_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ClosedDoors/LeftDoorSprite:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(399, 308)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("ClosedDoors/RightDoorSprite:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(475, 308)]
+}
+
+[sub_resource type="Animation" id="Animation_door_open"]
+resource_name = "door_open"
+length = 0.55
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ClosedDoors/LeftDoorSprite:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.55),
+"transitions": PackedFloat32Array(0.65, 1),
+"update": 0,
+"values": [Vector2(399, 308), Vector2(315, 308)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("ClosedDoors/RightDoorSprite:position")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.55),
+"transitions": PackedFloat32Array(0.65, 1),
+"update": 0,
+"values": [Vector2(475, 308), Vector2(559, 308)]
+}
+
+[sub_resource type="Animation" id="Animation_door_close"]
+resource_name = "door_close"
+length = 0.55
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ClosedDoors/LeftDoorSprite:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.55),
+"transitions": PackedFloat32Array(0.65, 1),
+"update": 0,
+"values": [Vector2(315, 308), Vector2(399, 308)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("ClosedDoors/RightDoorSprite:position")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.55),
+"transitions": PackedFloat32Array(0.65, 1),
+"update": 0,
+"values": [Vector2(559, 308), Vector2(475, 308)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_doors"]
+_data = {
+&"RESET": SubResource("Animation_door_reset"),
+&"door_close": SubResource("Animation_door_close"),
+&"door_open": SubResource("Animation_door_open")
+}
+
 [sub_resource type="RectangleShape2D" id="ConductorFloorShape"]
 size = Vector2(934, 23)
 
@@ -177,9 +269,11 @@ script = ExtResource("1")
 carriage_type = "conductor"
 sway_root_path = NodePath("ArtRoot")
 night_overlay_path = NodePath("ArtRoot/NightOverlay")
-interior_visual_path = NodePath("ArtRoot/Interior")
 exterior_visual_path = NodePath("ArtRoot/Exterior")
-closed_doors_path = NodePath("ArtRoot/Exterior/ClosedDoors")
+door_animation_path = NodePath("ArtRoot/Exterior/DoorAnimation")
+door_reset_animation = &"RESET"
+door_open_animation = &"door_open"
+door_close_animation = &"door_close"
 
 [node name="ArtRoot" type="Node2D" parent="." unique_id=1500656962]
 unique_name_in_owner = true
@@ -193,10 +287,18 @@ scale = Vector2(0.374415, 0.374415)
 texture = ExtResource("2")
 centered = false
 
-[node name="Exterior" type="Node2D" parent="ArtRoot" unique_id=1207132285]
+[node name="Exterior" type="CanvasGroup" parent="ArtRoot" unique_id=1207132285]
 unique_name_in_owner = true
 process_mode = 4
 z_index = 5
+material = ExtResource("10_fade")
+clear_margin = 16.0
+fit_margin = 16.0
+
+[node name="DoorwayOccluder" type="Polygon2D" parent="ArtRoot/Exterior"]
+z_index = -2
+color = Color(0.0352941, 0.054902, 0.0705882, 1)
+polygon = PackedVector2Array(390, 298, 566, 298, 566, 522, 390, 522)
 
 [node name="ExteriorSprite" type="Sprite2D" parent="ArtRoot/Exterior" unique_id=192217061]
 position = Vector2(11.999999, 214.7504)
@@ -212,6 +314,7 @@ centered = false
 
 [node name="ClosedDoors" type="Node2D" parent="ArtRoot/Exterior" unique_id=418785867]
 unique_name_in_owner = true
+z_index = -1
 
 [node name="LeftDoorSprite" type="Sprite2D" parent="ArtRoot/Exterior/ClosedDoors" unique_id=1510576987]
 position = Vector2(399, 308)
@@ -224,6 +327,9 @@ position = Vector2(475, 308)
 scale = Vector2(0.3772728, 0.36530608)
 texture = ExtResource("7")
 centered = false
+
+[node name="DoorAnimation" type="AnimationPlayer" parent="ArtRoot/Exterior"]
+libraries/ = SubResource("AnimationLibrary_doors")
 
 [node name="Wheels" type="Node2D" parent="ArtRoot" unique_id=1207599172]
 z_index = 6

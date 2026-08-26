@@ -13,16 +13,21 @@ signal documents_requested(passenger: Passenger)
 @export var night_prompt_text: String = "Hear Departure Statement"
 @export_category("Visual Scale")
 @export_range(0.3, 1.0, 0.01) var baby_visual_scale: float = 0.68
+@export var uses_authored_character_artwork: bool = false
 var documents_checked: bool = false
 var night_mode: bool = false
 var departed: bool = false
 var ai_enabled: bool = true
 var runtime_carriage: int = 1
+var boarding_staged: bool = false
 var _sway_time: float = 0.0
 var _ai_timer: float = 0.0
-var _ai_target_x: float = 0.0
+var _ai_target_position: Vector2
 var _ai_walking: bool = false
+var _boarding_handoff_active: bool = false
 var _walk_phase: float = 0.0
+var _inspection_paused: bool = false
+var _inspection_resume_walking: bool = false
 var _rng := RandomNumberGenerator.new()
 var _assigned_seat_position: Vector2
 var _activity_points := PackedVector2Array()
@@ -39,7 +44,7 @@ const PASSENGER_WALK_SPEED: float = 92.0
 func _ready() -> void:
 	super._ready()
 	runtime_carriage = _carriage_from_world_x(position.x)
-	_ai_target_x = position.x
+	_ai_target_position = position
 	_rng.randomize()
 	_day_prompt_text = prompt_text
 	_ai_timer = _next_ai_wait()
@@ -47,7 +52,9 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_sway_time += delta
-	if ai_enabled and not night_mode and not departed and data != null:
+	if _boarding_handoff_active and not night_mode and not departed and data != null:
+		_update_boarding_handoff(delta)
+	elif ai_enabled and not night_mode and not departed and data != null:
 		_update_day_ai(delta)
 	_update_visual()
 
@@ -67,38 +74,80 @@ func set_night_mode(value: bool) -> void:
 
 func depart_train() -> void:
 	departed = true
+	boarding_staged = false
+	_inspection_paused = false
 	_ai_walking = false
+	_boarding_handoff_active = false
 	visible = false
 	enabled = false
 
 func set_ai_enabled(value: bool) -> void:
-	ai_enabled = value and not departed and not night_mode
+	ai_enabled = value and not departed and not night_mode and not boarding_staged and not _inspection_paused
 
 func configure_seat_navigation(seat_position: Vector2, activity_points: PackedVector2Array, carriage_ranges: Dictionary) -> void:
 	_assigned_seat_position = seat_position
 	_activity_points = activity_points.duplicate()
 	_carriage_ranges = carriage_ranges.duplicate(true)
 	runtime_carriage = _carriage_from_world_x(position.x)
+
+func stage_boarding(boarding_position: Vector2) -> void:
+	if departed:
+		return
+	boarding_staged = true
+	ai_enabled = false
+	_ai_walking = false
+	_boarding_handoff_active = false
+	position = boarding_position
+	_ai_target_position = boarding_position
+	runtime_carriage = _carriage_from_world_x(position.x)
+	visible = false
+	enabled = false
+
+func finish_boarding() -> void:
+	if departed or not boarding_staged:
+		return
+	boarding_staged = false
+	visible = true
+	enabled = true
 	randomize_initial_activity()
+	_boarding_handoff_active = _ai_walking
+
+func finish_boarding_at(boarding_position: Vector2) -> void:
+	if departed or not boarding_staged:
+		return
+	position = boarding_position
+	runtime_carriage = _carriage_from_world_x(position.x)
+	finish_boarding()
+
+func set_inspection_paused(value: bool) -> void:
+	if departed or _inspection_paused == value:
+		return
+	_inspection_paused = value
+	if value:
+		_inspection_resume_walking = _ai_walking
+		_ai_walking = false
+		ai_enabled = false
+	else:
+		_ai_walking = _inspection_resume_walking and position.distance_to(_ai_target_position) > 1.0
+		_inspection_resume_walking = false
+		if not _ai_walking:
+			_ai_timer = maxf(_ai_timer, 0.25)
 
 func randomize_initial_activity() -> void:
 	if data == null or departed:
 		return
 	_ai_walking = false
-	_ai_target_x = position.x
+	_ai_target_position = position
 	var candidates: PackedVector2Array = _available_activity_points(runtime_carriage)
-	if candidates.is_empty() or _rng.randf() < initial_seated_chance:
-		_ai_timer = _next_ai_wait()
-		return
-	var target: Vector2 = candidates[_rng.randi_range(0, candidates.size() - 1)]
-	if _rng.randf() < initial_idle_at_activity_chance:
-		position.x = target.x
-		runtime_carriage = _carriage_from_world_x(position.x)
-		_ai_target_x = position.x
-		_ai_timer = _next_ai_wait()
-		return
-	_ai_target_x = target.x
-	_ai_walking = not is_equal_approx(position.x, _ai_target_x)
+	var target: Vector2 = _assigned_seat_position
+	if not candidates.is_empty() and _rng.randf() >= initial_seated_chance:
+		target = (
+			_find_closest_activity_point(candidates)
+			if _rng.randf() < initial_idle_at_activity_chance
+			else candidates[_rng.randi_range(0, candidates.size() - 1)]
+		)
+	_ai_target_position = target
+	_ai_walking = position.distance_to(_ai_target_position) > 1.0
 	if not _ai_walking:
 		_ai_timer = _next_ai_wait()
 
@@ -108,15 +157,16 @@ func get_runtime_carriage() -> int:
 func get_ai_behavior() -> String:
 	return data.ai_behavior if data != null else "still"
 
-func get_navigation_target_x() -> float:
-	return _ai_target_x if _ai_walking else position.x
+func get_navigation_target_position() -> Vector2:
+	return _ai_target_position if _ai_walking else position
 
 func _update_day_ai(delta: float) -> void:
 	if _ai_walking:
-		position.x = move_toward(position.x, _ai_target_x, PASSENGER_WALK_SPEED * delta)
+		position = position.move_toward(_ai_target_position, PASSENGER_WALK_SPEED * delta)
 		_walk_phase += delta * 9.0
 		runtime_carriage = _carriage_from_world_x(position.x)
-		if is_equal_approx(position.x, _ai_target_x):
+		if position.distance_to(_ai_target_position) <= 1.0:
+			position = _ai_target_position
 			_ai_walking = false
 			_ai_timer = _next_ai_wait()
 		return
@@ -125,6 +175,19 @@ func _update_day_ai(delta: float) -> void:
 	_ai_timer -= delta
 	if _ai_timer <= 0.0:
 		_choose_next_ai_target()
+
+func _update_boarding_handoff(delta: float) -> void:
+	if not _ai_walking:
+		_boarding_handoff_active = false
+		return
+	position = position.move_toward(_ai_target_position, PASSENGER_WALK_SPEED * delta)
+	_walk_phase += delta * 9.0
+	runtime_carriage = _carriage_from_world_x(position.x)
+	if position.distance_to(_ai_target_position) <= 1.0:
+		position = _ai_target_position
+		_ai_walking = false
+		_boarding_handoff_active = false
+		_ai_timer = _next_ai_wait()
 
 func _choose_next_ai_target() -> void:
 	var carriage: int = runtime_carriage
@@ -149,13 +212,13 @@ func _choose_next_ai_target() -> void:
 	var candidates: PackedVector2Array = _available_activity_points(target_carriage)
 	var assigned_carriage: int = _carriage_from_world_x(_assigned_seat_position.x)
 	if target_carriage == carriage and assigned_carriage == carriage and absf(position.x - _assigned_seat_position.x) > 28.0 and _rng.randf() < 0.25:
-		if not _is_navigation_target_claimed(_assigned_seat_position.x):
+		if not _is_navigation_target_claimed(_assigned_seat_position):
 			candidates.append(_assigned_seat_position)
 	if candidates.is_empty():
 		_ai_timer = _next_ai_wait()
 		return
 	var target: Vector2 = candidates[_rng.randi_range(0, candidates.size() - 1)]
-	_ai_target_x = target.x
+	_ai_target_position = target
 	_ai_walking = true
 
 func _available_activity_points(carriage: int) -> PackedVector2Array:
@@ -163,12 +226,12 @@ func _available_activity_points(carriage: int) -> PackedVector2Array:
 	for point: Vector2 in _activity_points:
 		if _carriage_from_world_x(point.x) != carriage:
 			continue
-		if absf(point.x - position.x) < 28.0 or _is_navigation_target_claimed(point.x):
+		if point.distance_to(position) < 28.0 or _is_navigation_target_claimed(point):
 			continue
 		result.append(point)
 	return result
 
-func _is_navigation_target_claimed(target_x: float) -> bool:
+func _is_navigation_target_claimed(target_position: Vector2) -> bool:
 	var parent: Node = get_parent()
 	if parent == null:
 		return false
@@ -178,9 +241,19 @@ func _is_navigation_target_claimed(target_x: float) -> bool:
 		var other := sibling as Passenger
 		if other.departed or not other.visible:
 			continue
-		if absf(other.get_navigation_target_x() - target_x) < minimum_activity_spacing:
+		if other.get_navigation_target_position().distance_to(target_position) < minimum_activity_spacing:
 			return true
 	return false
+
+func _find_closest_activity_point(candidates: PackedVector2Array) -> Vector2:
+	var closest: Vector2 = candidates[0]
+	var closest_distance: float = position.distance_squared_to(closest)
+	for point: Vector2 in candidates:
+		var distance: float = position.distance_squared_to(point)
+		if distance < closest_distance:
+			closest = point
+			closest_distance = distance
+	return closest
 
 func _next_ai_wait() -> float:
 	if data == null or data.ai_behavior == "still":
@@ -219,9 +292,10 @@ func _update_visual() -> void:
 	var ghost_alpha: float = 0.72 + sin(_sway_time * 2.2) * 0.08 if night_mode else 1.0
 	var body_tint: Color = data.body_color
 	body_tint.a = ghost_alpha
-	_body_tint.modulate = body_tint
+	_body_tint.modulate = body_tint if not uses_authored_character_artwork else Color.WHITE
+	_passenger_visual.modulate = Color(1.0, 1.0, 1.0, ghost_alpha) if uses_authored_character_artwork else Color.WHITE
 	_passenger_visual.scale = Vector2.ONE * baby_visual_scale if is_baby else Vector2.ONE
 	_passenger_visual.position.y = (10.0 if is_baby else 0.0) + (sin(_walk_phase) * 1.8 if _ai_walking else 0.0)
-	_baby_mark.visible = is_baby
+	_baby_mark.visible = is_baby and not uses_authored_character_artwork
 	_shadow.visible = data.anomaly_type != "shadowless"
 	_shadow.modulate.a = 0.52 if not night_mode else 0.28

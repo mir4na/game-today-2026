@@ -1,4 +1,4 @@
-# Where Do You Belong — Godot 4.7 Vertical Slice
+# Where Do You Belong? — Godot 4.7 Vertical Slice
 
 Playable 2D side-view mystery/deduction prototype. The conductor explores one continuous six-car train populated by passengers with varied ambient behavior, approaches them to assign who will disembark, keeps every station exchange balanced, types the names of the dead at sunset, then solves their night-station assignments.
 
