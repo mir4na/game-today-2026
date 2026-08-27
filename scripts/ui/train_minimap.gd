@@ -8,18 +8,18 @@ extends Control
 @export var normal_marker_color: Color
 
 var current_carriage: int = 0
-var _passenger_counts := PackedInt32Array([0, 0, 0, 0, 0, 0])
-@onready var _slots: Array[Control] = [%Slot0, %Slot1, %Slot2, %Slot3, %Slot4, %Slot5]
+var _passenger_counts := PackedInt32Array([0, 0, 0, 0, 0])
+@onready var _slots: Array[Control] = [%Slot0, %Slot1, %Slot2, %Slot3, %Slot4]
 
 func set_current_carriage(value: int) -> void:
-	var next_carriage: int = clampi(value, 0, 5)
+	var next_carriage: int = clampi(value, 0, 4)
 	if current_carriage == next_carriage:
 		return
 	current_carriage = next_carriage
 	_refresh()
 
 func set_passenger_counts(counts: PackedInt32Array) -> void:
-	if counts.size() != 6 or counts == _passenger_counts:
+	if counts.size() != 5 or counts == _passenger_counts:
 		return
 	_passenger_counts = counts.duplicate()
 	_refresh()

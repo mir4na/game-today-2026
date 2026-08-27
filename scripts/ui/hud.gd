@@ -16,6 +16,8 @@ extends CanvasLayer
 @onready var _prompt_label: Label = %PromptLabel
 @onready var _notification_panel: PanelContainer = %NotificationPanel
 @onready var _notification_label: Label = %NotificationLabel
+@onready var _tool_panel: PanelContainer = %ToolPanel
+@onready var _tool_inventory_label: Label = %ToolInventoryLabel
 var _notification_tween: Tween
 var _prompt_target: Node2D
 
@@ -36,6 +38,14 @@ func set_current_carriage(index: int) -> void:
 
 func set_passenger_counts(counts: PackedInt32Array) -> void:
 	_minimap.set_passenger_counts(counts)
+
+
+func set_market_tool_inventory(snapshot: Dictionary) -> void:
+	_tool_inventory_label.text = "[R] RADAR ×%d   •   AUDIT ×%d   •   SPEED LV.%d" % [
+		int(snapshot.get("radar_charges", 0)),
+		int(snapshot.get("audit_slips", 0)),
+		int(snapshot.get("speed_level", 0))
+	]
 
 func set_prompt(text: String, target: Node2D = null) -> void:
 	_prompt_label.text = text
@@ -64,6 +74,7 @@ func _update_prompt_position() -> void:
 
 func set_day_hud_visible(value: bool) -> void:
 	_clock_panel.visible = value
+	_tool_panel.visible = value
 	_floating_prompt.visible = value and not _prompt_label.text.is_empty()
 	# The train minimap remains visible through the night walk.
 
@@ -72,6 +83,7 @@ func set_cutscene_hidden(value: bool) -> void:
 
 func set_night_walk_mode() -> void:
 	_clock_panel.visible = false
+	_tool_panel.visible = true
 	_floating_prompt.visible = not _prompt_label.text.is_empty()
 
 func notify(message: String, seconds: float = 3.0) -> void:

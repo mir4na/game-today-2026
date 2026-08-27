@@ -98,7 +98,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Panel" type="PanelContainer" parent="Center"]
-custom_minimum_size = Vector2(850, 620)
+custom_minimum_size = Vector2(850, 680)
 layout_mode = 2
 theme_override_styles/panel = SubResource("ManifestPanelStyle")
 
@@ -254,6 +254,31 @@ placeholder_text = "Type a short name, then press Space..."
 layout_mode = 2
 theme_override_constants/separation = 12
 
+[node name="AuditInfo" type="HBoxContainer" parent="Center/Panel/Outer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="AuditStockLabel" type="Label" parent="Center/Panel/Outer/AuditInfo"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_font_sizes/font_size = 15
+
+[node name="AuditResultLabel" type="Label" parent="Center/Panel/Outer/AuditInfo"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 2
+
+[node name="AuditButton" type="Button" parent="Center/Panel/Outer/ActionRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "USE AUDIT SLIP ON ACTIVE LINE"
+
 [node name="CancelButton" type="Button" parent="Center/Panel/Outer/ActionRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 54)
@@ -263,12 +288,18 @@ text = "BACK TO TRAIN  [ESC]"
 
 [connection signal="text_submitted" from="Center/Panel/Outer/Paper/Lines/Row1/NameEntry1" to="." method="_on_name_entry_1_submitted"]
 [connection signal="text_changed" from="Center/Panel/Outer/Paper/Lines/Row1/NameEntry1" to="." method="_on_name_entry_1_text_changed"]
+[connection signal="focus_entered" from="Center/Panel/Outer/Paper/Lines/Row1/NameEntry1" to="." method="_set_active_entry" binds=[0]]
 [connection signal="text_submitted" from="Center/Panel/Outer/Paper/Lines/Row2/NameEntry2" to="." method="_on_name_entry_2_submitted"]
 [connection signal="text_changed" from="Center/Panel/Outer/Paper/Lines/Row2/NameEntry2" to="." method="_on_name_entry_2_text_changed"]
+[connection signal="focus_entered" from="Center/Panel/Outer/Paper/Lines/Row2/NameEntry2" to="." method="_set_active_entry" binds=[1]]
 [connection signal="text_submitted" from="Center/Panel/Outer/Paper/Lines/Row3/NameEntry3" to="." method="_on_name_entry_3_submitted"]
 [connection signal="text_changed" from="Center/Panel/Outer/Paper/Lines/Row3/NameEntry3" to="." method="_on_name_entry_3_text_changed"]
+[connection signal="focus_entered" from="Center/Panel/Outer/Paper/Lines/Row3/NameEntry3" to="." method="_set_active_entry" binds=[2]]
 [connection signal="text_submitted" from="Center/Panel/Outer/Paper/Lines/Row4/NameEntry4" to="." method="_on_name_entry_4_submitted"]
 [connection signal="text_changed" from="Center/Panel/Outer/Paper/Lines/Row4/NameEntry4" to="." method="_on_name_entry_4_text_changed"]
+[connection signal="focus_entered" from="Center/Panel/Outer/Paper/Lines/Row4/NameEntry4" to="." method="_set_active_entry" binds=[3]]
 [connection signal="text_submitted" from="Center/Panel/Outer/Paper/Lines/Row5/NameEntry5" to="." method="_on_name_entry_5_submitted"]
 [connection signal="text_changed" from="Center/Panel/Outer/Paper/Lines/Row5/NameEntry5" to="." method="_on_name_entry_5_text_changed"]
+[connection signal="focus_entered" from="Center/Panel/Outer/Paper/Lines/Row5/NameEntry5" to="." method="_set_active_entry" binds=[4]]
+[connection signal="pressed" from="Center/Panel/Outer/ActionRow/AuditButton" to="." method="_on_audit_button_pressed"]
 [connection signal="pressed" from="Center/Panel/Outer/ActionRow/CancelButton" to="." method="request_close"]

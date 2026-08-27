@@ -1,0 +1,144 @@
+class_name MarketToolState
+extends Node
+## Scene-owned inventory and balancing values for tools sold in the night market.
+
+signal inventory_changed(snapshot: Dictionary)
+
+const TOOL_AUDIT_SLIP: StringName = &"audit_slip"
+const TOOL_RADAR_CHARGE: StringName = &"radar_charge"
+const TOOL_SPEED_UPGRADE: StringName = &"speed_upgrade"
+
+@export_category("Starting Inventory")
+@export_range(0, 999, 1) var starting_merit_marks: int = 8
+@export_range(0, 20, 1) var starting_audit_slips: int = 1
+@export_range(0, 20, 1) var starting_radar_charges: int = 1
+@export_range(0, 8, 1) var starting_speed_level: int = 0
+@export_category("Market Costs")
+@export_range(1, 99, 1) var audit_slip_cost: int = 3
+@export_range(1, 99, 1) var radar_charge_cost: int = 4
+@export var speed_upgrade_costs: PackedInt32Array = PackedInt32Array([6, 10, 15])
+@export_category("Speed Upgrade")
+@export_range(0.0, 300.0, 1.0) var speed_bonus_per_level: float = 45.0
+@export_category("Paycheck Merit")
+@export_range(0, 20, 1) var merit_per_correct_dropoff: int = 1
+@export_range(1, 100, 1) var penalty_points_per_merit_loss: int = 10
+
+var merit_marks: int = 0
+var audit_slips: int = 0
+var radar_charges: int = 0
+var speed_level: int = 0
+var _shift_merit_awarded: bool = false
+
+
+func _ready() -> void:
+	_set_starting_inventory()
+
+
+func reset_inventory() -> void:
+	_set_starting_inventory()
+	_emit_inventory_changed()
+
+
+func _set_starting_inventory() -> void:
+	merit_marks = maxi(0, starting_merit_marks)
+	audit_slips = maxi(0, starting_audit_slips)
+	radar_charges = maxi(0, starting_radar_charges)
+	speed_level = clampi(starting_speed_level, 0, speed_upgrade_costs.size())
+	_shift_merit_awarded = false
+
+
+func award_shift_merit(correct_dropoffs: int, penalty_points: int) -> int:
+	if _shift_merit_awarded:
+		return 0
+	_shift_merit_awarded = true
+	var earned: int = maxi(0, correct_dropoffs) * merit_per_correct_dropoff
+	var deduction: int = maxi(0, penalty_points) / maxi(1, penalty_points_per_merit_loss)
+	earned = maxi(0, earned - deduction)
+	merit_marks += earned
+	_emit_inventory_changed()
+	return earned
+
+
+func purchase(tool_id: StringName) -> Dictionary:
+	match tool_id:
+		TOOL_AUDIT_SLIP:
+			return _purchase_consumable(audit_slip_cost, TOOL_AUDIT_SLIP)
+		TOOL_RADAR_CHARGE:
+			return _purchase_consumable(radar_charge_cost, TOOL_RADAR_CHARGE)
+		TOOL_SPEED_UPGRADE:
+			return _purchase_speed_upgrade()
+	return {"success": false, "message": "UNKNOWN MARKET ITEM"}
+
+
+func consume_audit_slip() -> bool:
+	if audit_slips <= 0:
+		return false
+	audit_slips -= 1
+	_emit_inventory_changed()
+	return true
+
+
+func consume_radar_charge() -> bool:
+	if radar_charges <= 0:
+		return false
+	radar_charges -= 1
+	_emit_inventory_changed()
+	return true
+
+
+func get_speed_bonus() -> float:
+	return float(speed_level) * speed_bonus_per_level
+
+
+func get_snapshot() -> Dictionary:
+	return {
+		"merit_marks": merit_marks,
+		"audit_slips": audit_slips,
+		"radar_charges": radar_charges,
+		"speed_level": speed_level,
+		"speed_max_level": speed_upgrade_costs.size(),
+		"audit_slip_cost": audit_slip_cost,
+		"radar_charge_cost": radar_charge_cost,
+		"speed_upgrade_cost": _next_speed_cost(),
+		"speed_bonus": get_speed_bonus()
+	}
+
+
+func _purchase_consumable(cost: int, tool_id: StringName) -> Dictionary:
+	if not _try_spend(cost):
+		return {"success": false, "message": "NOT ENOUGH MERIT MARKS"}
+	if tool_id == TOOL_AUDIT_SLIP:
+		audit_slips += 1
+		_emit_inventory_changed()
+		return {"success": true, "message": "AUDIT SLIP ADDED"}
+	radar_charges += 1
+	_emit_inventory_changed()
+	return {"success": true, "message": "RADAR CHARGE ADDED"}
+
+
+func _purchase_speed_upgrade() -> Dictionary:
+	var next_cost: int = _next_speed_cost()
+	if next_cost < 0:
+		return {"success": false, "message": "SPEED IS ALREADY AT MAXIMUM LEVEL"}
+	if not _try_spend(next_cost):
+		return {"success": false, "message": "NOT ENOUGH MERIT MARKS"}
+	speed_level += 1
+	_emit_inventory_changed()
+	return {"success": true, "message": "MOVEMENT SPEED UPGRADED TO LEVEL %d" % speed_level}
+
+
+func _try_spend(cost: int) -> bool:
+	if merit_marks < cost:
+		return false
+	merit_marks -= cost
+	return true
+
+
+func _next_speed_cost() -> int:
+	if speed_level < 0 or speed_level >= speed_upgrade_costs.size():
+		return -1
+	return speed_upgrade_costs[speed_level]
+
+
+func _emit_inventory_changed() -> void:
+	inventory_changed.emit(get_snapshot())

@@ -39,6 +39,8 @@
 [ext_resource type="Resource" path="res://data/daily_manifest_config.tres" id="37"]
 [ext_resource type="PackedScene" path="res://scenes/ui/blocked_aisle_puzzle_ui.tscn" id="38_blocked_ui"]
 [ext_resource type="PackedScene" path="res://scenes/ui/clean_seat_ui.tscn" id="39_clean_ui"]
+[ext_resource type="PackedScene" path="res://scenes/systems/market_tool_state.tscn" id="40_market_state"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_market_ui.tscn" id="41_market_ui"]
 
 [node name="Main" type="Node2D" unique_id=604105226]
 script = ExtResource("1")
@@ -54,6 +56,10 @@ night_shift_instruction = "NIGHT SHIFT\nINTERVIEW THE DECEASED, THEN RETURN TO T
 departure_statement_recorded_template = "DEPARTURE STATEMENT RECORDED\n%d / %d COLLECTED"
 blocked_aisle_delay_range_seconds = Vector2(9, 16)
 dirty_seat_delay_range_seconds = Vector2(24, 38)
+radar_glow_seconds = 6.0
+
+[node name="MarketToolState" parent="." instance=ExtResource("40_market_state")]
+unique_name_in_owner = true
 
 [node name="TravelSky" type="CanvasLayer" parent="." unique_id=1796731036]
 layer = -10
@@ -159,6 +165,9 @@ unique_name_in_owner = true
 [node name="ShiftReportUI" parent="ModalLayer" unique_id=470131896 instance=ExtResource("25")]
 unique_name_in_owner = true
 
+[node name="NightMarketUI" parent="ModalLayer" instance=ExtResource("41_market_ui")]
+unique_name_in_owner = true
+
 [node name="NightPuzzleUI" parent="ModalLayer" unique_id=1779434419 instance=ExtResource("8")]
 unique_name_in_owner = true
 
@@ -188,7 +197,10 @@ unique_name_in_owner = true
 [connection signal="sequence_timeline_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_timeline_changed"]
 [connection signal="train_motion_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_train_motion_changed"]
 [connection signal="closed" from="ModalLayer/DeadSelectionUI" to="." method="_on_modal_closed"]
+[connection signal="audit_requested" from="ModalLayer/DeadSelectionUI" to="." method="_on_abnormal_note_audit_requested"]
 [connection signal="continue_requested" from="ModalLayer/ShiftReportUI" to="." method="_on_shift_report_continue"]
+[connection signal="purchase_requested" from="ModalLayer/NightMarketUI" to="." method="_on_market_purchase_requested"]
+[connection signal="continue_requested" from="ModalLayer/NightMarketUI" to="." method="_on_night_market_continue"]
 [connection signal="departures_confirmed" from="ModalLayer/NightPuzzleUI" to="." method="_on_departures_confirmed"]
 [connection signal="restart_requested" from="ModalLayer/DepartureSequenceUI" to="." method="_restart_game"]
 [connection signal="main_menu_requested" from="ModalLayer/PauseUI" to="." method="_return_to_main_menu"]
@@ -200,6 +212,7 @@ unique_name_in_owner = true
 [connection signal="completed" from="ModalLayer/BlockedAislePuzzleUI" to="." method="_on_maintenance_minigame_completed"]
 [connection signal="closed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_closed"]
 [connection signal="completed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_completed"]
+[connection signal="inventory_changed" from="MarketToolState" to="." method="_on_market_inventory_changed"]
 
 [editable path="GameplayWorld/Train"]
 [editable path="GameplayWorld/Train/Cars/ConductorCar"]

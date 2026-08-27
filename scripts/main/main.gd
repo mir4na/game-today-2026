@@ -2,7 +2,7 @@ class_name AfterTheEndGame
 extends Node2D
 ## Owns the vertical-slice state and coordinates data, world presentation and UI.
 
-enum GameState { OPENING, DAY, SUNSET, SHIFT_REPORT, NIGHT, NIGHT_PUZZLE, COMPLETE }
+enum GameState { OPENING, DAY, SUNSET, SHIFT_REPORT, MARKET, NIGHT, NIGHT_PUZZLE, COMPLETE }
 enum NewspaperCase { NON_DEATH_NEWS, EXTERNAL_DEATH, MATCHING_PASSENGER_DEATH }
 enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_EXTERNAL_DEATH, FORCE_MATCHING_DEATH }
 
@@ -21,6 +21,8 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_EXTERNAL_DEATH, FORCE
 @export_category("Maintenance Distractions")
 @export var blocked_aisle_delay_range_seconds: Vector2 = Vector2(9.0, 16.0)
 @export var dirty_seat_delay_range_seconds: Vector2 = Vector2(24.0, 38.0)
+@export_category("Market Tools")
+@export_range(1.0, 30.0, 0.5) var radar_glow_seconds: float = 6.0
 @export_category("Newspaper")
 @export_enum("Random", "Force Non-Death", "Force External Death", "Force Matching Death") var newspaper_edition_mode: int = NewspaperEditionMode.RANDOM
 @export_category("Debug")
@@ -73,6 +75,7 @@ var _dirty_seat_events: Array[Node] = []
 var _active_dirty_seat_event: Node
 var _blocked_aisle_activated: bool = false
 var _dirty_seat_activated: bool = false
+var _earned_shift_merit: int = 0
 
 @onready var _train: TrainWorld = %Train
 @onready var _player: ConductorPlayer = %Player
@@ -91,6 +94,8 @@ var _dirty_seat_activated: bool = false
 @onready var _pause_ui: PauseUI = %PauseUI
 @onready var _blocked_aisle_ui: Control = %BlockedAislePuzzleUI
 @onready var _clean_seat_ui: Control = %CleanSeatUI
+@onready var _night_market_ui: Control = %NightMarketUI
+@onready var _market_tool_state: Node = %MarketToolState
 @onready var _blocked_aisle_timer: Timer = %BlockedAisleTimer
 @onready var _dirty_seat_timer: Timer = %DirtySeatTimer
 @onready var _ambience: TrainAmbience = %TrainAmbience
@@ -126,6 +131,7 @@ func _ready() -> void:
 	_player.set_interactables(_interactables)
 	_hud.set_clock(int(_day_minutes))
 	_set_arrival_clock_display(int(_day_minutes))
+	_on_market_inventory_changed(_market_tool_state.call(&"get_snapshot"))
 	_update_passenger_minimap()
 	_set_passenger_ai_enabled(false)
 	_active_modal = _day_intro_ui
@@ -194,6 +200,14 @@ func _final_arrival_minutes() -> float:
 	return START_MINUTES + station_travel_seconds * float(day_route.size() - 1)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if (
+		event.is_action_pressed(&"use_radar")
+		and _active_modal == null
+		and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
+	):
+		_use_carriage_radar()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed(&"notebook"):
 		if _notebook_ui.visible:
 			_notebook_ui.request_close()
@@ -223,7 +237,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_close_night_puzzle()
 	elif _pause_ui.visible:
 		_resume_from_pause()
-	elif state not in [GameState.OPENING, GameState.SHIFT_REPORT, GameState.COMPLETE]:
+	elif state not in [GameState.OPENING, GameState.SHIFT_REPORT, GameState.MARKET, GameState.COMPLETE]:
 		_open_pause()
 	get_viewport().set_input_as_handled()
 
@@ -1092,7 +1106,30 @@ func _open_abnormal_notes() -> void:
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
 	_active_modal = _dead_selection_ui
+	var tool_snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
+	_dead_selection_ui.configure_audit_slips(int(tool_snapshot.get("audit_slips", 0)))
 	_dead_selection_ui.open_notes(_get_active_passenger_data())
+
+
+func _on_abnormal_note_audit_requested(typed_name: String) -> void:
+	if state not in [GameState.DAY, GameState.SUNSET] or not _dead_selection_ui.visible:
+		return
+	if not bool(_market_tool_state.call(&"consume_audit_slip")):
+		_dead_selection_ui.show_audit_result("NO AUDIT SLIPS REMAINING", false)
+		return
+	var normalized_name: String = _normalize_name(typed_name)
+	var matched_name: String = ""
+	for data: PassengerData in _daily_manifest:
+		if normalized_name in [_normalize_name(data.passenger_name), _normalize_name(data.short_name)]:
+			matched_name = data.short_name
+			break
+	if matched_name.is_empty():
+		_dead_selection_ui.show_audit_result("NAME NOT FOUND IN TODAY'S MANIFEST", false)
+	else:
+		_dead_selection_ui.show_audit_result(
+			"MANIFEST NAME CONFIRMED: %s\nLIFE STATUS REMAINS UNDISCLOSED" % matched_name.to_upper(),
+			true
+		)
 
 func _auto_submit_abnormal_notes() -> void:
 	var selected_names: PackedStringArray = _dead_selection_ui.get_typed_names()
@@ -1154,6 +1191,11 @@ func _finalize_day_shift() -> void:
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
 	_hud.set_day_hud_visible(false)
+	_earned_shift_merit = int(_market_tool_state.call(
+		&"award_shift_merit",
+		_correct_drop_offs,
+		_penalty_points
+	))
 	_active_modal = _shift_report_ui
 	_shift_report_ui.open_report(_correct_drop_offs, _penalty_points, _penalty_log)
 
@@ -1161,8 +1203,78 @@ func _on_shift_report_continue() -> void:
 	if state != GameState.SHIFT_REPORT:
 		return
 	_shift_report_ui.hide()
+	_open_night_market()
+
+
+func _open_night_market() -> void:
+	state = GameState.MARKET
+	_player.movement_enabled = false
+	_player.interaction_enabled = false
+	_hud.set_prompt("")
+	_active_modal = _night_market_ui
+	_night_market_ui.call(
+		&"open_market",
+		_market_tool_state.call(&"get_snapshot"),
+		_earned_shift_merit
+	)
+
+
+func _on_market_purchase_requested(tool_id: StringName) -> void:
+	if state != GameState.MARKET:
+		return
+	var result: Dictionary = _market_tool_state.call(&"purchase", tool_id)
+	_night_market_ui.call(
+		&"show_purchase_result",
+		result,
+		_market_tool_state.call(&"get_snapshot")
+	)
+
+
+func _on_night_market_continue() -> void:
+	if state != GameState.MARKET:
+		return
+	_night_market_ui.hide()
 	_active_modal = null
 	_enter_night()
+
+
+func _on_market_inventory_changed(snapshot: Dictionary) -> void:
+	_player.set_market_speed_bonus(float(snapshot.get("speed_bonus", 0.0)))
+	_hud.set_market_tool_inventory(snapshot)
+	if is_instance_valid(_dead_selection_ui):
+		_dead_selection_ui.configure_audit_slips(int(snapshot.get("audit_slips", 0)))
+	if is_instance_valid(_night_market_ui) and _night_market_ui.visible:
+		_night_market_ui.call(&"set_snapshot", snapshot)
+
+
+func _use_carriage_radar() -> void:
+	var carriage_number: int = _train.get_passenger_carriage_number_at_world_x(_player.global_position.x)
+	if carriage_number <= 0:
+		_hud.notify("RADAR REQUIRES A PASSENGER COACH", 2.5)
+		return
+	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
+	if int(snapshot.get("radar_charges", 0)) <= 0:
+		_hud.notify("NO RADAR CHARGES REMAINING\nPurchase more at the Night Market", 3.0)
+		return
+	if not bool(_market_tool_state.call(&"consume_radar_charge")):
+		return
+	var anomaly_detected: bool = false
+	for passenger: Passenger in _passengers:
+		if (
+			_is_active_passenger(passenger)
+			and passenger.get_runtime_carriage() == carriage_number
+			and passenger.data.is_dead
+		):
+			anomaly_detected = true
+			break
+	if anomaly_detected:
+		_train.show_radar_anomaly_glow(carriage_number, radar_glow_seconds)
+		_hud.notify(
+			"RADAR POSITIVE\nANOMALY SIGNAL DETECTED IN COACH %d" % carriage_number,
+			radar_glow_seconds
+		)
+	else:
+		_hud.notify("RADAR CLEAR\nNO ANOMALY SIGNAL IN COACH %d" % carriage_number, 3.5)
 
 func _enter_night() -> void:
 	var puzzle_template := puzzle_resource as DeparturePuzzleData
@@ -1247,7 +1359,7 @@ func _update_carriage_indicator() -> void:
 	_hud.set_current_carriage(carriage_index)
 
 func _update_passenger_minimap() -> void:
-	var counts := PackedInt32Array([0, 0, 0, 0, 0, 0])
+	var counts := PackedInt32Array([0, 0, 0, 0, 0])
 	for passenger: Passenger in _passengers:
 		if not _is_active_passenger(passenger):
 			continue

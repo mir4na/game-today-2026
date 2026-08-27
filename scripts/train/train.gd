@@ -91,6 +91,23 @@ func get_passenger_carriage_world_ranges() -> Dictionary:
 		result[carriage.carriage_number] = Vector2(start_x, start_x + carriage.carriage_width)
 	return result
 
+
+func get_passenger_carriage_number_at_world_x(world_x: float) -> int:
+	var local_x: float = to_local(Vector2(world_x, global_position.y)).x
+	for carriage: CarriageVisual in _carriages:
+		if carriage.carriage_type != "passenger":
+			continue
+		if local_x >= carriage.position.x and local_x <= carriage.position.x + carriage.carriage_width:
+			return carriage.carriage_number
+	return 0
+
+
+func show_radar_anomaly_glow(carriage_number: int, duration: float) -> void:
+	for carriage: CarriageVisual in _carriages:
+		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
+			carriage.show_radar_anomaly_glow(duration)
+			return
+
 func get_carriage_index_at_world_x(world_x: float) -> int:
 	if _carriages.is_empty():
 		return 0

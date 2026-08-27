@@ -17,9 +17,12 @@ extends Node2D
 @export_node_path("AnimationPlayer") var door_animation_path: NodePath
 @export_node_path("AnimationPlayer") var wheel_animation_path: NodePath
 @export_node_path("CanvasItem") var cinematic_interior_shade_path: NodePath
+@export_node_path("PointLight2D") var radar_anomaly_light_path: NodePath
 @export_node_path("Node") var dirty_seat_events_root_path: NodePath
 @export var exterior_wipe_parameter: StringName = &"wipe_progress"
 @export_range(0.0, 2.0, 0.05) var cinematic_interior_fade_seconds: float = 0.45
+@export_range(0.0, 8.0, 0.1) var radar_light_energy: float = 2.4
+@export_range(0.05, 2.0, 0.05) var radar_light_fade_seconds: float = 0.35
 @export_category("Door Animations")
 @export var door_reset_animation: StringName = &"RESET"
 @export var door_open_animation: StringName = &"door_open"
@@ -33,13 +36,17 @@ extends Node2D
 @onready var _door_animation: AnimationPlayer = _get_optional_node(door_animation_path) as AnimationPlayer
 @onready var _wheel_animation: AnimationPlayer = _get_optional_node(wheel_animation_path) as AnimationPlayer
 @onready var _cinematic_interior_shade: CanvasItem = _get_optional_node(cinematic_interior_shade_path) as CanvasItem
+@onready var _radar_anomaly_light: PointLight2D = _get_optional_node(radar_anomaly_light_path) as PointLight2D
 @onready var _dirty_seat_events_root: Node = _get_optional_node(dirty_seat_events_root_path)
 
 var _cinematic_shade_tween: Tween
+var _radar_light_tween: Tween
 
 func _ready() -> void:
 	_validate_exterior_hierarchy()
 	_configure_dirty_seat_events(_dirty_seat_events_root)
+	if is_instance_valid(_radar_anomaly_light):
+		_radar_anomaly_light.energy = 0.0
 	end_exterior_mode()
 
 func set_environment(_scroll: float, night_strength: float, sway_time: float) -> void:
@@ -75,6 +82,29 @@ func set_motion_strength(value: float) -> void:
 	if not _wheel_animation.is_playing() and _wheel_animation.has_animation(wheel_spin_animation):
 		_wheel_animation.play(wheel_spin_animation)
 	_wheel_animation.speed_scale = motion_strength
+
+
+func show_radar_anomaly_glow(duration: float) -> void:
+	if not is_instance_valid(_radar_anomaly_light):
+		return
+	if is_instance_valid(_radar_light_tween):
+		_radar_light_tween.kill()
+	_radar_anomaly_light.energy = 0.0
+	var hold_seconds: float = maxf(0.0, duration - radar_light_fade_seconds * 2.0)
+	_radar_light_tween = create_tween()
+	_radar_light_tween.tween_property(
+		_radar_anomaly_light,
+		"energy",
+		radar_light_energy,
+		radar_light_fade_seconds
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_radar_light_tween.tween_interval(hold_seconds)
+	_radar_light_tween.tween_property(
+		_radar_anomaly_light,
+		"energy",
+		0.0,
+		radar_light_fade_seconds
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 
 func get_passenger_seat_slots() -> Array[Marker2D]:
 	return _get_marker_children(passenger_seat_slots_path)

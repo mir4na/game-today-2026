@@ -3,6 +3,7 @@ extends Control
 ## Persistent five-line abnormal-passenger notebook, auto-filed when daylight service ends.
 
 signal closed
+signal audit_requested(typed_name: String)
 
 @export_category("Inspector Copy")
 @export_multiline var notes_instruction_template: String
@@ -10,11 +11,29 @@ signal closed
 @onready var _entries: Array[LineEdit] = [%NameEntry1, %NameEntry2, %NameEntry3, %NameEntry4, %NameEntry5]
 @onready var _instruction_label: Label = %InstructionLabel
 @onready var _close_button: Button = %CancelButton
+@onready var _audit_stock_label: Label = %AuditStockLabel
+@onready var _audit_result_label: Label = %AuditResultLabel
+@onready var _audit_button: Button = %AuditButton
+
+var _last_active_entry_index: int = 0
 
 func open_notes(passengers: Array[PassengerData]) -> void:
 	_instruction_label.text = notes_instruction_template % passengers.size()
+	_audit_result_label.text = "Audit Slips only verify manifest spelling; they never reveal life status."
+	_audit_result_label.modulate = Color("8f887b")
 	show()
 	_focus_first_available_line()
+
+
+func configure_audit_slips(count: int) -> void:
+	var available: int = maxi(0, count)
+	_audit_stock_label.text = "AUDIT SLIPS AVAILABLE: %d" % available
+	_audit_button.disabled = available <= 0
+
+
+func show_audit_result(message: String, is_match: bool) -> void:
+	_audit_result_label.text = message
+	_audit_result_label.modulate = Color("3f7451") if is_match else Color("a94442")
 
 func _input(event: InputEvent) -> void:
 	if visible and event.is_action_pressed(&"ui_cancel"):
@@ -57,15 +76,30 @@ func _advance_after_space(new_text: String, index: int) -> void:
 		_focus_final_action()
 
 func _focus_first_available_line() -> void:
-	for entry: LineEdit in _entries:
+	for index: int in range(_entries.size()):
+		var entry: LineEdit = _entries[index]
 		if entry.text.strip_edges().is_empty():
+			_last_active_entry_index = index
 			entry.grab_focus()
 			return
+	_last_active_entry_index = 0
 	_entries[0].grab_focus()
 	_entries[0].caret_column = _entries[0].text.length()
 
 func _focus_final_action() -> void:
 	_close_button.grab_focus()
+
+
+func _set_active_entry(index: int) -> void:
+	_last_active_entry_index = clampi(index, 0, _entries.size() - 1)
+
+
+func _on_audit_button_pressed() -> void:
+	var typed_name: String = _entries[_last_active_entry_index].text.strip_edges()
+	if typed_name.is_empty():
+		show_audit_result("TYPE A NAME ON THE ACTIVE LINE FIRST", false)
+		return
+	audit_requested.emit(typed_name)
 
 func _on_name_entry_1_text_changed(text: String) -> void:
 	_advance_after_space(text, 0)
