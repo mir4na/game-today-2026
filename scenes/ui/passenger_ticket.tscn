@@ -13,10 +13,10 @@ border_width_top = 4
 border_width_right = 4
 border_width_bottom = 4
 border_color = Color(0.403922, 0.0705882, 0.0941176, 1)
-corner_radius_top_left = 48
-corner_radius_top_right = 48
-corner_radius_bottom_right = 32
-corner_radius_bottom_left = 32
+corner_radius_top_left = 41
+corner_radius_top_right = 41
+corner_radius_bottom_right = 41
+corner_radius_bottom_left = 41
 
 [sub_resource type="StyleBoxFlat" id="StampHandleInsetStyle"]
 bg_color = Color(0.94902, 0.270588, 0.266667, 1)
@@ -25,10 +25,10 @@ border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
 border_color = Color(1, 0.454902, 0.396078, 0.8)
-corner_radius_top_left = 41
-corner_radius_top_right = 41
-corner_radius_bottom_right = 27
-corner_radius_bottom_left = 27
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
 
 [sub_resource type="StyleBoxFlat" id="StampStemStyle"]
 bg_color = Color(0.105882, 0.101961, 0.109804, 1)
@@ -37,10 +37,10 @@ border_width_top = 3
 border_width_right = 3
 border_width_bottom = 3
 border_color = Color(0.027451, 0.027451, 0.0313726, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+corner_radius_top_left = 54
+corner_radius_top_right = 54
+corner_radius_bottom_right = 54
+corner_radius_bottom_left = 54
 
 [sub_resource type="StyleBoxFlat" id="StampCollarStyle"]
 bg_color = Color(0.105882, 0.109804, 0.121569, 1)
@@ -61,17 +61,17 @@ border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.0117647, 0.0117647, 0.0156863, 1)
-corner_radius_top_left = 48
-corner_radius_top_right = 48
-corner_radius_bottom_right = 48
-corner_radius_bottom_left = 48
+corner_radius_top_left = 72
+corner_radius_top_right = 72
+corner_radius_bottom_right = 72
+corner_radius_bottom_left = 72
 
 [sub_resource type="StyleBoxFlat" id="StampHighlightStyle"]
 bg_color = Color(1, 0.788235, 0.768627, 0.72)
-corner_radius_top_left = 22
-corner_radius_top_right = 22
-corner_radius_bottom_right = 22
-corner_radius_bottom_left = 22
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
 [sub_resource type="StyleBoxFlat" id="StampShadowStyle"]
 bg_color = Color(0.0117647, 0.0117647, 0.0156863, 0.48)
@@ -277,7 +277,7 @@ tracks/9/keys = {
 "times": PackedFloat32Array(0, 0.14, 0.38, 0.5, 0.82),
 "transitions": PackedFloat32Array(0.7, 1.45, 1.8, 0.7, 1),
 "update": 0,
-"values": [Vector2(220, 38), Vector2(220, 38), Vector2(220, 38), Vector2(220, 38), Vector2(220, 38)]
+"values": [Vector2(220, 146), Vector2(220, 146), Vector2(220, 146), Vector2(220, 146), Vector2(220, 146)]
 }
 tracks/10/type = "value"
 tracks/10/path = NodePath("StampTool:rotation")
@@ -313,7 +313,7 @@ tracks/13/keys = {
 "times": PackedFloat32Array(0, 0.14, 0.38, 0.5, 0.82),
 "transitions": PackedFloat32Array(0.7, 1.4, 1.8, 0.7, 1),
 "update": 0,
-"values": [Vector2(17, 189), Vector2(13, 187), Vector2(10, 184), Vector2(13, 186), Vector2(17, 189)]
+"values": [Vector2(16, 16), Vector2(13, 13), Vector2(8, 8), Vector2(12, 12), Vector2(16, 16)]
 }
 tracks/14/type = "value"
 tracks/14/path = NodePath("StampTool/ToolShadow:self_modulate")
@@ -658,10 +658,10 @@ visible = false
 z_index = 20
 layout_mode = 0
 offset_left = 220.0
-offset_top = 38.0
+offset_top = 146.0
 offset_right = 400.0
-offset_bottom = 278.0
-pivot_offset = Vector2(90, 198)
+offset_bottom = 326.0
+pivot_offset = Vector2(90, 90)
 rotation = -0.035
 scale = Vector2(1.14, 1.14)
 mouse_filter = 2
@@ -670,72 +670,72 @@ mouse_filter = 2
 z_index = -1
 layout_mode = 0
 offset_left = 16.0
-offset_top = 187.0
+offset_top = 16.0
 offset_right = 176.0
-offset_bottom = 229.0
+offset_bottom = 176.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StampShadowStyle")
 
 [node name="RubberPad" type="Panel" parent="StampTool"]
 layout_mode = 0
-offset_left = 19.0
-offset_top = 183.0
-offset_right = 161.0
-offset_bottom = 226.0
+offset_left = 18.0
+offset_top = 18.0
+offset_right = 162.0
+offset_bottom = 162.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StampRubberStyle")
 
 [node name="BaseLower" type="Panel" parent="StampTool"]
 layout_mode = 0
 offset_left = 7.0
-offset_top = 169.0
+offset_top = 7.0
 offset_right = 173.0
-offset_bottom = 218.0
+offset_bottom = 173.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StampCollarStyle")
 
 [node name="BaseFace" type="Panel" parent="StampTool"]
 layout_mode = 0
-offset_left = 1.0
-offset_top = 148.0
-offset_right = 179.0
-offset_bottom = 201.0
+offset_left = 14.0
+offset_top = 14.0
+offset_right = 166.0
+offset_bottom = 166.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StampCollarStyle")
 
 [node name="Neck" type="Panel" parent="StampTool"]
 layout_mode = 0
-offset_left = 57.0
-offset_top = 112.0
-offset_right = 123.0
-offset_bottom = 174.0
+offset_left = 36.0
+offset_top = 36.0
+offset_right = 144.0
+offset_bottom = 144.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StampStemStyle")
 
 [node name="Knob" type="Panel" parent="StampTool"]
 layout_mode = 0
-offset_left = 37.0
-offset_top = 14.0
-offset_right = 143.0
-offset_bottom = 139.0
+offset_left = 49.0
+offset_top = 49.0
+offset_right = 131.0
+offset_bottom = 131.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StampHandleStyle")
 
 [node name="KnobInset" type="Panel" parent="StampTool"]
 layout_mode = 0
-offset_left = 47.0
-offset_top = 24.0
-offset_right = 133.0
-offset_bottom = 126.0
+offset_left = 58.0
+offset_top = 58.0
+offset_right = 122.0
+offset_bottom = 122.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StampHandleInsetStyle")
 
 [node name="KnobHighlight" type="Panel" parent="StampTool"]
 layout_mode = 0
-offset_left = 61.0
-offset_top = 31.0
-offset_right = 108.0
-offset_bottom = 49.0
+offset_left = 68.0
+offset_top = 64.0
+offset_right = 91.0
+offset_bottom = 87.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StampHighlightStyle")
 

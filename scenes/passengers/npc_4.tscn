@@ -18,8 +18,8 @@ visible = false
 visible = false
 
 [node name="CharacterArtwork" type="Sprite2D" parent="CharacterScale/PassengerVisual" index="4"]
-position = Vector2(0, -92)
-scale = Vector2(0.412222, 0.412222)
+position = Vector2(-4.122, -41.097)
+scale = Vector2(0.274815, 0.274815)
 material = ExtResource("3_cutout")
 texture = ExtResource("2_art")
 

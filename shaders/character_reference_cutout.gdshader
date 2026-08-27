@@ -3,7 +3,7 @@ shader_type canvas_item;
 uniform vec3 reference_background_color : source_color = vec3(0.266667, 0.266667, 0.266667);
 uniform float solid_cutoff : hint_range(0.0, 0.1, 0.001) = 0.012;
 uniform float feather_cutoff : hint_range(0.0, 0.1, 0.001) = 0.035;
-uniform vec4 reference_content_bounds = vec4(0.07, 0.055, 0.93, 0.95);
+uniform vec4 reference_content_bounds = vec4(0.15, 0.10, 0.85, 0.90);
 
 void fragment() {
 	vec4 pixel = texture(TEXTURE, UV);

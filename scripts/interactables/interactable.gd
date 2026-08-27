@@ -7,6 +7,8 @@ signal interaction_requested(interactable: Interactable)
 @export var prompt_text: String = "Interact"
 @export var interaction_distance: float = 112.0
 @export var enabled: bool = true
+@export_category("Prompt Placement")
+@export_node_path("Node2D") var prompt_anchor_path: NodePath
 @export_category("Focus Presentation")
 @export_node_path("CanvasItem") var focus_visual_path: NodePath
 @export_range(1, 4096, 1) var focus_z_index: int = 100
@@ -37,6 +39,13 @@ func _ready() -> void:
 
 func get_prompt() -> String:
 	return "[E] %s" % prompt_text
+
+func get_prompt_anchor() -> Node2D:
+	if not prompt_anchor_path.is_empty():
+		var configured_anchor := get_node_or_null(prompt_anchor_path) as Node2D
+		if is_instance_valid(configured_anchor):
+			return configured_anchor
+	return self
 
 func can_interact() -> bool:
 	return enabled and visible

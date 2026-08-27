@@ -8,6 +8,7 @@ extends Resource
 @export_range(1, 4, 1) var deceased_passenger_count: int = 4
 @export_range(0, 4, 1) var minimum_initial_deceased: int = 1
 @export_range(1, 8, 1) var passenger_carriage_count: int = 4
+@export var balance_boarding_groups_across_carriages: bool = true
 
 @export_category("Ticket Service")
 @export var service_train_number: String

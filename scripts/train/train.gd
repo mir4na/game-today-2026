@@ -4,6 +4,7 @@ extends Node2D
 var _scroll: float = 0.0
 var _night_strength: float = 0.0
 var _sway_time: float = 0.0
+var _motion_strength: float = 1.0
 var _carriages: Array[CarriageVisual] = []
 
 @onready var _cars: Node2D = %Cars
@@ -18,8 +19,8 @@ func _ready() -> void:
 	_exterior_sequence.hide()
 
 func _process(delta: float) -> void:
-	_sway_time += delta
-	_scroll = fmod(_scroll + delta * lerpf(95.0, 48.0, _night_strength), 10000.0)
+	_sway_time += delta * _motion_strength
+	_scroll = fmod(_scroll + delta * lerpf(95.0, 48.0, _night_strength) * _motion_strength, 10000.0)
 	for carriage: CarriageVisual in _carriages:
 		carriage.set_environment(_scroll, _night_strength, _sway_time)
 		if _exterior_sequence.visible:
@@ -31,6 +32,12 @@ func _process(delta: float) -> void:
 
 func set_night_strength(value: float) -> void:
 	_night_strength = clampf(value, 0.0, 1.0)
+
+
+func set_motion_strength(value: float) -> void:
+	_motion_strength = clampf(value, 0.0, 1.0)
+	for carriage: CarriageVisual in _carriages:
+		carriage.set_motion_strength(_motion_strength)
 
 func show_exterior_body(duration: float, arrival_end: float, departure_start: float) -> void:
 	for carriage: CarriageVisual in _carriages:

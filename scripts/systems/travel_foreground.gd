@@ -13,6 +13,7 @@ extends CanvasLayer
 @export var cable_pass_animation: StringName = &"cable_pass"
 
 var _traveling: bool = false
+var _motion_strength: float = 0.0
 var _rng := RandomNumberGenerator.new()
 
 @onready var _travel_scenery: Node2D = %TravelScenery
@@ -30,18 +31,29 @@ func _ready() -> void:
 	_passing_pole.hide()
 
 func set_traveling(value: bool) -> void:
-	if _traveling == value:
+	set_motion_strength(1.0 if value else 0.0)
+
+
+func set_motion_strength(value: float) -> void:
+	var next_strength: float = clampf(value, 0.0, 1.0)
+	var was_traveling: bool = _traveling
+	_motion_strength = next_strength
+	_traveling = _motion_strength > 0.01
+	_cable_animation.speed_scale = _motion_strength
+	_pole_animation.speed_scale = _motion_strength
+	if _traveling == was_traveling:
 		return
-	_traveling = value
-	_travel_scenery.visible = value
+	_travel_scenery.visible = _traveling
 	_cable_timer.stop()
 	_pole_timer.stop()
 	_cable_animation.stop()
 	_pole_animation.stop()
 	_passing_cables.hide()
 	_passing_pole.hide()
-	if value:
-		_schedule_next_cable()
+	if _traveling:
+		_passing_cables.show()
+		_cable_animation.play(cable_pass_animation)
+		_cable_animation.speed_scale = _motion_strength
 		_schedule_next_pole()
 
 func _schedule_next_cable() -> void:
@@ -63,12 +75,14 @@ func _on_pole_timer_timeout() -> void:
 		return
 	_passing_pole.show()
 	_pole_animation.play(pole_pass_animation)
+	_pole_animation.speed_scale = _motion_strength
 
 func _on_cable_timer_timeout() -> void:
 	if not _traveling:
 		return
 	_passing_cables.show()
 	_cable_animation.play(cable_pass_animation)
+	_cable_animation.speed_scale = _motion_strength
 
 func _on_pole_animation_finished(animation_name: StringName) -> void:
 	if animation_name != pole_pass_animation:

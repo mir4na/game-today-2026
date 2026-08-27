@@ -37,6 +37,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/arrival_clock_ui.tscn" id="35"]
 [ext_resource type="PackedScene" uid="uid://drn1e0xhyylll" path="res://scenes/systems/travel_foreground.tscn" id="36"]
 [ext_resource type="Resource" path="res://data/daily_manifest_config.tres" id="37"]
+[ext_resource type="PackedScene" path="res://scenes/ui/blocked_aisle_puzzle_ui.tscn" id="38_blocked_ui"]
+[ext_resource type="PackedScene" path="res://scenes/ui/clean_seat_ui.tscn" id="39_clean_ui"]
 
 [node name="Main" type="Node2D" unique_id=604105226]
 script = ExtResource("1")
@@ -45,9 +47,13 @@ puzzle_resource = ExtResource("17")
 passenger_scene = ExtResource("34")
 manifest_config = ExtResource("37")
 day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere")
+station_travel_seconds = 30.0
+minimum_passenger_seat_spacing = 90.0
 debug_print_anomaly_roster = true
 night_shift_instruction = "NIGHT SHIFT\nINTERVIEW THE DECEASED, THEN RETURN TO THE FRONT CREW CAB"
 departure_statement_recorded_template = "DEPARTURE STATEMENT RECORDED\n%d / %d COLLECTED"
+blocked_aisle_delay_range_seconds = Vector2(9, 16)
+dirty_seat_delay_range_seconds = Vector2(24, 38)
 
 [node name="TravelSky" type="CanvasLayer" parent="." unique_id=1796731036]
 layer = -10
@@ -76,6 +82,10 @@ color = Color(0.025, 0.047, 0.094, 1)
 editor_description = "Move this node in the Inspector to adjust the complete train, passenger, and player gameplay layout vertically."
 position = Vector2(0, 100)
 
+[node name="WorldLighting" type="CanvasModulate" parent="GameplayWorld"]
+editor_description = "Gameplay ambient color grade. Keep UI unaffected by editing this CanvasModulate inside the world canvas."
+color = Color(0.84, 0.88, 0.94, 1)
+
 [node name="Passengers" type="Node2D" parent="GameplayWorld" unique_id=1237360660]
 unique_name_in_owner = true
 
@@ -94,6 +104,17 @@ position = Vector2(-16, 0)
 
 [node name="TrainAmbience" parent="." unique_id=1529690390 instance=ExtResource("18")]
 unique_name_in_owner = true
+
+[node name="MaintenanceTimers" type="Node" parent="."]
+editor_description = "Scene-owned timers for daylight distractions. Their randomized ranges are configured on Main."
+
+[node name="BlockedAisleTimer" type="Timer" parent="MaintenanceTimers"]
+unique_name_in_owner = true
+one_shot = true
+
+[node name="DirtySeatTimer" type="Timer" parent="MaintenanceTimers"]
+unique_name_in_owner = true
+one_shot = true
 
 [node name="TravelForeground" parent="." unique_id=1008320488 instance=ExtResource("36")]
 unique_name_in_owner = true
@@ -147,6 +168,12 @@ unique_name_in_owner = true
 [node name="PauseUI" parent="ModalLayer" unique_id=680489697 instance=ExtResource("10")]
 unique_name_in_owner = true
 
+[node name="BlockedAislePuzzleUI" parent="ModalLayer" instance=ExtResource("38_blocked_ui")]
+unique_name_in_owner = true
+
+[node name="CleanSeatUI" parent="ModalLayer" instance=ExtResource("39_clean_ui")]
+unique_name_in_owner = true
+
 [connection signal="interaction_pressed" from="GameplayWorld/PlayerSpawnPoint/Player" to="." method="_on_interaction_pressed"]
 [connection signal="nearby_interactable_changed" from="GameplayWorld/PlayerSpawnPoint/Player" to="." method="_on_nearby_interactable_changed"]
 [connection signal="clock_read" from="GameplayWorld/Train/Cars/ConductorCar/ArrivalClock" to="." method="_on_arrival_clock_read"]
@@ -157,9 +184,9 @@ unique_name_in_owner = true
 [connection signal="closed" from="ModalLayer/ArrivalClockUI" to="." method="_on_modal_closed"]
 [connection signal="intro_finished" from="ModalLayer/DayIntroUI" to="." method="_on_day_intro_finished"]
 [connection signal="boarding_actor_entered" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_boarding_actor_entered"]
-[connection signal="camera_return_started" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_camera_return_started"]
 [connection signal="sequence_finished" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_stop_finished"]
 [connection signal="sequence_timeline_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_timeline_changed"]
+[connection signal="train_motion_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_train_motion_changed"]
 [connection signal="closed" from="ModalLayer/DeadSelectionUI" to="." method="_on_modal_closed"]
 [connection signal="continue_requested" from="ModalLayer/ShiftReportUI" to="." method="_on_shift_report_continue"]
 [connection signal="departures_confirmed" from="ModalLayer/NightPuzzleUI" to="." method="_on_departures_confirmed"]
@@ -167,6 +194,12 @@ unique_name_in_owner = true
 [connection signal="main_menu_requested" from="ModalLayer/PauseUI" to="." method="_return_to_main_menu"]
 [connection signal="restart_requested" from="ModalLayer/PauseUI" to="." method="_restart_game"]
 [connection signal="resume_requested" from="ModalLayer/PauseUI" to="." method="_resume_from_pause"]
+[connection signal="timeout" from="MaintenanceTimers/BlockedAisleTimer" to="." method="_on_blocked_aisle_timer_timeout"]
+[connection signal="timeout" from="MaintenanceTimers/DirtySeatTimer" to="." method="_on_dirty_seat_timer_timeout"]
+[connection signal="closed" from="ModalLayer/BlockedAislePuzzleUI" to="." method="_on_maintenance_minigame_closed"]
+[connection signal="completed" from="ModalLayer/BlockedAislePuzzleUI" to="." method="_on_maintenance_minigame_completed"]
+[connection signal="closed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_closed"]
+[connection signal="completed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_completed"]
 
 [editable path="GameplayWorld/Train"]
 [editable path="GameplayWorld/Train/Cars/ConductorCar"]

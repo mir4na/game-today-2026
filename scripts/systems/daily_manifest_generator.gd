@@ -38,10 +38,15 @@ static func generate(
 
 	_reset_runtime_fields(passengers, route, config, rng)
 	_assign_boarding_schedule(passengers, route, config, boarding_counts)
+	if config.balance_boarding_groups_across_carriages:
+		_assign_balanced_boarding_carriages(passengers, scheduled_count, route, config, rng)
 	var deceased: Array[PassengerData] = _select_deceased(passengers, scheduled_count, config, rng)
 	_assign_living_destinations(passengers, scheduled_count, route, boarding_counts, rng)
-	_assign_deceased_anomalies(deceased, route, config, rng, include_matching_newspaper_case)
+	if not _assign_deceased_anomalies(deceased, route, config, rng, include_matching_newspaper_case):
+		return generated_manifest
 	if not _assign_wrong_train_boarders(passengers, scheduled_count, route, config, rng):
+		return generated_manifest
+	if not _validate_distinct_origins_and_destinations(passengers, scheduled_count):
 		return generated_manifest
 	_assign_ticket_numbers(passengers, scheduled_count, config)
 
@@ -101,6 +106,31 @@ static func _assign_boarding_schedule(
 		for _boarder: int in range(station_boarder_count):
 			passengers[cursor].origin_station = route[station_index]
 			cursor += 1
+
+
+static func _assign_balanced_boarding_carriages(
+	passengers: Array[PassengerData],
+	scheduled_count: int,
+	route: PackedStringArray,
+	config: DailyManifestConfig,
+	rng: RandomNumberGenerator
+) -> void:
+	var carriage_count: int = maxi(config.passenger_carriage_count, 1)
+	for station_index: int in range(route.size() - 1):
+		var boarding_group: Array[PassengerData] = []
+		for passenger_index: int in range(scheduled_count):
+			var data: PassengerData = passengers[passenger_index]
+			if data.origin_station == route[station_index]:
+				boarding_group.append(data)
+		if boarding_group.is_empty():
+			continue
+		var carriage_order: Array[int] = []
+		for carriage: int in range(1, carriage_count + 1):
+			carriage_order.append(carriage)
+		for group_index: int in range(boarding_group.size()):
+			if group_index % carriage_count == 0:
+				_shuffle_ints(carriage_order, rng)
+			boarding_group[group_index].current_carriage = carriage_order[group_index % carriage_count]
 
 static func _select_deceased(
 	passengers: Array[PassengerData],
@@ -267,11 +297,11 @@ static func _assign_deceased_anomalies(
 	config: DailyManifestConfig,
 	rng: RandomNumberGenerator,
 	include_matching_newspaper_case: bool
-) -> void:
+) -> bool:
 	var selected_anomalies: PackedStringArray = _select_anomaly_types(config, deceased.size(), rng, include_matching_newspaper_case)
 	if selected_anomalies.size() < deceased.size():
 		push_error("The anomaly pool cannot provide evidence for every deceased passenger.")
-		return
+		return false
 	if include_matching_newspaper_case:
 		var newspaper_type: String = String(config.newspaper_anomaly_type)
 		var newspaper_index: int = selected_anomalies.find(newspaper_type)
@@ -284,6 +314,15 @@ static func _assign_deceased_anomalies(
 			var held_anomaly: String = selected_anomalies[initial_deceased_index]
 			selected_anomalies[initial_deceased_index] = selected_anomalies[newspaper_index]
 			selected_anomalies[newspaper_index] = held_anomaly
+	if not _make_impossible_tickets_route_compatible(
+		selected_anomalies,
+		deceased,
+		route,
+		config,
+		rng,
+		include_matching_newspaper_case
+	):
+		return false
 	for index: int in range(deceased.size()):
 		var data: PassengerData = deceased[index]
 		var origin_index: int = maxi(0, route.find(data.origin_station))
@@ -291,7 +330,10 @@ static func _assign_deceased_anomalies(
 		data.anomaly_type = selected_anomalies[index]
 		match data.anomaly_type:
 			"impossible_ticket":
-				data.destination_station = route[rng.randi_range(0, origin_index)]
+				if origin_index <= 0:
+					push_error("Impossible-ticket anomalies require a boarding station after the first route stop.")
+					return false
+				data.destination_station = route[rng.randi_range(0, origin_index - 1)]
 			"unlisted_destination":
 				data.destination_station = _pick_unlisted_destination(config.unlisted_destination_names, route, rng)
 			"age_mismatch":
@@ -299,6 +341,87 @@ static func _assign_deceased_anomalies(
 					mini(config.age_mismatch_minimum_age, config.age_mismatch_maximum_age),
 					maxi(config.age_mismatch_minimum_age, config.age_mismatch_maximum_age)
 				)
+	return true
+
+
+static func _make_impossible_tickets_route_compatible(
+	selected_anomalies: PackedStringArray,
+	deceased: Array[PassengerData],
+	route: PackedStringArray,
+	config: DailyManifestConfig,
+	rng: RandomNumberGenerator,
+	include_matching_newspaper_case: bool
+) -> bool:
+	for anomaly_index: int in range(selected_anomalies.size()):
+		if selected_anomalies[anomaly_index] != "impossible_ticket":
+			continue
+		if route.find(deceased[anomaly_index].origin_station) > 0:
+			continue
+		var swap_index: int = -1
+		for candidate_index: int in range(selected_anomalies.size()):
+			if selected_anomalies[candidate_index] == "impossible_ticket":
+				continue
+			if route.find(deceased[candidate_index].origin_station) > 0:
+				swap_index = candidate_index
+				break
+		if swap_index >= 0:
+			var held_anomaly: String = selected_anomalies[anomaly_index]
+			selected_anomalies[anomaly_index] = selected_anomalies[swap_index]
+			selected_anomalies[swap_index] = held_anomaly
+			continue
+		var replacement: String = _pick_compatible_anomaly_replacement(
+			selected_anomalies,
+			config,
+			rng,
+			include_matching_newspaper_case
+		)
+		if replacement.is_empty():
+			push_error("No compatible anomaly trait is available to replace an impossible ticket at the first station.")
+			return false
+		selected_anomalies[anomaly_index] = replacement
+	return true
+
+
+static func _pick_compatible_anomaly_replacement(
+	selected_anomalies: PackedStringArray,
+	config: DailyManifestConfig,
+	rng: RandomNumberGenerator,
+	include_matching_newspaper_case: bool
+) -> String:
+	var trait_counts: Dictionary = {}
+	for selected: String in selected_anomalies:
+		trait_counts[selected] = int(trait_counts.get(selected, 0)) + 1
+	# The incompatible impossible-ticket slot is about to be replaced.
+	trait_counts["impossible_ticket"] = maxi(0, int(trait_counts.get("impossible_ticket", 0)) - 1)
+	var candidates := PackedStringArray()
+	for anomaly_type: String in config.anomaly_types:
+		if anomaly_type == "impossible_ticket" or anomaly_type == String(config.newspaper_anomaly_type):
+			continue
+		if int(trait_counts.get(anomaly_type, 0)) >= config.max_passengers_per_anomaly_trait:
+			continue
+		candidates.append(anomaly_type)
+	if candidates.is_empty() and include_matching_newspaper_case:
+		var newspaper_type: String = String(config.newspaper_anomaly_type)
+		if int(trait_counts.get(newspaper_type, 0)) < config.max_passengers_per_anomaly_trait:
+			candidates.append(newspaper_type)
+	if candidates.is_empty():
+		return ""
+	return candidates[rng.randi_range(0, candidates.size() - 1)]
+
+
+static func _validate_distinct_origins_and_destinations(
+	passengers: Array[PassengerData],
+	scheduled_count: int
+) -> bool:
+	for index: int in range(scheduled_count):
+		var data: PassengerData = passengers[index]
+		if data.origin_station == data.destination_station:
+			push_error(
+				"Passenger %s cannot board and have a destination at the same station (%s)."
+				% [data.passenger_name, data.origin_station]
+			)
+			return false
+	return true
 
 static func _select_anomaly_types(
 	config: DailyManifestConfig,

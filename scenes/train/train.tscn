@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://b18t7ho1drja1"]
 
 [ext_resource type="Script" uid="uid://bfstuunjhbkt" path="res://scripts/train/train.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/train/coal_car.tscn" id="2"]
 [ext_resource type="PackedScene" uid="uid://j33im4mh4yg7" path="res://scenes/train/passenger_coach.tscn" id="3"]
 [ext_resource type="PackedScene" uid="uid://jjmypdgegc27" path="res://scenes/train/conductor_car.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/interactables/newspaper.tscn" id="5"]
@@ -9,12 +8,10 @@
 [ext_resource type="Texture2D" uid="uid://cxa3lskemwyal" path="res://assets/kereta/Lantai.png" id="6_v58c7"]
 [ext_resource type="Script" uid="uid://cc1e1727eckwm" path="res://scripts/train/train_exterior_body.gd" id="7"]
 [ext_resource type="Texture2D" uid="uid://d3kh2a47g41ko" path="res://assets/kereta/Jalan.png" id="7_v58c7"]
+[ext_resource type="PackedScene" path="res://scenes/minigames/blocked_aisle_event.tscn" id="8_blocked"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yjxff"]
 size = Vector2(72.77644, 18.86792)
-
-[sub_resource type="RectangleShape2D" id="CoalConnectorRampShape"]
-size = Vector2(48, 8)
 
 [sub_resource type="Animation" id="Animation_exterior_reset"]
 resource_name = "RESET"
@@ -127,13 +124,13 @@ tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
 tracks/2/path = NodePath(".:wipe_progress")
-tracks/2/interp = 2
+tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.18, 0.62, 1.2),
-"transitions": PackedFloat32Array(1, 1.35, 0.8, 1),
+"times": PackedFloat32Array(0, 1.2),
+"transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [0.0, 0.08, 0.58, 1.0]
+"values": [0.0, 1.0]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_exterior"]
@@ -176,11 +173,23 @@ position = Vector2(740, 483)
 [node name="PassengerCoach1" parent="Cars" unique_id=297172719 instance=ExtResource("3")]
 position = Vector2(3840, 0)
 
-[node name="CoalCar" parent="Cars" unique_id=1011616683 instance=ExtResource("2")]
-position = Vector2(4800, 0)
-
 [node name="CarConnections" type="Node2D" parent="Cars" unique_id=2071011326]
 z_index = 4
+
+[node name="MaintenanceEvents" type="Node2D" parent="Cars/CarConnections"]
+editor_description = "Blocked-aisle anchors live at the passenger-coach connectors. Adjust these scene positions directly in the Inspector."
+
+[node name="BlockedAisle43" parent="Cars/CarConnections/MaintenanceEvents" instance=ExtResource("8_blocked")]
+position = Vector2(1918.5, 430)
+adjacent_carriages = Vector2i(4, 3)
+
+[node name="BlockedAisle32" parent="Cars/CarConnections/MaintenanceEvents" instance=ExtResource("8_blocked")]
+position = Vector2(2878.5, 430)
+adjacent_carriages = Vector2i(3, 2)
+
+[node name="BlockedAisle21" parent="Cars/CarConnections/MaintenanceEvents" instance=ExtResource("8_blocked")]
+position = Vector2(3838.5, 430)
+adjacent_carriages = Vector2i(2, 1)
 
 [node name="FloorConnection" type="Node2D" parent="Cars/CarConnections" unique_id=131007500]
 
@@ -296,110 +305,11 @@ position = Vector2(958.5, 384.5)
 scale = Vector2(0.3552644, 0.34175086)
 texture = ExtResource("7_v58c7")
 
-[node name="FloorConnection5" type="Node2D" parent="Cars/CarConnections" unique_id=1649673685]
-position = Vector2(3840, 0)
-
-[node name="StaticBody2D" type="StaticBody2D" parent="Cars/CarConnections/FloorConnection5" unique_id=836338802]
-collision_layer = 2
-
-[node name="Lantai" type="Sprite2D" parent="Cars/CarConnections/FloorConnection5/StaticBody2D" unique_id=83777669]
-position = Vector2(958.00006, 495)
-scale = Vector2(0.7105278, 0.371)
-texture = ExtResource("6_v58c7")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Cars/CarConnections/FloorConnection5/StaticBody2D" unique_id=757340754]
-position = Vector2(958.5, 500.5)
-scale = Vector2(0.371, 0.371)
-shape = SubResource("RectangleShape2D_yjxff")
-
-[node name="CoalRampCollision" type="CollisionShape2D" parent="Cars/CarConnections/FloorConnection5/StaticBody2D" unique_id=1466904026]
-position = Vector2(984, 508.5)
-rotation = 0.5
-shape = SubResource("CoalConnectorRampShape")
-
-[node name="Connection5" type="Node2D" parent="Cars/CarConnections" unique_id=55088240]
-position = Vector2(3840, 0)
-
-[node name="AntarKertea" type="Sprite2D" parent="Cars/CarConnections/Connection5" unique_id=1885693113]
-position = Vector2(958.49994, 374.8485)
-scale = Vector2(0.3552628, 0.37715048)
-texture = ExtResource("6_iuhv6")
-
-[node name="Jalan" type="Sprite2D" parent="Cars/CarConnections/Connection5" unique_id=1692677333]
-position = Vector2(958.5, 384.5)
-scale = Vector2(0.3552644, 0.34175086)
-texture = ExtResource("7_v58c7")
-
-[node name="CoachLabels" type="Node2D" parent="Cars" unique_id=86394090]
-
-[node name="Plaque4" type="Polygon2D" parent="Cars/CoachLabels" unique_id=1922245172]
-color = Color(0.06, 0.07, 0.09, 0.9)
-polygon = PackedVector2Array(1373, 176, 1603, 176, 1603, 206, 1373, 206)
-
-[node name="Label4" type="Label" parent="Cars/CoachLabels" unique_id=670490508]
-offset_left = 1383.0
-offset_top = 177.0
-offset_right = 1593.0
-offset_bottom = 206.0
-theme_override_colors/font_color = Color(0.917647, 0.854902, 0.721569, 1)
-theme_override_font_sizes/font_size = 15
-text = "COACH 4"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Plaque3" type="Polygon2D" parent="Cars/CoachLabels" unique_id=1600898784]
-color = Color(0.06, 0.07, 0.09, 0.9)
-polygon = PackedVector2Array(2333, 176, 2563, 176, 2563, 206, 2333, 206)
-
-[node name="Label3" type="Label" parent="Cars/CoachLabels" unique_id=1825066661]
-offset_left = 2343.0
-offset_top = 177.0
-offset_right = 2553.0
-offset_bottom = 206.0
-theme_override_colors/font_color = Color(0.917647, 0.854902, 0.721569, 1)
-theme_override_font_sizes/font_size = 15
-text = "COACH 3"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Plaque2" type="Polygon2D" parent="Cars/CoachLabels" unique_id=970035596]
-color = Color(0.06, 0.07, 0.09, 0.9)
-polygon = PackedVector2Array(3293, 176, 3523, 176, 3523, 206, 3293, 206)
-
-[node name="Label2" type="Label" parent="Cars/CoachLabels" unique_id=379026812]
-offset_left = 3303.0
-offset_top = 177.0
-offset_right = 3513.0
-offset_bottom = 206.0
-theme_override_colors/font_color = Color(0.917647, 0.854902, 0.721569, 1)
-theme_override_font_sizes/font_size = 15
-text = "COACH 2"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Plaque1" type="Polygon2D" parent="Cars/CoachLabels" unique_id=1516027325]
-color = Color(0.06, 0.07, 0.09, 0.9)
-polygon = PackedVector2Array(4253, 176, 4483, 176, 4483, 206, 4253, 206)
-
-[node name="Label1" type="Label" parent="Cars/CoachLabels" unique_id=646107700]
-offset_left = 4263.0
-offset_top = 177.0
-offset_right = 4473.0
-offset_bottom = 206.0
-theme_override_colors/font_color = Color(0.917647, 0.854902, 0.721569, 1)
-theme_override_font_sizes/font_size = 15
-text = "COACH 1"
-horizontal_alignment = 1
-vertical_alignment = 1
-
 [node name="ExteriorSequence" type="Node2D" parent="." unique_id=737171454]
 unique_name_in_owner = true
 process_mode = 4
 visible = false
-modulate = Color(1, 1, 1, 1)
 script = ExtResource("7")
-door_close_duration = 0.55
-closed_hold_before_exit = 1.0
 
 [node name="ExteriorTransition" type="AnimationPlayer" parent="ExteriorSequence" unique_id=52580453]
 unique_name_in_owner = true
@@ -413,5 +323,5 @@ position = Vector2(6.5, 372.5)
 shape = SubResource("LeftBoundaryShape")
 
 [node name="RightBoundaryCollision" type="CollisionShape2D" parent="TrainBoundaries" unique_id=1650242370]
-position = Vector2(5713, 312)
+position = Vector2(4753, 312)
 shape = SubResource("RightBoundaryShape")

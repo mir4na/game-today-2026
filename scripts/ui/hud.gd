@@ -4,6 +4,9 @@ extends CanvasLayer
 
 @export_category("Inspector Copy")
 @export var clock_template: String = "%02d:%02d %s"
+@export_category("Interaction Prompt")
+@export var prompt_screen_offset: Vector2 = Vector2(0.0, -8.0)
+@export var prompt_edge_margin: Vector2 = Vector2(24.0, 20.0)
 
 @onready var _root: Control = %Root
 @onready var _minimap: TrainMinimap = %TrainMinimap
@@ -14,6 +17,10 @@ extends CanvasLayer
 @onready var _notification_panel: PanelContainer = %NotificationPanel
 @onready var _notification_label: Label = %NotificationLabel
 var _notification_tween: Tween
+var _prompt_target: Node2D
+
+func _process(_delta: float) -> void:
+	_update_prompt_position()
 
 func set_clock(total_minutes: int) -> void:
 	var hour_24: int = total_minutes / 60
@@ -30,9 +37,30 @@ func set_current_carriage(index: int) -> void:
 func set_passenger_counts(counts: PackedInt32Array) -> void:
 	_minimap.set_passenger_counts(counts)
 
-func set_prompt(text: String) -> void:
+func set_prompt(text: String, target: Node2D = null) -> void:
 	_prompt_label.text = text
+	_prompt_target = target if not text.is_empty() and is_instance_valid(target) else null
 	_floating_prompt.visible = not text.is_empty()
+	_update_prompt_position()
+
+func _update_prompt_position() -> void:
+	if not _floating_prompt.visible or not is_instance_valid(_prompt_target):
+		return
+	var screen_anchor := _prompt_target.get_global_transform_with_canvas().origin + prompt_screen_offset
+	var prompt_size := _floating_prompt.size
+	var viewport_size := get_viewport().get_visible_rect().size
+	var desired_position := screen_anchor - Vector2(prompt_size.x * 0.5, prompt_size.y)
+	desired_position.x = clampf(
+		desired_position.x,
+		prompt_edge_margin.x,
+		maxf(prompt_edge_margin.x, viewport_size.x - prompt_size.x - prompt_edge_margin.x)
+	)
+	desired_position.y = clampf(
+		desired_position.y,
+		prompt_edge_margin.y,
+		maxf(prompt_edge_margin.y, viewport_size.y - prompt_size.y - prompt_edge_margin.y)
+	)
+	_floating_prompt.position = desired_position
 
 func set_day_hud_visible(value: bool) -> void:
 	_clock_panel.visible = value

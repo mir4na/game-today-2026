@@ -14,7 +14,13 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_EXTERNAL_DEATH, FORCE
 @export_category("Day Route")
 @export var day_route: PackedStringArray
 @export_category("Station Service")
+@export_range(5.0, 300.0, 1.0) var station_travel_seconds: float = 30.0
 @export_range(1, 8, 1) var unlisted_destination_penalty_units: int = 1
+@export_category("Passenger Placement")
+@export_range(0.0, 180.0, 5.0) var minimum_passenger_seat_spacing: float = 90.0
+@export_category("Maintenance Distractions")
+@export var blocked_aisle_delay_range_seconds: Vector2 = Vector2(9.0, 16.0)
+@export var dirty_seat_delay_range_seconds: Vector2 = Vector2(24.0, 38.0)
 @export_category("Newspaper")
 @export_enum("Random", "Force Non-Death", "Force External Death", "Force Matching Death") var newspaper_edition_mode: int = NewspaperEditionMode.RANDOM
 @export_category("Debug")
@@ -26,7 +32,6 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_EXTERNAL_DEATH, FORCE
 const ABNORMAL_NOTE_PENALTY: int = 10
 const WRONG_STOP_PENALTY: int = 12
 const START_MINUTES: float = 14.0 * 60.0
-const STATION_TRAVEL_SECONDS: float = 60.0
 const SUNSET_MINUTES: float = 17.5 * 60.0
 
 var state: GameState = GameState.OPENING
@@ -61,7 +66,13 @@ var _arrival_clock: Interactable
 var _nearby_interactable: Interactable
 var _active_modal: Control
 var _station_cutscene_context: StringName = &""
+var _station_cutscene_motion_strength: float = 1.0
 var _inspected_passenger: Passenger
+var _blocked_aisle_events: Array[Node] = []
+var _dirty_seat_events: Array[Node] = []
+var _active_dirty_seat_event: Node
+var _blocked_aisle_activated: bool = false
+var _dirty_seat_activated: bool = false
 
 @onready var _train: TrainWorld = %Train
 @onready var _player: ConductorPlayer = %Player
@@ -78,6 +89,10 @@ var _inspected_passenger: Passenger
 @onready var _night_puzzle_ui: NightPuzzleUI = %NightPuzzleUI
 @onready var _sequence_ui: DepartureSequenceUI = %DepartureSequenceUI
 @onready var _pause_ui: PauseUI = %PauseUI
+@onready var _blocked_aisle_ui: Control = %BlockedAislePuzzleUI
+@onready var _clean_seat_ui: Control = %CleanSeatUI
+@onready var _blocked_aisle_timer: Timer = %BlockedAisleTimer
+@onready var _dirty_seat_timer: Timer = %DirtySeatTimer
 @onready var _ambience: TrainAmbience = %TrainAmbience
 @onready var _travel_foreground: TravelForeground = %TravelForeground
 @onready var _night_sky_overlay: ColorRect = %NightSkyOverlay
@@ -107,6 +122,7 @@ func _ready() -> void:
 	_debug_print_configured_anomaly_roster()
 	_debug_print_active_anomaly_roster("INITIAL BOARDING")
 	_collect_interactables(self)
+	_configure_maintenance_events()
 	_player.set_interactables(_interactables)
 	_hud.set_clock(int(_day_minutes))
 	_set_arrival_clock_display(int(_day_minutes))
@@ -143,6 +159,9 @@ func _process(delta: float) -> void:
 		_hud.notify("THE LAST LIGHT IS FADING", 3.0)
 
 func _update_travel_foreground() -> void:
+	if _station_stop_ui.visible:
+		_travel_foreground.set_motion_strength(_station_cutscene_motion_strength)
+		return
 	var is_traveling: bool = _is_world_simulation_active() and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
 	if state in [GameState.DAY, GameState.SUNSET]:
 		is_traveling = is_traveling and not _station_arrival_announced
@@ -154,6 +173,8 @@ func _announce_next_station() -> void:
 		return
 	if _is_passenger_inspection_active():
 		_document_overlay.request_close()
+	elif _is_maintenance_minigame_active():
+		_active_modal.call(&"request_close")
 	_station_arrival_announced = true
 	_process_station_arrival()
 
@@ -167,10 +188,10 @@ func _next_day_station() -> String:
 	return day_route[clampi(_route_index + 1, 0, day_route.size() - 1)]
 
 func _next_arrival_minutes() -> float:
-	return minf(START_MINUTES + float(_route_index + 1) * STATION_TRAVEL_SECONDS, _final_arrival_minutes())
+	return minf(START_MINUTES + float(_route_index + 1) * station_travel_seconds, _final_arrival_minutes())
 
 func _final_arrival_minutes() -> float:
-	return START_MINUTES + STATION_TRAVEL_SECONDS * float(day_route.size() - 1)
+	return START_MINUTES + station_travel_seconds * float(day_route.size() - 1)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"notebook"):
@@ -190,6 +211,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		_notebook_ui.request_close()
 	elif _arrival_clock_ui.visible:
 		_arrival_clock_ui.call(&"request_close")
+	elif _blocked_aisle_ui.visible:
+		_blocked_aisle_ui.call(&"request_close")
+	elif _clean_seat_ui.visible:
+		_clean_seat_ui.call(&"request_close")
 	elif _station_stop_ui.visible:
 		_station_stop_ui.skip_sequence()
 	elif _dead_selection_ui.visible:
@@ -361,14 +386,37 @@ func _finish_staged_boarding() -> void:
 
 func _find_available_seat(carriage: int) -> Marker2D:
 	var available_seats: Array[Marker2D] = []
+	var comfortably_spaced_seats: Array[Marker2D] = []
 	for seat_slot: Marker2D in _train.get_passenger_seat_slots(carriage):
+		if _is_seat_blocked_by_maintenance(seat_slot):
+			continue
 		var occupant := _seat_occupant_by_slot.get(seat_slot) as Passenger
 		if not _is_active_passenger(occupant):
 			_seat_occupant_by_slot.erase(seat_slot)
 			available_seats.append(seat_slot)
 	if available_seats.is_empty():
 		return null
-	return available_seats[_daily_rng.randi_range(0, available_seats.size() - 1)]
+	for seat_slot: Marker2D in available_seats:
+		if _has_enough_space_from_occupied_seats(seat_slot):
+			comfortably_spaced_seats.append(seat_slot)
+	var candidate_seats: Array[Marker2D] = comfortably_spaced_seats if not comfortably_spaced_seats.is_empty() else available_seats
+	return candidate_seats[_daily_rng.randi_range(0, candidate_seats.size() - 1)]
+
+func _has_enough_space_from_occupied_seats(candidate: Marker2D) -> bool:
+	var candidate_position: Vector2 = _passenger_container.to_local(candidate.global_position)
+	for occupied_value: Variant in _seat_occupant_by_slot.keys():
+		var occupied_slot := occupied_value as Marker2D
+		var occupant := _seat_occupant_by_slot.get(occupied_slot) as Passenger
+		if not is_instance_valid(occupied_slot) or not _is_active_passenger(occupant):
+			continue
+		if absf(candidate.global_position.x - occupied_slot.global_position.x) < minimum_passenger_seat_spacing:
+			return false
+	for passenger: Passenger in _passengers:
+		if not _is_active_passenger(passenger):
+			continue
+		if absf(candidate_position.x - passenger.get_navigation_target_position().x) < minimum_passenger_seat_spacing:
+			return false
+	return true
 
 func _release_passenger_seat(passenger: Passenger) -> Marker2D:
 	var seat_slot := _seat_slot_by_passenger.get(passenger) as Marker2D
@@ -575,6 +623,128 @@ func _collect_interactables(node: Node) -> void:
 				_arrival_clock = interactable
 		_collect_interactables(child)
 
+
+func _configure_maintenance_events() -> void:
+	_blocked_aisle_events.clear()
+	_dirty_seat_events.clear()
+	for event: Node in get_tree().get_nodes_in_group(&"blocked_aisle_events"):
+		if not is_ancestor_of(event):
+			continue
+		_blocked_aisle_events.append(event)
+		var blocked_callback := Callable(self, &"_on_blocked_aisle_puzzle_requested")
+		if not event.is_connected(&"puzzle_requested", blocked_callback):
+			event.connect(&"puzzle_requested", blocked_callback)
+	for event: Node in get_tree().get_nodes_in_group(&"dirty_seat_events"):
+		if not is_ancestor_of(event):
+			continue
+		_dirty_seat_events.append(event)
+		var cleaning_callback := Callable(self, &"_on_dirty_seat_cleaning_requested")
+		if not event.is_connected(&"cleaning_requested", cleaning_callback):
+			event.connect(&"cleaning_requested", cleaning_callback)
+
+
+func _schedule_maintenance_events() -> void:
+	if not _blocked_aisle_activated and not _blocked_aisle_events.is_empty():
+		_blocked_aisle_timer.start(_random_delay(blocked_aisle_delay_range_seconds))
+	if not _dirty_seat_activated and not _dirty_seat_events.is_empty():
+		_dirty_seat_timer.start(_random_delay(dirty_seat_delay_range_seconds))
+
+
+func _random_delay(delay_range: Vector2) -> float:
+	var minimum_delay: float = minf(delay_range.x, delay_range.y)
+	var maximum_delay: float = maxf(delay_range.x, delay_range.y)
+	return _daily_rng.randf_range(maxf(minimum_delay, 0.1), maxf(maximum_delay, 0.1))
+
+
+func _on_blocked_aisle_timer_timeout() -> void:
+	if _blocked_aisle_activated or state not in [GameState.DAY, GameState.SUNSET]:
+		return
+	if _station_stop_ui.visible:
+		_blocked_aisle_timer.start(1.0)
+		return
+	var distant_candidates: Array[Node] = []
+	for event: Node in _blocked_aisle_events:
+		var world_event := event as Node2D
+		if is_instance_valid(world_event) and world_event.global_position.distance_to(_player.global_position) > 190.0:
+			distant_candidates.append(event)
+	var candidates: Array[Node] = distant_candidates if not distant_candidates.is_empty() else _blocked_aisle_events
+	if candidates.is_empty():
+		return
+	var selected_event: Node = candidates[_daily_rng.randi_range(0, candidates.size() - 1)]
+	selected_event.call(&"set_event_active", true)
+	_blocked_aisle_activated = true
+	_hud.notify("LUGGAGE HAS BLOCKED A COACH CONNECTOR\nFind the obstruction and repack it", 4.0)
+
+
+func _on_dirty_seat_timer_timeout() -> void:
+	if _dirty_seat_activated or state not in [GameState.DAY, GameState.SUNSET]:
+		return
+	if _station_stop_ui.visible:
+		_dirty_seat_timer.start(1.0)
+		return
+	var vacant_candidates: Array[Node] = []
+	for event: Node in _dirty_seat_events:
+		if not is_instance_valid(event):
+			continue
+		var seat_marker := event.call(&"get_seat_marker") as Marker2D
+		var occupant := _seat_occupant_by_slot.get(seat_marker) as Passenger
+		if is_instance_valid(seat_marker) and not _is_active_passenger(occupant):
+			vacant_candidates.append(event)
+	if vacant_candidates.is_empty():
+		_dirty_seat_timer.start(2.0)
+		return
+	_active_dirty_seat_event = vacant_candidates[_daily_rng.randi_range(0, vacant_candidates.size() - 1)]
+	_active_dirty_seat_event.call(&"set_event_active", true)
+	_dirty_seat_activated = true
+	_remove_locked_carriage_assignments(_dirty_seat_carriage())
+	_hud.notify("A PASSENGER SEAT NEEDS CLEANING\nDrop-off stamps in that coach are locked", 4.0)
+
+
+func _remove_locked_carriage_assignments(carriage_number: int) -> void:
+	for assignment_index: int in range(_station_assignment.size() - 1, -1, -1):
+		var passenger: Passenger = _find_active_passenger_by_name(_station_assignment[assignment_index])
+		if passenger != null and passenger.get_runtime_carriage() == carriage_number:
+			_station_assignment.remove_at(assignment_index)
+	if is_instance_valid(_inspected_passenger) and _inspected_passenger.get_runtime_carriage() == carriage_number:
+		_document_overlay.configure_station_assignment(false)
+
+
+func _on_blocked_aisle_puzzle_requested(event: Node) -> void:
+	if _active_modal != null or state not in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]:
+		return
+	_active_modal = _blocked_aisle_ui
+	_player.movement_enabled = false
+	_player.interaction_enabled = false
+	_hud.set_prompt("")
+	_blocked_aisle_ui.call(&"open_puzzle", event)
+
+
+func _on_dirty_seat_cleaning_requested(event: Node) -> void:
+	if _active_modal != null or state not in [GameState.DAY, GameState.SUNSET]:
+		return
+	_active_modal = _clean_seat_ui
+	_player.movement_enabled = false
+	_player.interaction_enabled = false
+	_hud.set_prompt("")
+	_clean_seat_ui.call(&"open_cleaning", event)
+
+
+func _on_maintenance_minigame_closed() -> void:
+	_active_modal = null
+	_set_player_control_for_state()
+
+
+func _on_maintenance_minigame_completed(event: Node) -> void:
+	if is_instance_valid(event) and event.has_method(&"mark_solved"):
+		event.call(&"mark_solved")
+	if event == _active_dirty_seat_event:
+		_active_dirty_seat_event = null
+		_hud.notify("SEAT CLEAN\nDrop-off stamps for this coach are available again", 3.0)
+	else:
+		_hud.notify("AISLE CLEARED\nThe coach connector is open", 3.0)
+	_active_modal = null
+	_set_player_control_for_state()
+
 func _set_arrival_clock_display(total_minutes: int) -> void:
 	if is_instance_valid(_arrival_clock):
 		_arrival_clock.call(&"set_clock", total_minutes)
@@ -587,7 +757,10 @@ func _on_interaction_pressed(interactable: Interactable) -> void:
 
 func _on_nearby_interactable_changed(interactable: Interactable) -> void:
 	_nearby_interactable = interactable
-	_hud.set_prompt(interactable.get_prompt() if interactable != null else "")
+	_hud.set_prompt(
+		interactable.get_prompt() if interactable != null else "",
+		interactable.get_prompt_anchor() if interactable != null else null
+	)
 
 func _on_passenger_documents_requested(passenger: Passenger) -> void:
 	if passenger.departed:
@@ -637,6 +810,10 @@ func _on_station_assignment_toggled(passenger_name: String, should_assign: bool)
 		return
 	var canonical_name: String = passenger.data.passenger_name
 	var assignment_index: int = _station_assignment.find(canonical_name)
+	if should_assign and _is_dropoff_locked_for_carriage(passenger.get_runtime_carriage()):
+		_document_overlay.configure_station_assignment(false)
+		_hud.notify("CLEANING REQUIRED\nDrop-off stamps in this coach are locked", 2.5)
+		return
 	if should_assign:
 		if assignment_index < 0:
 			_station_assignment.append(canonical_name)
@@ -692,7 +869,12 @@ func _process_station_arrival() -> void:
 		for assigned_name: String in _station_assignment:
 			var assigned_passenger: Passenger = _find_active_passenger_by_name(assigned_name)
 			# Deceased passengers cannot actually leave during daylight. They remain for night service.
-			if assigned_passenger != null and not assigned_passenger.data.is_dead and not departing.has(assigned_passenger):
+			if (
+				assigned_passenger != null
+				and not assigned_passenger.data.is_dead
+				and not _is_dropoff_locked_for_carriage(assigned_passenger.get_runtime_carriage())
+				and not departing.has(assigned_passenger)
+			):
 				departing.append(assigned_passenger)
 
 	var invalid_assignment_count: int = 0 if is_terminal_arrival else _station_assignment.size() - departing.size()
@@ -771,7 +953,6 @@ func _start_station_stop_cutscene(station_name: String, departing_actors: Array[
 	_hud.set_day_hud_visible(false)
 	_hud.set_cutscene_hidden(true)
 	_set_passenger_ai_enabled(false)
-	_player.begin_station_cutscene_camera()
 	var stop_timeline: Vector3 = _station_stop_ui.get_stop_timeline()
 	_train.show_exterior_body(stop_timeline.x, stop_timeline.y, stop_timeline.z)
 	_station_stop_ui.play_stop(station_name, departing_actors, boarding_actors, _train.get_passenger_door_markers())
@@ -786,7 +967,6 @@ func _on_day_intro_finished() -> void:
 	_station_cutscene_context = &"opening"
 	_active_modal = _station_stop_ui
 	_hud.set_cutscene_hidden(true)
-	_player.begin_station_cutscene_camera()
 	var opening_timeline: Vector3 = _station_stop_ui.get_opening_timeline()
 	_train.show_exterior_body(opening_timeline.x, opening_timeline.y, opening_timeline.z)
 	_station_stop_ui.play_opening(day_route[0], boarding_actors, _train.get_passenger_door_markers())
@@ -794,16 +974,22 @@ func _on_day_intro_finished() -> void:
 func _on_station_cutscene_timeline_changed(elapsed: float) -> void:
 	_train.set_exterior_sequence_elapsed(elapsed)
 
-func _on_station_cutscene_boarding_actor_entered(actor_index: int, door_screen_position: Vector2) -> void:
+
+func _on_station_cutscene_train_motion_changed(strength: float) -> void:
+	_station_cutscene_motion_strength = clampf(strength, 0.0, 1.0)
+	_train.set_motion_strength(_station_cutscene_motion_strength)
+	_travel_foreground.set_motion_strength(_station_cutscene_motion_strength)
+	_ambience.motion_strength = _station_cutscene_motion_strength
+
+func _on_station_cutscene_boarding_actor_entered(actor_index: int, _door_screen_position: Vector2) -> void:
 	if actor_index < 0 or actor_index >= _boarding_passengers.size():
 		return
 	var passenger: Passenger = _boarding_passengers[actor_index]
 	if _is_active_passenger(passenger):
-		var door_world_position: Vector2 = get_viewport().get_canvas_transform().affine_inverse() * door_screen_position
-		passenger.finish_boarding_at(_passenger_container.to_local(door_world_position))
-
-func _on_station_cutscene_camera_return_started() -> void:
-	_player.begin_gameplay_camera_return()
+		# The overlay may use an on-screen fallback door when the passenger's real
+		# carriage is outside the cinematic camera. Keep the world NPC at the
+		# scene-authored door where it was staged so carriage allocation is intact.
+		passenger.finish_boarding()
 
 func _on_station_stop_finished() -> void:
 	var finished_context: StringName = _station_cutscene_context
@@ -820,6 +1006,7 @@ func _on_station_stop_finished() -> void:
 		_update_passenger_minimap()
 		_set_passenger_ai_enabled(true)
 		_set_player_control_for_state()
+		_schedule_maintenance_events()
 		return
 	var serviced_station: String = _next_day_station()
 	_route_index += 1
@@ -1048,7 +1235,10 @@ func _set_player_control_for_state() -> void:
 	var can_walk: bool = _active_modal == null and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
 	_player.movement_enabled = can_walk
 	_player.interaction_enabled = can_walk
-	_hud.set_prompt(_nearby_interactable.get_prompt() if can_walk and is_instance_valid(_nearby_interactable) else "")
+	_hud.set_prompt(
+		_nearby_interactable.get_prompt() if can_walk and is_instance_valid(_nearby_interactable) else "",
+		_nearby_interactable.get_prompt_anchor() if can_walk and is_instance_valid(_nearby_interactable) else null
+	)
 
 func _update_carriage_indicator() -> void:
 	if not is_instance_valid(_player):
@@ -1077,7 +1267,27 @@ func _is_passenger_inspection_active() -> bool:
 	)
 
 func _is_world_simulation_active() -> bool:
-	return _active_modal == null or _is_passenger_inspection_active()
+	return _active_modal == null or _is_passenger_inspection_active() or _is_maintenance_minigame_active()
+
+
+func _is_maintenance_minigame_active() -> bool:
+	return _active_modal in [_blocked_aisle_ui, _clean_seat_ui]
+
+
+func _dirty_seat_carriage() -> int:
+	if not is_instance_valid(_active_dirty_seat_event):
+		return -1
+	return int(_active_dirty_seat_event.get(&"carriage_number"))
+
+
+func _is_dropoff_locked_for_carriage(carriage_number: int) -> bool:
+	return is_instance_valid(_active_dirty_seat_event) and _dirty_seat_carriage() == carriage_number
+
+
+func _is_seat_blocked_by_maintenance(seat_marker: Marker2D) -> bool:
+	if not is_instance_valid(_active_dirty_seat_event):
+		return false
+	return _active_dirty_seat_event.call(&"get_seat_marker") == seat_marker
 
 func _is_active_passenger(passenger: Passenger) -> bool:
 	return is_instance_valid(passenger) and not passenger.departed

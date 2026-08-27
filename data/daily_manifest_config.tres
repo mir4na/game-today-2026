@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1")
+balance_boarding_groups_across_carriages = true
 service_train_number = "505"
 alternate_train_numbers = PackedStringArray("318", "742", "901")
 ticket_day_code = "01"

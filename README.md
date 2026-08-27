@@ -35,10 +35,9 @@ MainMenu                         application entry
 └── Quit
 
 Main                             gameplay scene
-├── Train                         one continuous 5,760 px level, moving left
+├── Train                         one continuous 4,800 px level, moving left
 │   ├── ConductorCar             far left/front spawn; passenger-coach body, driver controls, route clock, and abnormal-passenger typewriter
 │   ├── PassengerCoach4..1       modular cutaway coach scenes
-│   ├── CoalCar                  far right/rear
 │   └── ExteriorSequence         scene-authored station transition controller
 ├── Passengers                   ten active Passenger instances; two replacements spawn at every day stop
 ├── Player                       CharacterBody2D + Camera2D + final conductor texture
