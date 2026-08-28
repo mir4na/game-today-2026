@@ -1,7 +1,9 @@
 shader_type canvas_item;
 render_mode unshaded;
 
-// 0.0 keeps the exterior fully visible. 1.0 removes it from top to bottom.
+// 0.0 keeps the complete composite visible. 1.0 removes it from top to bottom.
+// The CanvasGroup includes both the exterior body and its animated doors, so a
+// single horizontal feather crosses both visuals at the exact same world height.
 uniform float wipe_progress : hint_range(0.0, 1.0) = 0.0;
 uniform float edge_softness : hint_range(0.01, 0.25) = 0.08;
 uniform sampler2D screen_texture : hint_screen_texture, repeat_disable, filter_nearest;

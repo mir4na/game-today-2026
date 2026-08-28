@@ -12,7 +12,12 @@ day_prompt = "Night ledger unavailable during daylight"
 night_prompt = "Open Night Drop-Off Ledger"
 prompt_text = "Night ledger unavailable during daylight"
 interaction_distance = 145.0
+prompt_anchor_path = NodePath("InteractionPromptAnchor")
 focus_visual_path = NodePath("AbnormalPassengerTypewriter")
+
+[node name="InteractionPromptAnchor" type="Marker2D" parent="."]
+editor_description = "Inspector-authored screen prompt anchor above the typewriter."
+position = Vector2(0, -145)
 
 [node name="AbnormalPassengerTypewriter" type="CanvasGroup" parent="." unique_id=1347730817]
 material = ExtResource("2_outline")

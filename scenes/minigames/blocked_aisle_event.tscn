@@ -1,0 +1,92 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/minigames/blocked_aisle_event.gd" id="1_event"]
+[ext_resource type="Material" path="res://resources/materials/interactable_outline.tres" id="2_outline"]
+
+[sub_resource type="RectangleShape2D" id="InteractionShape"]
+size = Vector2(150, 190)
+
+[sub_resource type="RectangleShape2D" id="DoorPassageShape"]
+size = Vector2(28, 220)
+
+[node name="BlockedAisleEvent" type="Area2D" groups=["blocked_aisle_events"]]
+visible = false
+z_index = 9
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("1_event")
+prompt_text = "Repack blocked aisle"
+interaction_distance = 150.0
+enabled = false
+prompt_anchor_path = NodePath("InteractionPromptAnchor")
+focus_visual_path = NodePath("LuggageVisual")
+door_blocker_collision_path = NodePath("DoorPassageBlocker/DoorBlockerCollision")
+interaction_collision_path = NodePath("InteractionCollision")
+
+[node name="InteractionPromptAnchor" type="Marker2D" parent="."]
+editor_description = "Inspector-authored screen prompt anchor above the luggage pile."
+position = Vector2(0, -180)
+
+[node name="LuggageVisual" type="CanvasGroup" parent="."]
+material = ExtResource("2_outline")
+
+[node name="Shadow" type="Polygon2D" parent="LuggageVisual"]
+z_index = -1
+color = Color(0.0431373, 0.054902, 0.0705882, 0.52)
+polygon = PackedVector2Array(-66, -4, -52, -14, 45, -14, 66, -3, 47, 8, -48, 8)
+
+[node name="LargeCase" type="Polygon2D" parent="LuggageVisual"]
+position = Vector2(-44, -83)
+color = Color(0.286275, 0.192157, 0.145098, 1)
+polygon = PackedVector2Array(0, 0, 75, 0, 75, 79, 0, 79)
+
+[node name="LargeCaseBand" type="Polygon2D" parent="LuggageVisual"]
+position = Vector2(-44, -83)
+color = Color(0.815686, 0.647059, 0.352941, 1)
+polygon = PackedVector2Array(32, 0, 42, 0, 42, 79, 32, 79)
+
+[node name="TallCase" type="Polygon2D" parent="LuggageVisual"]
+position = Vector2(20, -116)
+color = Color(0.176471, 0.286275, 0.337255, 1)
+polygon = PackedVector2Array(0, 0, 47, 0, 47, 112, 0, 112)
+
+[node name="TallCaseHandle" type="Line2D" parent="LuggageVisual"]
+position = Vector2(20, -116)
+points = PackedVector2Array(14, 0, 14, -14, 33, -14, 33, 0)
+width = 5.0
+default_color = Color(0.105882, 0.145098, 0.168627, 1)
+
+[node name="TopParcel" type="Polygon2D" parent="LuggageVisual"]
+position = Vector2(-35, -126)
+rotation = -0.0872665
+color = Color(0.552941, 0.345098, 0.235294, 1)
+polygon = PackedVector2Array(0, 0, 59, 0, 59, 39, 0, 39)
+
+[node name="ParcelCordH" type="Line2D" parent="LuggageVisual"]
+position = Vector2(-35, -126)
+rotation = -0.0872665
+points = PackedVector2Array(0, 20, 59, 20)
+width = 3.0
+default_color = Color(0.905882, 0.8, 0.6, 1)
+
+[node name="ParcelCordV" type="Line2D" parent="LuggageVisual"]
+position = Vector2(-35, -126)
+rotation = -0.0872665
+points = PackedVector2Array(29, 0, 29, 39)
+width = 3.0
+default_color = Color(0.905882, 0.8, 0.6, 1)
+
+[node name="DoorPassageBlocker" type="StaticBody2D" parent="."]
+editor_description = "Physical barrier at the connector doorway. Move this node in the Inspector to align it with the door; it is intentionally separate from LuggageVisual."
+collision_layer = 2
+collision_mask = 0
+
+[node name="DoorBlockerCollision" type="CollisionShape2D" parent="DoorPassageBlocker"]
+editor_description = "Thin door-threshold barrier that prevents the player from crossing until the luggage puzzle is resolved."
+position = Vector2(0, -50)
+shape = SubResource("DoorPassageShape")
+
+[node name="InteractionCollision" type="CollisionShape2D" parent="."]
+editor_description = "Area shape for selecting/interacting with the luggage, matching passenger interactions. It does not physically block movement."
+position = Vector2(0, -88)
+shape = SubResource("InteractionShape")

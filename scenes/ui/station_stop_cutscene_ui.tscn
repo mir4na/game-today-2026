@@ -160,7 +160,7 @@ tracks/1/keys = {
 
 [sub_resource type="Animation" id="Animation_title_reveal"]
 resource_name = "title_reveal"
-length = 1.5
+length = 0.32
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -168,10 +168,10 @@ tracks/0/path = NodePath("CinematicTitle:modulate:a")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.22, 0.92, 1.5),
-"transitions": PackedFloat32Array(1.6, 1, 0.75, 1),
+"times": PackedFloat32Array(0, 0.22),
+"transitions": PackedFloat32Array(1.6, 1),
 "update": 0,
-"values": [0.0, 1.0, 1.0, 0.0]
+"values": [0.0, 1.0]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -180,10 +180,10 @@ tracks/1/path = NodePath("CinematicTitle:position:y")
 tracks/1/interp = 2
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.32, 1.5),
-"transitions": PackedFloat32Array(1.35, 1, 0.85),
+"times": PackedFloat32Array(0, 0.32),
+"transitions": PackedFloat32Array(1.35, 1),
 "update": 0,
-"values": [10.0, 0.0, -8.0]
+"values": [10.0, 0.0]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_title"]
@@ -213,23 +213,38 @@ letterbox_in_animation = &"letterbox_in"
 letterbox_out_animation = &"letterbox_out"
 title_reveal_animation = &"title_reveal"
 camera_return_lead_time = 0.75
-platform_vertical_offset = 138.0
-platform_horizontal_offset = 52.0
+screen_fade_duration = 0.85
+platform_vertical_offset = 148.0
+platform_horizontal_offset = 112.0
 door_visibility_margin = 48.0
-departing_start_time = 1.0
-departing_stagger = 0.26
-departing_walk_duration = 1.35
-stop_duration = 7.1
-stop_arrival_end = 0.35
-stop_departure_start = 4.35
-opening_duration = 7.65
-opening_departure_start = 4.9
-opening_boarding_start_time = 0.65
-opening_boarding_stagger = 0.28
-opening_boarding_walk_duration = 1.45
-exchange_boarding_start_time = 2.15
-exchange_boarding_stagger = 0.1
-exchange_boarding_walk_duration = 1.2
+stop_duration = 12.0
+stop_deceleration_start = 2.0
+stop_arrival_end = 3.35
+stop_departure_start = 8.0
+opening_duration = 12.0
+opening_deceleration_start = 2.0
+opening_arrival_end = 3.35
+opening_departure_start = 8.0
+door_close_motion_delay = 0.55
+departing_start_time = 4.05
+departing_stagger_min = 0.1
+departing_stagger_max = 0.22
+departing_walk_duration_min = 1.0
+departing_walk_duration_max = 1.45
+opening_boarding_start_time = 4.05
+opening_boarding_stagger_min = 0.07
+opening_boarding_stagger_max = 0.36
+opening_boarding_walk_duration_min = 0.95
+opening_boarding_walk_duration_max = 1.35
+exchange_boarding_start_time = 4.35
+exchange_boarding_stagger_min = 0.09
+exchange_boarding_stagger_max = 0.36
+exchange_boarding_walk_duration_min = 0.95
+exchange_boarding_walk_duration_max = 1.4
+minimum_path_curve = 7.0
+maximum_path_curve = 19.0
+maximum_step_lift = 8.0
+maximum_walk_tilt = 0.025
 
 [node name="Streaks" type="Node2D" parent="."]
 
@@ -343,6 +358,54 @@ unique_name_in_owner = true
 [node name="Actor19" parent="ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
+[node name="Actor20" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor21" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor22" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor23" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor24" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor25" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor26" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor27" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor28" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor29" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor30" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor31" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor32" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor33" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor34" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
+[node name="Actor35" parent="ActorSlots" instance=ExtResource("2")]
+unique_name_in_owner = true
+
 [node name="TopBar" type="ColorRect" parent="."]
 unique_name_in_owner = true
 z_index = 20
@@ -434,6 +497,18 @@ theme_override_font_sizes/font_size = 15
 text = "10 BOARDING     [E / SPACE / ESC] SKIP"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="ScreenFade" type="ColorRect" parent="."]
+unique_name_in_owner = true
+z_index = 100
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.00392157, 0.00588235, 0.00980392, 1)
 
 [node name="LetterboxAnimation" type="AnimationPlayer" parent="."]
 unique_name_in_owner = true

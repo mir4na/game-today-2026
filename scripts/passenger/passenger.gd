@@ -10,6 +10,8 @@ const PASSENGER_FOOT_ANCHOR_Y: float = 37.5
 @export_category("Passenger AI")
 @export_range(50.0, 140.0, 5.0) var minimum_activity_spacing: float = 90.0
 @export_range(0.0, 1.0, 0.05) var initial_idle_at_activity_chance: float = 0.35
+@export_range(0, 6, 1) var minimum_roaming_source_population: int = 2
+@export_range(1, 8, 1) var maximum_roaming_target_population: int = 3
 @export_category("Interaction Copy")
 @export var night_prompt_text: String = "Hear Departure Statement"
 @export_category("Visual Scale")
@@ -162,6 +164,9 @@ func get_ai_behavior() -> String:
 func get_navigation_target_position() -> Vector2:
 	return _ai_target_position if _ai_walking else position
 
+func get_reserved_seat_position() -> Vector2:
+	return _assigned_seat_position
+
 func _update_day_ai(delta: float) -> void:
 	if _ai_walking:
 		_update_facing_direction()
@@ -202,9 +207,13 @@ func _choose_next_ai_target() -> void:
 			var configured_carriages: Array[int] = _get_configured_carriages()
 			var carriage_index: int = configured_carriages.find(carriage)
 			if carriage_index > 0:
-				carriage_candidates.append(configured_carriages[carriage_index - 1])
+				var previous_carriage: int = configured_carriages[carriage_index - 1]
+				if _can_roam_to_carriage(carriage, previous_carriage):
+					carriage_candidates.append(previous_carriage)
 			if carriage_index >= 0 and carriage_index < configured_carriages.size() - 1:
-				carriage_candidates.append(configured_carriages[carriage_index + 1])
+				var next_carriage: int = configured_carriages[carriage_index + 1]
+				if _can_roam_to_carriage(carriage, next_carriage):
+					carriage_candidates.append(next_carriage)
 			if not carriage_candidates.is_empty():
 				target_carriage = carriage_candidates[_rng.randi_range(0, carriage_candidates.size() - 1)]
 		"wander", "window_watcher", "restless":
@@ -239,10 +248,17 @@ func _is_navigation_target_claimed(target_position: Vector2) -> bool:
 		if sibling == self or not sibling is Passenger:
 			continue
 		var other := sibling as Passenger
-		if other.departed or not other.visible:
+		if other.departed:
 			continue
-		if other.get_navigation_target_position().distance_to(target_position) < minimum_activity_spacing:
+		if other.get_reserved_seat_position().distance_to(target_position) < minimum_activity_spacing:
 			return true
+		if other.visible:
+			# Reserve both ends of an NPC's walk. Looking only at its destination
+			# allowed another NPC to choose the position it was still occupying.
+			if other.position.distance_to(target_position) < minimum_activity_spacing:
+				return true
+			if other.get_navigation_target_position().distance_to(target_position) < minimum_activity_spacing:
+				return true
 	return false
 
 func _find_closest_activity_point(candidates: PackedVector2Array) -> Vector2:
@@ -315,6 +331,33 @@ func _get_configured_carriages() -> Array[int]:
 	if result.is_empty():
 		result.append(runtime_carriage)
 	return result
+
+
+func _can_roam_to_carriage(source_carriage: int, target_carriage: int) -> bool:
+	if source_carriage == target_carriage:
+		return true
+	var parent: Node = get_parent()
+	if parent == null:
+		return false
+	var source_population: int = 0
+	var target_population: int = 0
+	for sibling: Node in parent.get_children():
+		if not sibling is Passenger:
+			continue
+		var other := sibling as Passenger
+		if other.departed or not other.visible:
+			continue
+		var planned_carriage: int = other.get_runtime_carriage()
+		if other._ai_walking:
+			planned_carriage = other._carriage_from_world_x(other.get_navigation_target_position().x)
+		if planned_carriage == source_carriage:
+			source_population += 1
+		if planned_carriage == target_carriage:
+			target_population += 1
+	return (
+		source_population > minimum_roaming_source_population
+		and target_population < maximum_roaming_target_population
+	)
 
 func _update_visual() -> void:
 	_passenger_visual.visible = data != null and not departed

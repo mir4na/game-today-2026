@@ -5,6 +5,7 @@ var _scroll: float = 0.0
 var _night_strength: float = 0.0
 var _day_cycle_progress: float = 0.0
 var _sway_time: float = 0.0
+var _motion_strength: float = 1.0
 var _carriages: Array[CarriageVisual] = []
 
 @onready var _cars: Node2D = %Cars
@@ -19,8 +20,8 @@ func _ready() -> void:
 	_exterior_sequence.hide()
 
 func _process(delta: float) -> void:
-	_sway_time += delta
-	_scroll = fmod(_scroll + delta * lerpf(165.0, 112.0, _night_strength), 10000.0)
+	_sway_time += delta * _motion_strength
+	_scroll = fmod(_scroll + delta * lerpf(165.0, 112.0, _night_strength) * _motion_strength, 10000.0)
 	for carriage: CarriageVisual in _carriages:
 		carriage.set_environment(_scroll, _night_strength, _day_cycle_progress, _sway_time)
 		if _exterior_sequence.visible:
@@ -35,6 +36,11 @@ func set_night_strength(value: float) -> void:
 
 func set_day_cycle_progress(value: float) -> void:
 	_day_cycle_progress = clampf(value, 0.0, 1.0)
+
+func set_motion_strength(value: float) -> void:
+	_motion_strength = clampf(value, 0.0, 1.0)
+	for carriage: CarriageVisual in _carriages:
+		carriage.set_motion_strength(_motion_strength)
 
 func show_exterior_body(duration: float, arrival_end: float, departure_start: float) -> void:
 	for carriage: CarriageVisual in _carriages:
@@ -87,6 +93,23 @@ func get_passenger_carriage_world_ranges() -> Dictionary:
 		var start_x: float = carriage.global_position.x
 		result[carriage.carriage_number] = Vector2(start_x, start_x + carriage.carriage_width)
 	return result
+
+
+func get_passenger_carriage_number_at_world_x(world_x: float) -> int:
+	var local_x: float = to_local(Vector2(world_x, global_position.y)).x
+	for carriage: CarriageVisual in _carriages:
+		if carriage.carriage_type != "passenger":
+			continue
+		if local_x >= carriage.position.x and local_x <= carriage.position.x + carriage.carriage_width:
+			return carriage.carriage_number
+	return 0
+
+
+func show_radar_anomaly_glow(carriage_number: int, duration: float) -> void:
+	for carriage: CarriageVisual in _carriages:
+		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
+			carriage.show_radar_anomaly_glow(duration)
+			return
 
 func get_carriage_index_at_world_x(world_x: float) -> int:
 	if _carriages.is_empty():

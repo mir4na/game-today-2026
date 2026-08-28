@@ -1,0 +1,239 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/night_market_ui.gd" id="1"]
+[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
+
+[sub_resource type="StyleBoxFlat" id="MarketPanelStyle"]
+content_margin_left = 24.0
+content_margin_top = 20.0
+content_margin_right = 24.0
+content_margin_bottom = 20.0
+bg_color = Color(0.043, 0.063, 0.091, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.78, 0.64, 0.39, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="ToolCardStyle"]
+content_margin_left = 18.0
+content_margin_top = 18.0
+content_margin_right = 18.0
+content_margin_bottom = 18.0
+bg_color = Color(0.09, 0.13, 0.18, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.31, 0.39, 0.49, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="NightMarketUI" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+theme = ExtResource("2")
+script = ExtResource("1")
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.008, 0.012, 0.023, 0.98)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(1120, 620)
+layout_mode = 2
+theme_override_styles/panel = SubResource("MarketPanelStyle")
+
+[node name="Outer" type="VBoxContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 13
+
+[node name="Eyebrow" type="Label" parent="Center/Panel/Outer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.69, 0.75, 1)
+theme_override_font_sizes/font_size = 14
+text = "SOUL LINE SUPPLY COUNTER"
+horizontal_alignment = 1
+
+[node name="Title" type="Label" parent="Center/Panel/Outer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.83, 0.61, 1)
+theme_override_font_sizes/font_size = 34
+text = "NIGHT MARKET"
+horizontal_alignment = 1
+
+[node name="MeritLabel" type="Label" parent="Center/Panel/Outer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.59, 0.84, 0.68, 1)
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
+
+[node name="Instruction" type="Label" parent="Center/Panel/Outer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.81, 0.78, 1)
+theme_override_font_sizes/font_size = 15
+text = "Purchase consumables for investigations or permanently improve movement speed for this run."
+horizontal_alignment = 1
+
+[node name="Cards" type="HBoxContainer" parent="Center/Panel/Outer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+
+[node name="AuditCard" type="PanelContainer" parent="Center/Panel/Outer/Cards"]
+custom_minimum_size = Vector2(342, 310)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("ToolCardStyle")
+
+[node name="Box" type="VBoxContainer" parent="Center/Panel/Outer/Cards/AuditCard"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Center/Panel/Outer/Cards/AuditCard/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.83, 0.61, 1)
+theme_override_font_sizes/font_size = 23
+text = "AUDIT SLIP"
+
+[node name="Type" type="Label" parent="Center/Panel/Outer/Cards/AuditCard/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.61, 0.68, 0.76, 1)
+text = "CONSUMABLE"
+
+[node name="Description" type="Label" parent="Center/Panel/Outer/Cards/AuditCard/Box"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 16
+text = "Validate whether one typed name exists in today's passenger manifest. It never reveals whether that passenger is deceased."
+autowrap_mode = 2
+
+[node name="AuditStockLabel" type="Label" parent="Center/Panel/Outer/Cards/AuditCard/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.59, 0.84, 0.68, 1)
+
+[node name="AuditButton" type="Button" parent="Center/Panel/Outer/Cards/AuditCard/Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+
+[node name="RadarCard" type="PanelContainer" parent="Center/Panel/Outer/Cards"]
+custom_minimum_size = Vector2(342, 310)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("ToolCardStyle")
+
+[node name="Box" type="VBoxContainer" parent="Center/Panel/Outer/Cards/RadarCard"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Center/Panel/Outer/Cards/RadarCard/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.83, 0.61, 1)
+theme_override_font_sizes/font_size = 23
+text = "CARRIAGE RADAR"
+
+[node name="Type" type="Label" parent="Center/Panel/Outer/Cards/RadarCard/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.61, 0.68, 0.76, 1)
+text = "CONSUMABLE CHARGE"
+
+[node name="Description" type="Label" parent="Center/Panel/Outer/Cards/RadarCard/Box"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 16
+text = "Press R inside a passenger coach. If an anomaly is aboard that coach, its interior glows red temporarily."
+autowrap_mode = 2
+
+[node name="RadarStockLabel" type="Label" parent="Center/Panel/Outer/Cards/RadarCard/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.59, 0.84, 0.68, 1)
+
+[node name="RadarButton" type="Button" parent="Center/Panel/Outer/Cards/RadarCard/Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+
+[node name="SpeedCard" type="PanelContainer" parent="Center/Panel/Outer/Cards"]
+custom_minimum_size = Vector2(342, 310)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("ToolCardStyle")
+
+[node name="Box" type="VBoxContainer" parent="Center/Panel/Outer/Cards/SpeedCard"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Center/Panel/Outer/Cards/SpeedCard/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.83, 0.61, 1)
+theme_override_font_sizes/font_size = 23
+text = "SWIFTSTEP SOLES"
+
+[node name="Type" type="Label" parent="Center/Panel/Outer/Cards/SpeedCard/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.61, 0.68, 0.76, 1)
+text = "PERMANENT RUN UPGRADE"
+
+[node name="Description" type="Label" parent="Center/Panel/Outer/Cards/SpeedCard/Box"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 16
+text = "Increase the conductor's walking speed. Each level stacks with the previous upgrade."
+autowrap_mode = 2
+
+[node name="SpeedLevelLabel" type="Label" parent="Center/Panel/Outer/Cards/SpeedCard/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.59, 0.84, 0.68, 1)
+
+[node name="SpeedButton" type="Button" parent="Center/Panel/Outer/Cards/SpeedCard/Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+
+[node name="FeedbackLabel" type="Label" parent="Center/Panel/Outer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+
+[node name="ContinueButton" type="Button" parent="Center/Panel/Outer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+text = "ENTER NIGHT SERVICE"
+
+[connection signal="pressed" from="Center/Panel/Outer/Cards/AuditCard/Box/AuditButton" to="." method="_on_audit_button_pressed"]
+[connection signal="pressed" from="Center/Panel/Outer/Cards/RadarCard/Box/RadarButton" to="." method="_on_radar_button_pressed"]
+[connection signal="pressed" from="Center/Panel/Outer/Cards/SpeedCard/Box/SpeedButton" to="." method="_on_speed_button_pressed"]
+[connection signal="pressed" from="Center/Panel/Outer/ContinueButton" to="." method="_on_continue_button_pressed"]

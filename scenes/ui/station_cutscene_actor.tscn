@@ -12,7 +12,8 @@ color = Color(0.035, 0.04, 0.05, 0.38)
 
 [node name="CharacterSprite" type="Sprite2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(0, -103)
+position = Vector2(0, -91)
 scale = Vector2(0.32, 0.32)
+material = ExtResource("1_cutout")
 texture_filter = 4
 material = ExtResource("1_cutout")

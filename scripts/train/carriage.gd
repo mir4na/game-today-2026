@@ -19,24 +19,45 @@ const NIGHT_WINDOW_LIGHT := Color("3aa2e9")
 @export_node_path("CanvasItem") var night_overlay_path: NodePath
 @export_node_path("CanvasItem") var window_light_root_path: NodePath
 @export_node_path("Node2D") var exterior_visual_path: NodePath
+@export_node_path("Node2D") var exterior_door_visual_path: NodePath
 @export_node_path("AnimationPlayer") var door_animation_path: NodePath
+@export_node_path("AnimationPlayer") var wheel_animation_path: NodePath
+@export_node_path("CanvasItem") var cinematic_interior_shade_path: NodePath
+@export_node_path("PointLight2D") var radar_anomaly_light_path: NodePath
+@export_node_path("Node") var dirty_seat_events_root_path: NodePath
 @export var exterior_wipe_parameter: StringName = &"wipe_progress"
+@export_range(0.0, 2.0, 0.05) var cinematic_interior_fade_seconds: float = 0.45
+@export_range(0.0, 8.0, 0.1) var radar_light_energy: float = 2.4
+@export_range(0.05, 2.0, 0.05) var radar_light_fade_seconds: float = 0.35
 @export_category("Door Animations")
 @export var door_reset_animation: StringName = &"RESET"
 @export var door_open_animation: StringName = &"door_open"
 @export var door_close_animation: StringName = &"door_close"
+@export var wheel_spin_animation: StringName = &"wheel_spin"
 
 @onready var _sway_root: Node2D = _get_optional_node(sway_root_path) as Node2D
 @onready var _night_overlay: CanvasItem = _get_optional_node(night_overlay_path) as CanvasItem
 @onready var _window_light_root: CanvasItem = _get_optional_node(window_light_root_path) as CanvasItem
 @onready var _exterior_visual: Node2D = _get_optional_node(exterior_visual_path) as Node2D
+@onready var _exterior_door_visual: Node2D = _get_optional_node(exterior_door_visual_path) as Node2D
 @onready var _door_animation: AnimationPlayer = _get_optional_node(door_animation_path) as AnimationPlayer
+@onready var _wheel_animation: AnimationPlayer = _get_optional_node(wheel_animation_path) as AnimationPlayer
+@onready var _cinematic_interior_shade: CanvasItem = _get_optional_node(cinematic_interior_shade_path) as CanvasItem
+@onready var _radar_anomaly_light: PointLight2D = _get_optional_node(radar_anomaly_light_path) as PointLight2D
+@onready var _dirty_seat_events_root: Node = _get_optional_node(dirty_seat_events_root_path)
+
 var _window_lights: Array[Light2D] = []
 var _window_flare_materials: Array[ShaderMaterial] = []
+var _cinematic_shade_tween: Tween
+var _radar_light_tween: Tween
 
 func _ready() -> void:
 	if is_instance_valid(_window_light_root):
 		_collect_window_lights(_window_light_root)
+	_validate_exterior_hierarchy()
+	_configure_dirty_seat_events(_dirty_seat_events_root)
+	if is_instance_valid(_radar_anomaly_light):
+		_radar_anomaly_light.energy = 0.0
 	end_exterior_mode()
 
 func set_environment(_scroll: float, night_strength: float, day_cycle_progress: float, sway_time: float) -> void:
@@ -89,33 +110,55 @@ func _collect_window_lights(parent: Node) -> void:
 		_collect_window_lights(child)
 
 func begin_exterior_mode() -> void:
-	if not is_instance_valid(_exterior_visual):
-		return
-	_exterior_visual.show()
-	_exterior_visual.process_mode = Node.PROCESS_MODE_INHERIT
-	_exterior_visual.modulate.a = 1.0
-	_exterior_visual.position.y = 0.0
+	_fade_cinematic_interior_shade(1.0)
+	_prepare_exterior_layer(_exterior_visual)
 	_set_exterior_wipe_progress(0.0)
 	_reset_exterior_doors()
 
 func set_exterior_transition(alpha: float, vertical_offset: float, wipe_progress: float) -> void:
-	if not is_instance_valid(_exterior_visual) or not _exterior_visual.visible:
-		return
-	_exterior_visual.modulate.a = clampf(alpha, 0.0, 1.0)
-	_exterior_visual.position.y = vertical_offset
+	_set_exterior_layer_transition(_exterior_visual, alpha, vertical_offset)
 	_set_exterior_wipe_progress(wipe_progress)
 
 func end_exterior_mode() -> void:
-	if is_instance_valid(_exterior_visual):
-		_exterior_visual.hide()
-		_exterior_visual.process_mode = Node.PROCESS_MODE_DISABLED
-		_exterior_visual.modulate.a = 1.0
-		_exterior_visual.position.y = 0.0
-		_set_exterior_wipe_progress(0.0)
+	_fade_cinematic_interior_shade(0.0)
+	_reset_exterior_layer(_exterior_visual)
+	_set_exterior_wipe_progress(0.0)
 	_reset_exterior_doors()
 
 func set_exterior_doors_open(value: bool) -> void:
 	_play_door_animation(door_open_animation if value else door_close_animation)
+
+
+func set_motion_strength(value: float) -> void:
+	if not is_instance_valid(_wheel_animation):
+		return
+	var motion_strength: float = clampf(value, 0.0, 1.0)
+	if not _wheel_animation.is_playing() and _wheel_animation.has_animation(wheel_spin_animation):
+		_wheel_animation.play(wheel_spin_animation)
+	_wheel_animation.speed_scale = motion_strength
+
+
+func show_radar_anomaly_glow(duration: float) -> void:
+	if not is_instance_valid(_radar_anomaly_light):
+		return
+	if is_instance_valid(_radar_light_tween):
+		_radar_light_tween.kill()
+	_radar_anomaly_light.energy = 0.0
+	var hold_seconds: float = maxf(0.0, duration - radar_light_fade_seconds * 2.0)
+	_radar_light_tween = create_tween()
+	_radar_light_tween.tween_property(
+		_radar_anomaly_light,
+		"energy",
+		radar_light_energy,
+		radar_light_fade_seconds
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_radar_light_tween.tween_interval(hold_seconds)
+	_radar_light_tween.tween_property(
+		_radar_anomaly_light,
+		"energy",
+		0.0,
+		radar_light_fade_seconds
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 
 func get_passenger_seat_slots() -> Array[Marker2D]:
 	return _get_marker_children(passenger_seat_slots_path)
@@ -143,10 +186,57 @@ func _get_optional_node(node_path: NodePath) -> Node:
 		return null
 	return get_node_or_null(node_path)
 
-func _set_exterior_wipe_progress(value: float) -> void:
-	if not is_instance_valid(_exterior_visual):
+func _configure_dirty_seat_events(root: Node) -> void:
+	if not is_instance_valid(root):
 		return
-	var shader_material := _exterior_visual.material as ShaderMaterial
+	var pending: Array[Node] = [root]
+	while not pending.is_empty():
+		var current: Node = pending.pop_back()
+		for child: Node in current.get_children():
+			pending.append(child)
+			if child.is_in_group(&"dirty_seat_events") and child.has_method(&"set_carriage_number"):
+				child.call(&"set_carriage_number", carriage_number)
+
+func _set_exterior_wipe_progress(value: float) -> void:
+	_set_layer_wipe_progress(_exterior_visual, value)
+
+
+func _validate_exterior_hierarchy() -> void:
+	if not is_instance_valid(_exterior_visual) or not is_instance_valid(_exterior_door_visual):
+		return
+	if not _exterior_visual.is_ancestor_of(_exterior_door_visual):
+		push_error("Exterior doors must remain inside the scene-authored Exterior fade group.")
+
+
+func _prepare_exterior_layer(layer: Node2D) -> void:
+	if not is_instance_valid(layer):
+		return
+	layer.show()
+	layer.process_mode = Node.PROCESS_MODE_INHERIT
+	layer.modulate.a = 1.0
+	layer.position.y = 0.0
+
+
+func _set_exterior_layer_transition(layer: Node2D, alpha: float, vertical_offset: float) -> void:
+	if not is_instance_valid(layer) or not layer.visible:
+		return
+	layer.modulate.a = clampf(alpha, 0.0, 1.0)
+	layer.position.y = vertical_offset
+
+
+func _reset_exterior_layer(layer: Node2D) -> void:
+	if not is_instance_valid(layer):
+		return
+	layer.hide()
+	layer.process_mode = Node.PROCESS_MODE_DISABLED
+	layer.modulate.a = 1.0
+	layer.position.y = 0.0
+
+
+func _set_layer_wipe_progress(layer: Node2D, value: float) -> void:
+	if not is_instance_valid(layer):
+		return
+	var shader_material := layer.material as ShaderMaterial
 	if shader_material == null:
 		return
 	shader_material.set_shader_parameter(exterior_wipe_parameter, clampf(value, 0.0, 1.0))
@@ -167,3 +257,21 @@ func _play_door_animation(animation_name: StringName) -> void:
 		push_warning("Missing carriage door animation: %s" % animation_name)
 		return
 	_door_animation.play(animation_name)
+
+func _fade_cinematic_interior_shade(target_alpha: float) -> void:
+	if not is_instance_valid(_cinematic_interior_shade):
+		return
+	if _cinematic_shade_tween != null and _cinematic_shade_tween.is_valid():
+		_cinematic_shade_tween.kill()
+	var clamped_alpha: float = clampf(target_alpha, 0.0, 1.0)
+	if cinematic_interior_fade_seconds <= 0.0 or not is_inside_tree():
+		_cinematic_interior_shade.modulate.a = clamped_alpha
+		return
+	_cinematic_shade_tween = create_tween()
+	_cinematic_shade_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_cinematic_shade_tween.tween_property(
+		_cinematic_interior_shade,
+		^"modulate:a",
+		clamped_alpha,
+		cinematic_interior_fade_seconds
+	)

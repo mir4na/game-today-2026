@@ -9,6 +9,9 @@
 [ext_resource type="Texture2D" uid="uid://bd3gsinxrrynl" path="res://assets/kereta/Pintu kanan.png" id="7"]
 [ext_resource type="Material" path="res://resources/materials/exterior_top_down_fade.tres" id="8_fade"]
 [ext_resource type="Material" path="res://resources/materials/window_light_mask.tres" id="9_window_light"]
+[ext_resource type="Texture2D" uid="uid://c1r4rdjeoyrm7" path="res://assets/kereta/bagian_bawah.png" id="9_t2b4i"]
+[ext_resource type="PackedScene" path="res://scenes/train/train_interior_lighting.tscn" id="10_lighting"]
+[ext_resource type="PackedScene" path="res://scenes/train/passenger_seat.tscn" id="11_seat"]
 
 [sub_resource type="Gradient" id="Gradient_e78od"]
 offsets = PackedFloat32Array(0, 0.61778843, 1)
@@ -270,81 +273,107 @@ _data = {
 &"wheel_spin": SubResource("Animation_wheel_spin")
 }
 
+[sub_resource type="Gradient" id="Gradient_radar_red"]
+offsets = PackedFloat32Array(0, 0.55, 1)
+colors = PackedColorArray(1, 0.05, 0.04, 1, 0.85, 0.025, 0.02, 0.66, 0.3, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_radar_red"]
+gradient = SubResource("Gradient_radar_red")
+width = 960
+height = 420
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
 [sub_resource type="RectangleShape2D" id="PassengerFloorShape"]
 size = Vector2(934, 24)
 
 [node name="PassengerCoach" type="Node2D" unique_id=120272921]
 script = ExtResource("1")
 carriage_number = 1
-passenger_seat_slots_path = NodePath("PassengerSeatSlots")
-passenger_activity_slots_path = NodePath("PassengerActivitySlots")
-passenger_door_slots_path = NodePath("PassengerDoorSlots")
+passenger_seat_slots_path = NodePath("PassengerLayout/PassengerSeatSlots")
+passenger_activity_slots_path = NodePath("PassengerLayout/PassengerActivitySlots")
+passenger_door_slots_path = NodePath("PassengerLayout/PassengerDoorSlots")
 sway_root_path = NodePath("ArtRoot")
 night_overlay_path = NodePath("ArtRoot/NightOverlay")
 window_light_root_path = NodePath("ArtRoot/Interior/WindowLightRoot")
 exterior_visual_path = NodePath("ArtRoot/Exterior")
+exterior_door_visual_path = NodePath("ArtRoot/Exterior/ClosedDoors")
 door_animation_path = NodePath("ArtRoot/Exterior/DoorAnimation")
+wheel_animation_path = NodePath("ArtRoot/Wheels/WheelAnimation")
+cinematic_interior_shade_path = NodePath("ArtRoot/CinematicInteriorShade")
+radar_anomaly_light_path = NodePath("ArtRoot/RadarAnomalyLight")
+dirty_seat_events_root_path = NodePath("PassengerLayout/PassengerSeatSlots")
+cinematic_interior_fade_seconds = 0.45
+radar_light_energy = 2.4
+radar_light_fade_seconds = 0.35
 
-[node name="PassengerSeatSlots" type="Node2D" parent="." unique_id=141957282]
-editor_description = "One Marker2D for each of the 12 visible passenger seats. Move these markers in the Inspector to adjust passenger placement."
+[node name="PassengerLayout" type="Node2D" parent="."]
+editor_description = "Shared passenger ground baseline. Move this node vertically in the Inspector to align every seat, activity, and boarding position without changing the train floor."
+position = Vector2(0, 430)
 
-[node name="Seat1" type="Marker2D" parent="PassengerSeatSlots" unique_id=1173216612]
-position = Vector2(67, 440)
+[node name="PassengerSeatSlots" type="Node2D" parent="PassengerLayout" unique_id=141957282]
+editor_description = "One Marker2D for each visible passenger seat. Adjust horizontal placement here; vertical alignment is controlled by PassengerLayout."
 
-[node name="Seat2" type="Marker2D" parent="PassengerSeatSlots" unique_id=2075857442]
-position = Vector2(124, 440)
+[node name="Seat1" parent="PassengerLayout/PassengerSeatSlots" unique_id=1173216612 instance=ExtResource("11_seat")]
+position = Vector2(67, 0)
 
-[node name="Seat3" type="Marker2D" parent="PassengerSeatSlots" unique_id=1040894170]
-position = Vector2(180, 440)
+[node name="Seat2" parent="PassengerLayout/PassengerSeatSlots" unique_id=2075857442 instance=ExtResource("11_seat")]
+position = Vector2(124, 0)
 
-[node name="Seat4" type="Marker2D" parent="PassengerSeatSlots" unique_id=1787967331]
-position = Vector2(236, 440)
+[node name="Seat3" parent="PassengerLayout/PassengerSeatSlots" unique_id=1040894170 instance=ExtResource("11_seat")]
+position = Vector2(180, 0)
 
-[node name="Seat5" type="Marker2D" parent="PassengerSeatSlots" unique_id=263002142]
-position = Vector2(292, 440)
+[node name="Seat4" parent="PassengerLayout/PassengerSeatSlots" unique_id=1546739015 instance=ExtResource("11_seat")]
+position = Vector2(236, 0)
 
-[node name="Seat6" type="Marker2D" parent="PassengerSeatSlots" unique_id=1856402927]
-position = Vector2(349, 440)
+[node name="Seat5" parent="PassengerLayout/PassengerSeatSlots" unique_id=782260775 instance=ExtResource("11_seat")]
+position = Vector2(292, 0)
 
-[node name="Seat7" type="Marker2D" parent="PassengerSeatSlots" unique_id=2048963888]
-position = Vector2(604, 440)
+[node name="Seat6" parent="PassengerLayout/PassengerSeatSlots" unique_id=829470910 instance=ExtResource("11_seat")]
+position = Vector2(349, 0)
 
-[node name="Seat8" type="Marker2D" parent="PassengerSeatSlots" unique_id=1319699676]
-position = Vector2(661, 440)
+[node name="Seat7" parent="PassengerLayout/PassengerSeatSlots" unique_id=1325952382 instance=ExtResource("11_seat")]
+position = Vector2(604, 0)
 
-[node name="Seat9" type="Marker2D" parent="PassengerSeatSlots" unique_id=877558589]
-position = Vector2(717, 440)
+[node name="Seat8" parent="PassengerLayout/PassengerSeatSlots" unique_id=1067196251 instance=ExtResource("11_seat")]
+position = Vector2(661, 0)
 
-[node name="Seat10" type="Marker2D" parent="PassengerSeatSlots" unique_id=1502430394]
-position = Vector2(774, 440)
+[node name="Seat9" parent="PassengerLayout/PassengerSeatSlots" unique_id=1888379417 instance=ExtResource("11_seat")]
+position = Vector2(717, 0)
 
-[node name="Seat11" type="Marker2D" parent="PassengerSeatSlots" unique_id=670268879]
-position = Vector2(830, 440)
+[node name="Seat10" parent="PassengerLayout/PassengerSeatSlots" unique_id=258523522 instance=ExtResource("11_seat")]
+position = Vector2(774, 0)
 
-[node name="Seat12" type="Marker2D" parent="PassengerSeatSlots" unique_id=350131362]
-position = Vector2(887, 440)
+[node name="Seat11" parent="PassengerLayout/PassengerSeatSlots" unique_id=465335388 instance=ExtResource("11_seat")]
+position = Vector2(830, 0)
 
-[node name="PassengerActivitySlots" type="Node2D" parent="." unique_id=1069195525]
+[node name="Seat12" parent="PassengerLayout/PassengerSeatSlots" unique_id=1160981160 instance=ExtResource("11_seat")]
+position = Vector2(887, 0)
 
-[node name="DoorWatch" type="Marker2D" parent="PassengerActivitySlots" unique_id=999687608]
-position = Vector2(434, 504)
+[node name="PassengerActivitySlots" type="Node2D" parent="PassengerLayout" unique_id=1069195525]
+editor_description = "AI standing and roaming targets. These inherit the same ground baseline as seats and doors."
 
-[node name="AisleLeft" type="Marker2D" parent="PassengerActivitySlots" unique_id=736964388]
-position = Vector2(350, 520)
+[node name="DoorWatch" type="Marker2D" parent="PassengerLayout/PassengerActivitySlots" unique_id=999687608]
+position = Vector2(434, 0)
 
-[node name="AisleRight" type="Marker2D" parent="PassengerActivitySlots" unique_id=635026494]
-position = Vector2(610, 520)
+[node name="AisleLeft" type="Marker2D" parent="PassengerLayout/PassengerActivitySlots" unique_id=736964388]
+position = Vector2(350, 0)
 
-[node name="FarWindow" type="Marker2D" parent="PassengerActivitySlots" unique_id=991429653]
-position = Vector2(860, 520)
+[node name="AisleRight" type="Marker2D" parent="PassengerLayout/PassengerActivitySlots" unique_id=635026494]
+position = Vector2(610, 0)
 
-[node name="PassengerDoorSlots" type="Node2D" parent="." unique_id=57805849]
+[node name="FarWindow" type="Marker2D" parent="PassengerLayout/PassengerActivitySlots" unique_id=991429653]
+position = Vector2(860, 0)
 
-[node name="DoorLeft" type="Marker2D" parent="PassengerDoorSlots" unique_id=653101308]
-position = Vector2(446, 525)
+[node name="PassengerDoorSlots" type="Node2D" parent="PassengerLayout" unique_id=57805849]
+editor_description = "Boarding handoff targets. These inherit the same ground baseline as seats and AI activity targets."
 
-[node name="DoorRight" type="Marker2D" parent="PassengerDoorSlots" unique_id=1253140837]
-position = Vector2(514, 525)
+[node name="DoorLeft" type="Marker2D" parent="PassengerLayout/PassengerDoorSlots" unique_id=653101308]
+position = Vector2(446, 0)
+
+[node name="DoorRight" type="Marker2D" parent="PassengerLayout/PassengerDoorSlots" unique_id=1253140837]
+position = Vector2(514, 0)
 
 [node name="ArtRoot" type="Node2D" parent="." unique_id=1724717493]
 unique_name_in_owner = true
@@ -418,8 +447,25 @@ scale = Vector2(0.374415, 0.374415)
 texture = ExtResource("2")
 centered = false
 
+[node name="InteriorLighting" parent="ArtRoot" instance=ExtResource("10_lighting")]
+
+[node name="RadarAnomalyLight" type="PointLight2D" parent="ArtRoot"]
+editor_description = "Scene-authored red anomaly scan light. Position, color, size, and maximum energy can be tuned here and on the PassengerCoach Inspector."
+position = Vector2(480, 355)
+energy = 0.0
+color = Color(1, 0.04, 0.025, 1)
+texture = SubResource("GradientTexture2D_radar_red")
+
+[node name="CinematicInteriorShade" type="Polygon2D" parent="ArtRoot"]
+editor_description = "Cutscene-only interior grade. Color controls the cinematic darkness; CarriageVisual only fades its alpha."
+modulate = Color(1, 1, 1, 0)
+z_index = 4
+color = Color(0.025, 0.047, 0.09, 0.34)
+polygon = PackedVector2Array(0, 190, 960, 190, 960, 525, 0, 525)
+
 [node name="Exterior" type="CanvasGroup" parent="ArtRoot" unique_id=997357374]
 unique_name_in_owner = true
+editor_description = "The complete cutscene exterior composite. Exterior sprites and ClosedDoors share this single top-to-bottom wipe material so they disappear in sync."
 process_mode = 4
 z_index = 5
 material = ExtResource("8_fade")
@@ -427,12 +473,14 @@ fit_margin = 16.0
 clear_margin = 16.0
 
 [node name="ExteriorSprite" type="Sprite2D" parent="ArtRoot/Exterior" unique_id=1182358690]
+z_index = 1
 position = Vector2(11.999999, 214.7504)
 scale = Vector2(0.37449878, 0.374415)
 texture = ExtResource("4")
 centered = false
 
 [node name="ExteriorUnderframeSprite" type="Sprite2D" parent="ArtRoot/Exterior" unique_id=1762554862]
+z_index = 1
 position = Vector2(0, 521.3963)
 scale = Vector2(0.374415, 0.374415)
 texture = ExtResource("5")
@@ -440,7 +488,7 @@ centered = false
 
 [node name="ClosedDoors" type="Node2D" parent="ArtRoot/Exterior" unique_id=277686762]
 unique_name_in_owner = true
-z_index = -1
+editor_description = "Animated exterior doors. Keep this node inside Exterior so the doors use the exact same cinematic wipe."
 
 [node name="LeftDoorSprite" type="Sprite2D" parent="ArtRoot/Exterior/ClosedDoors" unique_id=794130417]
 position = Vector2(399, 308)
@@ -454,7 +502,7 @@ scale = Vector2(0.3772728, 0.36530608)
 texture = ExtResource("7")
 centered = false
 
-[node name="DoorAnimation" type="AnimationPlayer" parent="ArtRoot/Exterior" unique_id=194953674]
+[node name="DoorAnimation" type="AnimationPlayer" parent="ArtRoot/Exterior" unique_id=321901150]
 libraries/ = SubResource("AnimationLibrary_doors")
 
 [node name="Wheels" type="Node2D" parent="ArtRoot" unique_id=1283830032]
@@ -531,6 +579,20 @@ polygon = PackedVector2Array(0, -29.2044, 1.87208, -28.4555, 2.99532, -26.9579, 
 libraries/ = SubResource("AnimationLibrary_wheels")
 autoplay = &"wheel_spin"
 speed_scale = 3.5
+
+[node name="UnderframeCovers" type="Node2D" parent="ArtRoot"]
+editor_description = "Scene-authored bogie covers. Adjust the left and right cover sprites here without changing wheel positions or floor collision."
+z_index = 6
+
+[node name="LeftBogieCover" type="Sprite2D" parent="ArtRoot/UnderframeCovers"]
+position = Vector2(215.95375, 567)
+scale = Vector2(0.3737353, 0.371)
+texture = ExtResource("9_t2b4i")
+
+[node name="RightBogieCover" type="Sprite2D" parent="ArtRoot/UnderframeCovers"]
+position = Vector2(749.95374, 567)
+scale = Vector2(0.3737353, 0.371)
+texture = ExtResource("9_t2b4i")
 
 [node name="NightOverlay" type="Polygon2D" parent="ArtRoot" unique_id=2125477584]
 unique_name_in_owner = true

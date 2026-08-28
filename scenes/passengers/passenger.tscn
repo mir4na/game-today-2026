@@ -4,7 +4,7 @@
 [ext_resource type="ShaderMaterial" path="res://resources/materials/interactable_outline.tres" id="2_outline"]
 
 [sub_resource type="RectangleShape2D" id="InteractionShape"]
-size = Vector2(110, 224)
+size = Vector2(110, 170)
 
 [node name="Passenger" type="Area2D"]
 z_index = 2
@@ -13,21 +13,28 @@ collision_layer = 0
 collision_mask = 0
 prompt_text = "INSPECT PASSENGER"
 interaction_distance = 105.0
+prompt_anchor_path = NodePath("InteractionPromptAnchor")
 focus_visual_path = NodePath("CharacterScale")
 focus_z_index = 100
 minimum_activity_spacing = 90.0
 initial_idle_at_activity_chance = 0.35
+minimum_roaming_source_population = 2
+maximum_roaming_target_population = 3
 night_prompt_text = "Hear Departure Statement"
 baby_visual_scale = 0.68
 
+[node name="InteractionPromptAnchor" type="Marker2D" parent="."]
+editor_description = "Inspector-authored screen prompt anchor above the passenger."
+position = Vector2(0, -165)
+
 [node name="Shadow" type="Polygon2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(0, 5)
-polygon = PackedVector2Array(-34, 0, -31.413, -2.296, -24.041, -4.243, -13.012, -5.543, 0, -6, 13.012, -5.543, 24.041, -4.243, 31.413, -2.296, 34, 0, 31.413, 2.296, 24.041, 4.243, 13.012, 5.543, 0, 6, -13.012, 5.543, -24.041, 4.243, -31.413, 2.296)
-color = Color(0.03, 0.035, 0.05, 0.62)
+position = Vector2(0, 80)
+polygon = PackedVector2Array(-48, 0, -44.346, -3.061, -33.941, -5.657, -18.369, -7.391, 0, -8, 18.369, -7.391, 33.941, -5.657, 44.346, -3.061, 48, 0, 44.346, 3.061, 33.941, 5.657, 18.369, 7.391, 0, 8, -18.369, 7.391, -33.941, 5.657, -44.346, 3.061)
+color = Color(0.05, 0.05, 0.06, 0.8)
 
 [node name="CharacterScale" type="CanvasGroup" parent="."]
-position = Vector2(0, -33.75)
+position = Vector2(0, 35.25)
 scale = Vector2(0.9, 0.9)
 material = ExtResource("2_outline")
 clear_margin = 8.0
@@ -74,5 +81,4 @@ polygon = PackedVector2Array(-9, -195, -6, -204, 0, -208.5, 6, -204, 9, -195, 6,
 color = Color(0.847059, 0.752941, 0.607843, 1)
 
 [node name="InteractionShape" type="CollisionShape2D" parent="."]
-position = Vector2(0, -112)
 shape = SubResource("InteractionShape")

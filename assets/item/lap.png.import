@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b86n33ei2jcb7"
-path="res://.godot/imported/coal_car.svg-7ef129eabce2e72fe9e1af42dffaaf01.ctex"
+uid="uid://rtv7tfulbcyt"
+path="res://.godot/imported/lap.png-a7d5d2b75fd0b8ed518e15fd708d16ee.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/vector/coal_car.svg"
-dest_files=["res://.godot/imported/coal_car.svg-7ef129eabce2e72fe9e1af42dffaaf01.ctex"]
+source_file="res://assets/item/lap.png"
+dest_files=["res://.godot/imported/lap.png-a7d5d2b75fd0b8ed518e15fd708d16ee.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

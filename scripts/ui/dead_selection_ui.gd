@@ -3,6 +3,7 @@ extends Control
 ## Persistent drag-and-drop abnormality log, auto-filed when daylight service ends.
 
 signal closed
+signal audit_requested(typed_name: String)
 
 const DragCardScript := preload("res://scripts/ui/abnormal_passenger_drag_card.gd")
 const LOG_SLOT_COUNT: int = 5
@@ -16,6 +17,11 @@ var _passenger_cards: Dictionary = {}
 @onready var _entries: Array[Button] = [%LogSlot1, %LogSlot2, %LogSlot3, %LogSlot4, %LogSlot5]
 @onready var _instruction_label: Label = %InstructionLabel
 @onready var _close_button: Button = %CancelButton
+@onready var _audit_stock_label: Label = %AuditStockLabel
+@onready var _audit_result_label: Label = %AuditResultLabel
+@onready var _audit_button: Button = %AuditButton
+
+var _last_active_entry_index: int = 0
 
 func _ready() -> void:
 	for entry: Button in _entries:
@@ -26,8 +32,21 @@ func open_notes(passengers: Array[PassengerData]) -> void:
 	_instruction_label.text = notes_instruction_template % passengers.size()
 	_rebuild_passenger_cards(passengers)
 	_refresh_log_slots()
+	_audit_result_label.text = "Audit Slips only verify manifest spelling; they never reveal life status."
+	_audit_result_label.modulate = Color("8f887b")
 	show()
 	_close_button.grab_focus()
+
+
+func configure_audit_slips(count: int) -> void:
+	var available: int = maxi(0, count)
+	_audit_stock_label.text = "AUDIT SLIPS AVAILABLE: %d" % available
+	_audit_button.disabled = available <= 0
+
+
+func show_audit_result(message: String, is_match: bool) -> void:
+	_audit_result_label.text = message
+	_audit_result_label.modulate = Color("3f7451") if is_match else Color("a94442")
 
 func _input(event: InputEvent) -> void:
 	if visible and event.is_action_pressed(&"ui_cancel"):
@@ -64,6 +83,7 @@ func _rebuild_passenger_cards(passengers: Array[PassengerData]) -> void:
 func _on_passenger_dropped(target_slot: int, passenger_name: String, source_slot: int) -> void:
 	if target_slot < 0 or target_slot >= LOG_SLOT_COUNT or passenger_name.is_empty():
 		return
+	_last_active_entry_index = target_slot
 	var previous_target: String = _slot_names[target_slot]
 	var existing_slot: int = _slot_names.find(passenger_name)
 	if source_slot >= 0 and source_slot < LOG_SLOT_COUNT and source_slot != target_slot:
@@ -91,3 +111,10 @@ func _update_passenger_cards() -> void:
 		var card := _passenger_cards[passenger_name] as Button
 		if is_instance_valid(card):
 			card.call(&"set_logged", _slot_names.has(passenger_name))
+
+func _on_audit_button_pressed() -> void:
+	var logged_name: String = _slot_names[_last_active_entry_index]
+	if logged_name.is_empty():
+		show_audit_result("DROP A PASSENGER INTO THE LOG FIRST", false)
+		return
+	audit_requested.emit(logged_name)

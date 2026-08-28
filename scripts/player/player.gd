@@ -13,24 +13,27 @@ signal interaction_pressed(interactable: Interactable)
 			_set_nearest(null)
 @export_category("Artwork Direction")
 @export var artwork_faces_left: bool = true
-@export_category("Camera Transitions")
-@export var cutscene_zoom_out_animation: StringName = &"cutscene_zoom_out"
-@export var gameplay_camera_return_animation: StringName = &"gameplay_camera_return"
+@export_category("Scene Animation")
+@export var idle_animation: StringName = &"idle"
+@export var walk_animation: StringName = &"walk"
+@export_range(0.0, 64.0, 0.5) var walk_animation_threshold: float = 2.0
 var _interactables: Array[Interactable] = []
 var _nearest: Interactable
 var _facing: float = 1.0
-var _walk_time: float = 0.0
+var _market_speed_bonus: float = 0.0
 
-@onready var _static_sprite: Sprite2D = %MCVisual
-@onready var _camera_transition: AnimationPlayer = %CameraTransition
+@onready var _animated_sprite: AnimatedSprite2D = %MCVisual
 @onready var _gravity: float = float(ProjectSettings.get_setting("physics/2d/default_gravity"))
-@onready var _static_sprite_base_y: float = _static_sprite.position.y
+
+
+func _ready() -> void:
+	_play_animation(idle_animation)
 
 func _physics_process(delta: float) -> void:
 	var direction: float = 0.0
 	if movement_enabled:
 		direction = Input.get_axis(&"move_left", &"move_right")
-	velocity.x = direction * move_speed
+	velocity.x = direction * get_effective_move_speed()
 	if not is_on_floor():
 		velocity.y += _gravity * delta
 	else:
@@ -38,8 +41,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	if absf(direction) > 0.01:
 		_facing = signf(direction)
-		_walk_time += delta * 10.0
-	_update_visual(direction)
+	_update_visual()
 	_update_nearest()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -54,17 +56,13 @@ func set_interactables(nodes: Array[Interactable]) -> void:
 func clear_interactable() -> void:
 	_set_nearest(null)
 
-func begin_station_cutscene_camera() -> void:
-	_play_camera_transition(cutscene_zoom_out_animation)
 
-func begin_gameplay_camera_return() -> void:
-	_play_camera_transition(gameplay_camera_return_animation)
+func set_market_speed_bonus(value: float) -> void:
+	_market_speed_bonus = maxf(0.0, value)
 
-func _play_camera_transition(animation_name: StringName) -> void:
-	if not _camera_transition.has_animation(animation_name):
-		push_warning("Missing player camera animation: %s" % animation_name)
-		return
-	_camera_transition.play(animation_name)
+
+func get_effective_move_speed() -> float:
+	return move_speed + _market_speed_bonus
 
 func _update_nearest() -> void:
 	var candidate: Interactable = null
@@ -89,8 +87,14 @@ func _set_nearest(candidate: Interactable) -> void:
 		_nearest.set_interaction_focus(true)
 	nearby_interactable_changed.emit(_nearest)
 
-func _update_visual(_direction: float) -> void:
-	var bob: float = sin(_walk_time) * 2.0 if absf(velocity.x) > 1.0 else 0.0
+func _update_visual() -> void:
 	var flip_horizontally: bool = _facing > 0.0 if artwork_faces_left else _facing < 0.0
-	_static_sprite.position.y = _static_sprite_base_y + bob
-	_static_sprite.flip_h = flip_horizontally
+	_animated_sprite.flip_h = flip_horizontally
+	_play_animation(walk_animation if absf(velocity.x) >= walk_animation_threshold else idle_animation)
+
+
+func _play_animation(animation_name: StringName) -> void:
+	if not is_instance_valid(_animated_sprite) or not _animated_sprite.sprite_frames.has_animation(animation_name):
+		return
+	if _animated_sprite.animation != animation_name or not _animated_sprite.is_playing():
+		_animated_sprite.play(animation_name)

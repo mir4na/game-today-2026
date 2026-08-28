@@ -154,6 +154,6 @@ bbcode_enabled = true
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 54)
 layout_mode = 2
-text = "ENTER NIGHT SERVICE  [SPACE / ENTER]"
+text = "CONTINUE TO NIGHT MARKET  [SPACE / ENTER]"
 
 [connection signal="pressed" from="Center/Panel/Outer/ContinueButton" to="." method="_on_continue_button_pressed"]

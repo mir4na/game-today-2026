@@ -26,7 +26,7 @@ var _interaction_enabled: bool = false
 @onready var _service_date: Label = %ServiceDate
 @onready var _train_number: Label = %TrainNumber
 @onready var _ticket_number: Label = %TicketNumber
-@onready var _validation_stamp: TextureRect = %ValidationStamp
+@onready var _validation_stamp: Control = %ValidationStamp
 @onready var _stamp_animation: AnimationPlayer = %StampAnimation
 
 

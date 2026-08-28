@@ -10,9 +10,14 @@ size = Vector2(214, 138)
 script = ExtResource("1")
 prompt_text = "Check Station Arrival Clock"
 interaction_distance = 155.0
+prompt_anchor_path = NodePath("InteractionPromptAnchor")
 focus_visual_path = NodePath("ConsoleClock")
 focus_z_index = 100
 clock_template = "%02d:%02d %s"
+
+[node name="InteractionPromptAnchor" type="Marker2D" parent="."]
+editor_description = "Inspector-authored screen prompt anchor above the arrival clock."
+position = Vector2(0, -225)
 
 [node name="ConsoleClock" type="CanvasGroup" parent="."]
 position = Vector2(0, -124)

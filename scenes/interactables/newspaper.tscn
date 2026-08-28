@@ -10,8 +10,13 @@ size = Vector2(90, 55)
 script = ExtResource("1")
 prompt_text = "Read Newspaper"
 interaction_distance = 105.0
+prompt_anchor_path = NodePath("InteractionPromptAnchor")
 focus_visual_path = NodePath("Visual")
 focus_z_index = 100
+
+[node name="InteractionPromptAnchor" type="Marker2D" parent="."]
+editor_description = "Inspector-authored screen prompt anchor above the newspaper."
+position = Vector2(0, -58)
 
 [node name="Visual" type="CanvasGroup" parent="."]
 rotation = -0.08
