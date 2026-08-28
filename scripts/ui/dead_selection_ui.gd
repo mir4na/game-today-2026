@@ -36,7 +36,16 @@ func show_audit_result(message: String, is_match: bool) -> void:
 	_audit_result_label.modulate = Color("3f7451") if is_match else Color("a94442")
 
 func _input(event: InputEvent) -> void:
-	if visible and event.is_action_pressed(&"ui_cancel"):
+	if not visible:
+		return
+	var key_event := event as InputEventKey
+	if key_event != null and key_event.echo:
+		return
+	if event.is_action_pressed(&"ui_up") and _move_entry_focus(-1):
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(&"ui_down") and _move_entry_focus(1):
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(&"ui_cancel"):
 		request_close()
 		get_viewport().set_input_as_handled()
 
@@ -92,6 +101,18 @@ func _focus_final_action() -> void:
 
 func _set_active_entry(index: int) -> void:
 	_last_active_entry_index = clampi(index, 0, _entries.size() - 1)
+
+
+func _move_entry_focus(direction: int) -> bool:
+	var focused_control: Control = get_viewport().gui_get_focus_owner()
+	var current_index: int = _entries.find(focused_control)
+	if current_index < 0:
+		return false
+	var target_index: int = clampi(current_index + direction, 0, _entries.size() - 1)
+	_last_active_entry_index = target_index
+	_entries[target_index].grab_focus()
+	_entries[target_index].caret_column = _entries[target_index].text.length()
+	return true
 
 
 func _on_audit_button_pressed() -> void:

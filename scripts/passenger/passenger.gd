@@ -14,7 +14,6 @@ signal documents_requested(passenger: Passenger)
 @export_category("Interaction Copy")
 @export var night_prompt_text: String = "Hear Departure Statement"
 @export_category("Visual Scale")
-@export_range(0.3, 1.0, 0.01) var baby_visual_scale: float = 0.68
 @export var uses_authored_character_artwork: bool = false
 var documents_checked: bool = false
 var night_mode: bool = false
@@ -41,7 +40,6 @@ const PASSENGER_WALK_SPEED: float = 92.0
 @onready var _shadow: Polygon2D = %Shadow
 @onready var _passenger_visual: Node2D = %PassengerVisual
 @onready var _body_tint: Node2D = %BodyTint
-@onready var _baby_mark: Polygon2D = %BabyMark
 
 func _ready() -> void:
 	super._ready()
@@ -331,14 +329,12 @@ func _update_visual() -> void:
 	_passenger_visual.visible = data != null and not departed
 	if data == null or departed:
 		return
-	var is_baby: bool = data.anomaly_type == "age_mismatch"
 	var ghost_alpha: float = 0.72 + sin(_sway_time * 2.2) * 0.08 if night_mode else 1.0
 	var body_tint: Color = data.body_color
 	body_tint.a = ghost_alpha
 	_body_tint.modulate = body_tint if not uses_authored_character_artwork else Color.WHITE
 	_passenger_visual.modulate = Color(1.0, 1.0, 1.0, ghost_alpha) if uses_authored_character_artwork else Color.WHITE
-	_passenger_visual.scale = Vector2.ONE * baby_visual_scale if is_baby else Vector2.ONE
-	_passenger_visual.position.y = (10.0 if is_baby else 0.0) + (sin(_walk_phase) * 1.8 if _ai_walking else 0.0)
-	_baby_mark.visible = is_baby and not uses_authored_character_artwork
+	_passenger_visual.scale = Vector2.ONE
+	_passenger_visual.position.y = sin(_walk_phase) * 1.8 if _ai_walking else 0.0
 	_shadow.visible = data.anomaly_type != "shadowless"
 	_shadow.modulate.a = 0.52 if not night_mode else 0.28

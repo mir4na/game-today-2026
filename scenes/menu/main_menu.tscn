@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/menu/main_menu.gd" id="1"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
 [ext_resource type="Texture2D" path="res://assets/vector/main_menu_backdrop.svg" id="3"]
-[ext_resource type="PackedScene" path="res://scenes/main/main.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/ui/loading_screen_ui.tscn" id="4"]
 
 [sub_resource type="StyleBoxFlat" id="MenuPanelStyle"]
 content_margin_left = 18.0
@@ -46,7 +46,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2")
 script = ExtResource("1")
-game_scene = ExtResource("4")
+loading_screen_scene = ExtResource("4")
 volume_value_template = "%d%%"
 default_volume = 80.0
 default_fullscreen = true

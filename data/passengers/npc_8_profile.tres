@@ -2,18 +2,18 @@
 
 [ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://cd48rc6fhar0b" path="res://assets/characters/Where Do You Belong_/NPC8.png" id="2"]
-
 [ext_resource type="PackedScene" path="res://scenes/passengers/npc_8.tscn" id="3_scene"]
 
 [resource]
 script = ExtResource("1")
-passenger_scene = ExtResource("3_scene")
-passenger_name = "Hana"
-short_name = "Hana"
+gender = 1
+passenger_name = "Elias"
+short_name = "Elias"
 age = 22
 occupation = "Student"
 body_color = Color(0.42, 0.58, 0.76, 1)
+passenger_scene = ExtResource("3_scene")
 id_photo = ExtResource("2")
-identity_number = "H-008"
-birth_place = "Cinderfield"
+identity_number = "CID-0008"
+birth_place = "Marigold Bay"
 date_of_birth = "08 AUG 2004"

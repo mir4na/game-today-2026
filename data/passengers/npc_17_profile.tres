@@ -2,18 +2,17 @@
 
 [ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://c2kx16gwe45jl" path="res://assets/characters/Where Do You Belong_/NPC17 - Rheina.png" id="2"]
-
 [ext_resource type="PackedScene" path="res://scenes/passengers/npc_17.tscn" id="3_scene"]
 
 [resource]
 script = ExtResource("1")
-passenger_scene = ExtResource("3_scene")
-passenger_name = "Talia"
-short_name = "Talia"
+passenger_name = "Anthea"
+short_name = "Anthea"
 age = 26
 occupation = "Cartographer"
 body_color = Color(0.72, 0.46, 0.49, 1)
+passenger_scene = ExtResource("3_scene")
 id_photo = ExtResource("2")
-identity_number = "T-017"
-birth_place = "Brambleford"
+identity_number = "CID-0017"
+birth_place = "Windcrest"
 date_of_birth = "09 NOV 2000"

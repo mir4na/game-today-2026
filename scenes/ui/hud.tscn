@@ -56,6 +56,7 @@ corner_radius_bottom_left = 7
 layer = 10
 script = ExtResource("1")
 clock_template = "%02d:%02d %s"
+tool_inventory_template = "BLESSINGS %d   •   [R] RADAR ×%d   •   AUDIT ×%d   •   SPEED LV.%d"
 prompt_screen_offset = Vector2(0, -8)
 prompt_edge_margin = Vector2(24, 20)
 
@@ -113,7 +114,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 14
-text = "[R] RADAR ×0   •   AUDIT ×0   •   SPEED LV.0"
+text = "BLESSINGS 0   •   [R] RADAR ×0   •   AUDIT ×0   •   SPEED LV.0"
 horizontal_alignment = 1
 
 [node name="FloatingPrompt" type="Control" parent="Root"]

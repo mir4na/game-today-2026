@@ -39,7 +39,7 @@ Main                             gameplay scene
 │   ├── ConductorCar             far left/front spawn; passenger-coach body, driver controls, route clock, and abnormal-passenger typewriter
 │   ├── PassengerCoach4..1       modular cutaway coach scenes
 │   └── ExteriorSequence         scene-authored station transition controller
-├── Passengers                   ten active Passenger instances; two replacements spawn at every day stop
+├── Passengers                   data-generated passenger roster; replacements board during station exchanges
 ├── Player                       CharacterBody2D + Camera2D + final conductor texture
 ├── TrainAmbience                procedural rail/night ambience
 ├── HUD                          duties, live passenger-dot minimap, prompt, clock, notifications
@@ -49,7 +49,8 @@ Main                             gameplay scene
     ├── NotebookUI              passengers/route/evidence
     ├── StationStopCutsceneUI    letterbox + passenger staging over the gameplay camera
     ├── DeadSelectionUI          five typed abnormal-passenger report fields
-    ├── ShiftReportUI            Merit, Penalty Points, paycheck threshold, and SP result
+    ├── ShiftReportUI            correct drop-offs, anomaly guesses, penalties, and earned Blessings
+    ├── NightMarketUI            tools purchased with Blessings before night service
     ├── NightPuzzleUI            deceased-passenger/night-stop clue board
     ├── DepartureSequenceUI      four-station ending sequence
     └── PauseUI
@@ -62,7 +63,8 @@ Every static hierarchy and visual is scene-owned: menu panels and backdrop, HUD 
 ## Main scripts
 
 - `scripts/menu/main_menu.gd` binds the scene-authored responsive menu, applies and saves settings, and transitions into gameplay.
-- `scripts/main/main.gd` owns the `OPENING → DAY → SUNSET → DEAD_SELECTION → SHIFT_REPORT → NIGHT → NIGHT_PUZZLE → COMPLETE` state flow, the complete named daytime route, four 60-second station legs, repeated exit assignments, equal station exchanges, cutscenes, live minimap population, deferred transition penalties, Merit/SP, time, and validation.
+- `scripts/main/main.gd` owns the `OPENING → DAY → SUNSET → SHIFT_REPORT → MARKET → NIGHT → NIGHT_PUZZLE → COMPLETE` state flow, the configured daytime route and travel duration, repeated exit assignments, station exchanges, cutscenes, live minimap population, penalties, Blessings rewards, time, and validation.
+- `scripts/systems/market_tool_state.gd` owns the Inspector-configured Blessings balance, daylight/night reward rates, penalty deductions, purchases, consumables, and speed upgrade inventory.
 - `scripts/player/player.gd` handles horizontal `CharacterBody2D` movement, camera follow, facing, and nearest-interactable selection.
 - `scripts/train/carriage.gd` and `scripts/train/train.gd` animate the scene-authored modular carriages, day/night overlay, underframe, and train sway; their geometry and palette live in train scenes and assigned SVG textures.
 - `scripts/passenger/passenger_data.gd` is the designer-facing passenger Resource. `passenger.gd` presents it, emits inspection requests, and runs the selected ambient AI profile inside safe passenger-coach boundaries.
@@ -71,17 +73,25 @@ Every static hierarchy and visual is scene-owned: menu panels and backdrop, HUD 
 
 ## Adding a passenger
 
-1. Duplicate a file in `data/passengers` and edit its exported identity, route, ticket, carriage, color, life state, anomaly, `ai_behavior`, and `ai_interval_seconds`. `origin_station` is where they board; `destination_station` is where the conductor should assign them to get off during the day.
-2. Add the new `.tres` resource to `passenger_resources` on `Main`.
-3. Set `initially_on_train = false` for a station replacement. Give it the same origin station and preferably the same carriage as the passenger it replaces.
-4. Keep the initial roster at no more than 10 and the active deceased roster at no more than 4.
-5. If the passenger belongs in a night puzzle, update that puzzle's clues and solution. World positions and typed-manifest validation populate automatically.
+1. Duplicate an `npc_*_profile.tres` file and assign its scene, portrait, gender, civil ID, birthplace, birth date, occupation, and visual color.
+2. Add the profile to `passenger_identity_profiles` on `Main`, then update `total_passenger_count` in `DailyManifestConfig`.
+3. Add enough unique names to the matching Victorian gender pool. Names, routes, tickets, carriage, life state, anomaly, and AI behavior are assigned at runtime.
+4. Keep the opening roster at no more than 10 and the active deceased roster at no more than 4.
 
 The runtime never writes into passenger Resources, so the same data can safely be reused by UI and visual nodes.
 
+The current roster contains 17 unique visual profiles: NPC 1, 3, 4, 6, 7, 9, 11, 14, 15, and 17 are female; the remaining profiles are male. NPC 18 was removed because it duplicated NPC 10.
+
+### Document formats
+
+- Identity numbers use `CID-0001`: the `CID` document prefix followed by a stable four-digit identity serial.
+- Service dates use `DD MON YYYY`, while the ticket's compact day code uses `YYMMDD`.
+- Train numbers use three digits and normally match the active service configured in `DailyManifestConfig`.
+- Ticket numbers use `YYMMDD-TRAIN-SERIAL`, for example `260607-505-0001`. A time-invalid ticket changes both its printed service date and the matching `YYMMDD` segment; a wrong-train boarder changes the train segment.
+
 ## Adding an anomaly
 
-Existing values are `none`, `shadowless`, `impossible_ticket`, `age_mismatch`, and `newspaper_death`.
+Configured deceased-anomaly values are `shadowless`, `impossible_ticket`, `unlisted_destination`, `portrait_mismatch`, `time_invalid_ticket`, and `newspaper_death`; `none` marks a normal passenger. `wrong_train_boarder` is a daytime ticket violation, not a deceased anomaly.
 
 1. Add a new value to `anomaly_type` in `passenger_data.gd`.
 2. Add only its visible/body presentation to `passenger.gd` or the relevant interactable/environment script.

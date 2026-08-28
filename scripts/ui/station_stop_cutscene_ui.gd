@@ -3,6 +3,7 @@ extends Control
 ## Scene-authored station cinematic layered over the unchanged gameplay camera.
 
 signal sequence_finished
+signal timeline_completed
 signal sequence_timeline_changed(elapsed: float)
 signal train_motion_changed(strength: float)
 signal camera_return_started
@@ -63,6 +64,7 @@ var _departing_motion_profiles: Array[Dictionary] = []
 var _boarding_motion_profiles: Array[Dictionary] = []
 var _door_markers: Dictionary = {}
 var _finished: bool = false
+var _timeline_completed: bool = false
 var _opening_mode: bool = false
 var _duration: float = 12.0
 var _deceleration_start: float = 2.0
@@ -129,6 +131,7 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 	_door_markers = door_markers.duplicate()
 	_elapsed = 0.0
 	_finished = false
+	_timeline_completed = false
 	_letterbox_exit_started = false
 	_camera_return_started = false
 	_entered_boarding_actor_indices.clear()
@@ -164,8 +167,9 @@ func _process(delta: float) -> void:
 	if not _letterbox_exit_started and _elapsed >= maxf(_duration - _letterbox_exit_lead_time, 0.0):
 		_letterbox_exit_started = true
 		_play_letterbox_animation(letterbox_out_animation)
-	if _elapsed >= _duration:
-		_finish_sequence()
+	if _elapsed >= _duration and not _timeline_completed:
+		_timeline_completed = true
+		timeline_completed.emit()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -176,7 +180,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-func _finish_sequence() -> void:
+func complete_sequence() -> void:
 	if _finished:
 		return
 	_finished = true

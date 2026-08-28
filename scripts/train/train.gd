@@ -1,6 +1,8 @@
 class_name TrainWorld
 extends Node2D
 
+signal exterior_fade_out_finished
+
 var _scroll: float = 0.0
 var _night_strength: float = 0.0
 var _sway_time: float = 0.0
@@ -16,6 +18,7 @@ func _ready() -> void:
 			_carriages.append(child as CarriageVisual)
 	_carriages.sort_custom(func(left: CarriageVisual, right: CarriageVisual) -> bool: return left.position.x < right.position.x)
 	_exterior_sequence.doors_open_changed.connect(_on_exterior_doors_open_changed)
+	_exterior_sequence.fade_out_finished.connect(_on_exterior_fade_out_finished)
 	_exterior_sequence.hide()
 
 func _process(delta: float) -> void:
@@ -52,12 +55,21 @@ func hide_exterior_body() -> void:
 func set_exterior_sequence_elapsed(value: float) -> void:
 	_exterior_sequence.set_sequence_elapsed(value)
 
+func ensure_exterior_fade_out_started() -> void:
+	_exterior_sequence.ensure_fade_out_started()
+
+func is_exterior_fade_out_complete() -> bool:
+	return _exterior_sequence.is_fade_out_complete()
+
 func is_exterior_body_visible() -> bool:
 	return _exterior_sequence.visible
 
 func _on_exterior_doors_open_changed(is_open: bool) -> void:
 	for carriage: CarriageVisual in _carriages:
 		carriage.set_exterior_doors_open(is_open)
+
+func _on_exterior_fade_out_finished() -> void:
+	exterior_fade_out_finished.emit()
 
 func get_passenger_seat_slots(carriage_number: int) -> Array[Marker2D]:
 	for carriage: CarriageVisual in _carriages:
@@ -106,6 +118,13 @@ func show_radar_anomaly_glow(carriage_number: int, duration: float) -> void:
 	for carriage: CarriageVisual in _carriages:
 		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
 			carriage.show_radar_anomaly_glow(duration)
+			return
+
+
+func play_radar_scan(carriage_number: int, world_origin: Vector2, duration: float) -> void:
+	for carriage: CarriageVisual in _carriages:
+		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
+			await carriage.play_radar_scan(world_origin, duration)
 			return
 
 func get_carriage_index_at_world_x(world_x: float) -> int:

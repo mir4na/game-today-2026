@@ -17,9 +17,13 @@ extends Node2D
 @export_node_path("AnimationPlayer") var door_animation_path: NodePath
 @export_node_path("AnimationPlayer") var wheel_animation_path: NodePath
 @export_node_path("CanvasItem") var cinematic_interior_shade_path: NodePath
+@export_node_path("Control") var radar_scan_effect_path: NodePath
 @export_node_path("PointLight2D") var radar_anomaly_light_path: NodePath
 @export_node_path("Node") var dirty_seat_events_root_path: NodePath
 @export var exterior_wipe_parameter: StringName = &"wipe_progress"
+@export var radar_scan_origin_parameter: StringName = &"scan_origin_uv"
+@export var radar_scan_progress_parameter: StringName = &"scan_progress"
+@export var radar_scan_aspect_parameter: StringName = &"scan_aspect"
 @export_range(0.0, 2.0, 0.05) var cinematic_interior_fade_seconds: float = 0.45
 @export_range(0.0, 8.0, 0.1) var radar_light_energy: float = 2.4
 @export_range(0.05, 2.0, 0.05) var radar_light_fade_seconds: float = 0.35
@@ -36,15 +40,18 @@ extends Node2D
 @onready var _door_animation: AnimationPlayer = _get_optional_node(door_animation_path) as AnimationPlayer
 @onready var _wheel_animation: AnimationPlayer = _get_optional_node(wheel_animation_path) as AnimationPlayer
 @onready var _cinematic_interior_shade: CanvasItem = _get_optional_node(cinematic_interior_shade_path) as CanvasItem
+@onready var _radar_scan_effect: Control = _get_optional_node(radar_scan_effect_path) as Control
 @onready var _radar_anomaly_light: PointLight2D = _get_optional_node(radar_anomaly_light_path) as PointLight2D
 @onready var _dirty_seat_events_root: Node = _get_optional_node(dirty_seat_events_root_path)
 
 var _cinematic_shade_tween: Tween
+var _radar_scan_tween: Tween
 var _radar_light_tween: Tween
 
 func _ready() -> void:
 	_validate_exterior_hierarchy()
 	_configure_dirty_seat_events(_dirty_seat_events_root)
+	_reset_radar_scan_effect()
 	if is_instance_valid(_radar_anomaly_light):
 		_radar_anomaly_light.energy = 0.0
 	end_exterior_mode()
@@ -106,6 +113,42 @@ func show_radar_anomaly_glow(duration: float) -> void:
 		radar_light_fade_seconds
 	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 
+
+func play_radar_scan(world_origin: Vector2, duration: float) -> void:
+	if not is_instance_valid(_radar_scan_effect):
+		return
+	var shader_material := _radar_scan_effect.material as ShaderMaterial
+	if shader_material == null or _radar_scan_effect.size.x <= 0.0 or _radar_scan_effect.size.y <= 0.0:
+		return
+	if is_instance_valid(_radar_scan_tween):
+		_radar_scan_tween.kill()
+	var effect_local_origin: Vector2 = (
+		_radar_scan_effect.get_global_transform_with_canvas().affine_inverse() * world_origin
+	)
+	var origin_uv := Vector2(
+		clampf(effect_local_origin.x / _radar_scan_effect.size.x, 0.0, 1.0),
+		clampf(effect_local_origin.y / _radar_scan_effect.size.y, 0.0, 1.0)
+	)
+	shader_material.set_shader_parameter(radar_scan_origin_parameter, origin_uv)
+	shader_material.set_shader_parameter(
+		radar_scan_aspect_parameter,
+		_radar_scan_effect.size.x / _radar_scan_effect.size.y
+	)
+	_set_radar_scan_progress(0.0)
+	_radar_scan_effect.show()
+	_radar_scan_tween = create_tween()
+	_radar_scan_tween.tween_method(
+		_set_radar_scan_progress,
+		0.0,
+		1.0,
+		maxf(duration, 0.05)
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	var active_tween: Tween = _radar_scan_tween
+	await active_tween.finished
+	if _radar_scan_tween != active_tween:
+		return
+	_reset_radar_scan_effect()
+
 func get_passenger_seat_slots() -> Array[Marker2D]:
 	return _get_marker_children(passenger_seat_slots_path)
 
@@ -145,6 +188,21 @@ func _configure_dirty_seat_events(root: Node) -> void:
 
 func _set_exterior_wipe_progress(value: float) -> void:
 	_set_layer_wipe_progress(_exterior_visual, value)
+
+
+func _set_radar_scan_progress(value: float) -> void:
+	if not is_instance_valid(_radar_scan_effect):
+		return
+	var shader_material := _radar_scan_effect.material as ShaderMaterial
+	if shader_material == null:
+		return
+	shader_material.set_shader_parameter(radar_scan_progress_parameter, clampf(value, 0.0, 1.0))
+
+
+func _reset_radar_scan_effect() -> void:
+	_set_radar_scan_progress(0.0)
+	if is_instance_valid(_radar_scan_effect):
+		_radar_scan_effect.hide()
 
 
 func _validate_exterior_hierarchy() -> void:

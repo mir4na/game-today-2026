@@ -4,6 +4,7 @@ extends CanvasLayer
 
 @export_category("Inspector Copy")
 @export var clock_template: String = "%02d:%02d %s"
+@export var tool_inventory_template: String = "BLESSINGS %d   •   [R] RADAR ×%d   •   AUDIT ×%d   •   SPEED LV.%d"
 @export_category("Interaction Prompt")
 @export var prompt_screen_offset: Vector2 = Vector2(0.0, -8.0)
 @export var prompt_edge_margin: Vector2 = Vector2(24.0, 20.0)
@@ -41,7 +42,8 @@ func set_passenger_counts(counts: PackedInt32Array) -> void:
 
 
 func set_market_tool_inventory(snapshot: Dictionary) -> void:
-	_tool_inventory_label.text = "[R] RADAR ×%d   •   AUDIT ×%d   •   SPEED LV.%d" % [
+	_tool_inventory_label.text = tool_inventory_template % [
+		int(snapshot.get("blessings", 0)),
 		int(snapshot.get("radar_charges", 0)),
 		int(snapshot.get("audit_slips", 0)),
 		int(snapshot.get("speed_level", 0))

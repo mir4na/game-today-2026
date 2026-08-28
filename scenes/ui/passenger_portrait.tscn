@@ -6,7 +6,6 @@
 custom_minimum_size = Vector2(255, 350)
 mouse_filter = 2
 script = ExtResource("1")
-baby_visual_scale = 0.68
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -68,12 +67,6 @@ color = Color(1, 1, 1, 1)
 [node name="Head" type="Polygon2D" parent="PortraitVisual/BodyTint"]
 polygon = PackedVector2Array(-18, -116, -14, -132, 0, -141, 14, -132, 18, -116, 14, -102, 0, -93, -14, -102)
 color = Color(1, 1, 1, 1)
-
-[node name="BabyMark" type="Polygon2D" parent="PortraitVisual"]
-unique_name_in_owner = true
-visible = false
-polygon = PackedVector2Array(-6, -135, -4, -141, 0, -144, 4, -141, 6, -135, 4, -129, 0, -126, -4, -129)
-color = Color(0.847059, 0.752941, 0.607843, 1)
 
 [node name="NamePlate" type="ColorRect" parent="."]
 layout_mode = 1

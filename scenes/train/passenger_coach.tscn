@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://c1r4rdjeoyrm7" path="res://assets/kereta/bagian_bawah.png" id="9_t2b4i"]
 [ext_resource type="PackedScene" path="res://scenes/train/train_interior_lighting.tscn" id="10_lighting"]
 [ext_resource type="PackedScene" path="res://scenes/train/passenger_seat.tscn" id="11_seat"]
+[ext_resource type="Material" path="res://resources/materials/radar_carriage_scan.tres" id="12_radar_scan"]
 
 [sub_resource type="Animation" id="Animation_door_reset"]
 resource_name = "RESET"
@@ -290,6 +291,7 @@ exterior_door_visual_path = NodePath("ArtRoot/Exterior/ClosedDoors")
 door_animation_path = NodePath("ArtRoot/Exterior/DoorAnimation")
 wheel_animation_path = NodePath("ArtRoot/Wheels/WheelAnimation")
 cinematic_interior_shade_path = NodePath("ArtRoot/CinematicInteriorShade")
+radar_scan_effect_path = NodePath("ArtRoot/RadarScanEffect")
 radar_anomaly_light_path = NodePath("ArtRoot/RadarAnomalyLight")
 dirty_seat_events_root_path = NodePath("PassengerLayout/PassengerSeatSlots")
 cinematic_interior_fade_seconds = 0.45
@@ -376,6 +378,17 @@ texture = ExtResource("2")
 centered = false
 
 [node name="InteriorLighting" parent="ArtRoot" instance=ExtResource("10_lighting")]
+
+[node name="RadarScanEffect" type="ColorRect" parent="ArtRoot"]
+editor_description = "Scene-authored one-coach radar sweep. Adjust this rectangle to define the scanned interior area; tune its ring, trail, grid, and colors in the assigned ShaderMaterial."
+visible = false
+z_index = 20
+offset_top = 190.0
+offset_right = 960.0
+offset_bottom = 525.0
+mouse_filter = 2
+material = ExtResource("12_radar_scan")
+color = Color(1, 1, 1, 1)
 
 [node name="RadarAnomalyLight" type="PointLight2D" parent="ArtRoot"]
 editor_description = "Scene-authored red anomaly scan light. Position, color, size, and maximum energy can be tuned here and on the PassengerCoach Inspector."

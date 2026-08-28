@@ -15,10 +15,12 @@ signal stamp_animation_finished
 @export var remove_stamp_animation: StringName = &"remove_disembark_stamp"
 @export var unstamped_tooltip: String = "Stamp this ticket for the next stop"
 @export var stamped_tooltip: String = "Remove the disembark stamp"
+@export var locked_tooltip: String = "Clean the dirty seat before stamping tickets"
 
 var _data: PassengerData
 var _is_stamped: bool = false
 var _interaction_enabled: bool = false
+var _stamp_locked: bool = false
 
 @onready var _passenger_name: Label = %PassengerName
 @onready var _origin: Label = %Origin
@@ -60,10 +62,18 @@ func set_disembark_stamped(value: bool, animate: bool = false) -> void:
 
 
 func set_stamp_interaction_enabled(value: bool) -> void:
-	_interaction_enabled = value
-	mouse_filter = Control.MOUSE_FILTER_STOP if value else Control.MOUSE_FILTER_IGNORE
-	focus_mode = Control.FOCUS_ALL if value else Control.FOCUS_NONE
+	_interaction_enabled = value and not _stamp_locked
+	mouse_filter = Control.MOUSE_FILTER_STOP if _interaction_enabled else Control.MOUSE_FILTER_IGNORE
+	focus_mode = Control.FOCUS_ALL if _interaction_enabled else Control.FOCUS_NONE
 	_update_tooltip()
+
+
+func set_stamp_locked(value: bool) -> void:
+	_stamp_locked = value
+	if _stamp_locked:
+		set_stamp_interaction_enabled(false)
+	else:
+		_update_tooltip()
 
 
 func is_stamp_animating() -> bool:
@@ -82,6 +92,7 @@ func _apply_passenger_data() -> void:
 		_passenger_name.text = missing_value_text
 		_origin.text = missing_value_text
 		_destination.text = missing_value_text
+		_service_date.text = _display_or_fallback(service_date_text)
 		_ticket_number.text = missing_value_text
 		return
 
@@ -91,6 +102,7 @@ func _apply_passenger_data() -> void:
 	_passenger_name.text = _display_or_fallback(printed_name).to_upper()
 	_origin.text = _display_or_fallback(_data.origin_station).to_upper()
 	_destination.text = _display_or_fallback(_data.destination_station).to_upper()
+	_service_date.text = _display_or_fallback(_data.ticket_service_date).to_upper()
 	_train_number.text = _display_or_fallback(_data.ticket_train_number).to_upper()
 	_ticket_number.text = _display_or_fallback(_data.ticket_number).to_upper()
 
@@ -119,7 +131,10 @@ func _apply_stamp_immediately(value: bool) -> void:
 
 
 func _update_tooltip() -> void:
-	tooltip_text = stamped_tooltip if _is_stamped else unstamped_tooltip
+	if _stamp_locked:
+		tooltip_text = locked_tooltip
+	else:
+		tooltip_text = stamped_tooltip if _is_stamped else unstamped_tooltip
 
 
 func _on_stamp_animation_finished(_animation_name: StringName) -> void:

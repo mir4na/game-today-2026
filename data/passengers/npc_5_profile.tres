@@ -2,18 +2,18 @@
 
 [ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://caq1hdskr8s86" path="res://assets/characters/Where Do You Belong_/NPC5.png" id="2"]
-
 [ext_resource type="PackedScene" path="res://scenes/passengers/npc_5.tscn" id="3_scene"]
 
 [resource]
 script = ExtResource("1")
-passenger_scene = ExtResource("3_scene")
-passenger_name = "Eira"
-short_name = "Eira"
+gender = 1
+passenger_name = "Dimitris"
+short_name = "Dimitris"
 age = 27
 occupation = "Botanist"
 body_color = Color(0.34, 0.63, 0.46, 1)
+passenger_scene = ExtResource("3_scene")
 id_photo = ExtResource("2")
-identity_number = "E-005"
-birth_place = "Eastmere"
+identity_number = "CID-0005"
+birth_place = "Bellmont"
 date_of_birth = "04 MAR 1999"

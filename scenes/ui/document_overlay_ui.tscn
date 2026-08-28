@@ -69,9 +69,7 @@ mouse_filter = 0
 theme = ExtResource("2")
 script = ExtResource("1")
 newspaper_title = "THE AFTERNOON DISPATCH"
-non_death_subject_names = PackedStringArray("Mara", "Silas", "Nadia", "Rufus", "Elara", "Tomas")
 non_death_newspaper_template = "[font_size=28][b]RESTORED RAIL BRIDGE REOPENS[/b][/font_size]\n\n%s, the project supervisor, announced that the coastal rail bridge has reopened after months of repairs.\n\nOfficials expect regular freight service to resume before the end of the week. The reopening was completed without disruption to scheduled service.\n\n[font_size=15][color=#9c9386]Edition printed before the afternoon service left %s.[/color][/font_size]"
-external_death_subject_names = PackedStringArray("Mara", "Silas", "Nadia", "Rufus", "Elara", "Tomas")
 external_death_newspaper_template = "[font_size=28][b]RETIRED HARBORMASTER DIES AT COASTAL HOME[/b][/font_size]\n\n%s, 71, was found dead at a coastal home early this morning. No passenger aboard this service carries that name.\n\nAuthorities described the death as natural and closed the investigation.\n\n[font_size=15][color=#9c9386]Edition printed before the afternoon service left %s.[/color][/font_size]"
 matching_death_newspaper_template = "[font_size=28][b]LOCAL %s DIES IN MORNING FIRE[/b][/font_size]\n\n%s, %d, was confirmed dead after a fire swept through their workplace shortly after sunrise.\n\nAuthorities stated that the %s %s could not have survived the blaze.\n\n[font_size=15][color=#9c9386]Edition printed before the afternoon service left %s.[/color][/font_size]"
 departure_statement_title = "DEPARTURE STATEMENT"
@@ -129,7 +127,7 @@ theme_override_styles/hover = SubResource("CloseButtonHover")
 theme_override_styles/pressed = SubResource("CloseButtonPressed")
 theme_override_styles/focus = SubResource("CloseButtonHover")
 text = "×"
-tooltip_text = "Close passenger documents [ESC]"
+tooltip_text = "Close passenger documents [E / ESC]"
 
 [node name="ReaderCenter" type="CenterContainer" parent="."]
 layout_mode = 1
@@ -164,7 +162,7 @@ text = "DOCUMENT"
 
 [node name="CloseButton" type="Button" parent="ReaderCenter/ReaderPanel/ReaderLayout/Header"]
 layout_mode = 2
-text = "CLOSE  [ESC]"
+text = "CLOSE  [E / ESC]"
 
 [node name="ReaderContent" type="RichTextLabel" parent="ReaderCenter/ReaderPanel/ReaderLayout"]
 unique_name_in_owner = true

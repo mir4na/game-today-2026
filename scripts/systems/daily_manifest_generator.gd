@@ -14,7 +14,7 @@ static func generate(
 		push_error("Daily manifest generation requires a config and at least two day stations.")
 		return generated_manifest
 
-	var passengers: Array[PassengerData] = _create_runtime_passengers(identity_profiles)
+	var passengers: Array[PassengerData] = _create_runtime_passengers(identity_profiles, config, rng)
 	_shuffle_passengers(passengers, rng)
 
 	var intermediate_stop_count: int = maxi(0, route.size() - 2)
@@ -42,7 +42,15 @@ static func generate(
 		_assign_balanced_boarding_carriages(passengers, scheduled_count, route, config, rng)
 	var deceased: Array[PassengerData] = _select_deceased(passengers, scheduled_count, config, rng)
 	_assign_living_destinations(passengers, scheduled_count, route, boarding_counts, rng)
-	if not _assign_deceased_anomalies(deceased, route, config, rng, include_matching_newspaper_case):
+	if not _assign_deceased_anomalies(
+		deceased,
+		passengers,
+		scheduled_count,
+		route,
+		config,
+		rng,
+		include_matching_newspaper_case
+	):
 		return generated_manifest
 	if not _assign_wrong_train_boarders(passengers, scheduled_count, route, config, rng):
 		return generated_manifest
@@ -54,31 +62,84 @@ static func generate(
 		generated_manifest.append(passengers[index])
 	return generated_manifest
 
-static func _create_runtime_passengers(identity_profiles: Array[PassengerIdentityProfile]) -> Array[PassengerData]:
+static func _create_runtime_passengers(
+	identity_profiles: Array[PassengerIdentityProfile],
+	config: DailyManifestConfig,
+	rng: RandomNumberGenerator
+) -> Array[PassengerData]:
 	var passengers: Array[PassengerData] = []
+	var combined_names: PackedStringArray = config.get_all_passenger_names()
+	if combined_names.size() < config.minimum_unique_name_count:
+		push_error(
+			"Passenger name pool needs at least %d unique names; configured %d."
+			% [config.minimum_unique_name_count, combined_names.size()]
+		)
+		return passengers
 	var used_names: Dictionary = {}
+	var female_names: PackedStringArray = _prepare_name_pool(config.female_passenger_names, used_names)
+	var male_names: PackedStringArray = _prepare_name_pool(config.male_passenger_names, used_names)
+	_shuffle_strings(female_names, rng)
+	_shuffle_strings(male_names, rng)
+	var female_profile_count: int = 0
+	var male_profile_count: int = 0
+	for profile: PassengerIdentityProfile in identity_profiles:
+		if profile == null:
+			continue
+		if profile.gender == PassengerIdentityProfile.Gender.FEMALE:
+			female_profile_count += 1
+		else:
+			male_profile_count += 1
+	if female_names.size() < female_profile_count or male_names.size() < male_profile_count:
+		push_error(
+			"Passenger name pools need %d female and %d male unique names; configured %d and %d."
+			% [female_profile_count, male_profile_count, female_names.size(), male_names.size()]
+		)
+		return passengers
+	var female_name_index: int = 0
+	var male_name_index: int = 0
 	for profile: PassengerIdentityProfile in identity_profiles:
 		if profile == null or not profile.is_valid_identity():
 			push_warning("Daily manifest skipped an invalid passenger identity profile.")
 			continue
-		var lookup_name: String = profile.get_lookup_name()
-		if used_names.has(lookup_name):
-			push_error("Passenger identity names must be unique; duplicate name: %s." % profile.short_name)
-			continue
 		var runtime_data: PassengerData = PassengerData.create_from_identity(profile)
 		if runtime_data == null:
 			continue
-		used_names[lookup_name] = true
+		var assigned_name: String
+		if profile.gender == PassengerIdentityProfile.Gender.FEMALE:
+			assigned_name = female_names[female_name_index]
+			female_name_index += 1
+		else:
+			assigned_name = male_names[male_name_index]
+			male_name_index += 1
+		runtime_data.passenger_name = assigned_name
+		runtime_data.short_name = assigned_name
 		passengers.append(runtime_data)
 	return passengers
 
+
+static func _prepare_name_pool(configured_names: PackedStringArray, used_names: Dictionary) -> PackedStringArray:
+	var result := PackedStringArray()
+	for configured_name: String in configured_names:
+		var cleaned_name: String = configured_name.strip_edges()
+		var normalized_name: String = cleaned_name.to_lower()
+		if cleaned_name.is_empty() or used_names.has(normalized_name):
+			continue
+		used_names[normalized_name] = true
+		result.append(cleaned_name)
+	return result
+
 static func _reset_runtime_fields(passengers: Array[PassengerData], route: PackedStringArray, config: DailyManifestConfig, rng: RandomNumberGenerator) -> void:
 	for data: PassengerData in passengers:
+		data.age = data.identity_profile.age
+		data.id_photo = data.identity_profile.id_photo
+		data.id_photo_owner = data.passenger_name
 		data.origin_station = route[-1]
 		data.destination_station = route[-1]
 		data.ticket_owner = data.short_name
 		data.ticket_number = ""
 		data.ticket_train_number = config.service_train_number.strip_edges()
+		data.ticket_service_date = config.service_date_text.strip_edges()
+		data.ticket_day_code = config.ticket_day_code.strip_edges()
 		data.ticket_issue_type = PassengerData.TICKET_ISSUE_NONE
 		data.required_dropoff_station = ""
 		data.is_dead = false
@@ -284,15 +345,19 @@ static func _find_dropoff_swap_candidate(
 	return null
 
 static func _assign_ticket_numbers(passengers: Array[PassengerData], scheduled_count: int, config: DailyManifestConfig) -> void:
-	var day_code: String = config.ticket_day_code.strip_edges()
-	if day_code.is_empty():
-		day_code = "00"
 	for index: int in range(scheduled_count):
 		var data: PassengerData = passengers[index]
+		var day_code: String = data.ticket_day_code.strip_edges()
+		if day_code.is_empty():
+			day_code = config.ticket_day_code.strip_edges()
+		if day_code.is_empty():
+			day_code = "000000"
 		data.ticket_number = "%s-%s-%04d" % [day_code, data.ticket_train_number, index + 1]
 
 static func _assign_deceased_anomalies(
 	deceased: Array[PassengerData],
+	passengers: Array[PassengerData],
+	scheduled_count: int,
 	route: PackedStringArray,
 	config: DailyManifestConfig,
 	rng: RandomNumberGenerator,
@@ -336,11 +401,61 @@ static func _assign_deceased_anomalies(
 				data.destination_station = route[rng.randi_range(0, origin_index - 1)]
 			"unlisted_destination":
 				data.destination_station = _pick_unlisted_destination(config.unlisted_destination_names, route, rng)
-			"age_mismatch":
-				data.age = rng.randi_range(
-					mini(config.age_mismatch_minimum_age, config.age_mismatch_maximum_age),
-					maxi(config.age_mismatch_minimum_age, config.age_mismatch_maximum_age)
-				)
+			"portrait_mismatch":
+				if not _assign_mismatched_portrait(data, passengers, scheduled_count, rng):
+					return false
+			"time_invalid_ticket":
+				if not _assign_invalid_ticket_date(data, config, rng):
+					return false
+	return true
+
+
+static func _assign_mismatched_portrait(
+	data: PassengerData,
+	passengers: Array[PassengerData],
+	scheduled_count: int,
+	rng: RandomNumberGenerator
+) -> bool:
+	var candidates: Array[PassengerData] = []
+	for index: int in range(scheduled_count):
+		var candidate: PassengerData = passengers[index]
+		if candidate == data or candidate.identity_profile == null:
+			continue
+		var candidate_photo: Texture2D = candidate.identity_profile.id_photo
+		if candidate_photo == null or candidate_photo == data.identity_profile.id_photo:
+			continue
+		candidates.append(candidate)
+	if candidates.is_empty():
+		push_error("Portrait-mismatch anomalies require another passenger with a distinct ID photo.")
+		return false
+	var portrait_owner: PassengerData = candidates[rng.randi_range(0, candidates.size() - 1)]
+	data.id_photo = portrait_owner.identity_profile.id_photo
+	data.id_photo_owner = portrait_owner.passenger_name
+	return true
+
+
+static func _assign_invalid_ticket_date(
+	data: PassengerData,
+	config: DailyManifestConfig,
+	rng: RandomNumberGenerator
+) -> bool:
+	var candidates: Array[Dictionary] = []
+	var active_code: String = config.ticket_day_code.strip_edges()
+	var active_date: String = config.service_date_text.strip_edges()
+	for configured_code: Variant in config.invalid_service_dates_by_day_code.keys():
+		var day_code: String = str(configured_code).strip_edges()
+		var printed_date: String = str(config.invalid_service_dates_by_day_code[configured_code]).strip_edges()
+		if day_code.is_empty() or printed_date.is_empty():
+			continue
+		if day_code == active_code or printed_date.to_lower() == active_date.to_lower():
+			continue
+		candidates.append({"day_code": day_code, "printed_date": printed_date})
+	if candidates.is_empty():
+		push_error("Time-invalid-ticket anomalies require at least one alternate service date and day code.")
+		return false
+	var selected: Dictionary = candidates[rng.randi_range(0, candidates.size() - 1)]
+	data.ticket_day_code = str(selected["day_code"])
+	data.ticket_service_date = str(selected["printed_date"])
 	return true
 
 

@@ -4,10 +4,20 @@
 
 [resource]
 script = ExtResource("1")
+total_passenger_count = 17
 balance_boarding_groups_across_carriages = true
+minimum_unique_name_count = 30
+female_passenger_names = PackedStringArray("Eleni", "Daphne", "Irene", "Kalliope", "Melina", "Nefeli", "Thalia", "Xenia", "Zoe", "Anthea", "Ariadne", "Despina", "Lydia", "Penelope", "Helena", "Dimitra", "Georgia", "Myrto")
+male_passenger_names = PackedStringArray("Andreas", "Dimitris", "Elias", "Leonidas", "Nikolas", "Stavros", "Theo", "Petros", "Yannis", "Alexios", "Christos", "Konstantinos", "Kyriakos", "Manolis", "Michalis", "Panagiotis", "Spyros", "Vasileios")
 service_train_number = "505"
 alternate_train_numbers = PackedStringArray("318", "742", "901")
-ticket_day_code = "01"
-anomaly_types = PackedStringArray("shadowless", "impossible_ticket", "unlisted_destination", "age_mismatch", "newspaper_death")
+service_date_text = "07 JUN 2026"
+ticket_day_code = "260607"
+invalid_service_dates_by_day_code = {
+"260606": "06 JUN 2026",
+"260608": "08 JUN 2026",
+"270607": "07 JUN 2027"
+}
+anomaly_types = PackedStringArray("shadowless", "impossible_ticket", "unlisted_destination", "portrait_mismatch", "time_invalid_ticket", "newspaper_death")
 unlisted_destination_names = PackedStringArray("Mistvale", "Greyhaven", "Hollowfen")
 ai_behaviors = PackedStringArray("still", "wander", "carriage_roamer", "window_watcher", "restless")

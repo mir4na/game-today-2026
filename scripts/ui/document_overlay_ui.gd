@@ -13,9 +13,7 @@ enum ViewMode {
 
 @export_category("Newspaper Cases")
 @export var newspaper_title: String
-@export var non_death_subject_names: PackedStringArray
 @export_multiline var non_death_newspaper_template: String
-@export var external_death_subject_names: PackedStringArray
 @export_multiline var external_death_newspaper_template: String
 @export_multiline var matching_death_newspaper_template: String
 @export_category("Departure Statement")
@@ -45,16 +43,18 @@ func show_passenger(data: PassengerData) -> void:
 	_passenger_close_button.show()
 	_documents.show()
 	_documents.set_passenger(data)
+	_documents.set_stamp_locked(false)
 	_documents.reset_to_id_card()
 	show()
 
 
-func get_random_non_death_subject(rng: RandomNumberGenerator, excluded_names: PackedStringArray) -> String:
-	return _pick_outside_name(non_death_subject_names, rng, excluded_names, "non-death newspaper")
-
-
-func get_random_external_death_subject(rng: RandomNumberGenerator, excluded_names: PackedStringArray) -> String:
-	return _pick_outside_name(external_death_subject_names, rng, excluded_names, "external-death newspaper")
+func get_random_outside_subject(
+	rng: RandomNumberGenerator,
+	shared_name_pool: PackedStringArray,
+	excluded_names: PackedStringArray,
+	case_label: String
+) -> String:
+	return _pick_outside_name(shared_name_pool, rng, excluded_names, case_label)
 
 
 func compose_non_death_newspaper(subject_name: String, edition_station: String) -> String:
@@ -100,6 +100,12 @@ func configure_station_assignment(is_assigned: bool, animate_stamp: bool = false
 	_documents.set_disembark_stamped(is_assigned, animate_stamp)
 
 
+func configure_stamp_lock(is_locked: bool) -> void:
+	if _view_mode != ViewMode.PASSENGER_DOCUMENTS:
+		return
+	_documents.set_stamp_locked(is_locked)
+
+
 func request_close() -> void:
 	hide()
 	_view_mode = ViewMode.NONE
@@ -111,14 +117,20 @@ func is_showing_passenger_documents() -> bool:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not visible or _view_mode != ViewMode.PASSENGER_DOCUMENTS or _data == null:
+	if not visible:
 		return
 	var key_event := event as InputEventKey
 	if key_event != null and key_event.echo:
 		return
+	if event.is_action_pressed(&"interact"):
+		request_close()
+		get_viewport().set_input_as_handled()
+		return
+	if _view_mode != ViewMode.PASSENGER_DOCUMENTS or _data == null:
+		return
 	if event.is_action_pressed(&"switch_document") and _documents.toggle_document():
 		get_viewport().set_input_as_handled()
-	elif event.is_action_pressed(&"interact") and _documents.request_stamp_action():
+	elif event.is_action_pressed(&"stamp_ticket") and _documents.request_stamp_action():
 		get_viewport().set_input_as_handled()
 
 

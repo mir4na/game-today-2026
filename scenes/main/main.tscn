@@ -10,31 +10,29 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/night_puzzle_ui.tscn" id="8"]
 [ext_resource type="PackedScene" path="res://scenes/night/departure_sequence_ui.tscn" id="9"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_ui.tscn" id="10"]
-[ext_resource type="Resource" path="res://data/passengers/aruna_vey.tres" id="11"]
-[ext_resource type="Resource" path="res://data/passengers/bima_sena.tres" id="12"]
-[ext_resource type="Resource" path="res://data/passengers/citra_lume.tres" id="13"]
-[ext_resource type="Resource" path="res://data/passengers/damar_vey.tres" id="14"]
-[ext_resource type="Resource" path="res://data/passengers/eira_sol.tres" id="15"]
-[ext_resource type="Resource" path="res://data/passengers/fajar_noor.tres" id="16"]
+[ext_resource type="Resource" path="res://data/passengers/npc_1_profile.tres" id="11"]
+[ext_resource type="Resource" path="res://data/passengers/npc_2_profile.tres" id="12"]
+[ext_resource type="Resource" path="res://data/passengers/npc_3_profile.tres" id="13"]
+[ext_resource type="Resource" path="res://data/passengers/npc_4_profile.tres" id="14"]
+[ext_resource type="Resource" path="res://data/passengers/npc_5_profile.tres" id="15"]
+[ext_resource type="Resource" path="res://data/passengers/npc_6_profile.tres" id="16"]
 [ext_resource type="Resource" path="res://data/puzzles/first_departures.tres" id="17"]
 [ext_resource type="PackedScene" path="res://scenes/systems/train_ambience.tscn" id="18"]
-[ext_resource type="Resource" path="res://data/passengers/gita_pranata.tres" id="19"]
-[ext_resource type="Resource" path="res://data/passengers/hana_vale.tres" id="20"]
-[ext_resource type="Resource" path="res://data/passengers/ilyas_rook.tres" id="21"]
-[ext_resource type="Resource" path="res://data/passengers/juno_mire.tres" id="22"]
-[ext_resource type="Resource" path="res://data/passengers/kala_sen.tres" id="23"]
-[ext_resource type="Resource" path="res://data/passengers/luma_orin.tres" id="24"]
+[ext_resource type="Resource" path="res://data/passengers/npc_7_profile.tres" id="19"]
+[ext_resource type="Resource" path="res://data/passengers/npc_8_profile.tres" id="20"]
+[ext_resource type="Resource" path="res://data/passengers/npc_9_profile.tres" id="21"]
+[ext_resource type="Resource" path="res://data/passengers/npc_10_profile.tres" id="22"]
+[ext_resource type="Resource" path="res://data/passengers/npc_11_profile.tres" id="23"]
+[ext_resource type="Resource" path="res://data/passengers/npc_12_profile.tres" id="24"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shift_report_ui.tscn" id="25"]
 [ext_resource type="PackedScene" path="res://scenes/ui/station_stop_cutscene_ui.tscn" id="26"]
 [ext_resource type="PackedScene" path="res://scenes/ui/day_intro_ui.tscn" id="27"]
-[ext_resource type="Resource" path="res://data/passengers/nara_kestrel.tres" id="28"]
-[ext_resource type="Resource" path="res://data/passengers/oren_pike.tres" id="29"]
-[ext_resource type="Resource" path="res://data/passengers/petra_voss.tres" id="30"]
-[ext_resource type="Resource" path="res://data/passengers/soren_vale.tres" id="31"]
-[ext_resource type="Resource" path="res://data/passengers/talia_reed.tres" id="32"]
-[ext_resource type="Resource" path="res://data/passengers/veya_lorn.tres" id="33"]
+[ext_resource type="Resource" path="res://data/passengers/npc_13_profile.tres" id="28"]
+[ext_resource type="Resource" path="res://data/passengers/npc_14_profile.tres" id="29"]
+[ext_resource type="Resource" path="res://data/passengers/npc_15_profile.tres" id="30"]
+[ext_resource type="Resource" path="res://data/passengers/npc_16_profile.tres" id="31"]
+[ext_resource type="Resource" path="res://data/passengers/npc_17_profile.tres" id="32"]
 [ext_resource type="PackedScene" path="res://scenes/passengers/passenger.tscn" id="34"]
-[ext_resource type="PackedScene" path="res://scenes/ui/arrival_clock_ui.tscn" id="35"]
 [ext_resource type="PackedScene" uid="uid://drn1e0xhyylll" path="res://scenes/systems/travel_foreground.tscn" id="36"]
 [ext_resource type="Resource" path="res://data/daily_manifest_config.tres" id="37"]
 [ext_resource type="PackedScene" path="res://scenes/ui/blocked_aisle_puzzle_ui.tscn" id="38_blocked_ui"]
@@ -44,18 +42,21 @@
 
 [node name="Main" type="Node2D" unique_id=604105226]
 script = ExtResource("1")
-passenger_identity_profiles = Array[Resource]([ExtResource("11"), ExtResource("12"), ExtResource("13"), ExtResource("14"), ExtResource("15"), ExtResource("16"), ExtResource("19"), ExtResource("20"), ExtResource("21"), ExtResource("22"), ExtResource("23"), ExtResource("24"), ExtResource("28"), ExtResource("29"), ExtResource("30"), ExtResource("31"), ExtResource("32"), ExtResource("33")])
+passenger_identity_profiles = Array[Resource]([ExtResource("11"), ExtResource("12"), ExtResource("13"), ExtResource("14"), ExtResource("15"), ExtResource("16"), ExtResource("19"), ExtResource("20"), ExtResource("21"), ExtResource("22"), ExtResource("23"), ExtResource("24"), ExtResource("28"), ExtResource("29"), ExtResource("30"), ExtResource("31"), ExtResource("32")])
 puzzle_resource = ExtResource("17")
 passenger_scene = ExtResource("34")
 manifest_config = ExtResource("37")
+day_number = 1
+maintenance_minigame_unlock_day = 2
 day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere")
-station_travel_seconds = 30.0
+station_travel_seconds = 120.0
 minimum_passenger_seat_spacing = 90.0
 debug_print_anomaly_roster = true
 night_shift_instruction = "NIGHT SHIFT\nINTERVIEW THE DECEASED, THEN RETURN TO THE FRONT CREW CAB"
 departure_statement_recorded_template = "DEPARTURE STATEMENT RECORDED\n%d / %d COLLECTED"
 blocked_aisle_delay_range_seconds = Vector2(9, 16)
 dirty_seat_delay_range_seconds = Vector2(24, 38)
+radar_scan_seconds = 1.6
 radar_glow_seconds = 6.0
 
 [node name="MarketToolState" parent="." instance=ExtResource("40_market_state")]
@@ -150,9 +151,6 @@ unique_name_in_owner = true
 [node name="NotebookUI" parent="ModalLayer" unique_id=449939847 instance=ExtResource("6")]
 unique_name_in_owner = true
 
-[node name="ArrivalClockUI" parent="ModalLayer" unique_id=1549270873 instance=ExtResource("35")]
-unique_name_in_owner = true
-
 [node name="DayIntroUI" parent="ModalLayer" unique_id=85941225 instance=ExtResource("27")]
 unique_name_in_owner = true
 
@@ -185,16 +183,16 @@ unique_name_in_owner = true
 
 [connection signal="interaction_pressed" from="GameplayWorld/PlayerSpawnPoint/Player" to="." method="_on_interaction_pressed"]
 [connection signal="nearby_interactable_changed" from="GameplayWorld/PlayerSpawnPoint/Player" to="." method="_on_nearby_interactable_changed"]
-[connection signal="clock_read" from="GameplayWorld/Train/Cars/ConductorCar/ArrivalClock" to="." method="_on_arrival_clock_read"]
+[connection signal="exterior_fade_out_finished" from="GameplayWorld/Train" to="." method="_on_train_exterior_fade_out_finished"]
 [connection signal="newspaper_read" from="GameplayWorld/Train/Cars/PassengerCoach2/Newspaper" to="." method="_on_newspaper_read"]
 [connection signal="closed" from="ModalLayer/DocumentOverlayUI" to="." method="_on_modal_closed"]
 [connection signal="station_assignment_toggled" from="ModalLayer/DocumentOverlayUI" to="." method="_on_station_assignment_toggled"]
 [connection signal="closed" from="ModalLayer/NotebookUI" to="." method="_on_modal_closed"]
-[connection signal="closed" from="ModalLayer/ArrivalClockUI" to="." method="_on_modal_closed"]
 [connection signal="intro_finished" from="ModalLayer/DayIntroUI" to="." method="_on_day_intro_finished"]
 [connection signal="boarding_actor_entered" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_boarding_actor_entered"]
 [connection signal="sequence_finished" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_stop_finished"]
 [connection signal="sequence_timeline_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_timeline_changed"]
+[connection signal="timeline_completed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_timeline_completed"]
 [connection signal="train_motion_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_train_motion_changed"]
 [connection signal="closed" from="ModalLayer/DeadSelectionUI" to="." method="_on_modal_closed"]
 [connection signal="audit_requested" from="ModalLayer/DeadSelectionUI" to="." method="_on_abnormal_note_audit_requested"]

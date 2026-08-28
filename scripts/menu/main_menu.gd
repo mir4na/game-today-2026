@@ -7,7 +7,7 @@ const SETTINGS_VERSION: int = 2
 const DEFAULT_FULLSCREEN: bool = true
 
 @export_category("Scene Configuration")
-@export var game_scene: PackedScene
+@export var loading_screen_scene: PackedScene
 @export var volume_value_template: String = "%d%%"
 @export var default_volume: float = 80.0
 @export var default_fullscreen: bool = DEFAULT_FULLSCREEN
@@ -49,11 +49,14 @@ func _save_and_close_settings() -> void:
 func _start_game() -> void:
 	if _transitioning:
 		return
+	if loading_screen_scene == null:
+		push_error("MainMenu/Loading Screen Scene is not configured in the Inspector.")
+		return
 	_transitioning = true
 	_set_menu_buttons_disabled(true)
 	var tween := create_tween()
 	tween.tween_property(_fade, "modulate:a", 1.0, 0.35)
-	tween.tween_callback(func() -> void: get_tree().change_scene_to_packed(game_scene))
+	tween.tween_callback(func() -> void: get_tree().change_scene_to_packed(loading_screen_scene))
 
 func _quit_game() -> void:
 	get_tree().quit()

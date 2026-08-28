@@ -3,9 +3,9 @@
 [ext_resource type="Script" path="res://scripts/systems/market_tool_state.gd" id="1"]
 
 [node name="MarketToolState" type="Node"]
-editor_description = "Runtime inventory and all market balancing values. Configure starting tools, costs, speed levels, and paycheck merit here in the Inspector."
+editor_description = "Runtime inventory and all market balancing values. Configure starting Blessings, tool costs, speed levels, and each reward source here in the Inspector."
 script = ExtResource("1")
-starting_merit_marks = 8
+starting_blessings = 0
 starting_audit_slips = 1
 starting_radar_charges = 1
 starting_speed_level = 0
@@ -13,5 +13,7 @@ audit_slip_cost = 3
 radar_charge_cost = 4
 speed_upgrade_costs = PackedInt32Array(6, 10, 15)
 speed_bonus_per_level = 45.0
-merit_per_correct_dropoff = 1
-penalty_points_per_merit_loss = 10
+blessings_per_correct_dropoff = 1
+blessings_per_correct_anomaly = 2
+blessings_per_correct_night_dropoff = 2
+penalty_points_per_blessing_loss = 10

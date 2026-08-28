@@ -16,9 +16,11 @@ enum ActiveDocument {
 @export var id_instruction: String
 @export var unstamped_ticket_instruction: String
 @export var stamped_ticket_instruction: String
+@export var locked_ticket_instruction: String
 
 var _active_document: ActiveDocument = ActiveDocument.ID_CARD
 var _is_stamped: bool = false
+var _stamp_locked: bool = false
 
 # These document scenes are validated by the authored hierarchy, without global-class parse coupling.
 @onready var _id_card: Variant = %IDCard
@@ -36,6 +38,13 @@ func set_passenger(data: PassengerData) -> void:
 	_passenger_ticket.set_passenger(data)
 	_is_stamped = false
 	_passenger_ticket.set_disembark_stamped(false)
+	_update_instruction()
+
+
+func set_stamp_locked(value: bool) -> void:
+	_stamp_locked = value
+	_passenger_ticket.set_stamp_locked(value)
+	_passenger_ticket.set_stamp_interaction_enabled(is_ticket_active() and not _stamp_locked)
 	_update_instruction()
 
 
@@ -84,7 +93,7 @@ func is_ticket_active() -> bool:
 
 
 func request_stamp_toggle() -> bool:
-	if not is_ticket_active() or _passenger_ticket.is_stamp_animating():
+	if _stamp_locked or not is_ticket_active() or _passenger_ticket.is_stamp_animating():
 		return false
 	stamp_toggle_requested.emit()
 	return true
@@ -105,12 +114,12 @@ func _on_ticket_stamp_toggle_requested() -> void:
 
 
 func _on_document_animation_finished(_animation_name: StringName) -> void:
-	_passenger_ticket.set_stamp_interaction_enabled(_active_document == ActiveDocument.TICKET)
+	_passenger_ticket.set_stamp_interaction_enabled(_active_document == ActiveDocument.TICKET and not _stamp_locked)
 	_update_instruction()
 
 
 func _on_ticket_stamp_animation_finished() -> void:
-	_passenger_ticket.set_stamp_interaction_enabled(is_ticket_active())
+	_passenger_ticket.set_stamp_interaction_enabled(is_ticket_active() and not _stamp_locked)
 	_update_instruction()
 
 
@@ -119,6 +128,8 @@ func _update_instruction() -> void:
 		return
 	if _active_document == ActiveDocument.ID_CARD:
 		_instruction_label.text = id_instruction
+	elif _stamp_locked:
+		_instruction_label.text = locked_ticket_instruction
 	elif _is_stamped:
 		_instruction_label.text = stamped_ticket_instruction
 	else:

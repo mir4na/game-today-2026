@@ -2,18 +2,17 @@
 
 [ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://cxu8fr50235tg" path="res://assets/characters/Where Do You Belong_/NPC6.png" id="2"]
-
 [ext_resource type="PackedScene" path="res://scenes/passengers/npc_6.tscn" id="3_scene"]
 
 [resource]
 script = ExtResource("1")
-passenger_scene = ExtResource("3_scene")
-passenger_name = "Fajar"
-short_name = "Fajar"
+passenger_name = "Kalliope"
+short_name = "Kalliope"
 age = 49
 occupation = "Clockmaker"
 body_color = Color(0.68, 0.52, 0.28, 1)
+passenger_scene = ExtResource("3_scene")
 id_photo = ExtResource("2")
-identity_number = "F-006"
-birth_place = "Alderwick"
+identity_number = "CID-0006"
+birth_place = "Ravenport"
 date_of_birth = "29 NOV 1977"

@@ -256,9 +256,10 @@ script = ExtResource("1_script")
 reset_animation = &"RESET"
 show_id_animation = &"show_id_card"
 show_ticket_animation = &"show_ticket"
-id_instruction = "[Q] VIEW TICKET    •    [ESC] CLOSE"
-unstamped_ticket_instruction = "[Q] VIEW ID    •    [E] / CLICK TICKET: APPLY DISEMBARK STAMP"
-stamped_ticket_instruction = "[Q] VIEW ID    •    [E] / CLICK TICKET: REMOVE DISEMBARK STAMP"
+id_instruction = "[Q] VIEW TICKET    •    [E] CLOSE"
+unstamped_ticket_instruction = "[Q] VIEW ID    •    [SPACE] APPLY DISEMBARK STAMP    •    [E] CLOSE"
+stamped_ticket_instruction = "[Q] VIEW ID    •    [SPACE] REMOVE DISEMBARK STAMP    •    [E] CLOSE"
+locked_ticket_instruction = "CLEAN THE DIRTY SEAT BEFORE STAMPING TICKETS    •    [Q] VIEW ID    •    [E] CLOSE"
 
 [node name="PassengerTicket" parent="." instance=ExtResource("3_ticket")]
 unique_name_in_owner = true
@@ -294,7 +295,7 @@ theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.96)
 theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 17
-text = "[Q] VIEW TICKET    •    [ESC] CLOSE"
+text = "[Q] VIEW TICKET    •    [E] CLOSE"
 horizontal_alignment = 1
 vertical_alignment = 1
 
