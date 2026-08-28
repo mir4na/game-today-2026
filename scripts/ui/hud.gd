@@ -2,12 +2,15 @@ class_name GameHUD
 extends CanvasLayer
 ## Persistent, low-profile HUD. Modal screens live in sibling UI scenes.
 
+signal abnormal_log_requested
+
 @export_category("Inspector Copy")
 @export var clock_template: String = "%02d:%02d %s"
 
 @onready var _root: Control = %Root
 @onready var _minimap: TrainMinimap = %TrainMinimap
 @onready var _clock_panel: PanelContainer = %ClockPanel
+@onready var _abnormal_log_button: Button = %AbnormalLogButton
 @onready var _clock_label: Label = %ClockLabel
 @onready var _floating_prompt: Control = %FloatingPrompt
 @onready var _prompt_label: Label = %PromptLabel
@@ -36,6 +39,7 @@ func set_prompt(text: String) -> void:
 
 func set_day_hud_visible(value: bool) -> void:
 	_clock_panel.visible = value
+	_abnormal_log_button.visible = value
 	_floating_prompt.visible = value and not _prompt_label.text.is_empty()
 	# The train minimap remains visible through the night walk.
 
@@ -44,7 +48,11 @@ func set_cutscene_hidden(value: bool) -> void:
 
 func set_night_walk_mode() -> void:
 	_clock_panel.visible = false
+	_abnormal_log_button.visible = false
 	_floating_prompt.visible = not _prompt_label.text.is_empty()
+
+func _request_abnormal_log() -> void:
+	abnormal_log_requested.emit()
 
 func notify(message: String, seconds: float = 3.0) -> void:
 	if is_instance_valid(_notification_tween):

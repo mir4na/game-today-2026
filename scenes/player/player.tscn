@@ -72,9 +72,9 @@ script = ExtResource("1")
 shape = SubResource("Capsule")
 
 [node name="GroundShadow" type="Polygon2D" parent="." unique_id=1435860278]
-position = Vector2(0, 80)
-color = Color(0.03, 0.03, 0.04, 0.42)
-polygon = PackedVector2Array(-38.4, 0, -35.477, -2.296, -27.153, -4.243, -14.695, -5.543, 0, -6, 14.695, -5.543, 27.153, -4.243, 35.477, -2.296, 38.4, 0, 35.477, 2.296, 27.153, 4.243, 14.695, 5.543, 0, 6, -14.695, 5.543, -27.153, 4.243, -35.477, 2.296)
+position = Vector2(0, 72)
+color = Color(0.03, 0.035, 0.05, 0.55)
+polygon = PackedVector2Array(-31, 0, -28.64, -2.296, -21.92, -4.243, -11.865, -5.543, 0, -6, 11.865, -5.543, 21.92, -4.243, 28.64, -2.296, 31, 0, 28.64, 2.296, 21.92, 4.243, 11.865, 5.543, 0, 6, -11.865, 5.543, -21.92, 4.243, -28.64, 2.296)
 
 [node name="MCVisual" type="Sprite2D" parent="." unique_id=1053191898]
 unique_name_in_owner = true

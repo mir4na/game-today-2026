@@ -7,7 +7,109 @@
 [ext_resource type="Texture2D" uid="uid://bh86nkwa5wa2l" path="res://assets/kereta/Bagian bawah.png" id="5"]
 [ext_resource type="Texture2D" uid="uid://qfgbxjo8e3mf" path="res://assets/kereta/Pintu kiri.png" id="6"]
 [ext_resource type="Texture2D" uid="uid://bd3gsinxrrynl" path="res://assets/kereta/Pintu kanan.png" id="7"]
-[ext_resource type="ShaderMaterial" path="res://resources/materials/exterior_top_down_fade.tres" id="8_fade"]
+[ext_resource type="Material" path="res://resources/materials/exterior_top_down_fade.tres" id="8_fade"]
+[ext_resource type="Material" path="res://resources/materials/window_light_mask.tres" id="9_window_light"]
+
+[sub_resource type="Gradient" id="Gradient_e78od"]
+offsets = PackedFloat32Array(0, 0.61778843, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.3389423, 0.3389423, 0.3389423, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_r0seb"]
+gradient = SubResource("Gradient_e78od")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.9045139, 0.19618055)
+
+[sub_resource type="Animation" id="Animation_door_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ClosedDoors/LeftDoorSprite:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(399, 308)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("ClosedDoors/RightDoorSprite:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(475, 308)]
+}
+
+[sub_resource type="Animation" id="Animation_door_close"]
+resource_name = "door_close"
+length = 0.55
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ClosedDoors/LeftDoorSprite:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.55),
+"transitions": PackedFloat32Array(0.65, 1),
+"update": 0,
+"values": [Vector2(315, 308), Vector2(399, 308)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("ClosedDoors/RightDoorSprite:position")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.55),
+"transitions": PackedFloat32Array(0.65, 1),
+"update": 0,
+"values": [Vector2(559, 308), Vector2(475, 308)]
+}
+
+[sub_resource type="Animation" id="Animation_door_open"]
+resource_name = "door_open"
+length = 0.55
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ClosedDoors/LeftDoorSprite:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.55),
+"transitions": PackedFloat32Array(0.65, 1),
+"update": 0,
+"values": [Vector2(399, 308), Vector2(315, 308)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("ClosedDoors/RightDoorSprite:position")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.55),
+"transitions": PackedFloat32Array(0.65, 1),
+"update": 0,
+"values": [Vector2(475, 308), Vector2(559, 308)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_doors"]
+_data = {
+&"RESET": SubResource("Animation_door_reset"),
+&"door_close": SubResource("Animation_door_close"),
+&"door_open": SubResource("Animation_door_open")
+}
 
 [sub_resource type="Animation" id="Animation_wheel_reset"]
 resource_name = "RESET"
@@ -168,97 +270,6 @@ _data = {
 &"wheel_spin": SubResource("Animation_wheel_spin")
 }
 
-[sub_resource type="Animation" id="Animation_door_reset"]
-resource_name = "RESET"
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("ClosedDoors/LeftDoorSprite:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(399, 308)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("ClosedDoors/RightDoorSprite:position")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(475, 308)]
-}
-
-[sub_resource type="Animation" id="Animation_door_open"]
-resource_name = "door_open"
-length = 0.55
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("ClosedDoors/LeftDoorSprite:position")
-tracks/0/interp = 2
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.55),
-"transitions": PackedFloat32Array(0.65, 1),
-"update": 0,
-"values": [Vector2(399, 308), Vector2(315, 308)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("ClosedDoors/RightDoorSprite:position")
-tracks/1/interp = 2
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.55),
-"transitions": PackedFloat32Array(0.65, 1),
-"update": 0,
-"values": [Vector2(475, 308), Vector2(559, 308)]
-}
-
-[sub_resource type="Animation" id="Animation_door_close"]
-resource_name = "door_close"
-length = 0.55
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("ClosedDoors/LeftDoorSprite:position")
-tracks/0/interp = 2
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.55),
-"transitions": PackedFloat32Array(0.65, 1),
-"update": 0,
-"values": [Vector2(315, 308), Vector2(399, 308)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("ClosedDoors/RightDoorSprite:position")
-tracks/1/interp = 2
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.55),
-"transitions": PackedFloat32Array(0.65, 1),
-"update": 0,
-"values": [Vector2(559, 308), Vector2(475, 308)]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_doors"]
-_data = {
-&"RESET": SubResource("Animation_door_reset"),
-&"door_close": SubResource("Animation_door_close"),
-&"door_open": SubResource("Animation_door_open")
-}
-
 [sub_resource type="RectangleShape2D" id="PassengerFloorShape"]
 size = Vector2(934, 24)
 
@@ -270,11 +281,9 @@ passenger_activity_slots_path = NodePath("PassengerActivitySlots")
 passenger_door_slots_path = NodePath("PassengerDoorSlots")
 sway_root_path = NodePath("ArtRoot")
 night_overlay_path = NodePath("ArtRoot/NightOverlay")
+window_light_root_path = NodePath("ArtRoot/Interior/WindowLightRoot")
 exterior_visual_path = NodePath("ArtRoot/Exterior")
 door_animation_path = NodePath("ArtRoot/Exterior/DoorAnimation")
-door_reset_animation = &"RESET"
-door_open_animation = &"door_open"
-door_close_animation = &"door_close"
 
 [node name="PassengerSeatSlots" type="Node2D" parent="." unique_id=141957282]
 editor_description = "One Marker2D for each of the 12 visible passenger seats. Move these markers in the Inspector to adjust passenger placement."
@@ -288,31 +297,31 @@ position = Vector2(124, 440)
 [node name="Seat3" type="Marker2D" parent="PassengerSeatSlots" unique_id=1040894170]
 position = Vector2(180, 440)
 
-[node name="Seat4" type="Marker2D" parent="PassengerSeatSlots"]
+[node name="Seat4" type="Marker2D" parent="PassengerSeatSlots" unique_id=1787967331]
 position = Vector2(236, 440)
 
-[node name="Seat5" type="Marker2D" parent="PassengerSeatSlots"]
+[node name="Seat5" type="Marker2D" parent="PassengerSeatSlots" unique_id=263002142]
 position = Vector2(292, 440)
 
-[node name="Seat6" type="Marker2D" parent="PassengerSeatSlots"]
+[node name="Seat6" type="Marker2D" parent="PassengerSeatSlots" unique_id=1856402927]
 position = Vector2(349, 440)
 
-[node name="Seat7" type="Marker2D" parent="PassengerSeatSlots"]
+[node name="Seat7" type="Marker2D" parent="PassengerSeatSlots" unique_id=2048963888]
 position = Vector2(604, 440)
 
-[node name="Seat8" type="Marker2D" parent="PassengerSeatSlots"]
+[node name="Seat8" type="Marker2D" parent="PassengerSeatSlots" unique_id=1319699676]
 position = Vector2(661, 440)
 
-[node name="Seat9" type="Marker2D" parent="PassengerSeatSlots"]
+[node name="Seat9" type="Marker2D" parent="PassengerSeatSlots" unique_id=877558589]
 position = Vector2(717, 440)
 
-[node name="Seat10" type="Marker2D" parent="PassengerSeatSlots"]
+[node name="Seat10" type="Marker2D" parent="PassengerSeatSlots" unique_id=1502430394]
 position = Vector2(774, 440)
 
-[node name="Seat11" type="Marker2D" parent="PassengerSeatSlots"]
+[node name="Seat11" type="Marker2D" parent="PassengerSeatSlots" unique_id=670268879]
 position = Vector2(830, 440)
 
-[node name="Seat12" type="Marker2D" parent="PassengerSeatSlots"]
+[node name="Seat12" type="Marker2D" parent="PassengerSeatSlots" unique_id=350131362]
 position = Vector2(887, 440)
 
 [node name="PassengerActivitySlots" type="Node2D" parent="." unique_id=1069195525]
@@ -343,7 +352,67 @@ unique_name_in_owner = true
 [node name="Interior" type="Node2D" parent="ArtRoot" unique_id=2101017426]
 unique_name_in_owner = true
 
+[node name="WindowLightRoot" type="Node2D" parent="ArtRoot/Interior" unique_id=179276824]
+
+[node name="PointLight2D" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=530496502]
+position = Vector2(83.5, 356.5)
+scale = Vector2(2.1093748, 3.421875)
+range_item_cull_mask = 2
+texture = SubResource("GradientTexture2D_r0seb")
+
+[node name="PointLight2D2" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=1283129845]
+position = Vector2(206, 365)
+scale = Vector2(2.1875, 3.421875)
+range_item_cull_mask = 2
+texture = SubResource("GradientTexture2D_r0seb")
+
+[node name="PointLight2D3" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=247803074]
+position = Vector2(324.5, 372.00003)
+scale = Vector2(1.9531254, 3.421875)
+range_item_cull_mask = 2
+texture = SubResource("GradientTexture2D_r0seb")
+
+[node name="PointLight2D7" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=1661962787]
+position = Vector2(517, 385)
+scale = Vector2(1.2500002, 2.3125005)
+range_item_cull_mask = 2
+texture = SubResource("GradientTexture2D_r0seb")
+
+[node name="PointLight2D8" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=2133199005]
+position = Vector2(437, 392)
+scale = Vector2(1.2500002, 2.3125005)
+range_item_cull_mask = 2
+texture = SubResource("GradientTexture2D_r0seb")
+
+[node name="PointLight2D4" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=2113669623]
+position = Vector2(628.5, 371.5)
+scale = Vector2(2.1093748, 3.421875)
+range_item_cull_mask = 2
+texture = SubResource("GradientTexture2D_r0seb")
+
+[node name="PointLight2D5" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=2045950748]
+position = Vector2(751, 380)
+scale = Vector2(2.1875, 3.421875)
+range_item_cull_mask = 2
+texture = SubResource("GradientTexture2D_r0seb")
+
+[node name="PointLight2D6" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=613080076]
+position = Vector2(869.5, 387.00003)
+scale = Vector2(1.9531254, 3.421875)
+range_item_cull_mask = 2
+texture = SubResource("GradientTexture2D_r0seb")
+
+[node name="WindowFlareOverlay" type="Sprite2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=1537785651]
+light_mask = 2
+z_index = 1
+material = ExtResource("9_window_light")
+position = Vector2(0, 214.7504)
+scale = Vector2(0.374415, 0.374415)
+texture = ExtResource("2")
+centered = false
+
 [node name="InteriorSprite" type="Sprite2D" parent="ArtRoot/Interior" unique_id=1103104007]
+light_mask = 2
 position = Vector2(0, 214.7504)
 scale = Vector2(0.374415, 0.374415)
 texture = ExtResource("2")
@@ -354,13 +423,8 @@ unique_name_in_owner = true
 process_mode = 4
 z_index = 5
 material = ExtResource("8_fade")
-clear_margin = 16.0
 fit_margin = 16.0
-
-[node name="DoorwayOccluder" type="Polygon2D" parent="ArtRoot/Exterior"]
-z_index = -2
-color = Color(0.0352941, 0.054902, 0.0705882, 1)
-polygon = PackedVector2Array(390, 298, 566, 298, 566, 522, 390, 522)
+clear_margin = 16.0
 
 [node name="ExteriorSprite" type="Sprite2D" parent="ArtRoot/Exterior" unique_id=1182358690]
 position = Vector2(11.999999, 214.7504)
@@ -390,7 +454,7 @@ scale = Vector2(0.3772728, 0.36530608)
 texture = ExtResource("7")
 centered = false
 
-[node name="DoorAnimation" type="AnimationPlayer" parent="ArtRoot/Exterior"]
+[node name="DoorAnimation" type="AnimationPlayer" parent="ArtRoot/Exterior" unique_id=194953674]
 libraries/ = SubResource("AnimationLibrary_doors")
 
 [node name="Wheels" type="Node2D" parent="ArtRoot" unique_id=1283830032]
@@ -466,6 +530,7 @@ polygon = PackedVector2Array(0, -29.2044, 1.87208, -28.4555, 2.99532, -26.9579, 
 [node name="WheelAnimation" type="AnimationPlayer" parent="ArtRoot/Wheels" unique_id=1754301045]
 libraries/ = SubResource("AnimationLibrary_wheels")
 autoplay = &"wheel_spin"
+speed_scale = 3.5
 
 [node name="NightOverlay" type="Polygon2D" parent="ArtRoot" unique_id=2125477584]
 unique_name_in_owner = true

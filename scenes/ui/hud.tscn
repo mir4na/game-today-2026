@@ -80,6 +80,18 @@ offset_bottom = 132.0
 grow_horizontal = 0
 theme_override_styles/panel = SubResource("HudPanelStyle")
 
+[node name="AbnormalLogButton" type="Button" parent="Root"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(238, 52)
+layout_mode = 1
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 262.0
+offset_bottom = 76.0
+theme_override_font_sizes/font_size = 16
+text = "ABNORMALITY LOG  [L]"
+
 [node name="MinimapBox" type="VBoxContainer" parent="Root/MinimapPanel"]
 layout_mode = 2
 
@@ -175,3 +187,5 @@ theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[connection signal="pressed" from="Root/AbnormalLogButton" to="." method="_request_abnormal_log"]

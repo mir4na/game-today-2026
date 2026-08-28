@@ -4,7 +4,7 @@ extends CharacterBody2D
 signal nearby_interactable_changed(interactable: Interactable)
 signal interaction_pressed(interactable: Interactable)
 
-@export var move_speed: float = 320.0
+@export var move_speed: float = 220.0
 @export var movement_enabled: bool = true
 @export var interaction_enabled: bool = true:
 	set(value):

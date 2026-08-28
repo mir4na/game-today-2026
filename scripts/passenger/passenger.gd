@@ -4,10 +4,11 @@ extends Interactable
 
 signal documents_requested(passenger: Passenger)
 
+const PASSENGER_FOOT_ANCHOR_Y: float = 37.5
+
 @export var data: PassengerData
 @export_category("Passenger AI")
 @export_range(50.0, 140.0, 5.0) var minimum_activity_spacing: float = 90.0
-@export_range(0.0, 1.0, 0.05) var initial_seated_chance: float = 0.25
 @export_range(0.0, 1.0, 0.05) var initial_idle_at_activity_chance: float = 0.35
 @export_category("Interaction Copy")
 @export var night_prompt_text: String = "Hear Departure Statement"
@@ -26,6 +27,7 @@ var _ai_target_position: Vector2
 var _ai_walking: bool = false
 var _boarding_handoff_active: bool = false
 var _walk_phase: float = 0.0
+var _facing_direction: float = 1.0
 var _inspection_paused: bool = false
 var _inspection_resume_walking: bool = false
 var _rng := RandomNumberGenerator.new()
@@ -139,8 +141,8 @@ func randomize_initial_activity() -> void:
 	_ai_walking = false
 	_ai_target_position = position
 	var candidates: PackedVector2Array = _available_activity_points(runtime_carriage)
-	var target: Vector2 = _assigned_seat_position
-	if not candidates.is_empty() and _rng.randf() >= initial_seated_chance:
+	var target: Vector2 = _find_standing_fallback_position(runtime_carriage)
+	if not candidates.is_empty():
 		target = (
 			_find_closest_activity_point(candidates)
 			if _rng.randf() < initial_idle_at_activity_chance
@@ -162,6 +164,7 @@ func get_navigation_target_position() -> Vector2:
 
 func _update_day_ai(delta: float) -> void:
 	if _ai_walking:
+		_update_facing_direction()
 		position = position.move_toward(_ai_target_position, PASSENGER_WALK_SPEED * delta)
 		_walk_phase += delta * 9.0
 		runtime_carriage = _carriage_from_world_x(position.x)
@@ -180,6 +183,7 @@ func _update_boarding_handoff(delta: float) -> void:
 	if not _ai_walking:
 		_boarding_handoff_active = false
 		return
+	_update_facing_direction()
 	position = position.move_toward(_ai_target_position, PASSENGER_WALK_SPEED * delta)
 	_walk_phase += delta * 9.0
 	runtime_carriage = _carriage_from_world_x(position.x)
@@ -210,10 +214,6 @@ func _choose_next_ai_target() -> void:
 			return
 
 	var candidates: PackedVector2Array = _available_activity_points(target_carriage)
-	var assigned_carriage: int = _carriage_from_world_x(_assigned_seat_position.x)
-	if target_carriage == carriage and assigned_carriage == carriage and absf(position.x - _assigned_seat_position.x) > 28.0 and _rng.randf() < 0.25:
-		if not _is_navigation_target_claimed(_assigned_seat_position):
-			candidates.append(_assigned_seat_position)
 	if candidates.is_empty():
 		_ai_timer = _next_ai_wait()
 		return
@@ -255,6 +255,38 @@ func _find_closest_activity_point(candidates: PackedVector2Array) -> Vector2:
 			closest_distance = distance
 	return closest
 
+func _find_standing_fallback_position(carriage: int) -> Vector2:
+	# Seat markers remain capacity bookkeeping only. Visual placement always uses the aisle floor.
+	var floor_y: float = _assigned_seat_position.y + 80.0
+	for point: Vector2 in _activity_points:
+		if _carriage_from_world_x(point.x) == carriage:
+			floor_y = maxf(floor_y, point.y)
+	var carriage_range: Vector2 = _carriage_ranges.get(carriage, Vector2(_assigned_seat_position.x - 400.0, _assigned_seat_position.x + 400.0))
+	var candidates := PackedVector2Array()
+	var left_edge: float = carriage_range.x + 70.0
+	var right_edge: float = carriage_range.y - 70.0
+	var candidate_x: float = left_edge
+	while candidate_x <= right_edge:
+		var candidate := Vector2(candidate_x, floor_y)
+		if not _is_navigation_target_claimed(candidate):
+			candidates.append(candidate)
+		candidate_x += minimum_activity_spacing
+	if candidates.is_empty():
+		return Vector2(clampf(_assigned_seat_position.x, left_edge, right_edge), floor_y)
+	var closest: Vector2 = candidates[0]
+	var closest_distance: float = absf(closest.x - _assigned_seat_position.x)
+	for candidate: Vector2 in candidates:
+		var distance: float = absf(candidate.x - _assigned_seat_position.x)
+		if distance < closest_distance:
+			closest = candidate
+			closest_distance = distance
+	return closest
+
+func _update_facing_direction() -> void:
+	var horizontal_delta: float = _ai_target_position.x - position.x
+	if absf(horizontal_delta) > 1.0:
+		_facing_direction = signf(horizontal_delta)
+
 func _next_ai_wait() -> float:
 	if data == null or data.ai_behavior == "still":
 		return 999999.0
@@ -294,8 +326,11 @@ func _update_visual() -> void:
 	body_tint.a = ghost_alpha
 	_body_tint.modulate = body_tint if not uses_authored_character_artwork else Color.WHITE
 	_passenger_visual.modulate = Color(1.0, 1.0, 1.0, ghost_alpha) if uses_authored_character_artwork else Color.WHITE
-	_passenger_visual.scale = Vector2.ONE * baby_visual_scale if is_baby else Vector2.ONE
-	_passenger_visual.position.y = (10.0 if is_baby else 0.0) + (sin(_walk_phase) * 1.8 if _ai_walking else 0.0)
+	var visual_scale: float = baby_visual_scale if is_baby else 1.0
+	# Authored NPC artwork faces left by default, so invert the movement sign for horizontal scale.
+	_passenger_visual.scale = Vector2(-visual_scale * _facing_direction, visual_scale)
+	# Scale around the feet so small anomaly bodies remain planted on their shadow.
+	_passenger_visual.position.y = PASSENGER_FOOT_ANCHOR_Y * (1.0 - visual_scale) + (sin(_walk_phase) * 1.8 if _ai_walking else 0.0)
 	_baby_mark.visible = is_baby and not uses_authored_character_artwork
 	_shadow.visible = data.anomaly_type != "shadowless"
 	_shadow.modulate.a = 0.52 if not night_mode else 0.28

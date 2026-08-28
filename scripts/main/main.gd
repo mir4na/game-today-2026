@@ -80,7 +80,8 @@ var _inspected_passenger: Passenger
 @onready var _pause_ui: PauseUI = %PauseUI
 @onready var _ambience: TrainAmbience = %TrainAmbience
 @onready var _travel_foreground: TravelForeground = %TravelForeground
-@onready var _night_sky_overlay: ColorRect = %NightSkyOverlay
+@onready var _sky_gradient: ColorRect = %NightSkyOverlay
+@onready var _night_atmosphere: ColorRect = %NightAtmosphere
 
 func _ready() -> void:
 	if day_route.size() < 2:
@@ -107,9 +108,12 @@ func _ready() -> void:
 	_debug_print_configured_anomaly_roster()
 	_debug_print_active_anomaly_roster("INITIAL BOARDING")
 	_collect_interactables(self)
+	if is_instance_valid(_desk):
+		_desk.enabled = false
 	_player.set_interactables(_interactables)
 	_hud.set_clock(int(_day_minutes))
 	_set_arrival_clock_display(int(_day_minutes))
+	_set_sky_cycle_progress(0.0)
 	_update_passenger_minimap()
 	_set_passenger_ai_enabled(false)
 	_active_modal = _day_intro_ui
@@ -131,9 +135,11 @@ func _process(delta: float) -> void:
 	_hud.set_clock(int(_day_minutes))
 	_set_arrival_clock_display(int(_day_minutes))
 	var night_strength: float = clampf((_day_minutes - 990.0) / maxf(_final_arrival_minutes() - 990.0, 1.0), 0.0, 1.0)
+	var cycle_progress: float = clampf((_day_minutes - START_MINUTES) / maxf(_final_arrival_minutes() - START_MINUTES, 1.0), 0.0, 1.0)
 	_train.set_night_strength(night_strength)
 	_ambience.night_strength = night_strength
-	_night_sky_overlay.modulate.a = night_strength
+	_set_sky_cycle_progress(cycle_progress)
+	_night_atmosphere.modulate.a = night_strength
 
 	if not _station_arrival_announced and _has_next_day_station() and _day_minutes >= _next_arrival_minutes():
 		_announce_next_station()
@@ -172,7 +178,21 @@ func _next_arrival_minutes() -> float:
 func _final_arrival_minutes() -> float:
 	return START_MINUTES + STATION_TRAVEL_SECONDS * float(day_route.size() - 1)
 
+func _set_sky_cycle_progress(value: float) -> void:
+	var clamped_progress: float = clampf(value, 0.0, 1.0)
+	_train.set_day_cycle_progress(clamped_progress)
+	var sky_material := _sky_gradient.material as ShaderMaterial
+	if sky_material != null:
+		sky_material.set_shader_parameter(&"cycle_progress", clamped_progress)
+
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"abnormal_log"):
+		if _dead_selection_ui.visible:
+			_dead_selection_ui.request_close()
+		elif _active_modal == null and state in [GameState.DAY, GameState.SUNSET]:
+			_open_abnormal_notes()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed(&"notebook"):
 		if _notebook_ui.visible:
 			_notebook_ui.request_close()
@@ -794,13 +814,12 @@ func _on_day_intro_finished() -> void:
 func _on_station_cutscene_timeline_changed(elapsed: float) -> void:
 	_train.set_exterior_sequence_elapsed(elapsed)
 
-func _on_station_cutscene_boarding_actor_entered(actor_index: int, door_screen_position: Vector2) -> void:
+func _on_station_cutscene_boarding_actor_entered(actor_index: int, _door_screen_position: Vector2) -> void:
 	if actor_index < 0 or actor_index >= _boarding_passengers.size():
 		return
 	var passenger: Passenger = _boarding_passengers[actor_index]
 	if _is_active_passenger(passenger):
-		var door_world_position: Vector2 = get_viewport().get_canvas_transform().affine_inverse() * door_screen_position
-		passenger.finish_boarding_at(_passenger_container.to_local(door_world_position))
+		passenger.finish_boarding()
 
 func _on_station_cutscene_camera_return_started() -> void:
 	_player.begin_gameplay_camera_return()
@@ -869,8 +888,6 @@ func _station_distance_units(destination_station: String, actual_station: String
 func _on_desk_interacted() -> void:
 	if state == GameState.NIGHT:
 		_open_night_puzzle()
-	elif state in [GameState.DAY, GameState.SUNSET]:
-		_open_abnormal_notes()
 
 func _open_notebook() -> void:
 	_active_modal = _notebook_ui
@@ -987,11 +1004,13 @@ func _enter_night() -> void:
 	state = GameState.NIGHT
 	_train.set_night_strength(1.0)
 	_ambience.night_strength = 1.0
-	_night_sky_overlay.modulate.a = 1.0
+	_set_sky_cycle_progress(1.0)
+	_night_atmosphere.modulate.a = 1.0
 	for passenger: Passenger in _passengers:
 		if _is_active_passenger(passenger):
 			passenger.set_night_mode(true)
 	_desk.set_night_mode(true)
+	_desk.enabled = true
 	_hud.set_night_walk_mode()
 	_hud.notify(night_shift_instruction, 5.0)
 	_set_player_control_for_state()

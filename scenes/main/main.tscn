@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b6rs66dr8m48s" path="res://scripts/main/main.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://b18t7ho1drja1" path="res://scenes/train/train.tscn" id="2"]
+[ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="2_6g32y"]
 [ext_resource type="PackedScene" uid="uid://cq24ye24eom3u" path="res://scenes/player/player.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/document_overlay_ui.tscn" id="5"]
@@ -10,44 +11,78 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/night_puzzle_ui.tscn" id="8"]
 [ext_resource type="PackedScene" path="res://scenes/night/departure_sequence_ui.tscn" id="9"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_ui.tscn" id="10"]
-[ext_resource type="Resource" path="res://data/passengers/aruna_vey.tres" id="11"]
-[ext_resource type="Resource" path="res://data/passengers/bima_sena.tres" id="12"]
-[ext_resource type="Resource" path="res://data/passengers/citra_lume.tres" id="13"]
-[ext_resource type="Resource" path="res://data/passengers/damar_vey.tres" id="14"]
-[ext_resource type="Resource" path="res://data/passengers/eira_sol.tres" id="15"]
-[ext_resource type="Resource" path="res://data/passengers/fajar_noor.tres" id="16"]
+[ext_resource type="Resource" uid="uid://cx6ttdmtj4lgd" path="res://data/passengers/aruna_vey.tres" id="11"]
+[ext_resource type="Resource" uid="uid://d1llapidnrg01" path="res://data/passengers/bima_sena.tres" id="12"]
+[ext_resource type="Resource" uid="uid://j3f80mwvqkci" path="res://data/passengers/citra_lume.tres" id="13"]
+[ext_resource type="Resource" uid="uid://cnv674vesefbn" path="res://data/passengers/damar_vey.tres" id="14"]
+[ext_resource type="Resource" uid="uid://d0d88ei13lo3h" path="res://data/passengers/eira_sol.tres" id="15"]
+[ext_resource type="Resource" uid="uid://d2rlldblp6o1k" path="res://data/passengers/fajar_noor.tres" id="16"]
 [ext_resource type="Resource" path="res://data/puzzles/first_departures.tres" id="17"]
 [ext_resource type="PackedScene" path="res://scenes/systems/train_ambience.tscn" id="18"]
-[ext_resource type="Resource" path="res://data/passengers/gita_pranata.tres" id="19"]
-[ext_resource type="Resource" path="res://data/passengers/hana_vale.tres" id="20"]
-[ext_resource type="Resource" path="res://data/passengers/ilyas_rook.tres" id="21"]
-[ext_resource type="Resource" path="res://data/passengers/juno_mire.tres" id="22"]
-[ext_resource type="Resource" path="res://data/passengers/kala_sen.tres" id="23"]
-[ext_resource type="Resource" path="res://data/passengers/luma_orin.tres" id="24"]
+[ext_resource type="Resource" uid="uid://r6fnaxd52bp4" path="res://data/passengers/gita_pranata.tres" id="19"]
+[ext_resource type="Resource" uid="uid://dleig4f4cwhd" path="res://data/passengers/hana_vale.tres" id="20"]
+[ext_resource type="Resource" uid="uid://bftahbm2q028f" path="res://data/passengers/ilyas_rook.tres" id="21"]
+[ext_resource type="Resource" uid="uid://dj737v4w8qg3u" path="res://data/passengers/juno_mire.tres" id="22"]
+[ext_resource type="Resource" uid="uid://bd0i86h8bavjo" path="res://data/passengers/kala_sen.tres" id="23"]
+[ext_resource type="Resource" uid="uid://04q085qiaa4u" path="res://data/passengers/luma_orin.tres" id="24"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shift_report_ui.tscn" id="25"]
 [ext_resource type="PackedScene" path="res://scenes/ui/station_stop_cutscene_ui.tscn" id="26"]
 [ext_resource type="PackedScene" path="res://scenes/ui/day_intro_ui.tscn" id="27"]
-[ext_resource type="Resource" path="res://data/passengers/nara_kestrel.tres" id="28"]
-[ext_resource type="Resource" path="res://data/passengers/oren_pike.tres" id="29"]
-[ext_resource type="Resource" path="res://data/passengers/petra_voss.tres" id="30"]
-[ext_resource type="Resource" path="res://data/passengers/soren_vale.tres" id="31"]
-[ext_resource type="Resource" path="res://data/passengers/talia_reed.tres" id="32"]
-[ext_resource type="Resource" path="res://data/passengers/veya_lorn.tres" id="33"]
+[ext_resource type="Resource" uid="uid://cgd464o6dvia0" path="res://data/passengers/nara_kestrel.tres" id="28"]
+[ext_resource type="Resource" uid="uid://cj3r8yb3lqr2s" path="res://data/passengers/oren_pike.tres" id="29"]
+[ext_resource type="Resource" uid="uid://diyhq8nh7l86r" path="res://data/passengers/petra_voss.tres" id="30"]
+[ext_resource type="Resource" uid="uid://58rs41etoeoh" path="res://data/passengers/soren_vale.tres" id="31"]
+[ext_resource type="Resource" uid="uid://dya15ngoi2o77" path="res://data/passengers/talia_reed.tres" id="32"]
+[ext_resource type="Resource" uid="uid://bsk2f3mg6cgrv" path="res://data/passengers/veya_lorn.tres" id="33"]
 [ext_resource type="PackedScene" path="res://scenes/passengers/passenger.tscn" id="34"]
 [ext_resource type="PackedScene" path="res://scenes/ui/arrival_clock_ui.tscn" id="35"]
 [ext_resource type="PackedScene" uid="uid://drn1e0xhyylll" path="res://scenes/systems/travel_foreground.tscn" id="36"]
-[ext_resource type="Resource" path="res://data/daily_manifest_config.tres" id="37"]
+[ext_resource type="Resource" uid="uid://b37vfh7cgqlw5" path="res://data/daily_manifest_config.tres" id="37"]
+[ext_resource type="Shader" uid="uid://dq13hfpieecwx" path="res://shaders/night_atmosphere.gdshader" id="38"]
+[ext_resource type="Shader" uid="uid://dws5qbo4ng6g" path="res://shaders/day_cycle_sky.gdshader" id="39"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_day_cycle_sky"]
+shader = ExtResource("39")
+shader_parameter/cycle_progress = 0.0
+shader_parameter/morning_top = Color(0.486275, 0.827451, 0.996078, 1)
+shader_parameter/morning_middle = Color(0.717647, 1, 0.952941, 1)
+shader_parameter/morning_bottom = Color(0.988235, 0.984314, 0.909804, 1)
+shader_parameter/sunset_top = Color(0.996078, 0.627451, 0.486275, 1)
+shader_parameter/sunset_middle = Color(0.996078, 0.992157, 0.666667, 1)
+shader_parameter/sunset_bottom = Color(0.988235, 0.984314, 0.909804, 1)
+shader_parameter/night_top = Color(0, 0.160784, 0.231373, 1)
+shader_parameter/night_middle = Color(0.039216, 0.345098, 0.494118, 1)
+shader_parameter/night_bottom = Color(0.227451, 0.635294, 0.913725, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_night_fog"]
+frequency = 0.005
+fractal_octaves = 4
+fractal_lacunarity = 2.1
+fractal_gain = 0.55
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_night_fog"]
+noise = SubResource("FastNoiseLite_night_fog")
+seamless = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_night_atmosphere"]
+shader = ExtResource("38")
+shader_parameter/noise_texture = SubResource("NoiseTexture2D_night_fog")
+shader_parameter/density = 0.52
+shader_parameter/speed = Vector2(0.02, 0.01)
+shader_parameter/fog_scale = Vector2(0.48, 0.48)
 
 [node name="Main" type="Node2D" unique_id=604105226]
 script = ExtResource("1")
-passenger_identity_profiles = Array[Resource]([ExtResource("11"), ExtResource("12"), ExtResource("13"), ExtResource("14"), ExtResource("15"), ExtResource("16"), ExtResource("19"), ExtResource("20"), ExtResource("21"), ExtResource("22"), ExtResource("23"), ExtResource("24"), ExtResource("28"), ExtResource("29"), ExtResource("30"), ExtResource("31"), ExtResource("32"), ExtResource("33")])
+passenger_identity_profiles = Array[ExtResource("2_6g32y")]([ExtResource("11"), ExtResource("12"), ExtResource("13"), ExtResource("14"), ExtResource("15"), ExtResource("16"), ExtResource("19"), ExtResource("20"), ExtResource("21"), ExtResource("22"), ExtResource("23"), ExtResource("24"), ExtResource("28"), ExtResource("29"), ExtResource("30"), ExtResource("31"), ExtResource("32"), ExtResource("33")])
 puzzle_resource = ExtResource("17")
 passenger_scene = ExtResource("34")
 manifest_config = ExtResource("37")
 day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere")
 debug_print_anomaly_roster = true
-night_shift_instruction = "NIGHT SHIFT\nINTERVIEW THE DECEASED, THEN RETURN TO THE FRONT CREW CAB"
-departure_statement_recorded_template = "DEPARTURE STATEMENT RECORDED\n%d / %d COLLECTED"
+night_shift_instruction = "NIGHT SHIFT
+INTERVIEW THE DECEASED, THEN RETURN TO THE FRONT CREW CAB"
+departure_statement_recorded_template = "DEPARTURE STATEMENT RECORDED
+%d / %d COLLECTED"
 
 [node name="TravelSky" type="CanvasLayer" parent="." unique_id=1796731036]
 layer = -10
@@ -63,14 +98,28 @@ color = Color(0.819608, 0.929412, 0.976471, 1)
 
 [node name="NightSkyOverlay" type="ColorRect" parent="TravelSky" unique_id=856837013]
 unique_name_in_owner = true
-modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_day_cycle_sky")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.025, 0.047, 0.094, 1)
+
+[node name="NightAtmosphereLayer" type="CanvasLayer" parent="." unique_id=1453875203]
+layer = 5
+
+[node name="NightAtmosphere" type="ColorRect" parent="NightAtmosphereLayer" unique_id=1750779091]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_night_atmosphere")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.68, 0.75, 0.8, 1)
 
 [node name="GameplayWorld" type="Node2D" parent="." unique_id=379074724]
 editor_description = "Move this node in the Inspector to adjust the complete train, passenger, and player gameplay layout vertically."
@@ -92,6 +141,9 @@ interaction_enabled = false
 unique_name_in_owner = true
 position = Vector2(-16, 0)
 
+[node name="CoachLabels" parent="GameplayWorld/Train/Cars" parent_id_path=PackedInt32Array(1577522868, 793357466) index="7" unique_id=86394090]
+visible = false
+
 [node name="TrainAmbience" parent="." unique_id=1529690390 instance=ExtResource("18")]
 unique_name_in_owner = true
 
@@ -104,12 +156,6 @@ editor_description = ""
 [node name="PassingCables" parent="TravelForeground/TravelScenery" index="0" unique_id=328679427]
 editor_description = ""
 visible = false
-
-[node name="RearOverheadWire" parent="TravelForeground/TravelScenery/PassingCables" index="0" unique_id=1254690009]
-scale = Vector2(0.374415, 0.374415)
-
-[node name="FrontOverheadWire" parent="TravelForeground/TravelScenery/PassingCables" index="1" unique_id=597990151]
-scale = Vector2(0.374415, 0.374415)
 
 [node name="HUD" parent="." unique_id=1053587110 instance=ExtResource("4")]
 unique_name_in_owner = true
@@ -151,6 +197,7 @@ unique_name_in_owner = true
 [connection signal="nearby_interactable_changed" from="GameplayWorld/PlayerSpawnPoint/Player" to="." method="_on_nearby_interactable_changed"]
 [connection signal="clock_read" from="GameplayWorld/Train/Cars/ConductorCar/ArrivalClock" to="." method="_on_arrival_clock_read"]
 [connection signal="newspaper_read" from="GameplayWorld/Train/Cars/PassengerCoach2/Newspaper" to="." method="_on_newspaper_read"]
+[connection signal="abnormal_log_requested" from="HUD" to="." method="_open_abnormal_notes"]
 [connection signal="closed" from="ModalLayer/DocumentOverlayUI" to="." method="_on_modal_closed"]
 [connection signal="station_assignment_toggled" from="ModalLayer/DocumentOverlayUI" to="." method="_on_station_assignment_toggled"]
 [connection signal="closed" from="ModalLayer/NotebookUI" to="." method="_on_modal_closed"]

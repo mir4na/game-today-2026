@@ -1,13 +1,14 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/dead_selection_ui.gd" id="1"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
+[ext_resource type="Script" path="res://scripts/ui/abnormal_log_drop_slot.gd" id="3_drop_slot"]
 
 [sub_resource type="StyleBoxFlat" id="ManifestPanelStyle"]
-content_margin_left = 18.0
-content_margin_top = 14.0
-content_margin_right = 18.0
-content_margin_bottom = 14.0
+content_margin_left = 20.0
+content_margin_top = 16.0
+content_margin_right = 20.0
+content_margin_bottom = 16.0
 bg_color = Color(0.0784314, 0.109804, 0.156863, 1)
 border_width_left = 2
 border_width_top = 2
@@ -19,28 +20,28 @@ corner_radius_top_right = 9
 corner_radius_bottom_right = 9
 corner_radius_bottom_left = 9
 
+[sub_resource type="StyleBoxFlat" id="RosterStyle"]
+content_margin_left = 14.0
+content_margin_top = 14.0
+content_margin_right = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(0.0588235, 0.0823529, 0.121569, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.321569, 0.4, 0.490196, 1)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
 [sub_resource type="StyleBoxFlat" id="PaperStyle"]
 content_margin_left = 18.0
-content_margin_top = 14.0
+content_margin_top = 16.0
 content_margin_right = 18.0
-content_margin_bottom = 14.0
+content_margin_bottom = 16.0
 bg_color = Color(0.866667, 0.823529, 0.721569, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.447059, 0.372549, 0.282353, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="EntryNormalStyle"]
-content_margin_left = 14.0
-content_margin_top = 8.0
-content_margin_right = 14.0
-content_margin_bottom = 8.0
-bg_color = Color(0.945098, 0.905882, 0.811765, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -51,17 +52,17 @@ corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 
-[sub_resource type="StyleBoxFlat" id="EntryFocusStyle"]
+[sub_resource type="StyleBoxFlat" id="DropStyle"]
 content_margin_left = 14.0
-content_margin_top = 8.0
+content_margin_top = 10.0
 content_margin_right = 14.0
-content_margin_bottom = 8.0
-bg_color = Color(1, 0.972549, 0.909804, 1)
+content_margin_bottom = 10.0
+bg_color = Color(0.945098, 0.905882, 0.811765, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.709804, 0.529412, 0.301961, 1)
+border_color = Color(0.447059, 0.372549, 0.282353, 1)
 corner_radius_top_left = 5
 corner_radius_top_right = 5
 corner_radius_bottom_right = 5
@@ -78,7 +79,7 @@ grow_vertical = 2
 mouse_filter = 0
 theme = ExtResource("2")
 script = ExtResource("1")
-notes_instruction_template = "%d passengers are currently aboard. Keep a private list of suspected abnormal passengers.\nType one SHORT NAME per line and press SPACE for the next line. Your notes are automatically filed when daylight service ends. ESC returns to the train."
+notes_instruction_template = "%d passengers aboard. Drag passenger cards into the five log lines. Drag logged names to reorder them; click a logged line to remove it. The log is filed automatically at the end of daylight service."
 
 [node name="Shade" type="ColorRect" parent="."]
 layout_mode = 1
@@ -87,188 +88,149 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.012, 0.018, 0.03, 0.96)
+mouse_filter = 2
+color = Color(0.012, 0.018, 0.03, 0.94)
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="Margin" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_left = 56
+theme_override_constants/margin_top = 34
+theme_override_constants/margin_right = 56
+theme_override_constants/margin_bottom = 34
 
-[node name="Panel" type="PanelContainer" parent="Center"]
-custom_minimum_size = Vector2(850, 620)
+[node name="Panel" type="PanelContainer" parent="Margin"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("ManifestPanelStyle")
 
-[node name="Outer" type="VBoxContainer" parent="Center/Panel"]
-layout_mode = 2
-theme_override_constants/separation = 13
-
-[node name="Heading" type="Label" parent="Center/Panel/Outer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_font_sizes/font_size = 30
-text = "ABNORMAL PASSENGER NOTES"
-horizontal_alignment = 1
-
-[node name="InstructionLabel" type="Label" parent="Center/Panel/Outer"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.905882, 0.878431, 0.823529, 1)
-theme_override_font_sizes/font_size = 16
-horizontal_alignment = 1
-autowrap_mode = 2
-
-[node name="Paper" type="PanelContainer" parent="Center/Panel/Outer"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_styles/panel = SubResource("PaperStyle")
-
-[node name="Lines" type="VBoxContainer" parent="Center/Panel/Outer/Paper"]
-layout_mode = 2
-theme_override_constants/separation = 13
-
-[node name="Row1" type="HBoxContainer" parent="Center/Panel/Outer/Paper/Lines"]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="Number" type="Label" parent="Center/Panel/Outer/Paper/Lines/Row1"]
-custom_minimum_size = Vector2(48, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25098, 0.223529, 0.184314, 1)
-theme_override_font_sizes/font_size = 19
-text = "01."
-
-[node name="NameEntry1" type="LineEdit" parent="Center/Panel/Outer/Paper/Lines/Row1"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 52)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.188235, 0.168627, 0.145098, 1)
-theme_override_colors/font_placeholder_color = Color(0.505882, 0.470588, 0.415686, 1)
-theme_override_colors/caret_color = Color(0.286275, 0.243137, 0.192157, 1)
-theme_override_font_sizes/font_size = 19
-theme_override_styles/normal = SubResource("EntryNormalStyle")
-theme_override_styles/focus = SubResource("EntryFocusStyle")
-placeholder_text = "Type a short name, then press Space..."
-
-[node name="Row2" type="HBoxContainer" parent="Center/Panel/Outer/Paper/Lines"]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="Number" type="Label" parent="Center/Panel/Outer/Paper/Lines/Row2"]
-custom_minimum_size = Vector2(48, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25098, 0.223529, 0.184314, 1)
-theme_override_font_sizes/font_size = 19
-text = "02."
-
-[node name="NameEntry2" type="LineEdit" parent="Center/Panel/Outer/Paper/Lines/Row2"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 52)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.188235, 0.168627, 0.145098, 1)
-theme_override_colors/font_placeholder_color = Color(0.505882, 0.470588, 0.415686, 1)
-theme_override_colors/caret_color = Color(0.286275, 0.243137, 0.192157, 1)
-theme_override_font_sizes/font_size = 19
-theme_override_styles/normal = SubResource("EntryNormalStyle")
-theme_override_styles/focus = SubResource("EntryFocusStyle")
-placeholder_text = "Type a short name, then press Space..."
-
-[node name="Row3" type="HBoxContainer" parent="Center/Panel/Outer/Paper/Lines"]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="Number" type="Label" parent="Center/Panel/Outer/Paper/Lines/Row3"]
-custom_minimum_size = Vector2(48, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25098, 0.223529, 0.184314, 1)
-theme_override_font_sizes/font_size = 19
-text = "03."
-
-[node name="NameEntry3" type="LineEdit" parent="Center/Panel/Outer/Paper/Lines/Row3"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 52)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.188235, 0.168627, 0.145098, 1)
-theme_override_colors/font_placeholder_color = Color(0.505882, 0.470588, 0.415686, 1)
-theme_override_colors/caret_color = Color(0.286275, 0.243137, 0.192157, 1)
-theme_override_font_sizes/font_size = 19
-theme_override_styles/normal = SubResource("EntryNormalStyle")
-theme_override_styles/focus = SubResource("EntryFocusStyle")
-placeholder_text = "Type a short name, then press Space..."
-
-[node name="Row4" type="HBoxContainer" parent="Center/Panel/Outer/Paper/Lines"]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="Number" type="Label" parent="Center/Panel/Outer/Paper/Lines/Row4"]
-custom_minimum_size = Vector2(48, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25098, 0.223529, 0.184314, 1)
-theme_override_font_sizes/font_size = 19
-text = "04."
-
-[node name="NameEntry4" type="LineEdit" parent="Center/Panel/Outer/Paper/Lines/Row4"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 52)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.188235, 0.168627, 0.145098, 1)
-theme_override_colors/font_placeholder_color = Color(0.505882, 0.470588, 0.415686, 1)
-theme_override_colors/caret_color = Color(0.286275, 0.243137, 0.192157, 1)
-theme_override_font_sizes/font_size = 19
-theme_override_styles/normal = SubResource("EntryNormalStyle")
-theme_override_styles/focus = SubResource("EntryFocusStyle")
-placeholder_text = "Type a short name, then press Space..."
-
-[node name="Row5" type="HBoxContainer" parent="Center/Panel/Outer/Paper/Lines"]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="Number" type="Label" parent="Center/Panel/Outer/Paper/Lines/Row5"]
-custom_minimum_size = Vector2(48, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.25098, 0.223529, 0.184314, 1)
-theme_override_font_sizes/font_size = 19
-text = "05."
-
-[node name="NameEntry5" type="LineEdit" parent="Center/Panel/Outer/Paper/Lines/Row5"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 52)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.188235, 0.168627, 0.145098, 1)
-theme_override_colors/font_placeholder_color = Color(0.505882, 0.470588, 0.415686, 1)
-theme_override_colors/caret_color = Color(0.286275, 0.243137, 0.192157, 1)
-theme_override_font_sizes/font_size = 19
-theme_override_styles/normal = SubResource("EntryNormalStyle")
-theme_override_styles/focus = SubResource("EntryFocusStyle")
-placeholder_text = "Type a short name, then press Space..."
-
-[node name="ActionRow" type="HBoxContainer" parent="Center/Panel/Outer"]
+[node name="Outer" type="VBoxContainer" parent="Margin/Panel"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="CancelButton" type="Button" parent="Center/Panel/Outer/ActionRow"]
+[node name="Heading" type="Label" parent="Margin/Panel/Outer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_font_sizes/font_size = 30
+text = "ABNORMALITY LOG"
+horizontal_alignment = 1
+
+[node name="InstructionLabel" type="Label" parent="Margin/Panel/Outer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.905882, 0.878431, 0.823529, 1)
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Columns" type="HBoxContainer" parent="Margin/Panel/Outer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="RosterPanel" type="PanelContainer" parent="Margin/Panel/Outer/Columns"]
+custom_minimum_size = Vector2(610, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-text = "BACK TO TRAIN  [ESC]"
+theme_override_styles/panel = SubResource("RosterStyle")
 
-[connection signal="text_submitted" from="Center/Panel/Outer/Paper/Lines/Row1/NameEntry1" to="." method="_on_name_entry_1_submitted"]
-[connection signal="text_changed" from="Center/Panel/Outer/Paper/Lines/Row1/NameEntry1" to="." method="_on_name_entry_1_text_changed"]
-[connection signal="text_submitted" from="Center/Panel/Outer/Paper/Lines/Row2/NameEntry2" to="." method="_on_name_entry_2_submitted"]
-[connection signal="text_changed" from="Center/Panel/Outer/Paper/Lines/Row2/NameEntry2" to="." method="_on_name_entry_2_text_changed"]
-[connection signal="text_submitted" from="Center/Panel/Outer/Paper/Lines/Row3/NameEntry3" to="." method="_on_name_entry_3_submitted"]
-[connection signal="text_changed" from="Center/Panel/Outer/Paper/Lines/Row3/NameEntry3" to="." method="_on_name_entry_3_text_changed"]
-[connection signal="text_submitted" from="Center/Panel/Outer/Paper/Lines/Row4/NameEntry4" to="." method="_on_name_entry_4_submitted"]
-[connection signal="text_changed" from="Center/Panel/Outer/Paper/Lines/Row4/NameEntry4" to="." method="_on_name_entry_4_text_changed"]
-[connection signal="text_submitted" from="Center/Panel/Outer/Paper/Lines/Row5/NameEntry5" to="." method="_on_name_entry_5_submitted"]
-[connection signal="text_changed" from="Center/Panel/Outer/Paper/Lines/Row5/NameEntry5" to="." method="_on_name_entry_5_text_changed"]
-[connection signal="pressed" from="Center/Panel/Outer/ActionRow/CancelButton" to="." method="request_close"]
+[node name="Box" type="VBoxContainer" parent="Margin/Panel/Outer/Columns/RosterPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Margin/Panel/Outer/Columns/RosterPanel/Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_font_sizes/font_size = 18
+text = "PASSENGERS ABOARD — DRAG A CARD"
+horizontal_alignment = 1
+
+[node name="RosterScroll" type="ScrollContainer" parent="Margin/Panel/Outer/Columns/RosterPanel/Box"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="PassengerGrid" type="GridContainer" parent="Margin/Panel/Outer/Columns/RosterPanel/Box/RosterScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 2
+
+[node name="Paper" type="PanelContainer" parent="Margin/Panel/Outer/Columns"]
+custom_minimum_size = Vector2(440, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("PaperStyle")
+
+[node name="Log" type="VBoxContainer" parent="Margin/Panel/Outer/Columns/Paper"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Margin/Panel/Outer/Columns/Paper/Log"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25098, 0.223529, 0.184314, 1)
+theme_override_font_sizes/font_size = 21
+text = "SUSPECTED ABNORMAL PASSENGERS"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LogSlot1" type="Button" parent="Margin/Panel/Outer/Columns/Paper/Log"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 68)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.188235, 0.168627, 0.145098, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("DropStyle")
+script = ExtResource("3_drop_slot")
+
+[node name="LogSlot2" type="Button" parent="Margin/Panel/Outer/Columns/Paper/Log"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 68)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.188235, 0.168627, 0.145098, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("DropStyle")
+script = ExtResource("3_drop_slot")
+slot_index = 1
+
+[node name="LogSlot3" type="Button" parent="Margin/Panel/Outer/Columns/Paper/Log"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 68)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.188235, 0.168627, 0.145098, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("DropStyle")
+script = ExtResource("3_drop_slot")
+slot_index = 2
+
+[node name="LogSlot4" type="Button" parent="Margin/Panel/Outer/Columns/Paper/Log"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 68)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.188235, 0.168627, 0.145098, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("DropStyle")
+script = ExtResource("3_drop_slot")
+slot_index = 3
+
+[node name="LogSlot5" type="Button" parent="Margin/Panel/Outer/Columns/Paper/Log"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 68)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.188235, 0.168627, 0.145098, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("DropStyle")
+script = ExtResource("3_drop_slot")
+slot_index = 4
+
+[node name="CancelButton" type="Button" parent="Margin/Panel/Outer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "CLOSE LOG  [L / ESC]"
+
+[connection signal="pressed" from="Margin/Panel/Outer/CancelButton" to="." method="request_close"]

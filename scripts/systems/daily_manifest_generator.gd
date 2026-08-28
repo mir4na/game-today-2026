@@ -38,6 +38,7 @@ static func generate(
 
 	_reset_runtime_fields(passengers, route, config, rng)
 	_assign_boarding_schedule(passengers, route, config, boarding_counts)
+	_assign_balanced_random_carriages(passengers, config, boarding_counts, rng)
 	var deceased: Array[PassengerData] = _select_deceased(passengers, scheduled_count, config, rng)
 	_assign_living_destinations(passengers, scheduled_count, route, boarding_counts, rng)
 	_assign_deceased_anomalies(deceased, route, config, rng, include_matching_newspaper_case)
@@ -78,7 +79,7 @@ static func _reset_runtime_fields(passengers: Array[PassengerData], route: Packe
 		data.required_dropoff_station = ""
 		data.is_dead = false
 		data.anomaly_type = "none"
-		data.current_carriage = rng.randi_range(1, config.passenger_carriage_count)
+		data.current_carriage = 1
 		data.initially_on_train = false
 		data.ai_behavior = _pick_string(config.ai_behaviors, rng, "still")
 		data.ai_interval_seconds = rng.randf_range(
@@ -101,6 +102,50 @@ static func _assign_boarding_schedule(
 		for _boarder: int in range(station_boarder_count):
 			passengers[cursor].origin_station = route[station_index]
 			cursor += 1
+
+static func _assign_balanced_random_carriages(
+	passengers: Array[PassengerData],
+	config: DailyManifestConfig,
+	boarding_counts: PackedInt32Array,
+	rng: RandomNumberGenerator
+) -> void:
+	var cursor: int = 0
+	_assign_random_carriage_cohort(
+		passengers,
+		cursor,
+		config.initial_passenger_count,
+		config.passenger_carriage_count,
+		rng
+	)
+	cursor += config.initial_passenger_count
+	for boarder_count: int in boarding_counts:
+		_assign_random_carriage_cohort(
+			passengers,
+			cursor,
+			boarder_count,
+			config.passenger_carriage_count,
+			rng
+		)
+		cursor += boarder_count
+
+static func _assign_random_carriage_cohort(
+	passengers: Array[PassengerData],
+	start_index: int,
+	passenger_count: int,
+	carriage_count: int,
+	rng: RandomNumberGenerator
+) -> void:
+	var assigned_count: int = 0
+	while assigned_count < passenger_count:
+		var carriage_cycle: Array[int] = []
+		for carriage: int in range(1, carriage_count + 1):
+			carriage_cycle.append(carriage)
+		_shuffle_ints(carriage_cycle, rng)
+		for carriage: int in carriage_cycle:
+			if assigned_count >= passenger_count:
+				break
+			passengers[start_index + assigned_count].current_carriage = carriage
+			assigned_count += 1
 
 static func _select_deceased(
 	passengers: Array[PassengerData],

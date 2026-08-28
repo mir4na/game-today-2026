@@ -1,4 +1,6 @@
-[gd_scene format=3]
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="ShaderMaterial" path="res://resources/materials/character_reference_cutout.tres" id="1_cutout"]
 
 [node name="StationCutsceneActor" type="Node2D"]
 visible = false
@@ -13,3 +15,4 @@ unique_name_in_owner = true
 position = Vector2(0, -103)
 scale = Vector2(0.32, 0.32)
 texture_filter = 4
+material = ExtResource("1_cutout")
