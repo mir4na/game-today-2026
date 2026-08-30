@@ -101,11 +101,11 @@ radar_origin_path = NodePath("RadarOrigin")
 shape = SubResource("Capsule")
 
 [node name="GroundShadow" type="Polygon2D" parent="." unique_id=1435860278]
-position = Vector2(0, 80)
+position = Vector2(0, 67)
 color = Color(0.03, 0.03, 0.04, 0.42)
-polygon = PackedVector2Array(-38.4, 0, -35.477, -2.296, -27.153, -4.243, -14.695, -5.543, 0, -6, 14.695, -5.543, 27.153, -4.243, 35.477, -2.296, 38.4, 0, 35.477, 2.296, 27.153, 4.243, 14.695, 5.543, 0, 6, -14.695, 5.543, -27.153, 4.243, -35.477, 2.296)
+polygon = PackedVector2Array(-48, 0, -44.346, -3.061, -33.941, -5.657, -18.369, -7.391, 0, -8, 18.369, -7.391, 33.941, -5.657, 44.346, -3.061, 48, 0, 44.346, 3.061, 33.941, 5.657, 18.369, 7.391, 0, 8, -18.369, 7.391, -33.941, 5.657, -44.346, 3.061)
 
-[node name="RadarOrigin" type="Marker2D" parent="."]
+[node name="RadarOrigin" type="Marker2D" parent="." unique_id=369639525]
 editor_description = "Scene-authored center point for the carriage radar sweep. Move this marker in the Inspector to align the scan origin with the player artwork."
 position = Vector2(0, -8)
 
