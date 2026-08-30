@@ -277,7 +277,6 @@ exterior_visual_path = NodePath("ArtRoot/Exterior")
 exterior_door_visual_path = NodePath("ArtRoot/Exterior/ClosedDoors")
 door_animation_path = NodePath("ArtRoot/Exterior/DoorAnimation")
 wheel_animation_path = NodePath("ArtRoot/Wheels/WheelAnimation")
-cinematic_interior_shade_path = NodePath("ArtRoot/CinematicInteriorShade")
 cinematic_interior_fade_seconds = 0.45
 
 [node name="ArtRoot" type="Node2D" parent="." unique_id=1500656962]
@@ -304,13 +303,6 @@ texture = ExtResource("2")
 centered = false
 
 [node name="InteriorLighting" parent="ArtRoot" instance=ExtResource("12_lighting")]
-
-[node name="CinematicInteriorShade" type="Polygon2D" parent="ArtRoot"]
-editor_description = "Cutscene-only interior grade. Color controls the cinematic darkness; CarriageVisual only fades its alpha."
-modulate = Color(1, 1, 1, 0)
-z_index = 4
-color = Color(0.025, 0.047, 0.09, 0.34)
-polygon = PackedVector2Array(0, 190, 960, 190, 960, 525, 0, 525)
 
 [node name="Exterior" type="CanvasGroup" parent="ArtRoot" unique_id=1207132285]
 unique_name_in_owner = true

@@ -14,6 +14,7 @@ const PASSENGER_FOOT_ANCHOR_Y: float = 37.5
 @export_range(1, 8, 1) var maximum_roaming_target_population: int = 3
 @export_category("Interaction Copy")
 @export var night_prompt_text: String = "Hear Departure Statement"
+@export_range(0.0, 48.0, 1.0) var dialogue_anchor_gap: float = 14.0
 @export_category("Visual Scale")
 @export_range(0.3, 1.0, 0.01) var baby_visual_scale: float = 0.68
 @export var uses_authored_character_artwork: bool = false
@@ -41,6 +42,7 @@ var _day_prompt_text: String = ""
 const PASSENGER_WALK_SPEED: float = 92.0
 
 @onready var _shadow: Polygon2D = %Shadow
+@onready var _interaction_prompt_anchor: Marker2D = $InteractionPromptAnchor
 @onready var _passenger_visual: Node2D = %PassengerVisual
 @onready var _body_tint: Node2D = %BodyTint
 @onready var _baby_mark: Polygon2D = %BabyMark
@@ -65,8 +67,29 @@ func _process(delta: float) -> void:
 func interact() -> void:
 	if data == null or departed:
 		return
-	documents_checked = true
 	documents_requested.emit(self)
+
+func get_prompt_anchor() -> Node2D:
+	return get_dialogue_anchor()
+
+func get_dialogue_anchor() -> Node2D:
+	_update_dialogue_anchor()
+	return _interaction_prompt_anchor
+
+func _update_dialogue_anchor() -> void:
+	if not is_instance_valid(_interaction_prompt_anchor) or not is_instance_valid(_passenger_visual):
+		return
+	var artwork := _passenger_visual.get_node_or_null("CharacterArtwork") as Sprite2D
+	if is_instance_valid(artwork) and artwork.texture != null:
+		var artwork_rect: Rect2 = artwork.get_rect()
+		var artwork_top_center := Vector2(artwork_rect.get_center().x, artwork_rect.position.y)
+		var top_position: Vector2 = to_local(artwork.to_global(artwork_top_center))
+		_interaction_prompt_anchor.position = Vector2(top_position.x, top_position.y - dialogue_anchor_gap)
+		return
+	var is_baby: bool = data != null and data.anomaly_type == "age_mismatch"
+	var visual_top: float = -208.5 if is_baby else -189.0
+	var fallback_top_position: Vector2 = to_local(_passenger_visual.to_global(Vector2(0.0, visual_top)))
+	_interaction_prompt_anchor.position = Vector2(fallback_top_position.x, fallback_top_position.y - dialogue_anchor_gap)
 
 func set_night_mode(value: bool) -> void:
 	night_mode = value
@@ -273,10 +296,11 @@ func _find_closest_activity_point(candidates: PackedVector2Array) -> Vector2:
 
 func _find_standing_fallback_position(carriage: int) -> Vector2:
 	# Seat markers remain capacity bookkeeping only. Visual placement always uses the aisle floor.
-	var floor_y: float = _assigned_seat_position.y + 80.0
+	var floor_y: float = _assigned_seat_position.y
 	for point: Vector2 in _activity_points:
 		if _carriage_from_world_x(point.x) == carriage:
-			floor_y = maxf(floor_y, point.y)
+			floor_y = point.y
+			break
 	var carriage_range: Vector2 = _carriage_ranges.get(carriage, Vector2(_assigned_seat_position.x - 400.0, _assigned_seat_position.x + 400.0))
 	var candidates := PackedVector2Array()
 	var left_edge: float = carriage_range.x + 70.0

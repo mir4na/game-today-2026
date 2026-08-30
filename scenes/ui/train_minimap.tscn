@@ -1,17 +1,22 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://cxgfpcr3hg68b"]
 
-[ext_resource type="Script" path="res://scripts/ui/train_minimap.gd" id="1"]
+[ext_resource type="Script" uid="uid://0j8h84yllxdm" path="res://scripts/ui/train_minimap.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://ddbii5vyjx3mi" path="res://assets/ui/gerbong_active.png" id="2_active"]
+[ext_resource type="Texture2D" uid="uid://1nweqvgg1u7s" path="res://assets/ui/gerbong_nonactive.png" id="3_inactive"]
 
-[node name="TrainMinimap" type="Control"]
-custom_minimum_size = Vector2(247, 64)
+[node name="TrainMinimap" type="Control" unique_id=1538774286]
+custom_minimum_size = Vector2(280, 50)
+layout_mode = 3
+anchors_preset = 0
 mouse_filter = 2
 script = ExtResource("1")
-selected_fill = Color(0.847059, 0.709804, 0.431373, 1)
-normal_fill = Color(0.223529, 0.266667, 0.317647, 1)
+active_carriage_texture = ExtResource("2_active")
+inactive_carriage_texture = ExtResource("3_inactive")
 selected_marker_color = Color(0.0941176, 0.12549, 0.168627, 1)
 normal_marker_color = Color(0.941176, 0.811765, 0.552941, 1)
 
-[node name="Connectors" type="Control" parent="."]
+[node name="Connectors" type="Control" parent="." unique_id=522977223]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +25,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Connector0" type="ColorRect" parent="Connectors"]
+[node name="Connector0" type="ColorRect" parent="Connectors" unique_id=2052335589]
 layout_mode = 0
 offset_left = 56.0
 offset_top = 19.0
@@ -28,7 +33,7 @@ offset_right = 63.0
 offset_bottom = 21.0
 color = Color(0.54902, 0.509804, 0.454902, 1)
 
-[node name="Connector1" type="ColorRect" parent="Connectors"]
+[node name="Connector1" type="ColorRect" parent="Connectors" unique_id=5565144]
 layout_mode = 0
 offset_left = 99.0
 offset_top = 19.0
@@ -36,7 +41,7 @@ offset_right = 106.0
 offset_bottom = 21.0
 color = Color(0.54902, 0.509804, 0.454902, 1)
 
-[node name="Connector2" type="ColorRect" parent="Connectors"]
+[node name="Connector2" type="ColorRect" parent="Connectors" unique_id=1452030313]
 layout_mode = 0
 offset_left = 142.0
 offset_top = 19.0
@@ -44,7 +49,7 @@ offset_right = 149.0
 offset_bottom = 21.0
 color = Color(0.54902, 0.509804, 0.454902, 1)
 
-[node name="Connector3" type="ColorRect" parent="Connectors"]
+[node name="Connector3" type="ColorRect" parent="Connectors" unique_id=1867580210]
 layout_mode = 0
 offset_left = 185.0
 offset_top = 19.0
@@ -52,21 +57,23 @@ offset_right = 192.0
 offset_bottom = 21.0
 color = Color(0.54902, 0.509804, 0.454902, 1)
 
-[node name="Slot0" type="Control" parent="."]
+[node name="Slot0" type="Control" parent="." unique_id=1878631634]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 20.0
-offset_top = 8.0
+anchors_preset = 0
+offset_left = 2.0
+offset_top = 2.0
 offset_right = 56.0
-offset_bottom = 60.0
+offset_bottom = 48.0
 
-[node name="Box" type="ColorRect" parent="Slot0"]
+[node name="Box" type="TextureRect" parent="Slot0" unique_id=756454706]
 layout_mode = 0
-offset_right = 36.0
-offset_bottom = 24.0
-color = Color(0.847059, 0.709804, 0.431373, 1)
+offset_right = 54.0
+offset_bottom = 23.0
+texture = ExtResource("2_active")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="MarkerLabel" type="Label" parent="Slot0/Box"]
+[node name="MarkerLabel" type="Label" parent="Slot0/Box" unique_id=161880028]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -79,31 +86,33 @@ theme_override_font_sizes/font_size = 10
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Label" type="Label" parent="Slot0"]
+[node name="Label" type="Label" parent="Slot0" unique_id=1181851844]
 layout_mode = 0
-offset_top = 30.0
-offset_right = 36.0
-offset_bottom = 52.0
+offset_top = 25.0
+offset_right = 54.0
+offset_bottom = 46.0
 theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
 theme_override_font_sizes/font_size = 14
 text = "C"
 horizontal_alignment = 1
 
-[node name="Slot1" type="Control" parent="."]
+[node name="Slot1" type="Control" parent="." unique_id=1641753493]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 63.0
-offset_top = 8.0
-offset_right = 99.0
-offset_bottom = 60.0
+anchors_preset = 0
+offset_left = 57.0
+offset_top = 2.0
+offset_right = 111.0
+offset_bottom = 48.0
 
-[node name="Box" type="ColorRect" parent="Slot1"]
+[node name="Box" type="TextureRect" parent="Slot1" unique_id=683516816]
 layout_mode = 0
-offset_right = 36.0
-offset_bottom = 24.0
-color = Color(0.223529, 0.266667, 0.317647, 1)
+offset_right = 54.0
+offset_bottom = 23.0
+texture = ExtResource("3_inactive")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="MarkerLabel" type="Label" parent="Slot1/Box"]
+[node name="MarkerLabel" type="Label" parent="Slot1/Box" unique_id=1589799408]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -116,31 +125,33 @@ theme_override_font_sizes/font_size = 10
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Label" type="Label" parent="Slot1"]
+[node name="Label" type="Label" parent="Slot1" unique_id=2579984]
 layout_mode = 0
-offset_top = 30.0
-offset_right = 36.0
-offset_bottom = 52.0
+offset_top = 25.0
+offset_right = 54.0
+offset_bottom = 46.0
 theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
 theme_override_font_sizes/font_size = 14
 text = "4"
 horizontal_alignment = 1
 
-[node name="Slot2" type="Control" parent="."]
+[node name="Slot2" type="Control" parent="." unique_id=247919059]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 106.0
-offset_top = 8.0
-offset_right = 142.0
-offset_bottom = 60.0
+anchors_preset = 0
+offset_left = 112.0
+offset_top = 2.0
+offset_right = 166.0
+offset_bottom = 48.0
 
-[node name="Box" type="ColorRect" parent="Slot2"]
+[node name="Box" type="TextureRect" parent="Slot2" unique_id=303909592]
 layout_mode = 0
-offset_right = 36.0
-offset_bottom = 24.0
-color = Color(0.223529, 0.266667, 0.317647, 1)
+offset_right = 54.0
+offset_bottom = 23.0
+texture = ExtResource("3_inactive")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="MarkerLabel" type="Label" parent="Slot2/Box"]
+[node name="MarkerLabel" type="Label" parent="Slot2/Box" unique_id=855814035]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -153,31 +164,33 @@ theme_override_font_sizes/font_size = 10
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Label" type="Label" parent="Slot2"]
+[node name="Label" type="Label" parent="Slot2" unique_id=602372540]
 layout_mode = 0
-offset_top = 30.0
-offset_right = 36.0
-offset_bottom = 52.0
+offset_top = 25.0
+offset_right = 54.0
+offset_bottom = 46.0
 theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
 theme_override_font_sizes/font_size = 14
 text = "3"
 horizontal_alignment = 1
 
-[node name="Slot3" type="Control" parent="."]
+[node name="Slot3" type="Control" parent="." unique_id=592430716]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 149.0
-offset_top = 8.0
-offset_right = 185.0
-offset_bottom = 60.0
+anchors_preset = 0
+offset_left = 167.0
+offset_top = 2.0
+offset_right = 221.0
+offset_bottom = 48.0
 
-[node name="Box" type="ColorRect" parent="Slot3"]
+[node name="Box" type="TextureRect" parent="Slot3" unique_id=906714206]
 layout_mode = 0
-offset_right = 36.0
-offset_bottom = 24.0
-color = Color(0.223529, 0.266667, 0.317647, 1)
+offset_right = 54.0
+offset_bottom = 23.0
+texture = ExtResource("3_inactive")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="MarkerLabel" type="Label" parent="Slot3/Box"]
+[node name="MarkerLabel" type="Label" parent="Slot3/Box" unique_id=1330998012]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -190,31 +203,33 @@ theme_override_font_sizes/font_size = 10
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Label" type="Label" parent="Slot3"]
+[node name="Label" type="Label" parent="Slot3" unique_id=1329828188]
 layout_mode = 0
-offset_top = 30.0
-offset_right = 36.0
-offset_bottom = 52.0
+offset_top = 25.0
+offset_right = 54.0
+offset_bottom = 46.0
 theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
 theme_override_font_sizes/font_size = 14
 text = "2"
 horizontal_alignment = 1
 
-[node name="Slot4" type="Control" parent="."]
+[node name="Slot4" type="Control" parent="." unique_id=1312268945]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 192.0
-offset_top = 8.0
-offset_right = 228.0
-offset_bottom = 60.0
+anchors_preset = 0
+offset_left = 222.0
+offset_top = 2.0
+offset_right = 276.0
+offset_bottom = 48.0
 
-[node name="Box" type="ColorRect" parent="Slot4"]
+[node name="Box" type="TextureRect" parent="Slot4" unique_id=415653150]
 layout_mode = 0
-offset_right = 36.0
-offset_bottom = 24.0
-color = Color(0.223529, 0.266667, 0.317647, 1)
+offset_right = 54.0
+offset_bottom = 23.0
+texture = ExtResource("3_inactive")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="MarkerLabel" type="Label" parent="Slot4/Box"]
+[node name="MarkerLabel" type="Label" parent="Slot4/Box" unique_id=1950435584]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -227,11 +242,11 @@ theme_override_font_sizes/font_size = 10
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Label" type="Label" parent="Slot4"]
+[node name="Label" type="Label" parent="Slot4" unique_id=1779723720]
 layout_mode = 0
-offset_top = 30.0
-offset_right = 36.0
-offset_bottom = 52.0
+offset_top = 25.0
+offset_right = 54.0
+offset_bottom = 46.0
 theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
 theme_override_font_sizes/font_size = 14
 text = "1"

@@ -1,6 +1,6 @@
 class_name TravelForeground
 extends CanvasLayer
-## Screen-space railway scenery shown only while the train is traveling.
+## Screen-space railway scenery that moves in transit and rests at stations.
 
 @export_category("Pole Timing")
 @export_range(0.5, 30.0, 0.5) var minimum_pole_interval: float = 2.5
@@ -14,6 +14,7 @@ extends CanvasLayer
 
 var _traveling: bool = false
 var _motion_strength: float = 0.0
+var _scenery_started: bool = false
 var _rng := RandomNumberGenerator.new()
 
 @onready var _travel_scenery: Node2D = %TravelScenery
@@ -38,23 +39,41 @@ func set_motion_strength(value: float) -> void:
 	var next_strength: float = clampf(value, 0.0, 1.0)
 	var was_traveling: bool = _traveling
 	_motion_strength = next_strength
-	_traveling = _motion_strength > 0.01
+	_traveling = _motion_strength > 0.001
 	_cable_animation.speed_scale = _motion_strength
 	_pole_animation.speed_scale = _motion_strength
 	if _traveling == was_traveling:
 		return
-	_travel_scenery.visible = _traveling
 	_cable_timer.stop()
 	_pole_timer.stop()
-	_cable_animation.stop()
-	_pole_animation.stop()
-	_passing_cables.hide()
-	_passing_pole.hide()
 	if _traveling:
-		_passing_cables.show()
-		_cable_animation.play(cable_pass_animation)
+		_scenery_started = true
+		_travel_scenery.show()
+		_resume_or_start_animation(_cable_animation, cable_pass_animation, _passing_cables)
 		_cable_animation.speed_scale = _motion_strength
-		_schedule_next_pole()
+		if _passing_pole.visible:
+			_resume_or_start_animation(_pole_animation, pole_pass_animation, _passing_pole)
+			_pole_animation.speed_scale = _motion_strength
+		else:
+			_schedule_next_pole()
+	elif _scenery_started:
+		# Keep the exact final positions from deceleration. Stopping the animation
+		# would apply its RESET track and make the scenery visibly teleport.
+		_cable_animation.pause()
+		_pole_animation.pause()
+		_travel_scenery.show()
+
+func _resume_or_start_animation(animation: AnimationPlayer, animation_name: StringName, visual: CanvasItem) -> void:
+	visual.show()
+	var can_resume: bool = (
+		animation.assigned_animation == animation_name
+		and animation.current_animation_position > 0.0
+		and animation.current_animation_position < animation.current_animation_length
+	)
+	if can_resume:
+		animation.play()
+	else:
+		animation.play(animation_name)
 
 func _schedule_next_cable() -> void:
 	if not _traveling:

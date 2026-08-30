@@ -30,11 +30,29 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_EXTERNAL_DEATH, FORCE
 @export_category("Inspector Copy")
 @export_multiline var night_shift_instruction: String
 @export var departure_statement_recorded_template: String
+@export_category("Passenger Inspection Dialogue")
+@export_multiline var inspection_request_line: String = "Ticket and identification, please."
+@export_range(0.2, 3.0, 0.05) var inspection_request_duration: float = 0.85
+@export_range(0.2, 3.0, 0.05) var inspection_reply_duration: float = 1.15
+@export_category("Night Statement Dialogue")
+@export_multiline var night_statement_template: String = "%s: \"%s\"\n[E] Continue"
+@export var missing_night_statement_text: String = "I have nothing left to tell you."
 
 const ABNORMAL_NOTE_PENALTY: int = 10
 const WRONG_STOP_PENALTY: int = 12
 const START_MINUTES: float = 14.0 * 60.0
-const SUNSET_MINUTES: float = 17.5 * 60.0
+const DAY_SERVICE_FINAL_CYCLE_PROGRESS: float = 1.0
+const SUNSET_STATE_PROGRESS: float = 0.62
+const SERVICE_NIGHT_START_PROGRESS: float = 0.70
+const SERVICE_FULL_NIGHT_PROGRESS: float = 0.98
+const INSPECTION_REPLIES: PackedStringArray = [
+	"Of course. Here you are.",
+	"Certainly, Inspector.",
+	"One moment... yes, here they are.",
+	"I have them ready for you.",
+	"Is everything in order?",
+	"Please be careful with the ticket."
+]
 
 var state: GameState = GameState.OPENING
 var _day_minutes: float = START_MINUTES
@@ -70,6 +88,10 @@ var _active_modal: Control
 var _station_cutscene_context: StringName = &""
 var _station_cutscene_motion_strength: float = 1.0
 var _inspected_passenger: Passenger
+var _inspection_dialogue_active: bool = false
+var _inspection_dialogue_serial: int = 0
+var _night_statement_active: bool = false
+var _night_statement_newly_recorded: bool = false
 var _blocked_aisle_events: Array[Node] = []
 var _dirty_seat_events: Array[Node] = []
 var _active_dirty_seat_event: Node
@@ -99,6 +121,7 @@ var _earned_shift_merit: int = 0
 @onready var _blocked_aisle_timer: Timer = %BlockedAisleTimer
 @onready var _dirty_seat_timer: Timer = %DirtySeatTimer
 @onready var _ambience: TrainAmbience = %TrainAmbience
+@onready var _travel_background: TravelBackground = %TravelBackground
 @onready var _travel_foreground: TravelForeground = %TravelForeground
 @onready var _sky_gradient: ColorRect = %NightSkyOverlay
 @onready var _night_atmosphere: ColorRect = %NightAtmosphere
@@ -131,6 +154,7 @@ func _ready() -> void:
 	if is_instance_valid(_desk):
 		_desk.enabled = false
 	_configure_maintenance_events()
+	_player.set_camera_right_limit(_train.get_right_edge_world_x())
 	_player.set_interactables(_interactables)
 	_hud.set_clock(int(_day_minutes))
 	_set_arrival_clock_display(int(_day_minutes))
@@ -142,6 +166,7 @@ func _ready() -> void:
 	_day_intro_ui.play_intro(1)
 
 func _process(delta: float) -> void:
+	_station_stop_ui.set_departure_blocked(_station_stop_ui.visible and _ambience.is_announcement_playing())
 	_update_travel_foreground()
 	var world_simulation_active: bool = _is_world_simulation_active()
 	_set_passenger_ai_enabled(world_simulation_active and state in [GameState.DAY, GameState.SUNSET])
@@ -156,27 +181,34 @@ func _process(delta: float) -> void:
 		_day_minutes = minf(_day_minutes + delta, _next_arrival_minutes())
 	_hud.set_clock(int(_day_minutes))
 	_set_arrival_clock_display(int(_day_minutes))
-	var night_strength: float = clampf((_day_minutes - 990.0) / maxf(_final_arrival_minutes() - 990.0, 1.0), 0.0, 1.0)
-	var cycle_progress: float = clampf((_day_minutes - START_MINUTES) / maxf(_final_arrival_minutes() - START_MINUTES, 1.0), 0.0, 1.0)
-	_train.set_night_strength(night_strength)
-	_ambience.night_strength = night_strength
+	var route_progress: float = clampf((_day_minutes - START_MINUTES) / maxf(_final_arrival_minutes() - START_MINUTES, 1.0), 0.0, 1.0)
+	var cycle_progress: float = route_progress * DAY_SERVICE_FINAL_CYCLE_PROGRESS
+	var service_night_strength: float = smoothstep(
+		SERVICE_NIGHT_START_PROGRESS,
+		SERVICE_FULL_NIGHT_PROGRESS,
+		cycle_progress
+	)
+	_train.set_night_strength(service_night_strength)
+	_ambience.night_strength = service_night_strength
 	_set_sky_cycle_progress(cycle_progress)
-	_night_atmosphere.modulate.a = night_strength
+	_night_atmosphere.modulate.a = service_night_strength
 
 	if not _station_arrival_announced and _has_next_day_station() and _day_minutes >= _next_arrival_minutes():
 		_announce_next_station()
 
-	if state == GameState.DAY and _day_minutes >= SUNSET_MINUTES:
+	if state == GameState.DAY and cycle_progress >= SUNSET_STATE_PROGRESS:
 		state = GameState.SUNSET
-		_hud.notify("THE LAST LIGHT IS FADING", 3.0)
+		_hud.notify("THE LAST LIGHT FADES BEYOND THE RAILS", 3.0)
 
 func _update_travel_foreground() -> void:
 	if _station_stop_ui.visible:
+		_travel_background.set_motion_strength(_station_cutscene_motion_strength)
 		_travel_foreground.set_motion_strength(_station_cutscene_motion_strength)
 		return
 	var is_traveling: bool = _is_world_simulation_active() and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
 	if state in [GameState.DAY, GameState.SUNSET]:
 		is_traveling = is_traveling and not _station_arrival_announced
+	_travel_background.set_traveling(is_traveling)
 	_travel_foreground.set_traveling(is_traveling)
 
 
@@ -207,12 +239,23 @@ func _final_arrival_minutes() -> float:
 
 func _set_sky_cycle_progress(value: float) -> void:
 	var clamped_progress: float = clampf(value, 0.0, 1.0)
+	_travel_background.set_cycle_progress(clamped_progress)
 	_train.set_day_cycle_progress(clamped_progress)
 	var sky_material := _sky_gradient.material as ShaderMaterial
 	if sky_material != null:
 		sky_material.set_shader_parameter(&"cycle_progress", clamped_progress)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _night_statement_active:
+		if event.is_action_pressed(&"interact") or event.is_action_pressed(&"ui_cancel"):
+			_close_night_statement_dialogue()
+			get_viewport().set_input_as_handled()
+		return
+	if _inspection_dialogue_active:
+		if event.is_action_pressed(&"ui_cancel"):
+			_cancel_inspection_dialogue()
+			get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed(&"abnormal_log"):
 		if _dead_selection_ui.visible:
 			_dead_selection_ui.request_close()
@@ -793,8 +836,15 @@ func _on_nearby_interactable_changed(interactable: Interactable) -> void:
 	_nearby_interactable = interactable
 	_hud.set_prompt(
 		interactable.get_prompt() if interactable != null else "",
-		interactable.get_prompt_anchor() if interactable != null else null
+		_get_interactable_prompt_anchor(interactable)
 	)
+
+func _get_interactable_prompt_anchor(interactable: Interactable) -> Node2D:
+	if interactable == null:
+		return null
+	if interactable is Passenger:
+		return (interactable as Passenger).get_dialogue_anchor()
+	return interactable.get_prompt_anchor()
 
 func _on_passenger_documents_requested(passenger: Passenger) -> void:
 	if passenger.departed:
@@ -802,8 +852,65 @@ func _on_passenger_documents_requested(passenger: Passenger) -> void:
 	if state == GameState.NIGHT:
 		_on_night_passenger_interacted(passenger)
 		return
+	if _inspection_dialogue_active:
+		return
+	if not _checked_passenger_data.has(passenger.data):
+		_play_inspection_dialogue(passenger)
+		return
+	_open_passenger_documents(passenger)
+
+func _play_inspection_dialogue(passenger: Passenger) -> void:
+	_inspection_dialogue_serial += 1
+	var dialogue_serial: int = _inspection_dialogue_serial
+	_inspection_dialogue_active = true
+	_inspected_passenger = passenger
+	_inspected_passenger.set_inspection_paused(true)
+	_player.movement_enabled = false
+	_player.interaction_enabled = false
+	_hud.set_prompt(inspection_request_line, _player.get_dialogue_anchor())
+	await get_tree().create_timer(inspection_request_duration).timeout
+	if not _is_inspection_dialogue_valid(passenger, dialogue_serial):
+		if dialogue_serial == _inspection_dialogue_serial:
+			_cancel_inspection_dialogue()
+		return
+	_hud.set_prompt(_get_inspection_reply(passenger.data), passenger.get_dialogue_anchor())
+	await get_tree().create_timer(inspection_reply_duration).timeout
+	if not _is_inspection_dialogue_valid(passenger, dialogue_serial):
+		if dialogue_serial == _inspection_dialogue_serial:
+			_cancel_inspection_dialogue()
+		return
+	_inspection_dialogue_active = false
+	_open_passenger_documents(passenger)
+
+func _get_inspection_reply(data: PassengerData) -> String:
+	if data == null:
+		return "Of course."
+	var identity_key: String = data.identity_number if not data.identity_number.is_empty() else data.passenger_name
+	var reply_index: int = posmod(hash(identity_key), INSPECTION_REPLIES.size())
+	return INSPECTION_REPLIES[reply_index]
+
+func _is_inspection_dialogue_valid(passenger: Passenger, dialogue_serial: int) -> bool:
+	return (
+		_inspection_dialogue_active
+		and dialogue_serial == _inspection_dialogue_serial
+		and is_instance_valid(passenger)
+		and passenger == _inspected_passenger
+		and not passenger.departed
+		and state in [GameState.DAY, GameState.SUNSET]
+	)
+
+func _cancel_inspection_dialogue() -> void:
+	_inspection_dialogue_serial += 1
+	_inspection_dialogue_active = false
+	if is_instance_valid(_inspected_passenger):
+		_inspected_passenger.set_inspection_paused(false)
+	_inspected_passenger = null
+	_set_player_control_for_state()
+
+func _open_passenger_documents(passenger: Passenger) -> void:
 	if not _checked_passenger_data.has(passenger.data):
 		_checked_passenger_data.append(passenger.data)
+	passenger.documents_checked = true
 	_inspected_passenger = passenger
 	_inspected_passenger.set_inspection_paused(true)
 	_active_modal = _document_overlay
@@ -815,7 +922,7 @@ func _on_passenger_documents_requested(passenger: Passenger) -> void:
 		_document_overlay.configure_station_assignment(_station_assignment.has(passenger.data.passenger_name))
 
 func _on_night_passenger_interacted(passenger: Passenger) -> void:
-	if passenger.data == null or not passenger.data.is_dead:
+	if _night_statement_active or passenger.data == null or not passenger.data.is_dead:
 		return
 	var puzzle: DeparturePuzzleData = _get_departure_puzzle()
 	if puzzle == null:
@@ -826,13 +933,22 @@ func _on_night_passenger_interacted(passenger: Passenger) -> void:
 	var newly_recorded: bool = not statement.is_empty() and not _collected_departure_statements.has(passenger_name)
 	if newly_recorded:
 		_collected_departure_statements[passenger_name] = statement
-	_active_modal = _document_overlay
+	_night_statement_active = true
+	_night_statement_newly_recorded = newly_recorded
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
+	var spoken_statement: String = statement if not statement.is_empty() else missing_night_statement_text
+	_hud.set_prompt(night_statement_template % [passenger_name, spoken_statement], passenger.get_prompt_anchor())
+
+func _close_night_statement_dialogue() -> void:
+	if not _night_statement_active:
+		return
+	_night_statement_active = false
 	_hud.set_prompt("")
-	_document_overlay.show_departure_statement(passenger.data, statement, newly_recorded)
-	if newly_recorded:
+	_set_player_control_for_state()
+	if _night_statement_newly_recorded:
 		_hud.notify(departure_statement_recorded_template % [_collected_departure_statements.size(), _get_departure_statement_total()], 3.0)
+	_night_statement_newly_recorded = false
 
 func _on_station_assignment_toggled(passenger_name: String, should_assign: bool) -> void:
 	if state not in [GameState.DAY, GameState.SUNSET] or not _has_next_day_station() or _station_exchange_processed:
@@ -980,6 +1096,7 @@ func _process_station_arrival() -> void:
 
 func _start_station_stop_cutscene(station_name: String, departing_actors: Array[Dictionary], boarding_actors: Array[Dictionary]) -> void:
 	_station_cutscene_context = &"station_exchange"
+	_ambience.begin_station_sequence()
 	_active_modal = _station_stop_ui
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
@@ -999,6 +1116,7 @@ func _on_day_intro_finished() -> void:
 		if _is_active_passenger(passenger) and passenger.data.origin_station == day_route[0]:
 			boarding_actors.append(_passenger_cutscene_actor(passenger))
 	_station_cutscene_context = &"opening"
+	_ambience.begin_station_sequence()
 	_active_modal = _station_stop_ui
 	_hud.set_cutscene_hidden(true)
 	var opening_timeline: Vector3 = _station_stop_ui.get_opening_timeline()
@@ -1011,8 +1129,10 @@ func _on_station_cutscene_timeline_changed(elapsed: float) -> void:
 func _on_station_cutscene_train_motion_changed(strength: float) -> void:
 	_station_cutscene_motion_strength = clampf(strength, 0.0, 1.0)
 	_train.set_motion_strength(_station_cutscene_motion_strength)
+	_travel_background.set_motion_strength(_station_cutscene_motion_strength)
 	_travel_foreground.set_motion_strength(_station_cutscene_motion_strength)
 	_ambience.motion_strength = _station_cutscene_motion_strength
+	_station_stop_ui.set_departure_blocked(_ambience.is_announcement_playing())
 
 func _on_station_cutscene_boarding_actor_entered(actor_index: int, _door_screen_position: Vector2) -> void:
 	if actor_index < 0 or actor_index >= _boarding_passengers.size():
@@ -1027,6 +1147,7 @@ func _on_station_cutscene_boarding_actor_entered(actor_index: int, _door_screen_
 func _on_station_stop_finished() -> void:
 	var finished_context: StringName = _station_cutscene_context
 	_station_cutscene_context = &""
+	_ambience.end_station_sequence()
 	_train.hide_exterior_body()
 	_finish_staged_boarding()
 	_hud.set_cutscene_hidden(false)
@@ -1203,6 +1324,7 @@ func _finalize_day_shift() -> void:
 	if _shift_report_finalized:
 		return
 	_shift_report_finalized = true
+	_set_train_stopped_for_night_transition()
 	state = GameState.SHIFT_REPORT
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
@@ -1301,6 +1423,7 @@ func _enter_night() -> void:
 	_runtime_puzzle = puzzle_template.create_runtime(_get_dead_passenger_data(), _daily_rng)
 	_collected_departure_statements.clear()
 	state = GameState.NIGHT
+	_resume_train_after_night_market()
 	_train.set_night_strength(1.0)
 	_ambience.night_strength = 1.0
 	_set_sky_cycle_progress(1.0)
@@ -1313,6 +1436,20 @@ func _enter_night() -> void:
 	_hud.set_night_walk_mode()
 	_hud.notify(night_shift_instruction, 5.0)
 	_set_player_control_for_state()
+
+func _set_train_stopped_for_night_transition() -> void:
+	_station_cutscene_motion_strength = 0.0
+	_train.set_motion_strength(0.0)
+	_travel_background.set_motion_strength(0.0)
+	_travel_foreground.set_motion_strength(0.0)
+	_ambience.pause_train_travel()
+
+func _resume_train_after_night_market() -> void:
+	_station_cutscene_motion_strength = 1.0
+	_train.set_motion_strength(1.0)
+	_travel_background.set_motion_strength(1.0)
+	_travel_foreground.set_motion_strength(1.0)
+	_ambience.resume_train_travel()
 
 func _open_night_puzzle() -> void:
 	state = GameState.NIGHT_PUZZLE
@@ -1363,12 +1500,17 @@ func _add_penalty(points: int, reason: String) -> void:
 	_penalty_log.append("%s  (+%d)" % [reason, applied_points])
 
 func _set_player_control_for_state() -> void:
-	var can_walk: bool = _active_modal == null and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
+	var can_walk: bool = (
+		_active_modal == null
+		and not _inspection_dialogue_active
+		and not _night_statement_active
+		and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
+	)
 	_player.movement_enabled = can_walk
 	_player.interaction_enabled = can_walk
 	_hud.set_prompt(
 		_nearby_interactable.get_prompt() if can_walk and is_instance_valid(_nearby_interactable) else "",
-		_nearby_interactable.get_prompt_anchor() if can_walk and is_instance_valid(_nearby_interactable) else null
+		_get_interactable_prompt_anchor(_nearby_interactable) if can_walk else null
 	)
 
 func _update_carriage_indicator() -> void:
@@ -1398,7 +1540,10 @@ func _is_passenger_inspection_active() -> bool:
 	)
 
 func _is_world_simulation_active() -> bool:
-	return _active_modal == null or _is_passenger_inspection_active() or _is_maintenance_minigame_active()
+	return (
+		not _inspection_dialogue_active
+		and (_active_modal == null or _is_passenger_inspection_active() or _is_maintenance_minigame_active())
+	)
 
 
 func _is_maintenance_minigame_active() -> bool:

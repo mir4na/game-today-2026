@@ -7,9 +7,9 @@
 [ext_resource type="Texture2D" uid="uid://bh86nkwa5wa2l" path="res://assets/kereta/Bagian bawah.png" id="5"]
 [ext_resource type="Texture2D" uid="uid://qfgbxjo8e3mf" path="res://assets/kereta/Pintu kiri.png" id="6"]
 [ext_resource type="Texture2D" uid="uid://bd3gsinxrrynl" path="res://assets/kereta/Pintu kanan.png" id="7"]
-[ext_resource type="Material" path="res://resources/materials/exterior_top_down_fade.tres" id="8_fade"]
-[ext_resource type="Material" path="res://resources/materials/window_light_mask.tres" id="9_window_light"]
+[ext_resource type="Material" uid="uid://brf65k0jnducb" path="res://resources/materials/exterior_top_down_fade.tres" id="8_fade"]
 [ext_resource type="Texture2D" uid="uid://c1r4rdjeoyrm7" path="res://assets/kereta/bagian_bawah.png" id="9_t2b4i"]
+[ext_resource type="Material" path="res://resources/materials/window_light_mask.tres" id="9_window_light"]
 [ext_resource type="PackedScene" path="res://scenes/train/train_interior_lighting.tscn" id="10_lighting"]
 [ext_resource type="PackedScene" path="res://scenes/train/passenger_seat.tscn" id="11_seat"]
 
@@ -22,6 +22,48 @@ gradient = SubResource("Gradient_e78od")
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(0.9045139, 0.19618055)
+
+[sub_resource type="Gradient" id="Gradient_radar_red"]
+offsets = PackedFloat32Array(0, 0.55, 1)
+colors = PackedColorArray(1, 0.05, 0.04, 1, 0.85, 0.025, 0.02, 0.66, 0.3, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_radar_red"]
+gradient = SubResource("Gradient_radar_red")
+width = 960
+height = 420
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_7n8ln"]
+offsets = PackedFloat32Array(0, 0.40625, 1)
+colors = PackedColorArray(1, 1, 0.11372549, 1, 0.43509614, 0.1262632, 0.049481526, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_7cu4k"]
+gradient = SubResource("Gradient_7n8ln")
+fill = 1
+fill_from = Vector2(0.5052083, 0.49479166)
+fill_to = Vector2(0.8802083, 0.1892361)
+
+[sub_resource type="Gradient" id="Gradient_78nmd"]
+offsets = PackedFloat32Array(0, 0.37259614, 0.93990386)
+colors = PackedColorArray(1, 1, 0.5294118, 1, 0.64997, 0.47137296, 0.12125202, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_jrwbp"]
+gradient = SubResource("Gradient_78nmd")
+fill = 1
+fill_from = Vector2(0.5260417, 0.5399306)
+fill_to = Vector2(0.8767361, 0.22743055)
+
+[sub_resource type="Gradient" id="Gradient_5px1x"]
+offsets = PackedFloat32Array(0, 0.38221154, 1)
+colors = PackedColorArray(0.9703134, 0.99999994, 0.96589774, 1, 0.1389706, 0.45432693, 0.10155543, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_jmf70"]
+gradient = SubResource("Gradient_5px1x")
+fill = 1
+fill_from = Vector2(0.4878472, 0.5086806)
+fill_to = Vector2(0.8454861, 0.2621528)
 
 [sub_resource type="Animation" id="Animation_door_reset"]
 resource_name = "RESET"
@@ -273,18 +315,6 @@ _data = {
 &"wheel_spin": SubResource("Animation_wheel_spin")
 }
 
-[sub_resource type="Gradient" id="Gradient_radar_red"]
-offsets = PackedFloat32Array(0, 0.55, 1)
-colors = PackedColorArray(1, 0.05, 0.04, 1, 0.85, 0.025, 0.02, 0.66, 0.3, 0, 0, 0)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_radar_red"]
-gradient = SubResource("Gradient_radar_red")
-width = 960
-height = 420
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-fill_to = Vector2(1, 0.5)
-
 [sub_resource type="RectangleShape2D" id="PassengerFloorShape"]
 size = Vector2(934, 24)
 
@@ -301,14 +331,10 @@ exterior_visual_path = NodePath("ArtRoot/Exterior")
 exterior_door_visual_path = NodePath("ArtRoot/Exterior/ClosedDoors")
 door_animation_path = NodePath("ArtRoot/Exterior/DoorAnimation")
 wheel_animation_path = NodePath("ArtRoot/Wheels/WheelAnimation")
-cinematic_interior_shade_path = NodePath("ArtRoot/CinematicInteriorShade")
 radar_anomaly_light_path = NodePath("ArtRoot/RadarAnomalyLight")
 dirty_seat_events_root_path = NodePath("PassengerLayout/PassengerSeatSlots")
-cinematic_interior_fade_seconds = 0.45
-radar_light_energy = 2.4
-radar_light_fade_seconds = 0.35
 
-[node name="PassengerLayout" type="Node2D" parent="."]
+[node name="PassengerLayout" type="Node2D" parent="." unique_id=1260823063]
 editor_description = "Shared passenger ground baseline. Move this node vertically in the Inspector to align every seat, activity, and boarding position without changing the train floor."
 position = Vector2(0, 430)
 
@@ -334,25 +360,26 @@ position = Vector2(292, 0)
 position = Vector2(349, 0)
 
 [node name="Seat7" parent="PassengerLayout/PassengerSeatSlots" unique_id=1325952382 instance=ExtResource("11_seat")]
-position = Vector2(604, 0)
+position = Vector2(609, 0)
 
 [node name="Seat8" parent="PassengerLayout/PassengerSeatSlots" unique_id=1067196251 instance=ExtResource("11_seat")]
-position = Vector2(661, 0)
+position = Vector2(666, 0)
 
 [node name="Seat9" parent="PassengerLayout/PassengerSeatSlots" unique_id=1888379417 instance=ExtResource("11_seat")]
-position = Vector2(717, 0)
+position = Vector2(722, 0)
 
 [node name="Seat10" parent="PassengerLayout/PassengerSeatSlots" unique_id=258523522 instance=ExtResource("11_seat")]
-position = Vector2(774, 0)
+position = Vector2(779, 0)
 
 [node name="Seat11" parent="PassengerLayout/PassengerSeatSlots" unique_id=465335388 instance=ExtResource("11_seat")]
-position = Vector2(830, 0)
+position = Vector2(835, 0)
 
 [node name="Seat12" parent="PassengerLayout/PassengerSeatSlots" unique_id=1160981160 instance=ExtResource("11_seat")]
-position = Vector2(887, 0)
+position = Vector2(892, 0)
 
 [node name="PassengerActivitySlots" type="Node2D" parent="PassengerLayout" unique_id=1069195525]
 editor_description = "AI standing and roaming targets. These inherit the same ground baseline as seats and doors."
+visible = false
 
 [node name="DoorWatch" type="Marker2D" parent="PassengerLayout/PassengerActivitySlots" unique_id=999687608]
 position = Vector2(434, 0)
@@ -368,6 +395,7 @@ position = Vector2(860, 0)
 
 [node name="PassengerDoorSlots" type="Node2D" parent="PassengerLayout" unique_id=57805849]
 editor_description = "Boarding handoff targets. These inherit the same ground baseline as seats and AI activity targets."
+visible = false
 
 [node name="DoorLeft" type="Marker2D" parent="PassengerLayout/PassengerDoorSlots" unique_id=653101308]
 position = Vector2(446, 0)
@@ -382,6 +410,7 @@ unique_name_in_owner = true
 unique_name_in_owner = true
 
 [node name="WindowLightRoot" type="Node2D" parent="ArtRoot/Interior" unique_id=179276824]
+visible = false
 
 [node name="PointLight2D" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=530496502]
 position = Vector2(83.5, 356.5)
@@ -447,26 +476,19 @@ scale = Vector2(0.374415, 0.374415)
 texture = ExtResource("2")
 centered = false
 
-[node name="InteriorLighting" parent="ArtRoot" instance=ExtResource("10_lighting")]
+[node name="InteriorLighting" parent="ArtRoot" unique_id=1422164408 instance=ExtResource("10_lighting")]
 
-[node name="RadarAnomalyLight" type="PointLight2D" parent="ArtRoot"]
+[node name="RadarAnomalyLight" type="PointLight2D" parent="ArtRoot" unique_id=1486944741]
 editor_description = "Scene-authored red anomaly scan light. Position, color, size, and maximum energy can be tuned here and on the PassengerCoach Inspector."
-position = Vector2(480, 355)
-energy = 0.0
+position = Vector2(483, 356)
 color = Color(1, 0.04, 0.025, 1)
+energy = 0.0
 texture = SubResource("GradientTexture2D_radar_red")
-
-[node name="CinematicInteriorShade" type="Polygon2D" parent="ArtRoot"]
-editor_description = "Cutscene-only interior grade. Color controls the cinematic darkness; CarriageVisual only fades its alpha."
-modulate = Color(1, 1, 1, 0)
-z_index = 4
-color = Color(0.025, 0.047, 0.09, 0.34)
-polygon = PackedVector2Array(0, 190, 960, 190, 960, 525, 0, 525)
 
 [node name="Exterior" type="CanvasGroup" parent="ArtRoot" unique_id=997357374]
 unique_name_in_owner = true
-editor_description = "The complete cutscene exterior composite. Exterior sprites and ClosedDoors share this single top-to-bottom wipe material so they disappear in sync."
 process_mode = 4
+editor_description = "The complete cutscene exterior composite. Exterior sprites and ClosedDoors share this single top-to-bottom wipe material so they disappear in sync."
 z_index = 5
 material = ExtResource("8_fade")
 fit_margin = 16.0
@@ -478,6 +500,21 @@ position = Vector2(11.999999, 214.7504)
 scale = Vector2(0.37449878, 0.374415)
 texture = ExtResource("4")
 centered = false
+
+[node name="PointLight2D" type="PointLight2D" parent="ArtRoot/Exterior" unique_id=423592622]
+position = Vector2(372, 307)
+scale = Vector2(0.37449878, 0.374415)
+texture = SubResource("GradientTexture2D_7cu4k")
+
+[node name="PointLight2D2" type="PointLight2D" parent="ArtRoot/Exterior" unique_id=630367761]
+position = Vector2(371.5, 319)
+scale = Vector2(0.35937503, 0.31250012)
+texture = SubResource("GradientTexture2D_jrwbp")
+
+[node name="PointLight2D3" type="PointLight2D" parent="ArtRoot/Exterior" unique_id=1398884387]
+position = Vector2(372, 331.5)
+scale = Vector2(0.37499994, 0.35937527)
+texture = SubResource("GradientTexture2D_jmf70")
 
 [node name="ExteriorUnderframeSprite" type="Sprite2D" parent="ArtRoot/Exterior" unique_id=1762554862]
 z_index = 1
@@ -580,16 +617,16 @@ libraries/ = SubResource("AnimationLibrary_wheels")
 autoplay = &"wheel_spin"
 speed_scale = 3.5
 
-[node name="UnderframeCovers" type="Node2D" parent="ArtRoot"]
+[node name="UnderframeCovers" type="Node2D" parent="ArtRoot" unique_id=101555287]
 editor_description = "Scene-authored bogie covers. Adjust the left and right cover sprites here without changing wheel positions or floor collision."
 z_index = 6
 
-[node name="LeftBogieCover" type="Sprite2D" parent="ArtRoot/UnderframeCovers"]
+[node name="LeftBogieCover" type="Sprite2D" parent="ArtRoot/UnderframeCovers" unique_id=1157615523]
 position = Vector2(215.95375, 567)
 scale = Vector2(0.3737353, 0.371)
 texture = ExtResource("9_t2b4i")
 
-[node name="RightBogieCover" type="Sprite2D" parent="ArtRoot/UnderframeCovers"]
+[node name="RightBogieCover" type="Sprite2D" parent="ArtRoot/UnderframeCovers" unique_id=1960268889]
 position = Vector2(749.95374, 567)
 scale = Vector2(0.3737353, 0.371)
 texture = ExtResource("9_t2b4i")

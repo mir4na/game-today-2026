@@ -7,6 +7,7 @@ signal doors_open_changed(is_open: bool)
 @export_category("Scene Animations")
 @export var transition_in_animation: StringName = &"exterior_fade_in"
 @export var transition_out_animation: StringName = &"exterior_fade_out"
+@export var use_departure_wipe: bool = false
 @export_range(0.0, 2.0, 0.05) var door_close_duration: float = 0.55
 @export_range(0.0, 3.0, 0.05) var closed_hold_before_exit: float = 1.0
 @export_range(0.0, 1.0, 0.01) var wipe_progress: float = 0.0
@@ -55,7 +56,7 @@ func _set_doors_open(value: bool) -> void:
 	doors_open_changed.emit(_doors_open)
 
 func _update_exit_transition() -> void:
-	if _transition_out_started:
+	if _transition_out_started or not use_departure_wipe:
 		return
 	var exit_start: float = _departure_start + door_close_duration + closed_hold_before_exit
 	if _elapsed < exit_start:

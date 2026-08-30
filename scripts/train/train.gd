@@ -94,6 +94,12 @@ func get_passenger_carriage_world_ranges() -> Dictionary:
 		result[carriage.carriage_number] = Vector2(start_x, start_x + carriage.carriage_width)
 	return result
 
+func get_right_edge_world_x() -> float:
+	var right_edge: float = global_position.x
+	for carriage: CarriageVisual in _carriages:
+		right_edge = maxf(right_edge, carriage.global_position.x + carriage.carriage_width)
+	return right_edge
+
 
 func get_passenger_carriage_number_at_world_x(world_x: float) -> int:
 	var local_x: float = to_local(Vector2(world_x, global_position.y)).x

@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://c8qmx71qn8rq6"]
+
+[ext_resource type="Script" uid="uid://drexucppoxj53" path="res://scripts/systems/travel_background.gd" id="1_background"]
+
+[node name="TravelBackground" type="CanvasLayer" unique_id=2116512518]
+layer = -9
+script = ExtResource("1_background")
+tunnel_enter_seconds = 2.0
+tunnel_hold_seconds = 1.0
+tunnel_exit_seconds = 2.0

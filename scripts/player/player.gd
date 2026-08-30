@@ -23,6 +23,8 @@ var _facing: float = 1.0
 var _market_speed_bonus: float = 0.0
 
 @onready var _animated_sprite: AnimatedSprite2D = %MCVisual
+@onready var _camera: Camera2D = $Camera2D
+@onready var _dialogue_anchor: Marker2D = %DialogueAnchor
 @onready var _gravity: float = float(ProjectSettings.get_setting("physics/2d/default_gravity"))
 
 
@@ -56,9 +58,15 @@ func set_interactables(nodes: Array[Interactable]) -> void:
 func clear_interactable() -> void:
 	_set_nearest(null)
 
+func get_dialogue_anchor() -> Node2D:
+	return _dialogue_anchor
+
 
 func set_market_speed_bonus(value: float) -> void:
 	_market_speed_bonus = maxf(0.0, value)
+
+func set_camera_right_limit(world_right_edge: float) -> void:
+	_camera.limit_right = maxi(_camera.limit_left + 1, int(floor(world_right_edge)))
 
 
 func get_effective_move_speed() -> float:
