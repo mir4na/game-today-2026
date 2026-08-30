@@ -26,11 +26,11 @@ const PERIOD_TEXTURES: Dictionary = {
 		{"texture": preload("res://assets/environment/sunset_layer4.png"), "speed": 28.0, "alpha": 1.0, "align": "top"},
 		{"texture": preload("res://assets/environment/sunset_layer3.png"), "speed": 18.0, "alpha": 1.0, "cloud": true},
 		{"texture": preload("res://assets/environment/sunset_layer2.png"), "speed": 45.0, "alpha": 1.0, "align": "top"},
-		{"texture": preload("res://assets/environment/sunset_layer1.png"), "speed": 60.0, "alpha": 1.0, "align": "bottom"},
+		{"texture": preload("res://assets/environment/sunset_layer1.png"), "speed": 60.0, "alpha": 1.0, "align": "bottom", "y_offset": 24.0},
 	],
 	Period.NIGHT: [
 		{"texture": preload("res://assets/environment/night_layer2.png"), "speed": 5.0, "alpha": 1.0, "align": "bottom"},
-		{"texture": preload("res://assets/environment/night_layer1.png"), "speed": 18.0, "alpha": 1.0, "cloud": true},
+		{"texture": preload("res://assets/environment/night_layer1.png"), "speed": 18.0, "alpha": 1.0, "cloud": true, "y_offset": -18.0},
 	],
 }
 
@@ -151,6 +151,7 @@ func _build_period(period: Period) -> void:
 		var layer_y: float = canvas_height * cloud_vertical_ratio if is_cloud else (
 			0.0 if vertical_alignment == "top" else canvas_height - float(texture.get_height()) * art_scale
 		)
+		layer_y += float(layer_spec.get("y_offset", 0.0))
 		var centered_x: float = (ART_REFERENCE_WIDTH - float(texture.get_width())) * 0.5 * art_scale
 		var copy_count: int = maxi(2, ceili(viewport_width / maxf(canvas_width, 1.0)) + 2)
 		for copy_index: int in range(copy_count):

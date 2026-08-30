@@ -5,6 +5,9 @@ uniform sampler2D screen_texture : hint_screen_texture, repeat_disable, filter_n
 uniform bool outline_enabled = false;
 uniform vec4 outline_color : source_color = vec4(0.96, 0.78, 0.32, 1.0);
 uniform float outline_width : hint_range(1.0, 8.0, 0.5) = 4.0;
+uniform float dead_effect_strength : hint_range(0.0, 1.0, 0.01) = 0.0;
+uniform float dead_desaturation : hint_range(0.0, 1.0, 0.01) = 0.72;
+uniform vec4 dead_tint : source_color = vec4(0.30, 0.52, 0.66, 0.24);
 
 
 float read_alpha(vec2 screen_uv, vec2 screen_offset) {
@@ -17,6 +20,10 @@ void fragment() {
 	if (source.a > 0.0001) {
 		source.rgb /= source.a;
 	}
+	float luminance = dot(source.rgb, vec3(0.299, 0.587, 0.114));
+	vec3 desaturated = mix(source.rgb, vec3(luminance), dead_desaturation);
+	vec3 death_graded = mix(desaturated, dead_tint.rgb, dead_tint.a);
+	source.rgb = mix(source.rgb, death_graded, dead_effect_strength);
 
 	if (!outline_enabled) {
 		COLOR *= source;
