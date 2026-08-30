@@ -11,6 +11,8 @@ signal interaction_pressed(interactable: Interactable)
 		interaction_enabled = value
 		if not interaction_enabled and is_inside_tree():
 			_set_nearest(null)
+@export_category("Scene References")
+@export_node_path("Marker2D") var radar_origin_path: NodePath
 @export_category("Artwork Direction")
 @export var artwork_faces_left: bool = true
 @export_category("Scene Animation")
@@ -24,6 +26,7 @@ var _market_speed_bonus: float = 0.0
 
 @onready var _animated_sprite: AnimatedSprite2D = %MCVisual
 @onready var _gravity: float = float(ProjectSettings.get_setting("physics/2d/default_gravity"))
+@onready var _radar_origin: Marker2D = get_node_or_null(radar_origin_path) as Marker2D
 
 
 func _ready() -> void:
@@ -63,6 +66,10 @@ func set_market_speed_bonus(value: float) -> void:
 
 func get_effective_move_speed() -> float:
 	return move_speed + _market_speed_bonus
+
+
+func get_radar_origin_world_position() -> Vector2:
+	return _radar_origin.global_position if is_instance_valid(_radar_origin) else global_position
 
 func _update_nearest() -> void:
 	var candidate: Interactable = null

@@ -114,16 +114,25 @@ func show_radar_anomaly_glow(duration: float) -> void:
 	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 
 
-func play_radar_scan(world_origin: Vector2, duration: float) -> void:
+func has_radar_scan_effect() -> bool:
 	if not is_instance_valid(_radar_scan_effect):
+		return false
+	var shader_material := _radar_scan_effect.material as ShaderMaterial
+	return (
+		shader_material != null
+		and _radar_scan_effect.size.x > 0.0
+		and _radar_scan_effect.size.y > 0.0
+	)
+
+
+func play_radar_scan(world_origin: Vector2, duration: float) -> void:
+	if not has_radar_scan_effect():
 		return
 	var shader_material := _radar_scan_effect.material as ShaderMaterial
-	if shader_material == null or _radar_scan_effect.size.x <= 0.0 or _radar_scan_effect.size.y <= 0.0:
-		return
 	if is_instance_valid(_radar_scan_tween):
 		_radar_scan_tween.kill()
 	var effect_local_origin: Vector2 = (
-		_radar_scan_effect.get_global_transform_with_canvas().affine_inverse() * world_origin
+		_radar_scan_effect.get_global_transform().affine_inverse() * world_origin
 	)
 	var origin_uv := Vector2(
 		clampf(effect_local_origin.x / _radar_scan_effect.size.x, 0.0, 1.0),

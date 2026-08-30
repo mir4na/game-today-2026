@@ -83,6 +83,10 @@ func set_day_hud_visible(value: bool) -> void:
 func set_cutscene_hidden(value: bool) -> void:
 	_root.visible = not value
 
+
+func set_radar_hidden(value: bool) -> void:
+	_root.visible = not value
+
 func set_night_walk_mode() -> void:
 	_clock_panel.visible = false
 	_tool_panel.visible = true

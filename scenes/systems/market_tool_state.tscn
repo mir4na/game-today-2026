@@ -14,6 +14,6 @@ radar_charge_cost = 4
 speed_upgrade_costs = PackedInt32Array(6, 10, 15)
 speed_bonus_per_level = 45.0
 blessings_per_correct_dropoff = 1
-blessings_per_correct_anomaly = 2
+blessings_per_retained_anomaly = 2
 blessings_per_correct_night_dropoff = 2
 penalty_points_per_blessing_loss = 10

@@ -121,6 +121,13 @@ func show_radar_anomaly_glow(carriage_number: int, duration: float) -> void:
 			return
 
 
+func can_play_radar_scan(carriage_number: int) -> bool:
+	for carriage: CarriageVisual in _carriages:
+		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
+			return carriage.has_radar_scan_effect()
+	return false
+
+
 func play_radar_scan(carriage_number: int, world_origin: Vector2, duration: float) -> void:
 	for carriage: CarriageVisual in _carriages:
 		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:

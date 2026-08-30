@@ -13,7 +13,8 @@ signal continue_requested
 @export var purchase_button_template: String = "BUY  •  %d BLESSINGS"
 @export var speed_button_template: String = "UPGRADE  •  %d BLESSINGS"
 @export var maximum_speed_text: String = "MAXIMUM LEVEL REACHED"
-@export var day_reward_template: String = "+%d BLESSINGS  •  DROP-OFFS +%d  •  ANOMALIES +%d  •  PENALTY −%d"
+@export var unavailable_item_text: String = "UNDER REVISION"
+@export var day_reward_template: String = "+%d BLESSINGS  •  DROP-OFFS +%d  •  RETAINED +%d  •  PENALTY −%d"
 
 @onready var _blessings_label: Label = %BlessingsLabel
 @onready var _audit_stock_label: Label = %AuditStockLabel
@@ -37,7 +38,7 @@ func open_market(snapshot: Dictionary, day_award: Dictionary) -> void:
 	_feedback_label.text = day_reward_template % [
 		int(day_award.get("earned", 0)),
 		int(day_award.get("dropoff_reward", 0)),
-		int(day_award.get("anomaly_reward", 0)),
+		int(day_award.get("retention_reward", 0)),
 		int(day_award.get("penalty_deduction", 0)),
 	]
 	_focus_first_available_action()
@@ -46,7 +47,6 @@ func open_market(snapshot: Dictionary, day_award: Dictionary) -> void:
 func set_snapshot(snapshot: Dictionary) -> void:
 	_snapshot = snapshot.duplicate(true)
 	var blessings: int = int(_snapshot.get("blessings", 0))
-	var audit_cost: int = int(_snapshot.get("audit_slip_cost", 0))
 	var radar_cost: int = int(_snapshot.get("radar_charge_cost", 0))
 	var speed_cost: int = int(_snapshot.get("speed_upgrade_cost", -1))
 	var speed_level: int = int(_snapshot.get("speed_level", 0))
@@ -59,10 +59,12 @@ func set_snapshot(snapshot: Dictionary) -> void:
 		speed_maximum,
 		int(round(float(_snapshot.get("speed_bonus", 0.0))))
 	]
-	_audit_button.text = purchase_button_template % audit_cost
+	_audit_button.text = unavailable_item_text
 	_radar_button.text = purchase_button_template % radar_cost
 	_speed_button.text = maximum_speed_text if speed_cost < 0 else speed_button_template % speed_cost
-	_audit_button.disabled = blessings < audit_cost
+	# The typed abnormality log was removed. Keep this scene-authored market slot
+	# reserved until Audit Slip receives a new night-deduction interaction.
+	_audit_button.disabled = true
 	_radar_button.disabled = blessings < radar_cost
 	_speed_button.disabled = speed_cost < 0 or blessings < speed_cost
 

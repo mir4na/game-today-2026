@@ -1,6 +1,6 @@
 # Where Do You Belong? — Godot 4.7 Vertical Slice
 
-Playable 2D side-view mystery/deduction prototype. The conductor explores one continuous six-car train populated by passengers with varied ambient behavior, approaches them to assign who will disembark, keeps every station exchange balanced, types the names of the dead at sunset, then solves their night-station assignments.
+Playable 2D side-view mystery/deduction prototype. The conductor explores a continuous train populated by passengers with varied ambient behavior, checks ID cards and tickets, stamps living passengers for the correct stops, retains suspected anomalies for night service, then solves their night-station assignments.
 
 ## Run
 
@@ -10,7 +10,7 @@ Open this folder in Godot **4.7** and press **F6/F5**, or run from a terminal:
 godot --path .
 ```
 
-The configured entry scene is `res://scenes/menu/main_menu.tscn`. Choose **Start** to load `res://scenes/main/main.tscn`. The player first spawns inside the far-left driver and conductor cab. A full-black **DAY 1** title card fades in and out, followed by the Alderwick boarding scene through the same `Camera2D` used during gameplay. A world-space exterior-body layer covers only the cutaway interior while ten starting passengers enter through doors visible in the current frame; the layer is removed after departure to reveal playable indoor space. The full daytime route is **Alderwick → Brambleford → Cinderfield → Dunmere → Eastmere**. Every leg takes exactly 60 seconds of unpaused play; the travel clock waits while a station assignment is being executed. Select exactly two passengers for the next stop; an assignment can be canceled from the same inspection panel until the station door seals it. A missed passenger remains aboard, while the delayed-stop penalty grows with the distance from their ticket destination. Each stop boards as many passengers as actually leave, up to the ten-passenger capacity. After Eastmere, the player must walk back to the front cab and interact with the visible abnormal-passenger typewriter. It provides five report rows: type one short name and press **Space** to advance to the next row. Submitted names are validated immediately before the paycheck report is calculated. Inspection, notebook, assignment, cutscene, and pause screens stop route progression so decisions can be made comfortably.
+The configured entry scene is `res://scenes/menu/main_menu.tscn`. Choose **Start** to load `res://scenes/main/main.tscn`. The player first spawns inside the front driver and conductor cab. After the day title and opening boarding cinematic, daytime play centers on checking each passenger's ID card and ticket. Stamp a ticket to assign that passenger to the next stop, or leave it unstamped when the evidence suggests an anomaly. Living passengers left aboard too long generate distance-based penalties; anomalous passengers reject daylight discharge and remain for night service. At the terminal, living passengers leave automatically and the paycheck directly reports correct drop-offs, anomalies retained without a mistaken stamp, and penalties—there is no separate abnormality log or typed-name submission.
 
 The newspaper can be read repeatedly. Its edition is rolled once per playthrough: a 50% chance names the deceased passenger tied to that evidence, while the other 50% reports an unrelated death and contains no name from the train roster. Rereading never rerolls the article, and the collected edition is copied verbatim into the notebook.
 
@@ -24,7 +24,7 @@ The game launches fullscreen by default. The main menu contains Start, Settings,
 | `E` | Use the nearest contextual interaction |
 | `Tab` | Open/close the notebook |
 | `Esc` | Close the active UI or pause |
-| Mouse / keyboard focus | Assign daytime exits, type manifest names, and select tabs/passengers/stations |
+| Mouse / keyboard focus | Inspect documents and select passengers, tools, or night stations |
 
 ## Scene structure
 
@@ -36,7 +36,7 @@ MainMenu                         application entry
 
 Main                             gameplay scene
 ├── Train                         one continuous 4,800 px level, moving left
-│   ├── ConductorCar             far left/front spawn; passenger-coach body, driver controls, route clock, and abnormal-passenger typewriter
+│   ├── ConductorCar             front spawn, driver controls, and night drop-off ledger
 │   ├── PassengerCoach4..1       modular cutaway coach scenes
 │   └── ExteriorSequence         scene-authored station transition controller
 ├── Passengers                   data-generated passenger roster; replacements board during station exchanges
@@ -48,7 +48,6 @@ Main                             gameplay scene
     ├── DocumentOverlayUI        ID and ticket documents; newspaper/statement reader
     ├── NotebookUI              passengers/route/evidence
     ├── StationStopCutsceneUI    letterbox + passenger staging over the gameplay camera
-    ├── DeadSelectionUI          five typed abnormal-passenger report fields
     ├── ShiftReportUI            correct drop-offs, anomaly guesses, penalties, and earned Blessings
     ├── NightMarketUI            tools purchased with Blessings before night service
     ├── NightPuzzleUI            deceased-passenger/night-stop clue board

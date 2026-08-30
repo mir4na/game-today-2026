@@ -29,6 +29,7 @@ var _boarding_handoff_active: bool = false
 var _walk_phase: float = 0.0
 var _inspection_paused: bool = false
 var _inspection_resume_walking: bool = false
+var _cross_carriage_roaming_enabled: bool = true
 var _rng := RandomNumberGenerator.new()
 var _assigned_seat_position: Vector2
 var _activity_points := PackedVector2Array()
@@ -83,6 +84,18 @@ func depart_train() -> void:
 
 func set_ai_enabled(value: bool) -> void:
 	ai_enabled = value and not departed and not night_mode and not boarding_staged and not _inspection_paused
+
+
+func set_cross_carriage_roaming_enabled(value: bool) -> void:
+	_cross_carriage_roaming_enabled = value
+	if (
+		not value
+		and _ai_walking
+		and _carriage_from_world_x(_ai_target_position.x) != runtime_carriage
+	):
+		_ai_target_position = position
+		_ai_walking = false
+		_ai_timer = _next_ai_wait()
 
 func configure_seat_navigation(seat_position: Vector2, activity_points: PackedVector2Array, carriage_ranges: Dictionary) -> void:
 	_assigned_seat_position = seat_position
@@ -198,16 +211,17 @@ func _choose_next_ai_target() -> void:
 	match data.ai_behavior:
 		"carriage_roamer":
 			var carriage_candidates: Array[int] = []
-			var configured_carriages: Array[int] = _get_configured_carriages()
-			var carriage_index: int = configured_carriages.find(carriage)
-			if carriage_index > 0:
-				var previous_carriage: int = configured_carriages[carriage_index - 1]
-				if _can_roam_to_carriage(carriage, previous_carriage):
-					carriage_candidates.append(previous_carriage)
-			if carriage_index >= 0 and carriage_index < configured_carriages.size() - 1:
-				var next_carriage: int = configured_carriages[carriage_index + 1]
-				if _can_roam_to_carriage(carriage, next_carriage):
-					carriage_candidates.append(next_carriage)
+			if _cross_carriage_roaming_enabled:
+				var configured_carriages: Array[int] = _get_configured_carriages()
+				var carriage_index: int = configured_carriages.find(carriage)
+				if carriage_index > 0:
+					var previous_carriage: int = configured_carriages[carriage_index - 1]
+					if _can_roam_to_carriage(carriage, previous_carriage):
+						carriage_candidates.append(previous_carriage)
+				if carriage_index >= 0 and carriage_index < configured_carriages.size() - 1:
+					var next_carriage: int = configured_carriages[carriage_index + 1]
+					if _can_roam_to_carriage(carriage, next_carriage):
+						carriage_candidates.append(next_carriage)
 			if not carriage_candidates.is_empty():
 				target_carriage = carriage_candidates[_rng.randi_range(0, carriage_candidates.size() - 1)]
 		"wander", "window_watcher", "restless":

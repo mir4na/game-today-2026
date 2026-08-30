@@ -6,7 +6,6 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/document_overlay_ui.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/ui/notebook_ui.tscn" id="6"]
-[ext_resource type="PackedScene" path="res://scenes/ui/dead_selection_ui.tscn" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_puzzle_ui.tscn" id="8"]
 [ext_resource type="PackedScene" path="res://scenes/night/departure_sequence_ui.tscn" id="9"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_ui.tscn" id="10"]
@@ -57,7 +56,8 @@ departure_statement_recorded_template = "DEPARTURE STATEMENT RECORDED\n%d / %d C
 blocked_aisle_delay_range_seconds = Vector2(9, 16)
 dirty_seat_delay_range_seconds = Vector2(24, 38)
 radar_scan_seconds = 1.6
-radar_glow_seconds = 6.0
+radar_result_reveal_seconds = 1.25
+radar_glow_seconds = 4.0
 
 [node name="MarketToolState" parent="." instance=ExtResource("40_market_state")]
 unique_name_in_owner = true
@@ -157,9 +157,6 @@ unique_name_in_owner = true
 [node name="StationStopCutsceneUI" parent="ModalLayer" unique_id=1598845350 instance=ExtResource("26")]
 unique_name_in_owner = true
 
-[node name="DeadSelectionUI" parent="ModalLayer" unique_id=1156141034 instance=ExtResource("7")]
-unique_name_in_owner = true
-
 [node name="ShiftReportUI" parent="ModalLayer" unique_id=470131896 instance=ExtResource("25")]
 unique_name_in_owner = true
 
@@ -194,8 +191,6 @@ unique_name_in_owner = true
 [connection signal="sequence_timeline_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_timeline_changed"]
 [connection signal="timeline_completed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_timeline_completed"]
 [connection signal="train_motion_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_train_motion_changed"]
-[connection signal="closed" from="ModalLayer/DeadSelectionUI" to="." method="_on_modal_closed"]
-[connection signal="audit_requested" from="ModalLayer/DeadSelectionUI" to="." method="_on_abnormal_note_audit_requested"]
 [connection signal="continue_requested" from="ModalLayer/ShiftReportUI" to="." method="_on_shift_report_continue"]
 [connection signal="purchase_requested" from="ModalLayer/NightMarketUI" to="." method="_on_market_purchase_requested"]
 [connection signal="continue_requested" from="ModalLayer/NightMarketUI" to="." method="_on_night_market_continue"]

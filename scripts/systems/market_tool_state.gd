@@ -21,7 +21,7 @@ const TOOL_SPEED_UPGRADE: StringName = &"speed_upgrade"
 @export_range(0.0, 300.0, 1.0) var speed_bonus_per_level: float = 45.0
 @export_category("Blessing Rewards")
 @export_range(0, 20, 1) var blessings_per_correct_dropoff: int = 1
-@export_range(0, 20, 1) var blessings_per_correct_anomaly: int = 2
+@export_range(0, 20, 1) var blessings_per_retained_anomaly: int = 2
 @export_range(0, 20, 1) var blessings_per_correct_night_dropoff: int = 2
 @export_range(1, 100, 1) var penalty_points_per_blessing_loss: int = 10
 
@@ -55,13 +55,13 @@ func _set_starting_inventory() -> void:
 	_last_night_award.clear()
 
 
-func award_day_blessings(correct_dropoffs: int, correct_anomalies: int, penalty_points: int) -> Dictionary:
+func award_day_blessings(correct_dropoffs: int, retained_anomalies: int, penalty_points: int) -> Dictionary:
 	if _day_blessings_awarded:
 		return _last_day_award.duplicate(true)
 	_day_blessings_awarded = true
 	var dropoff_reward: int = maxi(0, correct_dropoffs) * blessings_per_correct_dropoff
-	var anomaly_reward: int = maxi(0, correct_anomalies) * blessings_per_correct_anomaly
-	var gross_reward: int = dropoff_reward + anomaly_reward
+	var retention_reward: int = maxi(0, retained_anomalies) * blessings_per_retained_anomaly
+	var gross_reward: int = dropoff_reward + retention_reward
 	var requested_deduction: int = maxi(0, penalty_points) / maxi(1, penalty_points_per_blessing_loss)
 	var applied_deduction: int = mini(gross_reward, requested_deduction)
 	var earned: int = gross_reward - applied_deduction
@@ -69,10 +69,10 @@ func award_day_blessings(correct_dropoffs: int, correct_anomalies: int, penalty_
 	_last_day_award = {
 		"earned": earned,
 		"dropoff_reward": dropoff_reward,
-		"anomaly_reward": anomaly_reward,
+		"retention_reward": retention_reward,
 		"penalty_deduction": applied_deduction,
 		"correct_dropoffs": maxi(0, correct_dropoffs),
-		"correct_anomalies": maxi(0, correct_anomalies),
+		"retained_anomalies": maxi(0, retained_anomalies),
 	}
 	_emit_inventory_changed()
 	return _last_day_award.duplicate(true)

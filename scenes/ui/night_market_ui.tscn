@@ -135,7 +135,7 @@ text = "CONSUMABLE"
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_font_sizes/font_size = 16
-text = "Validate whether one typed name exists in today's passenger manifest. It never reveals whether that passenger is deceased."
+text = "Reserved for the revised night-deduction system. It cannot be purchased until its new interaction is finalized."
 autowrap_mode = 2
 
 [node name="AuditStockLabel" type="Label" parent="Center/Panel/Outer/Cards/AuditCard/Box"]
