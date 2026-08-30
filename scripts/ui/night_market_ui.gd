@@ -62,8 +62,8 @@ func set_snapshot(snapshot: Dictionary) -> void:
 	_audit_button.text = unavailable_item_text
 	_radar_button.text = purchase_button_template % radar_cost
 	_speed_button.text = maximum_speed_text if speed_cost < 0 else speed_button_template % speed_cost
-	# The typed abnormality log was removed. Keep this scene-authored market slot
-	# reserved until Audit Slip receives a new night-deduction interaction.
+	# Keep this scene-authored market slot reserved until Audit Slip receives a
+	# new night-deduction interaction.
 	_audit_button.disabled = true
 	_radar_button.disabled = blessings < radar_cost
 	_speed_button.disabled = speed_cost < 0 or blessings < speed_cost

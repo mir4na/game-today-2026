@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://bd3gsinxrrynl" path="res://assets/kereta/Pintu kanan.png" id="7"]
 [ext_resource type="PackedScene" uid="uid://dg5g8fm8dx45y" path="res://scenes/interactables/conductor_desk.tscn" id="8_desk"]
 [ext_resource type="Material" path="res://resources/materials/exterior_top_down_fade.tres" id="10_fade"]
+[ext_resource type="ShaderMaterial" path="res://resources/materials/window_light_mask.tres" id="11_window_light"]
 [ext_resource type="Texture2D" uid="uid://c1r4rdjeoyrm7" path="res://assets/kereta/bagian_bawah.png" id="11_underframe"]
 [ext_resource type="PackedScene" path="res://scenes/train/train_interior_lighting.tscn" id="12_lighting"]
 
@@ -270,6 +271,7 @@ script = ExtResource("1")
 carriage_type = "conductor"
 sway_root_path = NodePath("ArtRoot")
 night_overlay_path = NodePath("ArtRoot/NightOverlay")
+window_light_root_path = NodePath("ArtRoot/Interior/WindowLightRoot")
 exterior_visual_path = NodePath("ArtRoot/Exterior")
 exterior_door_visual_path = NodePath("ArtRoot/Exterior/ClosedDoors")
 door_animation_path = NodePath("ArtRoot/Exterior/DoorAnimation")
@@ -283,7 +285,18 @@ unique_name_in_owner = true
 [node name="Interior" type="Node2D" parent="ArtRoot" unique_id=567829785]
 unique_name_in_owner = true
 
+[node name="WindowLightRoot" type="Node2D" parent="ArtRoot/Interior"]
+
+[node name="WindowLightOverlay" type="Sprite2D" parent="ArtRoot/Interior/WindowLightRoot"]
+z_index = 1
+position = Vector2(0, 214.7504)
+scale = Vector2(0.374415, 0.374415)
+material = ExtResource("11_window_light")
+texture = ExtResource("2")
+centered = false
+
 [node name="InteriorSprite" type="Sprite2D" parent="ArtRoot/Interior" unique_id=918408825]
+light_mask = 2
 position = Vector2(0, 214.7504)
 scale = Vector2(0.374415, 0.374415)
 texture = ExtResource("2")

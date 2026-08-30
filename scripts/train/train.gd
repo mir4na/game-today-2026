@@ -5,6 +5,7 @@ signal exterior_fade_out_finished
 
 var _scroll: float = 0.0
 var _night_strength: float = 0.0
+var _day_cycle_progress: float = 0.0
 var _sway_time: float = 0.0
 var _motion_strength: float = 1.0
 var _carriages: Array[CarriageVisual] = []
@@ -25,7 +26,7 @@ func _process(delta: float) -> void:
 	_sway_time += delta * _motion_strength
 	_scroll = fmod(_scroll + delta * lerpf(95.0, 48.0, _night_strength) * _motion_strength, 10000.0)
 	for carriage: CarriageVisual in _carriages:
-		carriage.set_environment(_scroll, _night_strength, _sway_time)
+		carriage.set_environment(_scroll, _night_strength, _day_cycle_progress, _sway_time)
 		if _exterior_sequence.visible:
 			carriage.set_exterior_transition(
 				_exterior_sequence.modulate.a,
@@ -36,6 +37,8 @@ func _process(delta: float) -> void:
 func set_night_strength(value: float) -> void:
 	_night_strength = clampf(value, 0.0, 1.0)
 
+func set_day_cycle_progress(value: float) -> void:
+	_day_cycle_progress = clampf(value, 0.0, 1.0)
 
 func set_motion_strength(value: float) -> void:
 	_motion_strength = clampf(value, 0.0, 1.0)

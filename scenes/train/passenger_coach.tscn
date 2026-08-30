@@ -8,10 +8,21 @@
 [ext_resource type="Texture2D" uid="uid://qfgbxjo8e3mf" path="res://assets/kereta/Pintu kiri.png" id="6"]
 [ext_resource type="Texture2D" uid="uid://bd3gsinxrrynl" path="res://assets/kereta/Pintu kanan.png" id="7"]
 [ext_resource type="Material" path="res://resources/materials/exterior_top_down_fade.tres" id="8_fade"]
+[ext_resource type="Material" path="res://resources/materials/window_light_mask.tres" id="9_window_light"]
 [ext_resource type="Texture2D" uid="uid://c1r4rdjeoyrm7" path="res://assets/kereta/bagian_bawah.png" id="9_t2b4i"]
 [ext_resource type="PackedScene" path="res://scenes/train/train_interior_lighting.tscn" id="10_lighting"]
 [ext_resource type="PackedScene" path="res://scenes/train/passenger_seat.tscn" id="11_seat"]
 [ext_resource type="Material" path="res://resources/materials/radar_carriage_scan.tres" id="12_radar_scan"]
+
+[sub_resource type="Gradient" id="Gradient_e78od"]
+offsets = PackedFloat32Array(0, 0.61778843, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.3389423, 0.3389423, 0.3389423, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_r0seb"]
+gradient = SubResource("Gradient_e78od")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.9045139, 0.19618055)
 
 [sub_resource type="Animation" id="Animation_door_reset"]
 resource_name = "RESET"
@@ -286,6 +297,7 @@ passenger_activity_slots_path = NodePath("PassengerLayout/PassengerActivitySlots
 passenger_door_slots_path = NodePath("PassengerLayout/PassengerDoorSlots")
 sway_root_path = NodePath("ArtRoot")
 night_overlay_path = NodePath("ArtRoot/NightOverlay")
+window_light_root_path = NodePath("ArtRoot/Interior/WindowLightRoot")
 exterior_visual_path = NodePath("ArtRoot/Exterior")
 exterior_door_visual_path = NodePath("ArtRoot/Exterior/ClosedDoors")
 door_animation_path = NodePath("ArtRoot/Exterior/DoorAnimation")
@@ -371,7 +383,67 @@ unique_name_in_owner = true
 [node name="Interior" type="Node2D" parent="ArtRoot" unique_id=2101017426]
 unique_name_in_owner = true
 
+[node name="WindowLightRoot" type="Node2D" parent="ArtRoot/Interior" unique_id=179276824]
+
+[node name="PointLight2D" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=530496502]
+position = Vector2(83.5, 356.5)
+scale = Vector2(2.1093748, 3.421875)
+range_item_cull_mask = 2
+texture = SubResource("GradientTexture2D_r0seb")
+
+[node name="PointLight2D2" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=1283129845]
+position = Vector2(206, 365)
+scale = Vector2(2.1875, 3.421875)
+range_item_cull_mask = 2
+texture = SubResource("GradientTexture2D_r0seb")
+
+[node name="PointLight2D3" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=247803074]
+position = Vector2(324.5, 372.00003)
+scale = Vector2(1.9531254, 3.421875)
+range_item_cull_mask = 2
+texture = SubResource("GradientTexture2D_r0seb")
+
+[node name="PointLight2D7" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=1661962787]
+position = Vector2(517, 385)
+scale = Vector2(1.2500002, 2.3125005)
+range_item_cull_mask = 2
+texture = SubResource("GradientTexture2D_r0seb")
+
+[node name="PointLight2D8" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=2133199005]
+position = Vector2(437, 392)
+scale = Vector2(1.2500002, 2.3125005)
+range_item_cull_mask = 2
+texture = SubResource("GradientTexture2D_r0seb")
+
+[node name="PointLight2D4" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=2113669623]
+position = Vector2(628.5, 371.5)
+scale = Vector2(2.1093748, 3.421875)
+range_item_cull_mask = 2
+texture = SubResource("GradientTexture2D_r0seb")
+
+[node name="PointLight2D5" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=2045950748]
+position = Vector2(751, 380)
+scale = Vector2(2.1875, 3.421875)
+range_item_cull_mask = 2
+texture = SubResource("GradientTexture2D_r0seb")
+
+[node name="PointLight2D6" type="PointLight2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=613080076]
+position = Vector2(869.5, 387.00003)
+scale = Vector2(1.9531254, 3.421875)
+range_item_cull_mask = 2
+texture = SubResource("GradientTexture2D_r0seb")
+
+[node name="WindowFlareOverlay" type="Sprite2D" parent="ArtRoot/Interior/WindowLightRoot" unique_id=1537785651]
+light_mask = 2
+z_index = 1
+material = ExtResource("9_window_light")
+position = Vector2(0, 214.7504)
+scale = Vector2(0.374415, 0.374415)
+texture = ExtResource("2")
+centered = false
+
 [node name="InteriorSprite" type="Sprite2D" parent="ArtRoot/Interior" unique_id=1103104007]
+light_mask = 2
 position = Vector2(0, 214.7504)
 scale = Vector2(0.374415, 0.374415)
 texture = ExtResource("2")

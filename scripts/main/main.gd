@@ -106,7 +106,8 @@ var _radar_maintenance_pause_states: Dictionary = {}
 @onready var _dirty_seat_timer: Timer = %DirtySeatTimer
 @onready var _ambience: TrainAmbience = %TrainAmbience
 @onready var _travel_foreground: TravelForeground = %TravelForeground
-@onready var _night_sky_overlay: ColorRect = %NightSkyOverlay
+@onready var _sky_gradient: ColorRect = %NightSkyOverlay
+@onready var _night_atmosphere: ColorRect = %NightAtmosphere
 
 func _ready() -> void:
 	if day_route.size() < 2:
@@ -136,6 +137,7 @@ func _ready() -> void:
 	_configure_maintenance_events()
 	_player.set_interactables(_interactables)
 	_hud.set_clock(int(_day_minutes))
+	_set_sky_cycle_progress(0.0)
 	_on_market_inventory_changed(_market_tool_state.call(&"get_snapshot"))
 	_update_passenger_minimap()
 	_set_passenger_ai_enabled(false)
@@ -159,9 +161,11 @@ func _process(delta: float) -> void:
 		_day_minutes = minf(_day_minutes + delta, _next_arrival_minutes())
 	_hud.set_clock(int(_day_minutes))
 	var night_strength: float = clampf((_day_minutes - 990.0) / maxf(_final_arrival_minutes() - 990.0, 1.0), 0.0, 1.0)
+	var cycle_progress: float = clampf((_day_minutes - START_MINUTES) / maxf(_final_arrival_minutes() - START_MINUTES, 1.0), 0.0, 1.0)
 	_train.set_night_strength(night_strength)
 	_ambience.night_strength = night_strength
-	_night_sky_overlay.modulate.a = night_strength
+	_set_sky_cycle_progress(cycle_progress)
+	_night_atmosphere.modulate.a = night_strength
 
 	if not _station_arrival_announced and _has_next_day_station() and _day_minutes >= _next_arrival_minutes():
 		_announce_next_station()
@@ -204,6 +208,13 @@ func _next_arrival_minutes() -> float:
 
 func _final_arrival_minutes() -> float:
 	return START_MINUTES + station_travel_seconds * float(day_route.size() - 1)
+
+func _set_sky_cycle_progress(value: float) -> void:
+	var clamped_progress: float = clampf(value, 0.0, 1.0)
+	_train.set_day_cycle_progress(clamped_progress)
+	var sky_material := _sky_gradient.material as ShaderMaterial
+	if sky_material != null:
+		sky_material.set_shader_parameter(&"cycle_progress", clamped_progress)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _radar_scan_active:
@@ -1043,7 +1054,6 @@ func _on_day_intro_finished() -> void:
 func _on_station_cutscene_timeline_changed(elapsed: float) -> void:
 	_train.set_exterior_sequence_elapsed(elapsed)
 
-
 func _on_station_cutscene_timeline_completed() -> void:
 	_station_cutscene_timeline_complete = true
 	_train.ensure_exterior_fade_out_started()
@@ -1061,7 +1071,6 @@ func _try_complete_station_cutscene() -> void:
 		and _train.is_exterior_fade_out_complete()
 	):
 		_station_stop_ui.complete_sequence()
-
 
 func _on_station_cutscene_train_motion_changed(strength: float) -> void:
 	_station_cutscene_motion_strength = clampf(strength, 0.0, 1.0)
@@ -1351,7 +1360,8 @@ func _enter_night() -> void:
 	state = GameState.NIGHT
 	_train.set_night_strength(1.0)
 	_ambience.night_strength = 1.0
-	_night_sky_overlay.modulate.a = 1.0
+	_set_sky_cycle_progress(1.0)
+	_night_atmosphere.modulate.a = 1.0
 	for passenger: Passenger in _passengers:
 		if _is_active_passenger(passenger):
 			passenger.set_night_mode(true)

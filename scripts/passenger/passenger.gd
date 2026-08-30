@@ -27,6 +27,7 @@ var _ai_target_position: Vector2
 var _ai_walking: bool = false
 var _boarding_handoff_active: bool = false
 var _walk_phase: float = 0.0
+var _facing_direction: float = 1.0
 var _inspection_paused: bool = false
 var _inspection_resume_walking: bool = false
 var _cross_carriage_roaming_enabled: bool = true
@@ -178,6 +179,7 @@ func get_reserved_seat_position() -> Vector2:
 
 func _update_day_ai(delta: float) -> void:
 	if _ai_walking:
+		_update_facing_direction()
 		position = position.move_toward(_ai_target_position, PASSENGER_WALK_SPEED * delta)
 		_walk_phase += delta * 9.0
 		runtime_carriage = _carriage_from_world_x(position.x)
@@ -196,6 +198,7 @@ func _update_boarding_handoff(delta: float) -> void:
 	if not _ai_walking:
 		_boarding_handoff_active = false
 		return
+	_update_facing_direction()
 	position = position.move_toward(_ai_target_position, PASSENGER_WALK_SPEED * delta)
 	_walk_phase += delta * 9.0
 	runtime_carriage = _carriage_from_world_x(position.x)
@@ -283,6 +286,11 @@ func _find_closest_activity_point(candidates: PackedVector2Array) -> Vector2:
 			closest_distance = distance
 	return closest
 
+func _update_facing_direction() -> void:
+	var horizontal_delta: float = _ai_target_position.x - position.x
+	if absf(horizontal_delta) > 1.0:
+		_facing_direction = signf(horizontal_delta)
+
 func _next_ai_wait() -> float:
 	if data == null or data.ai_behavior == "still":
 		return 999999.0
@@ -348,7 +356,9 @@ func _update_visual() -> void:
 	body_tint.a = ghost_alpha
 	_body_tint.modulate = body_tint if not uses_authored_character_artwork else Color.WHITE
 	_passenger_visual.modulate = Color(1.0, 1.0, 1.0, ghost_alpha) if uses_authored_character_artwork else Color.WHITE
-	_passenger_visual.scale = Vector2.ONE
+	# The authored NPC sprites face left by default; the procedural fallback faces right.
+	var visual_direction: float = -_facing_direction if uses_authored_character_artwork else _facing_direction
+	_passenger_visual.scale = Vector2(visual_direction, 1.0)
 	_passenger_visual.position.y = sin(_walk_phase) * 1.8 if _ai_walking else 0.0
 	_shadow.visible = data.anomaly_type != "shadowless"
 	_shadow.modulate.a = 0.52 if not night_mode else 0.28

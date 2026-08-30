@@ -33,11 +33,43 @@
 [ext_resource type="Resource" path="res://data/passengers/npc_17_profile.tres" id="32"]
 [ext_resource type="PackedScene" path="res://scenes/passengers/passenger.tscn" id="34"]
 [ext_resource type="PackedScene" uid="uid://drn1e0xhyylll" path="res://scenes/systems/travel_foreground.tscn" id="36"]
-[ext_resource type="Resource" path="res://data/daily_manifest_config.tres" id="37"]
+[ext_resource type="Resource" uid="uid://b37vfh7cgqlw5" path="res://data/daily_manifest_config.tres" id="37"]
+[ext_resource type="Shader" uid="uid://dq13hfpieecwx" path="res://shaders/night_atmosphere.gdshader" id="38"]
+[ext_resource type="Shader" uid="uid://dws5qbo4ng6g" path="res://shaders/day_cycle_sky.gdshader" id="39"]
 [ext_resource type="PackedScene" path="res://scenes/ui/blocked_aisle_puzzle_ui.tscn" id="38_blocked_ui"]
 [ext_resource type="PackedScene" path="res://scenes/ui/clean_seat_ui.tscn" id="39_clean_ui"]
 [ext_resource type="PackedScene" path="res://scenes/systems/market_tool_state.tscn" id="40_market_state"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_market_ui.tscn" id="41_market_ui"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_day_cycle_sky"]
+shader = ExtResource("39")
+shader_parameter/cycle_progress = 0.0
+shader_parameter/morning_top = Color(0.486275, 0.827451, 0.996078, 1)
+shader_parameter/morning_middle = Color(0.717647, 1, 0.952941, 1)
+shader_parameter/morning_bottom = Color(0.988235, 0.984314, 0.909804, 1)
+shader_parameter/sunset_top = Color(0.996078, 0.627451, 0.486275, 1)
+shader_parameter/sunset_middle = Color(0.996078, 0.992157, 0.666667, 1)
+shader_parameter/sunset_bottom = Color(0.988235, 0.984314, 0.909804, 1)
+shader_parameter/night_top = Color(0, 0.160784, 0.231373, 1)
+shader_parameter/night_middle = Color(0.039216, 0.345098, 0.494118, 1)
+shader_parameter/night_bottom = Color(0.227451, 0.635294, 0.913725, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_night_fog"]
+frequency = 0.005
+fractal_octaves = 4
+fractal_lacunarity = 2.1
+fractal_gain = 0.55
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_night_fog"]
+noise = SubResource("FastNoiseLite_night_fog")
+seamless = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_night_atmosphere"]
+shader = ExtResource("38")
+shader_parameter/noise_texture = SubResource("NoiseTexture2D_night_fog")
+shader_parameter/density = 0.52
+shader_parameter/speed = Vector2(0.02, 0.01)
+shader_parameter/fog_scale = Vector2(0.48, 0.48)
 
 [node name="Main" type="Node2D" unique_id=604105226]
 script = ExtResource("1")
@@ -76,14 +108,28 @@ color = Color(0.819608, 0.929412, 0.976471, 1)
 
 [node name="NightSkyOverlay" type="ColorRect" parent="TravelSky" unique_id=856837013]
 unique_name_in_owner = true
-modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_day_cycle_sky")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.025, 0.047, 0.094, 1)
+
+[node name="NightAtmosphereLayer" type="CanvasLayer" parent="." unique_id=1453875203]
+layer = 5
+
+[node name="NightAtmosphere" type="ColorRect" parent="NightAtmosphereLayer" unique_id=1750779091]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_night_atmosphere")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.68, 0.75, 0.8, 1)
 
 [node name="GameplayWorld" type="Node2D" parent="." unique_id=379074724]
 editor_description = "Move this node in the Inspector to adjust the complete train, passenger, and player gameplay layout vertically."

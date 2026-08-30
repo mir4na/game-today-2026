@@ -2,6 +2,11 @@ class_name CarriageVisual
 extends Node2D
 ## Behavior for scene-authored carriage art. Geometry, colors, props and labels live in .tscn/SVG assets.
 
+# Middle colors from the same three-stop gradients used by the travel sky.
+const MORNING_WINDOW_LIGHT := Color("b7fff3")
+const SUNSET_WINDOW_LIGHT := Color("fefdaa")
+const NIGHT_WINDOW_LIGHT := Color("3aa2e9")
+
 @export_enum("passenger", "conductor") var carriage_type: String = "passenger"
 @export var carriage_number: int = 0
 @export_range(1.0, 4096.0, 1.0) var carriage_width: float = 960.0
@@ -12,6 +17,7 @@ extends Node2D
 @export_category("Scene Visuals")
 @export_node_path("Node2D") var sway_root_path: NodePath
 @export_node_path("CanvasItem") var night_overlay_path: NodePath
+@export_node_path("CanvasItem") var window_light_root_path: NodePath
 @export_node_path("Node2D") var exterior_visual_path: NodePath
 @export_node_path("Node2D") var exterior_door_visual_path: NodePath
 @export_node_path("AnimationPlayer") var door_animation_path: NodePath
@@ -35,6 +41,7 @@ extends Node2D
 
 @onready var _sway_root: Node2D = _get_optional_node(sway_root_path) as Node2D
 @onready var _night_overlay: CanvasItem = _get_optional_node(night_overlay_path) as CanvasItem
+@onready var _window_light_root: CanvasItem = _get_optional_node(window_light_root_path) as CanvasItem
 @onready var _exterior_visual: Node2D = _get_optional_node(exterior_visual_path) as Node2D
 @onready var _exterior_door_visual: Node2D = _get_optional_node(exterior_door_visual_path) as Node2D
 @onready var _door_animation: AnimationPlayer = _get_optional_node(door_animation_path) as AnimationPlayer
@@ -44,11 +51,15 @@ extends Node2D
 @onready var _radar_anomaly_light: PointLight2D = _get_optional_node(radar_anomaly_light_path) as PointLight2D
 @onready var _dirty_seat_events_root: Node = _get_optional_node(dirty_seat_events_root_path)
 
+var _window_lights: Array[Light2D] = []
+var _window_flare_materials: Array[ShaderMaterial] = []
 var _cinematic_shade_tween: Tween
 var _radar_scan_tween: Tween
 var _radar_light_tween: Tween
 
 func _ready() -> void:
+	if is_instance_valid(_window_light_root):
+		_collect_window_lights(_window_light_root)
 	_validate_exterior_hierarchy()
 	_configure_dirty_seat_events(_dirty_seat_events_root)
 	_reset_radar_scan_effect()
@@ -56,11 +67,50 @@ func _ready() -> void:
 		_radar_anomaly_light.energy = 0.0
 	end_exterior_mode()
 
-func set_environment(_scroll: float, night_strength: float, sway_time: float) -> void:
+func set_environment(_scroll: float, night_strength: float, day_cycle_progress: float, sway_time: float) -> void:
 	if is_instance_valid(_night_overlay):
 		_night_overlay.modulate.a = clampf(night_strength, 0.0, 1.0)
+	if is_instance_valid(_window_light_root):
+		var sunset_blend: float = smoothstep(0.08, 0.62, day_cycle_progress)
+		var night_blend: float = smoothstep(0.70, 0.98, day_cycle_progress)
+		var window_color: Color = MORNING_WINDOW_LIGHT.lerp(SUNSET_WINDOW_LIGHT, sunset_blend)
+		window_color = window_color.lerp(NIGHT_WINDOW_LIGHT, night_blend)
+		var base_strength: float = lerpf(0.72, 0.94, sunset_blend)
+		base_strength = lerpf(base_strength, 1.08, night_blend)
+		var pulse: float = 0.97 + sin(sway_time * 1.35 + carriage_number * 1.7) * 0.025
+		var secondary_pulse: float = sin(sway_time * 3.1 + carriage_number * 0.8) * 0.01
+		var animated_strength: float = base_strength * (pulse + secondary_pulse)
+		_set_window_light(window_color, animated_strength, day_cycle_progress)
 	if is_instance_valid(_sway_root):
 		_sway_root.position.y = sin(sway_time * 2.1 + carriage_number * 0.45) * 1.4
+
+func _set_window_light(window_color: Color, strength: float, day_cycle_progress: float) -> void:
+	# Sprite-based window masks inherit this tint from WindowLightRoot.
+	var overlay_color := window_color
+	overlay_color.a = clampf(strength * 0.42, 0.0, 0.48)
+	_window_light_root.modulate = overlay_color
+
+	# CanvasItem modulation does not reliably recolor Light2D nodes, so tint the
+	# actual window lights explicitly as well.
+	for window_light: Light2D in _window_lights:
+		if is_instance_valid(window_light):
+			window_light.color = window_color
+			window_light.energy = maxf(0.0, strength * 0.22)
+	for flare_material: ShaderMaterial in _window_flare_materials:
+		if is_instance_valid(flare_material):
+			flare_material.set_shader_parameter(&"cycle_progress", day_cycle_progress)
+			flare_material.set_shader_parameter(&"flare_strength", clampf(strength * 0.55, 0.0, 0.65))
+
+func _collect_window_lights(parent: Node) -> void:
+	for child: Node in parent.get_children():
+		if child is Light2D:
+			_window_lights.append(child as Light2D)
+		if child is CanvasItem:
+			var canvas_item := child as CanvasItem
+			var shader_material := canvas_item.material as ShaderMaterial
+			if shader_material != null and not _window_flare_materials.has(shader_material):
+				_window_flare_materials.append(shader_material)
+		_collect_window_lights(child)
 
 func begin_exterior_mode() -> void:
 	_fade_cinematic_interior_shade(1.0)
