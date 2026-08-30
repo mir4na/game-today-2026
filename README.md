@@ -12,7 +12,7 @@ godot --path .
 
 The configured entry scene is `res://scenes/menu/main_menu.tscn`. Choose **Start** to load `res://scenes/main/main.tscn`. The player first spawns inside the front driver and conductor cab. After the day title and opening boarding cinematic, daytime play centers on checking each passenger's ID card and ticket. Stamp a ticket to assign that passenger to the next stop, or leave it unstamped when the evidence suggests an anomaly. Living passengers left aboard too long generate distance-based penalties; anomalous passengers reject daylight discharge and remain for night service. At the terminal, living passengers leave automatically and the paycheck directly reports correct drop-offs, anomalies retained without a mistaken stamp, and penalties—there is no separate abnormality log or typed-name submission.
 
-The newspaper can be read repeatedly. Its edition is rolled once per playthrough: a 50% chance names the deceased passenger tied to that evidence, while the other 50% reports an unrelated death and contains no name from the train roster. Rereading never rerolls the article, and the collected edition is copied verbatim into the notebook.
+The newspaper can be read repeatedly. Its edition is rolled once per playthrough and remains unchanged when reread. Collected articles and inspected document summaries are copied into the conductor's guidebook alongside dynamic service data, operating rules, and the anomaly catalogue.
 
 The game launches fullscreen by default. The main menu contains Start, Settings, and Quit; Settings can switch back to Windowed and persist master volume, display mode, and VSync in `user://where_do_you_belong_settings.cfg`. The gameplay pause screen also provides a Main Menu button.
 
@@ -22,7 +22,7 @@ The game launches fullscreen by default. The main menu contains Start, Settings,
 |---|---|
 | `A` / `D` or Left / Right | Walk horizontally |
 | `E` | Use the nearest contextual interaction |
-| `Tab` | Open/close the notebook |
+| `Tab` | Open/close the conductor's guidebook |
 | `Esc` | Close the active UI or pause |
 | Mouse / keyboard focus | Inspect documents and select passengers, tools, or night stations |
 
@@ -46,7 +46,7 @@ Main                             gameplay scene
 └── ModalLayer
 	├── DayIntroUI                 full-black DAY 1 fade title card
     ├── DocumentOverlayUI        ID and ticket documents; newspaper/statement reader
-    ├── NotebookUI              passengers/route/evidence
+    ├── GuidebookUI             daily service, procedures, records, evidence, anomalies, night rules, and tools
     ├── StationStopCutsceneUI    letterbox + passenger staging over the gameplay camera
     ├── ShiftReportUI            correct drop-offs, anomaly guesses, penalties, and earned Blessings
     ├── NightMarketUI            tools purchased with Blessings before night service
@@ -94,7 +94,7 @@ Configured deceased-anomaly values are `shadowless`, `impossible_ticket`, `unlis
 
 1. Add a new value to `anomaly_type` in `passenger_data.gd`.
 2. Add only its visible/body presentation to `passenger.gd` or the relevant interactable/environment script.
-3. If it produces explicit documentary evidence, record that fact in `main.gd` and display it in `notebook_ui.gd`.
+3. If it produces explicit documentary evidence, record that fact in `main.gd` and display it through the scene-authored guidebook sections.
 4. Do not add automatic “anomaly” labels—the player must interpret visual contradictions and public records.
 
 ## Creating another departure puzzle

@@ -91,7 +91,7 @@ var _radar_maintenance_pause_states: Dictionary = {}
 @onready var _hud: GameHUD = %HUD
 # Avoid coupling main-scene parsing to the editor's global-class registration order.
 @onready var _document_overlay: Variant = %DocumentOverlayUI
-@onready var _notebook_ui: NotebookUI = %NotebookUI
+@onready var _guidebook_ui: Variant = %GuidebookUI
 @onready var _day_intro_ui: DayIntroUI = %DayIntroUI
 @onready var _station_stop_ui: StationStopCutsceneUI = %StationStopCutsceneUI
 @onready var _shift_report_ui: ShiftReportUI = %ShiftReportUI
@@ -218,11 +218,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		_use_carriage_radar()
 		get_viewport().set_input_as_handled()
 		return
-	if event.is_action_pressed(&"notebook"):
-		if _notebook_ui.visible:
-			_notebook_ui.request_close()
+	if event.is_action_pressed(&"guidebook"):
+		if _guidebook_ui.visible:
+			_guidebook_ui.request_close()
 		elif _active_modal == null and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]:
-			_open_notebook()
+			_open_guidebook()
 		get_viewport().set_input_as_handled()
 		return
 	if not event.is_action_pressed(&"ui_cancel"):
@@ -231,8 +231,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_day_intro_ui.skip_intro()
 	elif _document_overlay.visible:
 		_document_overlay.request_close()
-	elif _notebook_ui.visible:
-		_notebook_ui.request_close()
+	elif _guidebook_ui.visible:
+		_guidebook_ui.request_close()
 	elif _blocked_aisle_ui.visible:
 		_blocked_aisle_ui.call(&"request_close")
 	elif _clean_seat_ui.visible:
@@ -1146,12 +1146,21 @@ func _on_desk_interacted() -> void:
 	if state == GameState.NIGHT:
 		_open_night_puzzle()
 
-func _open_notebook() -> void:
-	_active_modal = _notebook_ui
+func _open_guidebook() -> void:
+	_active_modal = _guidebook_ui
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
-	_notebook_ui.open_notebook(_checked_passenger_data, _newspaper_document if _newspaper_read else "", _route_index)
+	_guidebook_ui.open_guidebook(
+		day_number,
+		manifest_config.service_train_number,
+		manifest_config.service_date_text,
+		manifest_config.ticket_day_code,
+		day_route,
+		_checked_passenger_data,
+		_newspaper_document if _newspaper_read else "",
+		_route_index
+	)
 
 func _on_modal_closed() -> void:
 	if is_instance_valid(_inspected_passenger):

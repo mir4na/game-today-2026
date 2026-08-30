@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://cq24ye24eom3u" path="res://scenes/player/player.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/document_overlay_ui.tscn" id="5"]
-[ext_resource type="PackedScene" path="res://scenes/ui/notebook_ui.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/ui/guidebook_ui.tscn" id="6"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_puzzle_ui.tscn" id="8"]
 [ext_resource type="PackedScene" path="res://scenes/night/departure_sequence_ui.tscn" id="9"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_ui.tscn" id="10"]
@@ -148,7 +148,7 @@ layer = 20
 [node name="DocumentOverlayUI" parent="ModalLayer" unique_id=215917641 instance=ExtResource("5")]
 unique_name_in_owner = true
 
-[node name="NotebookUI" parent="ModalLayer" unique_id=449939847 instance=ExtResource("6")]
+[node name="GuidebookUI" parent="ModalLayer" unique_id=449939847 instance=ExtResource("6")]
 unique_name_in_owner = true
 
 [node name="DayIntroUI" parent="ModalLayer" unique_id=85941225 instance=ExtResource("27")]
@@ -184,7 +184,7 @@ unique_name_in_owner = true
 [connection signal="newspaper_read" from="GameplayWorld/Train/Cars/PassengerCoach2/Newspaper" to="." method="_on_newspaper_read"]
 [connection signal="closed" from="ModalLayer/DocumentOverlayUI" to="." method="_on_modal_closed"]
 [connection signal="station_assignment_toggled" from="ModalLayer/DocumentOverlayUI" to="." method="_on_station_assignment_toggled"]
-[connection signal="closed" from="ModalLayer/NotebookUI" to="." method="_on_modal_closed"]
+[connection signal="closed" from="ModalLayer/GuidebookUI" to="." method="_on_modal_closed"]
 [connection signal="intro_finished" from="ModalLayer/DayIntroUI" to="." method="_on_day_intro_finished"]
 [connection signal="boarding_actor_entered" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_boarding_actor_entered"]
 [connection signal="sequence_finished" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_stop_finished"]
