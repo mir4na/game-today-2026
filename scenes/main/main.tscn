@@ -35,12 +35,14 @@
 [ext_resource type="PackedScene" uid="uid://drn1e0xhyylll" path="res://scenes/systems/travel_foreground.tscn" id="36"]
 [ext_resource type="Resource" uid="uid://b37vfh7cgqlw5" path="res://data/daily_manifest_config.tres" id="37"]
 [ext_resource type="Shader" uid="uid://dq13hfpieecwx" path="res://shaders/night_atmosphere.gdshader" id="38"]
-[ext_resource type="Shader" uid="uid://dws5qbo4ng6g" path="res://shaders/day_cycle_sky.gdshader" id="39"]
 [ext_resource type="PackedScene" path="res://scenes/ui/blocked_aisle_puzzle_ui.tscn" id="38_blocked_ui"]
+[ext_resource type="Shader" uid="uid://dws5qbo4ng6g" path="res://shaders/day_cycle_sky.gdshader" id="39"]
 [ext_resource type="PackedScene" path="res://scenes/ui/clean_seat_ui.tscn" id="39_clean_ui"]
 [ext_resource type="PackedScene" path="res://scenes/systems/market_tool_state.tscn" id="40_market_state"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_market_ui.tscn" id="41_market_ui"]
 [ext_resource type="Script" path="res://scripts/systems/camera_bounds_2d.gd" id="42_camera_bounds"]
+[ext_resource type="PackedScene" uid="uid://c8qmx71qn8rq6" path="res://scenes/systems/travel_background.tscn" id="43_travel_background"]
+[ext_resource type="Texture2D" uid="uid://bnl61bhej8bp4" path="res://assets/environment/railroad.png" id="44_railroad"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_day_cycle_sky"]
 shader = ExtResource("39")
@@ -92,7 +94,10 @@ radar_scan_seconds = 1.6
 radar_result_reveal_seconds = 1.25
 radar_glow_seconds = 4.0
 
-[node name="MarketToolState" parent="." instance=ExtResource("40_market_state")]
+[node name="MarketToolState" parent="." unique_id=1541596097 instance=ExtResource("40_market_state")]
+unique_name_in_owner = true
+
+[node name="TravelBackground" parent="." unique_id=1931677748 instance=ExtResource("43_travel_background")]
 unique_name_in_owner = true
 
 [node name="TravelSky" type="CanvasLayer" parent="." unique_id=1796731036]
@@ -151,7 +156,7 @@ position = Vector2(-16, 0)
 editor_description = "Bottom-right edge of the gameplay camera view."
 position = Vector2(3824, 720)
 
-[node name="WorldLighting" type="CanvasModulate" parent="GameplayWorld"]
+[node name="WorldLighting" type="CanvasModulate" parent="GameplayWorld" unique_id=763536821]
 editor_description = "Gameplay ambient color grade. Keep UI unaffected by editing this CanvasModulate inside the world canvas."
 color = Color(0.84, 0.88, 0.94, 1)
 
@@ -174,14 +179,14 @@ position = Vector2(-16, 0)
 [node name="TrainAmbience" parent="." unique_id=1529690390 instance=ExtResource("18")]
 unique_name_in_owner = true
 
-[node name="MaintenanceTimers" type="Node" parent="."]
+[node name="MaintenanceTimers" type="Node" parent="." unique_id=1567324646]
 editor_description = "Scene-owned timers for daylight distractions. Their randomized ranges are configured on Main."
 
-[node name="BlockedAisleTimer" type="Timer" parent="MaintenanceTimers"]
+[node name="BlockedAisleTimer" type="Timer" parent="MaintenanceTimers" unique_id=2037624566]
 unique_name_in_owner = true
 one_shot = true
 
-[node name="DirtySeatTimer" type="Timer" parent="MaintenanceTimers"]
+[node name="DirtySeatTimer" type="Timer" parent="MaintenanceTimers" unique_id=1421476985]
 unique_name_in_owner = true
 one_shot = true
 
@@ -200,6 +205,22 @@ scale = Vector2(0.374415, 0.374415)
 
 [node name="FrontOverheadWire" parent="TravelForeground/TravelScenery/PassingCables" index="1" unique_id=597990151]
 scale = Vector2(0.374415, 0.374415)
+
+[node name="RailroadUILayer" type="CanvasLayer" parent="." unique_id=1399997117]
+layer = 8
+
+[node name="Railroad" type="TextureRect" parent="RailroadUILayer" unique_id=505086778]
+texture_repeat = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 709.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("44_railroad")
+expand_mode = 1
+stretch_mode = 1
 
 [node name="HUD" parent="." unique_id=1053587110 instance=ExtResource("4")]
 unique_name_in_owner = true
@@ -222,7 +243,7 @@ unique_name_in_owner = true
 [node name="ShiftReportUI" parent="ModalLayer" unique_id=470131896 instance=ExtResource("25")]
 unique_name_in_owner = true
 
-[node name="NightMarketUI" parent="ModalLayer" instance=ExtResource("41_market_ui")]
+[node name="NightMarketUI" parent="ModalLayer" unique_id=372416607 instance=ExtResource("41_market_ui")]
 unique_name_in_owner = true
 
 [node name="NightPuzzleUI" parent="ModalLayer" unique_id=1779434419 instance=ExtResource("8")]
@@ -234,16 +255,19 @@ unique_name_in_owner = true
 [node name="PauseUI" parent="ModalLayer" unique_id=680489697 instance=ExtResource("10")]
 unique_name_in_owner = true
 
-[node name="BlockedAislePuzzleUI" parent="ModalLayer" instance=ExtResource("38_blocked_ui")]
+[node name="BlockedAislePuzzleUI" parent="ModalLayer" unique_id=559761803 instance=ExtResource("38_blocked_ui")]
 unique_name_in_owner = true
 
-[node name="CleanSeatUI" parent="ModalLayer" instance=ExtResource("39_clean_ui")]
+[node name="CleanSeatUI" parent="ModalLayer" unique_id=1148165085 instance=ExtResource("39_clean_ui")]
 unique_name_in_owner = true
 
+[connection signal="inventory_changed" from="MarketToolState" to="." method="_on_market_inventory_changed"]
 [connection signal="interaction_pressed" from="GameplayWorld/PlayerSpawnPoint/Player" to="." method="_on_interaction_pressed"]
 [connection signal="nearby_interactable_changed" from="GameplayWorld/PlayerSpawnPoint/Player" to="." method="_on_nearby_interactable_changed"]
 [connection signal="exterior_fade_out_finished" from="GameplayWorld/Train" to="." method="_on_train_exterior_fade_out_finished"]
-[connection signal="newspaper_read" from="GameplayWorld/Train/Cars/PassengerCoach2/Newspaper" to="." method="_on_newspaper_read"]
+[connection signal="newspaper_read" from="GameplayWorld/Train/Cars/PassengerCoach1/Newspaper" to="." method="_on_newspaper_read"]
+[connection signal="timeout" from="MaintenanceTimers/BlockedAisleTimer" to="." method="_on_blocked_aisle_timer_timeout"]
+[connection signal="timeout" from="MaintenanceTimers/DirtySeatTimer" to="." method="_on_dirty_seat_timer_timeout"]
 [connection signal="closed" from="ModalLayer/DocumentOverlayUI" to="." method="_on_modal_closed"]
 [connection signal="station_assignment_toggled" from="ModalLayer/DocumentOverlayUI" to="." method="_on_station_assignment_toggled"]
 [connection signal="closed" from="ModalLayer/GuidebookUI" to="." method="_on_modal_closed"]
@@ -254,20 +278,17 @@ unique_name_in_owner = true
 [connection signal="timeline_completed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_timeline_completed"]
 [connection signal="train_motion_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_train_motion_changed"]
 [connection signal="continue_requested" from="ModalLayer/ShiftReportUI" to="." method="_on_shift_report_continue"]
-[connection signal="purchase_requested" from="ModalLayer/NightMarketUI" to="." method="_on_market_purchase_requested"]
 [connection signal="continue_requested" from="ModalLayer/NightMarketUI" to="." method="_on_night_market_continue"]
+[connection signal="purchase_requested" from="ModalLayer/NightMarketUI" to="." method="_on_market_purchase_requested"]
 [connection signal="departures_confirmed" from="ModalLayer/NightPuzzleUI" to="." method="_on_departures_confirmed"]
 [connection signal="restart_requested" from="ModalLayer/DepartureSequenceUI" to="." method="_restart_game"]
 [connection signal="main_menu_requested" from="ModalLayer/PauseUI" to="." method="_return_to_main_menu"]
 [connection signal="restart_requested" from="ModalLayer/PauseUI" to="." method="_restart_game"]
 [connection signal="resume_requested" from="ModalLayer/PauseUI" to="." method="_resume_from_pause"]
-[connection signal="timeout" from="MaintenanceTimers/BlockedAisleTimer" to="." method="_on_blocked_aisle_timer_timeout"]
-[connection signal="timeout" from="MaintenanceTimers/DirtySeatTimer" to="." method="_on_dirty_seat_timer_timeout"]
 [connection signal="closed" from="ModalLayer/BlockedAislePuzzleUI" to="." method="_on_maintenance_minigame_closed"]
 [connection signal="completed" from="ModalLayer/BlockedAislePuzzleUI" to="." method="_on_maintenance_minigame_completed"]
 [connection signal="closed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_closed"]
 [connection signal="completed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_completed"]
-[connection signal="inventory_changed" from="MarketToolState" to="." method="_on_market_inventory_changed"]
 
 [editable path="GameplayWorld/Train"]
 [editable path="TravelForeground"]

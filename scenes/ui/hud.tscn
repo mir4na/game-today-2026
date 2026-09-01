@@ -1,8 +1,12 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/train_minimap.tscn" id="3"]
+[ext_resource type="Texture2D" path="res://assets/ui/dialogue_bubble.png" id="4_dialogue_bubble"]
+[ext_resource type="Texture2D" path="res://assets/ui/dialogue_pointer.png" id="5_dialogue_pointer"]
+[ext_resource type="Texture2D" path="res://assets/ui/gerbong_active.png" id="6_carriage_active"]
+[ext_resource type="Texture2D" path="res://assets/ui/gerbong_nonactive.png" id="7_carriage_inactive"]
 
 [sub_resource type="StyleBoxFlat" id="HudPanelStyle"]
 content_margin_left = 18.0
@@ -95,6 +99,8 @@ text = "TRAIN"
 [node name="TrainMinimap" parent="Root/MinimapPanel/MinimapBox" instance=ExtResource("3")]
 unique_name_in_owner = true
 layout_mode = 2
+active_carriage_texture = ExtResource("6_carriage_active")
+inactive_carriage_texture = ExtResource("7_carriage_inactive")
 
 [node name="ToolPanel" type="PanelContainer" parent="Root"]
 unique_name_in_owner = true
@@ -121,16 +127,35 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
-offset_right = 440.0
-offset_bottom = 48.0
+offset_right = 180.0
+offset_bottom = 75.0
 mouse_filter = 2
 
-[node name="PromptLabel" type="Label" parent="Root/FloatingPrompt"]
+[node name="BubbleBackground" type="NinePatchRect" parent="Root/FloatingPrompt"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -27.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4_dialogue_bubble")
+patch_margin_left = 24
+patch_margin_top = 20
+patch_margin_right = 24
+patch_margin_bottom = 20
+
+[node name="PromptLabel" type="Label" parent="Root/FloatingPrompt/BubbleBackground"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 10.0
+offset_right = -16.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.968627, 0.92549, 0.815686, 1)
@@ -142,6 +167,24 @@ theme_override_constants/shadow_offset_y = 3
 theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="DialoguePointer" type="TextureRect" parent="Root/FloatingPrompt"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -16.5
+offset_top = -33.0
+offset_right = 16.5
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
 
 [node name="ClockPanel" type="PanelContainer" parent="Root"]
 unique_name_in_owner = true

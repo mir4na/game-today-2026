@@ -25,6 +25,7 @@ var _facing: float = 1.0
 var _market_speed_bonus: float = 0.0
 
 @onready var _animated_sprite: AnimatedSprite2D = %MCVisual
+@onready var _dialogue_anchor: Marker2D = %DialogueAnchor
 @onready var _gravity: float = float(ProjectSettings.get_setting("physics/2d/default_gravity"))
 @onready var _radar_origin: Marker2D = get_node_or_null(radar_origin_path) as Marker2D
 
@@ -59,10 +60,12 @@ func set_interactables(nodes: Array[Interactable]) -> void:
 func clear_interactable() -> void:
 	_set_nearest(null)
 
+func get_dialogue_anchor() -> Node2D:
+	return _dialogue_anchor
+
 
 func set_market_speed_bonus(value: float) -> void:
 	_market_speed_bonus = maxf(0.0, value)
-
 
 func get_effective_move_speed() -> float:
 	return move_speed + _market_speed_bonus

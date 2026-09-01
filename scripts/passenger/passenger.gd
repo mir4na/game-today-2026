@@ -13,8 +13,17 @@ signal documents_requested(passenger: Passenger)
 @export_range(1, 8, 1) var maximum_roaming_target_population: int = 3
 @export_category("Interaction Copy")
 @export var night_prompt_text: String = "Hear Departure Statement"
+@export_range(0.0, 48.0, 1.0) var dialogue_anchor_gap: float = 14.0
 @export_category("Visual Scale")
 @export var uses_authored_character_artwork: bool = false
+@export_category("Deceased Night Presentation")
+@export_range(0.0, 1.0, 0.01) var dead_desaturation: float = 0.72
+@export var dead_tint: Color = Color(0.30, 0.52, 0.66, 0.24)
+@export_range(0.75, 1.0, 0.01) var dead_visual_alpha: float = 0.92
+@export_range(0.0, 1.0, 0.01) var dead_shadow_alpha: float = 0.14
+@export var dead_shadow_offset: Vector2 = Vector2(9.0, 5.0)
+@export_range(1.0, 1.5, 0.01) var dead_shadow_scale: float = 1.12
+@export var dead_twitch_interval_seconds: Vector2 = Vector2(4.0, 8.0)
 var documents_checked: bool = false
 var night_mode: bool = false
 var departed: bool = false
@@ -36,10 +45,18 @@ var _assigned_seat_position: Vector2
 var _activity_points := PackedVector2Array()
 var _carriage_ranges: Dictionary = {}
 var _day_prompt_text: String = ""
+var _shadow_rest_position: Vector2
+var _shadow_rest_scale: Vector2
+var _dead_idle_phase: float = 0.0
+var _dead_twitch_timer: float = 0.0
+var _dead_twitch_remaining: float = 0.0
+var _dead_twitch_offset: Vector2 = Vector2.ZERO
+var _dead_twitch_rotation: float = 0.0
 
 const PASSENGER_WALK_SPEED: float = 92.0
 
 @onready var _shadow: Polygon2D = %Shadow
+@onready var _interaction_prompt_anchor: Marker2D = $InteractionPromptAnchor
 @onready var _passenger_visual: Node2D = %PassengerVisual
 @onready var _body_tint: Node2D = %BodyTint
 
@@ -48,12 +65,18 @@ func _ready() -> void:
 	runtime_carriage = _carriage_from_world_x(position.x)
 	_ai_target_position = position
 	_rng.randomize()
+	_shadow_rest_position = _shadow.position
+	_shadow_rest_scale = _shadow.scale
+	_dead_idle_phase = _rng.randf_range(0.0, TAU)
+	_schedule_dead_twitch()
 	_day_prompt_text = prompt_text
 	_ai_timer = _next_ai_wait()
 	_update_visual()
 
 func _process(delta: float) -> void:
 	_sway_time += delta
+	if _is_dead_night_visual_active():
+		_update_dead_idle(delta)
 	if _boarding_handoff_active and not night_mode and not departed and data != null:
 		_update_boarding_handoff(delta)
 	elif ai_enabled and not night_mode and not departed and data != null:
@@ -63,8 +86,27 @@ func _process(delta: float) -> void:
 func interact() -> void:
 	if data == null or departed:
 		return
-	documents_checked = true
 	documents_requested.emit(self)
+
+func get_prompt_anchor() -> Node2D:
+	return get_dialogue_anchor()
+
+func get_dialogue_anchor() -> Node2D:
+	_update_dialogue_anchor()
+	return _interaction_prompt_anchor
+
+func _update_dialogue_anchor() -> void:
+	if not is_instance_valid(_interaction_prompt_anchor) or not is_instance_valid(_passenger_visual):
+		return
+	var artwork := _passenger_visual.get_node_or_null("CharacterArtwork") as Sprite2D
+	if is_instance_valid(artwork) and artwork.texture != null:
+		var artwork_rect: Rect2 = artwork.get_rect()
+		var artwork_top_center := Vector2(artwork_rect.get_center().x, artwork_rect.position.y)
+		var top_position: Vector2 = to_local(artwork.to_global(artwork_top_center))
+		_interaction_prompt_anchor.position = Vector2(top_position.x, top_position.y - dialogue_anchor_gap)
+		return
+	var fallback_top_position: Vector2 = to_local(_passenger_visual.to_global(Vector2(0.0, -189.0)))
+	_interaction_prompt_anchor.position = Vector2(fallback_top_position.x, fallback_top_position.y - dialogue_anchor_gap)
 
 func set_night_mode(value: bool) -> void:
 	night_mode = value
@@ -72,6 +114,8 @@ func set_night_mode(value: bool) -> void:
 	prompt_text = night_prompt_text if value and data != null and data.is_dead else _day_prompt_text
 	if data != null and not data.is_dead:
 		visible = not value
+	if not _is_dead_night_visual_active():
+		_reset_dead_idle()
 	_update_visual()
 
 func depart_train() -> void:
@@ -347,18 +391,78 @@ func _can_roam_to_carriage(source_carriage: int, target_carriage: int) -> bool:
 		and target_population < maximum_roaming_target_population
 	)
 
+
+func _is_dead_night_visual_active() -> bool:
+	return night_mode and data != null and data.is_dead and not departed
+
+
+func _schedule_dead_twitch() -> void:
+	var minimum_interval: float = minf(dead_twitch_interval_seconds.x, dead_twitch_interval_seconds.y)
+	var maximum_interval: float = maxf(dead_twitch_interval_seconds.x, dead_twitch_interval_seconds.y)
+	_dead_twitch_timer = _rng.randf_range(maxf(0.5, minimum_interval), maxf(0.5, maximum_interval))
+
+
+func _update_dead_idle(delta: float) -> void:
+	if _dead_twitch_remaining > 0.0:
+		_dead_twitch_remaining = maxf(0.0, _dead_twitch_remaining - delta)
+		if _dead_twitch_remaining <= 0.0:
+			_dead_twitch_offset = Vector2.ZERO
+			_dead_twitch_rotation = 0.0
+		return
+	_dead_twitch_timer -= delta
+	if _dead_twitch_timer > 0.0:
+		return
+	# One restrained discontinuity every few seconds reads as subtly wrong.
+	_dead_twitch_remaining = _rng.randf_range(0.045, 0.075)
+	_dead_twitch_offset = Vector2(
+		_rng.randf_range(-1.6, 1.6),
+		_rng.randf_range(-0.7, 0.7)
+	)
+	_dead_twitch_rotation = deg_to_rad(_rng.randf_range(-0.65, 0.65))
+	_schedule_dead_twitch()
+
+
+func _reset_dead_idle() -> void:
+	_dead_twitch_remaining = 0.0
+	_dead_twitch_offset = Vector2.ZERO
+	_dead_twitch_rotation = 0.0
+	_schedule_dead_twitch()
+
+
 func _update_visual() -> void:
 	_passenger_visual.visible = data != null and not departed
 	if data == null or departed:
 		return
-	var ghost_alpha: float = 0.72 + sin(_sway_time * 2.2) * 0.08 if night_mode else 1.0
+	var dead_visual_active: bool = _is_dead_night_visual_active()
+	var ghost_alpha: float = (
+		dead_visual_alpha + sin(_sway_time * 0.38 + _dead_idle_phase) * 0.012
+		if dead_visual_active
+		else 1.0
+	)
 	var body_tint: Color = data.body_color
-	body_tint.a = ghost_alpha
+	body_tint.a = 1.0
 	_body_tint.modulate = body_tint if not uses_authored_character_artwork else Color.WHITE
-	_passenger_visual.modulate = Color(1.0, 1.0, 1.0, ghost_alpha) if uses_authored_character_artwork else Color.WHITE
+	_passenger_visual.modulate = Color(1.0, 1.0, 1.0, ghost_alpha)
 	# The authored NPC sprites face left by default; the procedural fallback faces right.
 	var visual_direction: float = -_facing_direction if uses_authored_character_artwork else _facing_direction
 	_passenger_visual.scale = Vector2(visual_direction, 1.0)
-	_passenger_visual.position.y = sin(_walk_phase) * 1.8 if _ai_walking else 0.0
+	var dead_idle_y: float = sin(_sway_time * 0.32 + _dead_idle_phase) * 0.45 if dead_visual_active else 0.0
+	_passenger_visual.position = Vector2(
+		_dead_twitch_offset.x if dead_visual_active else 0.0,
+		(sin(_walk_phase) * 1.8 if _ai_walking else 0.0)
+		+ dead_idle_y
+		+ (_dead_twitch_offset.y if dead_visual_active else 0.0)
+	)
+	_passenger_visual.rotation = (
+		sin(_sway_time * 0.24 + _dead_idle_phase) * deg_to_rad(0.32) + _dead_twitch_rotation
+		if dead_visual_active
+		else 0.0
+	)
 	_shadow.visible = data.anomaly_type != "shadowless"
-	_shadow.modulate.a = 0.52 if not night_mode else 0.28
+	_shadow.position = _shadow_rest_position + (dead_shadow_offset if dead_visual_active else Vector2.ZERO)
+	_shadow.scale = _shadow_rest_scale * (dead_shadow_scale if dead_visual_active else 1.0)
+	_shadow.modulate.a = dead_shadow_alpha if dead_visual_active else 0.52
+	if is_instance_valid(_focus_material):
+		_focus_material.set_shader_parameter(&"dead_effect_strength", 1.0 if dead_visual_active else 0.0)
+		_focus_material.set_shader_parameter(&"dead_desaturation", dead_desaturation)
+		_focus_material.set_shader_parameter(&"dead_tint", dead_tint)

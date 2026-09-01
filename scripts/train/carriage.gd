@@ -33,6 +33,7 @@ const NIGHT_WINDOW_LIGHT := Color("3aa2e9")
 @export_range(0.0, 2.0, 0.05) var cinematic_interior_fade_seconds: float = 0.45
 @export_range(0.0, 1.0, 0.05) var radar_glow_opacity: float = 1.0
 @export_range(0.05, 2.0, 0.05) var radar_glow_fade_seconds: float = 0.35
+@export_range(0.1, 8.0, 0.1) var wheel_full_speed_scale: float = 3.5
 @export_category("Door Animations")
 @export var door_reset_animation: StringName = &"RESET"
 @export var door_open_animation: StringName = &"door_open"
@@ -135,9 +136,15 @@ func set_motion_strength(value: float) -> void:
 	if not is_instance_valid(_wheel_animation):
 		return
 	var motion_strength: float = clampf(value, 0.0, 1.0)
-	if not _wheel_animation.is_playing() and _wheel_animation.has_animation(wheel_spin_animation):
+	if motion_strength <= 0.001:
+		_wheel_animation.speed_scale = 0.0
+		_wheel_animation.pause()
+		return
+	if not _wheel_animation.has_animation(wheel_spin_animation):
+		return
+	_wheel_animation.speed_scale = wheel_full_speed_scale * motion_strength
+	if not _wheel_animation.is_playing():
 		_wheel_animation.play(wheel_spin_animation)
-	_wheel_animation.speed_scale = motion_strength
 
 
 func show_radar_anomaly_glow(duration: float) -> void:

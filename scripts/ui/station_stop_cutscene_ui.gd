@@ -23,30 +23,30 @@ signal boarding_actor_entered(actor_index: int, door_screen_position: Vector2)
 @export_range(0.1, 2.0, 0.05) var screen_fade_duration: float = 0.85
 @export_range(0.25, 1.5, 0.05) var camera_return_lead_time: float = 0.75
 @export_category("Train Timeline")
-@export_range(5.0, 15.0, 0.05) var stop_duration: float = 12.0
+@export_range(5.0, 20.0, 0.05) var stop_duration: float = 15.340431
 @export_range(0.0, 5.0, 0.05) var stop_deceleration_start: float = 2.0
-@export_range(0.5, 6.0, 0.05) var stop_arrival_end: float = 3.35
-@export_range(3.0, 12.0, 0.05) var stop_departure_start: float = 8.0
-@export_range(5.0, 15.0, 0.05) var opening_duration: float = 12.0
+@export_range(0.5, 10.0, 0.05) var stop_arrival_end: float = 6.690431
+@export_range(3.0, 18.0, 0.05) var stop_departure_start: float = 11.340431
+@export_range(5.0, 20.0, 0.05) var opening_duration: float = 15.340431
 @export_range(0.0, 5.0, 0.05) var opening_deceleration_start: float = 2.0
-@export_range(0.5, 6.0, 0.05) var opening_arrival_end: float = 3.35
-@export_range(3.0, 12.0, 0.05) var opening_departure_start: float = 8.0
+@export_range(0.5, 10.0, 0.05) var opening_arrival_end: float = 6.690431
+@export_range(3.0, 18.0, 0.05) var opening_departure_start: float = 11.340431
 @export_range(0.0, 2.0, 0.05) var door_close_motion_delay: float = 0.55
 @export_category("Passenger Staging")
 @export_range(80.0, 220.0, 1.0) var platform_vertical_offset: float = 148.0
 @export_range(20.0, 240.0, 1.0) var platform_horizontal_offset: float = 112.0
 @export_range(0.0, 160.0, 1.0) var door_visibility_margin: float = 48.0
-@export_range(0.0, 8.0, 0.05) var departing_start_time: float = 4.05
+@export_range(0.0, 12.0, 0.05) var departing_start_time: float = 7.390431
 @export_range(0.02, 0.6, 0.01) var departing_stagger_min: float = 0.1
 @export_range(0.02, 0.6, 0.01) var departing_stagger_max: float = 0.22
 @export_range(0.4, 2.5, 0.05) var departing_walk_duration_min: float = 1.0
 @export_range(0.4, 2.5, 0.05) var departing_walk_duration_max: float = 1.45
-@export_range(0.0, 8.0, 0.05) var opening_boarding_start_time: float = 4.05
+@export_range(0.0, 12.0, 0.05) var opening_boarding_start_time: float = 7.390431
 @export_range(0.02, 0.6, 0.01) var opening_boarding_stagger_min: float = 0.07
 @export_range(0.02, 0.6, 0.01) var opening_boarding_stagger_max: float = 0.36
 @export_range(0.4, 2.5, 0.05) var opening_boarding_walk_duration_min: float = 0.95
 @export_range(0.4, 2.5, 0.05) var opening_boarding_walk_duration_max: float = 1.35
-@export_range(0.0, 8.0, 0.05) var exchange_boarding_start_time: float = 4.35
+@export_range(0.0, 12.0, 0.05) var exchange_boarding_start_time: float = 7.690431
 @export_range(0.02, 0.6, 0.01) var exchange_boarding_stagger_min: float = 0.09
 @export_range(0.02, 0.6, 0.01) var exchange_boarding_stagger_max: float = 0.36
 @export_range(0.4, 2.5, 0.05) var exchange_boarding_walk_duration_min: float = 0.95
@@ -66,14 +66,15 @@ var _door_markers: Dictionary = {}
 var _finished: bool = false
 var _timeline_completed: bool = false
 var _opening_mode: bool = false
-var _duration: float = 12.0
+var _duration: float = 15.340431
 var _deceleration_start: float = 2.0
-var _arrival_end: float = 3.35
-var _departure_start: float = 8.0
+var _arrival_end: float = 6.690431
+var _departure_start: float = 11.340431
 var _motion_strength: float = -1.0
 var _letterbox_exit_started: bool = false
 var _letterbox_exit_lead_time: float = 0.0
 var _camera_return_started: bool = false
+var _departure_blocked: bool = false
 var _entered_boarding_actor_indices: Dictionary = {}
 var _motion_rng := RandomNumberGenerator.new()
 
@@ -124,6 +125,10 @@ func get_train_motion_strength() -> float:
 	return clampf(_motion_strength, 0.0, 1.0)
 
 
+func set_departure_blocked(blocked: bool) -> void:
+	_departure_blocked = blocked
+
+
 func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], boarding_actors: Array[Dictionary], door_markers: Dictionary) -> void:
 	_station_name = station_name
 	_departing_actors = departing_actors.duplicate(true)
@@ -132,6 +137,7 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 	_elapsed = 0.0
 	_finished = false
 	_timeline_completed = false
+	_departure_blocked = false
 	_letterbox_exit_started = false
 	_camera_return_started = false
 	_entered_boarding_actor_indices.clear()
@@ -153,6 +159,10 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 func skip_sequence() -> void:
 	if not visible or _camera_return_started:
 		return
+	# Preserve the station audio beats even when only the visuals are skipped.
+	# Reaching zero triggers brake/announcement, then the timeline jump below
+	# immediately restores train motion and its authored rail SFX.
+	_set_train_motion_strength(0.0)
 	_elapsed = maxf(_elapsed, _duration - camera_return_lead_time)
 	_start_camera_return_if_needed()
 	sequence_timeline_changed.emit(_elapsed)
@@ -160,7 +170,12 @@ func skip_sequence() -> void:
 
 
 func _process(delta: float) -> void:
-	_elapsed = minf(_elapsed + delta, _duration)
+	var next_elapsed: float = minf(_elapsed + delta, _duration)
+	if _departure_blocked:
+		var departure_motion_start: float = _departure_start + door_close_motion_delay
+		if _elapsed <= departure_motion_start:
+			next_elapsed = minf(next_elapsed, departure_motion_start)
+	_elapsed = next_elapsed
 	_start_camera_return_if_needed()
 	sequence_timeline_changed.emit(_elapsed)
 	_update_visuals()

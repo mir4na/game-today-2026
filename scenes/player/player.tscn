@@ -87,7 +87,7 @@ animations = [{
 }],
 "loop": 1,
 "name": &"walk",
-"speed": 20.0
+"speed": 10.0
 }]
 
 [node name="Player" type="CharacterBody2D" unique_id=2030105969]
@@ -116,7 +116,12 @@ scale = Vector2(0.25178573, 0.25142857)
 sprite_frames = SubResource("SpriteFrames_yjxff")
 animation = &"walk"
 autoplay = "idle"
-frame_progress = 0.9520759
+frame_progress = 0.23886856
+
+[node name="DialogueAnchor" type="Marker2D" parent="."]
+unique_name_in_owner = true
+editor_description = "Anchor for dialogue bubbles, positioned just above the player's head."
+position = Vector2(0, -112)
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=406153284]
 editor_description = "Gameplay camera zoom. World limits are supplied by the CameraBounds Min/Max markers in Main instead of hardcoded here."
