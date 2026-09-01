@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" path="res://scenes/train/train_interior_lighting.tscn" id="10_lighting"]
 [ext_resource type="PackedScene" path="res://scenes/train/passenger_seat.tscn" id="11_seat"]
 [ext_resource type="Material" path="res://resources/materials/radar_carriage_scan.tres" id="12_radar_scan"]
+[ext_resource type="Material" path="res://resources/materials/radar_anomaly_glow.tres" id="13_radar_glow"]
 
 [sub_resource type="Gradient" id="Gradient_e78od"]
 offsets = PackedFloat32Array(0, 0.61778843, 1)
@@ -274,18 +275,6 @@ _data = {
 &"wheel_spin": SubResource("Animation_wheel_spin")
 }
 
-[sub_resource type="Gradient" id="Gradient_radar_red"]
-offsets = PackedFloat32Array(0, 0.55, 1)
-colors = PackedColorArray(1, 0.05, 0.04, 1, 0.85, 0.025, 0.02, 0.66, 0.3, 0, 0, 0)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_radar_red"]
-gradient = SubResource("Gradient_radar_red")
-width = 960
-height = 420
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-fill_to = Vector2(1, 0.5)
-
 [sub_resource type="RectangleShape2D" id="PassengerFloorShape"]
 size = Vector2(934, 24)
 
@@ -303,12 +292,12 @@ exterior_door_visual_path = NodePath("ArtRoot/Exterior/ClosedDoors")
 door_animation_path = NodePath("ArtRoot/Exterior/DoorAnimation")
 wheel_animation_path = NodePath("ArtRoot/Wheels/WheelAnimation")
 cinematic_interior_shade_path = NodePath("ArtRoot/CinematicInteriorShade")
-radar_scan_effect_path = NodePath("ArtRoot/RadarScanEffect")
-radar_anomaly_light_path = NodePath("ArtRoot/RadarAnomalyLight")
+radar_scan_effect_path = NodePath("ArtRoot/RadarEffectBounds/RadarScanEffect")
+radar_anomaly_glow_path = NodePath("ArtRoot/RadarEffectBounds/RadarAnomalyGlow")
 dirty_seat_events_root_path = NodePath("PassengerLayout/PassengerSeatSlots")
 cinematic_interior_fade_seconds = 0.45
-radar_light_energy = 2.4
-radar_light_fade_seconds = 0.35
+radar_glow_opacity = 1.0
+radar_glow_fade_seconds = 0.35
 
 [node name="PassengerLayout" type="Node2D" parent="."]
 editor_description = "Shared passenger ground baseline. Move this node vertically in the Inspector to align every seat, activity, and boarding position without changing the train floor."
@@ -451,23 +440,40 @@ centered = false
 
 [node name="InteriorLighting" parent="ArtRoot" instance=ExtResource("10_lighting")]
 
-[node name="RadarScanEffect" type="ColorRect" parent="ArtRoot"]
-editor_description = "Scene-authored one-coach radar sweep. Adjust this rectangle to define the scanned interior area; tune its ring, trail, grid, and colors in the assigned ShaderMaterial."
-visible = false
+[node name="RadarEffectBounds" type="Control" parent="ArtRoot"]
+editor_description = "Per-coach radar boundary. Resize this Inspector-authored rectangle to keep the scan and anomaly glow inside the roof, walls, and floor."
 z_index = 20
 offset_top = 190.0
 offset_right = 960.0
 offset_bottom = 525.0
 mouse_filter = 2
-material = ExtResource("12_radar_scan")
+clip_contents = true
+
+[node name="RadarAnomalyGlow" type="ColorRect" parent="ArtRoot/RadarEffectBounds"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = ExtResource("13_radar_glow")
 color = Color(1, 1, 1, 1)
 
-[node name="RadarAnomalyLight" type="PointLight2D" parent="ArtRoot"]
-editor_description = "Scene-authored red anomaly scan light. Position, color, size, and maximum energy can be tuned here and on the PassengerCoach Inspector."
-position = Vector2(480, 355)
-energy = 0.0
-color = Color(1, 0.04, 0.025, 1)
-texture = SubResource("GradientTexture2D_radar_red")
+[node name="RadarScanEffect" type="ColorRect" parent="ArtRoot/RadarEffectBounds"]
+editor_description = "Scene-authored one-coach radar sweep. Tune its ring, trail, grid, and colors in the assigned ShaderMaterial."
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = ExtResource("12_radar_scan")
+color = Color(1, 1, 1, 1)
 
 [node name="CinematicInteriorShade" type="Polygon2D" parent="ArtRoot"]
 editor_description = "Cutscene-only interior grade. Color controls the cinematic darkness; CarriageVisual only fades its alpha."

@@ -119,9 +119,5 @@ autoplay = "idle"
 frame_progress = 0.9520759
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=406153284]
-editor_description = "Gameplay and station cutscenes share this fixed Inspector-authored zoom; no cinematic zoom animation is applied."
+editor_description = "Gameplay camera zoom. World limits are supplied by the CameraBounds Min/Max markers in Main instead of hardcoded here."
 zoom = Vector2(1.35, 1.35)
-limit_left = 0
-limit_top = 0
-limit_right = 6000
-limit_bottom = 720

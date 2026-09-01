@@ -1,0 +1,31 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/minigames/packing_piece.gd" id="1_piece"]
+[ext_resource type="Texture2D" path="res://assets/minigame/suitcase/Koper L shape.png" id="2_texture"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_root"]
+
+[node name="SuitcaseLShape" type="Panel"]
+editor_description = "Reusable L-shaped luggage scene. It occupies three cells inside a 2 × 2 bounding grid."
+custom_minimum_size = Vector2(128, 128)
+offset_right = 128.0
+offset_bottom = 128.0
+mouse_default_cursor_shape = 6
+theme_override_styles/panel = SubResource("StyleBoxEmpty_root")
+script = ExtResource("1_piece")
+grid_size = Vector2i(2, 2)
+occupied_cell_offsets = Array[Vector2i]([Vector2i(0, 0), Vector2i(0, 1), Vector2i(1, 1)])
+display_name = "SUITCASE L"
+label_path = NodePath("")
+
+[node name="Artwork" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_texture")
+expand_mode = 1
+stretch_mode = 5

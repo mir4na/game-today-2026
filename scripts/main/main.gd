@@ -746,7 +746,7 @@ func _on_blocked_aisle_timer_timeout() -> void:
 	if candidates.is_empty():
 		return
 	var selected_event: Node = candidates[_daily_rng.randi_range(0, candidates.size() - 1)]
-	selected_event.call(&"set_event_active", true)
+	selected_event.call(&"set_event_active", true, _player.global_position.x)
 	_blocked_aisle_activated = true
 	_hud.notify("LUGGAGE HAS BLOCKED A COACH CONNECTOR\nFind the obstruction and repack it", 4.0)
 

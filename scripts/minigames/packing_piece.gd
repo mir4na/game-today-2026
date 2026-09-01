@@ -7,6 +7,7 @@ signal dragged(piece: Control, pointer_position: Vector2, grab_offset: Vector2)
 signal released(piece: Control, pointer_position: Vector2, grab_offset: Vector2)
 
 @export var grid_size: Vector2i = Vector2i.ONE
+@export var occupied_cell_offsets: Array[Vector2i] = []
 @export var display_name: String = "LUGGAGE"
 @export_node_path("Label") var label_path: NodePath = NodePath("Label")
 
@@ -18,9 +19,20 @@ var _grab_offset: Vector2 = Vector2.ZERO
 
 func configure_grid_size(value: Vector2i, cell_size: float) -> void:
 	grid_size = Vector2i(maxi(value.x, 1), maxi(value.y, 1))
+	occupied_cell_offsets.clear()
 	size = Vector2(grid_size) * cell_size
 	if is_instance_valid(_label):
 		_label.text = "%s\n%d × %d" % [display_name, grid_size.x, grid_size.y]
+
+
+func get_occupied_cell_offsets() -> Array[Vector2i]:
+	if not occupied_cell_offsets.is_empty():
+		return occupied_cell_offsets.duplicate()
+	var cells: Array[Vector2i] = []
+	for y: int in range(grid_size.y):
+		for x: int in range(grid_size.x):
+			cells.append(Vector2i(x, y))
+	return cells
 
 
 func _gui_input(event: InputEvent) -> void:

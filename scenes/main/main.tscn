@@ -40,6 +40,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/clean_seat_ui.tscn" id="39_clean_ui"]
 [ext_resource type="PackedScene" path="res://scenes/systems/market_tool_state.tscn" id="40_market_state"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_market_ui.tscn" id="41_market_ui"]
+[ext_resource type="Script" path="res://scripts/systems/camera_bounds_2d.gd" id="42_camera_bounds"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_day_cycle_sky"]
 shader = ExtResource("39")
@@ -83,7 +84,7 @@ day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmer
 station_travel_seconds = 120.0
 minimum_passenger_seat_spacing = 90.0
 debug_print_anomaly_roster = true
-night_shift_instruction = "NIGHT SHIFT\nINTERVIEW THE DECEASED, THEN RETURN TO THE FRONT CREW CAB"
+night_shift_instruction = "NIGHT SHIFT\nINTERVIEW THE DECEASED, THEN RETURN TO THE LEDGER IN THE FRONT PASSENGER COACH"
 departure_statement_recorded_template = "DEPARTURE STATEMENT RECORDED\n%d / %d COLLECTED"
 blocked_aisle_delay_range_seconds = Vector2(9, 16)
 dirty_seat_delay_range_seconds = Vector2(24, 38)
@@ -135,6 +136,21 @@ color = Color(0.68, 0.75, 0.8, 1)
 editor_description = "Move this node in the Inspector to adjust the complete train, passenger, and player gameplay layout vertically."
 position = Vector2(0, 100)
 
+[node name="CameraBounds" type="Node2D" parent="GameplayWorld"]
+editor_description = "Scene-authored gameplay camera limits. Move Min and Max in the Inspector to change the allowed view without editing scripts."
+script = ExtResource("42_camera_bounds")
+camera_path = NodePath("../PlayerSpawnPoint/Player/Camera2D")
+min_marker_path = NodePath("Min")
+max_marker_path = NodePath("Max")
+
+[node name="Min" type="Marker2D" parent="GameplayWorld/CameraBounds"]
+editor_description = "Top-left edge of the gameplay camera view."
+position = Vector2(-16, 0)
+
+[node name="Max" type="Marker2D" parent="GameplayWorld/CameraBounds"]
+editor_description = "Bottom-right edge of the gameplay camera view."
+position = Vector2(3824, 720)
+
 [node name="WorldLighting" type="CanvasModulate" parent="GameplayWorld"]
 editor_description = "Gameplay ambient color grade. Keep UI unaffected by editing this CanvasModulate inside the world canvas."
 color = Color(0.84, 0.88, 0.94, 1)
@@ -143,7 +159,7 @@ color = Color(0.84, 0.88, 0.94, 1)
 unique_name_in_owner = true
 
 [node name="PlayerSpawnPoint" type="Marker2D" parent="GameplayWorld" unique_id=1158105950]
-editor_description = "Move this Marker2D in the Inspector to set the player's initial position inside the conductor car."
+editor_description = "Move this Marker2D in the Inspector to set the player's initial position inside the front passenger coach."
 position = Vector2(585, 430)
 
 [node name="Player" parent="GameplayWorld/PlayerSpawnPoint" unique_id=1358319638 instance=ExtResource("3")]
@@ -254,5 +270,4 @@ unique_name_in_owner = true
 [connection signal="inventory_changed" from="MarketToolState" to="." method="_on_market_inventory_changed"]
 
 [editable path="GameplayWorld/Train"]
-[editable path="GameplayWorld/Train/Cars/ConductorCar"]
 [editable path="TravelForeground"]
