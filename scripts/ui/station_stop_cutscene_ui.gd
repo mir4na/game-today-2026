@@ -72,7 +72,6 @@ var _arrival_end: float = 6.690431
 var _departure_start: float = 11.340431
 var _motion_strength: float = -1.0
 var _letterbox_exit_started: bool = false
-var _letterbox_exit_lead_time: float = 0.0
 var _camera_return_started: bool = false
 var _departure_blocked: bool = false
 var _entered_boarding_actor_indices: Dictionary = {}
@@ -143,7 +142,6 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 	_entered_boarding_actor_indices.clear()
 	_motion_rng.randomize()
 	_build_actor_motion_profiles()
-	_letterbox_exit_lead_time = _get_animation_duration(letterbox_out_animation)
 	_update_scene_copy()
 	show()
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -176,12 +174,8 @@ func _process(delta: float) -> void:
 		if _elapsed <= departure_motion_start:
 			next_elapsed = minf(next_elapsed, departure_motion_start)
 	_elapsed = next_elapsed
-	_start_camera_return_if_needed()
 	sequence_timeline_changed.emit(_elapsed)
 	_update_visuals()
-	if not _letterbox_exit_started and _elapsed >= maxf(_duration - _letterbox_exit_lead_time, 0.0):
-		_letterbox_exit_started = true
-		_play_letterbox_animation(letterbox_out_animation)
 	if _elapsed >= _duration and not _timeline_completed:
 		_timeline_completed = true
 		timeline_completed.emit()
@@ -205,6 +199,12 @@ func complete_sequence() -> void:
 	_start_camera_return_if_needed(true)
 	_set_train_motion_strength(1.0)
 	_screen_fade.modulate.a = 0.0
+	if _letterbox_animation.has_animation(letterbox_out_animation):
+		_letterbox_exit_started = true
+		_play_letterbox_animation(letterbox_out_animation)
+		var finished_animation: StringName = await _letterbox_animation.animation_finished
+		if finished_animation != letterbox_out_animation or not is_inside_tree():
+			return
 	_letterbox_animation.stop()
 	_cinematic_title_animation.stop()
 	process_mode = Node.PROCESS_MODE_DISABLED
@@ -275,13 +275,6 @@ func _play_cinematic_title_animation() -> void:
 		return
 	_cinematic_title_animation.stop()
 	_cinematic_title_animation.play(title_reveal_animation)
-
-
-func _get_animation_duration(animation_name: StringName) -> float:
-	if not _letterbox_animation.has_animation(animation_name):
-		return 0.0
-	var animation: Animation = _letterbox_animation.get_animation(animation_name)
-	return animation.length
 
 
 func _build_actor_motion_profiles() -> void:

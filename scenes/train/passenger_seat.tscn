@@ -1,20 +1,20 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://buwn8armxkqjw"]
 
 [ext_resource type="Texture2D" uid="uid://bb8rkrjaeuw6n" path="res://assets/kereta/seat.png" id="1_seat"]
-[ext_resource type="PackedScene" path="res://scenes/minigames/dirty_seat_event.tscn" id="2_dirty"]
+[ext_resource type="PackedScene" uid="uid://ci8rlqvlg325x" path="res://scenes/minigames/dirty_seat_event.tscn" id="2_dirty"]
 
-[node name="PassengerSeat" type="Marker2D" groups=["passenger_seats"]]
+[node name="PassengerSeat" type="Marker2D" unique_id=448457507 groups=["passenger_seats"]]
 editor_description = "One modular passenger seat. This root is also the NPC occupancy marker; move the complete seat from this node in the Inspector."
 
-[node name="SeatVisual" type="Sprite2D" parent="."]
+[node name="SeatVisual" type="Sprite2D" parent="." unique_id=2041782283]
 editor_description = "Independent seat artwork. Keep attachments under the sibling Attachments node."
 z_index = 1
 scale = Vector2(0.374415, 0.374415)
 texture = ExtResource("1_seat")
 
-[node name="Attachments" type="Node2D" parent="."]
+[node name="Attachments" type="Node2D" parent="." unique_id=503744244]
 editor_description = "Scene-based attachment point for dirt, lost items, or other per-seat events."
 
-[node name="DirtySeatEvent" parent="Attachments" instance=ExtResource("2_dirty")]
-position = Vector2(0, 50)
+[node name="DirtySeatEvent" parent="Attachments" unique_id=228326528 instance=ExtResource("2_dirty")]
+position = Vector2(1, 70)
 seat_marker_path = NodePath("../..")

@@ -1,10 +1,13 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/passenger/passenger.gd" id="1"]
 [ext_resource type="ShaderMaterial" path="res://resources/materials/interactable_outline.tres" id="2_outline"]
 
 [sub_resource type="RectangleShape2D" id="InteractionShape"]
 size = Vector2(110, 170)
+
+[sub_resource type="CircleShape2D" id="NpcNavigationProbeShape"]
+radius = 44.0
 
 [node name="Passenger" type="Area2D"]
 z_index = 2
@@ -21,6 +24,9 @@ initial_seated_chance = 0.25
 initial_idle_at_activity_chance = 0.35
 minimum_roaming_source_population = 2
 maximum_roaming_target_population = 3
+navigation_probe_path = NodePath("NpcNavigationProbe")
+navigation_probe_collision_path = NodePath("NpcNavigationProbe/ProbeCollision")
+navigation_blocker_mask = 4
 night_prompt_text = "Hear Departure Statement"
 
 [node name="InteractionPromptAnchor" type="Marker2D" parent="."]
@@ -77,3 +83,14 @@ default_color = Color(0.164706, 0.160784, 0.188235, 1)
 
 [node name="InteractionShape" type="CollisionShape2D" parent="."]
 shape = SubResource("InteractionShape")
+
+[node name="NpcNavigationProbe" type="Area2D" parent="."]
+editor_description = "Scene-authored NPC clearance probe. Its shape is queried before AI movement so passengers do not overlap active maintenance events."
+collision_layer = 0
+collision_mask = 4
+monitoring = false
+monitorable = false
+
+[node name="ProbeCollision" type="CollisionShape2D" parent="NpcNavigationProbe"]
+editor_description = "Adjust this radius in the Inspector to control NPC clearance around maintenance objects."
+shape = SubResource("NpcNavigationProbeShape")

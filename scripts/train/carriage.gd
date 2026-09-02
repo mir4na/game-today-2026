@@ -20,6 +20,9 @@ const NIGHT_WINDOW_LIGHT := Color("3aa2e9")
 @export_node_path("CanvasItem") var window_light_root_path: NodePath
 @export_node_path("Node2D") var exterior_visual_path: NodePath
 @export_node_path("Node2D") var exterior_door_visual_path: NodePath
+@export_node_path("Marker2D") var exterior_wipe_top_anchor_path: NodePath
+@export_node_path("Marker2D") var exterior_wipe_bottom_anchor_path: NodePath
+@export var exterior_wipe_visual_paths: Array[NodePath] = []
 @export_node_path("AnimationPlayer") var door_animation_path: NodePath
 @export_node_path("AnimationPlayer") var wheel_animation_path: NodePath
 @export_node_path("CanvasItem") var cinematic_interior_shade_path: NodePath
@@ -27,6 +30,8 @@ const NIGHT_WINDOW_LIGHT := Color("3aa2e9")
 @export_node_path("CanvasItem") var radar_anomaly_glow_path: NodePath
 @export_node_path("Node") var dirty_seat_events_root_path: NodePath
 @export var exterior_wipe_parameter: StringName = &"wipe_progress"
+@export var exterior_wipe_top_parameter: StringName = &"wipe_top_screen_y"
+@export var exterior_wipe_bottom_parameter: StringName = &"wipe_bottom_screen_y"
 @export var radar_scan_origin_parameter: StringName = &"scan_origin_uv"
 @export var radar_scan_progress_parameter: StringName = &"scan_progress"
 @export var radar_scan_aspect_parameter: StringName = &"scan_aspect"
@@ -45,6 +50,8 @@ const NIGHT_WINDOW_LIGHT := Color("3aa2e9")
 @onready var _window_light_root: CanvasItem = _get_optional_node(window_light_root_path) as CanvasItem
 @onready var _exterior_visual: Node2D = _get_optional_node(exterior_visual_path) as Node2D
 @onready var _exterior_door_visual: Node2D = _get_optional_node(exterior_door_visual_path) as Node2D
+@onready var _exterior_wipe_top_anchor: Marker2D = _get_optional_node(exterior_wipe_top_anchor_path) as Marker2D
+@onready var _exterior_wipe_bottom_anchor: Marker2D = _get_optional_node(exterior_wipe_bottom_anchor_path) as Marker2D
 @onready var _door_animation: AnimationPlayer = _get_optional_node(door_animation_path) as AnimationPlayer
 @onready var _wheel_animation: AnimationPlayer = _get_optional_node(wheel_animation_path) as AnimationPlayer
 @onready var _cinematic_interior_shade: CanvasItem = _get_optional_node(cinematic_interior_shade_path) as CanvasItem
@@ -54,11 +61,13 @@ const NIGHT_WINDOW_LIGHT := Color("3aa2e9")
 
 var _window_lights: Array[Light2D] = []
 var _window_flare_materials: Array[ShaderMaterial] = []
+var _exterior_wipe_material: ShaderMaterial
 var _cinematic_shade_tween: Tween
 var _radar_scan_tween: Tween
 var _radar_glow_tween: Tween
 
 func _ready() -> void:
+	_prepare_exterior_wipe_material()
 	if is_instance_valid(_window_light_root):
 		_collect_window_lights(_window_light_root)
 	_validate_exterior_hierarchy()
@@ -121,6 +130,8 @@ func begin_exterior_mode() -> void:
 func set_exterior_transition(alpha: float, vertical_offset: float, wipe_progress: float) -> void:
 	_set_exterior_layer_transition(_exterior_visual, alpha, vertical_offset)
 	_set_exterior_wipe_progress(wipe_progress)
+	if is_instance_valid(_exterior_visual):
+		_exterior_visual.visible = wipe_progress < 0.999
 
 func end_exterior_mode() -> void:
 	_fade_cinematic_interior_shade(0.0)
@@ -314,10 +325,47 @@ func _reset_exterior_layer(layer: Node2D) -> void:
 func _set_layer_wipe_progress(layer: Node2D, value: float) -> void:
 	if not is_instance_valid(layer):
 		return
-	var shader_material := layer.material as ShaderMaterial
+	var shader_material := _exterior_wipe_material
 	if shader_material == null:
 		return
+	_update_exterior_wipe_screen_bounds(shader_material)
 	shader_material.set_shader_parameter(exterior_wipe_parameter, clampf(value, 0.0, 1.0))
+
+
+func _prepare_exterior_wipe_material() -> void:
+	var wipe_visuals: Array[CanvasItem] = []
+	var configured_material: ShaderMaterial
+	for visual_path: NodePath in exterior_wipe_visual_paths:
+		var visual := get_node_or_null(visual_path) as CanvasItem
+		if not is_instance_valid(visual):
+			continue
+		wipe_visuals.append(visual)
+		if configured_material == null:
+			configured_material = visual.material as ShaderMaterial
+	if configured_material == null:
+		push_warning("%s requires scene-authored exterior wipe Sprite2D materials." % name)
+		return
+	_exterior_wipe_material = configured_material.duplicate() as ShaderMaterial
+	_exterior_wipe_material.resource_local_to_scene = true
+	for visual: CanvasItem in wipe_visuals:
+		visual.material = _exterior_wipe_material
+
+
+func _update_exterior_wipe_screen_bounds(shader_material: ShaderMaterial) -> void:
+	if (
+		not is_instance_valid(_exterior_wipe_top_anchor)
+		or not is_instance_valid(_exterior_wipe_bottom_anchor)
+		or not is_inside_tree()
+	):
+		return
+	var viewport_size: Vector2 = get_viewport_rect().size
+	if viewport_size.y <= 0.0:
+		return
+	var canvas_transform: Transform2D = get_viewport().get_canvas_transform()
+	var top_screen_position: Vector2 = canvas_transform * _exterior_wipe_top_anchor.global_position
+	var bottom_screen_position: Vector2 = canvas_transform * _exterior_wipe_bottom_anchor.global_position
+	shader_material.set_shader_parameter(exterior_wipe_top_parameter, top_screen_position.y / viewport_size.y)
+	shader_material.set_shader_parameter(exterior_wipe_bottom_parameter, bottom_screen_position.y / viewport_size.y)
 
 func _reset_exterior_doors() -> void:
 	if not is_instance_valid(_door_animation):

@@ -12,15 +12,16 @@ signal cleaned
 @export_node_path("Node2D") var stain_markers_path: NodePath
 @export_node_path("ColorRect") var dirt_layer_path: NodePath
 @export_node_path("TextureRect") var cloth_path: NodePath
-@export_node_path("CPUParticles2D") var cleaning_particles_path: NodePath
+@export_node_path("ColorRect") var cleaning_foam_path: NodePath
 
 @onready var _dirt_layer: ColorRect = get_node_or_null(dirt_layer_path) as ColorRect
 @onready var _cloth: TextureRect = get_node_or_null(cloth_path) as TextureRect
-@onready var _cleaning_particles: CPUParticles2D = get_node_or_null(cleaning_particles_path) as CPUParticles2D
+@onready var _cleaning_foam: ColorRect = get_node_or_null(cleaning_foam_path) as ColorRect
 
 var _mask_image: Image
 var _mask_texture: ImageTexture
 var _material: ShaderMaterial
+var _foam_material: ShaderMaterial
 var _sample_points: Array[Vector2i] = []
 var _wiping: bool = false
 var _completed: bool = false
@@ -31,6 +32,11 @@ func _ready() -> void:
 	_material = _dirt_layer.material.duplicate() as ShaderMaterial
 	_material.resource_local_to_scene = true
 	_dirt_layer.material = _material
+	if is_instance_valid(_cleaning_foam):
+		_foam_material = _cleaning_foam.material.duplicate() as ShaderMaterial
+		_foam_material.resource_local_to_scene = true
+		_cleaning_foam.material = _foam_material
+		_foam_material.set_shader_parameter(&"surface_size", size)
 	_mask_image = Image.create(mask_resolution, mask_resolution, false, Image.FORMAT_L8)
 	_mask_image.fill(Color.BLACK)
 	_mask_texture = ImageTexture.create_from_image(_mask_image)
@@ -47,9 +53,7 @@ func reset_cleaning() -> void:
 		_mask_texture.update(_mask_image)
 	if is_instance_valid(_cloth):
 		_cloth.hide()
-	if is_instance_valid(_cleaning_particles):
-		_cleaning_particles.emitting = false
-		_cleaning_particles.restart()
+	_set_foam(Vector2.ZERO, false)
 	cleaning_progress.emit(0.0)
 
 
@@ -127,8 +131,7 @@ func _complete_cleaning() -> void:
 	cleaning_progress.emit(1.0)
 	if is_instance_valid(_cloth):
 		_cloth.hide()
-	if is_instance_valid(_cleaning_particles):
-		_cleaning_particles.emitting = false
+	_set_foam(Vector2.ZERO, false)
 	cleaned.emit()
 
 
@@ -169,6 +172,12 @@ func _update_cloth(pointer_position: Vector2, should_show: bool) -> void:
 	_cloth.position = pointer_position - _cloth.size * 0.5
 	var pointer_inside: bool = Rect2(Vector2.ZERO, size).has_point(pointer_position)
 	_cloth.visible = should_show and pointer_inside
-	if is_instance_valid(_cleaning_particles):
-		_cleaning_particles.position = pointer_position
-		_cleaning_particles.emitting = should_show and _wiping and pointer_inside
+	_set_foam(pointer_position, should_show and _wiping and pointer_inside)
+
+
+func _set_foam(pointer_position: Vector2, active: bool) -> void:
+	if not is_instance_valid(_foam_material):
+		return
+	var safe_size := Vector2(maxf(size.x, 1.0), maxf(size.y, 1.0))
+	_foam_material.set_shader_parameter(&"foam_center", pointer_position / safe_size)
+	_foam_material.set_shader_parameter(&"foam_active", 1.0 if active else 0.0)

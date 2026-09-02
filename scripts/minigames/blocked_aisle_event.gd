@@ -16,6 +16,8 @@ signal resolved(event: Node)
 @export_node_path("Node2D") var luggage_visual_path: NodePath
 @export_node_path("CollisionShape2D") var door_blocker_collision_path: NodePath
 @export_node_path("CollisionShape2D") var interaction_collision_path: NodePath
+@export_node_path("CollisionShape2D") var npc_exclusion_collision_path: NodePath
+@export_node_path("Marker2D") var tracker_anchor_path: NodePath
 
 @onready var _left_spawn_anchor: Node2D = get_node_or_null(left_spawn_anchor_path) as Node2D
 @onready var _right_spawn_anchor: Node2D = get_node_or_null(right_spawn_anchor_path) as Node2D
@@ -23,6 +25,7 @@ signal resolved(event: Node)
 @onready var _luggage_visual: Node2D = get_node_or_null(luggage_visual_path) as Node2D
 @onready var _door_blocker_collision: CollisionShape2D = get_node_or_null(door_blocker_collision_path) as CollisionShape2D
 @onready var _interaction_collision: CollisionShape2D = get_node_or_null(interaction_collision_path) as CollisionShape2D
+@onready var _npc_exclusion_collision: CollisionShape2D = get_node_or_null(npc_exclusion_collision_path) as CollisionShape2D
 
 var _resolved: bool = false
 var _interaction_offset_from_luggage: Vector2 = Vector2.ZERO
@@ -50,6 +53,7 @@ func set_event_active(value: bool, observer_global_x: float = NAN) -> void:
 	enabled = value
 	_set_collision_enabled(_door_blocker_collision, value)
 	_set_collision_enabled(_interaction_collision, value)
+	_set_collision_enabled(_npc_exclusion_collision, value)
 
 
 func mark_solved() -> void:
@@ -59,6 +63,7 @@ func mark_solved() -> void:
 	enabled = false
 	_set_collision_enabled(_door_blocker_collision, false)
 	_set_collision_enabled(_interaction_collision, false)
+	_set_collision_enabled(_npc_exclusion_collision, false)
 	hide()
 	resolved.emit(self)
 
@@ -69,6 +74,11 @@ func is_resolved() -> bool:
 
 func get_active_spawn_side() -> StringName:
 	return _active_spawn_side
+
+
+func get_tracker_anchor() -> Node2D:
+	var configured_anchor := get_node_or_null(tracker_anchor_path) as Node2D
+	return configured_anchor if is_instance_valid(configured_anchor) else self
 
 
 func _place_luggage_for_observer(observer_global_x: float) -> void:

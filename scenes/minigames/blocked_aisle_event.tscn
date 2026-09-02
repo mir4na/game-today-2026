@@ -6,6 +6,9 @@
 [ext_resource type="Texture2D" uid="uid://reld0rjcihve" path="res://assets/minigame/suitcase/Group 56.png" id="4_case_wide"]
 [ext_resource type="Texture2D" uid="uid://bsf4ckf5qwmch" path="res://assets/minigame/suitcase/Group 57.png" id="5_case_tall"]
 
+[sub_resource type="RectangleShape2D" id="NpcExclusionShape"]
+size = Vector2(232, 210)
+
 [sub_resource type="RectangleShape2D" id="DoorPassageShape"]
 size = Vector2(28, 220)
 
@@ -23,23 +26,26 @@ door_center_anchor_path = NodePath("PlacementAnchors/DoorCenterAnchor")
 luggage_visual_path = NodePath("LuggageVisual")
 door_blocker_collision_path = NodePath("DoorPassageBlocker/DoorBlockerCollision")
 interaction_collision_path = NodePath("InteractionCollision")
+npc_exclusion_collision_path = NodePath("LuggageVisual/NpcExclusionArea/NpcExclusionCollision")
+tracker_anchor_path = NodePath("LuggageVisual/TrackerAnchor")
 prompt_text = "Repack blocked aisle"
 interaction_distance = 150.0
 enabled = false
+interaction_origin_path = NodePath("InteractionCollision")
 prompt_anchor_path = NodePath("LuggageVisual/InteractionPromptAnchor")
 focus_visual_path = NodePath("LuggageVisual")
 
-[node name="PlacementAnchors" type="Node2D" parent="."]
+[node name="PlacementAnchors" type="Node2D" parent="." unique_id=2006043616]
 editor_description = "Move these anchors in the Inspector to control which side of the doorway receives the luggage pile."
 
-[node name="LeftSpawnAnchor" type="Marker2D" parent="PlacementAnchors"]
+[node name="LeftSpawnAnchor" type="Marker2D" parent="PlacementAnchors" unique_id=283067894]
 editor_description = "Suitcase position when the player approaches from the left."
 
-[node name="DoorCenterAnchor" type="Marker2D" parent="PlacementAnchors"]
+[node name="DoorCenterAnchor" type="Marker2D" parent="PlacementAnchors" unique_id=1654002009]
 editor_description = "Center of the connector doorway; used only to detect the player's approach side."
 position = Vector2(92, 0)
 
-[node name="RightSpawnAnchor" type="Marker2D" parent="PlacementAnchors"]
+[node name="RightSpawnAnchor" type="Marker2D" parent="PlacementAnchors" unique_id=929222450]
 editor_description = "Suitcase position when the player approaches from the right."
 position = Vector2(184, 0)
 
@@ -49,7 +55,11 @@ material = ExtResource("2_outline")
 
 [node name="InteractionPromptAnchor" type="Marker2D" parent="LuggageVisual" unique_id=1832407386]
 editor_description = "Inspector-authored floating prompt offset; it follows the selected luggage side."
-position = Vector2(0, -180)
+position = Vector2(0, -260)
+
+[node name="TrackerAnchor" type="Marker2D" parent="LuggageVisual" unique_id=652826811]
+editor_description = "Inspector-authored target used by the maintenance HUD tracker."
+position = Vector2(0, -205)
 
 [node name="TallSuitcase" type="Sprite2D" parent="LuggageVisual" unique_id=2123819379]
 editor_description = "Tall rear suitcase; texture and transform are Inspector-authored."
@@ -69,6 +79,17 @@ position = Vector2(-19, -38)
 scale = Vector2(0.12, 0.12)
 texture = ExtResource("4_case_wide")
 
+[node name="NpcExclusionArea" type="Area2D" parent="LuggageVisual" unique_id=1892611205]
+editor_description = "NPC-only navigation blocker. It follows the suitcase side and does not block the player or interaction area."
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+
+[node name="NpcExclusionCollision" type="CollisionShape2D" parent="LuggageVisual/NpcExclusionArea" unique_id=1269216826]
+editor_description = "Adjust this scene-authored shape to keep passengers clear of the suitcase artwork."
+position = Vector2(2, -82)
+shape = SubResource("NpcExclusionShape")
+
 [node name="DoorPassageBlocker" type="StaticBody2D" parent="." unique_id=1072097916]
 editor_description = "Physical barrier at the connector doorway. Move this node in the Inspector to align it with the door; it is intentionally separate from LuggageVisual."
 collision_layer = 2
@@ -80,6 +101,6 @@ position = Vector2(92, -103)
 shape = SubResource("DoorPassageShape")
 
 [node name="InteractionCollision" type="CollisionShape2D" parent="." unique_id=315754791]
-editor_description = "Area shape for selecting/interacting with the luggage, matching passenger interactions. It does not physically block movement."
+editor_description = "Area shape and distance origin for selecting/interacting with the luggage. It follows the selected side and does not physically block movement."
 position = Vector2(6, -88)
 shape = SubResource("InteractionShape")

@@ -11,6 +11,10 @@ signal documents_requested(passenger: Passenger)
 @export_range(0.0, 1.0, 0.05) var initial_idle_at_activity_chance: float = 0.35
 @export_range(0, 6, 1) var minimum_roaming_source_population: int = 2
 @export_range(1, 8, 1) var maximum_roaming_target_population: int = 3
+@export_category("NPC Navigation Collision")
+@export_node_path("Area2D") var navigation_probe_path: NodePath
+@export_node_path("CollisionShape2D") var navigation_probe_collision_path: NodePath
+@export_flags_2d_physics var navigation_blocker_mask: int = 4
 @export_category("Interaction Copy")
 @export var night_prompt_text: String = "Hear Departure Statement"
 @export_range(0.0, 48.0, 1.0) var dialogue_anchor_gap: float = 14.0
@@ -52,6 +56,7 @@ var _dead_twitch_timer: float = 0.0
 var _dead_twitch_remaining: float = 0.0
 var _dead_twitch_offset: Vector2 = Vector2.ZERO
 var _dead_twitch_rotation: float = 0.0
+var _escaping_navigation_blocker: bool = false
 
 const PASSENGER_WALK_SPEED: float = 92.0
 
@@ -59,6 +64,8 @@ const PASSENGER_WALK_SPEED: float = 92.0
 @onready var _interaction_prompt_anchor: Marker2D = $InteractionPromptAnchor
 @onready var _passenger_visual: Node2D = %PassengerVisual
 @onready var _body_tint: Node2D = %BodyTint
+@onready var _navigation_probe: Area2D = get_node_or_null(navigation_probe_path) as Area2D
+@onready var _navigation_probe_collision: CollisionShape2D = get_node_or_null(navigation_probe_collision_path) as CollisionShape2D
 
 func _ready() -> void:
 	super._ready()
@@ -78,8 +85,10 @@ func _process(delta: float) -> void:
 	if _is_dead_night_visual_active():
 		_update_dead_idle(delta)
 	if _boarding_handoff_active and not night_mode and not departed and data != null:
+		_begin_navigation_blocker_escape_if_needed()
 		_update_boarding_handoff(delta)
 	elif ai_enabled and not night_mode and not departed and data != null:
+		_begin_navigation_blocker_escape_if_needed()
 		_update_day_ai(delta)
 	_update_visual()
 
@@ -124,6 +133,7 @@ func depart_train() -> void:
 	_inspection_paused = false
 	_ai_walking = false
 	_boarding_handoff_active = false
+	_escaping_navigation_blocker = false
 	visible = false
 	enabled = false
 
@@ -155,6 +165,7 @@ func stage_boarding(boarding_position: Vector2) -> void:
 	ai_enabled = false
 	_ai_walking = false
 	_boarding_handoff_active = false
+	_escaping_navigation_blocker = false
 	position = boarding_position
 	_ai_target_position = boarding_position
 	runtime_carriage = _carriage_from_world_x(position.x)
@@ -224,7 +235,8 @@ func get_reserved_seat_position() -> Vector2:
 func _update_day_ai(delta: float) -> void:
 	if _ai_walking:
 		_update_facing_direction()
-		position = position.move_toward(_ai_target_position, PASSENGER_WALK_SPEED * delta)
+		if not _advance_ai_movement(delta):
+			return
 		_walk_phase += delta * 9.0
 		runtime_carriage = _carriage_from_world_x(position.x)
 		if position.distance_to(_ai_target_position) <= 1.0:
@@ -243,7 +255,9 @@ func _update_boarding_handoff(delta: float) -> void:
 		_boarding_handoff_active = false
 		return
 	_update_facing_direction()
-	position = position.move_toward(_ai_target_position, PASSENGER_WALK_SPEED * delta)
+	if not _advance_ai_movement(delta):
+		_boarding_handoff_active = false
+		return
 	_walk_phase += delta * 9.0
 	runtime_carriage = _carriage_from_world_x(position.x)
 	if position.distance_to(_ai_target_position) <= 1.0:
@@ -294,7 +308,7 @@ func _available_activity_points(carriage: int) -> PackedVector2Array:
 	for point: Vector2 in _activity_points:
 		if _carriage_from_world_x(point.x) != carriage:
 			continue
-		if point.distance_to(position) < 28.0 or _is_navigation_target_claimed(point):
+		if point.distance_to(position) < 28.0 or _is_navigation_target_claimed(point) or _is_npc_navigation_blocked(point):
 			continue
 		result.append(point)
 	return result
@@ -329,6 +343,57 @@ func _find_closest_activity_point(candidates: PackedVector2Array) -> Vector2:
 			closest = point
 			closest_distance = distance
 	return closest
+
+
+func _advance_ai_movement(delta: float) -> bool:
+	var proposed_position: Vector2 = position.move_toward(_ai_target_position, PASSENGER_WALK_SPEED * delta)
+	if not _escaping_navigation_blocker and _is_npc_navigation_blocked(proposed_position):
+		_ai_target_position = position
+		_ai_walking = false
+		_ai_timer = minf(_next_ai_wait(), 2.0)
+		return false
+	position = proposed_position
+	if _escaping_navigation_blocker and not _is_npc_navigation_blocked(position):
+		_escaping_navigation_blocker = false
+	return true
+
+
+func _begin_navigation_blocker_escape_if_needed() -> void:
+	if _escaping_navigation_blocker or not _is_npc_navigation_blocked(position):
+		return
+	var escape_candidates := PackedVector2Array()
+	for point: Vector2 in _activity_points:
+		if not _is_npc_navigation_blocked(point) and not _is_navigation_target_claimed(point):
+			escape_candidates.append(point)
+	if not _is_npc_navigation_blocked(_assigned_seat_position) and not _is_navigation_target_claimed(_assigned_seat_position):
+		escape_candidates.append(_assigned_seat_position)
+	if escape_candidates.is_empty():
+		return
+	_ai_target_position = _find_closest_activity_point(escape_candidates)
+	_ai_walking = true
+	_escaping_navigation_blocker = true
+
+
+func _is_npc_navigation_blocked(local_position: Vector2) -> bool:
+	if (
+		not is_instance_valid(_navigation_probe)
+		or not is_instance_valid(_navigation_probe_collision)
+		or _navigation_probe_collision.shape == null
+		or get_parent() == null
+	):
+		return false
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = _navigation_probe_collision.shape
+	query.collision_mask = navigation_blocker_mask
+	query.collide_with_areas = true
+	query.collide_with_bodies = false
+	query.exclude = [_navigation_probe.get_rid()]
+	var proposed_global_position: Vector2 = get_parent().to_global(local_position)
+	var probe_offset: Vector2 = _navigation_probe.global_position - global_position
+	var probe_transform: Transform2D = _navigation_probe.global_transform
+	probe_transform.origin = proposed_global_position + probe_offset
+	query.transform = probe_transform
+	return not get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty()
 
 func _update_facing_direction() -> void:
 	var horizontal_delta: float = _ai_target_position.x - position.x

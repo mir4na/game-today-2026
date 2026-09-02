@@ -49,6 +49,7 @@ script = ExtResource("1_ui")
 suitcase_piece_scenes = Array[PackedScene]([ExtResource("5_1x1"), ExtResource("6_1x2"), ExtResource("7_1x3"), ExtResource("8_2x2"), ExtResource("9_2x3"), ExtResource("10_l")])
 loose_shelf_columns = 5
 loose_shelf_origin_offset = Vector2(24, 48)
+loose_piece_spacing = Vector2(12, 12)
 
 [node name="Shade" type="ColorRect" parent="."]
 layout_mode = 1

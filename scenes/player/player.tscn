@@ -124,5 +124,6 @@ editor_description = "Anchor for dialogue bubbles, positioned just above the pla
 position = Vector2(0, -112)
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=406153284]
-editor_description = "Gameplay camera zoom. World limits are supplied by the CameraBounds Min/Max markers in Main instead of hardcoded here."
+editor_description = "Gameplay framing. Negative Position Y places the train lower on screen. World limits are supplied by CameraBounds/Min and Max in Main."
+position = Vector2(0, -40)
 zoom = Vector2(1.35, 1.35)

@@ -85,6 +85,7 @@ var _night_statement_active: bool = false
 var _night_statement_newly_recorded: bool = false
 var _blocked_aisle_events: Array[Node] = []
 var _dirty_seat_events: Array[Node] = []
+var _active_blocked_aisle_event: Node
 var _active_dirty_seat_event: Node
 var _blocked_aisle_activated: bool = false
 var _dirty_seat_activated: bool = false
@@ -347,6 +348,8 @@ func _roll_random_newspaper_case() -> NewspaperCase:
 	return NewspaperCase.MATCHING_PASSENGER_DEATH
 
 func _prepare_newspaper_edition() -> void:
+	_document_overlay.choose_random_newspaper_visual(_daily_rng)
+	_document_overlay.configure_newspaper_portrait(_choose_random_newspaper_portrait())
 	var excluded_passenger_names: PackedStringArray = _get_generated_passenger_names()
 	var shared_name_pool: PackedStringArray = manifest_config.get_all_passenger_names()
 	if _newspaper_case == NewspaperCase.MATCHING_PASSENGER_DEATH:
@@ -375,6 +378,17 @@ func _prepare_newspaper_edition() -> void:
 		"non-death newspaper"
 	)
 	_newspaper_document = _document_overlay.compose_non_death_newspaper(_newspaper_subject_name, day_route[0])
+
+
+func _choose_random_newspaper_portrait() -> Texture2D:
+	var candidates: Array[Texture2D] = []
+	for profile: PassengerIdentityProfile in passenger_identity_profiles:
+		if profile != null and profile.id_photo != null:
+			candidates.append(profile.id_photo)
+	if candidates.is_empty():
+		push_warning("No passenger portrait is available for the newspaper photograph.")
+		return null
+	return candidates[_daily_rng.randi_range(0, candidates.size() - 1)]
 
 func _find_newspaper_subject(rng: RandomNumberGenerator) -> PassengerData:
 	var candidates: Array[PassengerData] = []
@@ -732,6 +746,7 @@ func _configure_maintenance_events() -> void:
 		var cleaning_callback := Callable(self, &"_on_dirty_seat_cleaning_requested")
 		if not event.is_connected(&"cleaning_requested", cleaning_callback):
 			event.connect(&"cleaning_requested", cleaning_callback)
+	_refresh_maintenance_trackers()
 
 
 func _schedule_maintenance_events() -> void:
@@ -768,9 +783,10 @@ func _on_blocked_aisle_timer_timeout() -> void:
 	var candidates: Array[Node] = distant_candidates if not distant_candidates.is_empty() else _blocked_aisle_events
 	if candidates.is_empty():
 		return
-	var selected_event: Node = candidates[_daily_rng.randi_range(0, candidates.size() - 1)]
-	selected_event.call(&"set_event_active", true, _player.global_position.x)
+	_active_blocked_aisle_event = candidates[_daily_rng.randi_range(0, candidates.size() - 1)]
+	_active_blocked_aisle_event.call(&"set_event_active", true, _player.global_position.x)
 	_blocked_aisle_activated = true
+	_refresh_maintenance_trackers()
 	_hud.notify("LUGGAGE HAS BLOCKED A COACH CONNECTOR\nFind the obstruction and repack it", 4.0)
 
 
@@ -787,6 +803,8 @@ func _on_dirty_seat_timer_timeout() -> void:
 	for event: Node in _dirty_seat_events:
 		if not is_instance_valid(event):
 			continue
+		if event.has_method(&"can_spawn_random_event") and not bool(event.call(&"can_spawn_random_event")):
+			continue
 		var seat_marker := event.call(&"get_seat_marker") as Marker2D
 		var occupant := _seat_occupant_by_slot.get(seat_marker) as Passenger
 		if is_instance_valid(seat_marker) and not _is_active_passenger(occupant):
@@ -797,6 +815,7 @@ func _on_dirty_seat_timer_timeout() -> void:
 	_active_dirty_seat_event = vacant_candidates[_daily_rng.randi_range(0, vacant_candidates.size() - 1)]
 	_active_dirty_seat_event.call(&"set_event_active", true)
 	_dirty_seat_activated = true
+	_refresh_maintenance_trackers()
 	_clear_dropoff_assignments_for_dirty_seat()
 	_hud.notify("A PASSENGER SEAT NEEDS CLEANING\nAll drop-off stamps are locked until it is clean", 4.0)
 
@@ -846,9 +865,35 @@ func _on_maintenance_minigame_completed(event: Node) -> void:
 			_document_overlay.configure_stamp_lock(false)
 		_hud.notify("SEAT CLEAN\nDrop-off stamps are available again", 3.0)
 	else:
+		if event == _active_blocked_aisle_event:
+			_active_blocked_aisle_event = null
 		_hud.notify("AISLE CLEARED\nThe coach connector is open", 3.0)
+	_refresh_maintenance_trackers()
 	_active_modal = null
 	_set_player_control_for_state()
+
+
+func _refresh_maintenance_trackers() -> void:
+	var tracker_entries: Array[Dictionary] = []
+	if (
+		is_instance_valid(_active_blocked_aisle_event)
+		and _nearby_interactable != _active_blocked_aisle_event
+		and not bool(_active_blocked_aisle_event.call(&"is_resolved"))
+	):
+		tracker_entries.append({
+			"target": _active_blocked_aisle_event.call(&"get_tracker_anchor") as Node2D,
+			"label": "BLOCKED AISLE",
+		})
+	if (
+		is_instance_valid(_active_dirty_seat_event)
+		and _nearby_interactable != _active_dirty_seat_event
+		and not bool(_active_dirty_seat_event.call(&"is_resolved"))
+	):
+		tracker_entries.append({
+			"target": _active_dirty_seat_event.call(&"get_tracker_anchor") as Node2D,
+			"label": "DIRTY SEAT",
+		})
+	_hud.set_maintenance_targets(tracker_entries)
 
 func _on_interaction_pressed(interactable: Interactable) -> void:
 	if interactable is ConductorDeskInteractable:
@@ -862,6 +907,7 @@ func _on_nearby_interactable_changed(interactable: Interactable) -> void:
 		interactable.get_prompt() if interactable != null else "",
 		_get_interactable_prompt_anchor(interactable)
 	)
+	_refresh_maintenance_trackers()
 
 func _get_interactable_prompt_anchor(interactable: Interactable) -> Node2D:
 	if interactable == null:

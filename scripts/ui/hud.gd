@@ -34,6 +34,10 @@ extends CanvasLayer
 @onready var _notification_label: Label = %NotificationLabel
 @onready var _tool_panel: PanelContainer = %ToolPanel
 @onready var _tool_inventory_label: Label = %ToolInventoryLabel
+@onready var _maintenance_trackers: Array[Control] = [
+	$Root/MaintenanceTrackers/TrackerPrimary,
+	$Root/MaintenanceTrackers/TrackerSecondary,
+]
 var _notification_tween: Tween
 var _prompt_visibility_tween: Tween
 var _prompt_target: Node2D
@@ -68,6 +72,18 @@ func set_market_tool_inventory(snapshot: Dictionary) -> void:
 		int(snapshot.get("audit_slips", 0)),
 		int(snapshot.get("speed_level", 0))
 	]
+
+
+func set_maintenance_targets(target_entries: Array[Dictionary]) -> void:
+	for index: int in _maintenance_trackers.size():
+		var tracker: Control = _maintenance_trackers[index]
+		if index >= target_entries.size():
+			tracker.call(&"clear_target")
+			continue
+		var entry: Dictionary = target_entries[index]
+		var target := entry.get("target") as Node2D
+		var tracker_text: String = str(entry.get("label", "MAINTENANCE"))
+		tracker.call(&"set_target", target, tracker_text)
 
 func set_prompt(text: String, target: Node2D = null) -> void:
 	if text.is_empty():

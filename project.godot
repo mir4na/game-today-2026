@@ -64,6 +64,10 @@ use_radar={
 ]
 }
 
+[layer_names]
+
+2d_physics/layer_3="NPC Navigation Blockers"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

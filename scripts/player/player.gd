@@ -81,7 +81,7 @@ func _update_nearest() -> void:
 		for interactable: Interactable in _interactables:
 			if not is_instance_valid(interactable) or not interactable.can_interact():
 				continue
-			var distance: float = global_position.distance_to(interactable.global_position)
+			var distance: float = global_position.distance_to(interactable.get_interaction_world_position())
 			if distance <= interactable.interaction_distance and distance < closest_distance:
 				candidate = interactable
 				closest_distance = distance

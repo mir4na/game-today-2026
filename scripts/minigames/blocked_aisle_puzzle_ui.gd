@@ -19,6 +19,7 @@ signal completed(event: Node)
 @export_category("Loose Shelf Layout")
 @export_range(2, 8, 1) var loose_shelf_columns: int = 5
 @export var loose_shelf_origin_offset: Vector2 = Vector2(24.0, 48.0)
+@export var loose_piece_spacing: Vector2 = Vector2(12.0, 12.0)
 @export_category("Inspector Copy")
 @export var progress_template: String = "%d / %d CELLS PACKED"
 
@@ -276,7 +277,10 @@ func _shuffle_packed_scenes(values: Array[PackedScene]) -> void:
 
 
 func _arrange_piece_homes() -> void:
-	var shelf_rows: int = maxi(1, floori((_shelf.size.y - loose_shelf_origin_offset.y - 16.0) / cell_size))
+	var spacing := Vector2(maxf(0.0, loose_piece_spacing.x), maxf(0.0, loose_piece_spacing.y))
+	var shelf_step := Vector2(cell_size, cell_size) + spacing
+	var available_height: float = _shelf.size.y - loose_shelf_origin_offset.y - 16.0
+	var shelf_rows: int = maxi(1, floori((available_height + spacing.y) / shelf_step.y))
 	var occupied: Dictionary = {}
 	var local_origin: Vector2 = _shelf.global_position - _pieces_root.global_position + loose_shelf_origin_offset
 	var shelf_pieces: Array[Control] = _pieces.duplicate()
@@ -299,7 +303,7 @@ func _arrange_piece_homes() -> void:
 			continue
 		for offset: Vector2i in cell_offsets:
 			occupied[chosen_cell + offset] = piece
-		var home_position: Vector2 = local_origin + Vector2(chosen_cell) * cell_size
+		var home_position: Vector2 = local_origin + Vector2(chosen_cell) * shelf_step
 		_home_positions[piece] = home_position
 		piece.position = home_position
 

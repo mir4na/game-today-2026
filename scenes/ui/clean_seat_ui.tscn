@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/minigames/clean_seat_ui.gd" id="1_ui"]
 [ext_resource type="Script" path="res://scripts/minigames/clean_seat_surface.gd" id="2_surface"]
@@ -6,34 +6,15 @@
 [ext_resource type="Texture2D" path="res://assets/item/lap.png" id="4_cloth"]
 [ext_resource type="Shader" path="res://shaders/seat_dirt_wipe.gdshader" id="5_shader"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="6_theme"]
+[ext_resource type="Shader" path="res://shaders/seat_cleaning_foam.gdshader" id="7_foam_shader"]
 
 [sub_resource type="ShaderMaterial" id="DirtMaterial"]
 resource_local_to_scene = true
 shader = ExtResource("5_shader")
 
-[sub_resource type="Gradient" id="BubbleGradient"]
-offsets = PackedFloat32Array(0, 0.62, 1)
-colors = PackedColorArray(0.92, 0.98, 1, 0.92, 0.66, 0.9, 1, 0.62, 0.52, 0.82, 1, 0)
-
-[sub_resource type="GradientTexture2D" id="BubbleTexture"]
-gradient = SubResource("BubbleGradient")
-width = 24
-height = 24
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-fill_to = Vector2(1, 0.5)
-
-[sub_resource type="StyleBoxFlat" id="WindowStyle"]
-bg_color = Color(0.0431373, 0.054902, 0.0705882, 0.985)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.737255, 0.596078, 0.341176, 1)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
+[sub_resource type="ShaderMaterial" id="FoamMaterial"]
+resource_local_to_scene = true
+shader = ExtResource("7_foam_shader")
 
 [node name="CleanSeatUI" type="Control"]
 visible = false
@@ -58,7 +39,8 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.00784314, 0.0117647, 0.0196078, 0.84)
 
-[node name="CleaningWindow" type="Panel" parent="."]
+[node name="CleaningWindow" type="Control" parent="."]
+editor_description = "Transparent scene-authored cleaning layout: only the dirty seat, copy, cloth, and foam are presented."
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -71,7 +53,6 @@ offset_right = 430.0
 offset_bottom = 315.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("WindowStyle")
 
 [node name="Eyebrow" type="Label" parent="CleaningWindow"]
 offset_left = 30.0
@@ -126,7 +107,7 @@ completion_threshold = 0.98
 stain_markers_path = NodePath("StainMarkers")
 dirt_layer_path = NodePath("DirtLayer")
 cloth_path = NodePath("Cloth")
-cleaning_particles_path = NodePath("CleaningBubbles")
+cleaning_foam_path = NodePath("CleaningFoam")
 
 [node name="DirtLayer" type="ColorRect" parent="CleaningWindow/WipeSurface"]
 layout_mode = 1
@@ -157,25 +138,18 @@ metadata/radius = 41.0
 position = Vector2(132, 350)
 metadata/radius = 36.0
 
-[node name="CleaningBubbles" type="CPUParticles2D" parent="CleaningWindow/WipeSurface"]
+[node name="CleaningFoam" type="ColorRect" parent="CleaningWindow/WipeSurface"]
 unique_name_in_owner = true
-z_index = 6
-emitting = false
-amount = 30
-lifetime = 0.9
-randomness = 0.55
-texture = SubResource("BubbleTexture")
-emission_shape = 1
-emission_sphere_radius = 25.0
-direction = Vector2(0, -1)
-spread = 78.0
-gravity = Vector2(0, -38)
-initial_velocity_min = 52.0
-initial_velocity_max = 105.0
-angular_velocity_min = -90.0
-angular_velocity_max = 90.0
-scale_amount_min = 0.5
-scale_amount_max = 1.25
+z_index = 4
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = SubResource("FoamMaterial")
+color = Color(1, 1, 1, 1)
 
 [node name="Cloth" type="TextureRect" parent="CleaningWindow/WipeSurface"]
 unique_name_in_owner = true
@@ -228,6 +202,7 @@ offset_left = 620.0
 offset_top = 283.0
 offset_right = 812.0
 offset_bottom = 338.0
+flat = true
 text = "LEAVE  [ESC]"
 
 [node name="Hint" type="Label" parent="CleaningWindow"]

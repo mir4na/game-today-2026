@@ -9,13 +9,26 @@ enum ViewMode {
 	NONE,
 	PASSENGER_DOCUMENTS,
 	READER,
+	NEWSPAPER,
 }
 
 @export_category("Newspaper Cases")
-@export var newspaper_title: String
-@export_multiline var non_death_newspaper_template: String
-@export_multiline var external_death_newspaper_template: String
-@export_multiline var matching_death_newspaper_template: String
+@export_group("Ordinary News", "non_death_")
+@export var non_death_headline: String
+@export_multiline var non_death_primary_template: String
+@export var non_death_secondary_headline: String
+@export_multiline var non_death_secondary_template: String
+@export_group("External Death", "external_death_")
+@export var external_death_headline: String
+@export_multiline var external_death_primary_template: String
+@export var external_death_secondary_headline: String
+@export_multiline var external_death_secondary_template: String
+@export_group("Matching Death", "matching_death_")
+@export var matching_death_headline: String
+@export_multiline var matching_death_primary_template: String
+@export var matching_death_secondary_headline: String
+@export_multiline var matching_death_secondary_template: String
+@export_group("")
 @export_category("Departure Statement")
 @export var departure_statement_title: String
 @export_multiline var departure_statement_template: String
@@ -26,6 +39,10 @@ enum ViewMode {
 var _data: PassengerData
 var _view_mode: ViewMode = ViewMode.NONE
 var _is_assigned_to_next_station: bool = false
+var _newspaper_headline: String = ""
+var _newspaper_primary_body: String = ""
+var _newspaper_secondary_headline: String = ""
+var _newspaper_secondary_body: String = ""
 
 # These scene-owned children stay dynamic so a cold import can register their scripts in any order.
 @onready var _documents: Variant = %PassengerDocuments
@@ -33,6 +50,7 @@ var _is_assigned_to_next_station: bool = false
 @onready var _reader_panel: PanelContainer = %ReaderPanel
 @onready var _reader_title: Label = %ReaderTitle
 @onready var _reader_content: RichTextLabel = %ReaderContent
+@onready var _newspaper_reader: Variant = %NewspaperReader
 
 
 func show_passenger(data: PassengerData) -> void:
@@ -40,6 +58,7 @@ func show_passenger(data: PassengerData) -> void:
 	_view_mode = ViewMode.PASSENGER_DOCUMENTS
 	_is_assigned_to_next_station = false
 	_reader_panel.hide()
+	_newspaper_reader.hide()
 	_passenger_close_button.show()
 	_documents.show()
 	_documents.set_passenger(data)
@@ -58,30 +77,76 @@ func get_random_outside_subject(
 
 
 func compose_non_death_newspaper(subject_name: String, edition_station: String) -> String:
-	return non_death_newspaper_template % [subject_name, edition_station]
+	_set_newspaper_copy(
+		non_death_headline,
+		non_death_primary_template % subject_name.to_upper(),
+		non_death_secondary_headline,
+		non_death_secondary_template % edition_station
+	)
+	return _compose_newspaper_document()
 
 
 func compose_external_death_newspaper(subject_name: String, edition_station: String) -> String:
-	return external_death_newspaper_template % [subject_name, edition_station]
+	_set_newspaper_copy(
+		external_death_headline,
+		external_death_primary_template % subject_name.to_upper(),
+		external_death_secondary_headline,
+		external_death_secondary_template % edition_station
+	)
+	return _compose_newspaper_document()
 
 
 func compose_matching_death_newspaper(subject: PassengerData, edition_station: String) -> String:
 	if subject == null:
 		push_error("Matching-death newspaper requires a generated passenger subject.")
 		return ""
-	return matching_death_newspaper_template % [
-		subject.occupation.to_upper(),
-		subject.passenger_name,
-		subject.age,
-		subject.origin_station,
-		subject.occupation.to_lower(),
-		edition_station,
-	]
+	_set_newspaper_copy(
+		matching_death_headline,
+		matching_death_primary_template % [subject.passenger_name.to_upper(), subject.age],
+		matching_death_secondary_headline,
+		matching_death_secondary_template % [subject.origin_station, subject.occupation.to_lower(), edition_station]
+	)
+	return _compose_newspaper_document()
 
 
 func show_newspaper(document: String) -> void:
 	_data = null
-	_show_reader(newspaper_title, document)
+	_view_mode = ViewMode.NEWSPAPER
+	_documents.hide()
+	_passenger_close_button.hide()
+	_reader_panel.hide()
+	_newspaper_reader.set_content(
+		_newspaper_headline,
+		_newspaper_primary_body,
+		_newspaper_secondary_headline,
+		_newspaper_secondary_body
+	)
+	_newspaper_reader.show()
+	show()
+
+
+func choose_random_newspaper_visual(rng: RandomNumberGenerator) -> void:
+	_newspaper_reader.choose_random_variant(rng)
+
+
+func configure_newspaper_portrait(texture: Texture2D) -> void:
+	_newspaper_reader.set_portrait(texture)
+
+
+func _set_newspaper_copy(headline: String, primary_body: String, secondary_headline: String, secondary_body: String) -> void:
+	_newspaper_headline = headline
+	_newspaper_primary_body = primary_body
+	_newspaper_secondary_headline = secondary_headline
+	_newspaper_secondary_body = secondary_body
+
+
+func _compose_newspaper_document() -> String:
+	return "[font_size=25][b]%s[/b][/font_size]\n\n%s\n\n[b]%s[/b]\n%s" % [
+		_newspaper_headline,
+		_newspaper_primary_body,
+		_newspaper_secondary_headline,
+		_newspaper_secondary_body,
+	]
 
 
 func show_departure_statement(data: PassengerData, statement: String, newly_recorded: bool) -> void:
@@ -144,6 +209,7 @@ func _show_reader(title: String, document: String) -> void:
 	_view_mode = ViewMode.READER
 	_documents.hide()
 	_passenger_close_button.hide()
+	_newspaper_reader.hide()
 	_reader_title.text = title
 	_reader_content.text = document
 	_reader_panel.show()

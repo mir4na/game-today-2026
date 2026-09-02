@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/document_overlay_ui.gd" id="1"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/passenger_documents.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/ui/newspaper_reader.tscn" id="4_newspaper"]
 
 [sub_resource type="StyleBoxFlat" id="ReaderPanelStyle"]
 content_margin_left = 24.0
@@ -68,10 +69,18 @@ grow_vertical = 2
 mouse_filter = 0
 theme = ExtResource("2")
 script = ExtResource("1")
-newspaper_title = "THE AFTERNOON DISPATCH"
-non_death_newspaper_template = "[font_size=28][b]RESTORED RAIL BRIDGE REOPENS[/b][/font_size]\n\n%s, the project supervisor, announced that the coastal rail bridge has reopened after months of repairs.\n\nOfficials expect regular freight service to resume before the end of the week. The reopening was completed without disruption to scheduled service.\n\n[font_size=15][color=#9c9386]Edition printed before the afternoon service left %s.[/color][/font_size]"
-external_death_newspaper_template = "[font_size=28][b]RETIRED HARBORMASTER DIES AT COASTAL HOME[/b][/font_size]\n\n%s, 71, was found dead at a coastal home early this morning. No passenger aboard this service carries that name.\n\nAuthorities described the death as natural and closed the investigation.\n\n[font_size=15][color=#9c9386]Edition printed before the afternoon service left %s.[/color][/font_size]"
-matching_death_newspaper_template = "[font_size=28][b]LOCAL %s DIES IN MORNING FIRE[/b][/font_size]\n\n%s, %d, was confirmed dead after a fire swept through their workplace shortly after sunrise.\n\nAuthorities stated that the %s %s could not have survived the blaze.\n\n[font_size=15][color=#9c9386]Edition printed before the afternoon service left %s.[/color][/font_size]"
+non_death_headline = "RAIL BRIDGE REOPENS"
+non_death_primary_template = "[b]%s[/b], the restoration supervisor, confirmed that the coastal bridge reopened after months of structural repairs. Crews replaced damaged supports, reinforced the eastern span, and completed final safety checks before the first scheduled departure. A supervised test train crossed at reduced speed before regular traffic was cleared. The renewed line passed braking and signal tests without delay. No injuries were reported during the work."
+non_death_secondary_headline = "SERVICE OUTLOOK"
+non_death_secondary_template = "Passenger and freight schedules are expected to normalize this week. Speed restrictions will remain while inspectors monitor the span in active service. A second engineering review is planned after the first full week of traffic.\n\nEdition printed before the afternoon service left %s."
+external_death_headline = "HARBORMASTER FOUND DEAD"
+external_death_primary_template = "The retired harbormaster [b]%s[/b], aged 71, was discovered at a coastal residence shortly after sunrise after a neighbor requested a wellness check. Officials sealed the residence while investigators documented the rooms and collected personal records from the victim's study. Detectives photographed the study and garden entrance before the body was removed under guard. A locked ledger and several unopened letters were taken as evidence."
+external_death_secondary_headline = "CASE STATUS"
+external_death_secondary_template = "Authorities reported no sign of forced entry. Former coworkers and nearby residents are being interviewed as investigators reconstruct the victim's final hours. The coroner is comparing household records with witness accounts; no official cause has yet been released.\n\nEdition printed before the afternoon service left %s."
+matching_death_headline = "MORNING FIRE CLAIMS LIFE"
+matching_death_primary_template = "A workplace fire broke out shortly after sunrise. Night staff reported smoke spreading from a rear storage room before the alarm sounded. Authorities confirmed that [b]%s[/b], aged %d, was working inside when the blaze crossed the upper floor and blocked the main corridor. Emergency crews opened a second entry point after witnesses saw flames through the rear windows. The site remained closed while recovery work continued through the morning."
+matching_death_secondary_headline = "INVESTIGATION"
+matching_death_secondary_template = "Investigators stated that the %s %s could not have survived the incident. Employment records and witness statements are under review while the building remains closed. The alarm sequence is being traced; no final cause has been announced.\n\nEdition printed before the afternoon service left %s."
 departure_statement_title = "DEPARTURE STATEMENT"
 departure_statement_template = "[font_size=28][b]%s[/b][/font_size]\n\n[color=#c9ad79]STATEMENT[/color]\n\n\"%s\"\n\n[font_size=15][color=#9c9386]%s[/color][/font_size]"
 departure_statement_recorded_text = "Statement recorded in the night ledger."
@@ -129,6 +138,20 @@ theme_override_styles/focus = SubResource("CloseButtonHover")
 text = "×"
 tooltip_text = "Close passenger documents [E / ESC]"
 
+[node name="NewspaperCenter" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="NewspaperReader" parent="NewspaperCenter" instance=ExtResource("4_newspaper")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
 [node name="ReaderCenter" type="CenterContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -177,4 +200,5 @@ scroll_active = true
 
 [connection signal="pressed" from="ReaderCenter/ReaderPanel/ReaderLayout/Header/CloseButton" to="." method="request_close"]
 [connection signal="pressed" from="PassengerCloseButton" to="." method="request_close"]
+[connection signal="close_requested" from="NewspaperCenter/NewspaperReader" to="." method="request_close"]
 [connection signal="stamp_toggle_requested" from="PassengerDocumentCenter/PassengerDocuments" to="." method="_toggle_station_assignment"]
