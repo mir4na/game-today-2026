@@ -17,14 +17,12 @@ var _finished: bool = false
 
 @onready var _content: VBoxContainer = %Content
 @onready var _day_label: Label = %DayLabel
-@onready var _target_label: Label = %TargetLabel
 
-func play_intro(day_number: int, pass_target: int = 100) -> void:
+func play_intro(day_number: int) -> void:
 	_day_number = maxi(1, day_number)
 	_elapsed = 0.0
 	_finished = false
 	_day_label.text = day_title_template % _day_number
-	_target_label.text = "PAYCHECK TARGET: %d BLESSINGS" % pass_target
 	show()
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_apply_fade()

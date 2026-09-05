@@ -3,8 +3,8 @@ extends Node2D
 ## Owns the vertical-slice state and coordinates data, world presentation and UI.
 
 enum GameState { OPENING, DAY, SUNSET, SHIFT_REPORT, MARKET, NIGHT, NIGHT_PUZZLE, COMPLETE }
-enum NewspaperCase { NON_DEATH_NEWS, EXTERNAL_DEATH, MATCHING_PASSENGER_DEATH }
-enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_EXTERNAL_DEATH, FORCE_MATCHING_DEATH }
+enum NewspaperCase { NON_DEATH_NEWS, MATCHING_PASSENGER_DEATH }
+enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 
 @export_category("Data & Scenes")
 @export var passenger_identity_profiles: Array[PassengerIdentityProfile] = []
@@ -29,7 +29,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_EXTERNAL_DEATH, FORCE
 @export_range(0.1, 5.0, 0.05) var radar_result_reveal_seconds: float = 1.25
 @export_range(1.0, 30.0, 0.5) var radar_glow_seconds: float = 6.0
 @export_category("Newspaper")
-@export_enum("Random", "Force Non-Death", "Force External Death", "Force Matching Death") var newspaper_edition_mode: int = NewspaperEditionMode.RANDOM
+@export_enum("Random", "Force Non-Death", "Force Death") var newspaper_edition_mode: int = NewspaperEditionMode.RANDOM
 @export_category("Debug")
 @export var debug_print_anomaly_roster: bool = false
 @export_category("Inspector Copy")
@@ -134,6 +134,7 @@ func _ready() -> void:
 	else:
 		_shift_checkpoint = {}
 	_configure_daily_rng()
+	manifest_config = manifest_config.create_daily_service(day_number, _daily_seed)
 	_shift_checkpoint = ShiftProgress.make_checkpoint(day_number, _market_tool_state.call(&"get_snapshot"), _daily_seed)
 	ShiftProgress.save_checkpoint(_shift_checkpoint)
 	_choose_newspaper_case()
@@ -161,13 +162,15 @@ func _ready() -> void:
 	_update_passenger_minimap()
 	_set_passenger_ai_enabled(false)
 	_active_modal = _day_intro_ui
-	_day_intro_ui.play_intro(day_number, _get_day_pass_target())
+	_day_intro_ui.play_intro(day_number)
 
 func _process(delta: float) -> void:
 	_station_stop_ui.set_departure_blocked(_station_stop_ui.visible and _ambience.is_announcement_playing())
 	_update_travel_foreground()
 	var world_simulation_active: bool = _is_world_simulation_active()
 	_set_passenger_ai_enabled(world_simulation_active and state in [GameState.DAY, GameState.SUNSET])
+	if _guidebook_ui.visible:
+		_refresh_guidebook_progress()
 	_update_passenger_minimap()
 	_update_carriage_indicator()
 	if state != GameState.DAY and state != GameState.SUNSET:
@@ -350,27 +353,21 @@ func _choose_newspaper_case() -> void:
 	match newspaper_edition_mode:
 		NewspaperEditionMode.FORCE_NON_DEATH:
 			_newspaper_case = NewspaperCase.NON_DEATH_NEWS
-		NewspaperEditionMode.FORCE_EXTERNAL_DEATH:
-			_newspaper_case = NewspaperCase.EXTERNAL_DEATH
-		NewspaperEditionMode.FORCE_MATCHING_DEATH:
+		NewspaperEditionMode.FORCE_DEATH:
 			_newspaper_case = NewspaperCase.MATCHING_PASSENGER_DEATH
 		_:
 			_newspaper_case = _roll_random_newspaper_case()
 
 func _roll_random_newspaper_case() -> NewspaperCase:
 	var non_death_weight: float = maxf(0.0, manifest_config.non_death_news_weight)
-	var external_death_weight: float = maxf(0.0, manifest_config.external_death_news_weight)
 	var matching_death_weight: float = maxf(0.0, manifest_config.matching_death_news_weight)
-	var total_weight: float = non_death_weight + external_death_weight + matching_death_weight
+	var total_weight: float = non_death_weight + matching_death_weight
 	if total_weight <= 0.0:
 		push_warning("All newspaper case weights are zero; using the non-death edition.")
 		return NewspaperCase.NON_DEATH_NEWS
 	var roll: float = _daily_rng.randf() * total_weight
 	if roll < non_death_weight:
 		return NewspaperCase.NON_DEATH_NEWS
-	roll -= non_death_weight
-	if roll < external_death_weight:
-		return NewspaperCase.EXTERNAL_DEATH
 	return NewspaperCase.MATCHING_PASSENGER_DEATH
 
 func _prepare_newspaper_edition() -> void:
@@ -382,20 +379,11 @@ func _prepare_newspaper_edition() -> void:
 		var subject: PassengerData = _find_newspaper_subject(_daily_rng)
 		if subject != null:
 			_newspaper_subject_name = subject.passenger_name
+			_document_overlay.configure_newspaper_portrait(subject.id_photo)
 			_newspaper_document = _document_overlay.compose_matching_death_newspaper(subject, day_route[0], _daily_rng)
 			return
-		push_error("Matching-death newspaper has no generated newspaper anomaly; using the external-death edition instead.")
-		_newspaper_case = NewspaperCase.EXTERNAL_DEATH
-
-	if _newspaper_case == NewspaperCase.EXTERNAL_DEATH:
-		_newspaper_subject_name = _document_overlay.get_random_outside_subject(
-			_daily_rng,
-			shared_name_pool,
-			excluded_passenger_names,
-			"external-death newspaper"
-		)
-		_newspaper_document = _document_overlay.compose_external_death_newspaper(_newspaper_subject_name, day_route[0], _daily_rng)
-		return
+		push_error("Death newspaper requires an anomaly aboard; using ordinary news because the manifest has no matching subject.")
+		_newspaper_case = NewspaperCase.NON_DEATH_NEWS
 
 	_newspaper_subject_name = _document_overlay.get_random_outside_subject(
 		_daily_rng,
@@ -679,8 +667,6 @@ func _newspaper_case_debug_label() -> String:
 	match _newspaper_case:
 		NewspaperCase.NON_DEATH_NEWS:
 			return "NON-DEATH NEWS / NOT AN ANOMALY CLUE"
-		NewspaperCase.EXTERNAL_DEATH:
-			return "EXTERNAL DEATH / NAME NOT ON TRAIN"
 		NewspaperCase.MATCHING_PASSENGER_DEATH:
 			return "MATCHING DEATH / ANOMALY + NIGHT PASSENGER"
 		_:
@@ -1254,8 +1240,34 @@ func _open_guidebook() -> void:
 		manifest_config.ticket_day_code,
 		day_route,
 		_newspaper_document if _newspaper_read else "",
-		_route_index
+		_route_index,
+		_get_day_pass_target()
 	)
+	_refresh_guidebook_progress()
+
+
+func _refresh_guidebook_progress() -> void:
+	var earnings: Dictionary = _market_tool_state.call(
+		&"preview_day_blessings",
+		_correct_drop_offs,
+		_wrong_drop_offs,
+		_incorrectly_stamped_anomalies.size(),
+		_get_day_pass_target()
+	)
+	var boarded_today: int = 0
+	var aboard: int = 0
+	var stamped_aboard: int = 0
+	for passenger: Passenger in _passengers:
+		if not is_instance_valid(passenger) or passenger.boarding_staged:
+			continue
+		# Departed passengers remain in this shift's roster and cumulative total.
+		boarded_today += 1
+		if passenger.departed:
+			continue
+		aboard += 1
+		if _station_assignment.has(passenger.data.passenger_name):
+			stamped_aboard += 1
+	_guidebook_ui.update_shift_progress(_route_index, int(earnings.net_earnings), aboard, boarded_today, stamped_aboard)
 
 
 func _toggle_guidebook() -> void:

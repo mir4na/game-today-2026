@@ -23,16 +23,6 @@ enum ViewMode {
 @export_multiline var non_death_alt_primary_template: String
 @export var non_death_alt_secondary_headline: String
 @export_multiline var non_death_alt_secondary_template: String
-@export_group("External Death", "external_death_")
-@export var external_death_headline: String
-@export_multiline var external_death_primary_template: String
-@export var external_death_secondary_headline: String
-@export_multiline var external_death_secondary_template: String
-@export_group("External Death — Alternate", "external_death_alt_")
-@export var external_death_alt_headline: String
-@export_multiline var external_death_alt_primary_template: String
-@export var external_death_alt_secondary_headline: String
-@export_multiline var external_death_alt_secondary_template: String
 @export_group("Matching Death", "matching_death_")
 @export var matching_death_headline: String
 @export_multiline var matching_death_primary_template: String
@@ -105,25 +95,6 @@ func compose_non_death_newspaper(
 	var primary_template: String = non_death_alt_primary_template if use_alternate else non_death_primary_template
 	var secondary_headline: String = non_death_alt_secondary_headline if use_alternate else non_death_secondary_headline
 	var secondary_template: String = non_death_alt_secondary_template if use_alternate else non_death_secondary_template
-	_set_newspaper_copy(
-		headline,
-		primary_template % subject_name.to_upper(),
-		secondary_headline,
-		secondary_template % edition_station
-	)
-	return _compose_newspaper_document()
-
-
-func compose_external_death_newspaper(
-	subject_name: String,
-	edition_station: String,
-	rng: RandomNumberGenerator = null
-) -> String:
-	var use_alternate: bool = _roll_alternate_copy(rng, external_death_alt_primary_template)
-	var headline: String = external_death_alt_headline if use_alternate else external_death_headline
-	var primary_template: String = external_death_alt_primary_template if use_alternate else external_death_primary_template
-	var secondary_headline: String = external_death_alt_secondary_headline if use_alternate else external_death_secondary_headline
-	var secondary_template: String = external_death_alt_secondary_template if use_alternate else external_death_secondary_template
 	_set_newspaper_copy(
 		headline,
 		primary_template % subject_name.to_upper(),

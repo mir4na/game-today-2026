@@ -55,18 +55,14 @@ func _set_starting_inventory() -> void:
 	_last_night_award.clear()
 
 
-func award_day_blessings(correct_dropoffs: int, wrong_dropoffs: int, incorrect_anomalies: int, pass_target: int) -> Dictionary:
-	if _day_blessings_awarded:
-		return _last_day_award.duplicate(true)
-	_day_blessings_awarded = true
+func preview_day_blessings(correct_dropoffs: int, wrong_dropoffs: int, incorrect_anomalies: int, pass_target: int) -> Dictionary:
 	var dropoff_reward: int = maxi(0, correct_dropoffs) * blessings_per_correct_dropoff
 	var wrong_deduction: int = maxi(0, wrong_dropoffs) * blessings_per_wrong_dropoff
 	var anomaly_deduction: int = maxi(0, incorrect_anomalies) * blessings_per_incorrect_anomaly
 	var net_earnings: int = dropoff_reward - wrong_deduction - anomaly_deduction
 	var passed: bool = net_earnings >= pass_target
 	var earned: int = maxi(0, net_earnings) if passed else 0
-	blessings += earned
-	_last_day_award = {
+	return {
 		"earned": earned,
 		"dropoff_reward": dropoff_reward,
 		"wrong_deduction": wrong_deduction,
@@ -82,6 +78,14 @@ func award_day_blessings(correct_dropoffs: int, wrong_dropoffs: int, incorrect_a
 		"wrong_dropoffs": maxi(0, wrong_dropoffs),
 		"incorrect_anomalies": maxi(0, incorrect_anomalies),
 	}
+
+
+func award_day_blessings(correct_dropoffs: int, wrong_dropoffs: int, incorrect_anomalies: int, pass_target: int) -> Dictionary:
+	if _day_blessings_awarded:
+		return _last_day_award.duplicate(true)
+	_day_blessings_awarded = true
+	_last_day_award = preview_day_blessings(correct_dropoffs, wrong_dropoffs, incorrect_anomalies, pass_target)
+	blessings += int(_last_day_award.earned)
 	_emit_inventory_changed()
 	return _last_day_award.duplicate(true)
 

@@ -12,11 +12,13 @@ signal closed
 @export var completed_service_text: String
 @export_category("Guide Sections")
 @export_multiline var procedure_document: String
-@export_multiline var newspaper_document: String
-@export_multiline var night_service_document: String
-@export_multiline var tools_document: String
 
 var _day_number: int = 1
+var _pass_target: int = 0
+var _net_earnings: int = 0
+var _passenger_count: int = 0
+var _boarded_today: int = 0
+var _stamped_aboard: int = 0
 var _service_train_number: String = ""
 var _service_date: String = ""
 var _service_day_code: String = ""
@@ -41,9 +43,11 @@ func open_guidebook(
 	service_day_code: String,
 	route_stations: PackedStringArray,
 	_collected_newspaper: String,
-	route_index: int
+	route_index: int,
+	pass_target: int
 ) -> void:
 	_day_number = maxi(1, day_number)
+	_pass_target = maxi(0, pass_target)
 	_service_train_number = service_train_number
 	_service_date = service_date
 	_service_day_code = service_day_code
@@ -64,6 +68,21 @@ func request_close() -> void:
 	closed.emit()
 
 
+func update_shift_progress(route_index: int, net_earnings: int, passenger_count: int, boarded_today: int, stamped_aboard: int) -> void:
+	var next_route_index: int = clampi(route_index, 0, maxi(0, _route_stations.size() - 1))
+	if _route_index == next_route_index and _net_earnings == net_earnings and _passenger_count == passenger_count and _boarded_today == boarded_today and _stamped_aboard == stamped_aboard:
+		return
+	_route_index = next_route_index
+	_net_earnings = net_earnings
+	_passenger_count = maxi(0, passenger_count)
+	_boarded_today = maxi(0, boarded_today)
+	_stamped_aboard = maxi(0, stamped_aboard)
+	if visible and _today_button.disabled:
+		var scroll_position: float = _content.get_v_scroll_bar().value
+		_show_today()
+		_content.get_v_scroll_bar().value = scroll_position
+
+
 func _show_today() -> void:
 	var current_station: String = _station_at(_route_index)
 	var next_station: String = completed_service_text
@@ -74,8 +93,16 @@ func _show_today() -> void:
 		"TODAY'S SERVICE",
 		today_document_template % [
 			_day_number,
-			_service_train_number,
 			_service_date,
+			_service_train_number,
+			_pass_target,
+			_net_earnings,
+			maxi(0, _pass_target - _net_earnings),
+			_boarded_today,
+			_passenger_count,
+			_stamped_aboard,
+			_route_index,
+			maxi(0, _route_stations.size() - 1),
 			_service_day_code,
 			current_station,
 			next_station,
@@ -85,7 +112,7 @@ func _show_today() -> void:
 
 
 func _show_procedure() -> void:
-	_set_section(_procedure_button, "RULES", "\n\n".join([procedure_document, newspaper_document, night_service_document, tools_document]))
+	_set_section(_procedure_button, "RULES", procedure_document)
 
 
 func _show_anomalies() -> void:

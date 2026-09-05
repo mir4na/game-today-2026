@@ -27,6 +27,74 @@ func _run() -> void:
 	game._finish_staged_boarding()
 	game._open_guidebook()
 	var guide: GuidebookUI = game._guidebook_ui
+	var original_day: int = game.day_number
+	for day: int in range(1, 6):
+		game.day_number = day
+		game._open_guidebook()
+		_check(guide._content.text.contains("PASS TARGET: %d BLESSINGS" % game._get_day_pass_target()), "Today's Service shows the paycheck target for day %d." % day)
+	game.day_number = original_day
+	game._open_guidebook()
+	_check(not game._day_intro_ui.has_node("Center/Content/TargetLabel"), "The opening chapter card does not display the paycheck target.")
+	var starting_balance: int = game._market_tool_state.blessings
+	var initial_count: int = game._active_passenger_count()
+	_check(guide._content.text.contains("[b]Passengers aboard[/b]  %d" % initial_count), "Today shows the actual opening passenger count.")
+	_check(guide._content.text.contains("[b]Boarded today[/b]  %d" % initial_count), "Opening passengers count toward the cumulative total.")
+	_check(guide._content.text.contains("[b]Train number[/b]  %s" % game.manifest_config.service_train_number), "Guidebook displays the generated service number.")
+	var stamp_subject: Passenger = game._passengers[0]
+	game._on_station_assignment_toggled(stamp_subject.data.passenger_name, true)
+	game._refresh_guidebook_progress()
+	_check(guide._content.text.contains("[b]Stamped aboard[/b]  1"), "Applying a stamp updates the onboard stamp count.")
+	game._on_station_assignment_toggled(stamp_subject.data.passenger_name, false)
+	game._refresh_guidebook_progress()
+	_check(guide._content.text.contains("[b]Stamped aboard[/b]  0"), "Removing a stamp decreases the onboard stamp count.")
+	game._incorrectly_stamped_anomalies.clear()
+	var boarder: Passenger
+	for data: PassengerData in game._daily_manifest:
+		if data.initially_on_train:
+			continue
+		var seat: Marker2D = game._find_available_seat(data.current_carriage)
+		if seat != null:
+			boarder = game._spawn_passenger(data, seat)
+			if boarder != null:
+				break
+	_check(boarder != null, "The test can spawn a later boarder.")
+	if boarder != null:
+		game._stage_passenger_for_boarding(boarder, 0)
+		game._refresh_guidebook_progress()
+		_check(guide._boarded_today == initial_count, "A staged passenger is not counted before boarding.")
+		game._finish_staged_boarding()
+		game._refresh_guidebook_progress()
+		initial_count += 1
+		_check(guide._boarded_today == initial_count and guide._passenger_count == initial_count, "Finishing boarding increases both counts.")
+	game._station_assignment.append(game._passengers.back().data.passenger_name)
+	game._correct_drop_offs = 3
+	game._wrong_drop_offs = 1
+	game._incorrectly_stamped_anomalies["Test anomaly"] = true
+	game._route_index = 1
+	game._passengers.back().depart_train()
+	game._process(0.01)
+	_check(guide._content.text.contains("[b]Net earnings so far[/b]  30 Blessings"), "Live earnings use +30/-20/-40 scoring.")
+	_check(guide._content.text.contains("[b]Still needed[/b]  %d Blessings" % maxi(0, game._get_day_pass_target() - 30)), "The remaining target reflects net earnings.")
+	_check(guide._content.text.contains("[b]Scheduled stops completed[/b]  1 / %d" % (game.day_route.size() - 1)), "Route progress excludes the departure station.")
+	_check(guide._content.text.contains("[b]Passengers aboard[/b]  %d" % (initial_count - 1)), "Departed passengers disappear from the live count.")
+	_check(guide._boarded_today == initial_count, "Departures do not reduce the cumulative boarding total.")
+	_check(guide._stamped_aboard == 0, "A departed stamped passenger is excluded even before assignments are cleared.")
+	game._station_assignment.clear()
+	guide._show_procedure()
+	game._correct_drop_offs = 0
+	game._process(0.01)
+	_check(guide._page_title.text == "RULES", "Live updates preserve the selected section.")
+	guide._show_today()
+	_check(guide._content.text.contains("[b]Net earnings so far[/b]  -60 Blessings"), "Negative earnings are shown without hiding penalties.")
+	game._correct_drop_offs = 20
+	game._process(0.01)
+	_check(guide._content.text.contains("[b]Still needed[/b]  0 Blessings"), "Exceeding the target leaves zero still needed.")
+	_check(game._market_tool_state.blessings == starting_balance and not game._market_tool_state._day_blessings_awarded, "Viewing progress never pays out or finalizes the shift.")
+	game._correct_drop_offs = 0
+	game._wrong_drop_offs = 0
+	game._incorrectly_stamped_anomalies.clear()
+	game._route_index = 0
+	game._refresh_guidebook_progress()
 	_check(guide._section_buttons().size() == 3, "Guidebook has exactly three sections.")
 	var before: float = game._day_minutes
 	game._process(1.0)

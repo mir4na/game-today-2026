@@ -31,7 +31,6 @@ extends Resource
 
 @export_category("Newspaper")
 @export_range(0.0, 10.0, 0.1) var non_death_news_weight: float = 1.0
-@export_range(0.0, 10.0, 0.1) var external_death_news_weight: float = 1.0
 @export_range(0.0, 10.0, 0.1) var matching_death_news_weight: float = 1.0
 
 @export_category("Passenger AI")
@@ -42,6 +41,19 @@ extends Resource
 @export_category("Random Seed")
 @export var use_random_seed: bool = true
 @export var debug_seed: int = 2026
+
+
+func create_daily_service(day: int, shift_seed: int) -> DailyManifestConfig:
+	var daily := duplicate(true) as DailyManifestConfig
+	var service_rng := RandomNumberGenerator.new()
+	service_rng.seed = ("train:%d:day:%d" % [shift_seed, day]).hash()
+	var numbers := PackedStringArray()
+	for number: int in range(100, 1000):
+		var candidate: String = str(number)
+		if not alternate_train_numbers.has(candidate):
+			numbers.append(candidate)
+	daily.service_train_number = numbers[service_rng.randi_range(0, numbers.size() - 1)]
+	return daily
 
 
 func get_all_passenger_names() -> PackedStringArray:

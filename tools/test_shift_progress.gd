@@ -47,6 +47,19 @@ func _run() -> void:
 	menu.get_node("%ContinueButton").pressed.emit()
 	var game: AfterTheEndGame = await _wait_for_game()
 	_check(game.day_number == 2 and game._daily_seed == checkpoint.seed, "Continue restores the saved day and roster seed.")
+	var service_number: String = game.manifest_config.service_train_number
+	var scene_probe: AfterTheEndGame = load("res://scenes/main/main.tscn").instantiate()
+	var authored_config: DailyManifestConfig = scene_probe.manifest_config
+	var authored_number: String = authored_config.service_train_number
+	_check(authored_config.create_daily_service(2, checkpoint.seed).service_train_number == service_number, "Continue restores the daily service number from its checkpoint seed.")
+	var generated_numbers: Dictionary = {}
+	for sample_day: int in range(1, 6):
+		var daily_config: DailyManifestConfig = authored_config.create_daily_service(sample_day, checkpoint.seed)
+		generated_numbers[daily_config.service_train_number] = true
+		_check(daily_config.service_train_number == authored_config.create_daily_service(sample_day, checkpoint.seed).service_train_number, "Daily service generation is repeatable.")
+		_check(not daily_config.alternate_train_numbers.has(daily_config.service_train_number), "Wrong-train numbers remain distinct from the current service.")
+	_check(generated_numbers.size() > 1 and authored_config.service_train_number == authored_number, "Daily randomization varies without modifying the authored config.")
+	scene_probe.free()
 	_check(game._market_tool_state.get("blessings") == 500, "Continue restores the day-start inventory.")
 	var names: PackedStringArray = _roster(game)
 	var anomaly: Passenger = null
@@ -73,6 +86,7 @@ func _run() -> void:
 	game = current_scene as AfterTheEndGame
 	game.process_mode = Node.PROCESS_MODE_DISABLED
 	_check(_roster(game) == names and game.day_number == 2, "Restart must keep the day and manifest.")
+	_check(game.manifest_config.service_train_number == service_number, "Restart keeps the same service number.")
 	_check(game._market_tool_state.get("blessings") == 500 and game._market_tool_state.get("radar_charges") == 3, "Restart must not keep payout or purchases from the previous attempt.")
 	game._finalize_day_shift()
 	_check(not game._day_blessing_award.passed, "A zero-earnings attempt must fail despite savings.")
