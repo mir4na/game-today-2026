@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3 uid="uid://cgd464o6dvia0"]
+
+[ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://dhmpf4e8dcvmq" path="res://assets/characters/Where Do You Belong_/NPC13 - Ame.png" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/passengers/npc_13.tscn" id="3_scene"]
+
+[resource]
+script = ExtResource("1")
+gender = 1
+passenger_name = "Stavros"
+short_name = "Stavros"
+age = 38
+occupation = "Bookbinder"
+body_color = Color(0.55, 0.38, 0.62, 1)
+passenger_scene = ExtResource("3_scene")
+id_photo = ExtResource("2")
+identity_number = "CID-0013"
+birth_place = "Westhaven"
+date_of_birth = "30 JAN 1988"

@@ -39,7 +39,8 @@ completion_atmosphere_text = "Thank you for playing Where Do You Belong?"
 passenger_departure_template = "%s leaves the night train here."
 next_button_text = "NEXT NIGHT STOP"
 complete_button_text = "COMPLETE JOURNEY"
-restart_button_text = "RESTART SHIFT"
+journey_continue_button_text = "CONTINUE"
+blessing_reward_template = "+%d BLESSINGS\n%d CORRECT SOUL DROP-OFFS • BALANCE %d"
 
 [node name="Background" type="ColorRect" parent="."]
 unique_name_in_owner = true
@@ -70,6 +71,7 @@ theme_override_constants/separation = 22
 alignment = 1
 
 [node name="StationLabel" type="Label" parent="Center/Panel/Box"]
+theme_type_variation = &"HeaderLabel"
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
@@ -95,6 +97,14 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.905882, 0.878431, 0.823529, 1)
 theme_override_font_sizes/font_size = 17
+horizontal_alignment = 1
+
+[node name="BlessingRewardLabel" type="Label" parent="Center/Panel/Box"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.560784, 0.827451, 0.658824, 1)
+theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 
 [node name="ContinueButton" type="Button" parent="Center/Panel/Box"]

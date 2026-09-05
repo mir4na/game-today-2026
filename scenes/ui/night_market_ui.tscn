@@ -46,6 +46,10 @@ grow_vertical = 2
 mouse_filter = 0
 theme = ExtResource("2")
 script = ExtResource("1")
+blessings_template = "BLESSINGS  %d"
+purchase_button_template = "BUY  •  %d BLESSINGS"
+speed_button_template = "UPGRADE  •  %d BLESSINGS"
+day_reward_template = "+%d BLESSINGS  •  DROP-OFFS +%d  •  PENALTY −%d"
 
 [node name="Shade" type="ColorRect" parent="."]
 layout_mode = 1
@@ -81,13 +85,14 @@ text = "SOUL LINE SUPPLY COUNTER"
 horizontal_alignment = 1
 
 [node name="Title" type="Label" parent="Center/Panel/Outer"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.94, 0.83, 0.61, 1)
 theme_override_font_sizes/font_size = 34
 text = "NIGHT MARKET"
 horizontal_alignment = 1
 
-[node name="MeritLabel" type="Label" parent="Center/Panel/Outer"]
+[node name="BlessingsLabel" type="Label" parent="Center/Panel/Outer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.59, 0.84, 0.68, 1)
@@ -117,6 +122,7 @@ layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="Title" type="Label" parent="Center/Panel/Outer/Cards/AuditCard/Box"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.94, 0.83, 0.61, 1)
 theme_override_font_sizes/font_size = 23
@@ -131,7 +137,7 @@ text = "CONSUMABLE"
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_font_sizes/font_size = 16
-text = "Validate whether one typed name exists in today's passenger manifest. It never reveals whether that passenger is deceased."
+text = "Reserved for the revised night-deduction system. It cannot be purchased until its new interaction is finalized."
 autowrap_mode = 2
 
 [node name="AuditStockLabel" type="Label" parent="Center/Panel/Outer/Cards/AuditCard/Box"]
@@ -155,6 +161,7 @@ layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="Title" type="Label" parent="Center/Panel/Outer/Cards/RadarCard/Box"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.94, 0.83, 0.61, 1)
 theme_override_font_sizes/font_size = 23
@@ -193,6 +200,7 @@ layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="Title" type="Label" parent="Center/Panel/Outer/Cards/SpeedCard/Box"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.94, 0.83, 0.61, 1)
 theme_override_font_sizes/font_size = 23

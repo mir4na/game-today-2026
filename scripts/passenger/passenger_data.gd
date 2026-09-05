@@ -15,6 +15,7 @@ var age: int = 30
 var occupation: String = "Unknown"
 var body_color: Color = Color("8eb7c8")
 var id_photo: Texture2D
+var id_photo_owner: String = ""
 var identity_number: String = ""
 var birth_place: String = ""
 var date_of_birth: String = ""
@@ -24,6 +25,8 @@ var destination_station: String = ""
 var ticket_owner: String = ""
 var ticket_number: String = ""
 var ticket_train_number: String = ""
+var ticket_service_date: String = ""
+var ticket_day_code: String = ""
 var ticket_issue_type: StringName = TICKET_ISSUE_NONE
 var required_dropoff_station: String = ""
 var is_dead: bool = false
@@ -47,6 +50,7 @@ static func create_from_identity(profile: PassengerIdentityProfile) -> Passenger
 	data.occupation = profile.occupation
 	data.body_color = profile.body_color
 	data.id_photo = profile.id_photo
+	data.id_photo_owner = data.passenger_name
 	data.identity_number = profile.identity_number
 	data.birth_place = profile.birth_place
 	data.date_of_birth = profile.date_of_birth

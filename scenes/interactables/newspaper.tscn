@@ -1,56 +1,37 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://cugd4ar6xupi2"]
 
-[ext_resource type="Script" path="res://scripts/interactables/newspaper.gd" id="1"]
-[ext_resource type="ShaderMaterial" path="res://resources/materials/interactable_outline.tres" id="2_outline"]
+[ext_resource type="Script" uid="uid://w1kwenk3fmei" path="res://scripts/interactables/newspaper.gd" id="1"]
+[ext_resource type="Material" path="res://resources/materials/interactable_outline.tres" id="2_outline"]
+[ext_resource type="Texture2D" uid="uid://dbd4nf7tdm8i1" path="res://assets/ui/newspaper/Rak.png" id="3_rack"]
 
-[sub_resource type="RectangleShape2D" id="PaperShape"]
-size = Vector2(90, 55)
+[sub_resource type="RectangleShape2D" id="RackInteractionShape"]
+size = Vector2(180, 228)
 
-[node name="Newspaper" type="Area2D"]
+[node name="Newspaper" type="Area2D" unique_id=654820484 groups=["passenger_stop_obstacles"]]
+editor_description = "Scene-authored newspaper rack. Adjust its artwork, collision, and prompt directly through this scene's Inspector."
 script = ExtResource("1")
 prompt_text = "Read Newspaper"
-interaction_distance = 105.0
+interaction_distance = 150.0
 prompt_anchor_path = NodePath("InteractionPromptAnchor")
 focus_visual_path = NodePath("Visual")
-focus_z_index = 100
 
-[node name="InteractionPromptAnchor" type="Marker2D" parent="."]
+[node name="InteractionPromptAnchor" type="Marker2D" parent="." unique_id=377578827]
 editor_description = "Inspector-authored screen prompt anchor above the newspaper."
-position = Vector2(0, -58)
+position = Vector2(0, -234)
 
-[node name="Visual" type="CanvasGroup" parent="."]
-rotation = -0.08
+[node name="Visual" type="CanvasGroup" parent="." unique_id=1225356523]
+editor_description = "Outline target containing the scene-authored newspaper rack sprite."
 material = ExtResource("2_outline")
-clear_margin = 8.0
-fit_margin = 8.0
+fit_margin = 12.0
+clear_margin = 12.0
 
-[node name="Paper" type="Polygon2D" parent="Visual"]
-polygon = PackedVector2Array(-35, -20, 35, -20, 35, 22, -35, 22)
-color = Color(0.870588, 0.827451, 0.717647, 1)
+[node name="RackSprite" type="Sprite2D" parent="Visual" unique_id=1164740874]
+editor_description = "Newspaper rack artwork. Texture, position, and scale are editable through the Inspector."
+position = Vector2(0, -114)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("3_rack")
 
-[node name="Headline" type="Polygon2D" parent="Visual"]
-polygon = PackedVector2Array(-29, -14, 29, -14, 29, -7, -29, -7)
-color = Color(0.258824, 0.239216, 0.223529, 1)
-
-[node name="Line0" type="Line2D" parent="Visual"]
-points = PackedVector2Array(-28, -2, 26, -2)
-width = 2.0
-default_color = Color(0.505882, 0.47451, 0.423529, 1)
-
-[node name="Line1" type="Line2D" parent="Visual"]
-points = PackedVector2Array(-28, 4, 26, 4)
-width = 2.0
-default_color = Color(0.505882, 0.47451, 0.423529, 1)
-
-[node name="Line2" type="Line2D" parent="Visual"]
-points = PackedVector2Array(-28, 10, 26, 10)
-width = 2.0
-default_color = Color(0.505882, 0.47451, 0.423529, 1)
-
-[node name="Line3" type="Line2D" parent="Visual"]
-points = PackedVector2Array(-28, 16, 26, 16)
-width = 2.0
-default_color = Color(0.505882, 0.47451, 0.423529, 1)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("PaperShape")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=688299852]
+editor_description = "Interaction area aligned with the rack artwork; it does not physically block the player."
+position = Vector2(0, -114)
+shape = SubResource("RackInteractionShape")

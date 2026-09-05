@@ -5,9 +5,10 @@ extends Control
 const SETTINGS_PATH: String = "user://where_do_you_belong_settings.cfg"
 const SETTINGS_VERSION: int = 2
 const DEFAULT_FULLSCREEN: bool = true
+const ShiftProgress = preload("res://scripts/systems/shift_progress.gd")
 
 @export_category("Scene Configuration")
-@export var game_scene: PackedScene
+@export var loading_screen_scene: PackedScene
 @export var volume_value_template: String = "%d%%"
 @export var default_volume: float = 80.0
 @export var default_fullscreen: bool = DEFAULT_FULLSCREEN
@@ -16,6 +17,8 @@ const DEFAULT_FULLSCREEN: bool = true
 @onready var _menu_panel: PanelContainer = %MenuPanel
 @onready var _settings_panel: PanelContainer = %SettingsPanel
 @onready var _start_button: Button = %StartButton
+@onready var _continue_button: Button = %ContinueButton
+@onready var _progress_hint: Label = %ProgressHint
 @onready var _settings_button: Button = %SettingsButton
 @onready var _quit_button: Button = %QuitButton
 @onready var _volume_slider: HSlider = %VolumeSlider
@@ -28,7 +31,17 @@ var _transitioning: bool = false
 
 func _ready() -> void:
 	_load_settings()
-	_start_button.grab_focus()
+	var checkpoint: Dictionary = ShiftProgress.load_checkpoint()
+	var can_continue: bool = not checkpoint.is_empty() and not bool(checkpoint.get("completed", false))
+	_continue_button.disabled = not can_continue
+	_continue_button.text = "CONTINUE — DAY %d" % int(checkpoint.day) if can_continue else "CONTINUE"
+	_progress_hint.text = "Continue resumes the start of your saved day.\nNew Game replaces the saved run." if can_continue else "Five days. One journey."
+	if not checkpoint.is_empty() and bool(checkpoint.get("completed", false)):
+		_progress_hint.text = "FIVE-DAY JOURNEY COMPLETE\nStart a new game to play again."
+	if can_continue:
+		_continue_button.grab_focus()
+	else:
+		_start_button.grab_focus()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"ui_cancel") and _settings_panel.visible:
@@ -49,17 +62,38 @@ func _save_and_close_settings() -> void:
 func _start_game() -> void:
 	if _transitioning:
 		return
+	if loading_screen_scene == null:
+		push_error("MainMenu/Loading Screen Scene is not configured in the Inspector.")
+		return
+	if not ShiftProgress.save_checkpoint(ShiftProgress.make_checkpoint(1, {}, ShiftProgress.new_seed())):
+		_progress_hint.text = "Progress could not be saved. Please try again."
+		return
+	_open_game()
+
+func _continue_game() -> void:
+	if _transitioning:
+		return
+	var checkpoint: Dictionary = ShiftProgress.load_checkpoint()
+	if checkpoint.is_empty() or bool(checkpoint.get("completed", false)):
+		return
+	_open_game()
+
+func _open_game() -> void:
+	if loading_screen_scene == null:
+		push_error("MainMenu/Loading Screen Scene is not configured in the Inspector.")
+		return
 	_transitioning = true
 	_set_menu_buttons_disabled(true)
 	var tween := create_tween()
 	tween.tween_property(_fade, "modulate:a", 1.0, 0.35)
-	tween.tween_callback(func() -> void: get_tree().change_scene_to_packed(game_scene))
+	tween.tween_callback(func() -> void: get_tree().change_scene_to_packed(loading_screen_scene))
 
 func _quit_game() -> void:
 	get_tree().quit()
 
 func _set_menu_buttons_disabled(value: bool) -> void:
 	_start_button.disabled = value
+	_continue_button.disabled = value
 	_settings_button.disabled = value
 	_quit_button.disabled = value
 

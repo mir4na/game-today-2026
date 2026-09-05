@@ -6,3 +6,5 @@
 shader = ExtResource("1_shader")
 shader_parameter/wipe_progress = 0.0
 shader_parameter/edge_softness = 0.08
+shader_parameter/wipe_top_screen_y = 0.0
+shader_parameter/wipe_bottom_screen_y = 1.0

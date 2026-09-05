@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://d1e8ff3y77utw"]
+[gd_scene load_steps=5 format=3 uid="uid://d1e8ff3y77utw"]
 
 [ext_resource type="Script" path="res://scripts/ui/id_card.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://cvsli236qi2rk" path="res://assets/ui/id_card.png" id="2"]
 [ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="3"]
+[ext_resource type="FontFile" uid="uid://jysqo0nff08k" path="res://fonts/Josefin_Sans/static/JosefinSans-Medium.ttf" id="4_medium"]
 
 [node name="IDCard" type="Control"]
 custom_minimum_size = Vector2(620, 358)
@@ -78,7 +79,7 @@ offset_top = 174.0
 offset_right = 606.0
 offset_bottom = 198.0
 theme_override_colors/font_color = Color(0.105882, 0.105882, 0.145098, 1)
-theme_override_fonts/font = ExtResource("3")
+theme_override_fonts/font = ExtResource("4_medium")
 theme_override_font_sizes/font_size = 18
 text = "NOT RECORDED"
 text_overrun_behavior = 3
@@ -91,7 +92,7 @@ offset_top = 217.0
 offset_right = 606.0
 offset_bottom = 241.0
 theme_override_colors/font_color = Color(0.105882, 0.105882, 0.145098, 1)
-theme_override_fonts/font = ExtResource("3")
+theme_override_fonts/font = ExtResource("4_medium")
 theme_override_font_sizes/font_size = 18
 text = "NOT RECORDED"
 text_overrun_behavior = 3
@@ -104,7 +105,7 @@ offset_top = 260.0
 offset_right = 606.0
 offset_bottom = 284.0
 theme_override_colors/font_color = Color(0.105882, 0.105882, 0.145098, 1)
-theme_override_fonts/font = ExtResource("3")
+theme_override_fonts/font = ExtResource("4_medium")
 theme_override_font_sizes/font_size = 18
 text = "NOT RECORDED"
 text_overrun_behavior = 3

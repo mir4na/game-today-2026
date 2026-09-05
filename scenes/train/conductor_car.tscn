@@ -8,8 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://qfgbxjo8e3mf" path="res://assets/kereta/Pintu kiri.png" id="6"]
 [ext_resource type="Texture2D" uid="uid://bd3gsinxrrynl" path="res://assets/kereta/Pintu kanan.png" id="7"]
 [ext_resource type="PackedScene" uid="uid://dg5g8fm8dx45y" path="res://scenes/interactables/conductor_desk.tscn" id="8_desk"]
-[ext_resource type="PackedScene" path="res://scenes/interactables/arrival_clock.tscn" id="9_clock"]
-[ext_resource type="ShaderMaterial" path="res://resources/materials/exterior_top_down_fade.tres" id="10_fade"]
+[ext_resource type="Material" path="res://resources/materials/exterior_top_down_fade.tres" id="10_fade"]
 [ext_resource type="ShaderMaterial" path="res://resources/materials/window_light_mask.tres" id="11_window_light"]
 [ext_resource type="Texture2D" uid="uid://c1r4rdjeoyrm7" path="res://assets/kereta/bagian_bawah.png" id="11_underframe"]
 [ext_resource type="PackedScene" path="res://scenes/train/train_interior_lighting.tscn" id="12_lighting"]
@@ -277,6 +276,7 @@ exterior_visual_path = NodePath("ArtRoot/Exterior")
 exterior_door_visual_path = NodePath("ArtRoot/Exterior/ClosedDoors")
 door_animation_path = NodePath("ArtRoot/Exterior/DoorAnimation")
 wheel_animation_path = NodePath("ArtRoot/Wheels/WheelAnimation")
+cinematic_interior_shade_path = NodePath("ArtRoot/CinematicInteriorShade")
 cinematic_interior_fade_seconds = 0.45
 
 [node name="ArtRoot" type="Node2D" parent="." unique_id=1500656962]
@@ -303,6 +303,13 @@ texture = ExtResource("2")
 centered = false
 
 [node name="InteriorLighting" parent="ArtRoot" instance=ExtResource("12_lighting")]
+
+[node name="CinematicInteriorShade" type="Polygon2D" parent="ArtRoot"]
+editor_description = "Cutscene-only interior grade. Color controls the cinematic darkness; CarriageVisual only fades its alpha."
+modulate = Color(1, 1, 1, 0)
+z_index = 4
+color = Color(0.025, 0.047, 0.09, 0.34)
+polygon = PackedVector2Array(0, 190, 960, 190, 960, 525, 0, 525)
 
 [node name="Exterior" type="CanvasGroup" parent="ArtRoot" unique_id=1207132285]
 unique_name_in_owner = true
@@ -417,7 +424,6 @@ color = Color(0.117647, 0.152941, 0.184314, 0.9)
 polygon = PackedVector2Array(0, -29.2044, 1.87208, -28.4555, 2.99532, -26.9579, 3.36974, -25.4602, 2.99532, -23.5881, 1.87208, -22.4649, 0, -22.0905, -1.87208, -22.4649, -2.99532, -23.5881, -3.36974, -25.4602, -2.99532, -26.9579, -1.87208, -28.4555)
 
 [node name="WheelAnimation" type="AnimationPlayer" parent="ArtRoot/Wheels" unique_id=396644254]
-speed_scale = 3.5
 libraries/ = SubResource("AnimationLibrary_wheels")
 autoplay = &"wheel_spin"
 
@@ -454,7 +460,3 @@ shape = SubResource("ConductorFloorShape")
 [node name="ConductorDesk" parent="." unique_id=118447953 instance=ExtResource("8_desk")]
 unique_name_in_owner = true
 position = Vector2(746, 456)
-
-[node name="ArrivalClock" parent="." unique_id=1051265954 instance=ExtResource("9_clock")]
-unique_name_in_owner = true
-position = Vector2(255, 520)

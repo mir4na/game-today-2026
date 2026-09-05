@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/menu/main_menu.gd" id="1"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
 [ext_resource type="Texture2D" path="res://assets/vector/main_menu_backdrop.svg" id="3"]
-[ext_resource type="PackedScene" path="res://scenes/main/main.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/ui/loading_screen_ui.tscn" id="4"]
 
 [sub_resource type="StyleBoxFlat" id="MenuPanelStyle"]
 content_margin_left = 18.0
@@ -46,7 +46,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2")
 script = ExtResource("1")
-game_scene = ExtResource("4")
+loading_screen_scene = ExtResource("4")
 volume_value_template = "%d%%"
 default_volume = 80.0
 default_fullscreen = true
@@ -85,6 +85,7 @@ theme_override_font_sizes/font_size = 16
 text = "A CONDUCTOR'S LAST ROUTE"
 
 [node name="GameTitle" type="Label" parent="SafeMargin/Layout/TitleBlock"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.937255, 0.839216, 0.623529, 1)
 theme_override_constants/line_spacing = -8
@@ -123,6 +124,7 @@ theme_override_constants/separation = 17
 alignment = 1
 
 [node name="Header" type="Label" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 24
@@ -133,21 +135,24 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(0, 22)
 layout_mode = 2
 
+[node name="ContinueButton" type="Button" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "CONTINUE"
+
 [node name="StartButton" type="Button" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 62)
 layout_mode = 2
-focus_neighbor_top = NodePath("../QuitButton")
-focus_neighbor_bottom = NodePath("../SettingsButton")
 theme_override_font_sizes/font_size = 20
-text = "START"
+text = "NEW GAME"
 
 [node name="SettingsButton" type="Button" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 62)
 layout_mode = 2
-focus_neighbor_top = NodePath("../StartButton")
-focus_neighbor_bottom = NodePath("../QuitButton")
 theme_override_font_sizes/font_size = 20
 text = "SETTINGS"
 
@@ -155,12 +160,11 @@ text = "SETTINGS"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 62)
 layout_mode = 2
-focus_neighbor_top = NodePath("../SettingsButton")
-focus_neighbor_bottom = NodePath("../StartButton")
 theme_override_font_sizes/font_size = 20
 text = "QUIT"
 
-[node name="Hint" type="Label" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
+[node name="ProgressHint" type="Label" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.556863, 0.576471, 0.6, 1)
 theme_override_font_sizes/font_size = 13
@@ -183,6 +187,7 @@ layout_mode = 2
 theme_override_constants/separation = 17
 
 [node name="Header" type="Label" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 26
@@ -298,3 +303,5 @@ color = Color(0, 0, 0, 1)
 [connection signal="item_selected" from="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox/DisplayMode" to="." method="_on_display_mode_selected"]
 [connection signal="toggled" from="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox/VsyncToggle" to="." method="_on_vsync_toggled"]
 [connection signal="pressed" from="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox/SettingsBackButton" to="." method="_save_and_close_settings"]
+
+[connection signal="pressed" from="SafeMargin/Layout/RightStack/MenuPanel/MenuBox/ContinueButton" to="." method="_continue_game"]

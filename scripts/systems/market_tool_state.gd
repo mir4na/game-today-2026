@@ -9,7 +9,7 @@ const TOOL_RADAR_CHARGE: StringName = &"radar_charge"
 const TOOL_SPEED_UPGRADE: StringName = &"speed_upgrade"
 
 @export_category("Starting Inventory")
-@export_range(0, 999, 1) var starting_merit_marks: int = 8
+@export_range(0, 999, 1) var starting_blessings: int = 0
 @export_range(0, 20, 1) var starting_audit_slips: int = 1
 @export_range(0, 20, 1) var starting_radar_charges: int = 1
 @export_range(0, 8, 1) var starting_speed_level: int = 0
@@ -19,15 +19,20 @@ const TOOL_SPEED_UPGRADE: StringName = &"speed_upgrade"
 @export var speed_upgrade_costs: PackedInt32Array = PackedInt32Array([6, 10, 15])
 @export_category("Speed Upgrade")
 @export_range(0.0, 300.0, 1.0) var speed_bonus_per_level: float = 45.0
-@export_category("Paycheck Merit")
-@export_range(0, 20, 1) var merit_per_correct_dropoff: int = 1
-@export_range(1, 100, 1) var penalty_points_per_merit_loss: int = 10
+@export_category("Blessing Rewards")
+@export_range(0, 100, 1) var blessings_per_correct_dropoff: int = 30
+@export_range(0, 100, 1) var blessings_per_wrong_dropoff: int = 20
+@export_range(0, 100, 1) var blessings_per_incorrect_anomaly: int = 40
+@export_range(0, 20, 1) var blessings_per_correct_night_dropoff: int = 2
 
-var merit_marks: int = 0
+var blessings: int = 0
 var audit_slips: int = 0
 var radar_charges: int = 0
 var speed_level: int = 0
-var _shift_merit_awarded: bool = false
+var _day_blessings_awarded: bool = false
+var _night_blessings_awarded: bool = false
+var _last_day_award: Dictionary = {}
+var _last_night_award: Dictionary = {}
 
 
 func _ready() -> void:
@@ -40,23 +45,73 @@ func reset_inventory() -> void:
 
 
 func _set_starting_inventory() -> void:
-	merit_marks = maxi(0, starting_merit_marks)
+	blessings = maxi(0, starting_blessings)
 	audit_slips = maxi(0, starting_audit_slips)
 	radar_charges = maxi(0, starting_radar_charges)
 	speed_level = clampi(starting_speed_level, 0, speed_upgrade_costs.size())
-	_shift_merit_awarded = false
+	_day_blessings_awarded = false
+	_night_blessings_awarded = false
+	_last_day_award.clear()
+	_last_night_award.clear()
 
 
-func award_shift_merit(correct_dropoffs: int, penalty_points: int) -> int:
-	if _shift_merit_awarded:
-		return 0
-	_shift_merit_awarded = true
-	var earned: int = maxi(0, correct_dropoffs) * merit_per_correct_dropoff
-	var deduction: int = maxi(0, penalty_points) / maxi(1, penalty_points_per_merit_loss)
-	earned = maxi(0, earned - deduction)
-	merit_marks += earned
+func preview_day_blessings(correct_dropoffs: int, wrong_dropoffs: int, incorrect_anomalies: int, pass_target: int) -> Dictionary:
+	var dropoff_reward: int = maxi(0, correct_dropoffs) * blessings_per_correct_dropoff
+	var wrong_deduction: int = maxi(0, wrong_dropoffs) * blessings_per_wrong_dropoff
+	var anomaly_deduction: int = maxi(0, incorrect_anomalies) * blessings_per_incorrect_anomaly
+	var net_earnings: int = dropoff_reward - wrong_deduction - anomaly_deduction
+	var passed: bool = net_earnings >= pass_target
+	var earned: int = maxi(0, net_earnings) if passed else 0
+	return {
+		"earned": earned,
+		"dropoff_reward": dropoff_reward,
+		"wrong_deduction": wrong_deduction,
+		"anomaly_deduction": anomaly_deduction,
+		"penalty_deduction": wrong_deduction + anomaly_deduction,
+		"net_earnings": net_earnings,
+		"pass_target": pass_target,
+		"passed": passed,
+		"correct_rate": blessings_per_correct_dropoff,
+		"wrong_rate": blessings_per_wrong_dropoff,
+		"anomaly_rate": blessings_per_incorrect_anomaly,
+		"correct_dropoffs": maxi(0, correct_dropoffs),
+		"wrong_dropoffs": maxi(0, wrong_dropoffs),
+		"incorrect_anomalies": maxi(0, incorrect_anomalies),
+	}
+
+
+func award_day_blessings(correct_dropoffs: int, wrong_dropoffs: int, incorrect_anomalies: int, pass_target: int) -> Dictionary:
+	if _day_blessings_awarded:
+		return _last_day_award.duplicate(true)
+	_day_blessings_awarded = true
+	_last_day_award = preview_day_blessings(correct_dropoffs, wrong_dropoffs, incorrect_anomalies, pass_target)
+	blessings += int(_last_day_award.earned)
 	_emit_inventory_changed()
-	return earned
+	return _last_day_award.duplicate(true)
+
+
+func restore_shift_inventory(snapshot: Dictionary) -> void:
+	_set_starting_inventory()
+	blessings = maxi(0, int(snapshot.get("blessings", starting_blessings)))
+	audit_slips = maxi(0, int(snapshot.get("audit_slips", starting_audit_slips)))
+	radar_charges = maxi(0, int(snapshot.get("radar_charges", starting_radar_charges)))
+	speed_level = clampi(int(snapshot.get("speed_level", starting_speed_level)), 0, speed_upgrade_costs.size())
+	_emit_inventory_changed()
+
+
+func award_night_blessings(correct_night_dropoffs: int) -> Dictionary:
+	if _night_blessings_awarded:
+		return _last_night_award.duplicate(true)
+	_night_blessings_awarded = true
+	var correct_count: int = maxi(0, correct_night_dropoffs)
+	var earned: int = correct_count * blessings_per_correct_night_dropoff
+	blessings += earned
+	_last_night_award = {
+		"earned": earned,
+		"correct_night_dropoffs": correct_count,
+	}
+	_emit_inventory_changed()
+	return _last_night_award.duplicate(true)
 
 
 func purchase(tool_id: StringName) -> Dictionary:
@@ -92,7 +147,7 @@ func get_speed_bonus() -> float:
 
 func get_snapshot() -> Dictionary:
 	return {
-		"merit_marks": merit_marks,
+		"blessings": blessings,
 		"audit_slips": audit_slips,
 		"radar_charges": radar_charges,
 		"speed_level": speed_level,
@@ -106,7 +161,7 @@ func get_snapshot() -> Dictionary:
 
 func _purchase_consumable(cost: int, tool_id: StringName) -> Dictionary:
 	if not _try_spend(cost):
-		return {"success": false, "message": "NOT ENOUGH MERIT MARKS"}
+		return {"success": false, "message": "NOT ENOUGH BLESSINGS"}
 	if tool_id == TOOL_AUDIT_SLIP:
 		audit_slips += 1
 		_emit_inventory_changed()
@@ -121,16 +176,16 @@ func _purchase_speed_upgrade() -> Dictionary:
 	if next_cost < 0:
 		return {"success": false, "message": "SPEED IS ALREADY AT MAXIMUM LEVEL"}
 	if not _try_spend(next_cost):
-		return {"success": false, "message": "NOT ENOUGH MERIT MARKS"}
+		return {"success": false, "message": "NOT ENOUGH BLESSINGS"}
 	speed_level += 1
 	_emit_inventory_changed()
 	return {"success": true, "message": "MOVEMENT SPEED UPGRADED TO LEVEL %d" % speed_level}
 
 
 func _try_spend(cost: int) -> bool:
-	if merit_marks < cost:
+	if blessings < cost:
 		return false
-	merit_marks -= cost
+	blessings -= cost
 	return true
 
 

@@ -126,12 +126,10 @@ one_shot = true
 
 [node name="PoleAnimation" type="AnimationPlayer" parent="." unique_id=1368531899]
 unique_name_in_owner = true
-speed_scale = 1.45
 libraries/ = SubResource("AnimationLibrary_pole")
 
 [node name="CableAnimation" type="AnimationPlayer" parent="." unique_id=1518753713]
 unique_name_in_owner = true
-speed_scale = 1.45
 libraries/ = SubResource("AnimationLibrary_cable")
 
 [connection signal="timeout" from="PoleTimer" to="." method="_on_pole_timer_timeout"]

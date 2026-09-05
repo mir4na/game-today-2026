@@ -1,6 +1,8 @@
 class_name TrainWorld
 extends Node2D
 
+signal exterior_fade_out_finished
+
 var _scroll: float = 0.0
 var _night_strength: float = 0.0
 var _day_cycle_progress: float = 0.0
@@ -17,11 +19,12 @@ func _ready() -> void:
 			_carriages.append(child as CarriageVisual)
 	_carriages.sort_custom(func(left: CarriageVisual, right: CarriageVisual) -> bool: return left.position.x < right.position.x)
 	_exterior_sequence.doors_open_changed.connect(_on_exterior_doors_open_changed)
+	_exterior_sequence.fade_out_finished.connect(_on_exterior_fade_out_finished)
 	_exterior_sequence.hide()
 
 func _process(delta: float) -> void:
 	_sway_time += delta * _motion_strength
-	_scroll = fmod(_scroll + delta * lerpf(165.0, 112.0, _night_strength) * _motion_strength, 10000.0)
+	_scroll = fmod(_scroll + delta * lerpf(95.0, 48.0, _night_strength) * _motion_strength, 10000.0)
 	for carriage: CarriageVisual in _carriages:
 		carriage.set_environment(_scroll, _night_strength, _day_cycle_progress, _sway_time)
 		if _exterior_sequence.visible:
@@ -55,12 +58,21 @@ func hide_exterior_body() -> void:
 func set_exterior_sequence_elapsed(value: float) -> void:
 	_exterior_sequence.set_sequence_elapsed(value)
 
+func ensure_exterior_fade_out_started() -> void:
+	_exterior_sequence.ensure_fade_out_started()
+
+func is_exterior_fade_out_complete() -> bool:
+	return _exterior_sequence.is_fade_out_complete()
+
 func is_exterior_body_visible() -> bool:
 	return _exterior_sequence.visible
 
 func _on_exterior_doors_open_changed(is_open: bool) -> void:
 	for carriage: CarriageVisual in _carriages:
 		carriage.set_exterior_doors_open(is_open)
+
+func _on_exterior_fade_out_finished() -> void:
+	exterior_fade_out_finished.emit()
 
 func get_passenger_seat_slots(carriage_number: int) -> Array[Marker2D]:
 	for carriage: CarriageVisual in _carriages:
@@ -117,6 +129,20 @@ func show_radar_anomaly_glow(carriage_number: int, duration: float) -> void:
 			carriage.show_radar_anomaly_glow(duration)
 			return
 
+
+func can_play_radar_scan(carriage_number: int) -> bool:
+	for carriage: CarriageVisual in _carriages:
+		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
+			return carriage.has_radar_scan_effect()
+	return false
+
+
+func play_radar_scan(carriage_number: int, world_origin: Vector2, duration: float) -> void:
+	for carriage: CarriageVisual in _carriages:
+		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
+			await carriage.play_radar_scan(world_origin, duration)
+			return
+
 func get_carriage_index_at_world_x(world_x: float) -> int:
 	if _carriages.is_empty():
 		return 0
@@ -134,3 +160,10 @@ func get_carriage_index_at_world_x(world_x: float) -> int:
 			nearest_distance = distance
 			nearest_index = carriage_index
 	return nearest_index
+
+
+func get_nearest_carriage_number_at_world_x(world_x: float) -> int:
+	if _carriages.is_empty():
+		return 0
+	var carriage_index: int = get_carriage_index_at_world_x(world_x)
+	return _carriages[carriage_index].carriage_number

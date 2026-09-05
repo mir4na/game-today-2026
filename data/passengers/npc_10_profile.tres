@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3 uid="uid://dj737v4w8qg3u"]
+
+[ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://6pmi1hwtwk7j" path="res://assets/characters/Where Do You Belong_/NPC10.png" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/passengers/npc_10.tscn" id="3_scene"]
+
+[resource]
+script = ExtResource("1")
+gender = 1
+passenger_name = "Leonidas"
+short_name = "Leonidas"
+age = 31
+occupation = "Florist"
+body_color = Color(0.51, 0.64, 0.42, 1)
+passenger_scene = ExtResource("3_scene")
+id_photo = ExtResource("2")
+identity_number = "CID-0010"
+birth_place = "Silvercoast"
+date_of_birth = "19 OCT 1995"

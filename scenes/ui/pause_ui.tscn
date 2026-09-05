@@ -60,6 +60,7 @@ theme_override_constants/separation = 16
 alignment = 1
 
 [node name="Title" type="Label" parent="Center/Panel/Box"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 29
@@ -70,7 +71,7 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.905882, 0.878431, 0.823529, 1)
 theme_override_font_sizes/font_size = 16
-text = "A / D or Arrows — Walk\nE — Interact / Stamp Ticket\nQ — Switch ID / Ticket\nTAB — Notebook\nESC — Pause / Close"
+text = "A / D or Arrows — Walk\nE — Interact / Close Documents\nQ — Switch ID / Ticket\nSPACE — Stamp Ticket\nTAB — Guidebook\nR — Carriage Radar\nESC — Pause / Close"
 horizontal_alignment = 1
 
 [node name="ResumeButton" type="Button" parent="Center/Panel/Box"]

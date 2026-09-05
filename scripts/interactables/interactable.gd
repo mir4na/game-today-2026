@@ -7,10 +7,13 @@ signal interaction_requested(interactable: Interactable)
 @export var prompt_text: String = "Interact"
 @export var interaction_distance: float = 112.0
 @export var enabled: bool = true
+@export_category("Interaction Placement")
+@export_node_path("Node2D") var interaction_origin_path: NodePath
 @export_category("Prompt Placement")
 @export_node_path("Node2D") var prompt_anchor_path: NodePath
 @export_category("Focus Presentation")
 @export_node_path("CanvasItem") var focus_visual_path: NodePath
+@export var raise_on_focus: bool = true
 @export_range(1, 4096, 1) var focus_z_index: int = 100
 
 var _focus_visual: CanvasItem
@@ -40,6 +43,13 @@ func _ready() -> void:
 func get_prompt() -> String:
 	return "[E] %s" % prompt_text
 
+func get_interaction_world_position() -> Vector2:
+	if not interaction_origin_path.is_empty():
+		var configured_origin := get_node_or_null(interaction_origin_path) as Node2D
+		if is_instance_valid(configured_origin):
+			return configured_origin.global_position
+	return global_position
+
 func get_prompt_anchor() -> Node2D:
 	if not prompt_anchor_path.is_empty():
 		var configured_anchor := get_node_or_null(prompt_anchor_path) as Node2D
@@ -56,7 +66,7 @@ func interact() -> void:
 func set_interaction_focus(value: bool) -> void:
 	if is_instance_valid(_focus_material):
 		_focus_material.set_shader_parameter(&"outline_enabled", value)
-	if value:
+	if value and raise_on_focus:
 		z_as_relative = false
 		z_index = focus_z_index
 	else:

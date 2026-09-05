@@ -1,0 +1,463 @@
+[gd_scene format=3 uid="uid://cfafs25hli3c2"]
+
+[ext_resource type="Script" uid="uid://clj8os3t0800r" path="res://scripts/ui/newspaper_reader.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://donvcgiiqmpwk" path="res://assets/ui/newspaper/newspaper_ui.png" id="2_type_1"]
+[ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="3_15k6j"]
+[ext_resource type="FontFile" uid="uid://jysqo0nff08k" path="res://fonts/Josefin_Sans/static/JosefinSans-Medium.ttf" id="4_koq3p"]
+[ext_resource type="Texture2D" uid="uid://dnw3xncrqeq8s" path="res://assets/environment/afternoon_layer1.png" id="5_gx3ub"]
+[ext_resource type="Texture2D" uid="uid://bncr0xj2vcjt4" path="res://assets/environment/night_layer1.png" id="6_3s53l"]
+[ext_resource type="Texture2D" uid="uid://li3c23vv68qq" path="res://assets/environment/sunset_layer1.png" id="6_8hboi"]
+[ext_resource type="Material" path="res://resources/materials/newspaper_portrait_censor.tres" id="7_portrait_censor"]
+[ext_resource type="Texture2D" uid="uid://dpj5cbxom46s4" path="res://assets/ui/newspaper/newspaper type 2.png" id="9_3s53l"]
+[ext_resource type="Texture2D" uid="uid://rtv7tfulbcyt" path="res://assets/item/lap.png" id="10_777m4"]
+[ext_resource type="Texture2D" uid="uid://chcns0per0frq" path="res://assets/environment/PelAn.png" id="10_bvtxm"]
+[ext_resource type="Texture2D" uid="uid://byob3xmwasbkk" path="res://assets/ui/Kursi kotor.png" id="12_5tgax"]
+[ext_resource type="Texture2D" uid="uid://biw0f3wxnqss1" path="res://assets/characters/Where Do You Belong_/NPC1.png" id="13_placeholder_npc"]
+[ext_resource type="Material" path="res://resources/materials/newspaper_full_image_censor.tres" id="14_full_image_censor"]
+
+[sub_resource type="Animation" id="Animation_present_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("Type1:position")
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Type1:rotation")
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Type1:scale")
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.84, 0.84)]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("Type1:self_modulate")
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("Type2:position")
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+tracks/5/type = "value"
+tracks/5/path = NodePath("Type2:rotation")
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/6/type = "value"
+tracks/6/path = NodePath("Type2:scale")
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.84, 0.84)]
+}
+tracks/7/type = "value"
+tracks/7/path = NodePath("Type2:self_modulate")
+tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_present"]
+resource_name = "present"
+length = 0.86
+tracks/0/type = "value"
+tracks/0/path = NodePath("Type1:position")
+tracks/0/interp = 2
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.68, 0.86),
+"transitions": PackedFloat32Array(1.35, 0.65, 1),
+"update": 0,
+"values": [Vector2(0, 760), Vector2(0, -16), Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Type1:rotation")
+tracks/1/interp = 2
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.68, 0.86),
+"transitions": PackedFloat32Array(1.25, 0.72, 1),
+"update": 0,
+"values": [0.018, -0.004, 0.0]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Type1:scale")
+tracks/2/interp = 2
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.68, 0.86),
+"transitions": PackedFloat32Array(1.3, 0.7, 1),
+"update": 0,
+"values": [Vector2(0.79, 0.79), Vector2(0.855, 0.855), Vector2(0.84, 0.84)]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("Type1:self_modulate")
+tracks/3/interp = 2
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.26, 0.86),
+"transitions": PackedFloat32Array(1.2, 0.8, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0.72), Color(1, 1, 1, 1), Color(1, 1, 1, 1)]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("Type2:position")
+tracks/4/interp = 2
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.68, 0.86),
+"transitions": PackedFloat32Array(1.35, 0.65, 1),
+"update": 0,
+"values": [Vector2(0, 760), Vector2(0, -16), Vector2(0, 0)]
+}
+tracks/5/type = "value"
+tracks/5/path = NodePath("Type2:rotation")
+tracks/5/interp = 2
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 0.68, 0.86),
+"transitions": PackedFloat32Array(1.25, 0.72, 1),
+"update": 0,
+"values": [0.018, -0.004, 0.0]
+}
+tracks/6/type = "value"
+tracks/6/path = NodePath("Type2:scale")
+tracks/6/interp = 2
+tracks/6/keys = {
+"times": PackedFloat32Array(0, 0.68, 0.86),
+"transitions": PackedFloat32Array(1.3, 0.7, 1),
+"update": 0,
+"values": [Vector2(0.79, 0.79), Vector2(0.855, 0.855), Vector2(0.84, 0.84)]
+}
+tracks/7/type = "value"
+tracks/7/path = NodePath("Type2:self_modulate")
+tracks/7/interp = 2
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 0.26, 0.86),
+"transitions": PackedFloat32Array(1.2, 0.8, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0.72), Color(1, 1, 1, 1), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_presentation"]
+_data = {
+&"RESET": SubResource("Animation_present_reset"),
+&"present": SubResource("Animation_present")
+}
+
+[node name="NewspaperReader" type="Control" unique_id=1881011231]
+custom_minimum_size = Vector2(993, 681)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 993.0
+offset_bottom = 681.0
+mouse_filter = 1
+script = ExtResource("1_script")
+variant_paths = Array[NodePath]([NodePath("Type1"), NodePath("Type2")])
+headline_paths = Array[NodePath]([NodePath("Type1/Title"), NodePath("Type2/Title")])
+primary_body_paths = Array[NodePath]([NodePath("Type1/Desc1"), NodePath("Type2/Desc1")])
+secondary_headline_paths = Array[NodePath]([NodePath(""), NodePath("Type2/Subtitle")])
+secondary_body_paths = Array[NodePath]([NodePath("Type1/Desc2"), NodePath("Type2/Desc2")])
+portrait_paths = Array[NodePath]([NodePath("Type1/NewspaperPicture/CensoredImage/NpcPicture"), NodePath("Type2/NewspaperPicture/CensoredImage/NpcPicture")])
+presentation_player_path = NodePath("PresentationAnimation")
+presentation_animation = &"present"
+
+[node name="Type1" type="Control" parent="." unique_id=1992626553]
+editor_description = "Newspaper visual type 1. Adjust its artwork and article bounds here through the Inspector."
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.84, 0.84)
+pivot_offset = Vector2(496.5, 340.5)
+mouse_filter = 1
+
+[node name="Artwork" type="TextureRect" parent="Type1" unique_id=171060293]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_type_1")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Article" type="RichTextLabel" parent="Type1" unique_id=1462596024]
+visible = false
+layout_mode = 0
+offset_left = 105.0
+offset_top = 378.0
+offset_right = 888.0
+offset_bottom = 620.0
+mouse_filter = 1
+theme_override_colors/default_color = Color(0.890196, 0.839216, 0.760784, 1)
+theme_override_font_sizes/normal_font_size = 17
+theme_override_font_sizes/bold_font_size = 20
+bbcode_enabled = true
+
+[node name="Title" type="Label" parent="Type1" unique_id=194847472]
+editor_description = "Case headline preview. Runtime replaces only this text; layout and typography remain Inspector-authored."
+layout_mode = 0
+offset_left = 88.33333
+offset_top = 205.00003
+offset_right = 528.3333
+offset_bottom = 237.00003
+theme_override_colors/font_color = Color(0.7411765, 0.6666667, 0.5921569, 1)
+theme_override_fonts/font = ExtResource("3_15k6j")
+theme_override_font_sizes/font_size = 32
+text = "MORNING FIRE CLAIMS LIFE"
+
+[node name="Desc1" type="RichTextLabel" parent="Type1" unique_id=1100738312]
+editor_description = "Primary Case C preview copy. Runtime replaces only the text."
+layout_mode = 0
+offset_left = 86.66667
+offset_top = 245.0
+offset_right = 503.3333
+offset_bottom = 361.0
+mouse_filter = 2
+theme_override_colors/default_color = Color(0.3019608, 0.24705882, 0.21960784, 1)
+theme_override_fonts/normal_font = ExtResource("4_koq3p")
+theme_override_fonts/bold_font = ExtResource("3_15k6j")
+theme_override_font_sizes/normal_font_size = 13
+theme_override_font_sizes/bold_font_size = 13
+bbcode_enabled = true
+text = "A workplace fire broke out shortly after sunrise. Night staff reported smoke spreading from a rear storage room before the alarm sounded. Authorities confirmed that [b]ELENI[/b], aged 34, was working inside when the blaze crossed the upper floor and blocked the main corridor. Emergency crews opened a second entry point after witnesses saw flames through the rear windows. The site remained closed while recovery work continued through the morning."
+
+[node name="Desc2" type="RichTextLabel" parent="Type1" unique_id=908591944]
+editor_description = "Secondary Case C preview copy. Runtime replaces only the text."
+layout_mode = 0
+offset_left = 514.99994
+offset_top = 243.33334
+offset_right = 919.99994
+offset_bottom = 359.33334
+mouse_filter = 2
+theme_override_colors/default_color = Color(0.3019608, 0.24705882, 0.21960784, 1)
+theme_override_fonts/normal_font = ExtResource("4_koq3p")
+theme_override_fonts/bold_font = ExtResource("3_15k6j")
+theme_override_font_sizes/normal_font_size = 13
+theme_override_font_sizes/bold_font_size = 13
+bbcode_enabled = true
+text = "Investigators stated that the local tailor could not have survived the incident. Employment records and witness statements are under review while the building remains closed. The alarm sequence is being traced; no final cause has been announced.
+
+Edition printed before the afternoon service departed."
+
+[node name="CloseButton" type="Button" parent="Type1" unique_id=1061282681]
+layout_mode = 0
+offset_left = 916.6666
+offset_top = 721.6667
+offset_right = 1146.6666
+offset_bottom = 769.6667
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.890196, 0.839216, 0.760784, 1)
+theme_override_colors/font_hover_color = Color(1, 0.945098, 0.85098, 1)
+theme_override_font_sizes/font_size = 16
+text = "CLOSE  [E / ESC]"
+flat = true
+
+[node name="NewspaperPicture" type="Control" parent="Type1" unique_id=622688642]
+clip_contents = true
+anchors_preset = 0
+offset_left = 75.0
+offset_top = 363.0
+offset_right = 918.0
+offset_bottom = 681.0
+mouse_filter = 2
+
+[node name="CensoredImage" type="CanvasGroup" parent="Type1/NewspaperPicture" unique_id=149037537]
+editor_description = "Pixelates the complete newspaper photograph as one image. Adjust the censor block size through its Inspector material."
+material = ExtResource("14_full_image_censor")
+
+[node name="BackgroundPicture" type="Control" parent="Type1/NewspaperPicture/CensoredImage" unique_id=1051818335]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="SunriseLayer1" type="Sprite2D" parent="Type1/NewspaperPicture/CensoredImage/BackgroundPicture" unique_id=2084410592]
+position = Vector2(421.66666, 162.5)
+scale = Vector2(0.1418969, 0.6001372)
+texture = ExtResource("6_8hboi")
+
+[node name="NightLayer1" type="Sprite2D" parent="Type1/NewspaperPicture/CensoredImage/BackgroundPicture" unique_id=161053596]
+position = Vector2(584.1666, 165.3333)
+scale = Vector2(0.08121731, 0.77268636)
+texture = ExtResource("6_3s53l")
+
+[node name="AfternoonLayer1" type="Sprite2D" parent="Type1/NewspaperPicture/CensoredImage/BackgroundPicture" unique_id=2142494944]
+position = Vector2(583.95624, 192.42496)
+scale = Vector2(0.09488361, 0.29682034)
+texture = ExtResource("5_gx3ub")
+
+[node name="NpcPicture" type="Sprite2D" parent="Type1/NewspaperPicture/CensoredImage" unique_id=1510217158]
+editor_description = "Editor placeholder portrait. The daily manifest replaces this texture at runtime; the assigned shader previews cutout and pixel censorship in the scene."
+material = ExtResource("7_portrait_censor")
+position = Vector2(226.99997, 277)
+scale = Vector2(0.670853, 0.6666667)
+texture = ExtResource("13_placeholder_npc")
+
+[node name="Type2" type="Control" parent="." unique_id=1466457433]
+editor_description = "Newspaper visual type 2. Adjust its artwork and article bounds here through the Inspector."
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.84, 0.84)
+pivot_offset = Vector2(496.5, 340.5)
+mouse_filter = 1
+
+[node name="Artwork" type="TextureRect" parent="Type2" unique_id=112374122]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("9_3s53l")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Article" type="RichTextLabel" parent="Type2" unique_id=1248898512]
+visible = false
+layout_mode = 0
+offset_left = 96.0
+offset_top = 183.0
+offset_right = 897.0
+offset_bottom = 475.0
+mouse_filter = 1
+theme_override_colors/default_color = Color(0.27451, 0.223529, 0.196078, 1)
+theme_override_font_sizes/normal_font_size = 17
+theme_override_font_sizes/bold_font_size = 20
+bbcode_enabled = true
+
+[node name="Title" type="Label" parent="Type2" unique_id=1774267373]
+layout_mode = 0
+offset_left = 88.33333
+offset_top = 205.00003
+offset_right = 528.3333
+offset_bottom = 237.00003
+theme_override_colors/font_color = Color(0.7411765, 0.6666667, 0.5921569, 1)
+theme_override_fonts/font = ExtResource("3_15k6j")
+theme_override_font_sizes/font_size = 32
+text = "RIVER WAREHOUSE COLLAPSES"
+
+[node name="Desc1" type="RichTextLabel" parent="Type2" unique_id=1227118053]
+layout_mode = 0
+offset_left = 81.666664
+offset_top = 251.66666
+offset_right = 911.6666
+offset_bottom = 476.66666
+mouse_filter = 2
+theme_override_colors/default_color = Color(0.3019608, 0.24705882, 0.21960784, 1)
+theme_override_fonts/normal_font = ExtResource("4_koq3p")
+theme_override_fonts/bold_font = ExtResource("3_15k6j")
+theme_override_font_sizes/normal_font_size = 25
+theme_override_font_sizes/bold_font_size = 25
+bbcode_enabled = true
+text = "A riverside warehouse collapsed before dawn after workers reported a prolonged cracking sound from its eastern wall. Authorities confirmed that [b]ELENI[/b], aged 34, was still inside when the upper storage floor gave way and sealed the central passage. Rescue crews entered through the loading bay while unstable masonry delayed the search. Several cargo ledgers were recovered from a damaged office. The site remained closed throughout recovery."
+
+[node name="Subtitle" type="Label" parent="Type2" unique_id=1313727453]
+layout_mode = 0
+offset_left = 73.33333
+offset_top = 511.66663
+offset_right = 441.66663
+offset_bottom = 545.0
+theme_override_colors/font_color = Color(0.3019608, 0.24705882, 0.21960784, 1)
+theme_override_fonts/font = ExtResource("3_15k6j")
+theme_override_font_sizes/font_size = 25
+text = "RECOVERY EFFORT"
+
+[node name="Desc2" type="RichTextLabel" parent="Type2" unique_id=1440498728]
+layout_mode = 0
+offset_left = 74.00005
+offset_top = 546.6666
+offset_right = 433.3333
+offset_bottom = 670.0
+mouse_filter = 2
+theme_override_colors/default_color = Color(0.3019608, 0.24705882, 0.21960784, 1)
+theme_override_fonts/normal_font = ExtResource("4_koq3p")
+theme_override_fonts/bold_font = ExtResource("3_15k6j")
+theme_override_font_sizes/normal_font_size = 14
+theme_override_font_sizes/bold_font_size = 14
+bbcode_enabled = true
+text = "Employment records identify the missing worker as the Asterfall tailor named in the morning roster. Structural plans and maintenance reports are under review while engineers inspect the neighboring buildings. The collapse remains unexplained.
+
+Edition printed before the afternoon service departed."
+
+[node name="CloseButton" type="Button" parent="Type2" unique_id=611735791]
+layout_mode = 0
+offset_left = 916.6666
+offset_top = 721.6666
+offset_right = 1146.6665
+offset_bottom = 769.6666
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.27451, 0.223529, 0.196078, 1)
+theme_override_colors/font_hover_color = Color(0.109804, 0.0862745, 0.0745098, 1)
+theme_override_font_sizes/font_size = 16
+text = "CLOSE  [E / ESC]"
+flat = true
+
+[node name="NewspaperPicture" type="Control" parent="Type2" unique_id=1096322499]
+anchors_preset = 0
+offset_right = 993.0
+offset_bottom = 681.0
+mouse_filter = 2
+
+[node name="CensoredImage" type="CanvasGroup" parent="Type2/NewspaperPicture" unique_id=1639231578]
+editor_description = "Pixelates the complete newspaper photograph as one image. Adjust the censor block size through its Inspector material."
+material = ExtResource("14_full_image_censor")
+
+[node name="Lap" type="Sprite2D" parent="Type2/NewspaperPicture/CensoredImage" unique_id=1901451271]
+position = Vector2(703.33325, 581.66656)
+scale = Vector2(0.15, 0.15)
+texture = ExtResource("10_777m4")
+
+[node name="PelAn" type="Sprite2D" parent="Type2/NewspaperPicture/CensoredImage" unique_id=646612959]
+position = Vector2(663.3334, 588.3333)
+scale = Vector2(0.11843804, 0.106065236)
+texture = ExtResource("10_bvtxm")
+
+[node name="NpcPicture" type="Sprite2D" parent="Type2/NewspaperPicture/CensoredImage" unique_id=863664244]
+editor_description = "Editor placeholder portrait. The daily manifest replaces this texture at runtime; the assigned shader previews cutout and pixel censorship in the scene."
+material = ExtResource("7_portrait_censor")
+position = Vector2(521.6666, 588.3333)
+scale = Vector2(0.18, 0.172)
+texture = ExtResource("13_placeholder_npc")
+
+[node name="KursiKotor" type="Sprite2D" parent="Type2/NewspaperPicture/CensoredImage" unique_id=983536187]
+position = Vector2(858.3333, 585.5)
+scale = Vector2(0.15, 0.14232683)
+texture = ExtResource("12_5tgax")
+
+[node name="PresentationAnimation" type="AnimationPlayer" parent="."]
+editor_description = "Scene-authored newspaper lift animation. Edit the present animation here to tune its timing, overshoot, tilt, and scale."
+libraries/ = SubResource("AnimationLibrary_presentation")
+
+[connection signal="pressed" from="Type1/CloseButton" to="." method="_on_close_button_pressed"]
+[connection signal="pressed" from="Type2/CloseButton" to="." method="_on_close_button_pressed"]

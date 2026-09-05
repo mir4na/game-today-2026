@@ -1,12 +1,39 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://dklidc5jaeo1r"]
 
 [ext_resource type="PackedScene" path="res://scenes/passengers/passenger.tscn" id="1_base"]
-[ext_resource type="Texture2D" path="res://assets/characters/Where Do You Belong_/NPC13 - Ame.png" id="2_art"]
+[ext_resource type="Texture2D" uid="uid://dhmpf4e8dcvmq" path="res://assets/characters/Where Do You Belong_/NPC13 - Ame.png" id="2_art"]
+[ext_resource type="Shader" uid="uid://dq5qi6bem7nkh" path="res://shaders/interactable_outline.gdshader" id="2_cwold"]
+[ext_resource type="Material" path="res://resources/materials/character_reference_cutout.tres" id="3_cutout"]
 
-[ext_resource type="ShaderMaterial" path="res://resources/materials/character_reference_cutout.tres" id="3_cutout"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_o1b6i"]
+resource_local_to_scene = true
+shader = ExtResource("2_cwold")
+shader_parameter/outline_enabled = false
+shader_parameter/outline_color = Color(0.96, 0.78, 0.32, 1)
+shader_parameter/outline_width = 4.0
+shader_parameter/dead_effect_strength = 0.0
+shader_parameter/dead_desaturation = 0.72
+shader_parameter/dead_tint = Color(0.3, 0.52, 0.66, 0.24)
 
-[node name="npc_13" instance=ExtResource("1_base")]
+[sub_resource type="SpriteFrames" id="SpriteFrames_npc"]
+resource_local_to_scene = true
+animations = [{
+"frames": [],
+"loop": true,
+"name": &"idle",
+"speed": 10.0
+}, {
+"frames": [],
+"loop": true,
+"name": &"walk",
+"speed": 10.0
+}]
+
+[node name="npc_13" unique_id=2065370703 instance=ExtResource("1_base")]
 uses_authored_character_artwork = true
+
+[node name="CharacterScale" parent="." index="2"]
+material = SubResource("ShaderMaterial_o1b6i")
 
 [node name="BodyTint" parent="CharacterScale/PassengerVisual" index="0"]
 visible = false
@@ -17,10 +44,16 @@ visible = false
 [node name="RightLeg" parent="CharacterScale/PassengerVisual" index="2"]
 visible = false
 
-[node name="CharacterArtwork" type="Sprite2D" parent="CharacterScale/PassengerVisual" index="4"]
+[node name="InteractionPromptAnchor" parent="CharacterScale/PassengerVisual" index="3"]
+position = Vector2(0.972, -122.671)
+
+[node name="NPCVisual" parent="CharacterScale/PassengerVisual" index="4"]
 position = Vector2(2.986, -38.5)
 scale = Vector2(0.271428, 0.271428)
-material = ExtResource("3_cutout")
-texture = ExtResource("2_art")
+sprite_frames = SubResource("SpriteFrames_npc")
 
-[editable path="CharacterScale/PassengerVisual"]
+[node name="CharacterArtwork" type="Sprite2D" parent="CharacterScale/PassengerVisual" index="5" unique_id=1896563412]
+material = ExtResource("3_cutout")
+position = Vector2(2.986, -38.5)
+scale = Vector2(0.271428, 0.271428)
+texture = ExtResource("2_art")

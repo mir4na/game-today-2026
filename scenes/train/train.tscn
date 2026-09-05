@@ -2,13 +2,61 @@
 
 [ext_resource type="Script" uid="uid://bfstuunjhbkt" path="res://scripts/train/train.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://j33im4mh4yg7" path="res://scenes/train/passenger_coach.tscn" id="3"]
-[ext_resource type="PackedScene" uid="uid://jjmypdgegc27" path="res://scenes/train/conductor_car.tscn" id="4"]
-[ext_resource type="PackedScene" path="res://scenes/interactables/newspaper.tscn" id="5"]
+[ext_resource type="Shader" uid="uid://bxn1i0yabk62m" path="res://shaders/radar_anomaly_glow.gdshader" id="4_nmy2o"]
+[ext_resource type="PackedScene" uid="uid://cugd4ar6xupi2" path="res://scenes/interactables/newspaper.tscn" id="5"]
+[ext_resource type="Shader" uid="uid://df3d6yvnee1ie" path="res://shaders/radar_carriage_scan.gdshader" id="5_dmmtq"]
 [ext_resource type="Texture2D" uid="uid://bnios2cwcllit" path="res://assets/kereta/Antar kertea.png" id="6_iuhv6"]
 [ext_resource type="Texture2D" uid="uid://cxa3lskemwyal" path="res://assets/kereta/Lantai.png" id="6_v58c7"]
 [ext_resource type="Script" uid="uid://cc1e1727eckwm" path="res://scripts/train/train_exterior_body.gd" id="7"]
 [ext_resource type="Texture2D" uid="uid://d3kh2a47g41ko" path="res://assets/kereta/Jalan.png" id="7_v58c7"]
-[ext_resource type="PackedScene" path="res://scenes/minigames/blocked_aisle_event.tscn" id="8_blocked"]
+[ext_resource type="PackedScene" uid="uid://ddhu4mk3fcp8n" path="res://scenes/minigames/blocked_aisle_event.tscn" id="8_blocked"]
+[ext_resource type="PackedScene" uid="uid://dg5g8fm8dx45y" path="res://scenes/interactables/conductor_desk.tscn" id="9_night_ledger"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nmy2o"]
+resource_local_to_scene = true
+shader = ExtResource("4_nmy2o")
+shader_parameter/glow_color = Color(1, 0.035, 0.02, 0.78)
+shader_parameter/edge_feather = 0.12
+shader_parameter/center_strength = 0.9
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dmmtq"]
+resource_local_to_scene = true
+shader = ExtResource("5_dmmtq")
+shader_parameter/scan_origin_uv = Vector2(0.5, 0.72)
+shader_parameter/scan_progress = 0.0
+shader_parameter/scan_aspect = 2.85
+shader_parameter/front_width = 0.018
+shader_parameter/front_softness = 0.012
+shader_parameter/trail_length = 0.14
+shader_parameter/trail_strength = 0.2
+shader_parameter/residue_strength = 0.05
+shader_parameter/grid_strength = 0.08
+shader_parameter/boundary_strength = 0.28
+shader_parameter/front_color = Color(0.28, 0.94, 1, 0.96)
+shader_parameter/trail_color = Color(0.06, 0.42, 0.72, 0.34)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nm3wd"]
+resource_local_to_scene = true
+shader = ExtResource("4_nmy2o")
+shader_parameter/glow_color = Color(1, 0.035, 0.02, 0.78)
+shader_parameter/edge_feather = 0.12
+shader_parameter/center_strength = 0.9
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_n5jb8"]
+resource_local_to_scene = true
+shader = ExtResource("5_dmmtq")
+shader_parameter/scan_origin_uv = Vector2(0.5, 0.72)
+shader_parameter/scan_progress = 0.0
+shader_parameter/scan_aspect = 2.85
+shader_parameter/front_width = 0.018
+shader_parameter/front_softness = 0.012
+shader_parameter/trail_length = 0.14
+shader_parameter/trail_strength = 0.2
+shader_parameter/residue_strength = 0.05
+shader_parameter/grid_strength = 0.08
+shader_parameter/boundary_strength = 0.28
+shader_parameter/front_color = Color(0.28, 0.94, 1, 0.96)
+shader_parameter/trail_color = Color(0.06, 0.42, 0.72, 0.34)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yjxff"]
 size = Vector2(72.77644, 18.86792)
@@ -141,54 +189,84 @@ _data = {
 }
 
 [sub_resource type="RectangleShape2D" id="LeftBoundaryShape"]
-size = Vector2(13, 291)
+size = Vector2(52, 291)
 
 [sub_resource type="RectangleShape2D" id="RightBoundaryShape"]
-size = Vector2(80, 720)
+size = Vector2(48, 720)
 
 [node name="Train" type="Node2D" unique_id=36082991]
 script = ExtResource("1")
 
 [node name="Cars" type="Node2D" parent="." unique_id=793357466]
 unique_name_in_owner = true
-
-[node name="ConductorCar" parent="Cars" unique_id=122309048 instance=ExtResource("4")]
+position = Vector2(-12, 0)
 
 [node name="PassengerCoach4" parent="Cars" unique_id=398983735 instance=ExtResource("3")]
-position = Vector2(960, 0)
 carriage_number = 4
 
+[node name="RadarEffectBounds" parent="Cars/PassengerCoach4/ArtRoot" parent_id_path=PackedInt32Array(398983735, 1724717493) index="2" unique_id=545678927]
+offset_top = 0.0
+offset_bottom = 335.0
+
+[node name="RadarAnomalyGlow" parent="Cars/PassengerCoach4/ArtRoot/RadarEffectBounds" index="0" unique_id=648864988]
+material = SubResource("ShaderMaterial_nmy2o")
+
+[node name="RadarScanEffect" parent="Cars/PassengerCoach4/ArtRoot/RadarEffectBounds" index="1" unique_id=398318395]
+material = SubResource("ShaderMaterial_dmmtq")
+
+[node name="ConductorDesk" parent="Cars/PassengerCoach4" unique_id=1072375650 instance=ExtResource("9_night_ledger")]
+unique_name_in_owner = true
+editor_description = "Night drop-off ledger retained inside the front passenger coach after removing the dedicated conductor car."
+position = Vector2(746, 456)
+
+[node name="Newspaper" parent="Cars/PassengerCoach4" unique_id=891876982 instance=ExtResource("5")]
+unique_name_in_owner = true
+editor_description = "Newspaper rack placed inside Passenger Coach 4, the front passenger coach."
+z_index = 2
+position = Vector2(754, 515)
+scale = Vector2(0.5, 0.5)
+interaction_distance = 105.0
+
 [node name="PassengerCoach3" parent="Cars" unique_id=534537403 instance=ExtResource("3")]
-position = Vector2(1920, 0)
+position = Vector2(960, 0)
 carriage_number = 3
 
 [node name="PassengerCoach2" parent="Cars" unique_id=213345118 instance=ExtResource("3")]
-position = Vector2(2880, 0)
+position = Vector2(1920, 0)
 carriage_number = 2
 
-[node name="Newspaper" parent="Cars/PassengerCoach2" unique_id=891876982 instance=ExtResource("5")]
-unique_name_in_owner = true
-position = Vector2(740, 483)
+[node name="RadarEffectBounds" parent="Cars/PassengerCoach2/ArtRoot" parent_id_path=PackedInt32Array(213345118, 1724717493) index="2" unique_id=545678927]
+offset_top = 0.0
+offset_bottom = 335.0
+
+[node name="RadarAnomalyGlow" parent="Cars/PassengerCoach2/ArtRoot/RadarEffectBounds" index="0" unique_id=648864988]
+material = SubResource("ShaderMaterial_nm3wd")
+
+[node name="RadarScanEffect" parent="Cars/PassengerCoach2/ArtRoot/RadarEffectBounds" index="1" unique_id=398318395]
+material = SubResource("ShaderMaterial_n5jb8")
 
 [node name="PassengerCoach1" parent="Cars" unique_id=297172719 instance=ExtResource("3")]
-position = Vector2(3840, 0)
+position = Vector2(2880, 0)
 
 [node name="CarConnections" type="Node2D" parent="Cars" unique_id=2071011326]
 z_index = 4
 
-[node name="MaintenanceEvents" type="Node2D" parent="Cars/CarConnections"]
+[node name="MaintenanceEvents" type="Node2D" parent="Cars/CarConnections" unique_id=1440122565]
 editor_description = "Blocked-aisle anchors live at the passenger-coach connectors. Adjust these scene positions directly in the Inspector."
 
-[node name="BlockedAisle43" parent="Cars/CarConnections/MaintenanceEvents" instance=ExtResource("8_blocked")]
-position = Vector2(1918.5, 430)
+[node name="BlockedAisle43" parent="Cars/CarConnections/MaintenanceEvents" unique_id=1176730495 instance=ExtResource("8_blocked")]
+position = Vector2(898.0001, 509)
+scale = Vector2(0.6, 0.6)
 adjacent_carriages = Vector2i(4, 3)
 
-[node name="BlockedAisle32" parent="Cars/CarConnections/MaintenanceEvents" instance=ExtResource("8_blocked")]
-position = Vector2(2878.5, 430)
+[node name="BlockedAisle32" parent="Cars/CarConnections/MaintenanceEvents" unique_id=2058176304 instance=ExtResource("8_blocked")]
+position = Vector2(1858, 509)
+scale = Vector2(0.6, 0.6)
 adjacent_carriages = Vector2i(3, 2)
 
-[node name="BlockedAisle21" parent="Cars/CarConnections/MaintenanceEvents" instance=ExtResource("8_blocked")]
-position = Vector2(3838.5, 430)
+[node name="BlockedAisle21" parent="Cars/CarConnections/MaintenanceEvents" unique_id=1472684273 instance=ExtResource("8_blocked")]
+position = Vector2(2818, 509)
+scale = Vector2(0.6, 0.6)
 adjacent_carriages = Vector2i(2, 1)
 
 [node name="FloorConnection" type="Node2D" parent="Cars/CarConnections" unique_id=131007500]
@@ -276,40 +354,14 @@ position = Vector2(958.5, 384.5)
 scale = Vector2(0.3552644, 0.34175086)
 texture = ExtResource("7_v58c7")
 
-[node name="FloorConnection4" type="Node2D" parent="Cars/CarConnections" unique_id=191405813]
-position = Vector2(2880, 0)
-
-[node name="StaticBody2D" type="StaticBody2D" parent="Cars/CarConnections/FloorConnection4" unique_id=1997232827]
-collision_layer = 2
-
-[node name="Lantai" type="Sprite2D" parent="Cars/CarConnections/FloorConnection4/StaticBody2D" unique_id=1702108251]
-position = Vector2(958.00006, 495)
-scale = Vector2(0.7105278, 0.371)
-texture = ExtResource("6_v58c7")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Cars/CarConnections/FloorConnection4/StaticBody2D" unique_id=1826772341]
-position = Vector2(958.5, 500.5)
-scale = Vector2(0.371, 0.371)
-shape = SubResource("RectangleShape2D_yjxff")
-
-[node name="Connection4" type="Node2D" parent="Cars/CarConnections" unique_id=1166067750]
-position = Vector2(2880, 0)
-
-[node name="AntarKertea" type="Sprite2D" parent="Cars/CarConnections/Connection4" unique_id=488832567]
-position = Vector2(958.49994, 374.8485)
-scale = Vector2(0.3552628, 0.37715048)
-texture = ExtResource("6_iuhv6")
-
-[node name="Jalan" type="Sprite2D" parent="Cars/CarConnections/Connection4" unique_id=353984184]
-position = Vector2(958.5, 384.5)
-scale = Vector2(0.3552644, 0.34175086)
-texture = ExtResource("7_v58c7")
-
 [node name="ExteriorSequence" type="Node2D" parent="." unique_id=737171454]
 unique_name_in_owner = true
 process_mode = 4
 visible = false
 script = ExtResource("7")
+use_departure_wipe = true
+door_close_duration = 0.55
+closed_hold_before_exit = 1.0
 
 [node name="ExteriorTransition" type="AnimationPlayer" parent="ExteriorSequence" unique_id=52580453]
 unique_name_in_owner = true
@@ -319,9 +371,12 @@ libraries/ = SubResource("AnimationLibrary_exterior")
 collision_layer = 2
 
 [node name="LeftBoundaryCollision" type="CollisionShape2D" parent="TrainBoundaries" unique_id=1615564570]
-position = Vector2(6.5, 372.5)
+position = Vector2(2, 372.5)
 shape = SubResource("LeftBoundaryShape")
 
 [node name="RightBoundaryCollision" type="CollisionShape2D" parent="TrainBoundaries" unique_id=1650242370]
-position = Vector2(4753, 312)
+position = Vector2(3809, 312)
 shape = SubResource("RightBoundaryShape")
+
+[editable path="Cars/PassengerCoach4"]
+[editable path="Cars/PassengerCoach2"]

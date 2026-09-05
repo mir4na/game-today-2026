@@ -3,11 +3,11 @@ extends CanvasLayer
 ## Screen-space railway scenery that moves in transit and rests at stations.
 
 @export_category("Pole Timing")
-@export_range(0.5, 30.0, 0.5) var minimum_pole_interval: float = 2.5
-@export_range(0.5, 30.0, 0.5) var maximum_pole_interval: float = 5.5
+@export_range(0.5, 30.0, 0.5) var minimum_pole_interval: float = 5.0
+@export_range(0.5, 30.0, 0.5) var maximum_pole_interval: float = 11.0
 @export_category("Cable Timing")
-@export_range(0.5, 30.0, 0.5) var minimum_cable_interval: float = 1.5
-@export_range(0.5, 30.0, 0.5) var maximum_cable_interval: float = 3.5
+@export_range(0.5, 30.0, 0.5) var minimum_cable_interval: float = 3.5
+@export_range(0.5, 30.0, 0.5) var maximum_cable_interval: float = 8.0
 @export_category("Scene Animation")
 @export var pole_pass_animation: StringName = &"pole_pass"
 @export var cable_pass_animation: StringName = &"cable_pass"

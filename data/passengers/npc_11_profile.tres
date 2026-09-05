@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3 uid="uid://bd0i86h8bavjo"]
+
+[ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://dwrgww2j8xgv4" path="res://assets/characters/Where Do You Belong_/NPC11.png" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/passengers/npc_11.tscn" id="3_scene"]
+
+[resource]
+script = ExtResource("1")
+passenger_name = "Thalia"
+short_name = "Thalia"
+age = 45
+occupation = "Archivist"
+body_color = Color(0.48, 0.42, 0.66, 1)
+passenger_scene = ExtResource("3_scene")
+id_photo = ExtResource("2")
+identity_number = "CID-0011"
+birth_place = "Redgrove"
+date_of_birth = "25 JUL 1981"

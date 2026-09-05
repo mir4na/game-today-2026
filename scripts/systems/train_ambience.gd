@@ -139,18 +139,9 @@ func _process(_delta: float) -> void:
 		var movement: float = clampf(motion_strength, 0.0, 1.0)
 		var base_frequency: float = lerpf(48.0, 34.0, night_strength) * lerpf(0.45, 1.0, movement)
 		var rumble: float = sin(_phase * TAU * base_frequency) * lerpf(0.035, 0.018, night_strength) * movement
-		var rail_click: float = (0.012 if movement > 0.18 and fmod(_phase, 0.72) < 0.018 else 0.0) * lerpf(1.0, 0.58, night_strength)
-		var wind_envelope: float = 0.45 + sin(_phase * TAU * 0.071) * 0.28
-		var wind: float = sin(_phase * TAU * 0.38) * 0.011 * wind_envelope * night_strength * movement
-		var grave_drone: float = (
-			sin(_phase * TAU * 23.0) * 0.006
-			+ sin(_phase * TAU * 35.7) * 0.0035
-		) * night_strength * movement
-		var distant_knock: float = 0.0
-		if movement > 0.18 and fmod(_phase, 5.8) < 0.026:
-			distant_knock = sin(_phase * TAU * 71.0) * 0.012 * night_strength
-		var hiss: float = randf_range(-0.004, 0.004) * lerpf(1.0, 1.65, night_strength) * movement
-		var sample: float = rumble + rail_click + wind + grave_drone + distant_knock + hiss
+		var rail_click: float = 0.012 if movement > 0.18 and fmod(_phase, 0.72) < 0.018 else 0.0
+		var wind: float = sin(_phase * TAU * 0.38) * 0.008 * night_strength * movement
+		var sample: float = rumble + rail_click + wind + randf_range(-0.004, 0.004) * movement
 		_playback.push_frame(Vector2(sample, sample))
 		_phase += 1.0 / _mix_rate
 

@@ -1,0 +1,19 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://bbm87kup81qnp"]
+
+[ext_resource type="Shader" uid="uid://df3d6yvnee1ie" path="res://shaders/radar_carriage_scan.gdshader" id="1_radar"]
+
+[resource]
+resource_local_to_scene = true
+shader = ExtResource("1_radar")
+shader_parameter/scan_origin_uv = Vector2(0.5, 0.72)
+shader_parameter/scan_progress = 0.0
+shader_parameter/scan_aspect = 2.85
+shader_parameter/front_width = 0.018
+shader_parameter/front_softness = 0.012
+shader_parameter/trail_length = 0.14
+shader_parameter/trail_strength = 0.2
+shader_parameter/residue_strength = 0.05
+shader_parameter/grid_strength = 0.08
+shader_parameter/boundary_strength = 0.28
+shader_parameter/front_color = Color(0.28, 0.94, 1, 0.96)
+shader_parameter/trail_color = Color(0.06, 0.42, 0.72, 0.34)

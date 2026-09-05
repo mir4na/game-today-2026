@@ -1,0 +1,383 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/guidebook_ui.gd" id="1"]
+[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/guidebook_anomaly_entry.tscn" id="3_entry"]
+
+[sub_resource type="StyleBoxFlat" id="BookCoverStyle"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.160784, 0.0901961, 0.054902, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.454902, 0.278431, 0.14902, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.55)
+shadow_size = 18
+
+[sub_resource type="StyleBoxFlat" id="LeftPageStyle"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.827451, 0.756863, 0.623529, 1)
+corner_radius_top_left = 9
+corner_radius_bottom_left = 9
+
+[sub_resource type="StyleBoxFlat" id="RightPageStyle"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.921569, 0.87451, 0.764706, 1)
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+
+[sub_resource type="StyleBoxFlat" id="SummaryStyle"]
+content_margin_left = 13.0
+content_margin_top = 11.0
+content_margin_right = 13.0
+content_margin_bottom = 11.0
+bg_color = Color(0.698039, 0.603922, 0.45098, 0.55)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.372549, 0.258824, 0.160784, 0.55)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="SectionButtonStyle"]
+content_margin_left = 13.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 3
+border_color = Color(0.360784, 0.247059, 0.145098, 0.35)
+
+[sub_resource type="StyleBoxFlat" id="SectionButtonHoverStyle"]
+content_margin_left = 13.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.741176, 0.658824, 0.521569, 0.72)
+border_width_left = 3
+border_color = Color(0.486275, 0.247059, 0.180392, 1)
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+
+[sub_resource type="StyleBoxFlat" id="SectionButtonActiveStyle"]
+content_margin_left = 13.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.486275, 0.219608, 0.176471, 0.92)
+border_width_left = 4
+border_color = Color(0.301961, 0.145098, 0.117647, 1)
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+
+[sub_resource type="StyleBoxFlat" id="CloseButtonStyle"]
+content_margin_left = 15.0
+content_margin_top = 7.0
+content_margin_right = 15.0
+content_margin_bottom = 7.0
+bg_color = Color(0.360784, 0.192157, 0.141176, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.533333, 0.34902, 0.211765, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="GuidebookUI" type="Control"]
+visible = false
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+theme = ExtResource("2")
+script = ExtResource("1")
+day_badge_template = "DAY %d"
+train_badge_template = "TRAIN  %s"
+date_badge_template = "%s"
+today_document_template = "[font_size=22][b]DAY %d • %s[/b][/font_size]\n[b]Train number[/b]  %s\n\n[font_size=20][b]PASS TARGET: %d BLESSINGS[/b][/font_size]\n[b]Net earnings so far[/b]  %d Blessings\n[b]Still needed[/b]  %d Blessings\n[color=#6b4a35]Today's earnings after penalties; earlier savings do not count.[/color]\n\n[font_size=20][b]PASSENGERS[/b][/font_size]\n[b]Boarded today[/b]  %d\n[b]Passengers aboard[/b]  %d\n[b]Stamped aboard[/b]  %d\n[color=#6b4a35]Boarded today includes everyone who has joined this shift, even after they leave. Stamped passengers are assigned to the next stop.[/color]\n\n[font_size=20][b]ROUTE REFERENCE[/b][/font_size]\n[b]Scheduled stops completed[/b]  %d / %d\n[b]Day code[/b]  %s\n[b]Current station[/b]  %s\n[b]Next station[/b]  %s\n\n%s"
+completed_service_text = "DAY SERVICE COMPLETE"
+procedure_document = "[font_size=20][b]INSPECT & DECIDE[/b][/font_size]\nCompare each passenger's ID and ticket with today's service details. Observe the passenger for signs listed in the Anomaly List before deciding who should leave.\n\n[font_size=20][b]DAYTIME DROP-OFFS[/b][/font_size]\nA stamped ticket assigns its passenger to the next daylight station. Stamp ordinary passengers when their required stop is next. A passenger on the wrong train must leave at the next station. At the terminal, all remaining living passengers leave automatically.\n\n[font_size=20][b]KEEP ANOMALIES ABOARD[/b][/font_size]\nAnomalies belong to night service. Do not stamp their tickets. A mistaken anomaly stamp incurs a penalty, and the anomaly remains aboard.\n\n[font_size=20][b]BLESSINGS & PENALTIES[/b][/font_size]\n[b]+30 Blessings[/b] — Each correct passenger drop-off.\n[b]−20 Blessings[/b] — Each incorrect passenger drop-off.\n[b]−40 Blessings[/b] — Each anomaly wrongly stamped, counted once per anomaly per shift.\nKeeping an anomaly aboard does not incur a penalty.\n\n[font_size=20][b]PASS THE SHIFT[/b][/font_size]\nYour paycheck compares this shift's earnings after penalties with the day's target. Meet or exceed the target to pass; savings from earlier shifts do not count toward it. You can restart the shift to try again.\n\n[font_size=20][b]NIGHT SERVICE[/b][/font_size]\nCollect the remaining souls' Departure Statements. Use their clues to assign each soul to a night station in the Night Drop-Off Ledger. Every required slot must contain exactly one soul before confirmation."
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0156863, 0.0196078, 0.027451, 0.86)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BookCover" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(1160, 650)
+layout_mode = 2
+theme_override_styles/panel = SubResource("BookCoverStyle")
+
+[node name="Pages" type="HBoxContainer" parent="Center/BookCover"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="LeftPage" type="PanelContainer" parent="Center/BookCover/Pages"]
+custom_minimum_size = Vector2(330, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("LeftPageStyle")
+
+[node name="Margin" type="MarginContainer" parent="Center/BookCover/Pages/LeftPage"]
+layout_mode = 2
+theme_override_constants/margin_left = 22
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Column" type="VBoxContainer" parent="Center/BookCover/Pages/LeftPage/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BookTitle" type="Label" parent="Center/BookCover/Pages/LeftPage/Margin/Column"]
+theme_type_variation = &"HeaderLabel"
+layout_mode = 2
+theme_override_colors/font_color = Color(0.243137, 0.145098, 0.0941176, 1)
+theme_override_font_sizes/font_size = 24
+text = "CONDUCTOR'S GUIDEBOOK"
+horizontal_alignment = 1
+
+[node name="BookSubtitle" type="Label" parent="Center/BookCover/Pages/LeftPage/Margin/Column"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.396078, 0.294118, 0.211765, 1)
+theme_override_font_sizes/font_size = 12
+text = "WHERE DO YOU BELONG?"
+horizontal_alignment = 1
+
+[node name="Summary" type="PanelContainer" parent="Center/BookCover/Pages/LeftPage/Margin/Column"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("SummaryStyle")
+
+[node name="Column" type="VBoxContainer" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Summary"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="DayBadge" type="Label" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Summary/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.235294, 0.141176, 0.0941176, 1)
+theme_override_font_sizes/font_size = 20
+text = "DAY 1"
+
+[node name="TrainBadge" type="Label" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Summary/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.301961, 0.203922, 0.133333, 1)
+theme_override_font_sizes/font_size = 15
+text = "TRAIN —"
+
+[node name="DateBadge" type="Label" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Summary/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.301961, 0.203922, 0.133333, 1)
+theme_override_font_sizes/font_size = 14
+text = "SERVICE DATE"
+
+[node name="SectionCaption" type="Label" parent="Center/BookCover/Pages/LeftPage/Margin/Column"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.419608, 0.298039, 0.2, 1)
+theme_override_font_sizes/font_size = 12
+text = "SECTIONS"
+
+[node name="Sections" type="VBoxContainer" parent="Center/BookCover/Pages/LeftPage/Margin/Column"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="TodayButton" type="Button" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Sections"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.223529, 0.137255, 0.0941176, 1)
+theme_override_colors/font_hover_color = Color(0.160784, 0.0901961, 0.054902, 1)
+theme_override_colors/font_disabled_color = Color(0.968627, 0.901961, 0.764706, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("SectionButtonStyle")
+theme_override_styles/hover = SubResource("SectionButtonHoverStyle")
+theme_override_styles/pressed = SubResource("SectionButtonHoverStyle")
+theme_override_styles/focus = SubResource("SectionButtonHoverStyle")
+theme_override_styles/disabled = SubResource("SectionButtonActiveStyle")
+text = "TODAY'S SERVICE"
+alignment = 0
+
+[node name="ProcedureButton" type="Button" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Sections"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.223529, 0.137255, 0.0941176, 1)
+theme_override_colors/font_disabled_color = Color(0.968627, 0.901961, 0.764706, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("SectionButtonStyle")
+theme_override_styles/hover = SubResource("SectionButtonHoverStyle")
+theme_override_styles/pressed = SubResource("SectionButtonHoverStyle")
+theme_override_styles/focus = SubResource("SectionButtonHoverStyle")
+theme_override_styles/disabled = SubResource("SectionButtonActiveStyle")
+text = "RULES"
+alignment = 0
+
+[node name="AnomaliesButton" type="Button" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Sections"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.223529, 0.137255, 0.0941176, 1)
+theme_override_colors/font_disabled_color = Color(0.968627, 0.901961, 0.764706, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("SectionButtonStyle")
+theme_override_styles/hover = SubResource("SectionButtonHoverStyle")
+theme_override_styles/pressed = SubResource("SectionButtonHoverStyle")
+theme_override_styles/focus = SubResource("SectionButtonHoverStyle")
+theme_override_styles/disabled = SubResource("SectionButtonActiveStyle")
+text = "ANOMALY LIST"
+alignment = 0
+
+[node name="Hint" type="Label" parent="Center/BookCover/Pages/LeftPage/Margin/Column"]
+layout_mode = 2
+size_flags_vertical = 10
+theme_override_colors/font_color = Color(0.396078, 0.294118, 0.211765, 1)
+theme_override_font_sizes/font_size = 12
+text = "Select a section to turn to that page."
+horizontal_alignment = 1
+
+[node name="Spine" type="ColorRect" parent="Center/BookCover/Pages"]
+custom_minimum_size = Vector2(14, 0)
+layout_mode = 2
+color = Color(0.278431, 0.160784, 0.0901961, 1)
+
+[node name="RightPage" type="PanelContainer" parent="Center/BookCover/Pages"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("RightPageStyle")
+
+[node name="Margin" type="MarginContainer" parent="Center/BookCover/Pages/RightPage"]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 26
+theme_override_constants/margin_bottom = 20
+
+[node name="Column" type="VBoxContainer" parent="Center/BookCover/Pages/RightPage/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Center/BookCover/Pages/RightPage/Margin/Column"]
+layout_mode = 2
+
+[node name="PageTitle" type="Label" parent="Center/BookCover/Pages/RightPage/Margin/Column/Header"]
+theme_type_variation = &"HeaderLabel"
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.25098, 0.145098, 0.0941176, 1)
+theme_override_font_sizes/font_size = 27
+text = "TODAY'S SERVICE"
+
+[node name="CloseButton" type="Button" parent="Center/BookCover/Pages/RightPage/Margin/Column/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.960784, 0.894118, 0.760784, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("CloseButtonStyle")
+text = "CLOSE  [TAB / ESC]"
+
+[node name="Rule" type="HSeparator" parent="Center/BookCover/Pages/RightPage/Margin/Column"]
+layout_mode = 2
+theme_override_colors/separator = Color(0.454902, 0.321569, 0.211765, 0.65)
+
+[node name="Content" type="RichTextLabel" parent="Center/BookCover/Pages/RightPage/Margin/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.188235, 0.145098, 0.113725, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_font_sizes/normal_font_size = 17
+theme_override_font_sizes/bold_font_size = 18
+bbcode_enabled = true
+fit_content = false
+scroll_active = true
+selection_enabled = true
+
+[node name="AnomalyList" type="ScrollContainer" parent="Center/BookCover/Pages/RightPage/Margin/Column"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Entries" type="VBoxContainer" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="Shadowless" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+layout_mode = 2
+heading = "SHADOWLESS"
+description = "No shadow appears beneath the passenger."
+
+[node name="ImpossibleTicket" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+layout_mode = 2
+heading = "IMPOSSIBLE TICKET"
+description = "The destination lies before the passenger's origin in today's direction of travel."
+
+[node name="UnlistedDestination" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+layout_mode = 2
+heading = "UNLISTED DESTINATION"
+description = "The destination does not appear on today's route."
+
+[node name="PortraitMismatch" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+layout_mode = 2
+heading = "PORTRAIT MISMATCH"
+description = "The ID portrait does not match its owner."
+
+[node name="TimeInvalidTicket" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+layout_mode = 2
+heading = "TIME-INVALID TICKET"
+description = "The service date or day code differs from today's service."
+
+[node name="NewspaperDeath" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+layout_mode = 2
+heading = "NEWSPAPER DEATH"
+description = "A death report always identifies an anomaly aboard. Match the printed name with passenger documents."
+
+[node name="Footer" type="Label" parent="Center/BookCover/Pages/RightPage/Margin/Column"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.435294, 0.333333, 0.25098, 1)
+theme_override_font_sizes/font_size = 12
+text = "Official conductor reference • Daily values update automatically"
+horizontal_alignment = 2
+
+[connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/TodayButton" to="." method="_show_today"]
+[connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/ProcedureButton" to="." method="_show_procedure"]
+[connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/AnomaliesButton" to="." method="_show_anomalies"]
+[connection signal="pressed" from="Center/BookCover/Pages/RightPage/Margin/Column/Header/CloseButton" to="." method="request_close"]

@@ -67,6 +67,7 @@ layout_mode = 2
 theme_override_constants/separation = 12
 
 [node name="Title" type="Label" parent="Margin/Outer"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 29
@@ -96,6 +97,7 @@ layout_mode = 2
 theme_override_constants/separation = 9
 
 [node name="Title" type="Label" parent="Margin/Outer/Columns/PassengerPanel/Box"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 18
@@ -138,6 +140,7 @@ layout_mode = 2
 theme_override_constants/separation = 9
 
 [node name="Title" type="Label" parent="Margin/Outer/Columns/StationPanel/Box"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 18
@@ -208,6 +211,7 @@ layout_mode = 2
 theme_override_constants/separation = 9
 
 [node name="Title" type="Label" parent="Margin/Outer/Columns/CluePanel/Box"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 18

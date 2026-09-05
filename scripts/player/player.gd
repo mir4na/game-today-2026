@@ -4,13 +4,15 @@ extends CharacterBody2D
 signal nearby_interactable_changed(interactable: Interactable)
 signal interaction_pressed(interactable: Interactable)
 
-@export var move_speed: float = 220.0
+@export var move_speed: float = 320.0
 @export var movement_enabled: bool = true
 @export var interaction_enabled: bool = true:
 	set(value):
 		interaction_enabled = value
 		if not interaction_enabled and is_inside_tree():
 			_set_nearest(null)
+@export_category("Scene References")
+@export_node_path("Marker2D") var radar_origin_path: NodePath
 @export_category("Artwork Direction")
 @export var artwork_faces_left: bool = true
 @export_category("Scene Animation")
@@ -23,9 +25,9 @@ var _facing: float = 1.0
 var _market_speed_bonus: float = 0.0
 
 @onready var _animated_sprite: AnimatedSprite2D = %MCVisual
-@onready var _camera: Camera2D = $Camera2D
 @onready var _dialogue_anchor: Marker2D = %DialogueAnchor
 @onready var _gravity: float = float(ProjectSettings.get_setting("physics/2d/default_gravity"))
+@onready var _radar_origin: Marker2D = get_node_or_null(radar_origin_path) as Marker2D
 
 
 func _ready() -> void:
@@ -65,12 +67,12 @@ func get_dialogue_anchor() -> Node2D:
 func set_market_speed_bonus(value: float) -> void:
 	_market_speed_bonus = maxf(0.0, value)
 
-func set_camera_right_limit(world_right_edge: float) -> void:
-	_camera.limit_right = maxi(_camera.limit_left + 1, int(floor(world_right_edge)))
-
-
 func get_effective_move_speed() -> float:
 	return move_speed + _market_speed_bonus
+
+
+func get_radar_origin_world_position() -> Vector2:
+	return _radar_origin.global_position if is_instance_valid(_radar_origin) else global_position
 
 func _update_nearest() -> void:
 	var candidate: Interactable = null
@@ -79,7 +81,7 @@ func _update_nearest() -> void:
 		for interactable: Interactable in _interactables:
 			if not is_instance_valid(interactable) or not interactable.can_interact():
 				continue
-			var distance: float = global_position.distance_to(interactable.global_position)
+			var distance: float = global_position.distance_to(interactable.get_interaction_world_position())
 			if distance <= interactable.interaction_distance and distance < closest_distance:
 				candidate = interactable
 				closest_distance = distance

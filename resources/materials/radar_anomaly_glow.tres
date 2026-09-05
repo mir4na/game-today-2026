@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/radar_anomaly_glow.gdshader" id="1"]
+
+[resource]
+resource_local_to_scene = true
+shader = ExtResource("1")
+shader_parameter/glow_color = Color(1, 0.035, 0.02, 0.78)
+shader_parameter/edge_feather = 0.12
+shader_parameter/center_strength = 0.9

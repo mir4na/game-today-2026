@@ -11,7 +11,9 @@
 [ext_resource type="Texture2D" uid="uid://c1r4rdjeoyrm7" path="res://assets/kereta/bagian_bawah.png" id="9_t2b4i"]
 [ext_resource type="Material" path="res://resources/materials/window_light_mask.tres" id="9_window_light"]
 [ext_resource type="PackedScene" path="res://scenes/train/train_interior_lighting.tscn" id="10_lighting"]
-[ext_resource type="PackedScene" path="res://scenes/train/passenger_seat.tscn" id="11_seat"]
+[ext_resource type="PackedScene" uid="uid://buwn8armxkqjw" path="res://scenes/train/passenger_seat.tscn" id="11_seat"]
+[ext_resource type="Material" path="res://resources/materials/radar_carriage_scan.tres" id="12_radar_scan"]
+[ext_resource type="Material" path="res://resources/materials/radar_anomaly_glow.tres" id="13_radar_glow"]
 
 [sub_resource type="Gradient" id="Gradient_e78od"]
 offsets = PackedFloat32Array(0, 0.61778843, 1)
@@ -22,18 +24,6 @@ gradient = SubResource("Gradient_e78od")
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(0.9045139, 0.19618055)
-
-[sub_resource type="Gradient" id="Gradient_radar_red"]
-offsets = PackedFloat32Array(0, 0.55, 1)
-colors = PackedColorArray(1, 0.05, 0.04, 1, 0.85, 0.025, 0.02, 0.66, 0.3, 0, 0, 0)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_radar_red"]
-gradient = SubResource("Gradient_radar_red")
-width = 960
-height = 420
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-fill_to = Vector2(1, 0.5)
 
 [sub_resource type="Gradient" id="Gradient_7n8ln"]
 offsets = PackedFloat32Array(0, 0.40625, 1)
@@ -329,9 +319,14 @@ night_overlay_path = NodePath("ArtRoot/NightOverlay")
 window_light_root_path = NodePath("ArtRoot/Interior/WindowLightRoot")
 exterior_visual_path = NodePath("ArtRoot/Exterior")
 exterior_door_visual_path = NodePath("ArtRoot/Exterior/ClosedDoors")
+exterior_wipe_top_anchor_path = NodePath("ArtRoot/ExteriorWipeBounds/Top")
+exterior_wipe_bottom_anchor_path = NodePath("ArtRoot/ExteriorWipeBounds/Bottom")
+exterior_wipe_visual_paths = Array[NodePath]([NodePath("ArtRoot/Exterior/ExteriorSprite"), NodePath("ArtRoot/Exterior/ExteriorUnderframeSprite"), NodePath("ArtRoot/Exterior/ClosedDoors/LeftDoorSprite"), NodePath("ArtRoot/Exterior/ClosedDoors/RightDoorSprite")])
 door_animation_path = NodePath("ArtRoot/Exterior/DoorAnimation")
 wheel_animation_path = NodePath("ArtRoot/Wheels/WheelAnimation")
-radar_anomaly_light_path = NodePath("ArtRoot/RadarAnomalyLight")
+cinematic_interior_shade_path = NodePath("ArtRoot/CinematicInteriorShade")
+radar_scan_effect_path = NodePath("ArtRoot/RadarEffectBounds/RadarScanEffect")
+radar_anomaly_glow_path = NodePath("ArtRoot/RadarEffectBounds/RadarAnomalyGlow")
 dirty_seat_events_root_path = NodePath("PassengerLayout/PassengerSeatSlots")
 
 [node name="PassengerLayout" type="Node2D" parent="." unique_id=1260823063]
@@ -343,6 +338,10 @@ editor_description = "One Marker2D for each visible passenger seat. Adjust horiz
 
 [node name="Seat1" parent="PassengerLayout/PassengerSeatSlots" unique_id=1173216612 instance=ExtResource("11_seat")]
 position = Vector2(67, 0)
+
+[node name="DirtySeatEvent" parent="PassengerLayout/PassengerSeatSlots/Seat1/Attachments" index="0"]
+editor_description = "Edge seat beside a coach connector. Random Dirty Seat events are disabled here to avoid overlapping Blocked Aisle."
+random_spawn_enabled = false
 
 [node name="Seat2" parent="PassengerLayout/PassengerSeatSlots" unique_id=2075857442 instance=ExtResource("11_seat")]
 position = Vector2(124, 0)
@@ -376,6 +375,10 @@ position = Vector2(835, 0)
 
 [node name="Seat12" parent="PassengerLayout/PassengerSeatSlots" unique_id=1160981160 instance=ExtResource("11_seat")]
 position = Vector2(892, 0)
+
+[node name="DirtySeatEvent" parent="PassengerLayout/PassengerSeatSlots/Seat12/Attachments" index="0"]
+editor_description = "Edge seat beside a coach connector. Random Dirty Seat events are disabled here to avoid overlapping Blocked Aisle."
+random_spawn_enabled = false
 
 [node name="PassengerActivitySlots" type="Node2D" parent="PassengerLayout" unique_id=1069195525]
 editor_description = "AI standing and roaming targets. These inherit the same ground baseline as seats and doors."
@@ -478,24 +481,69 @@ centered = false
 
 [node name="InteriorLighting" parent="ArtRoot" unique_id=1422164408 instance=ExtResource("10_lighting")]
 
-[node name="RadarAnomalyLight" type="PointLight2D" parent="ArtRoot" unique_id=1486944741]
-editor_description = "Scene-authored red anomaly scan light. Position, color, size, and maximum energy can be tuned here and on the PassengerCoach Inspector."
-position = Vector2(483, 356)
-color = Color(1, 0.04, 0.025, 1)
-energy = 0.0
-texture = SubResource("GradientTexture2D_radar_red")
+[node name="RadarEffectBounds" type="Control" parent="ArtRoot" unique_id=545678927]
+editor_description = "Inspector-authored carriage silhouette for radar VFX. Resize this rectangle to the interior roof, walls, and floor; the scan wave normalizes itself to these four sides."
+z_index = 20
+clip_contents = true
+layout_mode = 3
+anchors_preset = 0
+offset_top = 190.0
+offset_right = 960.0
+offset_bottom = 525.0
+mouse_filter = 2
 
-[node name="Exterior" type="CanvasGroup" parent="ArtRoot" unique_id=997357374]
+[node name="RadarAnomalyGlow" type="ColorRect" parent="ArtRoot/RadarEffectBounds" unique_id=648864988]
+visible = false
+modulate = Color(1, 1, 1, 0)
+material = ExtResource("13_radar_glow")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="RadarScanEffect" type="ColorRect" parent="ArtRoot/RadarEffectBounds" unique_id=398318395]
+editor_description = "Scene-authored one-coach radar sweep. Its wavefront grows from the player and follows all four sides of RadarEffectBounds. Tune front, trail, grid, boundary light, and colors in the assigned ShaderMaterial."
+visible = false
+material = ExtResource("12_radar_scan")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CinematicInteriorShade" type="Polygon2D" parent="ArtRoot" unique_id=1552500283]
+editor_description = "Cutscene-only interior grade. Color controls the cinematic darkness; CarriageVisual only fades its alpha."
+modulate = Color(1, 1, 1, 0)
+z_index = 4
+color = Color(0.025, 0.047, 0.09, 0.34)
+polygon = PackedVector2Array(0, 190, 960, 190, 960, 525, 0, 525)
+
+[node name="ExteriorWipeBounds" type="Node2D" parent="ArtRoot"]
+editor_description = "Inspector-authored vertical bounds for the exterior top-to-bottom wipe. Move the Top and Bottom markers to match the complete exterior artwork."
+
+[node name="Top" type="Marker2D" parent="ArtRoot/ExteriorWipeBounds"]
+editor_description = "The roof edge where the exterior fade begins."
+position = Vector2(0, 214)
+
+[node name="Bottom" type="Marker2D" parent="ArtRoot/ExteriorWipeBounds"]
+editor_description = "The lowest exterior edge where the fade completes."
+position = Vector2(0, 630)
+
+[node name="Exterior" type="Node2D" parent="ArtRoot" unique_id=997357374]
 unique_name_in_owner = true
 process_mode = 4
-editor_description = "The complete cutscene exterior composite. Exterior sprites and ClosedDoors share this single top-to-bottom wipe material so they disappear in sync."
+editor_description = "The complete cutscene exterior composite. Its Sprite2D children share one top-to-bottom wipe material so the body and doors disappear in sync."
+visible = false
 z_index = 5
-material = ExtResource("8_fade")
-fit_margin = 16.0
-clear_margin = 16.0
 
 [node name="ExteriorSprite" type="Sprite2D" parent="ArtRoot/Exterior" unique_id=1182358690]
 z_index = 1
+material = ExtResource("8_fade")
 position = Vector2(11.999999, 214.7504)
 scale = Vector2(0.37449878, 0.374415)
 texture = ExtResource("4")
@@ -518,6 +566,7 @@ texture = SubResource("GradientTexture2D_jmf70")
 
 [node name="ExteriorUnderframeSprite" type="Sprite2D" parent="ArtRoot/Exterior" unique_id=1762554862]
 z_index = 1
+material = ExtResource("8_fade")
 position = Vector2(0, 521.3963)
 scale = Vector2(0.374415, 0.374415)
 texture = ExtResource("5")
@@ -528,12 +577,14 @@ unique_name_in_owner = true
 editor_description = "Animated exterior doors. Keep this node inside Exterior so the doors use the exact same cinematic wipe."
 
 [node name="LeftDoorSprite" type="Sprite2D" parent="ArtRoot/Exterior/ClosedDoors" unique_id=794130417]
+material = ExtResource("8_fade")
 position = Vector2(399, 308)
 scale = Vector2(0.36363637, 0.3653061)
 texture = ExtResource("6")
 centered = false
 
 [node name="RightDoorSprite" type="Sprite2D" parent="ArtRoot/Exterior/ClosedDoors" unique_id=191171501]
+material = ExtResource("8_fade")
 position = Vector2(475, 308)
 scale = Vector2(0.3772728, 0.36530608)
 texture = ExtResource("7")
@@ -615,7 +666,6 @@ polygon = PackedVector2Array(0, -29.2044, 1.87208, -28.4555, 2.99532, -26.9579, 
 [node name="WheelAnimation" type="AnimationPlayer" parent="ArtRoot/Wheels" unique_id=1754301045]
 libraries/ = SubResource("AnimationLibrary_wheels")
 autoplay = &"wheel_spin"
-speed_scale = 3.5
 
 [node name="UnderframeCovers" type="Node2D" parent="ArtRoot" unique_id=101555287]
 editor_description = "Scene-authored bogie covers. Adjust the left and right cover sprites here without changing wheel positions or floor collision."

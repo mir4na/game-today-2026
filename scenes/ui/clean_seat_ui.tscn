@@ -6,34 +6,15 @@
 [ext_resource type="Texture2D" path="res://assets/item/lap.png" id="4_cloth"]
 [ext_resource type="Shader" path="res://shaders/seat_dirt_wipe.gdshader" id="5_shader"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="6_theme"]
+[ext_resource type="Shader" path="res://shaders/seat_cleaning_foam.gdshader" id="7_foam_shader"]
 
 [sub_resource type="ShaderMaterial" id="DirtMaterial"]
 resource_local_to_scene = true
 shader = ExtResource("5_shader")
 
-[sub_resource type="Gradient" id="BubbleGradient"]
-offsets = PackedFloat32Array(0, 0.62, 1)
-colors = PackedColorArray(0.92, 0.98, 1, 0.92, 0.66, 0.9, 1, 0.62, 0.52, 0.82, 1, 0)
-
-[sub_resource type="GradientTexture2D" id="BubbleTexture"]
-gradient = SubResource("BubbleGradient")
-width = 24
-height = 24
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-fill_to = Vector2(1, 0.5)
-
-[sub_resource type="StyleBoxFlat" id="WindowStyle"]
-bg_color = Color(0.0431373, 0.054902, 0.0705882, 0.985)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.737255, 0.596078, 0.341176, 1)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
+[sub_resource type="ShaderMaterial" id="FoamMaterial"]
+resource_local_to_scene = true
+shader = ExtResource("7_foam_shader")
 
 [node name="CleanSeatUI" type="Control"]
 visible = false
@@ -56,9 +37,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.00784314, 0.0117647, 0.0196078, 0.84)
+color = Color(0.01, 0.015, 0.025, 0.72)
 
-[node name="CleaningWindow" type="Panel" parent="."]
+[node name="CleaningWindow" type="Control" parent="."]
+editor_description = "Transparent scene-authored cleaning layout: only the dirty seat, copy, cloth, and foam are presented."
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -71,25 +53,17 @@ offset_right = 430.0
 offset_bottom = 315.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("WindowStyle")
-
-[node name="Eyebrow" type="Label" parent="CleaningWindow"]
-offset_left = 30.0
-offset_top = 20.0
-offset_right = 830.0
-offset_bottom = 43.0
-theme_override_colors/font_color = Color(0.65098, 0.619608, 0.552941, 1)
-theme_override_font_sizes/font_size = 13
-text = "PASSENGER COACH MAINTENANCE"
-horizontal_alignment = 1
 
 [node name="Title" type="Label" parent="CleaningWindow"]
+theme_type_variation = &"HeaderLabel"
 offset_left = 30.0
 offset_top = 46.0
 offset_right = 830.0
 offset_bottom = 88.0
 theme_override_colors/font_color = Color(0.941176, 0.811765, 0.552941, 1)
 theme_override_font_sizes/font_size = 30
+theme_override_colors/font_outline_color = Color(0.01, 0.015, 0.025, 0.95)
+theme_override_constants/outline_size = 7
 text = "CLEAN THE SEAT"
 horizontal_alignment = 1
 
@@ -100,7 +74,9 @@ offset_right = 815.0
 offset_bottom = 120.0
 theme_override_colors/font_color = Color(0.803922, 0.792157, 0.752941, 1)
 theme_override_font_sizes/font_size = 15
-text = "Hold LEFT MOUSE and wipe every stain with the cloth."
+theme_override_colors/font_outline_color = Color(0.01, 0.015, 0.025, 0.95)
+theme_override_constants/outline_size = 5
+text = "Drag the cloth over the seat to wipe away every stain."
 horizontal_alignment = 1
 
 [node name="Seat" type="TextureRect" parent="CleaningWindow"]
@@ -123,10 +99,13 @@ offset_bottom = 567.0
 mouse_default_cursor_shape = 2
 script = ExtResource("2_surface")
 completion_threshold = 0.98
+foam_lifetime_seconds = 1.8
+foam_brush_scale = 1.3
+foam_decay_update_seconds = 0.08
 stain_markers_path = NodePath("StainMarkers")
 dirt_layer_path = NodePath("DirtLayer")
 cloth_path = NodePath("Cloth")
-cleaning_particles_path = NodePath("CleaningBubbles")
+cleaning_foam_path = NodePath("CleaningFoam")
 
 [node name="DirtLayer" type="ColorRect" parent="CleaningWindow/WipeSurface"]
 layout_mode = 1
@@ -157,25 +136,18 @@ metadata/radius = 41.0
 position = Vector2(132, 350)
 metadata/radius = 36.0
 
-[node name="CleaningBubbles" type="CPUParticles2D" parent="CleaningWindow/WipeSurface"]
+[node name="CleaningFoam" type="ColorRect" parent="CleaningWindow/WipeSurface"]
 unique_name_in_owner = true
-z_index = 6
-emitting = false
-amount = 30
-lifetime = 0.9
-randomness = 0.55
-texture = SubResource("BubbleTexture")
-emission_shape = 1
-emission_sphere_radius = 25.0
-direction = Vector2(0, -1)
-spread = 78.0
-gravity = Vector2(0, -38)
-initial_velocity_min = 52.0
-initial_velocity_max = 105.0
-angular_velocity_min = -90.0
-angular_velocity_max = 90.0
-scale_amount_min = 0.5
-scale_amount_max = 1.25
+z_index = 4
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = SubResource("FoamMaterial")
+color = Color(1, 1, 1, 1)
 
 [node name="Cloth" type="TextureRect" parent="CleaningWindow/WipeSurface"]
 unique_name_in_owner = true
@@ -190,56 +162,30 @@ stretch_mode = 5
 
 [node name="ProgressLabel" type="Label" parent="CleaningWindow"]
 unique_name_in_owner = true
-offset_left = 35.0
-offset_top = 182.0
-offset_right = 252.0
-offset_bottom = 218.0
+offset_left = 45.0
+offset_top = 582.0
+offset_right = 815.0
+offset_bottom = 612.0
 theme_override_colors/font_color = Color(0.886275, 0.772549, 0.54902, 1)
 theme_override_font_sizes/font_size = 18
+theme_override_colors/font_outline_color = Color(0.01, 0.015, 0.025, 0.95)
+theme_override_constants/outline_size = 5
 text = "CLEANING  0%"
 horizontal_alignment = 1
-
-[node name="TaskNote" type="Label" parent="CleaningWindow"]
-offset_left = 35.0
-offset_top = 232.0
-offset_right = 252.0
-offset_bottom = 343.0
-theme_override_colors/font_color = Color(0.67451, 0.662745, 0.627451, 1)
-theme_override_font_sizes/font_size = 14
-text = "Drop-off stamps are locked for this coach until its seat is sanitary."
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 2
 
 [node name="SuccessLabel" type="Label" parent="CleaningWindow"]
 unique_name_in_owner = true
 visible = false
-offset_left = 608.0
-offset_top = 215.0
-offset_right = 825.0
-offset_bottom = 254.0
+offset_left = 45.0
+offset_top = 582.0
+offset_right = 815.0
+offset_bottom = 612.0
 theme_override_colors/font_color = Color(0.513726, 0.890196, 0.603922, 1)
 theme_override_font_sizes/font_size = 18
+theme_override_colors/font_outline_color = Color(0.01, 0.015, 0.025, 0.95)
+theme_override_constants/outline_size = 5
 text = "SEAT CLEAN"
-horizontal_alignment = 1
-
-[node name="CloseButton" type="Button" parent="CleaningWindow"]
-offset_left = 620.0
-offset_top = 283.0
-offset_right = 812.0
-offset_bottom = 338.0
-text = "LEAVE  [ESC]"
-
-[node name="Hint" type="Label" parent="CleaningWindow"]
-offset_left = 35.0
-offset_top = 582.0
-offset_right = 825.0
-offset_bottom = 608.0
-theme_override_colors/font_color = Color(0.576471, 0.560784, 0.52549, 1)
-theme_override_font_sizes/font_size = 13
-text = "You may leave and return; the task restarts when reopened."
 horizontal_alignment = 1
 
 [connection signal="cleaning_progress" from="CleaningWindow/WipeSurface" to="." method="_on_cleaning_progress"]
 [connection signal="cleaned" from="CleaningWindow/WipeSurface" to="." method="_on_surface_cleaned"]
-[connection signal="pressed" from="CleaningWindow/CloseButton" to="." method="request_close"]

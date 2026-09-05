@@ -2,12 +2,13 @@ class_name GameHUD
 extends CanvasLayer
 ## Persistent, low-profile HUD. Modal screens live in sibling UI scenes.
 
-signal abnormal_log_requested
+signal guidebook_requested
 
 @export_category("Inspector Copy")
 @export var clock_template: String = "%02d:%02d %s"
+@export var tool_inventory_template: String = "BLESSINGS %d   •   [R] RADAR ×%d   •   AUDIT ×%d   •   SPEED LV.%d"
 @export_category("Interaction Prompt")
-@export var prompt_screen_offset: Vector2 = Vector2(0.0, -8.0)
+@export var prompt_screen_offset: Vector2 = Vector2.ZERO
 @export var prompt_edge_margin: Vector2 = Vector2(24.0, 20.0)
 @export var prompt_minimum_size: Vector2 = Vector2(180.0, 75.0)
 @export_range(180.0, 720.0, 10.0) var prompt_maximum_width: float = 440.0
@@ -27,7 +28,6 @@ signal abnormal_log_requested
 @onready var _root: Control = %Root
 @onready var _minimap: TrainMinimap = %TrainMinimap
 @onready var _clock_panel: PanelContainer = %ClockPanel
-@onready var _abnormal_log_button: Button = %AbnormalLogButton
 @onready var _clock_label: Label = %ClockLabel
 @onready var _floating_prompt: Control = %FloatingPrompt
 @onready var _prompt_label: Label = %PromptLabel
@@ -36,6 +36,10 @@ signal abnormal_log_requested
 @onready var _notification_label: Label = %NotificationLabel
 @onready var _tool_panel: PanelContainer = %ToolPanel
 @onready var _tool_inventory_label: Label = %ToolInventoryLabel
+@onready var _maintenance_trackers: Array[Control] = [
+	$Root/MaintenanceTrackers/TrackerPrimary,
+	$Root/MaintenanceTrackers/TrackerSecondary,
+]
 var _notification_tween: Tween
 var _prompt_visibility_tween: Tween
 var _prompt_target: Node2D
@@ -56,19 +60,32 @@ func set_clock(total_minutes: int) -> void:
 		hour_12 = 12
 	_clock_label.text = clock_template % [hour_12, minute, suffix]
 
-func set_current_carriage(index: int) -> void:
-	_minimap.set_current_carriage(index)
+func set_current_carriage_number(carriage_number: int) -> void:
+	_minimap.set_current_carriage_number(carriage_number)
 
-func set_passenger_counts(counts: PackedInt32Array) -> void:
-	_minimap.set_passenger_counts(counts)
+func set_passenger_counts_by_carriage(counts: Dictionary) -> void:
+	_minimap.set_passenger_counts_by_carriage(counts)
 
 
 func set_market_tool_inventory(snapshot: Dictionary) -> void:
-	_tool_inventory_label.text = "[R] RADAR ×%d   •   AUDIT ×%d   •   SPEED LV.%d" % [
+	_tool_inventory_label.text = tool_inventory_template % [
+		int(snapshot.get("blessings", 0)),
 		int(snapshot.get("radar_charges", 0)),
 		int(snapshot.get("audit_slips", 0)),
 		int(snapshot.get("speed_level", 0))
 	]
+
+
+func set_maintenance_targets(target_entries: Array[Dictionary]) -> void:
+	for index: int in _maintenance_trackers.size():
+		var tracker: Control = _maintenance_trackers[index]
+		if index >= target_entries.size():
+			tracker.call(&"clear_target")
+			continue
+		var entry: Dictionary = target_entries[index]
+		var target := entry.get("target") as Node2D
+		var tracker_text: String = str(entry.get("label", "MAINTENANCE"))
+		tracker.call(&"set_target", target, tracker_text)
 
 func set_prompt(text: String, target: Node2D = null) -> void:
 	if text.is_empty():
@@ -257,7 +274,6 @@ func _update_dialogue_pointer(target_local_x: float, prompt_width: float) -> voi
 
 func set_day_hud_visible(value: bool) -> void:
 	_clock_panel.visible = value
-	_abnormal_log_button.visible = value
 	_tool_panel.visible = value
 	_floating_prompt.visible = value and not _prompt_label.text.is_empty()
 	# The train minimap remains visible through the night walk.
@@ -265,14 +281,18 @@ func set_day_hud_visible(value: bool) -> void:
 func set_cutscene_hidden(value: bool) -> void:
 	_root.visible = not value
 
+
+func set_radar_hidden(value: bool) -> void:
+	_root.visible = not value
+
+
+func _on_guidebook_button_pressed() -> void:
+	guidebook_requested.emit()
+
 func set_night_walk_mode() -> void:
 	_clock_panel.visible = false
-	_abnormal_log_button.visible = false
 	_tool_panel.visible = true
 	_floating_prompt.visible = not _prompt_label.text.is_empty()
-
-func _request_abnormal_log() -> void:
-	abnormal_log_requested.emit()
 
 func notify(message: String, seconds: float = 3.0) -> void:
 	if is_instance_valid(_notification_tween):

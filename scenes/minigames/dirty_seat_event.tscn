@@ -1,51 +1,62 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://ci8rlqvlg325x"]
 
-[ext_resource type="Script" path="res://scripts/minigames/dirty_seat_event.gd" id="1_event"]
+[ext_resource type="Script" uid="uid://c3kbwydwqf3v3" path="res://scripts/minigames/dirty_seat_event.gd" id="1_event"]
 [ext_resource type="Material" path="res://resources/materials/interactable_outline.tres" id="2_outline"]
+[ext_resource type="Texture2D" uid="uid://b07y6ko2rc0lb" path="res://assets/minigame/dirty seat.png" id="3_dirty_seat"]
 
 [sub_resource type="RectangleShape2D" id="InteractionShape"]
 size = Vector2(92, 154)
 
-[node name="DirtySeatEvent" type="Area2D" groups=["dirty_seat_events"]]
+[sub_resource type="RectangleShape2D" id="NpcExclusionShape"]
+size = Vector2(104, 166)
+
+[node name="DirtySeatEvent" type="Area2D" unique_id=1374448487 groups=["dirty_seat_events"]]
 visible = false
-z_index = 3
+z_index = 1
 collision_layer = 0
 collision_mask = 0
 script = ExtResource("1_event")
+interaction_collision_path = NodePath("InteractionCollision")
+npc_exclusion_collision_path = NodePath("NpcExclusionArea/NpcExclusionCollision")
+tracker_anchor_path = NodePath("TrackerAnchor")
 prompt_text = "Clean dirty seat"
 interaction_distance = 132.0
 enabled = false
 prompt_anchor_path = NodePath("InteractionPromptAnchor")
 focus_visual_path = NodePath("StainVisual")
-interaction_collision_path = NodePath("InteractionCollision")
+raise_on_focus = false
+interaction_origin_path = NodePath("InteractionCollision")
 
-[node name="InteractionPromptAnchor" type="Marker2D" parent="."]
+[node name="InteractionPromptAnchor" type="Marker2D" parent="." unique_id=626334026]
 editor_description = "Inspector-authored screen prompt anchor above the dirty seat."
-position = Vector2(0, -135)
+position = Vector2(0, -120)
 
-[node name="StainVisual" type="CanvasGroup" parent="."]
+[node name="TrackerAnchor" type="Marker2D" parent="." unique_id=543934207]
+editor_description = "Inspector-authored target used by the maintenance HUD tracker."
+position = Vector2(0, -165)
+
+[node name="StainVisual" type="CanvasGroup" parent="." unique_id=2104374979]
+editor_description = "Dirty-seat artwork. Adjust its Sprite2D transform here; visibility follows the event root."
 material = ExtResource("2_outline")
 
-[node name="StainA" type="Polygon2D" parent="StainVisual"]
-position = Vector2(-11, -69)
-color = Color(0.270588, 0.133333, 0.054902, 0.9)
-polygon = PackedVector2Array(-23, -10, -8, -18, 13, -14, 26, -2, 20, 11, 2, 16, -18, 10)
+[node name="DirtySeatSprite" type="Sprite2D" parent="StainVisual" unique_id=858405311]
+editor_description = "The user-provided dirty-seat overlay, aligned to the complete seat artwork through the Inspector."
+position = Vector2(0, -67)
+scale = Vector2(0.14, 0.14)
+texture = ExtResource("3_dirty_seat")
 
-[node name="StainB" type="Polygon2D" parent="StainVisual"]
-position = Vector2(14, -37)
-color = Color(0.215686, 0.101961, 0.0431373, 0.84)
-polygon = PackedVector2Array(-16, -7, -3, -15, 14, -9, 20, 4, 8, 13, -10, 10)
+[node name="NpcExclusionArea" type="Area2D" parent="."]
+editor_description = "NPC-only navigation blocker that keeps passengers from covering the active dirty seat."
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+monitorable = true
 
-[node name="Crumb1" type="Polygon2D" parent="StainVisual"]
-position = Vector2(-29, -30)
-color = Color(0.662745, 0.470588, 0.239216, 1)
-polygon = PackedVector2Array(-4, -3, 5, -4, 6, 3, -2, 5)
+[node name="NpcExclusionCollision" type="CollisionShape2D" parent="NpcExclusionArea"]
+editor_description = "Adjust this scene-authored shape to control passenger clearance around the dirty seat."
+position = Vector2(0, -69)
+shape = SubResource("NpcExclusionShape")
 
-[node name="Crumb2" type="Polygon2D" parent="StainVisual"]
-position = Vector2(31, -61)
-color = Color(0.662745, 0.470588, 0.239216, 1)
-polygon = PackedVector2Array(-3, -4, 5, -2, 3, 5, -5, 3)
-
-[node name="InteractionCollision" type="CollisionShape2D" parent="."]
+[node name="InteractionCollision" type="CollisionShape2D" parent="." unique_id=1798481832]
 position = Vector2(0, -69)
 shape = SubResource("InteractionShape")

@@ -16,4 +16,3 @@ position = Vector2(0, -91)
 scale = Vector2(0.32, 0.32)
 material = ExtResource("1_cutout")
 texture_filter = 4
-material = ExtResource("1_cutout")

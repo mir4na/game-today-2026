@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" path="res://assets/ui/dialogue_pointer.png" id="5_dialogue_pointer"]
 [ext_resource type="Texture2D" path="res://assets/ui/gerbong_active.png" id="6_carriage_active"]
 [ext_resource type="Texture2D" path="res://assets/ui/gerbong_nonactive.png" id="7_carriage_inactive"]
+[ext_resource type="PackedScene" path="res://scenes/ui/maintenance_tracker.tscn" id="8_tracker"]
 
 [sub_resource type="StyleBoxFlat" id="HudPanelStyle"]
 content_margin_left = 18.0
@@ -56,11 +57,60 @@ corner_radius_top_right = 7
 corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
 
+[sub_resource type="StyleBoxFlat" id="GuidebookButtonNormal"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+bg_color = Color(0.05, 0.07, 0.1, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.752941, 0.603922, 0.380392, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="GuidebookButtonHover"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+bg_color = Color(0.11, 0.16, 0.22, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.933333, 0.827451, 0.607843, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="GuidebookButtonPressed"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+bg_color = Color(0.025, 0.035, 0.05, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.843137, 0.690196, 0.419608, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
 [node name="HUD" type="CanvasLayer"]
 layer = 10
 script = ExtResource("1")
 clock_template = "%02d:%02d %s"
-prompt_screen_offset = Vector2(0, -8)
+tool_inventory_template = "BLESSINGS %d   •   [R] RADAR ×%d   •   AUDIT ×%d   •   SPEED LV.%d"
+prompt_screen_offset = Vector2(0, 0)
 prompt_edge_margin = Vector2(24, 20)
 
 [node name="Root" type="Control" parent="."]
@@ -86,22 +136,11 @@ offset_bottom = 132.0
 grow_horizontal = 0
 theme_override_styles/panel = SubResource("HudPanelStyle")
 
-[node name="AbnormalLogButton" type="Button" parent="Root"]
-unique_name_in_owner = true
-visible = false
-custom_minimum_size = Vector2(238, 52)
-layout_mode = 1
-offset_left = 24.0
-offset_top = 24.0
-offset_right = 262.0
-offset_bottom = 76.0
-theme_override_font_sizes/font_size = 16
-text = "ABNORMALITY LOG  [L]"
-
 [node name="MinimapBox" type="VBoxContainer" parent="Root/MinimapPanel"]
 layout_mode = 2
 
 [node name="TrainTitle" type="Label" parent="Root/MinimapPanel/MinimapBox"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 17
@@ -131,8 +170,22 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 14
-text = "[R] RADAR ×0   •   AUDIT ×0   •   SPEED LV.0"
+text = "BLESSINGS 0   •   [R] RADAR ×0   •   AUDIT ×0   •   SPEED LV.0"
 horizontal_alignment = 1
+
+[node name="MaintenanceTrackers" type="Control" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TrackerPrimary" parent="Root/MaintenanceTrackers" instance=ExtResource("8_tracker")]
+
+[node name="TrackerSecondary" parent="Root/MaintenanceTrackers" instance=ExtResource("8_tracker")]
+off_screen_lane_offset = 92.0
 
 [node name="FloatingPrompt" type="Control" parent="Root"]
 unique_name_in_owner = true
@@ -222,6 +275,30 @@ theme_override_font_sizes/font_size = 23
 text = "04:00 PM"
 horizontal_alignment = 1
 
+[node name="GuidebookButton" type="Button" parent="Root"]
+unique_name_in_owner = true
+editor_description = "Bottom-left guidebook access. Position, size, copy, and styling are scene-authored and can be adjusted from this node in the Inspector."
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = -86.0
+offset_right = 248.0
+offset_bottom = -28.0
+grow_vertical = 0
+mouse_default_cursor_shape = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_colors/font_hover_color = Color(1, 0.956863, 0.827451, 1)
+theme_override_colors/font_pressed_color = Color(0.843137, 0.690196, 0.419608, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("GuidebookButtonNormal")
+theme_override_styles/hover = SubResource("GuidebookButtonHover")
+theme_override_styles/pressed = SubResource("GuidebookButtonPressed")
+text = "GUIDEBOOK   [TAB]"
+tooltip_text = "Open the conductor's guidebook"
+
 [node name="NotificationPanel" type="PanelContainer" parent="Root"]
 unique_name_in_owner = true
 visible = false
@@ -245,4 +322,4 @@ theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[connection signal="pressed" from="Root/AbnormalLogButton" to="." method="_request_abnormal_log"]
+[connection signal="pressed" from="Root/GuidebookButton" to="." method="_on_guidebook_button_pressed"]

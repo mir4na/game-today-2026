@@ -7,74 +7,65 @@
 size = Vector2(220, 120)
 
 [node name="ConductorDesk" type="Area2D" unique_id=1581011509]
+visible = false
 script = ExtResource("1")
-day_prompt = "Night ledger unavailable during daylight"
 night_prompt = "Open Night Drop-Off Ledger"
-prompt_text = "Night ledger unavailable during daylight"
+prompt_text = "Open Night Drop-Off Ledger"
+enabled = false
 interaction_distance = 145.0
 prompt_anchor_path = NodePath("InteractionPromptAnchor")
-focus_visual_path = NodePath("AbnormalPassengerTypewriter")
+focus_visual_path = NodePath("NightDropOffLedger")
 
 [node name="InteractionPromptAnchor" type="Marker2D" parent="."]
-editor_description = "Inspector-authored screen prompt anchor above the typewriter."
-position = Vector2(0, -145)
+editor_description = "Inspector-authored prompt anchor above the night drop-off ledger."
+position = Vector2(0, -90)
 
-[node name="AbnormalPassengerTypewriter" type="CanvasGroup" parent="." unique_id=1347730817]
+[node name="NightDropOffLedger" type="CanvasGroup" parent="." unique_id=1347730817]
 material = ExtResource("2_outline")
 fit_margin = 8.0
 clear_margin = 8.0
 
-[node name="Paper" type="Polygon2D" parent="AbnormalPassengerTypewriter" unique_id=1129371167]
+[node name="Paper" type="Polygon2D" parent="NightDropOffLedger" unique_id=1129371167]
 color = Color(0.901961, 0.854902, 0.737255, 1)
 polygon = PackedVector2Array(-43, -84, 41, -84, 41, -34, -43, -34)
 
-[node name="PaperLine1" type="Line2D" parent="AbnormalPassengerTypewriter" unique_id=2089350316]
+[node name="PaperLine1" type="Line2D" parent="NightDropOffLedger" unique_id=2089350316]
 points = PackedVector2Array(-34, -70, 32, -70)
 width = 2.0
 default_color = Color(0.411765, 0.360784, 0.294118, 0.75)
 
-[node name="PaperLine2" type="Line2D" parent="AbnormalPassengerTypewriter" unique_id=745254870]
+[node name="PaperLine2" type="Line2D" parent="NightDropOffLedger" unique_id=745254870]
 points = PackedVector2Array(-34, -60, 22, -60)
 width = 2.0
 default_color = Color(0.411765, 0.360784, 0.294118, 0.75)
 
-[node name="PaperLine3" type="Line2D" parent="AbnormalPassengerTypewriter" unique_id=1631743179]
+[node name="PaperLine3" type="Line2D" parent="NightDropOffLedger" unique_id=1631743179]
 points = PackedVector2Array(-34, -50, 29, -50)
 width = 2.0
 default_color = Color(0.411765, 0.360784, 0.294118, 0.75)
 
-[node name="Frame" type="Polygon2D" parent="AbnormalPassengerTypewriter" unique_id=597074177]
+[node name="Frame" type="Polygon2D" parent="NightDropOffLedger" unique_id=597074177]
 color = Color(0.105882, 0.133333, 0.160784, 1)
 polygon = PackedVector2Array(-62, -40, 58, -40, 73, 13, -75, 13)
 
-[node name="TopTrim" type="Line2D" parent="AbnormalPassengerTypewriter" unique_id=1944718312]
+[node name="TopTrim" type="Line2D" parent="NightDropOffLedger" unique_id=1944718312]
 points = PackedVector2Array(-55, -35, 51, -35)
 width = 5.0
 default_color = Color(0.643137, 0.533333, 0.34902, 1)
 
-[node name="KeyBed" type="Polygon2D" parent="AbnormalPassengerTypewriter" unique_id=950551621]
+[node name="KeyBed" type="Polygon2D" parent="NightDropOffLedger" unique_id=950551621]
 color = Color(0.211765, 0.243137, 0.270588, 1)
 polygon = PackedVector2Array(-53, -23, 49, -23, 58, 4, -62, 4)
 
-[node name="Keys1" type="Line2D" parent="AbnormalPassengerTypewriter" unique_id=441474517]
+[node name="Keys1" type="Line2D" parent="NightDropOffLedger" unique_id=441474517]
 points = PackedVector2Array(-43, -15, 39, -15)
 width = 4.0
 default_color = Color(0.784314, 0.729412, 0.619608, 1)
 
-[node name="Keys2" type="Line2D" parent="AbnormalPassengerTypewriter" unique_id=796053609]
+[node name="Keys2" type="Line2D" parent="NightDropOffLedger" unique_id=796053609]
 points = PackedVector2Array(-35, -5, 32, -5)
 width = 4.0
 default_color = Color(0.784314, 0.729412, 0.619608, 1)
-
-[node name="Title" type="Label" parent="AbnormalPassengerTypewriter" unique_id=1525877739]
-offset_left = -90.0
-offset_top = -116.0
-offset_right = 90.0
-offset_bottom = -91.0
-theme_override_colors/font_color = Color(0.294118, 0.258824, 0.219608, 1)
-theme_override_font_sizes/font_size = 12
-text = "NIGHT LEDGER"
-horizontal_alignment = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=433162877]
 position = Vector2(0, -35)

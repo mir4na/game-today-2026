@@ -5,7 +5,10 @@ extends Resource
 ## Keep the name, portrait, personal details, and visual identity together here.
 ## Daily routes, tickets, behavior, and anomaly roles belong to PassengerData instead.
 
+enum Gender { FEMALE, MALE }
+
 @export_category("Identity")
+@export var gender: Gender = Gender.FEMALE
 @export var passenger_name: String = "Unnamed"
 @export var short_name: String = "Unnamed"
 @export_range(0, 150, 1) var age: int = 30
@@ -26,6 +29,9 @@ func get_lookup_name() -> String:
 	if preferred_name.is_empty():
 		preferred_name = passenger_name.strip_edges()
 	return preferred_name.to_lower()
+
+func get_gender_key() -> StringName:
+	return &"female" if gender == Gender.FEMALE else &"male"
 
 func is_valid_identity() -> bool:
 	return not passenger_name.strip_edges().is_empty() and not get_lookup_name().is_empty()

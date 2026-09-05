@@ -1,10 +1,27 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/passenger/passenger.gd" id="1"]
 [ext_resource type="ShaderMaterial" path="res://resources/materials/interactable_outline.tres" id="2_outline"]
 
 [sub_resource type="RectangleShape2D" id="InteractionShape"]
 size = Vector2(110, 170)
+
+[sub_resource type="CircleShape2D" id="NpcNavigationProbeShape"]
+radius = 44.0
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_npc"]
+resource_local_to_scene = true
+animations = [{
+"frames": [],
+"loop": true,
+"name": &"idle",
+"speed": 10.0
+}, {
+"frames": [],
+"loop": true,
+"name": &"walk",
+"speed": 10.0
+}]
 
 [node name="Passenger" type="Area2D"]
 z_index = 2
@@ -13,23 +30,22 @@ collision_layer = 0
 collision_mask = 0
 prompt_text = "INSPECT PASSENGER"
 interaction_distance = 105.0
-prompt_anchor_path = NodePath("InteractionPromptAnchor")
+prompt_anchor_path = NodePath("CharacterScale/PassengerVisual/InteractionPromptAnchor")
 focus_visual_path = NodePath("CharacterScale")
 focus_z_index = 100
-minimum_activity_spacing = 90.0
+initial_seated_chance = 0.25
 initial_idle_at_activity_chance = 0.35
 minimum_roaming_source_population = 2
 maximum_roaming_target_population = 3
+navigation_probe_path = NodePath("NpcNavigationProbe")
+navigation_probe_collision_path = NodePath("NpcNavigationProbe/ProbeCollision")
+navigation_blocker_mask = 4
 night_prompt_text = "Hear Departure Statement"
-baby_visual_scale = 0.68
-
-[node name="InteractionPromptAnchor" type="Marker2D" parent="."]
-editor_description = "Inspector-authored screen prompt anchor above the passenger."
-position = Vector2(0, -165)
 
 [node name="Shadow" type="Polygon2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(0, 80)
+editor_description = "Scene-authored ground shadow aligned to the same foot baseline as the player. Adjust this node here to update every NPC variant."
+position = Vector2(0, 67)
 polygon = PackedVector2Array(-48, 0, -44.346, -3.061, -33.941, -5.657, -18.369, -7.391, 0, -8, 18.369, -7.391, 33.941, -5.657, 44.346, -3.061, 48, 0, 44.346, 3.061, 33.941, 5.657, 18.369, 7.391, 0, 8, -18.369, 7.391, -33.941, 5.657, -44.346, 3.061)
 color = Color(0.05, 0.05, 0.06, 0.8)
 
@@ -74,11 +90,27 @@ points = PackedVector2Array(18, -6, 22.5, 37.5)
 width = 15.0
 default_color = Color(0.164706, 0.160784, 0.188235, 1)
 
-[node name="BabyMark" type="Polygon2D" parent="CharacterScale/PassengerVisual"]
+[node name="InteractionPromptAnchor" type="Marker2D" parent="CharacterScale/PassengerVisual"]
+editor_description = "Bubble pointer tip, just above the visible head. Override this marker in each NPC scene; it follows the visual animation and is never repositioned by script."
+position = Vector2(0, -195)
+
+[node name="NPCVisual" type="AnimatedSprite2D" parent="CharacterScale/PassengerVisual"]
 unique_name_in_owner = true
+editor_description = "Assign idle and walk frames here, as with the player's MCVisual. Empty animations use the existing character artwork. Adjust Position and Scale for your frame size; transparent spritesheets need no cutout material."
 visible = false
-polygon = PackedVector2Array(-9, -195, -6, -204, 0, -208.5, 6, -204, 9, -195, 6, -186, 0, -181.5, -6, -186)
-color = Color(0.847059, 0.752941, 0.607843, 1)
+sprite_frames = SubResource("SpriteFrames_npc")
+animation = &"idle"
 
 [node name="InteractionShape" type="CollisionShape2D" parent="."]
 shape = SubResource("InteractionShape")
+
+[node name="NpcNavigationProbe" type="Area2D" parent="."]
+editor_description = "Scene-authored NPC clearance probe. Its shape is queried before AI movement so passengers do not overlap active maintenance events."
+collision_layer = 0
+collision_mask = 4
+monitoring = false
+monitorable = false
+
+[node name="ProbeCollision" type="CollisionShape2D" parent="NpcNavigationProbe"]
+editor_description = "Adjust this radius in the Inspector to control NPC clearance around maintenance objects."
+shape = SubResource("NpcNavigationProbeShape")
