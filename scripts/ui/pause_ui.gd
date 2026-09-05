@@ -5,6 +5,11 @@ signal resume_requested
 signal restart_requested
 signal main_menu_requested
 
+func _unhandled_input(event: InputEvent) -> void:
+	if visible and event.is_action_pressed(&"ui_cancel"):
+		get_viewport().set_input_as_handled()
+		resume_requested.emit()
+
 func open_pause() -> void:
 	show()
 	%ResumeButton.grab_focus()

@@ -10,11 +10,8 @@ signal closed
 @export var date_badge_template: String
 @export_multiline var today_document_template: String
 @export var completed_service_text: String
-@export_multiline var evidence_document_template: String
-@export_multiline var evidence_empty_document: String
 @export_category("Guide Sections")
 @export_multiline var procedure_document: String
-@export_multiline var anomaly_document: String
 @export_multiline var newspaper_document: String
 @export_multiline var night_service_document: String
 @export_multiline var tools_document: String
@@ -25,7 +22,6 @@ var _service_date: String = ""
 var _service_day_code: String = ""
 var _route_stations: PackedStringArray = PackedStringArray()
 var _route_index: int = 0
-var _collected_newspaper: String = ""
 
 @onready var _day_badge: Label = %DayBadge
 @onready var _train_badge: Label = %TrainBadge
@@ -34,11 +30,8 @@ var _collected_newspaper: String = ""
 @onready var _content: RichTextLabel = %Content
 @onready var _today_button: Button = %TodayButton
 @onready var _procedure_button: Button = %ProcedureButton
-@onready var _evidence_button: Button = %EvidenceButton
+@onready var _anomaly_list: ScrollContainer = %AnomalyList
 @onready var _anomalies_button: Button = %AnomaliesButton
-@onready var _newspaper_button: Button = %NewspaperButton
-@onready var _night_button: Button = %NightButton
-@onready var _tools_button: Button = %ToolsButton
 
 
 func open_guidebook(
@@ -47,7 +40,7 @@ func open_guidebook(
 	service_date: String,
 	service_day_code: String,
 	route_stations: PackedStringArray,
-	collected_newspaper: String,
+	_collected_newspaper: String,
 	route_index: int
 ) -> void:
 	_day_number = maxi(1, day_number)
@@ -55,7 +48,6 @@ func open_guidebook(
 	_service_date = service_date
 	_service_day_code = service_day_code
 	_route_stations = route_stations.duplicate()
-	_collected_newspaper = collected_newspaper
 	_route_index = clampi(route_index, 0, maxi(0, _route_stations.size() - 1))
 	_day_badge.text = day_badge_template % _day_number
 	_train_badge.text = train_badge_template % _service_train_number
@@ -93,50 +85,28 @@ func _show_today() -> void:
 
 
 func _show_procedure() -> void:
-	_set_section(_procedure_button, "DAY PROCEDURE", procedure_document)
-
-
-func _show_evidence() -> void:
-	var document: String = evidence_empty_document
-	if not _collected_newspaper.is_empty():
-		document = evidence_document_template % _collected_newspaper
-	_set_section(_evidence_button, "COLLECTED EVIDENCE", document)
+	_set_section(_procedure_button, "RULES", "\n\n".join([procedure_document, newspaper_document, night_service_document, tools_document]))
 
 
 func _show_anomalies() -> void:
-	_set_section(_anomalies_button, "ANOMALY CATALOGUE", anomaly_document)
-
-
-func _show_newspaper() -> void:
-	_set_section(_newspaper_button, "NEWSPAPER RULES", newspaper_document)
-
-
-func _show_night_service() -> void:
-	_set_section(_night_button, "NIGHT SERVICE", night_service_document)
-
-
-func _show_tools() -> void:
-	_set_section(_tools_button, "TOOLS & CONTROLS", tools_document)
+	_set_section(_anomalies_button, "ANOMALY LIST", "")
+	_content.hide()
+	_anomaly_list.show()
+	_anomaly_list.scroll_vertical = 0
 
 
 func _set_section(active_button: Button, title: String, document: String) -> void:
 	for button: Button in _section_buttons():
 		button.disabled = button == active_button
+	_content.show()
+	_anomaly_list.hide()
 	_page_title.text = title
 	_content.text = document
 	_content.scroll_to_line(0)
 
 
 func _section_buttons() -> Array[Button]:
-	return [
-		_today_button,
-		_procedure_button,
-		_evidence_button,
-		_anomalies_button,
-		_newspaper_button,
-		_night_button,
-		_tools_button,
-	]
+	return [_today_button, _procedure_button, _anomalies_button]
 
 
 func _station_at(index: int) -> String:

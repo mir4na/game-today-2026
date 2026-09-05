@@ -217,9 +217,7 @@ func _update_travel_foreground() -> void:
 func _announce_next_station() -> void:
 	if not _has_next_day_station() or _station_arrival_announced:
 		return
-	if _is_passenger_inspection_active():
-		_document_overlay.request_close()
-	elif _is_maintenance_minigame_active():
+	if _active_modal in [_document_overlay, _guidebook_ui] or _is_maintenance_minigame_active():
 		_active_modal.call(&"request_close")
 	_station_arrival_announced = true
 	_process_station_arrival()
@@ -1274,6 +1272,9 @@ func _on_modal_closed() -> void:
 	if is_instance_valid(_inspected_passenger):
 		_inspected_passenger.set_inspection_paused(false)
 	_inspected_passenger = null
+	# A newspaper may still be descending after the station sequence has begun.
+	if _active_modal not in [_document_overlay, _guidebook_ui]:
+		return
 	_active_modal = null
 	_set_player_control_for_state()
 
@@ -1283,8 +1284,10 @@ func _open_pause() -> void:
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
 	_pause_ui.open_pause()
+	get_tree().paused = true
 
 func _resume_from_pause() -> void:
+	get_tree().paused = false
 	_pause_ui.hide()
 	_active_modal = null
 	_set_player_control_for_state()
@@ -1589,11 +1592,7 @@ func _is_passenger_inspection_active() -> bool:
 	)
 
 func _is_world_simulation_active() -> bool:
-	return (
-		_active_modal == null
-		or _is_passenger_inspection_active()
-		or _is_maintenance_minigame_active()
-	)
+	return not get_tree().paused and _active_modal not in [_pause_ui, _day_intro_ui, _station_stop_ui]
 
 
 func _is_newspaper_active() -> bool:
@@ -1679,7 +1678,9 @@ func _on_journey_continue() -> void:
 
 func _restart_game() -> void:
 	if ShiftProgress.save_checkpoint(_shift_checkpoint):
+		get_tree().paused = false
 		get_tree().reload_current_scene()
 
 func _return_to_main_menu() -> void:
+	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")

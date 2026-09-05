@@ -129,7 +129,7 @@ func _check_idle_layout(passengers: Array[Passenger]) -> void:
 		for other_index: int in range(index + 1, passengers.size()):
 			var other: Passenger = passengers[other_index]
 			if not other._ai_walking and other.visible:
-				_check(absf(passenger.position.x - other.position.x) >= 120.0, "Stationary NPCs overlap.")
+				_check(not passenger._stop_shapes_overlap(passenger.position, other, other.position), "Stationary NPCs overlap.")
 
 func _check_motion(game: AfterTheEndGame, label: String) -> void:
 	game._update_travel_foreground()

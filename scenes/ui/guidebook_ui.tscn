@@ -1,7 +1,9 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/guidebook_ui.gd" id="1"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/guidebook_anomaly_entry.tscn" id="3_entry"]
 
 [sub_resource type="StyleBoxFlat" id="BookCoverStyle"]
 content_margin_left = 12.0
@@ -119,12 +121,9 @@ train_badge_template = "TRAIN  %s"
 date_badge_template = "%s"
 today_document_template = "[font_size=22][b]CURRENT ASSIGNMENT[/b][/font_size]\n\n[b]Day[/b]  %d\n[b]Active train[/b]  %s\n[b]Service date[/b]  %s\n[b]Day code[/b]  %s\n\n[b]Current station[/b]  %s\n[b]Next station[/b]  %s\n\n[font_size=20][b]DAY ROUTE[/b][/font_size]\n\n%s\n\n[color=#6b4a35]The values on this page update with the active manifest. You never need to memorize the train number, date, or route order.[/color]"
 completed_service_text = "DAY SERVICE COMPLETE"
-evidence_document_template = "[font_size=20][b]THE AFTERNOON DISPATCH[/b][/font_size]\n\n%s\n\n[color=#6b4a35]The edition remains unchanged when reread.[/color]"
-evidence_empty_document = "[font_size=20][b]NO EVIDENCE COLLECTED[/b][/font_size]\n\nRead the newspaper aboard the train to preserve its current edition here. Visual observations are intentionally not labelled as correct or incorrect."
-procedure_document = "[font_size=20][b]1 — INSPECT[/b][/font_size]\nApproach a passenger and press [b]E[/b]. Compare their ID card and ticket. Press [b]Q[/b] to switch documents.\n\n[font_size=20][b]2 — DECIDE[/b][/font_size]\nPress [b]SPACE[/b] on the ticket to apply or remove a disembark stamp. A stamp assigns that passenger to the next daylight station.\n\n[font_size=20][b]3 — PROTECT NIGHT SERVICE[/b][/font_size]\nDo not stamp a suspected anomaly. An anomaly belongs to the night train. A mistaken anomaly stamp is rejected at the station, creates a penalty, and the passenger remains aboard.\n\n[font_size=20][b]SERVICE VIOLATION[/b][/font_size]\nA living passenger whose ticket shows another train number is a wrong-train boarder, not an anomaly. Stamp their ticket so they leave at the next station.\n\n[font_size=20][b]TERMINAL[/b][/font_size]\nLiving passengers still aboard leave automatically. The paycheck then reports correct drop-offs, retained anomalies, and penalties."
-anomaly_document = "[font_size=19][b]SHADOWLESS[/b][/font_size]\nNo shadow appears beneath the passenger.\n\n[font_size=19][b]IMPOSSIBLE TICKET[/b][/font_size]\nThe printed destination lies before the passenger's origin in the current direction of travel.\n\n[font_size=19][b]UNLISTED DESTINATION[/b][/font_size]\nThe printed destination does not exist on today's daylight route.\n\n[font_size=19][b]PORTRAIT MISMATCH[/b][/font_size]\nThe ID portrait does not depict its stated owner and may belong to another passenger.\n\n[font_size=19][b]TIME-INVALID TICKET[/b][/font_size]\nThe printed service date or day code differs from today's active service.\n\n[font_size=19][b]NEWSPAPER DEATH[/b][/font_size]\nThe newspaper reports a death and its name exactly matches a passenger aboard.\n\n[color=#7d382d][b]Operational rule:[/b] every anomaly is a night passenger, but an ordinary ticket violation is not automatically an anomaly.[/color]"
+procedure_document = "[font_size=20][b]1 — INSPECT[/b][/font_size]\nApproach a passenger and press [b]E[/b]. Compare their ID card and ticket. Press [b]Q[/b] to switch documents.\n\n[font_size=20][b]2 — DECIDE[/b][/font_size]\nPress [b]SPACE[/b] on the ticket to apply or remove a disembark stamp. A stamp assigns that passenger to the next daylight station.\n\n[font_size=20][b]3 — PROTECT NIGHT SERVICE[/b][/font_size]\nDo not stamp a suspected anomaly. An anomaly belongs to the night train. A mistaken anomaly stamp is rejected at the station, creates a penalty, and the passenger remains aboard.\n\n[font_size=20][b]SERVICE VIOLATION[/b][/font_size]\nA living passenger whose ticket shows another train number is a wrong-train boarder, not an anomaly. Stamp their ticket so they leave at the next station.\n\n[font_size=20][b]TERMINAL[/b][/font_size]\nLiving passengers still aboard leave automatically. Each correct drop-off earns 30 Blessings. A wrong drop-off costs 20 Blessings; a mistaken anomaly stamp costs 40 Blessings. Meet today's paycheck target to pass. You can restart the shift."
 newspaper_document = "[font_size=20][b]ONE EDITION PER DAY[/b][/font_size]\nThe newspaper can be read repeatedly, but its content and featured name do not reroll. Only one principal name appears in an edition.\n\n[b]CASE A — Ordinary news[/b]\nThe story is unrelated to a death and provides no anomaly evidence.\n\n[b]CASE B — External death[/b]\nA death is reported, but no passenger aboard has that name. It provides no matching passenger evidence.\n\n[b]CASE C — Matching death[/b]\nA death is reported and the name matches a passenger aboard. That passenger is an anomaly.\n\n[color=#6b4a35]Always compare the printed name with inspected passenger documents; the presence of a death article alone is not sufficient.[/color]"
-night_service_document = "[font_size=20][b]AFTER THE FINAL DAYLIGHT STATION[/b][/font_size]\nOnly retained anomalies continue into night service. Living passengers do not travel beyond the terminal.\n\n[font_size=20][b]COLLECT STATEMENTS[/b][/font_size]\nInteract with each remaining soul. Their Departure Statement is stored automatically, so exact wording does not need to be memorized.\n\n[font_size=20][b]USE THE NIGHT LEDGER[/b][/font_size]\nReturn to the front crew cab and open the Night Drop-Off Ledger. Assign every soul to one night station.\n\n[b]Statement language[/b]\n• [b]Before[/b] — any earlier night stop.\n• [b]Immediately before[/b] — the directly preceding stop.\n• Every required slot must contain exactly one soul before confirmation.\n\n[color=#6b4a35]The guidebook explains deduction grammar, but never displays the solution for the current night.[/color]"
+night_service_document = "[font_size=20][b]AFTER THE FINAL DAYLIGHT STATION[/b][/font_size]\nOnly retained anomalies continue into night service. Living passengers do not travel beyond the terminal.\n\n[font_size=20][b]COLLECT STATEMENTS[/b][/font_size]\nInteract with each remaining soul. Their Departure Statement is stored automatically, so exact wording does not need to be memorized.\n\n[font_size=20][b]USE THE NIGHT LEDGER[/b][/font_size]\nOpen the Night Drop-Off Ledger in the front passenger coach. Assign every soul to one night station.\n\n[b]Statement language[/b]\n• [b]Before[/b] — any earlier night stop.\n• [b]Immediately before[/b] — the directly preceding stop.\n• Every required slot must contain exactly one soul before confirmation.\n\n[color=#6b4a35]The guidebook explains deduction grammar, but never displays the solution for the current night.[/color]"
 tools_document = "[font_size=19][b]CARRIAGE RADAR — R[/b][/font_size]\nConsumes one charge and scans only the passenger coach containing the player. If an anomaly is present, that coach briefly glows red after the scan.\n\n[font_size=19][b]MOVEMENT UPGRADE[/b][/font_size]\nA permanent upgrade for the current run that increases walking speed.\n\n[font_size=19][b]AUDIT SLIP[/b][/font_size]\nCurrently under revision and unavailable for purchase.\n\n[font_size=20][b]CONTROLS[/b][/font_size]\nA / D or Arrow Keys — Walk\nE — Interact / Close passenger documents\nQ — Switch ID and ticket\nSPACE — Apply or remove ticket stamp\nTAB — Open or close this guidebook\nR — Activate carriage radar\nESC — Close current screen / Pause"
 
 [node name="Shade" type="ColorRect" parent="."]
@@ -249,21 +248,7 @@ theme_override_styles/hover = SubResource("SectionButtonHoverStyle")
 theme_override_styles/pressed = SubResource("SectionButtonHoverStyle")
 theme_override_styles/focus = SubResource("SectionButtonHoverStyle")
 theme_override_styles/disabled = SubResource("SectionButtonActiveStyle")
-text = "DAY PROCEDURE"
-alignment = 0
-
-[node name="EvidenceButton" type="Button" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Sections"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.223529, 0.137255, 0.0941176, 1)
-theme_override_colors/font_disabled_color = Color(0.968627, 0.901961, 0.764706, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("SectionButtonStyle")
-theme_override_styles/hover = SubResource("SectionButtonHoverStyle")
-theme_override_styles/pressed = SubResource("SectionButtonHoverStyle")
-theme_override_styles/focus = SubResource("SectionButtonHoverStyle")
-theme_override_styles/disabled = SubResource("SectionButtonActiveStyle")
-text = "COLLECTED EVIDENCE"
+text = "RULES"
 alignment = 0
 
 [node name="AnomaliesButton" type="Button" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Sections"]
@@ -277,49 +262,7 @@ theme_override_styles/hover = SubResource("SectionButtonHoverStyle")
 theme_override_styles/pressed = SubResource("SectionButtonHoverStyle")
 theme_override_styles/focus = SubResource("SectionButtonHoverStyle")
 theme_override_styles/disabled = SubResource("SectionButtonActiveStyle")
-text = "ANOMALY CATALOGUE"
-alignment = 0
-
-[node name="NewspaperButton" type="Button" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Sections"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.223529, 0.137255, 0.0941176, 1)
-theme_override_colors/font_disabled_color = Color(0.968627, 0.901961, 0.764706, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("SectionButtonStyle")
-theme_override_styles/hover = SubResource("SectionButtonHoverStyle")
-theme_override_styles/pressed = SubResource("SectionButtonHoverStyle")
-theme_override_styles/focus = SubResource("SectionButtonHoverStyle")
-theme_override_styles/disabled = SubResource("SectionButtonActiveStyle")
-text = "NEWSPAPER RULES"
-alignment = 0
-
-[node name="NightButton" type="Button" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Sections"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.223529, 0.137255, 0.0941176, 1)
-theme_override_colors/font_disabled_color = Color(0.968627, 0.901961, 0.764706, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("SectionButtonStyle")
-theme_override_styles/hover = SubResource("SectionButtonHoverStyle")
-theme_override_styles/pressed = SubResource("SectionButtonHoverStyle")
-theme_override_styles/focus = SubResource("SectionButtonHoverStyle")
-theme_override_styles/disabled = SubResource("SectionButtonActiveStyle")
-text = "NIGHT SERVICE"
-alignment = 0
-
-[node name="ToolsButton" type="Button" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Sections"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.223529, 0.137255, 0.0941176, 1)
-theme_override_colors/font_disabled_color = Color(0.968627, 0.901961, 0.764706, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("SectionButtonStyle")
-theme_override_styles/hover = SubResource("SectionButtonHoverStyle")
-theme_override_styles/pressed = SubResource("SectionButtonHoverStyle")
-theme_override_styles/focus = SubResource("SectionButtonHoverStyle")
-theme_override_styles/disabled = SubResource("SectionButtonActiveStyle")
-text = "TOOLS & CONTROLS"
+text = "ANOMALY LIST"
 alignment = 0
 
 [node name="Hint" type="Label" parent="Center/BookCover/Pages/LeftPage/Margin/Column"]
@@ -388,6 +331,48 @@ fit_content = false
 scroll_active = true
 selection_enabled = true
 
+[node name="AnomalyList" type="ScrollContainer" parent="Center/BookCover/Pages/RightPage/Margin/Column"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Entries" type="VBoxContainer" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="Shadowless" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+layout_mode = 2
+heading = "SHADOWLESS"
+description = "No shadow appears beneath the passenger."
+
+[node name="ImpossibleTicket" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+layout_mode = 2
+heading = "IMPOSSIBLE TICKET"
+description = "The destination lies before the passenger's origin in today's direction of travel."
+
+[node name="UnlistedDestination" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+layout_mode = 2
+heading = "UNLISTED DESTINATION"
+description = "The destination does not appear on today's route."
+
+[node name="PortraitMismatch" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+layout_mode = 2
+heading = "PORTRAIT MISMATCH"
+description = "The ID portrait does not match its owner."
+
+[node name="TimeInvalidTicket" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+layout_mode = 2
+heading = "TIME-INVALID TICKET"
+description = "The service date or day code differs from today's service."
+
+[node name="NewspaperDeath" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+layout_mode = 2
+heading = "NEWSPAPER DEATH"
+description = "The newspaper reports a death whose name matches a passenger aboard."
+
 [node name="Footer" type="Label" parent="Center/BookCover/Pages/RightPage/Margin/Column"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.435294, 0.333333, 0.25098, 1)
@@ -397,9 +382,5 @@ horizontal_alignment = 2
 
 [connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/TodayButton" to="." method="_show_today"]
 [connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/ProcedureButton" to="." method="_show_procedure"]
-[connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/EvidenceButton" to="." method="_show_evidence"]
 [connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/AnomaliesButton" to="." method="_show_anomalies"]
-[connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/NewspaperButton" to="." method="_show_newspaper"]
-[connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/NightButton" to="." method="_show_night_service"]
-[connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/ToolsButton" to="." method="_show_tools"]
 [connection signal="pressed" from="Center/BookCover/Pages/RightPage/Margin/Column/Header/CloseButton" to="." method="request_close"]

@@ -33,7 +33,6 @@ interaction_distance = 105.0
 prompt_anchor_path = NodePath("CharacterScale/PassengerVisual/InteractionPromptAnchor")
 focus_visual_path = NodePath("CharacterScale")
 focus_z_index = 100
-minimum_activity_spacing = 120.0
 initial_seated_chance = 0.25
 initial_idle_at_activity_chance = 0.35
 minimum_roaming_source_population = 2

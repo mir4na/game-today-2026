@@ -6,7 +6,6 @@ signal documents_requested(passenger: Passenger)
 
 @export var data: PassengerData
 @export_category("Passenger AI")
-@export_range(120.0, 240.0, 5.0) var minimum_activity_spacing: float = 120.0
 @export_range(0.0, 1.0, 0.05) var initial_seated_chance: float = 0.25
 @export_range(0.0, 1.0, 0.05) var initial_idle_at_activity_chance: float = 0.35
 @export_range(0, 6, 1) var minimum_roaming_source_population: int = 2
@@ -68,6 +67,7 @@ var _settling_for_night: bool = false
 const PASSENGER_WALK_SPEED: float = 92.0
 
 @onready var _shadow: Polygon2D = %Shadow
+@onready var _interaction_shape: CollisionShape2D = $InteractionShape
 @onready var _passenger_visual: Node2D = %PassengerVisual
 @onready var _animated_sprite: AnimatedSprite2D = %NPCVisual
 @onready var _static_artwork: Sprite2D = _passenger_visual.get_node_or_null("CharacterArtwork") as Sprite2D
@@ -95,7 +95,11 @@ func _process(delta: float) -> void:
 	_sway_time += delta
 	if _is_dead_night_visual_active():
 		_update_dead_idle(delta)
-	if _settling_for_night and not departed and not _inspection_paused:
+	if _inspection_paused:
+		_animation_move_speed = 0.0
+		_update_visual()
+		return
+	if _settling_for_night and not departed:
 		_ensure_safe_idle_position()
 		_update_boarding_handoff(delta)
 		_settling_for_night = _ai_walking
@@ -202,6 +206,9 @@ func set_inspection_paused(value: bool) -> void:
 	else:
 		_ai_walking = _inspection_resume_walking and position.distance_to(_ai_target_position) > 1.0
 		_inspection_resume_walking = false
+		if not _is_stop_position_available(position):
+			_retarget_to_safe_stop(true)
+		ai_enabled = not night_mode and not boarding_staged
 		if not _ai_walking:
 			_ai_timer = maxf(_ai_timer, 0.25)
 
@@ -334,15 +341,14 @@ func _is_navigation_target_claimed(target_position: Vector2) -> bool:
 		var other := sibling as Passenger
 		if other.departed:
 			continue
-		var spacing: float = maxf(minimum_activity_spacing, other.minimum_activity_spacing)
-		if absf(other.get_reserved_seat_position().x - target_position.x) < spacing:
+		if _stop_shapes_overlap(target_position, other, other.get_reserved_seat_position()):
 			return true
 		if other.visible:
 			# Walking NPCs may cross occupied spots, but their destinations and
-			# stationary positions remain reserved across the full aisle depth.
-			if not other._ai_walking and absf(other.position.x - target_position.x) < spacing:
+			# stationary interaction shapes remain reserved.
+			if not other._ai_walking and _stop_shapes_overlap(target_position, other, other.position):
 				return true
-			if absf(other.get_navigation_target_position().x - target_position.x) < spacing:
+			if _stop_shapes_overlap(target_position, other, other.get_navigation_target_position()):
 				return true
 	return false
 
@@ -357,16 +363,16 @@ func _find_closest_activity_point(candidates: PackedVector2Array) -> Vector2:
 	return closest
 
 
-static func is_stop_reserved_for_interaction(tree: SceneTree, world_position: Vector2) -> bool:
+static func is_stop_reserved_for_interaction(tree: SceneTree, world_position: Vector2, shape: Shape2D = null, shape_transform: Transform2D = Transform2D.IDENTITY) -> bool:
 	for obstacle: Node in tree.get_nodes_in_group(&"passenger_stop_obstacles"):
-		if obstacle.call(&"is_passenger_stop_blocked", world_position):
+		if obstacle.call(&"is_passenger_stop_blocked", world_position, shape, shape_transform):
 			return true
 	return false
 
 
 func _is_stop_position_available(point: Vector2) -> bool:
 	return (
-		not is_stop_reserved_for_interaction(get_tree(), get_parent().to_global(point))
+		not is_stop_reserved_for_interaction(get_tree(), get_parent().to_global(point), _interaction_shape.shape, _stop_shape_transform(point))
 		and not _is_navigation_target_claimed(point)
 		and not _is_npc_navigation_blocked(point)
 	)
@@ -377,12 +383,35 @@ func _ensure_safe_idle_position() -> void:
 		_retarget_to_safe_stop()
 
 
-func _retarget_to_safe_stop() -> void:
+func _stop_shape_transform(point: Vector2) -> Transform2D:
+	var result: Transform2D = _interaction_shape.global_transform
+	result.origin += get_parent().to_global(point) - global_position
+	return result
+
+
+func _stop_shapes_overlap(point: Vector2, other: Passenger, other_point: Vector2) -> bool:
+	return _interaction_shape.shape.collide(_stop_shape_transform(point), other._interaction_shape.shape, other._stop_shape_transform(other_point))
+
+
+func _retarget_to_safe_stop(continue_forward: bool = false) -> void:
 	var candidates: PackedVector2Array = _available_activity_points(runtime_carriage)
 	if _is_stop_position_available(_assigned_seat_position) and (
 		candidates.is_empty() or _carriage_from_world_x(_assigned_seat_position.x) == runtime_carriage
 	):
 		candidates.append(_assigned_seat_position)
+	# Markers may all be reserved. Look along the aisle for a free stopping
+	# position so an NPC can keep walking out of an inspected passenger/rack.
+	var carriage_range: Vector2 = _carriage_ranges.get(runtime_carriage, Vector2(position.x - 480.0, position.x + 480.0))
+	if candidates.is_empty() or continue_forward:
+		for step: int in range(1, 49):
+			var point := Vector2(position.x + _facing_direction * step * 20.0, _assigned_seat_position.y)
+			if point.x < carriage_range.x + 60.0 or point.x > carriage_range.y - 60.0:
+				break
+			if _is_stop_position_available(point):
+				candidates.push_back(point)
+				if continue_forward:
+					candidates = PackedVector2Array([point])
+				break
 	if candidates.is_empty():
 		return
 	_ai_target_position = _find_closest_activity_point(candidates)
