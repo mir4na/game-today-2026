@@ -110,7 +110,7 @@ layer = 10
 script = ExtResource("1")
 clock_template = "%02d:%02d %s"
 tool_inventory_template = "BLESSINGS %d   •   [R] RADAR ×%d   •   AUDIT ×%d   •   SPEED LV.%d"
-prompt_screen_offset = Vector2(0, -8)
+prompt_screen_offset = Vector2(0, 0)
 prompt_edge_margin = Vector2(24, 20)
 
 [node name="Root" type="Control" parent="."]

@@ -17,7 +17,7 @@ focus_visual_path = NodePath("Visual")
 
 [node name="InteractionPromptAnchor" type="Marker2D" parent="." unique_id=377578827]
 editor_description = "Inspector-authored screen prompt anchor above the newspaper."
-position = Vector2(0, -250)
+position = Vector2(0, -234)
 
 [node name="Visual" type="CanvasGroup" parent="." unique_id=1225356523]
 editor_description = "Outline target containing the scene-authored newspaper rack sprite."

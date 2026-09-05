@@ -55,7 +55,7 @@ material = ExtResource("2_outline")
 
 [node name="InteractionPromptAnchor" type="Marker2D" parent="LuggageVisual" unique_id=1832407386]
 editor_description = "Inspector-authored floating prompt offset; it follows the selected luggage side."
-position = Vector2(0, -260)
+position = Vector2(53, -164)
 
 [node name="TrackerAnchor" type="Marker2D" parent="LuggageVisual" unique_id=652826811]
 editor_description = "Inspector-authored target used by the maintenance HUD tracker."

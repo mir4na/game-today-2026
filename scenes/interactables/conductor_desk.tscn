@@ -18,7 +18,7 @@ focus_visual_path = NodePath("NightDropOffLedger")
 
 [node name="InteractionPromptAnchor" type="Marker2D" parent="."]
 editor_description = "Inspector-authored prompt anchor above the night drop-off ledger."
-position = Vector2(0, -145)
+position = Vector2(0, -90)
 
 [node name="NightDropOffLedger" type="CanvasGroup" parent="." unique_id=1347730817]
 material = ExtResource("2_outline")

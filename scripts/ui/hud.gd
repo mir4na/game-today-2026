@@ -8,7 +8,7 @@ signal guidebook_requested
 @export var clock_template: String = "%02d:%02d %s"
 @export var tool_inventory_template: String = "BLESSINGS %d   •   [R] RADAR ×%d   •   AUDIT ×%d   •   SPEED LV.%d"
 @export_category("Interaction Prompt")
-@export var prompt_screen_offset: Vector2 = Vector2(0.0, -8.0)
+@export var prompt_screen_offset: Vector2 = Vector2.ZERO
 @export var prompt_edge_margin: Vector2 = Vector2(24.0, 20.0)
 @export var prompt_minimum_size: Vector2 = Vector2(180.0, 75.0)
 @export_range(180.0, 720.0, 10.0) var prompt_maximum_width: float = 440.0

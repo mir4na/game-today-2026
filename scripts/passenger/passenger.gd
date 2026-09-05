@@ -17,9 +17,14 @@ signal documents_requested(passenger: Passenger)
 @export_flags_2d_physics var navigation_blocker_mask: int = 4
 @export_category("Interaction Copy")
 @export var night_prompt_text: String = "Hear Departure Statement"
-@export_range(0.0, 48.0, 1.0) var dialogue_anchor_gap: float = 14.0
 @export_category("Visual Scale")
 @export var uses_authored_character_artwork: bool = false
+@export_category("Artwork Direction")
+@export var artwork_faces_left: bool = true
+@export_category("Scene Animation")
+@export var idle_animation: StringName = &"idle"
+@export var walk_animation: StringName = &"walk"
+@export_range(0.0, 64.0, 0.5) var walk_animation_threshold: float = 2.0
 @export_category("Deceased Night Presentation")
 @export_range(0.0, 1.0, 0.01) var dead_desaturation: float = 0.72
 @export var dead_tint: Color = Color(0.30, 0.52, 0.66, 0.24)
@@ -40,6 +45,7 @@ var _ai_target_position: Vector2
 var _ai_walking: bool = false
 var _boarding_handoff_active: bool = false
 var _walk_phase: float = 0.0
+var _animation_move_speed: float = 0.0
 var _facing_direction: float = 1.0
 var _inspection_paused: bool = false
 var _inspection_resume_walking: bool = false
@@ -61,9 +67,12 @@ var _escaping_navigation_blocker: bool = false
 const PASSENGER_WALK_SPEED: float = 92.0
 
 @onready var _shadow: Polygon2D = %Shadow
-@onready var _interaction_prompt_anchor: Marker2D = $InteractionPromptAnchor
 @onready var _passenger_visual: Node2D = %PassengerVisual
+@onready var _animated_sprite: AnimatedSprite2D = %NPCVisual
+@onready var _static_artwork: Sprite2D = _passenger_visual.get_node_or_null("CharacterArtwork") as Sprite2D
 @onready var _body_tint: Node2D = %BodyTint
+@onready var _left_leg: Line2D = _passenger_visual.get_node("LeftLeg") as Line2D
+@onready var _right_leg: Line2D = _passenger_visual.get_node("RightLeg") as Line2D
 @onready var _navigation_probe: Area2D = get_node_or_null(navigation_probe_path) as Area2D
 @onready var _navigation_probe_collision: CollisionShape2D = get_node_or_null(navigation_probe_collision_path) as CollisionShape2D
 
@@ -81,6 +90,7 @@ func _ready() -> void:
 	_update_visual()
 
 func _process(delta: float) -> void:
+	var previous_position: Vector2 = position
 	_sway_time += delta
 	if _is_dead_night_visual_active():
 		_update_dead_idle(delta)
@@ -90,6 +100,7 @@ func _process(delta: float) -> void:
 	elif ai_enabled and not night_mode and not departed and data != null:
 		_begin_navigation_blocker_escape_if_needed()
 		_update_day_ai(delta)
+	_animation_move_speed = position.distance_to(previous_position) / delta if delta > 0.0 else 0.0
 	_update_visual()
 
 func interact() -> void:
@@ -97,25 +108,9 @@ func interact() -> void:
 		return
 	documents_requested.emit(self)
 
-func get_prompt_anchor() -> Node2D:
-	return get_dialogue_anchor()
-
 func get_dialogue_anchor() -> Node2D:
-	_update_dialogue_anchor()
-	return _interaction_prompt_anchor
-
-func _update_dialogue_anchor() -> void:
-	if not is_instance_valid(_interaction_prompt_anchor) or not is_instance_valid(_passenger_visual):
-		return
-	var artwork := _passenger_visual.get_node_or_null("CharacterArtwork") as Sprite2D
-	if is_instance_valid(artwork) and artwork.texture != null:
-		var artwork_rect: Rect2 = artwork.get_rect()
-		var artwork_top_center := Vector2(artwork_rect.get_center().x, artwork_rect.position.y)
-		var top_position: Vector2 = to_local(artwork.to_global(artwork_top_center))
-		_interaction_prompt_anchor.position = Vector2(top_position.x, top_position.y - dialogue_anchor_gap)
-		return
-	var fallback_top_position: Vector2 = to_local(_passenger_visual.to_global(Vector2(0.0, -189.0)))
-	_interaction_prompt_anchor.position = Vector2(fallback_top_position.x, fallback_top_position.y - dialogue_anchor_gap)
+	# Keep the scene-authored marker editable and attached to the animated visual.
+	return get_prompt_anchor()
 
 func set_night_mode(value: bool) -> void:
 	night_mode = value
@@ -497,7 +492,9 @@ func _reset_dead_idle() -> void:
 func _update_visual() -> void:
 	_passenger_visual.visible = data != null and not departed
 	if data == null or departed:
+		_animated_sprite.stop()
 		return
+	var animated_artwork_active: bool = _update_sprite_animation()
 	var dead_visual_active: bool = _is_dead_night_visual_active()
 	var ghost_alpha: float = (
 		dead_visual_alpha + sin(_sway_time * 0.38 + _dead_idle_phase) * 0.012
@@ -509,12 +506,13 @@ func _update_visual() -> void:
 	_body_tint.modulate = body_tint if not uses_authored_character_artwork else Color.WHITE
 	_passenger_visual.modulate = Color(1.0, 1.0, 1.0, ghost_alpha)
 	# The authored NPC sprites face left by default; the procedural fallback faces right.
-	var visual_direction: float = -_facing_direction if uses_authored_character_artwork else _facing_direction
+	var faces_left: bool = artwork_faces_left if animated_artwork_active else uses_authored_character_artwork
+	var visual_direction: float = -_facing_direction if faces_left else _facing_direction
 	_passenger_visual.scale = Vector2(visual_direction, 1.0)
 	var dead_idle_y: float = sin(_sway_time * 0.32 + _dead_idle_phase) * 0.45 if dead_visual_active else 0.0
 	_passenger_visual.position = Vector2(
 		_dead_twitch_offset.x if dead_visual_active else 0.0,
-		(sin(_walk_phase) * 1.8 if _ai_walking else 0.0)
+		(sin(_walk_phase) * 1.8 if _ai_walking and not animated_artwork_active else 0.0)
 		+ dead_idle_y
 		+ (_dead_twitch_offset.y if dead_visual_active else 0.0)
 	)
@@ -531,3 +529,37 @@ func _update_visual() -> void:
 		_focus_material.set_shader_parameter(&"dead_effect_strength", 1.0 if dead_visual_active else 0.0)
 		_focus_material.set_shader_parameter(&"dead_desaturation", dead_desaturation)
 		_focus_material.set_shader_parameter(&"dead_tint", dead_tint)
+
+
+func _update_sprite_animation() -> bool:
+	var walking: bool = (
+		_animation_move_speed > 0.0
+		and _animation_move_speed >= walk_animation_threshold
+		and _ai_walking
+		and not night_mode
+		and not boarding_staged
+		and not _inspection_paused
+		and (ai_enabled or _boarding_handoff_active)
+	)
+	var animation_name: StringName = walk_animation if walking else idle_animation
+	if not _has_sprite_animation(animation_name):
+		animation_name = idle_animation
+	var has_animation: bool = _has_sprite_animation(animation_name)
+	_animated_sprite.visible = has_animation
+	if is_instance_valid(_static_artwork):
+		_static_artwork.visible = not has_animation
+	var show_procedural_artwork: bool = not has_animation and not uses_authored_character_artwork
+	_body_tint.visible = show_procedural_artwork
+	_left_leg.visible = show_procedural_artwork
+	_right_leg.visible = show_procedural_artwork
+	if has_animation:
+		if _animated_sprite.animation != animation_name or not _animated_sprite.is_playing():
+			_animated_sprite.play(animation_name)
+	else:
+		_animated_sprite.stop()
+	return has_animation
+
+
+func _has_sprite_animation(animation_name: StringName) -> bool:
+	var frames: SpriteFrames = _animated_sprite.sprite_frames
+	return frames != null and frames.has_animation(animation_name) and frames.get_frame_count(animation_name) > 0

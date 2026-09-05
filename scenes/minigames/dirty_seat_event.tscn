@@ -29,7 +29,7 @@ interaction_origin_path = NodePath("InteractionCollision")
 
 [node name="InteractionPromptAnchor" type="Marker2D" parent="." unique_id=626334026]
 editor_description = "Inspector-authored screen prompt anchor above the dirty seat."
-position = Vector2(0, -210)
+position = Vector2(0, -120)
 
 [node name="TrackerAnchor" type="Marker2D" parent="." unique_id=543934207]
 editor_description = "Inspector-authored target used by the maintenance HUD tracker."

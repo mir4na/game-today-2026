@@ -15,6 +15,20 @@ shader_parameter/dead_effect_strength = 0.0
 shader_parameter/dead_desaturation = 0.72
 shader_parameter/dead_tint = Color(0.3, 0.52, 0.66, 0.24)
 
+[sub_resource type="SpriteFrames" id="SpriteFrames_npc"]
+resource_local_to_scene = true
+animations = [{
+"frames": [],
+"loop": true,
+"name": &"idle",
+"speed": 10.0
+}, {
+"frames": [],
+"loop": true,
+"name": &"walk",
+"speed": 10.0
+}]
+
 [node name="npc_13" unique_id=2065370703 instance=ExtResource("1_base")]
 uses_authored_character_artwork = true
 
@@ -30,7 +44,15 @@ visible = false
 [node name="RightLeg" parent="CharacterScale/PassengerVisual" index="2"]
 visible = false
 
-[node name="CharacterArtwork" type="Sprite2D" parent="CharacterScale/PassengerVisual" index="3" unique_id=1896563412]
+[node name="InteractionPromptAnchor" parent="CharacterScale/PassengerVisual" index="3"]
+position = Vector2(0.972, -122.671)
+
+[node name="NPCVisual" parent="CharacterScale/PassengerVisual" index="4"]
+position = Vector2(2.986, -38.5)
+scale = Vector2(0.271428, 0.271428)
+sprite_frames = SubResource("SpriteFrames_npc")
+
+[node name="CharacterArtwork" type="Sprite2D" parent="CharacterScale/PassengerVisual" index="5" unique_id=1896563412]
 material = ExtResource("3_cutout")
 position = Vector2(2.986, -38.5)
 scale = Vector2(0.271428, 0.271428)
