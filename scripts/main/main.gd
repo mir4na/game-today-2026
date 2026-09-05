@@ -12,13 +12,13 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_EXTERNAL_DEATH, FORCE
 @export var passenger_scene: PackedScene
 @export var manifest_config: DailyManifestConfig
 @export_category("Day Progression")
-@export_range(1, 99, 1) var day_number: int = 1
+@export_range(1, 5, 1) var day_number: int = 1
+@export var day_pass_targets: PackedInt32Array = PackedInt32Array([100, 120, 140, 160, 180])
 @export_range(1, 99, 1) var maintenance_minigame_unlock_day: int = 2
 @export_category("Day Route")
 @export var day_route: PackedStringArray
 @export_category("Station Service")
 @export_range(5.0, 300.0, 1.0) var station_travel_seconds: float = 120.0
-@export_range(1, 8, 1) var unlisted_destination_penalty_units: int = 1
 @export_category("Passenger Placement")
 @export_range(0.0, 180.0, 5.0) var minimum_passenger_seat_spacing: float = 90.0
 @export_category("Maintenance Distractions")
@@ -39,7 +39,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_EXTERNAL_DEATH, FORCE
 @export_multiline var night_statement_template: String = "%s: \"%s\"\n[E] Continue"
 @export var missing_night_statement_text: String = "I have nothing left to tell you."
 
-const WRONG_STOP_PENALTY: int = 12
+const ShiftProgress = preload("res://scripts/systems/shift_progress.gd")
 const START_MINUTES: float = 14.0 * 60.0
 const DAY_SERVICE_FINAL_CYCLE_PROGRESS: float = 1.0
 const SUNSET_STATE_PROGRESS: float = 0.62
@@ -69,9 +69,11 @@ var _daily_seed: int = 0
 var _incorrectly_stamped_anomalies: Dictionary = {}
 var _shift_report_finalized: bool = false
 var _correct_drop_offs: int = 0
+var _wrong_drop_offs: int = 0
 var _retained_anomalies: int = 0
-var _penalty_points: int = 0
 var _penalty_log := PackedStringArray()
+var _shift_checkpoint: Dictionary = {}
+var _progress_advanced: bool = false
 var _newspaper: NewspaperInteractable
 var _desk: ConductorDeskInteractable
 var _nearby_interactable: Interactable
@@ -125,7 +127,15 @@ func _ready() -> void:
 	if manifest_config == null:
 		push_error("Main/Manifest Config must reference a DailyManifestConfig resource.")
 		return
+	_shift_checkpoint = ShiftProgress.load_checkpoint()
+	if not _shift_checkpoint.is_empty() and not _shift_checkpoint.completed:
+		day_number = int(_shift_checkpoint.day)
+		_market_tool_state.call(&"restore_shift_inventory", _shift_checkpoint.inventory)
+	else:
+		_shift_checkpoint = {}
 	_configure_daily_rng()
+	_shift_checkpoint = ShiftProgress.make_checkpoint(day_number, _market_tool_state.call(&"get_snapshot"), _daily_seed)
+	ShiftProgress.save_checkpoint(_shift_checkpoint)
 	_choose_newspaper_case()
 	_daily_manifest = DailyManifestGenerator.generate(
 		passenger_identity_profiles,
@@ -151,7 +161,7 @@ func _ready() -> void:
 	_update_passenger_minimap()
 	_set_passenger_ai_enabled(false)
 	_active_modal = _day_intro_ui
-	_day_intro_ui.play_intro(day_number)
+	_day_intro_ui.play_intro(day_number, _get_day_pass_target())
 
 func _process(delta: float) -> void:
 	_station_stop_ui.set_departure_blocked(_station_stop_ui.visible and _ambience.is_announcement_playing())
@@ -323,7 +333,10 @@ func _spawn_initial_passengers() -> void:
 	_validate_active_passenger_constraints("initial boarding")
 
 func _configure_daily_rng() -> void:
-	if manifest_config.use_random_seed:
+	if not _shift_checkpoint.is_empty():
+		_daily_seed = int(_shift_checkpoint.seed)
+		_daily_rng.seed = _daily_seed
+	elif manifest_config.use_random_seed:
 		_daily_rng.randomize()
 		_daily_seed = _daily_rng.seed
 	else:
@@ -996,6 +1009,8 @@ func _on_station_assignment_toggled(passenger_name: String, should_assign: bool)
 	if should_assign:
 		if assignment_index < 0:
 			_station_assignment.append(canonical_name)
+		if passenger.data.is_dead:
+			_record_incorrect_anomaly(passenger.data, _next_day_station())
 	else:
 		if assignment_index >= 0:
 			_station_assignment.remove_at(assignment_index)
@@ -1019,22 +1034,10 @@ func _process_station_arrival() -> void:
 	_station_exchange_processed = true
 
 	var departing: Array[Passenger] = []
-	var anomaly_assignments: Array[Passenger] = []
 	for assigned_name: String in _station_assignment:
 		var assigned_passenger: Passenger = _find_active_passenger_by_name(assigned_name)
 		if assigned_passenger != null and assigned_passenger.data.is_dead:
-			anomaly_assignments.append(assigned_passenger)
-			_incorrectly_stamped_anomalies[assigned_passenger.data.passenger_name] = true
-	if not anomaly_assignments.is_empty():
-		_add_penalty(
-			WRONG_STOP_PENALTY * anomaly_assignments.size(),
-			"%s: %d anomalous passenger stamp%s rejected; passenger%s remained aboard" % [
-				arrival_station,
-				anomaly_assignments.size(),
-				"s" if anomaly_assignments.size() != 1 else "",
-				"s" if anomaly_assignments.size() != 1 else "",
-			]
-		)
+			_record_incorrect_anomaly(assigned_passenger.data, arrival_station)
 	if is_terminal_arrival:
 		# The final configured stop ends daylight service: every living passenger leaves automatically.
 		for passenger: Passenger in _passengers:
@@ -1051,15 +1054,6 @@ func _process_station_arrival() -> void:
 				and not departing.has(assigned_passenger)
 			):
 				departing.append(assigned_passenger)
-
-	var invalid_assignment_count: int = 0
-	if not is_terminal_arrival:
-		invalid_assignment_count = _station_assignment.size() - departing.size() - anomaly_assignments.size()
-	if invalid_assignment_count > 0:
-		_add_penalty(
-			WRONG_STOP_PENALTY * invalid_assignment_count,
-			"%s: %d invalid drop-off assignment%s" % [arrival_station, invalid_assignment_count, "s" if invalid_assignment_count != 1 else ""]
-		)
 
 	var available_boarders: Array[PassengerData] = []
 	if not is_terminal_arrival:
@@ -1079,14 +1073,14 @@ func _process_station_arrival() -> void:
 			"carriage": departure_carriage,
 		})
 		var required_dropoff_station: String = departing_passenger.data.get_required_day_dropoff_station()
-		var distance_units: int = _station_distance_units(required_dropoff_station, arrival_station)
-		if distance_units == 0:
+		if required_dropoff_station == arrival_station:
 			_correct_drop_offs += 1
 		else:
-			_add_penalty(
-				WRONG_STOP_PENALTY * distance_units,
-				"%s left at %s, %d stop%s from %s" % [departing_passenger.data.passenger_name, arrival_station, distance_units, "s" if distance_units != 1 else "", required_dropoff_station]
-			)
+			_wrong_drop_offs += 1
+			_penalty_log.append("%s: left at %s; expected %s  (−%d Blessings)" % [
+				departing_passenger.data.passenger_name, arrival_station, required_dropoff_station,
+				int(_market_tool_state.get("blessings_per_wrong_dropoff")),
+			])
 		departing_passenger.depart_train()
 		if is_terminal_arrival:
 			continue
@@ -1110,12 +1104,6 @@ func _process_station_arrival() -> void:
 		})
 		boarded += 1
 
-	if not is_terminal_arrival and boarded < departing.size():
-		var boarding_shortfall: int = departing.size() - boarded
-		_add_penalty(
-			WRONG_STOP_PENALTY * boarding_shortfall,
-			"%s: %d replacement passenger%s could not board" % [arrival_station, boarding_shortfall, "s" if boarding_shortfall != 1 else ""]
-		)
 	_validate_active_passenger_constraints("%s station exchange" % arrival_station)
 	_debug_print_active_anomaly_roster("%s STATION EXCHANGE" % arrival_station.to_upper())
 	_player.set_interactables(_interactables)
@@ -1248,13 +1236,6 @@ func _find_boarder_for_carriage(boarders: Array[PassengerData], carriage: int) -
 			return i
 	return -1
 
-func _station_distance_units(destination_station: String, actual_station: String) -> int:
-	var destination_index: int = day_route.find(destination_station)
-	var actual_index: int = day_route.find(actual_station)
-	if destination_index < 0 or actual_index < 0:
-		return unlisted_destination_penalty_units
-	return absi(actual_index - destination_index)
-
 func _on_desk_interacted() -> void:
 	if state == GameState.NIGHT:
 		_open_night_puzzle()
@@ -1324,20 +1305,23 @@ func _finalize_day_shift() -> void:
 	_day_blessing_award = _market_tool_state.call(
 		&"award_day_blessings",
 		_correct_drop_offs,
-		_retained_anomalies,
-		_penalty_points
+		_wrong_drop_offs,
+		_incorrectly_stamped_anomalies.size(),
+		_get_day_pass_target()
 	)
 	_active_modal = _shift_report_ui
-	_shift_report_ui.open_report(
-		_correct_drop_offs,
-		_retained_anomalies,
-		_penalty_points,
-		_penalty_log,
-		_day_blessing_award
-	)
+	_shift_report_ui.open_report(day_number, _retained_anomalies, _get_dead_passenger_data().size(), _penalty_log, _day_blessing_award)
+
+func _get_day_pass_target() -> int:
+	if day_pass_targets.is_empty():
+		return 100
+	return maxi(0, day_pass_targets[clampi(day_number - 1, 0, day_pass_targets.size() - 1)])
 
 func _on_shift_report_continue() -> void:
 	if state != GameState.SHIFT_REPORT:
+		return
+	if not bool(_day_blessing_award.get("passed", false)):
+		_restart_game()
 		return
 	_shift_report_ui.hide()
 	_open_night_market()
@@ -1547,12 +1531,13 @@ func _on_departures_confirmed(assignments: Dictionary) -> void:
 func _get_departure_puzzle() -> DeparturePuzzleData:
 	return _runtime_puzzle if _runtime_puzzle != null else puzzle_resource as DeparturePuzzleData
 
-func _add_penalty(points: int, reason: String) -> void:
-	var applied_points: int = maxi(0, points)
-	if applied_points == 0:
+func _record_incorrect_anomaly(data: PassengerData, station: String) -> void:
+	if _incorrectly_stamped_anomalies.has(data.passenger_name):
 		return
-	_penalty_points += applied_points
-	_penalty_log.append("%s  (+%d)" % [reason, applied_points])
+	_incorrectly_stamped_anomalies[data.passenger_name] = true
+	_penalty_log.append("%s: anomaly assigned to %s; remains aboard  (−%d Blessings)" % [
+		data.passenger_name, station, int(_market_tool_state.get("blessings_per_incorrect_anomaly")),
+	])
 
 
 func _travel_duration_label() -> String:
@@ -1657,8 +1642,32 @@ func _get_dead_passenger_data() -> Array[PassengerData]:
 			result.append(passenger.data)
 	return result
 
+func _on_night_sequence_finished() -> void:
+	if state != GameState.COMPLETE or _progress_advanced:
+		return
+	var next_checkpoint: Dictionary = ShiftProgress.make_checkpoint(
+		mini(day_number + 1, ShiftProgress.DAY_COUNT),
+		_market_tool_state.call(&"get_snapshot"), ShiftProgress.new_seed()
+	)
+	next_checkpoint.completed = day_number >= ShiftProgress.DAY_COUNT
+	_progress_advanced = ShiftProgress.save_checkpoint(next_checkpoint)
+	_sequence_ui.set_progress_result(day_number, ShiftProgress.DAY_COUNT, _progress_advanced)
+
+
+func _on_journey_continue() -> void:
+	if not _progress_advanced:
+		_on_night_sequence_finished()
+		if not _progress_advanced:
+			return
+	if day_number >= ShiftProgress.DAY_COUNT:
+		_return_to_main_menu()
+	else:
+		get_tree().reload_current_scene()
+
+
 func _restart_game() -> void:
-	get_tree().reload_current_scene()
+	if ShiftProgress.save_checkpoint(_shift_checkpoint):
+		get_tree().reload_current_scene()
 
 func _return_to_main_menu() -> void:
 	get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")

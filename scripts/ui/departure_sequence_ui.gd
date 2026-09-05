@@ -2,7 +2,7 @@ class_name DepartureSequenceUI
 extends Control
 
 signal sequence_finished
-signal restart_requested
+signal journey_continue_requested
 
 @export_category("Presentation")
 @export var station_colors: Array[Color]
@@ -14,7 +14,7 @@ signal restart_requested
 @export var passenger_departure_template: String = "%s leaves the night train here."
 @export var next_button_text: String = "NEXT NIGHT STOP"
 @export var complete_button_text: String = "COMPLETE JOURNEY"
-@export var restart_button_text: String = "RESTART SHIFT"
+@export var journey_continue_button_text: String = "CONTINUE"
 @export var blessing_reward_template: String = "+%d BLESSINGS\n%d CORRECT SOUL DROP-OFFS • BALANCE %d"
 
 var _puzzle: DeparturePuzzleData
@@ -77,15 +77,26 @@ func _show_complete() -> void:
 		_blessing_balance,
 	]
 	_blessing_reward_label.show()
-	_continue_button.text = restart_button_text
+	_continue_button.text = journey_continue_button_text
 	_complete_screen = true
 	sequence_finished.emit()
 
 func _on_continue_button_pressed() -> void:
 	if _complete_screen:
-		_restart()
+		journey_continue_requested.emit()
 	else:
 		_advance()
 
-func _restart() -> void:
-	restart_requested.emit()
+
+func set_progress_result(day: int, day_count: int, saved: bool) -> void:
+	if not saved:
+		_atmosphere_label.text = "Progress could not be saved. Try again to continue."
+		_continue_button.text = "RETRY SAVE"
+		return
+	if day >= day_count:
+		_station_label.text = "JOURNEY COMPLETE"
+		_atmosphere_label.text = "All %d days completed. Every shift brought them closer to home." % day_count
+		_continue_button.text = "MAIN MENU"
+	else:
+		_station_label.text = "DAY %d COMPLETE" % day
+		_continue_button.text = "BEGIN DAY %d" % (day + 1)

@@ -112,8 +112,8 @@ visible = false
 position = Vector2(-7.111, -122.671)
 
 [node name="NPCVisual" parent="CharacterScale/PassengerVisual" index="4"]
-position = Vector2(2.059, -35.081)
-scale = Vector2(0.257381, 0.257381)
+position = Vector2(0.492734, -51.923393)
+scale = Vector2(0.226389, 0.226389)
 sprite_frames = SubResource("SpriteFrames_ydwx1")
 
 [node name="CharacterArtwork" type="Sprite2D" parent="CharacterScale/PassengerVisual" index="5" unique_id=1418710910]

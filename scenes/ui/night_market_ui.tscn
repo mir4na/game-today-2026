@@ -49,7 +49,7 @@ script = ExtResource("1")
 blessings_template = "BLESSINGS  %d"
 purchase_button_template = "BUY  •  %d BLESSINGS"
 speed_button_template = "UPGRADE  •  %d BLESSINGS"
-day_reward_template = "+%d BLESSINGS  •  DROP-OFFS +%d  •  ANOMALIES +%d  •  PENALTY −%d"
+day_reward_template = "+%d BLESSINGS  •  DROP-OFFS +%d  •  PENALTY −%d"
 
 [node name="Shade" type="ColorRect" parent="."]
 layout_mode = 1

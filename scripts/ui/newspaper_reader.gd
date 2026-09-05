@@ -67,6 +67,22 @@ func present() -> void:
 	_presentation_player.advance(0.0)
 
 
+func dismiss() -> void:
+	if not is_instance_valid(_presentation_player) or not _presentation_player.has_animation(presentation_animation):
+		return
+	# Reverse from the current lift position, including Esc pressed during entry.
+	var from_position: float = _presentation_player.get_animation(presentation_animation).length
+	if _presentation_player.is_playing() and _presentation_player.assigned_animation == presentation_animation:
+		from_position = _presentation_player.current_animation_position
+	if from_position <= 0.001:
+		_presentation_player.stop()
+		return
+	_presentation_player.play(presentation_animation, -1.0, -1.0, true)
+	_presentation_player.seek(from_position, true)
+	_presentation_player.advance(0.0)
+	await _presentation_player.animation_finished
+
+
 func set_portrait(texture: Texture2D) -> void:
 	_portrait_texture = texture
 	for portrait: Sprite2D in _portraits:

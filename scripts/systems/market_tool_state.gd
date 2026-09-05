@@ -20,10 +20,10 @@ const TOOL_SPEED_UPGRADE: StringName = &"speed_upgrade"
 @export_category("Speed Upgrade")
 @export_range(0.0, 300.0, 1.0) var speed_bonus_per_level: float = 45.0
 @export_category("Blessing Rewards")
-@export_range(0, 20, 1) var blessings_per_correct_dropoff: int = 1
-@export_range(0, 20, 1) var blessings_per_retained_anomaly: int = 2
+@export_range(0, 100, 1) var blessings_per_correct_dropoff: int = 30
+@export_range(0, 100, 1) var blessings_per_wrong_dropoff: int = 20
+@export_range(0, 100, 1) var blessings_per_incorrect_anomaly: int = 40
 @export_range(0, 20, 1) var blessings_per_correct_night_dropoff: int = 2
-@export_range(1, 100, 1) var penalty_points_per_blessing_loss: int = 10
 
 var blessings: int = 0
 var audit_slips: int = 0
@@ -55,27 +55,44 @@ func _set_starting_inventory() -> void:
 	_last_night_award.clear()
 
 
-func award_day_blessings(correct_dropoffs: int, retained_anomalies: int, penalty_points: int) -> Dictionary:
+func award_day_blessings(correct_dropoffs: int, wrong_dropoffs: int, incorrect_anomalies: int, pass_target: int) -> Dictionary:
 	if _day_blessings_awarded:
 		return _last_day_award.duplicate(true)
 	_day_blessings_awarded = true
 	var dropoff_reward: int = maxi(0, correct_dropoffs) * blessings_per_correct_dropoff
-	var retention_reward: int = maxi(0, retained_anomalies) * blessings_per_retained_anomaly
-	var gross_reward: int = dropoff_reward + retention_reward
-	var requested_deduction: int = maxi(0, penalty_points) / maxi(1, penalty_points_per_blessing_loss)
-	var applied_deduction: int = mini(gross_reward, requested_deduction)
-	var earned: int = gross_reward - applied_deduction
+	var wrong_deduction: int = maxi(0, wrong_dropoffs) * blessings_per_wrong_dropoff
+	var anomaly_deduction: int = maxi(0, incorrect_anomalies) * blessings_per_incorrect_anomaly
+	var net_earnings: int = dropoff_reward - wrong_deduction - anomaly_deduction
+	var passed: bool = net_earnings >= pass_target
+	var earned: int = maxi(0, net_earnings) if passed else 0
 	blessings += earned
 	_last_day_award = {
 		"earned": earned,
 		"dropoff_reward": dropoff_reward,
-		"retention_reward": retention_reward,
-		"penalty_deduction": applied_deduction,
+		"wrong_deduction": wrong_deduction,
+		"anomaly_deduction": anomaly_deduction,
+		"penalty_deduction": wrong_deduction + anomaly_deduction,
+		"net_earnings": net_earnings,
+		"pass_target": pass_target,
+		"passed": passed,
+		"correct_rate": blessings_per_correct_dropoff,
+		"wrong_rate": blessings_per_wrong_dropoff,
+		"anomaly_rate": blessings_per_incorrect_anomaly,
 		"correct_dropoffs": maxi(0, correct_dropoffs),
-		"retained_anomalies": maxi(0, retained_anomalies),
+		"wrong_dropoffs": maxi(0, wrong_dropoffs),
+		"incorrect_anomalies": maxi(0, incorrect_anomalies),
 	}
 	_emit_inventory_changed()
 	return _last_day_award.duplicate(true)
+
+
+func restore_shift_inventory(snapshot: Dictionary) -> void:
+	_set_starting_inventory()
+	blessings = maxi(0, int(snapshot.get("blessings", starting_blessings)))
+	audit_slips = maxi(0, int(snapshot.get("audit_slips", starting_audit_slips)))
+	radar_charges = maxi(0, int(snapshot.get("radar_charges", starting_radar_charges)))
+	speed_level = clampi(int(snapshot.get("speed_level", starting_speed_level)), 0, speed_upgrade_costs.size())
+	_emit_inventory_changed()
 
 
 func award_night_blessings(correct_night_dropoffs: int) -> Dictionary:

@@ -44,7 +44,7 @@ func open_puzzle(event: Node) -> void:
 		if randomize_piece_set_on_new_event or _pieces.is_empty():
 			_rebuild_piece_set()
 		_arrange_piece_homes()
-		_reset_pieces()
+		_initialize_piece_positions()
 	show()
 	_completed = false
 
@@ -56,19 +56,11 @@ func request_close() -> void:
 	closed.emit()
 
 
-func reset_puzzle() -> void:
-	if not visible:
-		return
-	_reset_pieces()
-
-
 func _unhandled_input(event: InputEvent) -> void:
 	if visible and event.is_action_pressed(&"ui_cancel"):
 		request_close()
 		get_viewport().set_input_as_handled()
-	elif visible and event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_R:
-		reset_puzzle()
-		get_viewport().set_input_as_handled()
+
 
 
 func _on_piece_grabbed(piece: Control, _grab_offset: Vector2) -> void:
@@ -127,7 +119,7 @@ func _release_piece_cells(piece: Control) -> void:
 		_occupied_cells.erase(cell)
 
 
-func _reset_pieces() -> void:
+func _initialize_piece_positions() -> void:
 	_completed = false
 	_placement_by_piece.clear()
 	_occupied_cells.clear()

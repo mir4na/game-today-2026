@@ -335,7 +335,7 @@ unique_name_in_owner = true
 [connection signal="continue_requested" from="ModalLayer/NightMarketUI" to="." method="_on_night_market_continue"]
 [connection signal="purchase_requested" from="ModalLayer/NightMarketUI" to="." method="_on_market_purchase_requested"]
 [connection signal="departures_confirmed" from="ModalLayer/NightPuzzleUI" to="." method="_on_departures_confirmed"]
-[connection signal="restart_requested" from="ModalLayer/DepartureSequenceUI" to="." method="_restart_game"]
+[connection signal="journey_continue_requested" from="ModalLayer/DepartureSequenceUI" to="." method="_on_journey_continue"]
 [connection signal="main_menu_requested" from="ModalLayer/PauseUI" to="." method="_return_to_main_menu"]
 [connection signal="restart_requested" from="ModalLayer/PauseUI" to="." method="_restart_game"]
 [connection signal="resume_requested" from="ModalLayer/PauseUI" to="." method="_resume_from_pause"]
@@ -348,3 +348,6 @@ unique_name_in_owner = true
 [editable path="GameplayWorld/Train/Cars/PassengerCoach4"]
 [editable path="GameplayWorld/Train/Cars/PassengerCoach2"]
 [editable path="TravelForeground"]
+
+[connection signal="sequence_finished" from="ModalLayer/DepartureSequenceUI" to="." method="_on_night_sequence_finished"]
+[connection signal="main_menu_requested" from="ModalLayer/ShiftReportUI" to="." method="_return_to_main_menu"]

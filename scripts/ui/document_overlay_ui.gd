@@ -53,6 +53,8 @@ enum ViewMode {
 
 var _data: PassengerData
 var _view_mode: ViewMode = ViewMode.NONE
+var _closing: bool = false
+var _view_revision: int = 0
 var _is_assigned_to_next_station: bool = false
 var _newspaper_headline: String = ""
 var _newspaper_primary_body: String = ""
@@ -69,6 +71,8 @@ var _newspaper_secondary_body: String = ""
 
 
 func show_passenger(data: PassengerData) -> void:
+	_view_revision += 1
+	_closing = false
 	_data = data
 	_view_mode = ViewMode.PASSENGER_DOCUMENTS
 	_is_assigned_to_next_station = false
@@ -152,6 +156,8 @@ func compose_matching_death_newspaper(
 
 
 func show_newspaper(document: String) -> void:
+	_view_revision += 1
+	_closing = false
 	_data = null
 	_view_mode = ViewMode.NEWSPAPER
 	_documents.hide()
@@ -221,8 +227,17 @@ func configure_stamp_lock(is_locked: bool) -> void:
 
 
 func request_close() -> void:
+	if not visible or _closing:
+		return
+	_closing = true
+	var closing_revision: int = _view_revision
+	if _view_mode == ViewMode.NEWSPAPER:
+		await _newspaper_reader.dismiss()
+		if closing_revision != _view_revision:
+			return
 	hide()
 	_view_mode = ViewMode.NONE
+	_closing = false
 	closed.emit()
 
 
@@ -255,6 +270,8 @@ func _toggle_station_assignment() -> void:
 
 
 func _show_reader(title: String, document: String) -> void:
+	_view_revision += 1
+	_closing = false
 	_view_mode = ViewMode.READER
 	_documents.hide()
 	_passenger_close_button.hide()

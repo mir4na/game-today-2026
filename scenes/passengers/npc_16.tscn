@@ -112,8 +112,8 @@ visible = false
 position = Vector2(-2.265, -122.671)
 
 [node name="NPCVisual" parent="CharacterScale/PassengerVisual" index="4"]
-position = Vector2(1.228, -39.722)
-scale = Vector2(0.272869, 0.272869)
+position = Vector2(0.604118, -56.740112)
+scale = Vector2(0.219930, 0.219930)
 sprite_frames = SubResource("SpriteFrames_t1gjp")
 animation = &"walk"
 

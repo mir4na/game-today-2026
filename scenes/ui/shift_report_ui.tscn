@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/shift_report_ui.gd" id="1"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
@@ -19,22 +19,6 @@ corner_radius_top_right = 9
 corner_radius_bottom_right = 9
 corner_radius_bottom_left = 9
 
-[sub_resource type="StyleBoxFlat" id="MetricCardStyle"]
-content_margin_left = 18.0
-content_margin_top = 14.0
-content_margin_right = 18.0
-content_margin_bottom = 14.0
-bg_color = Color(0.133333, 0.184314, 0.239216, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.384314, 0.458824, 0.545098, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
 [node name="ShiftReportUI" type="Control"]
 visible = false
 layout_mode = 3
@@ -46,13 +30,6 @@ grow_vertical = 2
 mouse_filter = 0
 theme = ExtResource("2")
 script = ExtResource("1")
-correct_drop_off_template = "%d PASSENGERS"
-retained_anomaly_template = "%d PASSENGERS"
-penalty_total_template = "%d PTS"
-blessings_earned_template = "+%d"
-reward_breakdown_template = "DROP-OFFS +%d   •   RETAINED +%d   •   PENALTY −%d BLESSINGS"
-penalty_entry_template = "• %s"
-no_penalties_text = "No penalties issued."
 
 [node name="Shade" type="ColorRect" parent="."]
 layout_mode = 1
@@ -72,144 +49,156 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Panel" type="PanelContainer" parent="Center"]
-custom_minimum_size = Vector2(820, 650)
+custom_minimum_size = Vector2(880, 650)
 layout_mode = 2
 theme_override_styles/panel = SubResource("ReportPanelStyle")
 
 [node name="Outer" type="VBoxContainer" parent="Center/Panel"]
 layout_mode = 2
-theme_override_constants/separation = 13
+theme_override_constants/separation = 12
 
 [node name="Title" type="Label" parent="Center/Panel/Outer"]
-theme_type_variation = &"HeaderLabel"
-layout_mode = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_font_sizes/font_size = 29
-text = "DAYLIGHT PAYCHECK"
-horizontal_alignment = 1
-
-[node name="Metrics" type="GridContainer" parent="Center/Panel/Outer"]
-layout_mode = 2
-theme_override_constants/h_separation = 12
-columns = 2
-
-[node name="CorrectDropOffCard" type="PanelContainer" parent="Center/Panel/Outer/Metrics"]
-custom_minimum_size = Vector2(365, 96)
-layout_mode = 2
-theme_override_styles/panel = SubResource("MetricCardStyle")
-
-[node name="Box" type="VBoxContainer" parent="Center/Panel/Outer/Metrics/CorrectDropOffCard"]
-layout_mode = 2
-
-[node name="Caption" type="Label" parent="Center/Panel/Outer/Metrics/CorrectDropOffCard/Box"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.666667, 0.701961, 0.741176, 1)
-theme_override_font_sizes/font_size = 13
-text = "CORRECT DROP-OFFS"
-horizontal_alignment = 1
-
-[node name="CorrectDropOffValue" type="Label" parent="Center/Panel/Outer/Metrics/CorrectDropOffCard/Box"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.827451, 0.658824, 1)
-theme_override_font_sizes/font_size = 25
-horizontal_alignment = 1
-
-[node name="PenaltyCard" type="PanelContainer" parent="Center/Panel/Outer/Metrics"]
-custom_minimum_size = Vector2(365, 96)
-layout_mode = 2
-theme_override_styles/panel = SubResource("MetricCardStyle")
-
-[node name="Box" type="VBoxContainer" parent="Center/Panel/Outer/Metrics/PenaltyCard"]
-layout_mode = 2
-
-[node name="Caption" type="Label" parent="Center/Panel/Outer/Metrics/PenaltyCard/Box"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.666667, 0.701961, 0.741176, 1)
-theme_override_font_sizes/font_size = 13
-text = "TOTAL PENALTY"
-horizontal_alignment = 1
-
-[node name="PenaltyValue" type="Label" parent="Center/Panel/Outer/Metrics/PenaltyCard/Box"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_font_sizes/font_size = 25
+theme_override_font_sizes/font_size = 28
+text = "DAY 1 — PAYCHECK"
 horizontal_alignment = 1
 
-[node name="RetainedAnomalyCard" type="PanelContainer" parent="Center/Panel/Outer/Metrics"]
-custom_minimum_size = Vector2(365, 96)
+[node name="Subtitle" type="Label" parent="Center/Panel/Outer"]
 layout_mode = 2
-theme_override_styles/panel = SubResource("MetricCardStyle")
-
-[node name="Box" type="VBoxContainer" parent="Center/Panel/Outer/Metrics/RetainedAnomalyCard"]
-layout_mode = 2
-
-[node name="Caption" type="Label" parent="Center/Panel/Outer/Metrics/RetainedAnomalyCard/Box"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.666667, 0.701961, 0.741176, 1)
-theme_override_font_sizes/font_size = 13
-text = "ANOMALIES RETAINED"
-horizontal_alignment = 1
-
-[node name="RetainedAnomalyValue" type="Label" parent="Center/Panel/Outer/Metrics/RetainedAnomalyCard/Box"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.827451, 0.658824, 1)
-theme_override_font_sizes/font_size = 25
-horizontal_alignment = 1
-
-[node name="BlessingsCard" type="PanelContainer" parent="Center/Panel/Outer/Metrics"]
-custom_minimum_size = Vector2(365, 96)
-layout_mode = 2
-theme_override_styles/panel = SubResource("MetricCardStyle")
-
-[node name="Box" type="VBoxContainer" parent="Center/Panel/Outer/Metrics/BlessingsCard"]
-layout_mode = 2
-
-[node name="Caption" type="Label" parent="Center/Panel/Outer/Metrics/BlessingsCard/Box"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.666667, 0.701961, 0.741176, 1)
-theme_override_font_sizes/font_size = 13
-text = "BLESSINGS EARNED"
-horizontal_alignment = 1
-
-[node name="BlessingsEarnedValue" type="Label" parent="Center/Panel/Outer/Metrics/BlessingsCard/Box"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.827451, 0.658824, 1)
-theme_override_font_sizes/font_size = 25
-horizontal_alignment = 1
-
-[node name="RewardBreakdown" type="Label" parent="Center/Panel/Outer"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.78, 0.82, 0.74, 1)
 theme_override_font_sizes/font_size = 14
+text = "DAYLIGHT SERVICE   /   ALL AMOUNTS IN BLESSINGS"
 horizontal_alignment = 1
 
 [node name="Rule" type="HSeparator" parent="Center/Panel/Outer"]
 layout_mode = 2
 
-[node name="DetailTitle" type="Label" parent="Center/Panel/Outer"]
-theme_type_variation = &"HeaderLabel"
+[node name="Accounts" type="GridContainer" parent="Center/Panel/Outer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_font_sizes/font_size = 17
-text = "PENALTY LIST"
+columns = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 12
+
+[node name="CorrectCaption" type="Label" parent="Center/Panel/Outer/Accounts"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "CORRECT DROP-OFFS"
+
+[node name="CorrectValue" type="Label" parent="Center/Panel/Outer/Accounts"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 18
+text = "0 × 30     +0"
+
+[node name="WrongCaption" type="Label" parent="Center/Panel/Outer/Accounts"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "WRONG DROP-OFFS"
+
+[node name="WrongValue" type="Label" parent="Center/Panel/Outer/Accounts"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 18
+text = "0 × 20     −0"
+
+[node name="AnomalyCaption" type="Label" parent="Center/Panel/Outer/Accounts"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "ANOMALIES INCORRECTLY STAMPED"
+
+[node name="AnomalyValue" type="Label" parent="Center/Panel/Outer/Accounts"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 18
+text = "0 × 40     −0"
+
+[node name="RetainedCaption" type="Label" parent="Center/Panel/Outer/Accounts"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "ANOMALIES SAFELY RETAINED"
+
+[node name="RetainedValue" type="Label" parent="Center/Panel/Outer/Accounts"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 14
+text = "0 / 4   •   NO BONUS OR PENALTY"
+
+[node name="NetCaption" type="Label" parent="Center/Panel/Outer/Accounts"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "NET EARNINGS"
+
+[node name="NetValue" type="Label" parent="Center/Panel/Outer/Accounts"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 18
+text = "0 BLESSINGS"
+
+[node name="TargetCaption" type="Label" parent="Center/Panel/Outer/Accounts"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "REQUIRED TO PASS"
+
+[node name="TargetValue" type="Label" parent="Center/Panel/Outer/Accounts"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 18
+text = "100 BLESSINGS"
+
+[node name="ResultLabel" type="Label" parent="Center/Panel/Outer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "PASSED"
+horizontal_alignment = 1
+
+[node name="PaymentLabel" type="Label" parent="Center/Panel/Outer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+
+[node name="DetailTitle" type="Label" parent="Center/Panel/Outer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "PENALTY DETAILS"
 
 [node name="Breakdown" type="RichTextLabel" parent="Center/Panel/Outer"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 90)
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_colors/default_color = Color(0.866667, 0.839216, 0.792157, 1)
-theme_override_font_sizes/normal_font_size = 16
-bbcode_enabled = true
+theme_override_font_sizes/normal_font_size = 15
+text = "No penalties issued."
 
-[node name="ContinueButton" type="Button" parent="Center/Panel/Outer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 54)
+[node name="Actions" type="HBoxContainer" parent="Center/Panel/Outer"]
 layout_mode = 2
-text = "CONTINUE TO NIGHT MARKET  [SPACE / ENTER]"
+theme_override_constants/separation = 12
 
-[connection signal="pressed" from="Center/Panel/Outer/ContinueButton" to="." method="_on_continue_button_pressed"]
+[node name="MainMenuButton" type="Button" parent="Center/Panel/Outer/Actions"]
+custom_minimum_size = Vector2(190, 50)
+layout_mode = 2
+text = "MAIN MENU"
+
+[node name="ContinueButton" type="Button" parent="Center/Panel/Outer/Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "CONTINUE TO NIGHT MARKET"
+
+[connection signal="pressed" from="Center/Panel/Outer/Actions/ContinueButton" to="." method="_on_continue_button_pressed"]
+[connection signal="pressed" from="Center/Panel/Outer/Actions/MainMenuButton" to="." method="_on_main_menu_pressed"]

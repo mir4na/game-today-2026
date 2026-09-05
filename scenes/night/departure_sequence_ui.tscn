@@ -39,7 +39,7 @@ completion_atmosphere_text = "Thank you for playing Where Do You Belong?"
 passenger_departure_template = "%s leaves the night train here."
 next_button_text = "NEXT NIGHT STOP"
 complete_button_text = "COMPLETE JOURNEY"
-restart_button_text = "RESTART SHIFT"
+journey_continue_button_text = "CONTINUE"
 blessing_reward_template = "+%d BLESSINGS\n%d CORRECT SOUL DROP-OFFS • BALANCE %d"
 
 [node name="Background" type="ColorRect" parent="."]

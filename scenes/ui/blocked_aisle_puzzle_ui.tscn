@@ -36,6 +36,17 @@ loose_shelf_columns = 5
 loose_shelf_origin_offset = Vector2(24, 48)
 loose_piece_spacing = Vector2(12, 12)
 
+[node name="Shade" type="ColorRect" parent="."]
+editor_description = "Full-screen dim behind the luggage puzzle. Adjust alpha here to tune background darkness."
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.01, 0.015, 0.025, 0.72)
+
 [node name="PuzzleWindow" type="Control" parent="."]
 unique_name_in_owner = true
 editor_description = "Transparent scene-authored layout anchor. It intentionally has no wrapper panel so only text, suitcase pieces, and target blocks are rendered."
@@ -66,16 +77,17 @@ theme_override_font_sizes/font_size = 30
 text = "BLOCKED AISLE"
 horizontal_alignment = 1
 
-[node name="Instruction" type="Label" parent="PuzzleWindow"]
+[node name="Description" type="Label" parent="PuzzleWindow"]
 offset_left = 40.0
 offset_top = 78.0
 offset_right = 780.0
 offset_bottom = 109.0
+mouse_filter = 2
 theme_override_colors/font_color = Color(0.803922, 0.792157, 0.752941, 1)
 theme_override_colors/font_outline_color = Color(0.0352941, 0.0431373, 0.054902, 0.95)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 15
-text = "Drag the suitcase blocks onto every wooden board block."
+text = "Drag the luggage onto the rack to fill every space."
 horizontal_alignment = 1
 
 [node name="Shelf" type="Control" parent="PuzzleWindow"]
@@ -184,18 +196,6 @@ offset_right = 253.0
 offset_bottom = 189.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("BoardBlockStyle")
-
-[node name="Hint" type="Label" parent="PuzzleWindow"]
-offset_left = 40.0
-offset_top = 460.0
-offset_right = 780.0
-offset_bottom = 486.0
-theme_override_colors/font_color = Color(0.576471, 0.560784, 0.52549, 1)
-theme_override_colors/font_outline_color = Color(0.0352941, 0.0431373, 0.054902, 0.95)
-theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 13
-text = "DRAG TO PLACE  •  R RESET  •  ESC CLOSE"
-horizontal_alignment = 1
 
 [node name="Pieces" type="Control" parent="PuzzleWindow"]
 unique_name_in_owner = true
