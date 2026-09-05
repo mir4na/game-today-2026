@@ -22,19 +22,10 @@ animations = [{
 [node name="npc_6" instance=ExtResource("1_base")]
 uses_authored_character_artwork = true
 
-[node name="BodyTint" parent="CharacterScale/PassengerVisual" index="0"]
-visible = false
-
-[node name="LeftLeg" parent="CharacterScale/PassengerVisual" index="1"]
-visible = false
-
-[node name="RightLeg" parent="CharacterScale/PassengerVisual" index="2"]
-visible = false
-
-[node name="InteractionPromptAnchor" parent="CharacterScale/PassengerVisual" index="3"]
+[node name="InteractionPromptAnchor" parent="CharacterScale/PassengerVisual" index="0"]
 position = Vector2(-3.005, -122.671)
 
-[node name="NPCVisual" parent="CharacterScale/PassengerVisual" index="4"]
+[node name="NPCVisual" parent="CharacterScale/PassengerVisual" index="1"]
 position = Vector2(-1.237, -41.097)
 scale = Vector2(0.274815, 0.274815)
 sprite_frames = SubResource("SpriteFrames_npc")

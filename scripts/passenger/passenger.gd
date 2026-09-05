@@ -71,9 +71,9 @@ const PASSENGER_WALK_SPEED: float = 92.0
 @onready var _passenger_visual: Node2D = %PassengerVisual
 @onready var _animated_sprite: AnimatedSprite2D = %NPCVisual
 @onready var _static_artwork: Sprite2D = _passenger_visual.get_node_or_null("CharacterArtwork") as Sprite2D
-@onready var _body_tint: Node2D = %BodyTint
-@onready var _left_leg: Line2D = _passenger_visual.get_node("LeftLeg") as Line2D
-@onready var _right_leg: Line2D = _passenger_visual.get_node("RightLeg") as Line2D
+@onready var _body_tint: Node2D = _passenger_visual.get_node_or_null("BodyTint") as Node2D
+@onready var _left_leg: Line2D = _passenger_visual.get_node_or_null("LeftLeg") as Line2D
+@onready var _right_leg: Line2D = _passenger_visual.get_node_or_null("RightLeg") as Line2D
 @onready var _navigation_probe: Area2D = get_node_or_null(navigation_probe_path) as Area2D
 @onready var _navigation_probe_collision: CollisionShape2D = get_node_or_null(navigation_probe_collision_path) as CollisionShape2D
 
@@ -583,7 +583,8 @@ func _update_visual() -> void:
 	)
 	var body_tint: Color = data.body_color
 	body_tint.a = 1.0
-	_body_tint.modulate = body_tint if not uses_authored_character_artwork else Color.WHITE
+	if is_instance_valid(_body_tint):
+		_body_tint.modulate = body_tint
 	_passenger_visual.modulate = Color(1.0, 1.0, 1.0, ghost_alpha)
 	# The authored NPC sprites face left by default; the procedural fallback faces right.
 	var faces_left: bool = artwork_faces_left if animated_artwork_active else uses_authored_character_artwork
@@ -629,9 +630,12 @@ func _update_sprite_animation() -> bool:
 	if is_instance_valid(_static_artwork):
 		_static_artwork.visible = not has_animation
 	var show_procedural_artwork: bool = not has_animation and not uses_authored_character_artwork
-	_body_tint.visible = show_procedural_artwork
-	_left_leg.visible = show_procedural_artwork
-	_right_leg.visible = show_procedural_artwork
+	if is_instance_valid(_body_tint):
+		_body_tint.visible = show_procedural_artwork
+	if is_instance_valid(_left_leg):
+		_left_leg.visible = show_procedural_artwork
+	if is_instance_valid(_right_leg):
+		_right_leg.visible = show_procedural_artwork
 	if has_animation:
 		if _animated_sprite.animation != animation_name or not _animated_sprite.is_playing():
 			_animated_sprite.play(animation_name)

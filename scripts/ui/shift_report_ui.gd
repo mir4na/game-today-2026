@@ -5,7 +5,26 @@ extends Control
 signal continue_requested
 signal main_menu_requested
 
-@onready var _title: Label = %Title
+@export_category("Receipt Copy")
+@export var subtitle_template: String
+@export var reward_template: String
+@export var deduction_template: String
+@export var retained_template: String
+@export var amount_template: String
+@export var penalty_line_template: String
+@export_multiline var no_penalties_text: String
+@export_category("Passed Result")
+@export var passed_result_template: String
+@export var passed_result_color: Color
+@export_multiline var passed_payment_template: String
+@export var passed_button_text: String
+@export_category("Failed Result")
+@export var failed_result_template: String
+@export var failed_result_color: Color
+@export_multiline var failed_payment_text: String
+@export var failed_button_text: String
+
+@onready var _subtitle: Label = %Subtitle
 @onready var _correct: Label = %CorrectValue
 @onready var _wrong: Label = %WrongValue
 @onready var _anomaly: Label = %AnomalyValue
@@ -20,23 +39,23 @@ var _continue_sent: bool = false
 
 func open_report(day: int, retained: int, anomaly_total: int, penalties: PackedStringArray, award: Dictionary) -> void:
 	_continue_sent = false
-	_title.text = "DAY %d — PAYCHECK" % day
-	_correct.text = "%d × %d     +%d" % [award.correct_dropoffs, award.correct_rate, award.dropoff_reward]
-	_wrong.text = "%d × %d     −%d" % [award.wrong_dropoffs, award.wrong_rate, award.wrong_deduction]
-	_anomaly.text = "%d × %d     −%d" % [award.incorrect_anomalies, award.anomaly_rate, award.anomaly_deduction]
-	_retained.text = "%d / %d   •   NO BONUS OR PENALTY" % [retained, anomaly_total]
-	_net.text = "%d BLESSINGS" % int(award.net_earnings)
-	_target.text = "%d BLESSINGS" % int(award.pass_target)
+	_subtitle.text = subtitle_template % day
+	_correct.text = reward_template % [award.correct_dropoffs, award.correct_rate, award.dropoff_reward]
+	_wrong.text = deduction_template % [award.wrong_dropoffs, award.wrong_rate, award.wrong_deduction]
+	_anomaly.text = deduction_template % [award.incorrect_anomalies, award.anomaly_rate, award.anomaly_deduction]
+	_retained.text = retained_template % [retained, anomaly_total]
+	_net.text = amount_template % int(award.net_earnings)
+	_target.text = amount_template % int(award.pass_target)
 	var passed: bool = bool(award.passed)
 	var difference: int = int(award.net_earnings) - int(award.pass_target)
-	_result.text = "PASSED  •  %d above target" % difference if passed else "FAILED  •  %d below target" % -difference
-	_result.modulate = Color("9ed8ae") if passed else Color("ee9d91")
-	_payment.text = "%d Blessings added to your balance." % int(award.earned) if passed else "Restart this shift with your starting balance and supplies restored."
-	_continue_button.text = "CONTINUE TO NIGHT MARKET" if passed else "RESTART SHIFT"
+	_result.text = passed_result_template % difference if passed else failed_result_template % -difference
+	_result.add_theme_color_override(&"font_color", passed_result_color if passed else failed_result_color)
+	_payment.text = passed_payment_template % int(award.earned) if passed else failed_payment_text
+	_continue_button.text = passed_button_text if passed else failed_button_text
 	var lines := PackedStringArray()
 	for penalty: String in penalties:
-		lines.append("• %s" % penalty)
-	_breakdown.text = "\n".join(lines) if not lines.is_empty() else "No penalties issued."
+		lines.append(penalty_line_template % penalty)
+	_breakdown.text = "\n".join(lines) if not lines.is_empty() else no_penalties_text
 	_breakdown.scroll_to_line(0)
 	show()
 	_continue_button.grab_focus()

@@ -34,7 +34,7 @@
 [ext_resource type="Resource" uid="uid://58rs41etoeoh" path="res://data/passengers/npc_16_profile.tres" id="31"]
 [ext_resource type="Shader" uid="uid://df3d6yvnee1ie" path="res://shaders/radar_carriage_scan.gdshader" id="31_wcrab"]
 [ext_resource type="Resource" uid="uid://dya15ngoi2o77" path="res://data/passengers/npc_17_profile.tres" id="32"]
-[ext_resource type="PackedScene" path="res://scenes/passengers/passenger.tscn" id="34"]
+[ext_resource type="PackedScene" path="res://scenes/passengers/passenger_placeholder.tscn" id="34"]
 [ext_resource type="PackedScene" uid="uid://drn1e0xhyylll" path="res://scenes/systems/travel_foreground.tscn" id="36"]
 [ext_resource type="Resource" uid="uid://b37vfh7cgqlw5" path="res://data/daily_manifest_config.tres" id="37"]
 [ext_resource type="Shader" uid="uid://dq13hfpieecwx" path="res://shaders/night_atmosphere.gdshader" id="38"]

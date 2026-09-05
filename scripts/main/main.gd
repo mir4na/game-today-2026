@@ -18,7 +18,8 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export_category("Day Route")
 @export var day_route: PackedStringArray
 @export_category("Station Service")
-@export_range(5.0, 300.0, 1.0) var station_travel_seconds: float = 120.0
+## Travel time per route leg, excluding station cutscenes and pauses.
+@export var station_travel_durations_seconds: PackedFloat32Array = PackedFloat32Array([180.0, 120.0, 120.0, 60.0])
 @export_category("Passenger Placement")
 @export_range(120.0, 240.0, 5.0) var minimum_passenger_seat_spacing: float = 120.0
 @export_category("Maintenance Distractions")
@@ -235,10 +236,21 @@ func _next_day_station() -> String:
 	return day_route[clampi(_route_index + 1, 0, day_route.size() - 1)]
 
 func _next_arrival_minutes() -> float:
-	return minf(START_MINUTES + float(_route_index + 1) * station_travel_seconds, _final_arrival_minutes())
+	var arrival: float = START_MINUTES
+	for leg: int in range(mini(_route_index + 1, day_route.size() - 1)):
+		arrival += _get_station_travel_seconds(leg)
+	return arrival
 
 func _final_arrival_minutes() -> float:
-	return START_MINUTES + station_travel_seconds * float(day_route.size() - 1)
+	var arrival: float = START_MINUTES
+	for leg: int in range(day_route.size() - 1):
+		arrival += _get_station_travel_seconds(leg)
+	return arrival
+
+func _get_station_travel_seconds(leg: int) -> float:
+	if station_travel_durations_seconds.is_empty():
+		return 120.0
+	return maxf(5.0, station_travel_durations_seconds[clampi(leg, 0, station_travel_durations_seconds.size() - 1)])
 
 func _set_sky_cycle_progress(value: float) -> void:
 	var clamped_progress: float = clampf(value, 0.0, 1.0)
@@ -1560,7 +1572,7 @@ func _record_incorrect_anomaly(data: PassengerData, station: String) -> void:
 
 
 func _travel_duration_label() -> String:
-	var total_seconds: int = maxi(0, int(round(station_travel_seconds)))
+	var total_seconds: int = int(round(_get_station_travel_seconds(_route_index)))
 	return "%02d:%02d" % [total_seconds / 60, total_seconds % 60]
 
 func _set_player_control_for_state() -> void:

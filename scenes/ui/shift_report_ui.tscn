@@ -1,25 +1,40 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://lcrtqfabki5g"]
 
-[ext_resource type="Script" path="res://scripts/ui/shift_report_ui.gd" id="1"]
-[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
+[ext_resource type="Script" uid="uid://bm1u4mahvji27" path="res://scripts/ui/shift_report_ui.gd" id="1"]
+[ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="2"]
+[ext_resource type="Texture2D" uid="uid://bxutec74w1ulc" path="res://assets/ui/paycheck/Subtract.png" id="3_paper"]
+[ext_resource type="Texture2D" uid="uid://fkrulhyhaey" path="res://assets/ui/paycheck/Vector 77.png" id="4_solid"]
+[ext_resource type="Texture2D" uid="uid://bylfneerkadap" path="res://assets/ui/paycheck/Vector 78.png" id="5_dashed"]
+[ext_resource type="Texture2D" uid="uid://cvk26c47ysqne" path="res://assets/ui/paycheck/receipt.png" id="6_barcode"]
 
-[sub_resource type="StyleBoxFlat" id="ReportPanelStyle"]
-content_margin_left = 18.0
-content_margin_top = 14.0
-content_margin_right = 18.0
-content_margin_bottom = 14.0
-bg_color = Color(0.0901961, 0.129412, 0.176471, 1)
+[sub_resource type="StyleBoxFlat" id="ActionNormal"]
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
+bg_color = Color(0.2, 0.2, 0.24, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="ActionFocus"]
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
+bg_color = Color(0.28, 0.28, 0.32, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.772549, 0.639216, 0.423529, 1)
-corner_radius_top_left = 9
-corner_radius_top_right = 9
-corner_radius_bottom_right = 9
-corner_radius_bottom_left = 9
+border_color = Color(0.93, 0.89, 0.83, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
-[node name="ShiftReportUI" type="Control"]
+[node name="ShiftReportUI" type="Control" unique_id=1786341781]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -27,178 +42,401 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 theme = ExtResource("2")
 script = ExtResource("1")
+subtitle_template = "DAY %d  /  ALL AMOUNTS IN BLESSINGS"
+reward_template = "%d × %d     +%d"
+deduction_template = "%d × %d     −%d"
+retained_template = "%d / %d"
+amount_template = "%d BLESSINGS"
+penalty_line_template = "• %s"
+no_penalties_text = "No penalties issued."
+passed_result_template = "PASSED  •  %d above target"
+passed_result_color = Color(0.219608, 0.407843, 0.286275, 1)
+passed_payment_template = "%d Blessings added to your balance."
+passed_button_text = "CONTINUE TO NIGHT MARKET"
+failed_result_template = "FAILED  •  %d below target"
+failed_result_color = Color(0.701961, 0.25098, 0.25098, 1)
+failed_payment_text = "Restart this shift with your starting balance and supplies restored."
+failed_button_text = "RESTART SHIFT"
 
-[node name="Shade" type="ColorRect" parent="."]
+[node name="Shade" type="ColorRect" parent="." unique_id=437207411]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.01, 0.016, 0.027, 0.97)
+mouse_filter = 2
+color = Color(0.025, 0.025, 0.03, 0.88)
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="Center" type="CenterContainer" parent="." unique_id=79896254]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
-[node name="Panel" type="PanelContainer" parent="Center"]
-custom_minimum_size = Vector2(880, 650)
-layout_mode = 2
-theme_override_styles/panel = SubResource("ReportPanelStyle")
-
-[node name="Outer" type="VBoxContainer" parent="Center/Panel"]
+[node name="Stack" type="VBoxContainer" parent="Center" unique_id=1009697102]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Title" type="Label" parent="Center/Panel/Outer"]
-unique_name_in_owner = true
+[node name="Receipt" type="Control" parent="Center/Stack" unique_id=1542592152]
+editor_description = "Receipt artwork assembled from assets/ui/paycheck. Text is positioned in this 460 × 630 paper space; edit the child nodes to match replacement artwork."
+custom_minimum_size = Vector2(460, 630)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_font_sizes/font_size = 28
-text = "DAY 1 — PAYCHECK"
+mouse_filter = 2
+
+[node name="Paper" type="TextureRect" parent="Center/Stack/Receipt" unique_id=425061469]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_paper")
+expand_mode = 1
+
+[node name="TopRule" type="TextureRect" parent="Center/Stack/Receipt" unique_id=1153714708]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 44.0
+offset_right = 428.0
+offset_bottom = 47.0
+mouse_filter = 2
+texture = ExtResource("4_solid")
+expand_mode = 1
+
+[node name="Title" type="Label" parent="Center/Stack/Receipt" unique_id=336073120]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 32.0
+offset_top = 54.0
+offset_right = 428.0
+offset_bottom = 92.0
+theme_type_variation = &"HeaderLabel"
+theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 32
+text = "PAYCHECK"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Subtitle" type="Label" parent="Center/Panel/Outer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "DAYLIGHT SERVICE   /   ALL AMOUNTS IN BLESSINGS"
+[node name="Subtitle" type="Label" parent="Center/Stack/Receipt" unique_id=983172110]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 32.0
+offset_top = 94.0
+offset_right = 428.0
+offset_bottom = 112.0
+theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 12
+text = "DAY 1  /  ALL AMOUNTS IN BLESSINGS"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Rule" type="HSeparator" parent="Center/Panel/Outer"]
-layout_mode = 2
+[node name="HeaderRule" type="TextureRect" parent="Center/Stack/Receipt" unique_id=937801243]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 120.0
+offset_right = 428.0
+offset_bottom = 123.0
+mouse_filter = 2
+texture = ExtResource("5_dashed")
+expand_mode = 1
 
-[node name="Accounts" type="GridContainer" parent="Center/Panel/Outer"]
-layout_mode = 2
-columns = 2
-theme_override_constants/h_separation = 24
-theme_override_constants/v_separation = 12
-
-[node name="CorrectCaption" type="Label" parent="Center/Panel/Outer/Accounts"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 18
-text = "CORRECT DROP-OFFS"
-
-[node name="CorrectValue" type="Label" parent="Center/Panel/Outer/Accounts"]
-unique_name_in_owner = true
-layout_mode = 2
-horizontal_alignment = 2
-theme_override_font_sizes/font_size = 18
-text = "0 × 30     +0"
-
-[node name="WrongCaption" type="Label" parent="Center/Panel/Outer/Accounts"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 18
-text = "WRONG DROP-OFFS"
-
-[node name="WrongValue" type="Label" parent="Center/Panel/Outer/Accounts"]
-unique_name_in_owner = true
-layout_mode = 2
-horizontal_alignment = 2
-theme_override_font_sizes/font_size = 18
-text = "0 × 20     −0"
-
-[node name="AnomalyCaption" type="Label" parent="Center/Panel/Outer/Accounts"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 18
-text = "ANOMALIES INCORRECTLY STAMPED"
-
-[node name="AnomalyValue" type="Label" parent="Center/Panel/Outer/Accounts"]
-unique_name_in_owner = true
-layout_mode = 2
-horizontal_alignment = 2
-theme_override_font_sizes/font_size = 18
-text = "0 × 40     −0"
-
-[node name="RetainedCaption" type="Label" parent="Center/Panel/Outer/Accounts"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 14
-text = "ANOMALIES SAFELY RETAINED"
-
-[node name="RetainedValue" type="Label" parent="Center/Panel/Outer/Accounts"]
-unique_name_in_owner = true
-layout_mode = 2
-horizontal_alignment = 2
-theme_override_font_sizes/font_size = 14
-text = "0 / 4   •   NO BONUS OR PENALTY"
-
-[node name="NetCaption" type="Label" parent="Center/Panel/Outer/Accounts"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 18
-text = "NET EARNINGS"
-
-[node name="NetValue" type="Label" parent="Center/Panel/Outer/Accounts"]
-unique_name_in_owner = true
-layout_mode = 2
-horizontal_alignment = 2
-theme_override_font_sizes/font_size = 18
-text = "0 BLESSINGS"
-
-[node name="TargetCaption" type="Label" parent="Center/Panel/Outer/Accounts"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 18
-text = "REQUIRED TO PASS"
-
-[node name="TargetValue" type="Label" parent="Center/Panel/Outer/Accounts"]
-unique_name_in_owner = true
-layout_mode = 2
-horizontal_alignment = 2
-theme_override_font_sizes/font_size = 18
-text = "100 BLESSINGS"
-
-[node name="ResultLabel" type="Label" parent="Center/Panel/Outer"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 28
-text = "PASSED"
-horizontal_alignment = 1
-
-[node name="PaymentLabel" type="Label" parent="Center/Panel/Outer"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 15
-horizontal_alignment = 1
-
-[node name="DetailTitle" type="Label" parent="Center/Panel/Outer"]
-layout_mode = 2
+[node name="CorrectCaption" type="Label" parent="Center/Stack/Receipt" unique_id=31312748]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 142.0
+offset_right = 276.0
+offset_bottom = 166.0
+theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 16
-text = "PENALTY DETAILS"
+text = "CORRECT DROP-OFFS"
+vertical_alignment = 1
 
-[node name="Breakdown" type="RichTextLabel" parent="Center/Panel/Outer"]
+[node name="CorrectValue" type="Label" parent="Center/Stack/Receipt" unique_id=823350649]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 90)
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_font_sizes/normal_font_size = 15
+layout_mode = 0
+offset_left = 270.0
+offset_top = 142.0
+offset_right = 428.0
+offset_bottom = 166.0
+theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 16
+text = "0 × 30     +0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="WrongCaption" type="Label" parent="Center/Stack/Receipt" unique_id=34058644]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 174.0
+offset_right = 276.0
+offset_bottom = 198.0
+theme_override_colors/font_color = Color(0.7, 0.25, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 16
+text = "WRONG DROP-OFFS"
+vertical_alignment = 1
+
+[node name="WrongValue" type="Label" parent="Center/Stack/Receipt" unique_id=1969419892]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 270.0
+offset_top = 174.0
+offset_right = 428.0
+offset_bottom = 198.0
+theme_override_colors/font_color = Color(0.7, 0.25, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 16
+text = "0 × 20     −0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="AnomalyCaption" type="Label" parent="Center/Stack/Receipt" unique_id=591410445]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 206.0
+offset_right = 276.0
+offset_bottom = 230.0
+theme_override_colors/font_color = Color(0.7, 0.25, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 16
+text = "ANOMALY STAMPS"
+vertical_alignment = 1
+
+[node name="AnomalyValue" type="Label" parent="Center/Stack/Receipt" unique_id=333283711]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 270.0
+offset_top = 206.0
+offset_right = 428.0
+offset_bottom = 230.0
+theme_override_colors/font_color = Color(0.7, 0.25, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 16
+text = "0 × 40     −0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="RetainedCaption" type="Label" parent="Center/Stack/Receipt" unique_id=2025552026]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 246.0
+offset_right = 284.0
+offset_bottom = 268.0
+theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 13
+text = "ANOMALIES RETAINED"
+vertical_alignment = 1
+
+[node name="RetainedValue" type="Label" parent="Center/Stack/Receipt" unique_id=1350857997]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 294.0
+offset_top = 246.0
+offset_right = 428.0
+offset_bottom = 268.0
+theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 13
+text = "0 / 4"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="DetailTitle" type="Label" parent="Center/Stack/Receipt" unique_id=1416548424]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 287.0
+offset_right = 428.0
+offset_bottom = 307.0
+theme_type_variation = &"HeaderLabel"
+theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 12
+text = "PENALTY DETAILS"
+vertical_alignment = 1
+
+[node name="Breakdown" type="RichTextLabel" parent="Center/Stack/Receipt" unique_id=1002253214]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 32.0
+offset_top = 312.0
+offset_right = 428.0
+offset_bottom = 408.0
+theme_override_colors/default_color = Color(0.43, 0.37, 0.36, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/normal_font_size = 13
 text = "No penalties issued."
 
-[node name="Actions" type="HBoxContainer" parent="Center/Panel/Outer"]
+[node name="TotalRule" type="TextureRect" parent="Center/Stack/Receipt" unique_id=158001455]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 422.0
+offset_right = 428.0
+offset_bottom = 425.0
+mouse_filter = 2
+texture = ExtResource("4_solid")
+expand_mode = 1
+
+[node name="NetCaption" type="Label" parent="Center/Stack/Receipt" unique_id=2038894041]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 433.0
+offset_right = 222.0
+offset_bottom = 460.0
+theme_type_variation = &"HeaderLabel"
+theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 18
+text = "NET TOTAL"
+vertical_alignment = 1
+
+[node name="NetValue" type="Label" parent="Center/Stack/Receipt" unique_id=1453477585]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 219.0
+offset_top = 433.0
+offset_right = 428.0
+offset_bottom = 460.0
+theme_type_variation = &"HeaderLabel"
+theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 18
+text = "0 BLESSINGS"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="TargetCaption" type="Label" parent="Center/Stack/Receipt" unique_id=2001262666]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 465.0
+offset_right = 262.0
+offset_bottom = 487.0
+theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 13
+text = "REQUIRED TO PASS"
+vertical_alignment = 1
+
+[node name="TargetValue" type="Label" parent="Center/Stack/Receipt" unique_id=1291313750]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 254.0
+offset_top = 465.0
+offset_right = 428.0
+offset_bottom = 487.0
+theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 13
+text = "100 BLESSINGS"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="ResultLabel" type="Label" parent="Center/Stack/Receipt" unique_id=1005450703]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 32.0
+offset_top = 494.0
+offset_right = 428.0
+offset_bottom = 519.0
+theme_type_variation = &"HeaderLabel"
+theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 19
+text = "PASSED"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PaymentLabel" type="Label" parent="Center/Stack/Receipt" unique_id=1822000088]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 32.0
+offset_top = 519.0
+offset_right = 428.0
+offset_bottom = 550.0
+theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 13
+text = "0 Blessings added to your balance."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="BottomRule" type="TextureRect" parent="Center/Stack/Receipt" unique_id=485071202]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 556.0
+offset_right = 428.0
+offset_bottom = 559.0
+mouse_filter = 2
+texture = ExtResource("4_solid")
+expand_mode = 1
+
+[node name="Barcode" type="TextureRect" parent="Center/Stack/Receipt" unique_id=2087556874]
+layout_mode = 0
+offset_left = 154.0
+offset_top = 568.0
+offset_right = 306.0
+offset_bottom = 608.0
+mouse_filter = 2
+texture = ExtResource("6_barcode")
+expand_mode = 1
+
+[node name="Actions" type="HBoxContainer" parent="Center/Stack" unique_id=940146137]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="MainMenuButton" type="Button" parent="Center/Panel/Outer/Actions"]
-custom_minimum_size = Vector2(190, 50)
+[node name="MainMenuButton" type="Button" parent="Center/Stack/Actions" unique_id=1060566752]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(128, 42)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.93, 0.89, 0.83, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("ActionNormal")
+theme_override_styles/pressed = SubResource("ActionNormal")
+theme_override_styles/hover = SubResource("ActionFocus")
+theme_override_styles/focus = SubResource("ActionFocus")
 text = "MAIN MENU"
 
-[node name="ContinueButton" type="Button" parent="Center/Panel/Outer/Actions"]
+[node name="ContinueButton" type="Button" parent="Center/Stack/Actions" unique_id=1250957708]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 50)
+custom_minimum_size = Vector2(320, 42)
 layout_mode = 2
-size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.93, 0.89, 0.83, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("ActionNormal")
+theme_override_styles/pressed = SubResource("ActionNormal")
+theme_override_styles/hover = SubResource("ActionFocus")
+theme_override_styles/focus = SubResource("ActionFocus")
 text = "CONTINUE TO NIGHT MARKET"
 
-[connection signal="pressed" from="Center/Panel/Outer/Actions/ContinueButton" to="." method="_on_continue_button_pressed"]
-[connection signal="pressed" from="Center/Panel/Outer/Actions/MainMenuButton" to="." method="_on_main_menu_pressed"]
+[connection signal="pressed" from="Center/Stack/Actions/MainMenuButton" to="." method="_on_main_menu_pressed"]
+[connection signal="pressed" from="Center/Stack/Actions/ContinueButton" to="." method="_on_continue_button_pressed"]

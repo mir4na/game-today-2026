@@ -35,19 +35,10 @@ uses_authored_character_artwork = true
 [node name="CharacterScale" parent="." index="2"]
 material = SubResource("ShaderMaterial_o1b6i")
 
-[node name="BodyTint" parent="CharacterScale/PassengerVisual" index="0"]
-visible = false
-
-[node name="LeftLeg" parent="CharacterScale/PassengerVisual" index="1"]
-visible = false
-
-[node name="RightLeg" parent="CharacterScale/PassengerVisual" index="2"]
-visible = false
-
-[node name="InteractionPromptAnchor" parent="CharacterScale/PassengerVisual" index="3"]
+[node name="InteractionPromptAnchor" parent="CharacterScale/PassengerVisual" index="0"]
 position = Vector2(0.972, -122.671)
 
-[node name="NPCVisual" parent="CharacterScale/PassengerVisual" index="4"]
+[node name="NPCVisual" parent="CharacterScale/PassengerVisual" index="1"]
 position = Vector2(2.986, -38.5)
 scale = Vector2(0.271428, 0.271428)
 sprite_frames = SubResource("SpriteFrames_npc")
