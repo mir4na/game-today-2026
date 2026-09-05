@@ -10,9 +10,6 @@ signal closed
 @export var date_badge_template: String
 @export_multiline var today_document_template: String
 @export var completed_service_text: String
-@export_multiline var passenger_empty_document: String
-@export var passenger_header_template: String
-@export_multiline var passenger_line_template: String
 @export_multiline var evidence_document_template: String
 @export_multiline var evidence_empty_document: String
 @export_category("Guide Sections")
@@ -28,7 +25,6 @@ var _service_date: String = ""
 var _service_day_code: String = ""
 var _route_stations: PackedStringArray = PackedStringArray()
 var _route_index: int = 0
-var _passengers: Array[PassengerData] = []
 var _collected_newspaper: String = ""
 
 @onready var _day_badge: Label = %DayBadge
@@ -38,7 +34,6 @@ var _collected_newspaper: String = ""
 @onready var _content: RichTextLabel = %Content
 @onready var _today_button: Button = %TodayButton
 @onready var _procedure_button: Button = %ProcedureButton
-@onready var _records_button: Button = %RecordsButton
 @onready var _evidence_button: Button = %EvidenceButton
 @onready var _anomalies_button: Button = %AnomaliesButton
 @onready var _newspaper_button: Button = %NewspaperButton
@@ -52,7 +47,6 @@ func open_guidebook(
 	service_date: String,
 	service_day_code: String,
 	route_stations: PackedStringArray,
-	passengers: Array[PassengerData],
 	collected_newspaper: String,
 	route_index: int
 ) -> void:
@@ -61,7 +55,6 @@ func open_guidebook(
 	_service_date = service_date
 	_service_day_code = service_day_code
 	_route_stations = route_stations.duplicate()
-	_passengers = passengers.duplicate()
 	_collected_newspaper = collected_newspaper
 	_route_index = clampi(route_index, 0, maxi(0, _route_stations.size() - 1))
 	_day_badge.text = day_badge_template % _day_number
@@ -103,24 +96,6 @@ func _show_procedure() -> void:
 	_set_section(_procedure_button, "DAY PROCEDURE", procedure_document)
 
 
-func _show_records() -> void:
-	var document: String = passenger_empty_document
-	if not _passengers.is_empty():
-		var lines := PackedStringArray([passenger_header_template % _passengers.size()])
-		for data: PassengerData in _passengers:
-			lines.append(passenger_line_template % [
-				data.passenger_name.to_upper(),
-				data.age,
-				data.origin_station,
-				data.destination_station,
-				data.ticket_number,
-				data.ticket_train_number,
-				data.ticket_service_date,
-			])
-		document = "\n".join(lines)
-	_set_section(_records_button, "PASSENGER RECORDS", document)
-
-
 func _show_evidence() -> void:
 	var document: String = evidence_empty_document
 	if not _collected_newspaper.is_empty():
@@ -156,7 +131,6 @@ func _section_buttons() -> Array[Button]:
 	return [
 		_today_button,
 		_procedure_button,
-		_records_button,
 		_evidence_button,
 		_anomalies_button,
 		_newspaper_button,

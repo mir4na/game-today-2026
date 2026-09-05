@@ -160,3 +160,10 @@ func get_carriage_index_at_world_x(world_x: float) -> int:
 			nearest_distance = distance
 			nearest_index = carriage_index
 	return nearest_index
+
+
+func get_nearest_carriage_number_at_world_x(world_x: float) -> int:
+	if _carriages.is_empty():
+		return 0
+	var carriage_index: int = get_carriage_index_at_world_x(world_x)
+	return _carriages[carriage_index].carriage_number

@@ -25,12 +25,15 @@ shader = ExtResource("5_dmmtq")
 shader_parameter/scan_origin_uv = Vector2(0.5, 0.72)
 shader_parameter/scan_progress = 0.0
 shader_parameter/scan_aspect = 2.85
-shader_parameter/ring_width = 0.025
-shader_parameter/ring_softness = 0.018
+shader_parameter/front_width = 0.018
+shader_parameter/front_softness = 0.012
+shader_parameter/trail_length = 0.14
 shader_parameter/trail_strength = 0.2
-shader_parameter/grid_strength = 0.16
-shader_parameter/ring_color = Color(0.2, 0.9, 1, 0.92)
-shader_parameter/trail_color = Color(0.08, 0.48, 0.78, 0.32)
+shader_parameter/residue_strength = 0.05
+shader_parameter/grid_strength = 0.08
+shader_parameter/boundary_strength = 0.28
+shader_parameter/front_color = Color(0.28, 0.94, 1, 0.96)
+shader_parameter/trail_color = Color(0.06, 0.42, 0.72, 0.34)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_nm3wd"]
 resource_local_to_scene = true
@@ -45,12 +48,15 @@ shader = ExtResource("5_dmmtq")
 shader_parameter/scan_origin_uv = Vector2(0.5, 0.72)
 shader_parameter/scan_progress = 0.0
 shader_parameter/scan_aspect = 2.85
-shader_parameter/ring_width = 0.025
-shader_parameter/ring_softness = 0.018
+shader_parameter/front_width = 0.018
+shader_parameter/front_softness = 0.012
+shader_parameter/trail_length = 0.14
 shader_parameter/trail_strength = 0.2
-shader_parameter/grid_strength = 0.16
-shader_parameter/ring_color = Color(0.2, 0.9, 1, 0.92)
-shader_parameter/trail_color = Color(0.08, 0.48, 0.78, 0.32)
+shader_parameter/residue_strength = 0.05
+shader_parameter/grid_strength = 0.08
+shader_parameter/boundary_strength = 0.28
+shader_parameter/front_color = Color(0.28, 0.94, 1, 0.96)
+shader_parameter/trail_color = Color(0.06, 0.42, 0.72, 0.34)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yjxff"]
 size = Vector2(72.77644, 18.86792)

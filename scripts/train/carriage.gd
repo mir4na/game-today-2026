@@ -220,7 +220,7 @@ func play_radar_scan(world_origin: Vector2, duration: float) -> void:
 		0.0,
 		1.0,
 		maxf(duration, 0.05)
-	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	var active_tween: Tween = _radar_scan_tween
 	await active_tween.finished
 	if _radar_scan_tween != active_tween:

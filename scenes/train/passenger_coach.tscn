@@ -482,7 +482,7 @@ centered = false
 [node name="InteriorLighting" parent="ArtRoot" unique_id=1422164408 instance=ExtResource("10_lighting")]
 
 [node name="RadarEffectBounds" type="Control" parent="ArtRoot" unique_id=545678927]
-editor_description = "Per-coach radar boundary. Resize this Inspector-authored rectangle to keep the scan and anomaly glow inside the roof, walls, and floor."
+editor_description = "Inspector-authored carriage silhouette for radar VFX. Resize this rectangle to the interior roof, walls, and floor; the scan wave normalizes itself to these four sides."
 z_index = 20
 clip_contents = true
 layout_mode = 3
@@ -505,7 +505,7 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="RadarScanEffect" type="ColorRect" parent="ArtRoot/RadarEffectBounds" unique_id=398318395]
-editor_description = "Scene-authored one-coach radar sweep. Tune its ring, trail, grid, and colors in the assigned ShaderMaterial."
+editor_description = "Scene-authored one-coach radar sweep. Its wavefront grows from the player and follows all four sides of RadarEffectBounds. Tune front, trail, grid, boundary light, and colors in the assigned ShaderMaterial."
 visible = false
 material = ExtResource("12_radar_scan")
 layout_mode = 1

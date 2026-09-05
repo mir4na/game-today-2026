@@ -9,6 +9,10 @@ signal cleaned
 @export_range(64, 512, 1) var mask_resolution: int = 256
 @export_range(8.0, 80.0, 1.0) var brush_radius: float = 27.0
 @export_range(0.5, 1.0, 0.01) var completion_threshold: float = 0.98
+@export_category("Foam Trail")
+@export_range(0.5, 4.0, 0.05) var foam_lifetime_seconds: float = 1.8
+@export_range(0.75, 2.0, 0.05) var foam_brush_scale: float = 1.3
+@export_range(0.03, 0.2, 0.01) var foam_decay_update_seconds: float = 0.08
 @export_node_path("Node2D") var stain_markers_path: NodePath
 @export_node_path("ColorRect") var dirt_layer_path: NodePath
 @export_node_path("TextureRect") var cloth_path: NodePath
@@ -20,12 +24,16 @@ signal cleaned
 
 var _mask_image: Image
 var _mask_texture: ImageTexture
+var _foam_mask_image: Image
+var _foam_mask_texture: ImageTexture
 var _material: ShaderMaterial
 var _foam_material: ShaderMaterial
 var _sample_points: Array[Vector2i] = []
 var _wiping: bool = false
 var _completed: bool = false
 var _last_wipe_position: Vector2 = Vector2.ZERO
+var _foam_decay_accumulator: float = 0.0
+var _foam_present: bool = false
 
 
 func _ready() -> void:
@@ -41,6 +49,11 @@ func _ready() -> void:
 	_mask_image.fill(Color.BLACK)
 	_mask_texture = ImageTexture.create_from_image(_mask_image)
 	_material.set_shader_parameter(&"erase_mask", _mask_texture)
+	_foam_mask_image = Image.create(mask_resolution, mask_resolution, false, Image.FORMAT_L8)
+	_foam_mask_image.fill(Color.BLACK)
+	_foam_mask_texture = ImageTexture.create_from_image(_foam_mask_image)
+	if is_instance_valid(_foam_material):
+		_foam_material.set_shader_parameter(&"foam_mask", _foam_mask_texture)
 	call_deferred(&"_configure_scene_stains")
 	reset_cleaning()
 
@@ -51,10 +64,26 @@ func reset_cleaning() -> void:
 	if _mask_image != null:
 		_mask_image.fill(Color.BLACK)
 		_mask_texture.update(_mask_image)
+	if _foam_mask_image != null:
+		_foam_mask_image.fill(Color.BLACK)
+		_foam_mask_texture.update(_foam_mask_image)
+	_foam_decay_accumulator = 0.0
+	_foam_present = false
 	if is_instance_valid(_cloth):
 		_cloth.hide()
 	_set_foam(Vector2.ZERO, false)
 	cleaning_progress.emit(0.0)
+
+
+func _process(delta: float) -> void:
+	if not _foam_present or _foam_mask_image == null:
+		return
+	_foam_decay_accumulator += delta
+	if _foam_decay_accumulator < foam_decay_update_seconds:
+		return
+	var elapsed: float = _foam_decay_accumulator
+	_foam_decay_accumulator = 0.0
+	_decay_foam_mask(elapsed)
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -112,8 +141,12 @@ func _paint_segment(from: Vector2, to: Vector2) -> void:
 	var step_distance: float = maxf(brush_radius * 0.32, 2.0)
 	var steps: int = maxi(1, ceili(distance / step_distance))
 	for step: int in range(steps + 1):
-		_paint_circle(from.lerp(to, float(step) / float(steps)))
+		var wipe_position: Vector2 = from.lerp(to, float(step) / float(steps))
+		_paint_circle(wipe_position)
+		_paint_foam_circle(wipe_position)
 	_mask_texture.update(_mask_image)
+	_foam_mask_texture.update(_foam_mask_image)
+	_foam_present = true
 	var progress: float = _calculate_progress()
 	cleaning_progress.emit(progress)
 	if progress >= completion_threshold:
@@ -156,6 +189,52 @@ func _paint_circle(local_center: Vector2) -> void:
 				_mask_image.set_pixel(image_x, image_y, Color.WHITE)
 
 
+func _paint_foam_circle(local_center: Vector2) -> void:
+	var image_center := Vector2(
+		local_center.x / size.x * float(mask_resolution),
+		local_center.y / size.y * float(mask_resolution)
+	)
+	var foam_radius: float = brush_radius * foam_brush_scale
+	var radius_x: float = foam_radius / size.x * float(mask_resolution)
+	var radius_y: float = foam_radius / size.y * float(mask_resolution)
+	var min_x: int = clampi(floori(image_center.x - radius_x), 0, mask_resolution - 1)
+	var max_x: int = clampi(ceili(image_center.x + radius_x), 0, mask_resolution - 1)
+	var min_y: int = clampi(floori(image_center.y - radius_y), 0, mask_resolution - 1)
+	var max_y: int = clampi(ceili(image_center.y + radius_y), 0, mask_resolution - 1)
+	for image_y: int in range(min_y, max_y + 1):
+		for image_x: int in range(min_x, max_x + 1):
+			var normalized := Vector2(
+				(float(image_x) - image_center.x) / maxf(radius_x, 1.0),
+				(float(image_y) - image_center.y) / maxf(radius_y, 1.0)
+			)
+			var distance_squared: float = normalized.length_squared()
+			if distance_squared > 1.0:
+				continue
+			var strength: float = clampf(1.0 - distance_squared * 0.45, 0.0, 1.0)
+			var current_strength: float = _foam_mask_image.get_pixel(image_x, image_y).r
+			if strength > current_strength:
+				_foam_mask_image.set_pixel(image_x, image_y, Color(strength, strength, strength, 1.0))
+
+
+func _decay_foam_mask(elapsed: float) -> void:
+	var decay_amount: int = maxi(1, roundi(255.0 * elapsed / maxf(foam_lifetime_seconds, 0.01)))
+	var data: PackedByteArray = _foam_mask_image.get_data()
+	var remaining: bool = false
+	for index: int in range(data.size()):
+		var faded_value: int = maxi(0, int(data[index]) - decay_amount)
+		data[index] = faded_value
+		remaining = remaining or faded_value > 0
+	_foam_mask_image.set_data(
+		mask_resolution,
+		mask_resolution,
+		false,
+		Image.FORMAT_L8,
+		data
+	)
+	_foam_mask_texture.update(_foam_mask_image)
+	_foam_present = remaining
+
+
 func _calculate_progress() -> float:
 	if _sample_points.is_empty():
 		return 0.0
@@ -180,4 +259,4 @@ func _set_foam(pointer_position: Vector2, active: bool) -> void:
 		return
 	var safe_size := Vector2(maxf(size.x, 1.0), maxf(size.y, 1.0))
 	_foam_material.set_shader_parameter(&"foam_center", pointer_position / safe_size)
-	_foam_material.set_shader_parameter(&"foam_active", 1.0 if active else 0.0)
+	_foam_material.set_shader_parameter(&"brush_active", 1.0 if active else 0.0)

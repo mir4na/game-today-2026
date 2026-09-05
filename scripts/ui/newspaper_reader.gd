@@ -11,11 +11,15 @@ signal close_requested
 @export var secondary_headline_paths: Array[NodePath] = []
 @export var secondary_body_paths: Array[NodePath] = []
 @export var portrait_paths: Array[NodePath] = []
+@export_category("Presentation")
+@export_node_path("AnimationPlayer") var presentation_player_path: NodePath
+@export var presentation_animation: StringName = &"present"
 
 var _variants: Array[Control] = []
 var _portraits: Array[Sprite2D] = []
 var _selected_variant: int = 0
 var _portrait_texture: Texture2D
+@onready var _presentation_player: AnimationPlayer = get_node_or_null(presentation_player_path) as AnimationPlayer
 
 
 func _ready() -> void:
@@ -49,6 +53,18 @@ func set_content(headline: String, primary_body: String, secondary_headline: Str
 	_set_rich_text(primary_body_paths, primary_body)
 	_set_plain_text(secondary_headline_paths, secondary_headline)
 	_set_rich_text(secondary_body_paths, secondary_body)
+
+
+func present() -> void:
+	if not is_instance_valid(_presentation_player):
+		push_warning("Newspaper Reader has no Inspector-configured presentation AnimationPlayer.")
+		return
+	if not _presentation_player.has_animation(presentation_animation):
+		push_warning("Newspaper Reader presentation animation '%s' was not found." % presentation_animation)
+		return
+	_presentation_player.stop()
+	_presentation_player.play(presentation_animation)
+	_presentation_player.advance(0.0)
 
 
 func set_portrait(texture: Texture2D) -> void:

@@ -1,7 +1,8 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/station_stop_cutscene_ui.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/ui/station_cutscene_actor.tscn" id="2"]
+[ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="3_theme"]
 
 [sub_resource type="Animation" id="Animation_letterbox_reset"]
 resource_name = "RESET"
@@ -202,6 +203,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
+theme = ExtResource("3_theme")
 script = ExtResource("1")
 opening_heading_template = "%s"
 exchange_heading_template = "%s"
@@ -444,6 +446,7 @@ mouse_filter = 2
 
 [node name="HeadingLabel" type="Label" parent="CinematicTitle"]
 unique_name_in_owner = true
+theme_type_variation = &"HeaderLabel"
 layout_mode = 1
 anchor_top = 0.5
 anchor_right = 1.0

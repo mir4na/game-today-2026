@@ -2,6 +2,8 @@ class_name GameHUD
 extends CanvasLayer
 ## Persistent, low-profile HUD. Modal screens live in sibling UI scenes.
 
+signal guidebook_requested
+
 @export_category("Inspector Copy")
 @export var clock_template: String = "%02d:%02d %s"
 @export var tool_inventory_template: String = "BLESSINGS %d   •   [R] RADAR ×%d   •   AUDIT ×%d   •   SPEED LV.%d"
@@ -58,11 +60,11 @@ func set_clock(total_minutes: int) -> void:
 		hour_12 = 12
 	_clock_label.text = clock_template % [hour_12, minute, suffix]
 
-func set_current_carriage(index: int) -> void:
-	_minimap.set_current_carriage(index)
+func set_current_carriage_number(carriage_number: int) -> void:
+	_minimap.set_current_carriage_number(carriage_number)
 
-func set_passenger_counts(counts: PackedInt32Array) -> void:
-	_minimap.set_passenger_counts(counts)
+func set_passenger_counts_by_carriage(counts: Dictionary) -> void:
+	_minimap.set_passenger_counts_by_carriage(counts)
 
 
 func set_market_tool_inventory(snapshot: Dictionary) -> void:
@@ -282,6 +284,10 @@ func set_cutscene_hidden(value: bool) -> void:
 
 func set_radar_hidden(value: bool) -> void:
 	_root.visible = not value
+
+
+func _on_guidebook_button_pressed() -> void:
+	guidebook_requested.emit()
 
 func set_night_walk_mode() -> void:
 	_clock_panel.visible = false

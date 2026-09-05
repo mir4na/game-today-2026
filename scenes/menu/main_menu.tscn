@@ -85,6 +85,7 @@ theme_override_font_sizes/font_size = 16
 text = "A CONDUCTOR'S LAST ROUTE"
 
 [node name="GameTitle" type="Label" parent="SafeMargin/Layout/TitleBlock"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.937255, 0.839216, 0.623529, 1)
 theme_override_constants/line_spacing = -8
@@ -123,6 +124,7 @@ theme_override_constants/separation = 17
 alignment = 1
 
 [node name="Header" type="Label" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 24
@@ -183,6 +185,7 @@ layout_mode = 2
 theme_override_constants/separation = 17
 
 [node name="Header" type="Label" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 26

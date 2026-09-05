@@ -61,7 +61,6 @@ var _daily_manifest: Array[PassengerData] = []
 var _seat_occupant_by_slot: Dictionary = {}
 var _seat_slot_by_passenger: Dictionary = {}
 var _boarding_passengers: Array[Passenger] = []
-var _checked_passenger_data: Array[PassengerData] = []
 var _interactables: Array[Interactable] = []
 var _collected_departure_statements: Dictionary = {}
 var _runtime_puzzle: DeparturePuzzleData
@@ -235,6 +234,26 @@ func _set_sky_cycle_progress(value: float) -> void:
 	if sky_material != null:
 		sky_material.set_shader_parameter(&"cycle_progress", clamped_progress)
 
+
+func _input(event: InputEvent) -> void:
+	# Tab is also Godot's default UI focus-navigation key. Handle this global UI
+	# shortcut before focused Control nodes consume it, while still respecting
+	# gameplay modal ownership.
+	if not event.is_action_pressed(&"guidebook"):
+		return
+	if event is InputEventKey and event.echo:
+		return
+	if _radar_scan_active or _night_statement_active:
+		return
+	if not _guidebook_ui.visible and (
+		_active_modal != null
+		or state not in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
+	):
+		return
+	_toggle_guidebook()
+	get_viewport().set_input_as_handled()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if _radar_scan_active:
 		if event.is_pressed():
@@ -251,13 +270,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
 	):
 		_use_carriage_radar()
-		get_viewport().set_input_as_handled()
-		return
-	if event.is_action_pressed(&"guidebook"):
-		if _guidebook_ui.visible:
-			_guidebook_ui.request_close()
-		elif _active_modal == null and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]:
-			_open_guidebook()
 		get_viewport().set_input_as_handled()
 		return
 	if not event.is_action_pressed(&"ui_cancel"):
@@ -356,7 +368,7 @@ func _prepare_newspaper_edition() -> void:
 		var subject: PassengerData = _find_newspaper_subject(_daily_rng)
 		if subject != null:
 			_newspaper_subject_name = subject.passenger_name
-			_newspaper_document = _document_overlay.compose_matching_death_newspaper(subject, day_route[0])
+			_newspaper_document = _document_overlay.compose_matching_death_newspaper(subject, day_route[0], _daily_rng)
 			return
 		push_error("Matching-death newspaper has no generated newspaper anomaly; using the external-death edition instead.")
 		_newspaper_case = NewspaperCase.EXTERNAL_DEATH
@@ -368,7 +380,7 @@ func _prepare_newspaper_edition() -> void:
 			excluded_passenger_names,
 			"external-death newspaper"
 		)
-		_newspaper_document = _document_overlay.compose_external_death_newspaper(_newspaper_subject_name, day_route[0])
+		_newspaper_document = _document_overlay.compose_external_death_newspaper(_newspaper_subject_name, day_route[0], _daily_rng)
 		return
 
 	_newspaper_subject_name = _document_overlay.get_random_outside_subject(
@@ -377,7 +389,7 @@ func _prepare_newspaper_edition() -> void:
 		excluded_passenger_names,
 		"non-death newspaper"
 	)
-	_newspaper_document = _document_overlay.compose_non_death_newspaper(_newspaper_subject_name, day_route[0])
+	_newspaper_document = _document_overlay.compose_non_death_newspaper(_newspaper_subject_name, day_route[0], _daily_rng)
 
 
 func _choose_random_newspaper_portrait() -> Texture2D:
@@ -925,8 +937,6 @@ func _on_passenger_documents_requested(passenger: Passenger) -> void:
 	_open_passenger_documents(passenger)
 
 func _open_passenger_documents(passenger: Passenger) -> void:
-	if not _checked_passenger_data.has(passenger.data):
-		_checked_passenger_data.append(passenger.data)
 	passenger.documents_checked = true
 	_inspected_passenger = passenger
 	_inspected_passenger.set_inspection_paused(true)
@@ -1260,10 +1270,20 @@ func _open_guidebook() -> void:
 		manifest_config.service_date_text,
 		manifest_config.ticket_day_code,
 		day_route,
-		_checked_passenger_data,
 		_newspaper_document if _newspaper_read else "",
 		_route_index
 	)
+
+
+func _toggle_guidebook() -> void:
+	if _guidebook_ui.visible:
+		_guidebook_ui.request_close()
+	elif _active_modal == null and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]:
+		_open_guidebook()
+
+
+func _on_guidebook_requested() -> void:
+	_toggle_guidebook()
 
 func _on_modal_closed() -> void:
 	if is_instance_valid(_inspected_passenger):
@@ -1556,17 +1576,17 @@ func _set_player_control_for_state() -> void:
 func _update_carriage_indicator() -> void:
 	if not is_instance_valid(_player):
 		return
-	var carriage_index: int = _train.get_carriage_index_at_world_x(_player.global_position.x)
-	_hud.set_current_carriage(carriage_index)
+	var carriage_number: int = _train.get_nearest_carriage_number_at_world_x(_player.global_position.x)
+	_hud.set_current_carriage_number(carriage_number)
 
 func _update_passenger_minimap() -> void:
-	var counts := PackedInt32Array([0, 0, 0, 0, 0])
+	var counts_by_carriage: Dictionary = {}
 	for passenger: Passenger in _passengers:
 		if not _is_active_passenger(passenger):
 			continue
-		var minimap_index: int = clampi(5 - passenger.get_runtime_carriage(), 1, 4)
-		counts[minimap_index] += 1
-	_hud.set_passenger_counts(counts)
+		var carriage_number: int = passenger.get_runtime_carriage()
+		counts_by_carriage[carriage_number] = int(counts_by_carriage.get(carriage_number, 0)) + 1
+	_hud.set_passenger_counts_by_carriage(counts_by_carriage)
 
 func _set_passenger_ai_enabled(value: bool) -> void:
 	for passenger: Passenger in _passengers:

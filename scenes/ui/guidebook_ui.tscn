@@ -119,9 +119,6 @@ train_badge_template = "TRAIN  %s"
 date_badge_template = "%s"
 today_document_template = "[font_size=22][b]CURRENT ASSIGNMENT[/b][/font_size]\n\n[b]Day[/b]  %d\n[b]Active train[/b]  %s\n[b]Service date[/b]  %s\n[b]Day code[/b]  %s\n\n[b]Current station[/b]  %s\n[b]Next station[/b]  %s\n\n[font_size=20][b]DAY ROUTE[/b][/font_size]\n\n%s\n\n[color=#6b4a35]The values on this page update with the active manifest. You never need to memorize the train number, date, or route order.[/color]"
 completed_service_text = "DAY SERVICE COMPLETE"
-passenger_empty_document = "[font_size=20][b]NO RECORDS YET[/b][/font_size]\n\nInspect a passenger's ID card and ticket to copy their visible document details here. The guidebook never records hidden life status or solves an anomaly for you."
-passenger_header_template = "[font_size=20][b]INSPECTED DOCUMENTS — %d[/b][/font_size]\n[color=#6b4a35]Visible document details are stored automatically so they do not need to be memorized.[/color]\n"
-passenger_line_template = "[b]%s[/b]  •  Age %d\n%s → %s\nTicket %s  •  Train %s  •  %s\n"
 evidence_document_template = "[font_size=20][b]THE AFTERNOON DISPATCH[/b][/font_size]\n\n%s\n\n[color=#6b4a35]The edition remains unchanged when reread.[/color]"
 evidence_empty_document = "[font_size=20][b]NO EVIDENCE COLLECTED[/b][/font_size]\n\nRead the newspaper aboard the train to preserve its current edition here. Visual observations are intentionally not labelled as correct or incorrect."
 procedure_document = "[font_size=20][b]1 — INSPECT[/b][/font_size]\nApproach a passenger and press [b]E[/b]. Compare their ID card and ticket. Press [b]Q[/b] to switch documents.\n\n[font_size=20][b]2 — DECIDE[/b][/font_size]\nPress [b]SPACE[/b] on the ticket to apply or remove a disembark stamp. A stamp assigns that passenger to the next daylight station.\n\n[font_size=20][b]3 — PROTECT NIGHT SERVICE[/b][/font_size]\nDo not stamp a suspected anomaly. An anomaly belongs to the night train. A mistaken anomaly stamp is rejected at the station, creates a penalty, and the passenger remains aboard.\n\n[font_size=20][b]SERVICE VIOLATION[/b][/font_size]\nA living passenger whose ticket shows another train number is a wrong-train boarder, not an anomaly. Stamp their ticket so they leave at the next station.\n\n[font_size=20][b]TERMINAL[/b][/font_size]\nLiving passengers still aboard leave automatically. The paycheck then reports correct drop-offs, retained anomalies, and penalties."
@@ -173,6 +170,7 @@ layout_mode = 2
 theme_override_constants/separation = 8
 
 [node name="BookTitle" type="Label" parent="Center/BookCover/Pages/LeftPage/Margin/Column"]
+theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.243137, 0.145098, 0.0941176, 1)
 theme_override_font_sizes/font_size = 24
@@ -252,20 +250,6 @@ theme_override_styles/pressed = SubResource("SectionButtonHoverStyle")
 theme_override_styles/focus = SubResource("SectionButtonHoverStyle")
 theme_override_styles/disabled = SubResource("SectionButtonActiveStyle")
 text = "DAY PROCEDURE"
-alignment = 0
-
-[node name="RecordsButton" type="Button" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Sections"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.223529, 0.137255, 0.0941176, 1)
-theme_override_colors/font_disabled_color = Color(0.968627, 0.901961, 0.764706, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("SectionButtonStyle")
-theme_override_styles/hover = SubResource("SectionButtonHoverStyle")
-theme_override_styles/pressed = SubResource("SectionButtonHoverStyle")
-theme_override_styles/focus = SubResource("SectionButtonHoverStyle")
-theme_override_styles/disabled = SubResource("SectionButtonActiveStyle")
-text = "PASSENGER RECORDS"
 alignment = 0
 
 [node name="EvidenceButton" type="Button" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Sections"]
@@ -371,6 +355,7 @@ theme_override_constants/separation = 12
 layout_mode = 2
 
 [node name="PageTitle" type="Label" parent="Center/BookCover/Pages/RightPage/Margin/Column/Header"]
+theme_type_variation = &"HeaderLabel"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -412,7 +397,6 @@ horizontal_alignment = 2
 
 [connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/TodayButton" to="." method="_show_today"]
 [connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/ProcedureButton" to="." method="_show_procedure"]
-[connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/RecordsButton" to="." method="_show_records"]
 [connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/EvidenceButton" to="." method="_show_evidence"]
 [connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/AnomaliesButton" to="." method="_show_anomalies"]
 [connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/NewspaperButton" to="." method="_show_newspaper"]

@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/day_intro_ui.gd" id="1"]
+[ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
 
 [node name="DayIntroUI" type="Control"]
 visible = false
@@ -12,6 +13,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
+theme = ExtResource("2_theme")
 script = ExtResource("1")
 day_title_template = "DAY %d"
 
@@ -41,6 +43,7 @@ theme_override_constants/separation = 13
 
 [node name="DayLabel" type="Label" parent="Center/Content"]
 unique_name_in_owner = true
+theme_type_variation = &"HeaderLabel"
 custom_minimum_size = Vector2(600, 88)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.94, 0.88, 0.76, 1)

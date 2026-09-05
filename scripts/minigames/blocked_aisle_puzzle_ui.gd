@@ -16,19 +16,14 @@ signal completed(event: Node)
 @export_range(1, 12, 1) var maximum_generated_pieces: int = 6
 @export_range(1, 6, 1) var minimum_distinct_piece_types: int = 2
 @export_range(1, 12, 1) var maximum_duplicate_per_scene: int = 3
-@export_category("Loose Shelf Layout")
+@export_category("Loose Block Layout")
 @export_range(2, 8, 1) var loose_shelf_columns: int = 5
 @export var loose_shelf_origin_offset: Vector2 = Vector2(24.0, 48.0)
 @export var loose_piece_spacing: Vector2 = Vector2(12.0, 12.0)
-@export_category("Inspector Copy")
-@export var progress_template: String = "%d / %d CELLS PACKED"
 
-@onready var _window: Control = %PuzzleWindow
 @onready var _shelf: Control = %Shelf
 @onready var _target_board: Control = %TargetBoard
 @onready var _pieces_root: Control = %Pieces
-@onready var _progress_label: Label = %ProgressLabel
-@onready var _success_label: Label = %SuccessLabel
 
 var _active_event: Node
 var _pieces: Array[Control] = []
@@ -41,7 +36,6 @@ var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	_rng.randomize()
-	_update_progress()
 
 
 func open_puzzle(event: Node) -> void:
@@ -52,7 +46,6 @@ func open_puzzle(event: Node) -> void:
 		_arrange_piece_homes()
 		_reset_pieces()
 	show()
-	_success_label.hide()
 	_completed = false
 
 
@@ -96,7 +89,6 @@ func _on_piece_released(piece: Control, _pointer_position: Vector2, _grab_offset
 		_place_piece(piece, cell, occupied_offsets)
 	else:
 		piece.position = _home_positions[piece]
-	_update_progress()
 	_check_completion()
 
 
@@ -142,8 +134,6 @@ func _reset_pieces() -> void:
 	for piece: Control in _pieces:
 		piece.position = _home_positions[piece]
 		piece.z_index = 1
-	_success_label.hide()
-	_update_progress()
 
 
 func _rebuild_piece_set() -> void:
@@ -320,17 +310,11 @@ func _get_piece_cell_offsets(piece: Control) -> Array[Vector2i]:
 	return cells
 
 
-func _update_progress() -> void:
-	if is_instance_valid(_progress_label):
-		_progress_label.text = progress_template % [_occupied_cells.size(), grid_columns * grid_rows]
-
-
 func _check_completion() -> void:
 	if _completed or _occupied_cells.size() < grid_columns * grid_rows:
 		return
 	_completed = true
-	_success_label.show()
-	await get_tree().create_timer(0.45).timeout
+	await get_tree().create_timer(0.25).timeout
 	if not is_inside_tree():
 		return
 	hide()

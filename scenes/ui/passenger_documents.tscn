@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/passenger_documents.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://d1e8ff3y77utw" path="res://scenes/ui/id_card.tscn" id="2_id"]
 [ext_resource type="PackedScene" uid="uid://d4majvc8ogbfm" path="res://scenes/ui/passenger_ticket.tscn" id="3_ticket"]
+[ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="4_theme"]
 
 [sub_resource type="Animation" id="Animation_document_reset"]
 resource_name = "RESET"
@@ -244,6 +245,7 @@ _data = {
 }
 
 [node name="PassengerDocuments" type="Control"]
+theme = ExtResource("4_theme")
 custom_minimum_size = Vector2(760, 520)
 layout_mode = 3
 anchors_preset = 0

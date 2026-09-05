@@ -15,6 +15,156 @@
 [ext_resource type="Texture2D" uid="uid://biw0f3wxnqss1" path="res://assets/characters/Where Do You Belong_/NPC1.png" id="13_placeholder_npc"]
 [ext_resource type="Material" path="res://resources/materials/newspaper_full_image_censor.tres" id="14_full_image_censor"]
 
+[sub_resource type="Animation" id="Animation_present_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("Type1:position")
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Type1:rotation")
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Type1:scale")
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.84, 0.84)]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("Type1:self_modulate")
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("Type2:position")
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+tracks/5/type = "value"
+tracks/5/path = NodePath("Type2:rotation")
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/6/type = "value"
+tracks/6/path = NodePath("Type2:scale")
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.84, 0.84)]
+}
+tracks/7/type = "value"
+tracks/7/path = NodePath("Type2:self_modulate")
+tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_present"]
+resource_name = "present"
+length = 0.86
+tracks/0/type = "value"
+tracks/0/path = NodePath("Type1:position")
+tracks/0/interp = 2
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.68, 0.86),
+"transitions": PackedFloat32Array(1.35, 0.65, 1),
+"update": 0,
+"values": [Vector2(0, 760), Vector2(0, -16), Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Type1:rotation")
+tracks/1/interp = 2
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.68, 0.86),
+"transitions": PackedFloat32Array(1.25, 0.72, 1),
+"update": 0,
+"values": [0.018, -0.004, 0.0]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Type1:scale")
+tracks/2/interp = 2
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.68, 0.86),
+"transitions": PackedFloat32Array(1.3, 0.7, 1),
+"update": 0,
+"values": [Vector2(0.79, 0.79), Vector2(0.855, 0.855), Vector2(0.84, 0.84)]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("Type1:self_modulate")
+tracks/3/interp = 2
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.26, 0.86),
+"transitions": PackedFloat32Array(1.2, 0.8, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0.72), Color(1, 1, 1, 1), Color(1, 1, 1, 1)]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("Type2:position")
+tracks/4/interp = 2
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.68, 0.86),
+"transitions": PackedFloat32Array(1.35, 0.65, 1),
+"update": 0,
+"values": [Vector2(0, 760), Vector2(0, -16), Vector2(0, 0)]
+}
+tracks/5/type = "value"
+tracks/5/path = NodePath("Type2:rotation")
+tracks/5/interp = 2
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 0.68, 0.86),
+"transitions": PackedFloat32Array(1.25, 0.72, 1),
+"update": 0,
+"values": [0.018, -0.004, 0.0]
+}
+tracks/6/type = "value"
+tracks/6/path = NodePath("Type2:scale")
+tracks/6/interp = 2
+tracks/6/keys = {
+"times": PackedFloat32Array(0, 0.68, 0.86),
+"transitions": PackedFloat32Array(1.3, 0.7, 1),
+"update": 0,
+"values": [Vector2(0.79, 0.79), Vector2(0.855, 0.855), Vector2(0.84, 0.84)]
+}
+tracks/7/type = "value"
+tracks/7/path = NodePath("Type2:self_modulate")
+tracks/7/interp = 2
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 0.26, 0.86),
+"transitions": PackedFloat32Array(1.2, 0.8, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0.72), Color(1, 1, 1, 1), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_presentation"]
+_data = {
+&"RESET": SubResource("Animation_present_reset"),
+&"present": SubResource("Animation_present")
+}
+
 [node name="NewspaperReader" type="Control" unique_id=1881011231]
 custom_minimum_size = Vector2(993, 681)
 layout_mode = 3
@@ -29,6 +179,8 @@ primary_body_paths = Array[NodePath]([NodePath("Type1/Desc1"), NodePath("Type2/D
 secondary_headline_paths = Array[NodePath]([NodePath(""), NodePath("Type2/Subtitle")])
 secondary_body_paths = Array[NodePath]([NodePath("Type1/Desc2"), NodePath("Type2/Desc2")])
 portrait_paths = Array[NodePath]([NodePath("Type1/NewspaperPicture/CensoredImage/NpcPicture"), NodePath("Type2/NewspaperPicture/CensoredImage/NpcPicture")])
+presentation_player_path = NodePath("PresentationAnimation")
+presentation_animation = &"present"
 
 [node name="Type1" type="Control" parent="." unique_id=1992626553]
 editor_description = "Newspaper visual type 1. Adjust its artwork and article bounds here through the Inspector."
@@ -38,7 +190,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(0.6, 0.6)
+scale = Vector2(0.84, 0.84)
 pivot_offset = Vector2(496.5, 340.5)
 mouse_filter = 1
 
@@ -175,7 +327,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(0.6, 0.6)
+scale = Vector2(0.84, 0.84)
 pivot_offset = Vector2(496.5, 340.5)
 mouse_filter = 1
 
@@ -213,7 +365,7 @@ offset_bottom = 237.00003
 theme_override_colors/font_color = Color(0.7411765, 0.6666667, 0.5921569, 1)
 theme_override_fonts/font = ExtResource("3_15k6j")
 theme_override_font_sizes/font_size = 32
-text = "MORNING FIRE CLAIMS LIFE"
+text = "RIVER WAREHOUSE COLLAPSES"
 
 [node name="Desc1" type="RichTextLabel" parent="Type2" unique_id=1227118053]
 layout_mode = 0
@@ -228,7 +380,7 @@ theme_override_fonts/bold_font = ExtResource("3_15k6j")
 theme_override_font_sizes/normal_font_size = 25
 theme_override_font_sizes/bold_font_size = 25
 bbcode_enabled = true
-text = "A workplace fire broke out shortly after sunrise. Night staff reported smoke spreading from a rear storage room before the alarm sounded. Authorities confirmed that [b]ELENI[/b], aged 34, was working inside when the blaze crossed the upper floor and blocked the main corridor. Emergency crews opened a second entry point after witnesses saw flames through the rear windows. The site remained closed while recovery work continued through the morning."
+text = "A riverside warehouse collapsed before dawn after workers reported a prolonged cracking sound from its eastern wall. Authorities confirmed that [b]ELENI[/b], aged 34, was still inside when the upper storage floor gave way and sealed the central passage. Rescue crews entered through the loading bay while unstable masonry delayed the search. Several cargo ledgers were recovered from a damaged office. The site remained closed throughout recovery."
 
 [node name="Subtitle" type="Label" parent="Type2" unique_id=1313727453]
 layout_mode = 0
@@ -239,7 +391,7 @@ offset_bottom = 545.0
 theme_override_colors/font_color = Color(0.3019608, 0.24705882, 0.21960784, 1)
 theme_override_fonts/font = ExtResource("3_15k6j")
 theme_override_font_sizes/font_size = 25
-text = "INVESTIGATION"
+text = "RECOVERY EFFORT"
 
 [node name="Desc2" type="RichTextLabel" parent="Type2" unique_id=1440498728]
 layout_mode = 0
@@ -254,7 +406,7 @@ theme_override_fonts/bold_font = ExtResource("3_15k6j")
 theme_override_font_sizes/normal_font_size = 14
 theme_override_font_sizes/bold_font_size = 14
 bbcode_enabled = true
-text = "Investigators stated that the local tailor could not have survived the incident. Employment records and witness statements are under review while the building remains closed. The alarm sequence is being traced; no final cause has been announced.
+text = "Employment records identify the missing worker as the Asterfall tailor named in the morning roster. Structural plans and maintenance reports are under review while engineers inspect the neighboring buildings. The collapse remains unexplained.
 
 Edition printed before the afternoon service departed."
 
@@ -302,6 +454,10 @@ texture = ExtResource("13_placeholder_npc")
 position = Vector2(858.3333, 585.5)
 scale = Vector2(0.15, 0.14232683)
 texture = ExtResource("12_5tgax")
+
+[node name="PresentationAnimation" type="AnimationPlayer" parent="."]
+editor_description = "Scene-authored newspaper lift animation. Edit the present animation here to tune its timing, overshoot, tilt, and scale."
+libraries/ = SubResource("AnimationLibrary_presentation")
 
 [connection signal="pressed" from="Type1/CloseButton" to="." method="_on_close_button_pressed"]
 [connection signal="pressed" from="Type2/CloseButton" to="." method="_on_close_button_pressed"]

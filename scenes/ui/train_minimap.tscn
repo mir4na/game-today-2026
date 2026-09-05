@@ -1,15 +1,20 @@
-[gd_scene format=3 uid="uid://cxgfpcr3hg68b"]
+[gd_scene load_steps=5 format=3 uid="uid://cxgfpcr3hg68b"]
 
 [ext_resource type="Script" uid="uid://0j8h84yllxdm" path="res://scripts/ui/train_minimap.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://ddbii5vyjx3mi" path="res://assets/ui/gerbong_active.png" id="2_active"]
 [ext_resource type="Texture2D" uid="uid://1nweqvgg1u7s" path="res://assets/ui/gerbong_nonactive.png" id="3_inactive"]
+[ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="4_theme"]
 
 [node name="TrainMinimap" type="Control" unique_id=1538774286]
-custom_minimum_size = Vector2(280, 50)
+custom_minimum_size = Vector2(224, 50)
 layout_mode = 3
 anchors_preset = 0
+size_flags_horizontal = 4
 mouse_filter = 2
+theme = ExtResource("4_theme")
 script = ExtResource("1")
+carriage_numbers = PackedInt32Array(4, 3, 2, 1)
+slot_paths = Array[NodePath]([NodePath("Slot0"), NodePath("Slot1"), NodePath("Slot2"), NodePath("Slot3")])
 active_carriage_texture = ExtResource("2_active")
 inactive_carriage_texture = ExtResource("3_inactive")
 selected_marker_color = Color(0.0941176, 0.12549, 0.168627, 1)
@@ -29,31 +34,23 @@ mouse_filter = 2
 layout_mode = 0
 offset_left = 56.0
 offset_top = 19.0
-offset_right = 63.0
+offset_right = 61.0
 offset_bottom = 21.0
 color = Color(0.54902, 0.509804, 0.454902, 1)
 
 [node name="Connector1" type="ColorRect" parent="Connectors" unique_id=5565144]
 layout_mode = 0
-offset_left = 99.0
+offset_left = 111.0
 offset_top = 19.0
-offset_right = 106.0
+offset_right = 116.0
 offset_bottom = 21.0
 color = Color(0.54902, 0.509804, 0.454902, 1)
 
 [node name="Connector2" type="ColorRect" parent="Connectors" unique_id=1452030313]
 layout_mode = 0
-offset_left = 142.0
+offset_left = 166.0
 offset_top = 19.0
-offset_right = 149.0
-offset_bottom = 21.0
-color = Color(0.54902, 0.509804, 0.454902, 1)
-
-[node name="Connector3" type="ColorRect" parent="Connectors" unique_id=1867580210]
-layout_mode = 0
-offset_left = 185.0
-offset_top = 19.0
-offset_right = 192.0
+offset_right = 171.0
 offset_bottom = 21.0
 color = Color(0.54902, 0.509804, 0.454902, 1)
 
@@ -93,7 +90,7 @@ offset_right = 54.0
 offset_bottom = 46.0
 theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
 theme_override_font_sizes/font_size = 14
-text = "C"
+text = "4"
 horizontal_alignment = 1
 
 [node name="Slot1" type="Control" parent="." unique_id=1641753493]
@@ -132,7 +129,7 @@ offset_right = 54.0
 offset_bottom = 46.0
 theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
 theme_override_font_sizes/font_size = 14
-text = "4"
+text = "3"
 horizontal_alignment = 1
 
 [node name="Slot2" type="Control" parent="." unique_id=247919059]
@@ -171,7 +168,7 @@ offset_right = 54.0
 offset_bottom = 46.0
 theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
 theme_override_font_sizes/font_size = 14
-text = "3"
+text = "2"
 horizontal_alignment = 1
 
 [node name="Slot3" type="Control" parent="." unique_id=592430716]
@@ -204,45 +201,6 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Label" type="Label" parent="Slot3" unique_id=1329828188]
-layout_mode = 0
-offset_top = 25.0
-offset_right = 54.0
-offset_bottom = 46.0
-theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
-theme_override_font_sizes/font_size = 14
-text = "2"
-horizontal_alignment = 1
-
-[node name="Slot4" type="Control" parent="." unique_id=1312268945]
-unique_name_in_owner = true
-anchors_preset = 0
-offset_left = 222.0
-offset_top = 2.0
-offset_right = 276.0
-offset_bottom = 48.0
-
-[node name="Box" type="TextureRect" parent="Slot4" unique_id=415653150]
-layout_mode = 0
-offset_right = 54.0
-offset_bottom = 23.0
-texture = ExtResource("3_inactive")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="MarkerLabel" type="Label" parent="Slot4/Box" unique_id=1950435584]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_constants/line_spacing = -7
-theme_override_font_sizes/font_size = 10
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Label" type="Label" parent="Slot4" unique_id=1779723720]
 layout_mode = 0
 offset_top = 25.0
 offset_right = 54.0
