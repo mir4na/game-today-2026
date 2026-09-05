@@ -75,6 +75,13 @@ func reset_cleaning() -> void:
 	cleaning_progress.emit(0.0)
 
 
+func cancel_wipe() -> void:
+	_wiping = false
+	if is_instance_valid(_cloth):
+		_cloth.hide()
+	_set_foam(Vector2.ZERO, false)
+
+
 func _process(delta: float) -> void:
 	if not _foam_present or _foam_mask_image == null:
 		return

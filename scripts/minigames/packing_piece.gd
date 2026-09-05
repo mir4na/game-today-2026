@@ -35,6 +35,10 @@ func get_occupied_cell_offsets() -> Array[Vector2i]:
 	return cells
 
 
+func cancel_drag() -> void:
+	_dragging = false
+
+
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:

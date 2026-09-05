@@ -31,6 +31,9 @@ var _home_positions: Dictionary = {}
 var _placement_by_piece: Dictionary = {}
 var _occupied_cells: Dictionary = {}
 var _completed: bool = false
+var _dragged_piece: Control
+var _drag_start_position: Vector2
+var _drag_start_cell: Vector2i = Vector2i(-1, -1)
 var _rng := RandomNumberGenerator.new()
 
 
@@ -40,18 +43,19 @@ func _ready() -> void:
 
 func open_puzzle(event: Node) -> void:
 	if event != _active_event:
+		_cancel_active_drag()
 		_active_event = event
 		if randomize_piece_set_on_new_event or _pieces.is_empty():
 			_rebuild_piece_set()
 		_arrange_piece_homes()
 		_initialize_piece_positions()
 	show()
-	_completed = false
 
 
 func request_close() -> void:
 	if not visible or _completed:
 		return
+	_cancel_active_drag()
 	hide()
 	closed.emit()
 
@@ -64,6 +68,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _on_piece_grabbed(piece: Control, _grab_offset: Vector2) -> void:
+	_dragged_piece = piece
+	_drag_start_position = piece.position
+	_drag_start_cell = _placement_by_piece.get(piece, Vector2i(-1, -1))
 	_release_piece_cells(piece)
 	piece.z_index = 20
 
@@ -73,6 +80,7 @@ func _on_piece_dragged(piece: Control, pointer_position: Vector2, grab_offset: V
 
 
 func _on_piece_released(piece: Control, _pointer_position: Vector2, _grab_offset: Vector2) -> void:
+	_dragged_piece = null
 	piece.z_index = 1
 	var relative: Vector2 = piece.global_position - _target_board.global_position
 	var cell := Vector2i(roundi(relative.x / cell_size), roundi(relative.y / cell_size))
@@ -82,6 +90,17 @@ func _on_piece_released(piece: Control, _pointer_position: Vector2, _grab_offset
 	else:
 		piece.position = _home_positions[piece]
 	_check_completion()
+
+
+func _cancel_active_drag() -> void:
+	if not is_instance_valid(_dragged_piece):
+		return
+	_dragged_piece.call(&"cancel_drag")
+	_dragged_piece.position = _drag_start_position
+	_dragged_piece.z_index = 1
+	if _drag_start_cell.x >= 0:
+		_place_piece(_dragged_piece, _drag_start_cell, _get_piece_cell_offsets(_dragged_piece))
+	_dragged_piece = null
 
 
 func _can_place_cells(

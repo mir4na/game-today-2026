@@ -245,6 +245,10 @@ func is_showing_passenger_documents() -> bool:
 	return visible and _view_mode == ViewMode.PASSENGER_DOCUMENTS and _data != null
 
 
+func is_showing_newspaper() -> bool:
+	return visible and _view_mode == ViewMode.NEWSPAPER
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return

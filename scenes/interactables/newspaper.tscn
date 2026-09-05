@@ -7,7 +7,7 @@
 [sub_resource type="RectangleShape2D" id="RackInteractionShape"]
 size = Vector2(180, 228)
 
-[node name="Newspaper" type="Area2D" unique_id=654820484]
+[node name="Newspaper" type="Area2D" unique_id=654820484 groups=["passenger_stop_obstacles"]]
 editor_description = "Scene-authored newspaper rack. Adjust its artwork, collision, and prompt directly through this scene's Inspector."
 script = ExtResource("1")
 prompt_text = "Read Newspaper"

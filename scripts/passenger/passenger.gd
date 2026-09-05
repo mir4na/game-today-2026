@@ -6,7 +6,7 @@ signal documents_requested(passenger: Passenger)
 
 @export var data: PassengerData
 @export_category("Passenger AI")
-@export_range(50.0, 140.0, 5.0) var minimum_activity_spacing: float = 90.0
+@export_range(120.0, 240.0, 5.0) var minimum_activity_spacing: float = 120.0
 @export_range(0.0, 1.0, 0.05) var initial_seated_chance: float = 0.25
 @export_range(0.0, 1.0, 0.05) var initial_idle_at_activity_chance: float = 0.35
 @export_range(0, 6, 1) var minimum_roaming_source_population: int = 2
@@ -63,6 +63,7 @@ var _dead_twitch_remaining: float = 0.0
 var _dead_twitch_offset: Vector2 = Vector2.ZERO
 var _dead_twitch_rotation: float = 0.0
 var _escaping_navigation_blocker: bool = false
+var _settling_for_night: bool = false
 
 const PASSENGER_WALK_SPEED: float = 92.0
 
@@ -94,11 +95,16 @@ func _process(delta: float) -> void:
 	_sway_time += delta
 	if _is_dead_night_visual_active():
 		_update_dead_idle(delta)
-	if _boarding_handoff_active and not night_mode and not departed and data != null:
+	if _settling_for_night and not departed and not _inspection_paused:
+		_ensure_safe_idle_position()
+		_update_boarding_handoff(delta)
+		_settling_for_night = _ai_walking
+	elif _boarding_handoff_active and not night_mode and not departed and data != null:
 		_begin_navigation_blocker_escape_if_needed()
 		_update_boarding_handoff(delta)
 	elif ai_enabled and not night_mode and not departed and data != null:
 		_begin_navigation_blocker_escape_if_needed()
+		_ensure_safe_idle_position()
 		_update_day_ai(delta)
 	_animation_move_speed = position.distance_to(previous_position) / delta if delta > 0.0 else 0.0
 	_update_visual()
@@ -118,6 +124,10 @@ func set_night_mode(value: bool) -> void:
 	prompt_text = night_prompt_text if value and data != null and data.is_dead else _day_prompt_text
 	if data != null and not data.is_dead:
 		visible = not value
+	# Finish a walk instead of freezing a ghost on top of another NPC or rack.
+	if value and visible and not departed:
+		_ensure_safe_idle_position()
+	_settling_for_night = value and visible and _ai_walking
 	if not _is_dead_night_visual_active():
 		_reset_dead_idle()
 	_update_visual()
@@ -143,9 +153,7 @@ func set_cross_carriage_roaming_enabled(value: bool) -> void:
 		and _ai_walking
 		and _carriage_from_world_x(_ai_target_position.x) != runtime_carriage
 	):
-		_ai_target_position = position
-		_ai_walking = false
-		_ai_timer = _next_ai_wait()
+		_retarget_to_safe_stop()
 
 func configure_seat_navigation(seat_position: Vector2, activity_points: PackedVector2Array, carriage_ranges: Dictionary) -> void:
 	_assigned_seat_position = seat_position
@@ -204,6 +212,8 @@ func randomize_initial_activity() -> void:
 	_ai_target_position = position
 	var candidates: PackedVector2Array = _available_activity_points(runtime_carriage)
 	var target: Vector2 = _assigned_seat_position
+	if not _is_stop_position_available(target) and not candidates.is_empty():
+		target = _find_closest_activity_point(candidates)
 	if not candidates.is_empty() and _rng.randf() >= initial_seated_chance:
 		target = (
 			_find_closest_activity_point(candidates)
@@ -235,6 +245,9 @@ func _update_day_ai(delta: float) -> void:
 		_walk_phase += delta * 9.0
 		runtime_carriage = _carriage_from_world_x(position.x)
 		if position.distance_to(_ai_target_position) <= 1.0:
+			if not _is_stop_position_available(_ai_target_position):
+				_retarget_to_safe_stop()
+				return
 			position = _ai_target_position
 			_ai_walking = false
 			_ai_timer = _next_ai_wait()
@@ -256,6 +269,9 @@ func _update_boarding_handoff(delta: float) -> void:
 	_walk_phase += delta * 9.0
 	runtime_carriage = _carriage_from_world_x(position.x)
 	if position.distance_to(_ai_target_position) <= 1.0:
+		if not _is_stop_position_available(_ai_target_position):
+			_retarget_to_safe_stop()
+			return
 		position = _ai_target_position
 		_ai_walking = false
 		_boarding_handoff_active = false
@@ -289,7 +305,7 @@ func _choose_next_ai_target() -> void:
 	var candidates: PackedVector2Array = _available_activity_points(target_carriage)
 	var assigned_carriage: int = _carriage_from_world_x(_assigned_seat_position.x)
 	if target_carriage == carriage and assigned_carriage == carriage and absf(position.x - _assigned_seat_position.x) > 28.0 and _rng.randf() < 0.25:
-		if not _is_navigation_target_claimed(_assigned_seat_position):
+		if _is_stop_position_available(_assigned_seat_position):
 			candidates.append(_assigned_seat_position)
 	if candidates.is_empty():
 		_ai_timer = _next_ai_wait()
@@ -303,7 +319,7 @@ func _available_activity_points(carriage: int) -> PackedVector2Array:
 	for point: Vector2 in _activity_points:
 		if _carriage_from_world_x(point.x) != carriage:
 			continue
-		if point.distance_to(position) < 28.0 or _is_navigation_target_claimed(point) or _is_npc_navigation_blocked(point):
+		if point.distance_to(position) < 28.0 or not _is_stop_position_available(point):
 			continue
 		result.append(point)
 	return result
@@ -318,14 +334,15 @@ func _is_navigation_target_claimed(target_position: Vector2) -> bool:
 		var other := sibling as Passenger
 		if other.departed:
 			continue
-		if other.get_reserved_seat_position().distance_to(target_position) < minimum_activity_spacing:
+		var spacing: float = maxf(minimum_activity_spacing, other.minimum_activity_spacing)
+		if absf(other.get_reserved_seat_position().x - target_position.x) < spacing:
 			return true
 		if other.visible:
-			# Reserve both ends of an NPC's walk. Looking only at its destination
-			# allowed another NPC to choose the position it was still occupying.
-			if other.position.distance_to(target_position) < minimum_activity_spacing:
+			# Walking NPCs may cross occupied spots, but their destinations and
+			# stationary positions remain reserved across the full aisle depth.
+			if not other._ai_walking and absf(other.position.x - target_position.x) < spacing:
 				return true
-			if other.get_navigation_target_position().distance_to(target_position) < minimum_activity_spacing:
+			if absf(other.get_navigation_target_position().x - target_position.x) < spacing:
 				return true
 	return false
 
@@ -340,12 +357,46 @@ func _find_closest_activity_point(candidates: PackedVector2Array) -> Vector2:
 	return closest
 
 
+static func is_stop_reserved_for_interaction(tree: SceneTree, world_position: Vector2) -> bool:
+	for obstacle: Node in tree.get_nodes_in_group(&"passenger_stop_obstacles"):
+		if obstacle.call(&"is_passenger_stop_blocked", world_position):
+			return true
+	return false
+
+
+func _is_stop_position_available(point: Vector2) -> bool:
+	return (
+		not is_stop_reserved_for_interaction(get_tree(), get_parent().to_global(point))
+		and not _is_navigation_target_claimed(point)
+		and not _is_npc_navigation_blocked(point)
+	)
+
+
+func _ensure_safe_idle_position() -> void:
+	if not _ai_walking and not _is_stop_position_available(position):
+		_retarget_to_safe_stop()
+
+
+func _retarget_to_safe_stop() -> void:
+	var candidates: PackedVector2Array = _available_activity_points(runtime_carriage)
+	if _is_stop_position_available(_assigned_seat_position) and (
+		candidates.is_empty() or _carriage_from_world_x(_assigned_seat_position.x) == runtime_carriage
+	):
+		candidates.append(_assigned_seat_position)
+	if candidates.is_empty():
+		return
+	_ai_target_position = _find_closest_activity_point(candidates)
+	_ai_walking = position.distance_to(_ai_target_position) > 1.0
+	_ai_timer = _next_ai_wait()
+
+
 func _advance_ai_movement(delta: float) -> bool:
 	var proposed_position: Vector2 = position.move_toward(_ai_target_position, PASSENGER_WALK_SPEED * delta)
 	if not _escaping_navigation_blocker and _is_npc_navigation_blocked(proposed_position):
 		_ai_target_position = position
 		_ai_walking = false
 		_ai_timer = minf(_next_ai_wait(), 2.0)
+		_retarget_to_safe_stop()
 		return false
 	position = proposed_position
 	if _escaping_navigation_blocker and not _is_npc_navigation_blocked(position):
@@ -358,9 +409,9 @@ func _begin_navigation_blocker_escape_if_needed() -> void:
 		return
 	var escape_candidates := PackedVector2Array()
 	for point: Vector2 in _activity_points:
-		if not _is_npc_navigation_blocked(point) and not _is_navigation_target_claimed(point):
+		if _is_stop_position_available(point):
 			escape_candidates.append(point)
-	if not _is_npc_navigation_blocked(_assigned_seat_position) and not _is_navigation_target_claimed(_assigned_seat_position):
+	if _is_stop_position_available(_assigned_seat_position):
 		escape_candidates.append(_assigned_seat_position)
 	if escape_candidates.is_empty():
 		return
@@ -536,10 +587,10 @@ func _update_sprite_animation() -> bool:
 		_animation_move_speed > 0.0
 		and _animation_move_speed >= walk_animation_threshold
 		and _ai_walking
-		and not night_mode
+		and (not night_mode or _settling_for_night)
 		and not boarding_staged
 		and not _inspection_paused
-		and (ai_enabled or _boarding_handoff_active)
+		and (ai_enabled or _boarding_handoff_active or _settling_for_night)
 	)
 	var animation_name: StringName = walk_animation if walking else idle_animation
 	if not _has_sprite_animation(animation_name):

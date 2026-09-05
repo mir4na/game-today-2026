@@ -20,7 +20,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_EXTERNAL_DEATH, FORCE
 @export_category("Station Service")
 @export_range(5.0, 300.0, 1.0) var station_travel_seconds: float = 120.0
 @export_category("Passenger Placement")
-@export_range(0.0, 180.0, 5.0) var minimum_passenger_seat_spacing: float = 90.0
+@export_range(120.0, 240.0, 5.0) var minimum_passenger_seat_spacing: float = 120.0
 @export_category("Maintenance Distractions")
 @export var blocked_aisle_delay_range_seconds: Vector2 = Vector2(9.0, 16.0)
 @export var dirty_seat_delay_range_seconds: Vector2 = Vector2(24.0, 38.0)
@@ -204,7 +204,10 @@ func _update_travel_foreground() -> void:
 		_travel_background.set_motion_strength(_station_cutscene_motion_strength)
 		_travel_foreground.set_motion_strength(_station_cutscene_motion_strength)
 		return
-	var is_traveling: bool = _is_world_simulation_active() and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
+	# In-game overlays leave the scenery running; only pause and the opening
+	# intro suspend it. Station stops still own the train's motion.
+	var scenery_active: bool = _active_modal not in [_pause_ui, _day_intro_ui]
+	var is_traveling: bool = scenery_active and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
 	if state in [GameState.DAY, GameState.SUNSET]:
 		is_traveling = is_traveling and not _station_arrival_announced
 	_travel_background.set_traveling(is_traveling)
@@ -492,7 +495,7 @@ func _find_available_seat(carriage: int) -> Marker2D:
 	var available_seats: Array[Marker2D] = []
 	var comfortably_spaced_seats: Array[Marker2D] = []
 	for seat_slot: Marker2D in _train.get_passenger_seat_slots(carriage):
-		if _is_seat_blocked_by_maintenance(seat_slot):
+		if _is_seat_blocked_by_maintenance(seat_slot) or Passenger.is_stop_reserved_for_interaction(get_tree(), seat_slot.global_position):
 			continue
 		var occupant := _seat_occupant_by_slot.get(seat_slot) as Passenger
 		if not _is_active_passenger(occupant):
@@ -503,8 +506,9 @@ func _find_available_seat(carriage: int) -> Marker2D:
 	for seat_slot: Marker2D in available_seats:
 		if _has_enough_space_from_occupied_seats(seat_slot):
 			comfortably_spaced_seats.append(seat_slot)
-	var candidate_seats: Array[Marker2D] = comfortably_spaced_seats if not comfortably_spaced_seats.is_empty() else available_seats
-	return candidate_seats[_daily_rng.randi_range(0, candidate_seats.size() - 1)]
+	if comfortably_spaced_seats.is_empty():
+		return null
+	return comfortably_spaced_seats[_daily_rng.randi_range(0, comfortably_spaced_seats.size() - 1)]
 
 func _has_enough_space_from_occupied_seats(candidate: Marker2D) -> bool:
 	var candidate_position: Vector2 = _passenger_container.to_local(candidate.global_position)
@@ -1589,6 +1593,14 @@ func _is_world_simulation_active() -> bool:
 		_active_modal == null
 		or _is_passenger_inspection_active()
 		or _is_maintenance_minigame_active()
+	)
+
+
+func _is_newspaper_active() -> bool:
+	return (
+		_active_modal == _document_overlay
+		and is_instance_valid(_document_overlay)
+		and bool(_document_overlay.call(&"is_showing_newspaper"))
 	)
 
 

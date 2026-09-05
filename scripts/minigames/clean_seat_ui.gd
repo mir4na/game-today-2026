@@ -17,16 +17,19 @@ var _completed: bool = false
 
 
 func open_cleaning(event: Node) -> void:
-	_active_event = event
-	_completed = false
-	_success_label.hide()
-	_surface.reset_cleaning()
+	if event != _active_event:
+		_active_event = event
+		_completed = false
+		_success_label.hide()
+		_progress_label.show()
+		_surface.reset_cleaning()
 	show()
 
 
 func request_close() -> void:
 	if not visible or _completed:
 		return
+	_surface.cancel_wipe()
 	hide()
 	closed.emit()
 
@@ -50,6 +53,7 @@ func _on_surface_cleaned() -> void:
 		return
 	_completed = true
 	_progress_label.text = progress_template % 100
+	_progress_label.hide()
 	_success_label.show()
 	await get_tree().create_timer(0.55).timeout
 	if not is_inside_tree():
