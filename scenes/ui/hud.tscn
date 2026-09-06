@@ -131,17 +131,19 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -248.0
+offset_left = -293.0
 offset_top = 24.0
 offset_right = -24.0
-offset_bottom = 74.0
+offset_bottom = 84.0
 grow_horizontal = 0
 
 [node name="TrainMinimap" parent="Root/MinimapAnchor" instance=ExtResource("3")]
 unique_name_in_owner = true
+editor_description = "Scene-authored minimap size. Adjust Scale here to resize the complete minimap while preserving its internal layout."
 layout_mode = 0
 offset_right = 224.0
 offset_bottom = 50.0
+scale = Vector2(1.2, 1.2)
 active_carriage_texture = ExtResource("6_carriage_active")
 inactive_carriage_texture = ExtResource("7_carriage_inactive")
 

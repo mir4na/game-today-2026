@@ -205,6 +205,7 @@ grow_vertical = 2
 mouse_filter = 0
 theme = ExtResource("3_theme")
 script = ExtResource("1")
+show_station_title = false
 opening_heading_template = "%s"
 exchange_heading_template = "%s"
 opening_subtitle_text = "INITIAL BOARDING"

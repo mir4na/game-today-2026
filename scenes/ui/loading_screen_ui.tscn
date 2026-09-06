@@ -1,135 +1,200 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3 uid="uid://j5aa62op4yf5"]
 
-[ext_resource type="Script" path="res://scripts/ui/loading_screen_ui.gd" id="1_script"]
-[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
+[ext_resource type="Script" uid="uid://bonln8flaos7y" path="res://scripts/ui/loading_screen_ui.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://cnjfku034uar1" path="res://assets/characters/spritesheet_mc.png" id="2_mc_sheet"]
+[ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="3_font"]
 
-[sub_resource type="StyleBoxFlat" id="ProgressBackground"]
-bg_color = Color(0.035, 0.052, 0.074, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.28, 0.35, 0.43, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+[sub_resource type="AtlasTexture" id="AtlasTexture_walk_0"]
+atlas = ExtResource("2_mc_sheet")
+region = Rect2(0, 0, 560, 700)
 
-[sub_resource type="StyleBoxFlat" id="ProgressFill"]
-bg_color = Color(0.91, 0.75, 0.43, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-expand_margin_left = -4.0
-expand_margin_top = -4.0
-expand_margin_right = -4.0
-expand_margin_bottom = -4.0
+[sub_resource type="AtlasTexture" id="AtlasTexture_walk_1"]
+atlas = ExtResource("2_mc_sheet")
+region = Rect2(560, 0, 560, 700)
 
-[node name="LoadingScreenUI" type="Control"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_walk_2"]
+atlas = ExtResource("2_mc_sheet")
+region = Rect2(1120, 0, 560, 700)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_walk_3"]
+atlas = ExtResource("2_mc_sheet")
+region = Rect2(0, 700, 560, 700)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_walk_4"]
+atlas = ExtResource("2_mc_sheet")
+region = Rect2(560, 700, 560, 700)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_walk_5"]
+atlas = ExtResource("2_mc_sheet")
+region = Rect2(1120, 700, 560, 700)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_walk_6"]
+atlas = ExtResource("2_mc_sheet")
+region = Rect2(0, 1400, 560, 700)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_walk_7"]
+atlas = ExtResource("2_mc_sheet")
+region = Rect2(560, 1400, 560, 700)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_walk_8"]
+atlas = ExtResource("2_mc_sheet")
+region = Rect2(1120, 1400, 560, 700)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_loading_mc"]
+resource_local_to_scene = true
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_walk_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_walk_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_walk_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_walk_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_walk_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_walk_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_walk_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_walk_7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_walk_8")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 10.0
+}]
+
+[sub_resource type="Animation" id="Animation_transition_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("FadeToBlack:modulate:a")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_fade_from_black"]
+resource_name = "fade_from_black"
+length = 0.34
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("FadeToBlack:modulate:a")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.34),
+"transitions": PackedFloat32Array(1, 1.4),
+"update": 0,
+"values": [1.0, 0.0]
+}
+
+[sub_resource type="Animation" id="Animation_fade_to_black"]
+resource_name = "fade_to_black"
+length = 0.42
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("FadeToBlack:modulate:a")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.42),
+"transitions": PackedFloat32Array(1.4, 1),
+"update": 0,
+"values": [0.0, 1.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_transition"]
+_data = {
+&"RESET": SubResource("Animation_transition_reset"),
+&"fade_from_black": SubResource("Animation_fade_from_black"),
+&"fade_to_black": SubResource("Animation_fade_to_black")
+}
+
+[node name="LoadingScreenUI" type="Control" unique_id=422593370]
+process_mode = 3
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
-theme = ExtResource("2_theme")
 script = ExtResource("1_script")
 target_scene_path = "res://scenes/main/main.tscn"
-minimum_display_seconds = 0.9
-bar_fill_speed = 135.0
-loading_status_text = "Preparing the day service"
-ready_status_text = "Shift ready"
-failed_status_text = "The shift could not be loaded"
-progress_text_template = "%d%%"
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="BottomLeft" type="Control" parent="." unique_id=1364740154]
+editor_description = "Scene-authored loading composition. Move or resize this node to reposition both the walking MC and Loading text."
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
+anchors_preset = 2
+anchor_top = 1.0
 anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.018, 0.027, 0.041, 1)
-
-[node name="UpperGlow" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 5.0
-grow_horizontal = 2
-mouse_filter = 2
-color = Color(0.91, 0.75, 0.43, 0.7)
-
-[node name="Center" type="CenterContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="Content" type="VBoxContainer" parent="Center"]
-custom_minimum_size = Vector2(660, 0)
-layout_mode = 2
-theme_override_constants/separation = 18
-
-[node name="Eyebrow" type="Label" parent="Center/Content"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.61, 0.55, 0.45, 1)
-theme_override_font_sizes/font_size = 15
-text = "NIGHT RAILWAY SERVICE"
-horizontal_alignment = 1
-
-[node name="Title" type="Label" parent="Center/Content"]
-theme_type_variation = &"HeaderLabel"
-layout_mode = 2
-theme_override_colors/font_color = Color(0.94, 0.85, 0.65, 1)
-theme_override_font_sizes/font_size = 42
-text = "WHERE DO YOU BELONG?"
-horizontal_alignment = 1
-
-[node name="Rule" type="HSeparator" parent="Center/Content"]
-custom_minimum_size = Vector2(0, 18)
-layout_mode = 2
-
-[node name="StatusLabel" type="Label" parent="Center/Content"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.84, 0.83, 0.8, 1)
-theme_override_font_sizes/font_size = 17
-text = "Preparing the day service"
-horizontal_alignment = 1
-
-[node name="ProgressBar" type="ProgressBar" parent="Center/Content"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(660, 24)
-layout_mode = 2
-theme_override_styles/background = SubResource("ProgressBackground")
-theme_override_styles/fill = SubResource("ProgressFill")
-show_percentage = false
-
-[node name="ProgressLabel" type="Label" parent="Center/Content"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.91, 0.75, 0.43, 1)
-theme_override_font_sizes/font_size = 16
-text = "0%"
-horizontal_alignment = 1
-
-[node name="Footer" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = 12
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -58.0
-offset_bottom = -28.0
-grow_horizontal = 2
+offset_left = 28.0
+offset_top = -216.0
+offset_right = 360.0
+offset_bottom = -22.0
 grow_vertical = 0
-theme_override_colors/font_color = Color(0.34, 0.37, 0.42, 1)
-theme_override_font_sizes/font_size = 13
-text = "The train departs when all records are ready"
-horizontal_alignment = 1
+mouse_filter = 2
+
+[node name="MCWalkAnchor" type="Node2D" parent="BottomLeft" unique_id=807487061]
+position = Vector2(42, 102)
+
+[node name="MCWalk" type="AnimatedSprite2D" parent="BottomLeft/MCWalkAnchor" unique_id=619214039]
+unique_name_in_owner = true
+editor_description = "Loading character artwork. It walks in place facing right; frames, playback speed, scale, and direction are editable here."
+position = Vector2(163.00003, -21)
+scale = Vector2(0.18, 0.18)
+sprite_frames = SubResource("SpriteFrames_loading_mc")
+animation = &"walk"
+autoplay = "walk"
+flip_h = true
+
+[node name="LoadingLabel" type="Label" parent="BottomLeft" unique_id=1245317667]
+unique_name_in_owner = true
+editor_description = "Loading typewriter copy. Position, color, font, and size are scene-authored here."
+layout_mode = 0
+offset_left = 171.0
+offset_top = 148.0
+offset_right = 453.0
+offset_bottom = 190.0
+theme_override_colors/font_color = Color(0.055, 0.04, 0.05, 1)
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 35
+text = "Loading..."
+visible_characters = 0
+visible_ratio = 0.0
+
+[node name="FadeToBlack" type="ColorRect" parent="." unique_id=1036737117]
+editor_description = "Scene-authored transition cover. Its color and fade animation can be adjusted here and in TransitionAnimation."
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="TransitionAnimation" type="AnimationPlayer" parent="." unique_id=923793167]
+unique_name_in_owner = true
+libraries/ = SubResource("AnimationLibrary_transition")

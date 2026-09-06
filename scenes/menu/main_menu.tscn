@@ -91,6 +91,159 @@ corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
+[sub_resource type="Animation" id="Animation_loading_transition"]
+resource_name = "loading_transition"
+length = 0.85
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("UI/MenuPanel/MenuContent/Title:modulate:a")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.14),
+"transitions": PackedFloat32Array(1.6, 1),
+"update": 0,
+"values": [1.0, 0.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("UI/MenuPanel/MenuContent/Title:scale")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.14),
+"transitions": PackedFloat32Array(1.6, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(0.92, 0.92)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("ColorGradeOverlays:position:x")
+tracks/2/interp = 2
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.55),
+"transitions": PackedFloat32Array(1.35, 1),
+"update": 0,
+"values": [0.0, -1280.0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("LoadingScreenUI:modulate:a")
+tracks/3/interp = 2
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.18, 0.38),
+"transitions": PackedFloat32Array(1, 1.4, 1),
+"update": 0,
+"values": [0.0, 0.0, 1.0]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/StartButton:position")
+tracks/4/interp = 2
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0.06, 0.58),
+"transitions": PackedFloat32Array(0.55, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(-26, 520)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/StartButton:rotation")
+tracks/5/interp = 2
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0.06, 0.58),
+"transitions": PackedFloat32Array(0.7, 1),
+"update": 0,
+"values": [0.0, -0.22]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/ContinueButton:position")
+tracks/6/interp = 2
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0.11, 0.63),
+"transitions": PackedFloat32Array(0.55, 1),
+"update": 0,
+"values": [Vector2(0, 67), Vector2(34, 580)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/ContinueButton:rotation")
+tracks/7/interp = 2
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0.11, 0.63),
+"transitions": PackedFloat32Array(0.7, 1),
+"update": 0,
+"values": [0.0, 0.18]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/SettingsButton:position")
+tracks/8/interp = 2
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0.16, 0.68),
+"transitions": PackedFloat32Array(0.55, 1),
+"update": 0,
+"values": [Vector2(0, 134), Vector2(-31, 640)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/SettingsButton:rotation")
+tracks/9/interp = 2
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0.16, 0.68),
+"transitions": PackedFloat32Array(0.7, 1),
+"update": 0,
+"values": [0.0, -0.15]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/QuitButton:position")
+tracks/10/interp = 2
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0.21, 0.73),
+"transitions": PackedFloat32Array(0.55, 1),
+"update": 0,
+"values": [Vector2(0, 201), Vector2(38, 700)]
+}
+tracks/11/type = "value"
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/QuitButton:rotation")
+tracks/11/interp = 2
+tracks/11/loop_wrap = true
+tracks/11/keys = {
+"times": PackedFloat32Array(0.21, 0.73),
+"transitions": PackedFloat32Array(0.7, 1),
+"update": 0,
+"values": [0.0, 0.23]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_loading_transition"]
+_data = {
+&"loading_transition": SubResource("Animation_loading_transition")
+}
+
 [node name="MainMenu" type="Control" unique_id=630513939]
 layout_mode = 3
 anchors_preset = 15
@@ -100,7 +253,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2")
 script = ExtResource("1")
-loading_screen_scene = ExtResource("3")
 
 [node name="Background" type="TextureRect" parent="." unique_id=414121816]
 layout_mode = 1
@@ -154,7 +306,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="ColorGradeOverlays" type="ColorRect" parent="." unique_id=498967854]
-editor_description = "Color grade for Background, WindowTravelVFX, MC, and HandGrip. Overlay1 uses Overlay blending; Overlay2 uses luminance-aware Soft Light. Tune both strengths in this node's ShaderMaterial. UI remains unaffected because it is drawn afterward."
+editor_description = "Color grade for Background, WindowTravelVFX, MC, and HandGrip. Overlay1 uses Overlay blending; Overlay2 uses luminance-aware Soft Light. Tune both strengths in this node's ShaderMaterial. LoadingTransitionAnimation slides this entire overlay left while UI remains unaffected."
 material = SubResource("ShaderMaterial_color_grade")
 layout_mode = 1
 anchors_preset = 15
@@ -192,23 +344,26 @@ offset_left = 214.0
 offset_top = 48.0
 offset_right = 534.0
 offset_bottom = 349.0
+pivot_offset = Vector2(160, 150.5)
 mouse_filter = 2
 texture = ExtResource("9_title")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="ButtonStack" type="VBoxContainer" parent="UI/MenuPanel/MenuContent" unique_id=118907970]
+[node name="ButtonStack" type="Control" parent="UI/MenuPanel/MenuContent" unique_id=118907970]
 layout_mode = 0
 offset_left = 230.0
 offset_top = 382.0
 offset_right = 540.0
 offset_bottom = 647.0
-theme_override_constants/separation = 3
 
 [node name="StartButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=1848000711]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(310, 64)
-layout_mode = 2
+layout_mode = 0
+offset_right = 310.0
+offset_bottom = 64.0
+pivot_offset = Vector2(155, 32)
 theme_override_colors/font_color = Color(0.06, 0.045, 0.06, 1)
 theme_override_colors/font_pressed_color = Color(0.12, 0.04, 0.09, 1)
 theme_override_colors/font_hover_color = Color(0.25, 0.055, 0.15, 1)
@@ -226,7 +381,11 @@ alignment = 0
 [node name="ContinueButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=1193259710]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(310, 64)
-layout_mode = 2
+layout_mode = 0
+offset_top = 67.0
+offset_right = 310.0
+offset_bottom = 131.0
+pivot_offset = Vector2(155, 32)
 theme_override_colors/font_color = Color(0.06, 0.045, 0.06, 1)
 theme_override_colors/font_focus_color = Color(0.06, 0.045, 0.06, 1)
 theme_override_colors/font_pressed_color = Color(0.12, 0.04, 0.09, 1)
@@ -259,7 +418,11 @@ flip_h = true
 [node name="SettingsButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=2090027751]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(310, 64)
-layout_mode = 2
+layout_mode = 0
+offset_top = 134.0
+offset_right = 310.0
+offset_bottom = 198.0
+pivot_offset = Vector2(155, 32)
 theme_override_colors/font_color = Color(0.06, 0.045, 0.06, 1)
 theme_override_colors/font_focus_color = Color(0.06, 0.045, 0.06, 1)
 theme_override_colors/font_pressed_color = Color(0.12, 0.04, 0.09, 1)
@@ -278,7 +441,11 @@ alignment = 0
 [node name="QuitButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=779991537]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(310, 64)
-layout_mode = 2
+layout_mode = 0
+offset_top = 201.0
+offset_right = 310.0
+offset_bottom = 265.0
+pivot_offset = Vector2(155, 32)
 theme_override_colors/font_color = Color(0.06, 0.045, 0.06, 1)
 theme_override_colors/font_pressed_color = Color(0.12, 0.04, 0.09, 1)
 theme_override_colors/font_hover_color = Color(0.25, 0.055, 0.15, 1)
@@ -404,19 +571,16 @@ focus_neighbor_top = NodePath("VsyncToggle")
 focus_neighbor_bottom = NodePath("VolumeRow/VolumeSlider")
 text = "SAVE & BACK  [ESC]"
 
-[node name="Fade" type="ColorRect" parent="." unique_id=1313484667]
+[node name="LoadingScreenUI" parent="." instance=ExtResource("3")]
 unique_name_in_owner = true
+visible = false
 modulate = Color(1, 1, 1, 0)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -3.0
-offset_right = -3.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0, 0, 0, 1)
+
+[node name="LoadingTransitionAnimation" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+&"": SubResource("AnimationLibrary_loading_transition")
+}
 
 [connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/StartButton" to="." method="_start_game"]
 [connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/ContinueButton" to="." method="_continue_game"]

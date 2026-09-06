@@ -8,7 +8,6 @@ const DEFAULT_FULLSCREEN: bool = true
 const ShiftProgress = preload("res://scripts/systems/shift_progress.gd")
 
 @export_category("Scene Configuration")
-@export var loading_screen_scene: PackedScene
 @export var volume_value_template: String = "%d%%"
 @export var default_volume: float = 80.0
 @export var default_fullscreen: bool = DEFAULT_FULLSCREEN
@@ -32,7 +31,8 @@ const ShiftProgress = preload("res://scripts/systems/shift_progress.gd")
 @onready var _display_mode: OptionButton = %DisplayMode
 @onready var _vsync_toggle: CheckButton = %VsyncToggle
 @onready var _settings_back_button: Button = %SettingsBackButton
-@onready var _fade: ColorRect = %Fade
+@onready var _loading_screen: LoadingScreenUI = %LoadingScreenUI
+@onready var _loading_transition_animation: AnimationPlayer = %LoadingTransitionAnimation
 @onready var _hand_grip: TextureRect = $HandGrip
 @onready var _mc: TextureRect = $MC
 var _transitioning: bool = false
@@ -89,9 +89,6 @@ func _save_and_close_settings() -> void:
 func _start_game() -> void:
 	if _transitioning:
 		return
-	if loading_screen_scene == null:
-		push_error("MainMenu/Loading Screen Scene is not configured in the Inspector.")
-		return
 	if ShiftProgress.start_new_run().is_empty():
 		push_error("A new run could not be saved. Please try again.")
 		return
@@ -106,14 +103,14 @@ func _continue_game() -> void:
 	_open_game()
 
 func _open_game() -> void:
-	if loading_screen_scene == null:
-		push_error("MainMenu/Loading Screen Scene is not configured in the Inspector.")
+	if not is_instance_valid(_loading_screen):
+		push_error("MainMenu/LoadingScreenUI scene instance is missing.")
 		return
 	_transitioning = true
 	_set_menu_buttons_disabled(true)
-	var tween := create_tween()
-	tween.tween_property(_fade, "modulate:a", 1.0, 0.35)
-	tween.tween_callback(func() -> void: get_tree().change_scene_to_packed(loading_screen_scene))
+	_loading_screen.begin_loading()
+	if _loading_transition_animation.has_animation(&"loading_transition"):
+		_loading_transition_animation.play(&"loading_transition")
 
 func _quit_game() -> void:
 	# Shift progress already lives in user:// and must survive application exit.
