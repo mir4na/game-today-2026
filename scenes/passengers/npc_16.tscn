@@ -103,8 +103,8 @@ material = SubResource("ShaderMaterial_1lunl")
 position = Vector2(-2.265, -122.671)
 
 [node name="NPCVisual" parent="CharacterScale/PassengerVisual" index="1"]
-position = Vector2(0.604118, -56.740112)
-scale = Vector2(0.219930, 0.219930)
+position = Vector2(0.301932, -56.201042)
+scale = Vector2(0.219138, 0.219138)
 sprite_frames = SubResource("SpriteFrames_t1gjp")
 animation = &"walk"
 
