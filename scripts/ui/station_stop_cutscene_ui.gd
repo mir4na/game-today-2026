@@ -14,8 +14,11 @@ signal boarding_actor_entered(actor_index: int, door_screen_position: Vector2)
 @export var exchange_heading_template: String = "%s • PASSENGER EXCHANGE"
 @export var opening_subtitle_text: String = "INITIAL BOARDING"
 @export var exchange_subtitle_text: String = "PASSENGER EXCHANGE"
+@export var terminal_heading_text: String = ""
+@export var terminal_subtitle_text: String = ""
 @export var opening_status_template: String = "%d BOARDING     [E / SPACE / ESC] SKIP"
 @export var exchange_status_template: String = "%d OFF  •  %d ON     [E / SPACE / ESC] SKIP"
+@export var terminal_status_template: String = "%d DISEMBARKING     [E / SPACE / ESC] SKIP"
 @export_category("Scene Animation")
 @export var letterbox_in_animation: StringName = &"letterbox_in"
 @export var letterbox_out_animation: StringName = &"letterbox_out"
@@ -66,6 +69,7 @@ var _door_markers: Dictionary = {}
 var _finished: bool = false
 var _timeline_completed: bool = false
 var _opening_mode: bool = false
+var _terminal_mode: bool = false
 var _duration: float = 15.340431
 var _deceleration_start: float = 2.0
 var _arrival_end: float = 6.690431
@@ -89,6 +93,7 @@ var _motion_rng := RandomNumberGenerator.new()
 @onready var _heading_label: Label = %HeadingLabel
 @onready var _subtitle_label: Label = %SubtitleLabel
 @onready var _status_label: Label = %StatusLabel
+@onready var _cinematic_title: Control = %CinematicTitle
 @onready var _screen_fade: ColorRect = %ScreenFade
 @onready var _letterbox_animation: AnimationPlayer = %LetterboxAnimation
 @onready var _cinematic_title_animation: AnimationPlayer = %CinematicTitleAnimation
@@ -96,6 +101,7 @@ var _motion_rng := RandomNumberGenerator.new()
 
 func play_stop(station_name: String, departing_actors: Array[Dictionary], boarding_actors: Array[Dictionary], door_markers: Dictionary = {}) -> void:
 	_opening_mode = false
+	_terminal_mode = false
 	_duration = stop_duration
 	_deceleration_start = stop_deceleration_start
 	_arrival_end = stop_arrival_end
@@ -105,11 +111,22 @@ func play_stop(station_name: String, departing_actors: Array[Dictionary], boardi
 
 func play_opening(station_name: String, boarding_actors: Array[Dictionary], door_markers: Dictionary = {}) -> void:
 	_opening_mode = true
+	_terminal_mode = false
 	_duration = opening_duration
 	_deceleration_start = opening_deceleration_start
 	_arrival_end = opening_arrival_end
 	_departure_start = opening_departure_start
 	_begin_sequence(station_name, [], boarding_actors, door_markers)
+
+
+func play_terminal(departing_actors: Array[Dictionary], door_markers: Dictionary = {}) -> void:
+	_opening_mode = false
+	_terminal_mode = true
+	_duration = stop_duration
+	_deceleration_start = stop_deceleration_start
+	_arrival_end = stop_arrival_end
+	_departure_start = stop_departure_start
+	_begin_sequence("", departing_actors, [], door_markers)
 
 
 func get_stop_timeline() -> Vector3:
@@ -257,9 +274,15 @@ func _set_train_motion_strength(value: float) -> void:
 
 
 func _update_scene_copy() -> void:
-	_heading_label.text = opening_heading_template % _station_name.to_upper() if _opening_mode else exchange_heading_template % _station_name.to_upper()
-	_subtitle_label.text = opening_subtitle_text if _opening_mode else exchange_subtitle_text
-	_status_label.text = opening_status_template % _boarding_actors.size() if _opening_mode else exchange_status_template % [_departing_actors.size(), _boarding_actors.size()]
+	if _terminal_mode:
+		_heading_label.text = terminal_heading_text
+		_subtitle_label.text = terminal_subtitle_text
+		_status_label.text = terminal_status_template % _departing_actors.size()
+	else:
+		_heading_label.text = opening_heading_template % _station_name.to_upper() if _opening_mode else exchange_heading_template % _station_name.to_upper()
+		_subtitle_label.text = opening_subtitle_text if _opening_mode else exchange_subtitle_text
+		_status_label.text = opening_status_template % _boarding_actors.size() if _opening_mode else exchange_status_template % [_departing_actors.size(), _boarding_actors.size()]
+	_cinematic_title.visible = not _heading_label.text.is_empty() or not _subtitle_label.text.is_empty()
 
 
 func _play_letterbox_animation(animation_name: StringName) -> void:

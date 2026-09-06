@@ -14,7 +14,7 @@ The configured entry scene is `res://scenes/menu/main_menu.tscn`. Choose **New G
 
 The paycheck awards **30 Blessings per correct living-passenger drop-off**, deducts **20 per wrong drop-off** regardless of distance, and deducts **40 per incorrectly stamped anomaly once per passenger per day**. Removing or repeating that stamp does not erase or multiply the penalty. Safely retained anomalies have no daylight bonus or penalty. Anomalies remain aboard for night service. No other daylight penalty categories are charged.
 
-**Net earnings** are compared with the day's target, independently of the saved wallet balance. Initial targets for Days 1–5 are **100 / 120 / 140 / 160 / 180**, configurable through Main → Day Progression → Day Pass Targets. The day intro also shows the target. PASSED pays the shift's net earnings and opens the Night Market; FAILED pays nothing and offers Restart Shift or Main Menu. Negative net earnings remain visible without taking previous days' savings. There are no strikes, warnings, or dropouts.
+**Net earnings** are compared with the day's target, independently of the saved wallet balance. Initial targets for Days 1–5 are **100 / 120 / 140 / 160 / 180**, configurable through Main → Day Progression → Day Pass Targets and displayed in Today Service. PASSED pays the shift's net earnings, then any key starts the veil cutscene into night service; FAILED pays nothing and any key restarts the same shift. Negative net earnings remain visible without taking previous days' savings. There are no strikes, warnings, or dropouts.
 
 Progress checkpoints contain the day, manifest seed, and starting Blessings/supplies/upgrades in `user://shift_progress.cfg`. Restart Shift and menu Continue restore that day-start checkpoint, including undoing the current attempt's purchases and rewards. They do not resume the exact mid-shift position or station. Completing the night saves the next day's inventory and seed. Day 5 ends the journey; the completed run can be replaced with New Game. Market prices and night rewards remain separately configurable.
 
@@ -74,12 +74,12 @@ Every static hierarchy and visual is scene-owned: menu panels and backdrop, HUD 
 ## Main scripts
 
 - `scripts/menu/main_menu.gd` binds the scene-authored responsive menu, applies and saves settings, and transitions into gameplay.
-- `scripts/main/main.gd` owns the `OPENING → DAY → SUNSET → SHIFT_REPORT → MARKET → NIGHT → NIGHT_PUZZLE → COMPLETE` state flow, the configured daytime route and travel duration, repeated exit assignments, station exchanges, cutscenes, live minimap population, penalties, Blessings rewards, time, and validation.
+- `scripts/main/main.gd` owns the `OPENING → DAY → SUNSET → SHIFT_REPORT → NIGHT_TRANSITION → NIGHT → NIGHT_PUZZLE → COMPLETE` state flow, the configured daytime route and travel duration, repeated exit assignments, station exchanges, cutscenes, live minimap population, penalties, Blessings rewards, time, and validation.
 - `scripts/systems/market_tool_state.gd` owns the Inspector-configured Blessings balance, daylight/night reward rates, penalty deductions, purchases, consumables, and speed upgrade inventory.
 - `scripts/player/player.gd` handles horizontal `CharacterBody2D` movement, camera follow, facing, and nearest-interactable selection.
 - `scripts/train/carriage.gd` and `scripts/train/train.gd` animate the scene-authored modular carriages, day/night overlay, underframe, and train sway; their geometry and palette live in train scenes and assigned SVG textures.
 - `scripts/passenger/passenger_data.gd` is the designer-facing passenger Resource. `passenger.gd` presents it, emits inspection requests, and runs the selected ambient AI profile inside safe passenger-coach boundaries.
-- `scripts/systems/departure_puzzle_data.gd` stores the night-stop order, relational clues, and internal deceased-passenger solution. “Night drop-off” means the station where a deceased passenger leaves the night train; it is separate from their daytime ticket destination.
+- `scripts/systems/departure_puzzle_data.gd` stores the ordered symbolic night destinations, relational clues, and internal deceased-passenger assignment solution. The night phase asks the player to identify where each anomaly belongs; it does not simulate physical station stops.
 - Scripts in `scripts/ui` project state into responsive Control/Container layouts and signal decisions back to `Main`.
 
 ## Adding a passenger

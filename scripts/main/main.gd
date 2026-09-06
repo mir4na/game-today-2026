@@ -2,7 +2,7 @@ class_name AfterTheEndGame
 extends Node2D
 ## Owns the vertical-slice state and coordinates data, world presentation and UI.
 
-enum GameState { OPENING, DAY, SUNSET, SHIFT_REPORT, MARKET, NIGHT, NIGHT_PUZZLE, COMPLETE }
+enum GameState { OPENING, DAY, SUNSET, SHIFT_REPORT, NIGHT_TRANSITION, MARKET, NIGHT, NIGHT_PUZZLE, COMPLETE }
 enum NewspaperCase { NON_DEATH_NEWS, MATCHING_PASSENGER_DEATH }
 enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 
@@ -19,7 +19,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export var day_route: PackedStringArray
 @export_category("Station Service")
 ## Travel time per route leg, excluding station cutscenes and pauses.
-@export var station_travel_durations_seconds: PackedFloat32Array = PackedFloat32Array([180.0, 120.0, 120.0, 60.0])
+@export var station_travel_durations_seconds: PackedFloat32Array = PackedFloat32Array([10.0, 10.0, 10.0, 10.0])
 @export_category("Passenger Placement")
 @export_range(120.0, 240.0, 5.0) var minimum_passenger_seat_spacing: float = 120.0
 @export_category("Maintenance Distractions")
@@ -93,6 +93,7 @@ var _blocked_aisle_activated: bool = false
 var _dirty_seat_activated: bool = false
 var _day_blessing_award: Dictionary = {}
 var _night_blessing_award: Dictionary = {}
+var _night_world_prepared: bool = false
 var _radar_scan_active: bool = false
 var _radar_maintenance_pause_states: Dictionary = {}
 
@@ -106,6 +107,7 @@ var _radar_maintenance_pause_states: Dictionary = {}
 @onready var _day_intro_ui: DayIntroUI = %DayIntroUI
 @onready var _station_stop_ui: StationStopCutsceneUI = %StationStopCutsceneUI
 @onready var _shift_report_ui: ShiftReportUI = %ShiftReportUI
+@onready var _night_transition_ui: NightTransitionCutsceneUI = %NightTransitionCutsceneUI
 @onready var _night_puzzle_ui: NightPuzzleUI = %NightPuzzleUI
 @onready var _sequence_ui: DepartureSequenceUI = %DepartureSequenceUI
 @onready var _pause_ui: PauseUI = %PauseUI
@@ -211,7 +213,7 @@ func _update_travel_foreground() -> void:
 	# In-game overlays leave the scenery running; only pause and the opening
 	# intro suspend it. Station stops still own the train's motion.
 	var scenery_active: bool = _active_modal not in [_pause_ui, _day_intro_ui]
-	var is_traveling: bool = scenery_active and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
+	var is_traveling: bool = scenery_active and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT_TRANSITION, GameState.NIGHT]
 	if state in [GameState.DAY, GameState.SUNSET]:
 		is_traveling = is_traveling and not _station_arrival_announced
 	_travel_background.set_traveling(is_traveling)
@@ -312,6 +314,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_clean_seat_ui.call(&"request_close")
 	elif _station_stop_ui.visible:
 		_station_stop_ui.skip_sequence()
+	elif _night_transition_ui.visible:
+		_night_transition_ui.skip_sequence()
 	elif _night_puzzle_ui.visible:
 		_close_night_puzzle()
 	elif _pause_ui.visible:
@@ -1104,13 +1108,14 @@ func _process_station_arrival() -> void:
 		})
 		boarded += 1
 
-	_validate_active_passenger_constraints("%s station exchange" % arrival_station)
-	_debug_print_active_anomaly_roster("%s STATION EXCHANGE" % arrival_station.to_upper())
+	var exchange_context: String = "terminal exchange" if is_terminal_arrival else "%s station exchange" % arrival_station
+	_validate_active_passenger_constraints(exchange_context)
+	_debug_print_active_anomaly_roster(exchange_context.to_upper())
 	_player.set_interactables(_interactables)
-	_start_station_stop_cutscene(arrival_station, departing_actors, boarding_actors)
+	_start_station_stop_cutscene(arrival_station, departing_actors, boarding_actors, is_terminal_arrival)
 
-func _start_station_stop_cutscene(station_name: String, departing_actors: Array[Dictionary], boarding_actors: Array[Dictionary]) -> void:
-	_station_cutscene_context = &"station_exchange"
+func _start_station_stop_cutscene(station_name: String, departing_actors: Array[Dictionary], boarding_actors: Array[Dictionary], terminal_arrival: bool = false) -> void:
+	_station_cutscene_context = &"terminal_exchange" if terminal_arrival else &"station_exchange"
 	_station_cutscene_timeline_complete = false
 	_ambience.begin_station_sequence()
 	_active_modal = _station_stop_ui
@@ -1122,7 +1127,10 @@ func _start_station_stop_cutscene(station_name: String, departing_actors: Array[
 	_set_passenger_ai_enabled(false)
 	var stop_timeline: Vector3 = _station_stop_ui.get_stop_timeline()
 	_train.show_exterior_body(stop_timeline.x, stop_timeline.y, stop_timeline.z)
-	_station_stop_ui.play_stop(station_name, departing_actors, boarding_actors, _train.get_passenger_door_markers())
+	if terminal_arrival:
+		_station_stop_ui.play_terminal(departing_actors, _train.get_passenger_door_markers())
+	else:
+		_station_stop_ui.play_stop(station_name, departing_actors, boarding_actors, _train.get_passenger_door_markers())
 
 func _on_day_intro_finished() -> void:
 	if state != GameState.OPENING:
@@ -1355,7 +1363,30 @@ func _on_shift_report_continue() -> void:
 		_restart_game()
 		return
 	_shift_report_ui.hide()
-	_open_night_market()
+	_start_night_transition()
+
+
+func _start_night_transition() -> void:
+	state = GameState.NIGHT_TRANSITION
+	_player.movement_enabled = false
+	_player.interaction_enabled = false
+	_hud.set_prompt("")
+	_hud.set_cutscene_hidden(true)
+	_active_modal = _night_transition_ui
+	_resume_train_for_night()
+	_night_transition_ui.play_transition()
+
+
+func _on_night_transition_veil_crossed() -> void:
+	_prepare_night_world()
+
+
+func _on_night_transition_finished() -> void:
+	if state != GameState.NIGHT_TRANSITION:
+		return
+	_active_modal = null
+	_hud.set_cutscene_hidden(false)
+	_enter_night()
 
 
 func _open_night_market() -> void:
@@ -1409,7 +1440,7 @@ func _use_carriage_radar() -> void:
 		return
 	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
 	if int(snapshot.get("radar_charges", 0)) <= 0:
-		_hud.notify("NO RADAR CHARGES REMAINING\nPurchase more at the Night Market", 3.0)
+		_hud.notify("NO RADAR CHARGES REMAINING", 3.0)
 		return
 	if not bool(_market_tool_state.call(&"consume_radar_charge")):
 		return
@@ -1481,14 +1512,24 @@ func _set_passenger_cross_carriage_roaming(value: bool) -> void:
 			passenger.set_cross_carriage_roaming_enabled(value)
 
 func _enter_night() -> void:
+	_prepare_night_world()
+	state = GameState.NIGHT
+	_resume_train_for_night()
+	_hud.set_night_walk_mode()
+	_hud.notify(night_shift_instruction, 5.0)
+	_set_player_control_for_state()
+
+
+func _prepare_night_world() -> void:
+	if _night_world_prepared:
+		return
 	var puzzle_template := puzzle_resource as DeparturePuzzleData
 	if puzzle_template == null:
 		push_error("The configured departure puzzle resource is invalid.")
 		return
+	_night_world_prepared = true
 	_runtime_puzzle = puzzle_template.create_runtime(_get_dead_passenger_data(), _daily_rng)
 	_collected_departure_statements.clear()
-	state = GameState.NIGHT
-	_resume_train_after_night_market()
 	_train.set_night_strength(1.0)
 	_ambience.night_strength = 1.0
 	_set_sky_cycle_progress(1.0)
@@ -1497,9 +1538,6 @@ func _enter_night() -> void:
 		if _is_active_passenger(passenger):
 			passenger.set_night_mode(true)
 	_desk.set_night_mode(true)
-	_hud.set_night_walk_mode()
-	_hud.notify(night_shift_instruction, 5.0)
-	_set_player_control_for_state()
 
 func _set_train_stopped_for_night_transition() -> void:
 	_station_cutscene_motion_strength = 0.0
@@ -1508,7 +1546,7 @@ func _set_train_stopped_for_night_transition() -> void:
 	_travel_foreground.set_motion_strength(0.0)
 	_ambience.pause_train_travel()
 
-func _resume_train_after_night_market() -> void:
+func _resume_train_for_night() -> void:
 	_station_cutscene_motion_strength = 1.0
 	_train.set_motion_strength(1.0)
 	_travel_background.set_motion_strength(1.0)
@@ -1542,11 +1580,11 @@ func _close_night_puzzle() -> void:
 func _on_departures_confirmed(assignments: Dictionary) -> void:
 	var puzzle: DeparturePuzzleData = _get_departure_puzzle()
 	if puzzle == null:
-		_night_puzzle_ui.show_error("The night departure manifest is unavailable.")
+		_night_puzzle_ui.show_error("The night assignment manifest is unavailable.")
 		return
 	for station: String in puzzle.night_stations:
 		if assignments.get(station, "") != puzzle.correct_passenger_by_station.get(station, ""):
-			_night_puzzle_ui.show_error("Something is wrong with the night drop-off assignments.")
+			_night_puzzle_ui.show_error("Something is wrong with the symbolic assignments.")
 			return
 	_night_blessing_award = _market_tool_state.call(&"award_night_blessings", puzzle.night_stations.size())
 	_night_puzzle_ui.hide()

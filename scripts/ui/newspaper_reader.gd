@@ -11,13 +11,18 @@ signal close_requested
 @export var secondary_headline_paths: Array[NodePath] = []
 @export var secondary_body_paths: Array[NodePath] = []
 @export var portrait_paths: Array[NodePath] = []
+@export var death_picture_paths: Array[NodePath] = []
+@export var non_death_picture_paths: Array[NodePath] = []
 @export_category("Presentation")
 @export_node_path("AnimationPlayer") var presentation_player_path: NodePath
 @export var presentation_animation: StringName = &"present"
 
 var _variants: Array[Control] = []
 var _portraits: Array[Sprite2D] = []
+var _death_pictures: Array[Control] = []
+var _non_death_pictures: Array[Control] = []
 var _selected_variant: int = 0
+var _case_is_death: bool = false
 var _portrait_texture: Texture2D
 @onready var _presentation_player: AnimationPlayer = get_node_or_null(presentation_player_path) as AnimationPlayer
 
@@ -39,6 +44,10 @@ func choose_random_variant(rng: RandomNumberGenerator) -> void:
 	set_variant(rng.randi_range(0, count - 1))
 
 
+func get_selected_variant() -> int:
+	return _selected_variant
+
+
 func set_variant(index: int) -> void:
 	var count: int = get_variant_count()
 	if count <= 0:
@@ -46,6 +55,14 @@ func set_variant(index: int) -> void:
 	_selected_variant = clampi(index, 0, count - 1)
 	for variant_index: int in range(_variants.size()):
 		_variants[variant_index].visible = variant_index == _selected_variant
+
+
+func set_case_is_death(is_death: bool) -> void:
+	_case_is_death = is_death
+	for picture: Control in _death_pictures:
+		picture.visible = _case_is_death
+	for picture: Control in _non_death_pictures:
+		picture.visible = not _case_is_death
 
 
 func set_content(headline: String, primary_body: String, secondary_headline: String, secondary_body: String) -> void:
@@ -93,6 +110,8 @@ func set_portrait(texture: Texture2D) -> void:
 func _resolve_scene_variants() -> void:
 	_variants.clear()
 	_portraits.clear()
+	_death_pictures.clear()
+	_non_death_pictures.clear()
 	for path: NodePath in variant_paths:
 		var variant := get_node_or_null(path) as Control
 		if is_instance_valid(variant):
@@ -101,6 +120,15 @@ func _resolve_scene_variants() -> void:
 		var portrait := get_node_or_null(path) as Sprite2D
 		if is_instance_valid(portrait):
 			_portraits.append(portrait)
+	for path: NodePath in death_picture_paths:
+		var picture := get_node_or_null(path) as Control
+		if is_instance_valid(picture):
+			_death_pictures.append(picture)
+	for path: NodePath in non_death_picture_paths:
+		var picture := get_node_or_null(path) as Control
+		if is_instance_valid(picture):
+			_non_death_pictures.append(picture)
+	set_case_is_death(_case_is_death)
 	if _portrait_texture != null:
 		set_portrait(_portrait_texture)
 	else:

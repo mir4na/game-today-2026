@@ -15,6 +15,6 @@ anomaly_descriptor_by_type = {
 }
 fallback_descriptor_template = "the %s"
 duplicate_descriptor_template = "%s who worked as the %s"
-immediately_before_template = "%s leaves immediately before %s."
-before_template = "%s leaves before %s."
-single_passenger_statement = "Only one unresolved departure remains on tonight's route."
+immediately_before_template = "%s's destination appears immediately before %s's."
+before_template = "%s's destination appears before %s's."
+single_passenger_statement = "Only one unresolved destination remains tonight."

@@ -78,7 +78,10 @@ func _run() -> void:
 	game._finalize_day_shift()
 	_check(game._day_blessing_award.net_earnings == 120 and game._day_blessing_award.passed, "Main paycheck passes at the Day 2 threshold.")
 	game._on_shift_report_continue()
-	_check(game.state == AfterTheEndGame.GameState.MARKET, "Passing unlocks the market.")
+	_check(game.state == AfterTheEndGame.GameState.NIGHT_TRANSITION, "Passing starts the symbolic night transition.")
+	_check(not game._night_market_ui.visible, "The paycheck no longer routes through the night market.")
+	game._night_transition_ui.skip_sequence()
+	_check(game.state == AfterTheEndGame.GameState.NIGHT, "Completing the transition enters night assignment gameplay.")
 	game._market_tool_state.call("purchase", &"radar_charge")
 	game._restart_game()
 	await process_frame
@@ -150,7 +153,7 @@ func _run() -> void:
 	if _failures > 0:
 		quit(1)
 		return
-	print("PASS: paycheck arithmetic, pass boundary, payout idempotence, seed/inventory persistence, retry rollback, anomaly deduplication, menu Continue, day advancement, five-day completion, corrupt-save handling.")
+	print("PASS: paycheck arithmetic, veil transition, pass boundary, payout idempotence, seed/inventory persistence, retry rollback, anomaly deduplication, menu Continue, day advancement, five-day completion, corrupt-save handling.")
 	quit()
 
 func _wait_for_game() -> AfterTheEndGame:

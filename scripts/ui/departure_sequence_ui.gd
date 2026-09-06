@@ -11,11 +11,11 @@ signal journey_continue_requested
 @export var completion_title: String
 @export var completion_passenger_text: String
 @export var completion_atmosphere_text: String
-@export var passenger_departure_template: String = "%s leaves the night train here."
-@export var next_button_text: String = "NEXT NIGHT STOP"
-@export var complete_button_text: String = "COMPLETE JOURNEY"
+@export var passenger_departure_template: String = "%s is assigned to this destination."
+@export var next_button_text: String = "NEXT ASSIGNMENT"
+@export var complete_button_text: String = "FINALIZE ASSIGNMENTS"
 @export var journey_continue_button_text: String = "CONTINUE"
-@export var blessing_reward_template: String = "+%d BLESSINGS\n%d CORRECT SOUL DROP-OFFS • BALANCE %d"
+@export var blessing_reward_template: String = "+%d BLESSINGS\n%d CORRECT SOUL ASSIGNMENTS • BALANCE %d"
 
 var _puzzle: DeparturePuzzleData
 var _assignments: Dictionary

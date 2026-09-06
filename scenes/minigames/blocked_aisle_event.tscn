@@ -16,7 +16,8 @@ size = Vector2(28, 220)
 size = Vector2(142, 190)
 
 [node name="BlockedAisleEvent" type="Area2D" unique_id=2130907540 groups=["blocked_aisle_events"]]
-z_index = 9
+editor_description = "Scene-authored blocked-aisle event. Its local z-index keeps the luggage above the connector interior while allowing the station-cutscene exterior to cover it."
+z_index = 0
 collision_layer = 0
 collision_mask = 0
 script = ExtResource("1_event")

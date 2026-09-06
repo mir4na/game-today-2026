@@ -7,32 +7,109 @@
 [ext_resource type="Texture2D" uid="uid://bylfneerkadap" path="res://assets/ui/paycheck/Vector 78.png" id="5_dashed"]
 [ext_resource type="Texture2D" uid="uid://cvk26c47ysqne" path="res://assets/ui/paycheck/receipt.png" id="6_barcode"]
 
-[sub_resource type="StyleBoxFlat" id="ActionNormal"]
-content_margin_left = 14.0
-content_margin_top = 10.0
-content_margin_right = 14.0
-content_margin_bottom = 10.0
-bg_color = Color(0.2, 0.2, 0.24, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+[sub_resource type="Animation" id="Animation_hint_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Center/Stack/ContinueHint:modulate:a")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [1.0]
+}
 
-[sub_resource type="StyleBoxFlat" id="ActionFocus"]
-content_margin_left = 14.0
-content_margin_top = 10.0
-content_margin_right = 14.0
-content_margin_bottom = 10.0
-bg_color = Color(0.28, 0.28, 0.32, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.93, 0.89, 0.83, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+[sub_resource type="Animation" id="Animation_hint_blink"]
+resource_name = "blink"
+length = 1.2
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Center/Stack/ContinueHint:modulate:a")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.2),
+"transitions": PackedFloat32Array(1.4, 1.4, 1),
+"update": 0,
+"values": [0.35, 1.0, 0.35]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_hint"]
+_data = {
+&"RESET": SubResource("Animation_hint_reset"),
+&"blink": SubResource("Animation_hint_blink")
+}
+
+[sub_resource type="Animation" id="Animation_present_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("Center:position:y")
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Center:modulate:a")
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [1.0]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Shade:modulate:a")
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [1.0]
+}
+
+[sub_resource type="Animation" id="Animation_present"]
+resource_name = "present"
+length = 0.86
+tracks/0/type = "value"
+tracks/0/path = NodePath("Center:position:y")
+tracks/0/interp = 2
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.68, 0.86),
+"transitions": PackedFloat32Array(1.35, 0.65, 1),
+"update": 0,
+"values": [760.0, -16.0, 0.0]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Center:modulate:a")
+tracks/1/interp = 2
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.26, 0.86),
+"transitions": PackedFloat32Array(1.2, 0.8, 1),
+"update": 0,
+"values": [0.72, 1.0, 1.0]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Shade:modulate:a")
+tracks/2/interp = 2
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.32, 0.86),
+"transitions": PackedFloat32Array(1.2, 0.8, 1),
+"update": 0,
+"values": [0.0, 1.0, 1.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_presentation"]
+_data = {
+&"RESET": SubResource("Animation_present_reset"),
+&"present": SubResource("Animation_present")
+}
 
 [node name="ShiftReportUI" type="Control" unique_id=1786341781]
 visible = false
@@ -54,11 +131,17 @@ no_penalties_text = "No penalties issued."
 passed_result_template = "PASSED  •  %d above target"
 passed_result_color = Color(0.219608, 0.407843, 0.286275, 1)
 passed_payment_template = "%d Blessings added to your balance."
-passed_button_text = "CONTINUE TO NIGHT MARKET"
+passed_continue_text = "PRESS ANY KEY TO CONTINUE"
 failed_result_template = "FAILED  •  %d below target"
 failed_result_color = Color(0.701961, 0.25098, 0.25098, 1)
 failed_payment_text = "Restart this shift with your starting balance and supplies restored."
-failed_button_text = "RESTART SHIFT"
+failed_continue_text = "PRESS ANY KEY TO RESTART SHIFT"
+typewriter_target_paths = Array[NodePath]([NodePath("Center/Stack/Receipt/Title"), NodePath("Center/Stack/Receipt/Subtitle"), NodePath("Center/Stack/Receipt/CorrectCaption"), NodePath("Center/Stack/Receipt/CorrectValue"), NodePath("Center/Stack/Receipt/WrongCaption"), NodePath("Center/Stack/Receipt/WrongValue"), NodePath("Center/Stack/Receipt/AnomalyCaption"), NodePath("Center/Stack/Receipt/AnomalyValue"), NodePath("Center/Stack/Receipt/RetainedCaption"), NodePath("Center/Stack/Receipt/RetainedValue"), NodePath("Center/Stack/Receipt/DetailTitle"), NodePath("Center/Stack/Receipt/Breakdown"), NodePath("Center/Stack/Receipt/NetCaption"), NodePath("Center/Stack/Receipt/NetValue"), NodePath("Center/Stack/Receipt/TargetCaption"), NodePath("Center/Stack/Receipt/TargetValue"), NodePath("Center/Stack/Receipt/ResultLabel"), NodePath("Center/Stack/Receipt/PaymentLabel")])
+typewriter_characters_per_second = 180.0
+typewriter_line_pause_seconds = 0.04
+maximum_target_duration_seconds = 1.25
+input_lock_seconds = 0.9
+presentation_player_path = NodePath("PresentationAnimation")
 
 [node name="Shade" type="ColorRect" parent="." unique_id=437207411]
 layout_mode = 1
@@ -410,33 +493,22 @@ mouse_filter = 2
 texture = ExtResource("6_barcode")
 expand_mode = 1
 
-[node name="Actions" type="HBoxContainer" parent="Center/Stack" unique_id=940146137]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="MainMenuButton" type="Button" parent="Center/Stack/Actions" unique_id=1060566752]
+[node name="ContinueHint" type="Label" parent="Center/Stack"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(128, 42)
+custom_minimum_size = Vector2(460, 38)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.93, 0.89, 0.83, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("ActionNormal")
-theme_override_styles/pressed = SubResource("ActionNormal")
-theme_override_styles/hover = SubResource("ActionFocus")
-theme_override_styles/focus = SubResource("ActionFocus")
-text = "MAIN MENU"
+theme_override_font_sizes/font_size = 15
+text = "PRESS ANY KEY TO CONTINUE"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="ContinueButton" type="Button" parent="Center/Stack/Actions" unique_id=1250957708]
+[node name="HintAnimation" type="AnimationPlayer" parent="."]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(320, 42)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.93, 0.89, 0.83, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("ActionNormal")
-theme_override_styles/pressed = SubResource("ActionNormal")
-theme_override_styles/hover = SubResource("ActionFocus")
-theme_override_styles/focus = SubResource("ActionFocus")
-text = "CONTINUE TO NIGHT MARKET"
+libraries = {
+&"": SubResource("AnimationLibrary_hint")
+}
 
-[connection signal="pressed" from="Center/Stack/Actions/MainMenuButton" to="." method="_on_main_menu_pressed"]
-[connection signal="pressed" from="Center/Stack/Actions/ContinueButton" to="." method="_on_continue_button_pressed"]
+[node name="PresentationAnimation" type="AnimationPlayer" parent="."]
+editor_description = "Scene-authored paycheck lift animation. Edit the present animation here to tune its timing, overshoot, fade, and entry distance."
+libraries/ = SubResource("AnimationLibrary_presentation")
