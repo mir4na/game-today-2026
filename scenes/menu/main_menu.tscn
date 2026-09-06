@@ -9,6 +9,30 @@
 [ext_resource type="Texture2D" uid="uid://dhwhdqdjxiwcu" path="res://assets/MainMenu/Title.png" id="9_title"]
 [ext_resource type="Texture2D" uid="uid://bqlo0h1m0riej" path="res://assets/MainMenu/Button.png" id="10_button"]
 [ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="11_irish"]
+[ext_resource type="Shader" uid="uid://denpgi42prlee" path="res://shaders/main_menu_window_travel.gdshader" id="12_window_travel"]
+[ext_resource type="Texture2D" uid="uid://bic2qisprdiaw" path="res://assets/MainMenu/Overlay1.png" id="13_overlay_1"]
+[ext_resource type="Texture2D" uid="uid://c486uin4euwuu" path="res://assets/MainMenu/Overlay2.png" id="14_overlay_2"]
+[ext_resource type="Shader" uid="uid://c3brnqlmhxjre" path="res://shaders/main_menu_color_grade.gdshader" id="15_color_grade"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_window_travel"]
+resource_local_to_scene = true
+shader = ExtResource("12_window_travel")
+shader_parameter/cloud_color = Color(1, 0.91, 0.92, 0.18)
+shader_parameter/distant_color = Color(0.45, 0.35, 0.46, 0.2)
+shader_parameter/near_color = Color(0.18, 0.22, 0.29, 0.32)
+shader_parameter/glint_color = Color(1, 0.86, 0.78, 0.2)
+shader_parameter/cloud_speed = 0.012
+shader_parameter/distant_speed = 0.055
+shader_parameter/near_speed = 0.48
+shader_parameter/effect_strength = 0.85
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_color_grade"]
+resource_local_to_scene = true
+shader = ExtResource("15_color_grade")
+shader_parameter/overlay_1 = ExtResource("13_overlay_1")
+shader_parameter/overlay_2 = ExtResource("14_overlay_2")
+shader_parameter/overlay_1_strength = 1.0
+shader_parameter/overlay_2_strength = 1.0
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_menu"]
 
@@ -89,6 +113,17 @@ mouse_filter = 2
 texture = ExtResource("4_background")
 expand_mode = 1
 
+[node name="WindowTravelVFX" type="ColorRect" parent="." unique_id=1661692563]
+editor_description = "Scene-authored moving scenery visible only through the train windows. Edit this node's ShaderMaterial parameters to tune cloud, horizon, foreground, and overall movement intensity."
+material = SubResource("ShaderMaterial_window_travel")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
 [node name="HandGrip" type="TextureRect" parent="." unique_id=1873936630]
 layout_mode = 0
 offset_left = 1056.0
@@ -107,8 +142,9 @@ anchors_preset = -1
 anchor_left = 0.464
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -15.0
 offset_right = 12.0
-offset_bottom = 19.0
+offset_bottom = 4.0
 grow_horizontal = 0
 grow_vertical = 2
 pivot_offset = Vector2(343, 720)
@@ -116,6 +152,17 @@ mouse_filter = 2
 texture = ExtResource("7_character")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="ColorGradeOverlays" type="ColorRect" parent="." unique_id=498967854]
+editor_description = "Color grade for Background, WindowTravelVFX, MC, and HandGrip. Overlay1 uses Overlay blending; Overlay2 uses luminance-aware Soft Light. Tune both strengths in this node's ShaderMaterial. UI remains unaffected because it is drawn afterward."
+material = SubResource("ShaderMaterial_color_grade")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="UI" type="Control" parent="." unique_id=396721982]
 layout_mode = 1
@@ -181,6 +228,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(310, 64)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.06, 0.045, 0.06, 1)
+theme_override_colors/font_focus_color = Color(0.06, 0.045, 0.06, 1)
 theme_override_colors/font_pressed_color = Color(0.12, 0.04, 0.09, 1)
 theme_override_colors/font_hover_color = Color(0.25, 0.055, 0.15, 1)
 theme_override_colors/font_disabled_color = Color(0.22, 0.22, 0.24, 0.75)
@@ -213,6 +261,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(310, 64)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.06, 0.045, 0.06, 1)
+theme_override_colors/font_focus_color = Color(0.06, 0.045, 0.06, 1)
 theme_override_colors/font_pressed_color = Color(0.12, 0.04, 0.09, 1)
 theme_override_colors/font_hover_color = Color(0.25, 0.055, 0.15, 1)
 theme_override_colors/font_disabled_color = Color(0.22, 0.22, 0.24, 0.75)
@@ -257,22 +306,6 @@ texture = ExtResource("10_button")
 expand_mode = 1
 stretch_mode = 5
 flip_h = true
-
-[node name="ProgressHint" type="Label" parent="UI/MenuPanel/MenuContent" unique_id=1472578400]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 188.0
-offset_top = 657.0
-offset_right = 582.0
-offset_bottom = 708.0
-theme_override_colors/font_color = Color(0.92, 0.82, 0.87, 0.76)
-theme_override_colors/font_shadow_color = Color(0.06, 0.035, 0.055, 0.9)
-theme_override_constants/shadow_offset_x = 2
-theme_override_constants/shadow_offset_y = 2
-theme_override_fonts/font = ExtResource("11_irish")
-theme_override_font_sizes/font_size = 15
-text = "Five days. One journey."
-horizontal_alignment = 1
 
 [node name="SettingsPanel" type="PanelContainer" parent="UI" unique_id=518228947]
 unique_name_in_owner = true
@@ -378,6 +411,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = -3.0
+offset_right = -3.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2

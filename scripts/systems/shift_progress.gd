@@ -5,6 +5,15 @@ const SAVE_PATH: String = "user://shift_progress.cfg"
 const VERSION: int = 1
 const DAY_COUNT: int = 5
 
+
+## Creates the only checkpoint that replaces an existing campaign from scratch.
+## Continue and normal application exit never call this function.
+static func start_new_run(path: String = SAVE_PATH) -> Dictionary:
+	var checkpoint: Dictionary = make_checkpoint(1, {}, new_seed())
+	if not save_checkpoint(checkpoint, path):
+		return {}
+	return checkpoint
+
 static func load_checkpoint(path: String = SAVE_PATH) -> Dictionary:
 	var file := ConfigFile.new()
 	if file.load(path) != OK or file.get_value("progress", "version", 0) != VERSION:

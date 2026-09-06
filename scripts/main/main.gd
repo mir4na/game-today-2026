@@ -530,13 +530,12 @@ func _find_available_seat(carriage: int) -> Marker2D:
 
 
 func _find_station_boarding_seat(preferred_carriage: int) -> Marker2D:
-	if preferred_carriage != station_sign_blocked_carriage:
-		var preferred_seat: Marker2D = _find_available_seat(preferred_carriage)
-		if preferred_seat != null:
-			return preferred_seat
+	var preferred_seat: Marker2D = _find_available_seat(preferred_carriage)
+	if preferred_seat != null:
+		return preferred_seat
 	var fallback_carriages: Array[int] = []
 	for carriage: int in range(1, manifest_config.passenger_carriage_count + 1):
-		if carriage != preferred_carriage and carriage != station_sign_blocked_carriage:
+		if carriage != preferred_carriage:
 			fallback_carriages.append(carriage)
 	for index: int in range(fallback_carriages.size() - 1, 0, -1):
 		var swap_index: int = _daily_rng.randi_range(0, index)
@@ -575,8 +574,6 @@ func _release_passenger_seat(passenger: Passenger) -> Marker2D:
 func _get_passenger_activity_positions() -> PackedVector2Array:
 	var positions := PackedVector2Array()
 	for activity_slot: Marker2D in _train.get_all_passenger_activity_slots():
-		if _train.get_passenger_carriage_number_at_world_x(activity_slot.global_position.x) == station_sign_blocked_carriage:
-			continue
 		positions.append(_passenger_container.to_local(activity_slot.global_position))
 	return positions
 
@@ -584,8 +581,6 @@ func _get_passenger_carriage_ranges() -> Dictionary:
 	var result: Dictionary = {}
 	var world_ranges: Dictionary = _train.get_passenger_carriage_world_ranges()
 	for carriage_key: Variant in world_ranges:
-		if int(carriage_key) == station_sign_blocked_carriage:
-			continue
 		var world_range: Vector2 = world_ranges[carriage_key]
 		var local_start: float = _passenger_container.to_local(Vector2(world_range.x, _passenger_container.global_position.y)).x
 		var local_end: float = _passenger_container.to_local(Vector2(world_range.y, _passenger_container.global_position.y)).x

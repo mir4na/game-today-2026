@@ -43,6 +43,23 @@ func _run() -> void:
 	var menu: MainMenu = MenuScene.instantiate()
 	root.add_child(menu)
 	_check(not menu.get_node("%ContinueButton").disabled and "DAY 2" in menu.get_node("%ContinueButton").text, "Menu must offer the saved day.")
+	menu.free()
+	menu = MenuScene.instantiate()
+	root.add_child(menu)
+	_check(Progress.load_checkpoint() == checkpoint, "Closing and reopening the application menu must not replace the saved run.")
+	_check(not menu.get_node("%ContinueButton").disabled and "DAY 2" in menu.get_node("%ContinueButton").text, "Continue must remain available after a relaunch.")
+	var continue_button := menu.get_node("%ContinueButton") as Button
+	continue_button.grab_focus()
+	_check(
+		continue_button.get_theme_color(&"font_focus_color").is_equal_approx(Color(0.06, 0.045, 0.06, 1.0)),
+		"The focused Continue button must keep its authored black text."
+	)
+	var settings_button := menu.get_node("%SettingsButton") as Button
+	settings_button.grab_focus()
+	_check(
+		settings_button.get_theme_color(&"font_focus_color").is_equal_approx(Color(0.06, 0.045, 0.06, 1.0)),
+		"The focused Settings button must keep its authored black text."
+	)
 	current_scene = menu
 	menu.get_node("%ContinueButton").pressed.emit()
 	var game: AfterTheEndGame = await _wait_for_game()
@@ -153,7 +170,7 @@ func _run() -> void:
 	if _failures > 0:
 		quit(1)
 		return
-	print("PASS: paycheck arithmetic, veil transition, pass boundary, payout idempotence, seed/inventory persistence, retry rollback, anomaly deduplication, menu Continue, day advancement, five-day completion, corrupt-save handling.")
+	print("PASS: paycheck arithmetic, veil transition, pass boundary, payout idempotence, relaunch persistence, focused menu styling, retry rollback, anomaly deduplication, menu Continue, day advancement, five-day completion, corrupt-save handling.")
 	quit()
 
 func _wait_for_game() -> AfterTheEndGame:

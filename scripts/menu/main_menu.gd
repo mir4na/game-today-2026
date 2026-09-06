@@ -25,7 +25,6 @@ const ShiftProgress = preload("res://scripts/systems/shift_progress.gd")
 @onready var _settings_panel: PanelContainer = %SettingsPanel
 @onready var _start_button: Button = %StartButton
 @onready var _continue_button: Button = %ContinueButton
-@onready var _progress_hint: Label = %ProgressHint
 @onready var _settings_button: Button = %SettingsButton
 @onready var _quit_button: Button = %QuitButton
 @onready var _volume_slider: HSlider = %VolumeSlider
@@ -44,14 +43,15 @@ var _hand_grip_time: float = 0.0
 func _ready() -> void:
 	_hand_grip_origin = _hand_grip.position
 	_mc_origin = _mc.position
+	_setup_mirrored_button_art(_continue_button)
+	_setup_mirrored_button_art(_quit_button)
 	_load_settings()
 	var checkpoint: Dictionary = ShiftProgress.load_checkpoint()
 	var can_continue: bool = not checkpoint.is_empty() and not bool(checkpoint.get("completed", false))
 	_continue_button.disabled = not can_continue
 	_continue_button.text = "CONTINUE — DAY %d" % int(checkpoint.day) if can_continue else "CONTINUE"
-	_progress_hint.text = "Continue resumes the start of your saved day.\nNew Game replaces the saved run." if can_continue else "Five days. One journey."
-	if not checkpoint.is_empty() and bool(checkpoint.get("completed", false)):
-		_progress_hint.text = "Five-day journey complete\nStart a new game to play again."
+	_refresh_mirrored_button_art(_continue_button)
+	_refresh_mirrored_button_art(_quit_button)
 	if can_continue:
 		_continue_button.grab_focus()
 	else:
@@ -92,8 +92,8 @@ func _start_game() -> void:
 	if loading_screen_scene == null:
 		push_error("MainMenu/Loading Screen Scene is not configured in the Inspector.")
 		return
-	if not ShiftProgress.save_checkpoint(ShiftProgress.make_checkpoint(1, {}, ShiftProgress.new_seed())):
-		_progress_hint.text = "Progress could not be saved. Please try again."
+	if ShiftProgress.start_new_run().is_empty():
+		push_error("A new run could not be saved. Please try again.")
 		return
 	_open_game()
 
@@ -116,6 +116,8 @@ func _open_game() -> void:
 	tween.tween_callback(func() -> void: get_tree().change_scene_to_packed(loading_screen_scene))
 
 func _quit_game() -> void:
+	# Shift progress already lives in user:// and must survive application exit.
+	# Only _start_game() replaces it with a fresh Day 1 checkpoint.
 	get_tree().quit()
 
 func _set_menu_buttons_disabled(value: bool) -> void:
@@ -123,6 +125,32 @@ func _set_menu_buttons_disabled(value: bool) -> void:
 	_continue_button.disabled = value
 	_settings_button.disabled = value
 	_quit_button.disabled = value
+	_refresh_mirrored_button_art(_continue_button)
+	_refresh_mirrored_button_art(_quit_button)
+
+func _setup_mirrored_button_art(button: Button) -> void:
+	button.mouse_entered.connect(_refresh_mirrored_button_art.bind(button))
+	button.mouse_exited.connect(_refresh_mirrored_button_art.bind(button))
+	button.focus_entered.connect(_refresh_mirrored_button_art.bind(button))
+	button.focus_exited.connect(_refresh_mirrored_button_art.bind(button))
+	button.button_down.connect(_set_mirrored_button_art_state.bind(button, &"pressed"))
+	button.button_up.connect(_refresh_mirrored_button_art.bind(button))
+
+func _refresh_mirrored_button_art(button: Button) -> void:
+	var state: StringName = &"normal"
+	if button.disabled:
+		state = &"disabled"
+	elif button.is_hovered():
+		state = &"hover"
+	_set_mirrored_button_art_state(button, state)
+
+func _set_mirrored_button_art_state(button: Button, state: StringName) -> void:
+	var art := button.get_node_or_null("MirroredButtonArt") as TextureRect
+	if art == null:
+		return
+	var source_style := _start_button.get_theme_stylebox(state)
+	if source_style is StyleBoxTexture:
+		art.self_modulate = source_style.modulate_color
 
 func _on_volume_changed(value: float) -> void:
 	_volume_value.text = volume_value_template % int(value)
