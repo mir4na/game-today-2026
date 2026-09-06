@@ -21,7 +21,7 @@ corner_radius_bottom_left = 5
 
 [node name="BlockedAislePuzzleUI" type="Control"]
 visible = false
-process_mode = 3
+process_mode = 1
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -204,3 +204,24 @@ layout_mode = 0
 offset_right = 820.0
 offset_bottom = 510.0
 mouse_filter = 2
+
+[node name="CloseButton" type="Button" parent="."]
+unique_name_in_owner = true
+editor_description = "Scene-authored minigame exit. It mirrors the E interaction shortcut; Esc is reserved for Pause."
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -194.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 72.0
+grow_horizontal = 0
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.941176, 0.811765, 0.552941, 1)
+theme_override_font_sizes/font_size = 17
+text = "CLOSE   [E]"
+tooltip_text = "Leave the minigame without resetting progress"
+
+[connection signal="pressed" from="CloseButton" to="." method="_on_close_button_pressed"]

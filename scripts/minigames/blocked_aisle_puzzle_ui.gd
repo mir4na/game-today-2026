@@ -61,9 +61,13 @@ func request_close() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if visible and event.is_action_pressed(&"ui_cancel"):
+	if visible and event.is_action_pressed(&"interact"):
 		request_close()
 		get_viewport().set_input_as_handled()
+
+
+func _on_close_button_pressed() -> void:
+	request_close()
 
 
 
@@ -325,7 +329,7 @@ func _check_completion() -> void:
 	if _completed or _occupied_cells.size() < grid_columns * grid_rows:
 		return
 	_completed = true
-	await get_tree().create_timer(0.25).timeout
+	await get_tree().create_timer(0.25, false).timeout
 	if not is_inside_tree():
 		return
 	hide()

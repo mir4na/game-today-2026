@@ -35,6 +35,7 @@ const NIGHT_WINDOW_LIGHT := Color("3aa2e9")
 @export var radar_scan_origin_parameter: StringName = &"scan_origin_uv"
 @export var radar_scan_progress_parameter: StringName = &"scan_progress"
 @export var radar_scan_aspect_parameter: StringName = &"scan_aspect"
+@export var radar_glow_aspect_parameter: StringName = &"glow_aspect"
 @export_range(0.0, 2.0, 0.05) var cinematic_interior_fade_seconds: float = 0.45
 @export_range(0.0, 1.0, 0.05) var radar_glow_opacity: float = 1.0
 @export_range(0.05, 2.0, 0.05) var radar_glow_fade_seconds: float = 0.35
@@ -161,6 +162,13 @@ func set_motion_strength(value: float) -> void:
 func show_radar_anomaly_glow(duration: float) -> void:
 	if not is_instance_valid(_radar_anomaly_glow):
 		return
+	var glow_material := _radar_anomaly_glow.material as ShaderMaterial
+	var glow_control := _radar_anomaly_glow as Control
+	if glow_material != null and glow_control != null and glow_control.size.y > 0.0:
+		glow_material.set_shader_parameter(
+			radar_glow_aspect_parameter,
+			glow_control.size.x / glow_control.size.y
+		)
 	if is_instance_valid(_radar_glow_tween):
 		_radar_glow_tween.kill()
 	_radar_anomaly_glow.modulate.a = 0.0

@@ -35,9 +35,13 @@ func request_close() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if visible and event.is_action_pressed(&"ui_cancel"):
+	if visible and event.is_action_pressed(&"interact"):
 		request_close()
 		get_viewport().set_input_as_handled()
+
+
+func _on_close_button_pressed() -> void:
+	request_close()
 
 
 func _on_cleaning_progress(value: float) -> void:
@@ -55,7 +59,7 @@ func _on_surface_cleaned() -> void:
 	_progress_label.text = progress_template % 100
 	_progress_label.hide()
 	_success_label.show()
-	await get_tree().create_timer(0.55).timeout
+	await get_tree().create_timer(0.55, false).timeout
 	if not is_inside_tree():
 		return
 	hide()

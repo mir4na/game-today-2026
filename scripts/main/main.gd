@@ -19,7 +19,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export var day_route: PackedStringArray
 @export_category("Station Service")
 ## Travel time per route leg, excluding station cutscenes and pauses.
-@export var station_travel_durations_seconds: PackedFloat32Array = PackedFloat32Array([10.0, 10.0, 10.0, 10.0])
+@export var station_travel_durations_seconds: PackedFloat32Array = PackedFloat32Array([30.0, 30.0, 30.0, 30.0])
 @export_category("Passenger Placement")
 @export_range(120.0, 240.0, 5.0) var minimum_passenger_seat_spacing: float = 120.0
 @export_category("Maintenance Distractions")
@@ -79,6 +79,7 @@ var _newspaper: NewspaperInteractable
 var _desk: ConductorDeskInteractable
 var _nearby_interactable: Interactable
 var _active_modal: Control
+var _modal_before_pause: Control
 var _station_cutscene_context: StringName = &""
 var _station_cutscene_timeline_complete: bool = false
 var _station_cutscene_motion_strength: float = 1.0
@@ -95,7 +96,6 @@ var _day_blessing_award: Dictionary = {}
 var _night_blessing_award: Dictionary = {}
 var _night_world_prepared: bool = false
 var _radar_scan_active: bool = false
-var _radar_maintenance_pause_states: Dictionary = {}
 
 @onready var _train: TrainWorld = %Train
 @onready var _player: ConductorPlayer = %Player
@@ -178,8 +178,8 @@ func _process(delta: float) -> void:
 	_update_carriage_indicator()
 	if state != GameState.DAY and state != GameState.SUNSET:
 		return
-	# Radar pauses only shift systems. Train sway, wheels, scenery, lighting,
-	# ambience, and local passenger activity continue to process normally.
+	# A radar scan suspends only route time. Every other gameplay system keeps
+	# processing, so the remaining time to the next station is unchanged.
 	if not world_simulation_active or _radar_scan_active:
 		return
 
@@ -271,7 +271,7 @@ func _input(event: InputEvent) -> void:
 		return
 	if event is InputEventKey and event.echo:
 		return
-	if _radar_scan_active or _night_statement_active:
+	if _night_statement_active:
 		return
 	if not _guidebook_ui.visible and (
 		_active_modal != null
@@ -283,10 +283,6 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _radar_scan_active:
-		if event.is_pressed():
-			get_viewport().set_input_as_handled()
-		return
 	if _night_statement_active:
 		if event.is_action_pressed(&"interact") or event.is_action_pressed(&"ui_cancel"):
 			_close_night_statement_dialogue()
@@ -302,24 +298,24 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if not event.is_action_pressed(&"ui_cancel"):
 		return
-	if _day_intro_ui.visible:
+	if _pause_ui.visible:
+		_resume_from_pause()
+	elif _day_intro_ui.visible:
 		_day_intro_ui.skip_intro()
 	elif _document_overlay.visible:
 		_document_overlay.request_close()
 	elif _guidebook_ui.visible:
 		_guidebook_ui.request_close()
 	elif _blocked_aisle_ui.visible:
-		_blocked_aisle_ui.call(&"request_close")
+		_open_pause()
 	elif _clean_seat_ui.visible:
-		_clean_seat_ui.call(&"request_close")
+		_open_pause()
 	elif _station_stop_ui.visible:
 		_station_stop_ui.skip_sequence()
 	elif _night_transition_ui.visible:
 		_night_transition_ui.skip_sequence()
 	elif _night_puzzle_ui.visible:
 		_close_night_puzzle()
-	elif _pause_ui.visible:
-		_resume_from_pause()
 	elif state not in [GameState.OPENING, GameState.SHIFT_REPORT, GameState.MARKET, GameState.COMPLETE]:
 		_open_pause()
 	get_viewport().set_input_as_handled()
@@ -1300,6 +1296,16 @@ func _toggle_guidebook() -> void:
 func _on_guidebook_requested() -> void:
 	_toggle_guidebook()
 
+
+func _on_radar_requested() -> void:
+	if (
+		_radar_scan_active
+		or _active_modal != null
+		or state not in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
+	):
+		return
+	_use_carriage_radar()
+
 func _on_modal_closed() -> void:
 	if is_instance_valid(_inspected_passenger):
 		_inspected_passenger.set_inspection_paused(false)
@@ -1311,6 +1317,9 @@ func _on_modal_closed() -> void:
 	_set_player_control_for_state()
 
 func _open_pause() -> void:
+	if _pause_ui.visible:
+		return
+	_modal_before_pause = _active_modal
 	_active_modal = _pause_ui
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
@@ -1321,7 +1330,8 @@ func _open_pause() -> void:
 func _resume_from_pause() -> void:
 	get_tree().paused = false
 	_pause_ui.hide()
-	_active_modal = null
+	_active_modal = _modal_before_pause if is_instance_valid(_modal_before_pause) and _modal_before_pause.visible else null
+	_modal_before_pause = null
 	_set_player_control_for_state()
 
 func _normalize_name(value: String) -> String:
@@ -1444,11 +1454,11 @@ func _use_carriage_radar() -> void:
 		return
 	if not bool(_market_tool_state.call(&"consume_radar_charge")):
 		return
+	# Snapshot the selected coach when the pulse starts. Passenger movement and
+	# every other gameplay system remain active while the visual travels.
+	var anomaly_detected: bool = _carriage_contains_anomaly(carriage_number)
 	_radar_scan_active = true
-	_set_player_control_for_state()
-	_hud.set_radar_hidden(true)
-	_set_maintenance_timers_radar_paused(true)
-	_set_passenger_cross_carriage_roaming(false)
+	_hud.set_radar_active(true)
 
 	await _train.play_radar_scan(
 		carriage_number,
@@ -1456,18 +1466,14 @@ func _use_carriage_radar() -> void:
 		radar_scan_seconds
 	)
 
-	# Read the result after the sweep. NPCs may keep behaving naturally inside
-	# the coach, while cross-coach movement is locked for a stable scan target.
-	var anomaly_detected: bool = _carriage_contains_anomaly(carriage_number)
 	if anomaly_detected:
 		_train.show_radar_anomaly_glow(carriage_number, radar_glow_seconds)
-	await get_tree().create_timer(radar_result_reveal_seconds).timeout
+	# This timer follows the normal pause state, so opening the pause menu also
+	# pauses the radar phase along with the rest of gameplay.
+	await get_tree().create_timer(radar_result_reveal_seconds, false).timeout
 
-	_set_passenger_cross_carriage_roaming(true)
-	_set_maintenance_timers_radar_paused(false)
-	_hud.set_radar_hidden(false)
 	_radar_scan_active = false
-	_set_player_control_for_state()
+	_hud.set_radar_active(false)
 	if anomaly_detected:
 		_hud.notify(
 			"RADAR POSITIVE\nANOMALY SIGNAL DETECTED IN COACH %d" % carriage_number,
@@ -1487,29 +1493,6 @@ func _carriage_contains_anomaly(carriage_number: int) -> bool:
 		):
 			return true
 	return false
-
-
-func _set_maintenance_timers_radar_paused(value: bool) -> void:
-	var maintenance_timers: Array[Timer] = [_blocked_aisle_timer, _dirty_seat_timer]
-	if value:
-		_radar_maintenance_pause_states.clear()
-		for timer: Timer in maintenance_timers:
-			if not is_instance_valid(timer):
-				continue
-			_radar_maintenance_pause_states[timer] = timer.paused
-			timer.paused = true
-		return
-	for timer: Timer in maintenance_timers:
-		if not is_instance_valid(timer):
-			continue
-		timer.paused = bool(_radar_maintenance_pause_states.get(timer, false))
-	_radar_maintenance_pause_states.clear()
-
-
-func _set_passenger_cross_carriage_roaming(value: bool) -> void:
-	for passenger: Passenger in _passengers:
-		if _is_active_passenger(passenger):
-			passenger.set_cross_carriage_roaming_enabled(value)
 
 func _enter_night() -> void:
 	_prepare_night_world()
@@ -1615,8 +1598,7 @@ func _travel_duration_label() -> String:
 
 func _set_player_control_for_state() -> void:
 	var can_walk: bool = (
-		not _radar_scan_active
-		and _active_modal == null
+		_active_modal == null
 		and not _night_statement_active
 		and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
 	)

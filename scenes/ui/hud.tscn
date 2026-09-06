@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
@@ -8,22 +8,6 @@
 [ext_resource type="Texture2D" path="res://assets/ui/gerbong_active.png" id="6_carriage_active"]
 [ext_resource type="Texture2D" path="res://assets/ui/gerbong_nonactive.png" id="7_carriage_inactive"]
 [ext_resource type="PackedScene" path="res://scenes/ui/maintenance_tracker.tscn" id="8_tracker"]
-
-[sub_resource type="StyleBoxFlat" id="HudPanelStyle"]
-content_margin_left = 18.0
-content_margin_top = 14.0
-content_margin_right = 18.0
-content_margin_bottom = 14.0
-bg_color = Color(0.06, 0.08, 0.11, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.752941, 0.603922, 0.380392, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="ClockStyle"]
 content_margin_left = 18.0
@@ -109,7 +93,8 @@ corner_radius_bottom_left = 8
 layer = 10
 script = ExtResource("1")
 clock_template = "%02d:%02d %s"
-tool_inventory_template = "BLESSINGS %d   •   [R] RADAR ×%d   •   AUDIT ×%d   •   SPEED LV.%d"
+tool_status_template = "BLESSINGS %d\nAUDIT ×%d  •  SPEED LV.%d"
+radar_button_template = "ACTIVATE RADAR   [R]  ×%d"
 prompt_screen_offset = Vector2(0, 0)
 prompt_edge_margin = Vector2(24, 20)
 
@@ -124,54 +109,44 @@ grow_vertical = 2
 mouse_filter = 2
 theme = ExtResource("2")
 
-[node name="MinimapPanel" type="PanelContainer" parent="Root"]
+[node name="MinimapAnchor" type="Control" parent="Root"]
+editor_description = "Independent top-right minimap anchor. Gameplay action buttons live elsewhere in the HUD and are unrelated to this node."
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -350.0
+offset_left = -248.0
 offset_top = 24.0
 offset_right = -24.0
-offset_bottom = 132.0
+offset_bottom = 74.0
 grow_horizontal = 0
-theme_override_styles/panel = SubResource("HudPanelStyle")
 
-[node name="MinimapBox" type="VBoxContainer" parent="Root/MinimapPanel"]
-layout_mode = 2
-
-[node name="TrainTitle" type="Label" parent="Root/MinimapPanel/MinimapBox"]
-theme_type_variation = &"HeaderLabel"
-layout_mode = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_font_sizes/font_size = 17
-text = "TRAIN"
-
-[node name="TrainMinimap" parent="Root/MinimapPanel/MinimapBox" instance=ExtResource("3")]
+[node name="TrainMinimap" parent="Root/MinimapAnchor" instance=ExtResource("3")]
 unique_name_in_owner = true
-layout_mode = 2
+layout_mode = 0
+offset_right = 224.0
+offset_bottom = 50.0
 active_carriage_texture = ExtResource("6_carriage_active")
 inactive_carriage_texture = ExtResource("7_carriage_inactive")
 
-[node name="ToolPanel" type="PanelContainer" parent="Root"]
+[node name="ToolStatusLabel" type="Label" parent="Root"]
 unique_name_in_owner = true
+editor_description = "Passive run status, independent from the minimap and side action buttons."
 layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -350.0
-offset_top = 142.0
-offset_right = -24.0
-offset_bottom = 190.0
-grow_horizontal = 0
-theme_override_styles/panel = SubResource("HudPanelStyle")
-
-[node name="ToolInventoryLabel" type="Label" parent="Root/ToolPanel"]
-unique_name_in_owner = true
-layout_mode = 2
+offset_left = 28.0
+offset_top = 24.0
+offset_right = 260.0
+offset_bottom = 76.0
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.92)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.55)
+theme_override_constants/line_spacing = 0
+theme_override_constants/outline_size = 4
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 14
-text = "BLESSINGS 0   •   [R] RADAR ×0   •   AUDIT ×0   •   SPEED LV.0"
-horizontal_alignment = 1
+text = "BLESSINGS 0
+AUDIT ×0  •  SPEED LV.0"
 
 [node name="MaintenanceTrackers" type="Control" parent="Root"]
 layout_mode = 1
@@ -277,16 +252,14 @@ horizontal_alignment = 1
 
 [node name="GuidebookButton" type="Button" parent="Root"]
 unique_name_in_owner = true
-editor_description = "Bottom-left guidebook access. Position, size, copy, and styling are scene-authored and can be adjusted from this node in the Inspector."
+editor_description = "Left-side guidebook action. Position, size, copy, and styling are scene-authored and can be adjusted here."
 layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
+anchor_top = 0.5
+anchor_bottom = 0.5
 offset_left = 28.0
-offset_top = -86.0
+offset_top = -29.0
 offset_right = 248.0
-offset_bottom = -28.0
-grow_vertical = 0
+offset_bottom = 29.0
 mouse_default_cursor_shape = 2
 focus_mode = 0
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
@@ -298,6 +271,31 @@ theme_override_styles/hover = SubResource("GuidebookButtonHover")
 theme_override_styles/pressed = SubResource("GuidebookButtonPressed")
 text = "GUIDEBOOK   [TAB]"
 tooltip_text = "Open the conductor's guidebook"
+
+[node name="RadarButton" type="Button" parent="Root"]
+unique_name_in_owner = true
+editor_description = "Independent right-side radar action. This button mirrors the R keyboard shortcut and shows the remaining charge count."
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -282.0
+offset_top = -29.0
+offset_right = -28.0
+offset_bottom = 29.0
+grow_horizontal = 0
+mouse_default_cursor_shape = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_colors/font_hover_color = Color(1, 0.956863, 0.827451, 1)
+theme_override_colors/font_pressed_color = Color(0.843137, 0.690196, 0.419608, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("GuidebookButtonNormal")
+theme_override_styles/hover = SubResource("GuidebookButtonHover")
+theme_override_styles/pressed = SubResource("GuidebookButtonPressed")
+text = "ACTIVATE RADAR   [R]  ×0"
+tooltip_text = "Scan the current passenger coach"
 
 [node name="NotificationPanel" type="PanelContainer" parent="Root"]
 unique_name_in_owner = true
@@ -323,3 +321,4 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [connection signal="pressed" from="Root/GuidebookButton" to="." method="_on_guidebook_button_pressed"]
+[connection signal="pressed" from="Root/RadarButton" to="." method="_on_radar_button_pressed"]

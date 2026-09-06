@@ -3,10 +3,12 @@ extends CanvasLayer
 ## Persistent, low-profile HUD. Modal screens live in sibling UI scenes.
 
 signal guidebook_requested
+signal radar_requested
 
 @export_category("Inspector Copy")
 @export var clock_template: String = "%02d:%02d %s"
-@export var tool_inventory_template: String = "BLESSINGS %d   •   [R] RADAR ×%d   •   AUDIT ×%d   •   SPEED LV.%d"
+@export var tool_status_template: String = "BLESSINGS %d\nAUDIT ×%d  •  SPEED LV.%d"
+@export var radar_button_template: String = "ACTIVATE RADAR   [R]  ×%d"
 @export_category("Interaction Prompt")
 @export var prompt_screen_offset: Vector2 = Vector2.ZERO
 @export var prompt_edge_margin: Vector2 = Vector2(24.0, 20.0)
@@ -34,8 +36,8 @@ signal guidebook_requested
 @onready var _dialogue_pointer: TextureRect = %DialoguePointer
 @onready var _notification_panel: PanelContainer = %NotificationPanel
 @onready var _notification_label: Label = %NotificationLabel
-@onready var _tool_panel: PanelContainer = %ToolPanel
-@onready var _tool_inventory_label: Label = %ToolInventoryLabel
+@onready var _tool_status_label: Label = %ToolStatusLabel
+@onready var _radar_button: Button = %RadarButton
 @onready var _maintenance_trackers: Array[Control] = [
 	$Root/MaintenanceTrackers/TrackerPrimary,
 	$Root/MaintenanceTrackers/TrackerSecondary,
@@ -68,12 +70,12 @@ func set_passenger_counts_by_carriage(counts: Dictionary) -> void:
 
 
 func set_market_tool_inventory(snapshot: Dictionary) -> void:
-	_tool_inventory_label.text = tool_inventory_template % [
+	_tool_status_label.text = tool_status_template % [
 		int(snapshot.get("blessings", 0)),
-		int(snapshot.get("radar_charges", 0)),
 		int(snapshot.get("audit_slips", 0)),
 		int(snapshot.get("speed_level", 0))
 	]
+	_radar_button.text = radar_button_template % int(snapshot.get("radar_charges", 0))
 
 
 func set_maintenance_targets(target_entries: Array[Dictionary]) -> void:
@@ -274,7 +276,8 @@ func _update_dialogue_pointer(target_local_x: float, prompt_width: float) -> voi
 
 func set_day_hud_visible(value: bool) -> void:
 	_clock_panel.visible = value
-	_tool_panel.visible = value
+	_tool_status_label.visible = value
+	_radar_button.visible = value
 	_floating_prompt.visible = value and not _prompt_label.text.is_empty()
 	# The train minimap remains visible through the night walk.
 
@@ -282,16 +285,22 @@ func set_cutscene_hidden(value: bool) -> void:
 	_root.visible = not value
 
 
-func set_radar_hidden(value: bool) -> void:
-	_root.visible = not value
+func set_radar_active(value: bool) -> void:
+	_radar_button.disabled = value
+	_radar_button.tooltip_text = "Radar scan in progress" if value else "Scan the current passenger coach"
 
 
 func _on_guidebook_button_pressed() -> void:
 	guidebook_requested.emit()
 
+
+func _on_radar_button_pressed() -> void:
+	radar_requested.emit()
+
 func set_night_walk_mode() -> void:
 	_clock_panel.visible = false
-	_tool_panel.visible = true
+	_tool_status_label.visible = true
+	_radar_button.visible = true
 	_floating_prompt.visible = not _prompt_label.text.is_empty()
 
 func notify(message: String, seconds: float = 3.0) -> void:
