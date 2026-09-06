@@ -28,11 +28,11 @@ z_index = 2
 script = ExtResource("1")
 collision_layer = 0
 collision_mask = 0
-prompt_text = "INSPECT PASSENGER"
+prompt_text = "Inspect passenger"
 interaction_distance = 105.0
 prompt_anchor_path = NodePath("CharacterScale/PassengerVisual/InteractionPromptAnchor")
 focus_visual_path = NodePath("CharacterScale")
-focus_z_index = 100
+focus_z_index = 2
 initial_seated_chance = 0.25
 initial_idle_at_activity_chance = 0.35
 minimum_roaming_source_population = 2
@@ -40,7 +40,7 @@ maximum_roaming_target_population = 3
 navigation_probe_path = NodePath("NpcNavigationProbe")
 navigation_probe_collision_path = NodePath("NpcNavigationProbe/ProbeCollision")
 navigation_blocker_mask = 4
-night_prompt_text = "Hear Departure Statement"
+night_prompt_text = "Hear departure statement"
 
 [node name="Shadow" type="Polygon2D" parent="."]
 unique_name_in_owner = true

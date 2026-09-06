@@ -30,12 +30,20 @@ signal resolved(event: Node)
 var _resolved: bool = false
 var _interaction_offset_from_luggage: Vector2 = Vector2.ZERO
 var _active_spawn_side: StringName = &"left"
+var _luggage_rest_scale: Vector2 = Vector2.ONE
+var _luggage_rest_rotation: float = 0.0
+var _luggage_rest_modulate: Color = Color.WHITE
+var _visual_tween: Tween
 
 
 func _ready() -> void:
 	super._ready()
 	if is_instance_valid(_interaction_collision) and is_instance_valid(_luggage_visual):
 		_interaction_offset_from_luggage = _interaction_collision.position - _luggage_visual.position
+	if is_instance_valid(_luggage_visual):
+		_luggage_rest_scale = _luggage_visual.scale
+		_luggage_rest_rotation = _luggage_visual.rotation
+		_luggage_rest_modulate = _luggage_visual.modulate
 	_validate_placement_nodes()
 	set_event_active(false)
 
@@ -49,7 +57,11 @@ func set_event_active(value: bool, observer_global_x: float = NAN) -> void:
 	_resolved = false if value else _resolved
 	if value:
 		_place_luggage_for_observer(observer_global_x)
-	visible = value
+		show()
+		_play_activation_animation()
+	else:
+		_reset_visual_animation()
+		hide()
 	enabled = value
 	_set_collision_enabled(_door_blocker_collision, value)
 	_set_collision_enabled(_interaction_collision, value)
@@ -64,8 +76,7 @@ func mark_solved() -> void:
 	_set_collision_enabled(_door_blocker_collision, false)
 	_set_collision_enabled(_interaction_collision, false)
 	_set_collision_enabled(_npc_exclusion_collision, false)
-	hide()
-	resolved.emit(self)
+	_play_resolve_animation()
 
 
 func is_resolved() -> bool:
@@ -117,3 +128,55 @@ func _validate_placement_nodes() -> void:
 func _set_collision_enabled(collision: CollisionShape2D, value: bool) -> void:
 	if is_instance_valid(collision):
 		collision.set_deferred(&"disabled", not value)
+
+
+func _play_activation_animation() -> void:
+	if not is_instance_valid(_luggage_visual):
+		return
+	_kill_visual_tween()
+	_luggage_visual.scale = _luggage_rest_scale * 0.78
+	_luggage_visual.rotation = _luggage_rest_rotation - 0.045
+	_luggage_visual.modulate = Color(
+		_luggage_rest_modulate.r,
+		_luggage_rest_modulate.g,
+		_luggage_rest_modulate.b,
+		0.0
+	)
+	_visual_tween = create_tween().set_parallel(true)
+	_visual_tween.tween_property(_luggage_visual, ^"scale", _luggage_rest_scale, 0.32).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_visual_tween.tween_property(_luggage_visual, ^"rotation", _luggage_rest_rotation, 0.24).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_visual_tween.tween_property(_luggage_visual, ^"modulate", _luggage_rest_modulate, 0.14).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+
+func _play_resolve_animation() -> void:
+	if not is_instance_valid(_luggage_visual):
+		hide()
+		resolved.emit(self)
+		return
+	_kill_visual_tween()
+	_visual_tween = create_tween()
+	_visual_tween.tween_property(_luggage_visual, ^"scale", _luggage_rest_scale * 1.08, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_visual_tween.tween_property(_luggage_visual, ^"scale", _luggage_rest_scale * 0.62, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	_visual_tween.parallel().tween_property(_luggage_visual, ^"rotation", _luggage_rest_rotation + 0.055, 0.2)
+	_visual_tween.parallel().tween_property(_luggage_visual, ^"modulate:a", 0.0, 0.16).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	_visual_tween.tween_callback(_finish_resolve_animation)
+
+
+func _finish_resolve_animation() -> void:
+	hide()
+	_reset_visual_animation()
+	resolved.emit(self)
+
+
+func _reset_visual_animation() -> void:
+	_kill_visual_tween()
+	if not is_instance_valid(_luggage_visual):
+		return
+	_luggage_visual.scale = _luggage_rest_scale
+	_luggage_visual.rotation = _luggage_rest_rotation
+	_luggage_visual.modulate = _luggage_rest_modulate
+
+
+func _kill_visual_tween() -> void:
+	if _visual_tween and _visual_tween.is_valid():
+		_visual_tween.kill()

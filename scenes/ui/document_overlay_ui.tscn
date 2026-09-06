@@ -110,9 +110,14 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="PassengerDocuments" parent="PassengerDocumentCenter" instance=ExtResource("3")]
-unique_name_in_owner = true
+[node name="PassengerDocumentAnchor" type="Control" parent="PassengerDocumentCenter"]
+custom_minimum_size = Vector2(760, 520)
 layout_mode = 2
+mouse_filter = 2
+
+[node name="PassengerDocuments" parent="PassengerDocumentCenter/PassengerDocumentAnchor" instance=ExtResource("3")]
+unique_name_in_owner = true
+layout_mode = 0
 
 [node name="PassengerCloseButton" type="Button" parent="."]
 unique_name_in_owner = true
@@ -127,7 +132,7 @@ offset_top = 24.0
 offset_right = -24.0
 offset_bottom = 78.0
 grow_horizontal = 0
-focus_neighbor_bottom = NodePath("../PassengerDocumentCenter/PassengerDocuments")
+focus_neighbor_bottom = NodePath("../PassengerDocumentCenter/PassengerDocumentAnchor/PassengerDocuments")
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_colors/font_hover_color = Color(1, 0.929412, 0.772549, 1)
@@ -165,21 +170,31 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="ReaderPanel" type="PanelContainer" parent="ReaderCenter"]
+[node name="ReaderAnchor" type="Control" parent="ReaderCenter"]
+custom_minimum_size = Vector2(1040, 600)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="ReaderPanel" type="PanelContainer" parent="ReaderCenter/ReaderAnchor"]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(1040, 600)
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_styles/panel = SubResource("ReaderPanelStyle")
 
-[node name="ReaderLayout" type="VBoxContainer" parent="ReaderCenter/ReaderPanel"]
+[node name="ReaderLayout" type="VBoxContainer" parent="ReaderCenter/ReaderAnchor/ReaderPanel"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Header" type="HBoxContainer" parent="ReaderCenter/ReaderPanel/ReaderLayout"]
+[node name="Header" type="HBoxContainer" parent="ReaderCenter/ReaderAnchor/ReaderPanel/ReaderLayout"]
 layout_mode = 2
 
-[node name="ReaderTitle" type="Label" parent="ReaderCenter/ReaderPanel/ReaderLayout/Header"]
+[node name="ReaderTitle" type="Label" parent="ReaderCenter/ReaderAnchor/ReaderPanel/ReaderLayout/Header"]
 theme_type_variation = &"HeaderLabel"
 unique_name_in_owner = true
 layout_mode = 2
@@ -188,11 +203,11 @@ theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 27
 text = "DOCUMENT"
 
-[node name="CloseButton" type="Button" parent="ReaderCenter/ReaderPanel/ReaderLayout/Header"]
+[node name="CloseButton" type="Button" parent="ReaderCenter/ReaderAnchor/ReaderPanel/ReaderLayout/Header"]
 layout_mode = 2
 text = "CLOSE  [E / ESC]"
 
-[node name="ReaderContent" type="RichTextLabel" parent="ReaderCenter/ReaderPanel/ReaderLayout"]
+[node name="ReaderContent" type="RichTextLabel" parent="ReaderCenter/ReaderAnchor/ReaderPanel/ReaderLayout"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
@@ -203,7 +218,7 @@ bbcode_enabled = true
 fit_content = false
 scroll_active = true
 
-[connection signal="pressed" from="ReaderCenter/ReaderPanel/ReaderLayout/Header/CloseButton" to="." method="request_close"]
+[connection signal="pressed" from="ReaderCenter/ReaderAnchor/ReaderPanel/ReaderLayout/Header/CloseButton" to="." method="request_close"]
 [connection signal="pressed" from="PassengerCloseButton" to="." method="request_close"]
 [connection signal="close_requested" from="NewspaperCenter/NewspaperReader" to="." method="request_close"]
-[connection signal="stamp_toggle_requested" from="PassengerDocumentCenter/PassengerDocuments" to="." method="_toggle_station_assignment"]
+[connection signal="stamp_toggle_requested" from="PassengerDocumentCenter/PassengerDocumentAnchor/PassengerDocuments" to="." method="_toggle_station_assignment"]

@@ -16,7 +16,7 @@
 [ext_resource type="Resource" uid="uid://cnv674vesefbn" path="res://data/passengers/npc_4_profile.tres" id="14"]
 [ext_resource type="Resource" uid="uid://d0d88ei13lo3h" path="res://data/passengers/npc_5_profile.tres" id="15"]
 [ext_resource type="Resource" uid="uid://d2rlldblp6o1k" path="res://data/passengers/npc_6_profile.tres" id="16"]
-[ext_resource type="Resource" path="res://data/puzzles/first_departures.tres" id="17"]
+[ext_resource type="Resource" uid="uid://dwxivcklwykx0" path="res://data/puzzles/first_departures.tres" id="17"]
 [ext_resource type="PackedScene" path="res://scenes/systems/train_ambience.tscn" id="18"]
 [ext_resource type="Resource" uid="uid://r6fnaxd52bp4" path="res://data/passengers/npc_7_profile.tres" id="19"]
 [ext_resource type="Resource" uid="uid://dleig4f4cwhd" path="res://data/passengers/npc_8_profile.tres" id="20"]
@@ -46,6 +46,7 @@
 [ext_resource type="Script" uid="uid://cr77segdw7blg" path="res://scripts/systems/camera_bounds_2d.gd" id="42_camera_bounds"]
 [ext_resource type="PackedScene" uid="uid://c8qmx71qn8rq6" path="res://scenes/systems/travel_background.tscn" id="43_travel_background"]
 [ext_resource type="Texture2D" uid="uid://bnl61bhej8bp4" path="res://assets/environment/railroad.png" id="44_railroad"]
+[ext_resource type="PackedScene" path="res://scenes/systems/station_cinematic_view.tscn" id="45_station_view"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_day_cycle_sky"]
 shader = ExtResource("39")
@@ -77,14 +78,14 @@ shader_parameter/density = 0.52
 shader_parameter/speed = Vector2(0.02, 0.01)
 shader_parameter/fog_scale = Vector2(0.48, 0.48)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_08tbl"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_f4j1x"]
 resource_local_to_scene = true
 shader = ExtResource("30_f4j1x")
 shader_parameter/glow_color = Color(1, 0.035, 0.02, 0.78)
 shader_parameter/edge_feather = 0.12
 shader_parameter/center_strength = 0.9
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_f4j1x"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_wcrab"]
 resource_local_to_scene = true
 shader = ExtResource("31_wcrab")
 shader_parameter/scan_origin_uv = Vector2(0.5, 0.72)
@@ -100,14 +101,14 @@ shader_parameter/boundary_strength = 0.28
 shader_parameter/front_color = Color(0.28, 0.94, 1, 0.96)
 shader_parameter/trail_color = Color(0.06, 0.42, 0.72, 0.34)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_wcrab"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gohbf"]
 resource_local_to_scene = true
 shader = ExtResource("30_f4j1x")
 shader_parameter/glow_color = Color(1, 0.035, 0.02, 0.78)
 shader_parameter/edge_feather = 0.12
 shader_parameter/center_strength = 0.9
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_gohbf"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_jucdw"]
 resource_local_to_scene = true
 shader = ExtResource("31_wcrab")
 shader_parameter/scan_origin_uv = Vector2(0.5, 0.72)
@@ -133,10 +134,10 @@ maintenance_minigame_unlock_day = 1
 day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere")
 radar_glow_seconds = 4.0
 debug_print_anomaly_roster = true
-night_shift_instruction = "NIGHT SHIFT
-INTERVIEW THE DECEASED, THEN RETURN TO THE LEDGER IN THE FRONT PASSENGER COACH"
-departure_statement_recorded_template = "DEPARTURE STATEMENT RECORDED
-%d / %d COLLECTED"
+night_shift_instruction = "Night shift
+Interview the deceased, then return to the ledger in the front passenger coach"
+departure_statement_recorded_template = "Departure statement recorded
+%d / %d collected"
 
 [node name="MarketToolState" parent="." unique_id=1541596097 instance=ExtResource("40_market_state")]
 unique_name_in_owner = true
@@ -204,6 +205,8 @@ position = Vector2(3799, 623)
 editor_description = "Gameplay ambient color grade. Keep UI unaffected by editing this CanvasModulate inside the world canvas."
 color = Color(0.84, 0.88, 0.94, 1)
 
+[node name="StationCinematicView" parent="GameplayWorld" unique_id=1840407460 instance=ExtResource("45_station_view")]
+
 [node name="Passengers" type="Node2D" parent="GameplayWorld" unique_id=1237360660]
 unique_name_in_owner = true
 
@@ -221,19 +224,19 @@ unique_name_in_owner = true
 position = Vector2(-16, 0)
 
 [node name="RadarAnomalyGlow" parent="GameplayWorld/Train/Cars/PassengerCoach4/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 398983735, 545678927) index="0" unique_id=648864988]
-material = SubResource("ShaderMaterial_08tbl")
+material = SubResource("ShaderMaterial_f4j1x")
 
 [node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach4/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 398983735, 545678927) index="1" unique_id=398318395]
-material = SubResource("ShaderMaterial_f4j1x")
+material = SubResource("ShaderMaterial_wcrab")
 
 [node name="Newspaper" parent="GameplayWorld/Train/Cars/PassengerCoach4" parent_id_path=PackedInt32Array(1577522868, 398983735) index="4" unique_id=891876982]
 position = Vector2(533, 495)
 
 [node name="RadarAnomalyGlow" parent="GameplayWorld/Train/Cars/PassengerCoach2/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 213345118, 545678927) index="0" unique_id=648864988]
-material = SubResource("ShaderMaterial_wcrab")
+material = SubResource("ShaderMaterial_gohbf")
 
 [node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach2/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 213345118, 545678927) index="1" unique_id=398318395]
-material = SubResource("ShaderMaterial_gohbf")
+material = SubResource("ShaderMaterial_jucdw")
 
 [node name="TrainAmbience" parent="." unique_id=1529690390 instance=ExtResource("18")]
 unique_name_in_owner = true
@@ -264,16 +267,17 @@ layer = 8
 
 [node name="Railroad" type="TextureRect" parent="RailroadUILayer" unique_id=505086778]
 texture_repeat = 2
-anchors_preset = 15
+anchors_preset = 12
+anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 716.0
+offset_top = -10.0
+offset_bottom = 11.0
 grow_horizontal = 2
-grow_vertical = 2
+grow_vertical = 0
 mouse_filter = 2
 texture = ExtResource("44_railroad")
 expand_mode = 1
-stretch_mode = 1
 
 [node name="HUD" parent="." unique_id=1053587110 instance=ExtResource("4")]
 unique_name_in_owner = true
@@ -327,15 +331,18 @@ unique_name_in_owner = true
 [connection signal="closed" from="ModalLayer/GuidebookUI" to="." method="_on_modal_closed"]
 [connection signal="intro_finished" from="ModalLayer/DayIntroUI" to="." method="_on_day_intro_finished"]
 [connection signal="boarding_actor_entered" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_boarding_actor_entered"]
+[connection signal="camera_return_started" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_camera_return_started"]
 [connection signal="sequence_finished" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_stop_finished"]
 [connection signal="sequence_timeline_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_timeline_changed"]
 [connection signal="timeline_completed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_timeline_completed"]
 [connection signal="train_motion_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_train_motion_changed"]
 [connection signal="continue_requested" from="ModalLayer/ShiftReportUI" to="." method="_on_shift_report_continue"]
+[connection signal="main_menu_requested" from="ModalLayer/ShiftReportUI" to="." method="_return_to_main_menu"]
 [connection signal="continue_requested" from="ModalLayer/NightMarketUI" to="." method="_on_night_market_continue"]
 [connection signal="purchase_requested" from="ModalLayer/NightMarketUI" to="." method="_on_market_purchase_requested"]
 [connection signal="departures_confirmed" from="ModalLayer/NightPuzzleUI" to="." method="_on_departures_confirmed"]
 [connection signal="journey_continue_requested" from="ModalLayer/DepartureSequenceUI" to="." method="_on_journey_continue"]
+[connection signal="sequence_finished" from="ModalLayer/DepartureSequenceUI" to="." method="_on_night_sequence_finished"]
 [connection signal="main_menu_requested" from="ModalLayer/PauseUI" to="." method="_return_to_main_menu"]
 [connection signal="restart_requested" from="ModalLayer/PauseUI" to="." method="_restart_game"]
 [connection signal="resume_requested" from="ModalLayer/PauseUI" to="." method="_resume_from_pause"]
@@ -348,6 +355,3 @@ unique_name_in_owner = true
 [editable path="GameplayWorld/Train/Cars/PassengerCoach4"]
 [editable path="GameplayWorld/Train/Cars/PassengerCoach2"]
 [editable path="TravelForeground"]
-
-[connection signal="sequence_finished" from="ModalLayer/DepartureSequenceUI" to="." method="_on_night_sequence_finished"]
-[connection signal="main_menu_requested" from="ModalLayer/ShiftReportUI" to="." method="_return_to_main_menu"]

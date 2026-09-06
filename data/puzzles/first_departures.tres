@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="DeparturePuzzleData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="DeparturePuzzleData" format=3 uid="uid://dwxivcklwykx0"]
 
-[ext_resource type="Script" path="res://scripts/systems/departure_puzzle_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://dylbvy4ioe7bs" path="res://scripts/systems/departure_puzzle_data.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
@@ -13,8 +13,6 @@ anomaly_descriptor_by_type = {
 "time_invalid_ticket": "the passenger carrying a ticket for another service day",
 "unlisted_destination": "the passenger whose destination is absent from the day route"
 }
-fallback_descriptor_template = "the %s"
-duplicate_descriptor_template = "%s who worked as the %s"
 immediately_before_template = "%s leaves immediately before %s."
 before_template = "%s leaves before %s."
 single_passenger_statement = "Only one unresolved departure remains on tonight's route."

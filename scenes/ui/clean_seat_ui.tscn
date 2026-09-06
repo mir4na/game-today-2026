@@ -64,7 +64,7 @@ theme_override_colors/font_color = Color(0.941176, 0.811765, 0.552941, 1)
 theme_override_font_sizes/font_size = 30
 theme_override_colors/font_outline_color = Color(0.01, 0.015, 0.025, 0.95)
 theme_override_constants/outline_size = 7
-text = "CLEAN THE SEAT"
+text = "Clean the seat"
 horizontal_alignment = 1
 
 [node name="Instruction" type="Label" parent="CleaningWindow"]
@@ -170,7 +170,7 @@ theme_override_colors/font_color = Color(0.886275, 0.772549, 0.54902, 1)
 theme_override_font_sizes/font_size = 18
 theme_override_colors/font_outline_color = Color(0.01, 0.015, 0.025, 0.95)
 theme_override_constants/outline_size = 5
-text = "CLEANING  0%"
+text = "Cleaning  0%"
 horizontal_alignment = 1
 
 [node name="SuccessLabel" type="Label" parent="CleaningWindow"]
@@ -184,7 +184,7 @@ theme_override_colors/font_color = Color(0.513726, 0.890196, 0.603922, 1)
 theme_override_font_sizes/font_size = 18
 theme_override_colors/font_outline_color = Color(0.01, 0.015, 0.025, 0.95)
 theme_override_constants/outline_size = 5
-text = "SEAT CLEAN"
+text = "Seat clean"
 horizontal_alignment = 1
 
 [connection signal="cleaning_progress" from="CleaningWindow/WipeSurface" to="." method="_on_cleaning_progress"]

@@ -14,6 +14,13 @@ const ShiftProgress = preload("res://scripts/systems/shift_progress.gd")
 @export var default_fullscreen: bool = DEFAULT_FULLSCREEN
 @export var default_vsync: bool = true
 
+@export_category("Hand Grip Motion")
+@export_range(0.0, 4.0, 0.05) var hand_grip_sway_degrees: float = 1.15
+@export_range(0.0, 5.0, 0.05) var hand_grip_vibration_pixels: float = 0.85
+@export_range(0.1, 5.0, 0.05) var hand_grip_sway_speed: float = 1.35
+@export_range(0.0, 2.0, 0.05) var mc_sway_degrees: float = 0.25
+@export_range(0.0, 5.0, 0.05) var mc_vibration_pixels: float = 0.65
+
 @onready var _menu_panel: PanelContainer = %MenuPanel
 @onready var _settings_panel: PanelContainer = %SettingsPanel
 @onready var _start_button: Button = %StartButton
@@ -27,9 +34,16 @@ const ShiftProgress = preload("res://scripts/systems/shift_progress.gd")
 @onready var _vsync_toggle: CheckButton = %VsyncToggle
 @onready var _settings_back_button: Button = %SettingsBackButton
 @onready var _fade: ColorRect = %Fade
+@onready var _hand_grip: TextureRect = $HandGrip
+@onready var _mc: TextureRect = $MC
 var _transitioning: bool = false
+var _hand_grip_origin: Vector2
+var _mc_origin: Vector2
+var _hand_grip_time: float = 0.0
 
 func _ready() -> void:
+	_hand_grip_origin = _hand_grip.position
+	_mc_origin = _mc.position
 	_load_settings()
 	var checkpoint: Dictionary = ShiftProgress.load_checkpoint()
 	var can_continue: bool = not checkpoint.is_empty() and not bool(checkpoint.get("completed", false))
@@ -37,11 +51,24 @@ func _ready() -> void:
 	_continue_button.text = "CONTINUE — DAY %d" % int(checkpoint.day) if can_continue else "CONTINUE"
 	_progress_hint.text = "Continue resumes the start of your saved day.\nNew Game replaces the saved run." if can_continue else "Five days. One journey."
 	if not checkpoint.is_empty() and bool(checkpoint.get("completed", false)):
-		_progress_hint.text = "FIVE-DAY JOURNEY COMPLETE\nStart a new game to play again."
+		_progress_hint.text = "Five-day journey complete\nStart a new game to play again."
 	if can_continue:
 		_continue_button.grab_focus()
 	else:
 		_start_button.grab_focus()
+
+func _process(delta: float) -> void:
+	_hand_grip_time += delta
+	var sway: float = sin(_hand_grip_time * hand_grip_sway_speed)
+	var secondary_sway: float = sin(_hand_grip_time * hand_grip_sway_speed * 0.47 + 0.8)
+	var vibration_x: float = sin(_hand_grip_time * 18.0) * hand_grip_vibration_pixels
+	var vibration_y: float = sin(_hand_grip_time * 23.0 + 1.7) * hand_grip_vibration_pixels * 0.55
+	_hand_grip.rotation = deg_to_rad((sway + secondary_sway * 0.32) * hand_grip_sway_degrees)
+	_hand_grip.position = _hand_grip_origin + Vector2(vibration_x, vibration_y)
+	var mc_vibration_x: float = sin(_hand_grip_time * 18.0) * mc_vibration_pixels
+	var mc_vibration_y: float = sin(_hand_grip_time * 23.0 + 1.7) * mc_vibration_pixels * 0.55
+	_mc.rotation = deg_to_rad((sway + secondary_sway * 0.32) * mc_sway_degrees)
+	_mc.position = _mc_origin + Vector2(mc_vibration_x, mc_vibration_y)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"ui_cancel") and _settings_panel.visible:

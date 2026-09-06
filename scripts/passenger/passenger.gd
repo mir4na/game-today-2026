@@ -15,7 +15,7 @@ signal documents_requested(passenger: Passenger)
 @export_node_path("CollisionShape2D") var navigation_probe_collision_path: NodePath
 @export_flags_2d_physics var navigation_blocker_mask: int = 4
 @export_category("Interaction Copy")
-@export var night_prompt_text: String = "Hear Departure Statement"
+@export var night_prompt_text: String = "Hear departure statement"
 @export_category("Visual Scale")
 @export var uses_authored_character_artwork: bool = false
 @export_category("Artwork Direction")
@@ -121,6 +121,33 @@ func interact() -> void:
 func get_dialogue_anchor() -> Node2D:
 	# Keep the scene-authored marker editable and attached to the animated visual.
 	return get_prompt_anchor()
+
+
+func get_station_cutscene_visual() -> Dictionary:
+	# Reuse the character presentation authored in each NPC scene. Animated
+	# passengers keep their walk cycle; the rest use their full-body artwork.
+	var visual: Dictionary = {
+		"faces_left": artwork_faces_left,
+	}
+	var frames: SpriteFrames = _animated_sprite.sprite_frames
+	if (
+		frames != null
+		and frames.has_animation(walk_animation)
+		and frames.get_frame_count(walk_animation) > 0
+	):
+		visual["sprite_frames"] = frames
+		visual["animation"] = walk_animation
+		visual["visual_position"] = _animated_sprite.position
+		visual["visual_scale"] = _animated_sprite.scale
+		return visual
+	if is_instance_valid(_static_artwork) and _static_artwork.texture != null:
+		visual["texture"] = _static_artwork.texture
+		visual["visual_position"] = _static_artwork.position
+		visual["visual_scale"] = _static_artwork.scale
+		return visual
+	if data != null:
+		visual["texture"] = data.id_photo
+	return visual
 
 func set_night_mode(value: bool) -> void:
 	night_mode = value

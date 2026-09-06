@@ -7,9 +7,9 @@ extends Control
 @export_range(0.0, 5.0, 0.05) var minimum_display_seconds: float = 0.9
 @export_range(10.0, 300.0, 1.0) var bar_fill_speed: float = 135.0
 @export_category("Scene Copy")
-@export var loading_status_text: String = "PREPARING THE DAY SERVICE"
-@export var ready_status_text: String = "SHIFT READY"
-@export var failed_status_text: String = "THE SHIFT COULD NOT BE LOADED"
+@export var loading_status_text: String = "Preparing the day service"
+@export var ready_status_text: String = "Shift ready"
+@export var failed_status_text: String = "The shift could not be loaded"
 @export var progress_text_template: String = "%d%%"
 
 var _elapsed: float = 0.0

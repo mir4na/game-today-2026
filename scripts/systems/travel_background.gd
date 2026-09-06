@@ -14,7 +14,7 @@ const PERIOD_TEXTURES: Dictionary = {
 		# The reference uses layer 1 as the full sunrise color field, with the
 		# cropped cloud artwork composed over it near the top of the canvas.
 		{"texture": preload("res://assets/environment/sunrise_layer1.png"), "speed": 56.0, "alpha": 1.0, "fill_canvas": true},
-		{"texture": preload("res://assets/environment/sunrise_layer2.png"), "speed": 18.0, "alpha": 1.0, "cloud": true},
+		{"texture": preload("res://assets/environment/sunrise_layer2.png"), "speed": 18.0, "alpha": 1.0, "cloud": true, "y_offset": -240.0},
 	],
 	Period.AFTERNOON: [
 		{"texture": preload("res://assets/environment/afternoon_layer4.png"), "speed": 18.0, "alpha": 1.0, "cloud": true},
@@ -25,7 +25,7 @@ const PERIOD_TEXTURES: Dictionary = {
 	Period.SUNSET: [
 		{"texture": preload("res://assets/environment/sunset_layer4.png"), "speed": 28.0, "alpha": 1.0, "align": "top"},
 		{"texture": preload("res://assets/environment/sunset_layer3.png"), "speed": 18.0, "alpha": 1.0, "cloud": true},
-		{"texture": preload("res://assets/environment/sunset_layer2.png"), "speed": 45.0, "alpha": 1.0, "align": "top"},
+		{"texture": preload("res://assets/environment/sunset_layer2.png"), "speed": 45.0, "alpha": 1.0, "align": "top", "vary_height": true},
 		{"texture": preload("res://assets/environment/sunset_layer1.png"), "speed": 60.0, "alpha": 1.0, "align": "bottom", "y_offset": 24.0},
 	],
 	Period.NIGHT: [
@@ -35,9 +35,9 @@ const PERIOD_TEXTURES: Dictionary = {
 }
 
 @export_category("Background Layout")
-@export_range(0.1, 2.0, 0.05) var art_scale_multiplier: float = 1.0
-@export var background_position: Vector2 = Vector2(0.0, 200.0)
-@export_range(0.0, 1.0, 0.01) var cloud_vertical_ratio: float = 0.58
+@export_range(0.1, 2.0, 0.05) var art_scale_multiplier: float = 1.05
+@export var background_position: Vector2 = Vector2(0.0, 220.0)
+@export_range(0.0, 1.0, 0.01) var cloud_vertical_ratio: float = 0.55
 @export_group("Sunrise Override", "sunrise_")
 @export_range(0.1, 2.0, 0.05) var sunrise_scale: float = 1.0
 @export var sunrise_offset: Vector2 = Vector2.ZERO
@@ -51,6 +51,13 @@ const PERIOD_TEXTURES: Dictionary = {
 @export_range(0.1, 2.0, 0.05) var night_scale: float = 1.0
 @export var night_offset: Vector2 = Vector2.ZERO
 @export_group("")
+@export_category("Afternoon & Sunset Floor")
+@export_range(0.45, 0.95, 0.01) var floor_horizon_ratio: float = 0.66
+@export var afternoon_floor_color: Color = Color("8d684c")
+@export var sunset_floor_color: Color = Color("70483f")
+@export_category("Sunset Tree Variation")
+@export_range(1.0, 1.3, 0.01) var sunset_tree_min_height: float = 1.0
+@export_range(1.0, 1.3, 0.01) var sunset_tree_max_height: float = 1.3
 @export_category("Parallax")
 @export_range(-1.0, 1.0, 0.05) var travel_direction: float = 1.0
 @export_category("Period Thresholds")
@@ -130,6 +137,7 @@ func _build_period(period: Period) -> void:
 	add_child(_period_root)
 	move_child(_period_root, 0)
 	var viewport_width: float = maxf(get_viewport().get_visible_rect().size.x, VIEWPORT_REFERENCE_WIDTH)
+	var viewport_height: float = maxf(get_viewport().get_visible_rect().size.y, 720.0)
 	var art_scale: float = (
 		(viewport_width / ART_REFERENCE_WIDTH)
 		* art_scale_multiplier
@@ -137,6 +145,7 @@ func _build_period(period: Period) -> void:
 	)
 	var canvas_width: float = ART_REFERENCE_WIDTH * art_scale
 	var canvas_height: float = ART_REFERENCE_HEIGHT * art_scale
+	_add_period_floor(period, viewport_width, viewport_height)
 	var layer_index: int = 0
 	for layer_spec: Dictionary in PERIOD_TEXTURES[period]:
 		var texture: Texture2D = layer_spec["texture"] as Texture2D
@@ -159,18 +168,60 @@ func _build_period(period: Period) -> void:
 			sprite.texture = texture
 			sprite.centered = false
 			sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+			var base_vertical_scale: float = (
+				canvas_height / float(texture.get_height()) if fill_canvas else art_scale
+			)
+			var height_multiplier: float = (
+				_sunset_tree_height_multiplier(copy_index)
+				if bool(layer_spec.get("vary_height", false))
+				else 1.0
+			)
 			sprite.scale = Vector2(
 				art_scale,
-				canvas_height / float(texture.get_height()) if fill_canvas else art_scale
+				base_vertical_scale * height_multiplier
 			)
 			sprite.position = Vector2(
 				float(copy_index) * canvas_width + centered_x,
-				layer_y
+				layer_y - float(texture.get_height()) * base_vertical_scale * (height_multiplier - 1.0)
 			)
 			sprite.modulate.a = float(layer_spec["alpha"])
 			layer_root.add_child(sprite)
 		layer_index += 1
 	_current_period = period
+
+
+func _add_period_floor(period: Period, viewport_width: float, viewport_height: float) -> void:
+	if period != Period.AFTERNOON and period != Period.SUNSET:
+		return
+	var floor_color: Color = afternoon_floor_color if period == Period.AFTERNOON else sunset_floor_color
+	var floor_top: float = viewport_height * floor_horizon_ratio - _period_root.position.y
+	var floor_bottom: float = viewport_height - _period_root.position.y
+	var floor_left: float = -viewport_width - _period_root.position.x
+	var floor_right: float = viewport_width * 2.0 - _period_root.position.x
+	var floor := Polygon2D.new()
+	floor.name = "BrownFloor"
+	floor.color = floor_color
+	floor.polygon = PackedVector2Array([
+		Vector2(floor_left, floor_top),
+		Vector2(floor_right, floor_top),
+		Vector2(floor_right, floor_bottom),
+		Vector2(floor_left, floor_bottom),
+	])
+	_period_root.add_child(floor)
+
+
+func _sunset_tree_height_multiplier(copy_index: int) -> float:
+	var variation: float = 0.0
+	match copy_index % 4:
+		1:
+			variation = 0.58
+		2:
+			variation = 1.0
+		3:
+			variation = 0.28
+	var minimum_height: float = minf(sunset_tree_min_height, sunset_tree_max_height)
+	var maximum_height: float = maxf(sunset_tree_min_height, sunset_tree_max_height)
+	return lerpf(minimum_height, maximum_height, variation)
 
 
 func _period_scale(period: Period) -> float:

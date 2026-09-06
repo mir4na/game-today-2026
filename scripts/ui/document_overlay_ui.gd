@@ -40,6 +40,13 @@ enum ViewMode {
 @export var departure_statement_recorded_text: String
 @export var departure_statement_reread_text: String
 @export_multiline var missing_departure_statement_text: String
+@export_category("Document Presentation")
+@export_range(0.2, 1.5, 0.01) var pop_in_duration: float = 0.86
+@export_range(100.0, 1000.0, 10.0) var pop_in_vertical_distance: float = 760.0
+@export_range(0.0, 5.0, 0.05) var pop_in_tilt_degrees: float = 1.03
+@export_range(0.7, 1.0, 0.01) var pop_in_start_scale: float = 0.94
+@export_range(0.0, 40.0, 1.0) var pop_in_overshoot_pixels: float = 16.0
+@export_range(1.0, 1.1, 0.005) var pop_in_overshoot_scale: float = 1.018
 
 var _data: PassengerData
 var _view_mode: ViewMode = ViewMode.NONE
@@ -50,6 +57,12 @@ var _newspaper_headline: String = ""
 var _newspaper_primary_body: String = ""
 var _newspaper_secondary_headline: String = ""
 var _newspaper_secondary_body: String = ""
+var _content_presentation_tween: Tween
+var _presented_control: Control
+var _presentation_rest_position: Vector2
+var _presentation_rest_rotation: float
+var _presentation_rest_scale: Vector2
+var _presentation_rest_modulate: Color
 
 # These scene-owned children stay dynamic so a cold import can register their scripts in any order.
 @onready var _documents: Variant = %PassengerDocuments
@@ -74,6 +87,7 @@ func show_passenger(data: PassengerData) -> void:
 	_documents.set_stamp_locked(false)
 	_documents.reset_to_id_card()
 	show()
+	_present_document_control(_documents as Control)
 
 
 func get_random_outside_subject(
@@ -129,6 +143,7 @@ func compose_matching_death_newspaper(
 func show_newspaper(document: String) -> void:
 	_view_revision += 1
 	_closing = false
+	_restore_presented_control()
 	_data = null
 	_view_mode = ViewMode.NEWSPAPER
 	_documents.hide()
@@ -206,6 +221,14 @@ func request_close() -> void:
 		await _newspaper_reader.dismiss()
 		if closing_revision != _view_revision:
 			return
+	elif _view_mode == ViewMode.PASSENGER_DOCUMENTS:
+		await _dismiss_document_control(_documents as Control)
+		if closing_revision != _view_revision:
+			return
+	elif _view_mode == ViewMode.READER:
+		await _dismiss_document_control(_reader_panel)
+		if closing_revision != _view_revision:
+			return
 	hide()
 	_view_mode = ViewMode.NONE
 	_closing = false
@@ -255,6 +278,140 @@ func _show_reader(title: String, document: String) -> void:
 	_reader_content.text = document
 	_reader_panel.show()
 	show()
+	_present_document_control(_reader_panel)
+
+
+func _present_document_control(target: Control) -> void:
+	if not is_instance_valid(target):
+		return
+	_restore_presented_control()
+	# CenterContainer owns a fixed-size anchor; this animated target is nested
+	# inside that anchor so the container never overwrites the tweened position.
+	# Wait one frame for its authored size and pivot to finish resolving.
+	var presentation_revision: int = _view_revision
+	var authored_modulate: Color = target.self_modulate
+	target.self_modulate.a = 0.0
+	await get_tree().process_frame
+	if (
+		presentation_revision != _view_revision
+		or _closing
+		or not is_instance_valid(target)
+		or not target.is_visible_in_tree()
+	):
+		if is_instance_valid(target):
+			target.self_modulate = authored_modulate
+		return
+	_presented_control = target
+	_presentation_rest_position = target.position
+	_presentation_rest_rotation = target.rotation
+	_presentation_rest_scale = target.scale
+	_presentation_rest_modulate = authored_modulate
+	if target.pivot_offset.is_zero_approx():
+		target.pivot_offset = target.size * 0.5
+	target.position = _presentation_rest_position + Vector2(0.0, pop_in_vertical_distance)
+	target.rotation = _presentation_rest_rotation + deg_to_rad(pop_in_tilt_degrees)
+	target.scale = _presentation_rest_scale * pop_in_start_scale
+	var entry_modulate := _presentation_rest_modulate
+	entry_modulate.a *= 0.72
+	target.self_modulate = entry_modulate
+	var lift_duration: float = pop_in_duration * (0.68 / 0.86)
+	var settle_duration: float = maxf(pop_in_duration - lift_duration, 0.01)
+	_content_presentation_tween = create_tween()
+	_content_presentation_tween.tween_property(
+		target,
+		^"position",
+		_presentation_rest_position - Vector2(0.0, pop_in_overshoot_pixels),
+		lift_duration
+	).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+	_content_presentation_tween.parallel().tween_property(
+		target,
+		^"rotation",
+		_presentation_rest_rotation - deg_to_rad(pop_in_tilt_degrees * 0.22),
+		lift_duration
+	).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+	_content_presentation_tween.parallel().tween_property(
+		target,
+		^"scale",
+		_presentation_rest_scale * pop_in_overshoot_scale,
+		lift_duration
+	).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+	_content_presentation_tween.parallel().tween_property(
+		target,
+		^"self_modulate",
+		_presentation_rest_modulate,
+		pop_in_duration * (0.26 / 0.86)
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_content_presentation_tween.tween_property(
+		target,
+		^"position",
+		_presentation_rest_position,
+		settle_duration
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_content_presentation_tween.parallel().tween_property(
+		target,
+		^"rotation",
+		_presentation_rest_rotation,
+		settle_duration
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_content_presentation_tween.parallel().tween_property(
+		target,
+		^"scale",
+		_presentation_rest_scale,
+		settle_duration
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+func _dismiss_document_control(target: Control) -> void:
+	if not is_instance_valid(target) or target != _presented_control:
+		return
+	_kill_content_presentation_tween()
+	var exit_duration: float = pop_in_duration * 0.62
+	var exit_modulate := _presentation_rest_modulate
+	exit_modulate.a *= 0.72
+	_content_presentation_tween = create_tween()
+	_content_presentation_tween.tween_property(
+		target,
+		^"position",
+		_presentation_rest_position + Vector2(0.0, pop_in_vertical_distance),
+		exit_duration
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	_content_presentation_tween.parallel().tween_property(
+		target,
+		^"rotation",
+		_presentation_rest_rotation + deg_to_rad(pop_in_tilt_degrees),
+		exit_duration
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	_content_presentation_tween.parallel().tween_property(
+		target,
+		^"scale",
+		_presentation_rest_scale * pop_in_start_scale,
+		exit_duration
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	_content_presentation_tween.parallel().tween_property(
+		target,
+		^"self_modulate",
+		exit_modulate,
+		exit_duration
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	await _content_presentation_tween.finished
+	if target == _presented_control:
+		_restore_presented_control()
+
+
+func _restore_presented_control() -> void:
+	_kill_content_presentation_tween()
+	if is_instance_valid(_presented_control):
+		_presented_control.position = _presentation_rest_position
+		_presented_control.rotation = _presentation_rest_rotation
+		_presented_control.scale = _presentation_rest_scale
+		_presented_control.self_modulate = _presentation_rest_modulate
+	_presented_control = null
+
+
+func _kill_content_presentation_tween() -> void:
+	if is_instance_valid(_content_presentation_tween) and _content_presentation_tween.is_valid():
+		_content_presentation_tween.kill()
+	_content_presentation_tween = null
 
 
 func _pick_outside_name(

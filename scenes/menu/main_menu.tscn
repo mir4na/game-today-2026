@@ -1,43 +1,73 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene format=3 uid="uid://u11x8aquho6q"]
 
-[ext_resource type="Script" path="res://scripts/menu/main_menu.gd" id="1"]
-[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
-[ext_resource type="Texture2D" path="res://assets/vector/main_menu_backdrop.svg" id="3"]
-[ext_resource type="PackedScene" path="res://scenes/ui/loading_screen_ui.tscn" id="4"]
+[ext_resource type="Script" uid="uid://b40w51ayqw254" path="res://scripts/menu/main_menu.gd" id="1"]
+[ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/loading_screen_ui.tscn" id="3"]
+[ext_resource type="Texture2D" uid="uid://b6pdcpef2bsjy" path="res://assets/MainMenu/Background.png" id="4_background"]
+[ext_resource type="Texture2D" uid="uid://d4dwaetsv56u3" path="res://assets/MainMenu/HandGrip.png" id="5_handgrip"]
+[ext_resource type="Texture2D" uid="uid://c47i3vl54x2a6" path="res://assets/MainMenu/Character.png" id="7_character"]
+[ext_resource type="Texture2D" uid="uid://dhwhdqdjxiwcu" path="res://assets/MainMenu/Title.png" id="9_title"]
+[ext_resource type="Texture2D" uid="uid://bqlo0h1m0riej" path="res://assets/MainMenu/Button.png" id="10_button"]
+[ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="11_irish"]
 
-[sub_resource type="StyleBoxFlat" id="MenuPanelStyle"]
-content_margin_left = 18.0
-content_margin_top = 14.0
-content_margin_right = 18.0
-content_margin_bottom = 14.0
-bg_color = Color(0.055, 0.075, 0.105, 0.96)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.705882, 0.580392, 0.384314, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_menu"]
 
-[sub_resource type="StyleBoxFlat" id="SettingsPanelStyle"]
-content_margin_left = 18.0
-content_margin_top = 14.0
-content_margin_right = 18.0
-content_margin_bottom = 14.0
-bg_color = Color(0.055, 0.075, 0.105, 0.98)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.529412, 0.607843, 0.698039, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_button_normal"]
+content_margin_left = 26.0
+content_margin_right = 26.0
+texture = ExtResource("10_button")
+texture_margin_left = 18.0
+texture_margin_top = 12.0
+texture_margin_right = 18.0
+texture_margin_bottom = 14.0
 
-[node name="MainMenu" type="Control"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_button_pressed"]
+content_margin_left = 26.0
+content_margin_right = 26.0
+texture = ExtResource("10_button")
+texture_margin_left = 18.0
+texture_margin_top = 12.0
+texture_margin_right = 18.0
+texture_margin_bottom = 14.0
+modulate_color = Color(0.82, 0.72, 0.82, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_button_hover"]
+content_margin_left = 26.0
+content_margin_right = 26.0
+texture = ExtResource("10_button")
+texture_margin_left = 18.0
+texture_margin_top = 12.0
+texture_margin_right = 18.0
+texture_margin_bottom = 14.0
+modulate_color = Color(1, 0.84, 0.93, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_button_disabled"]
+content_margin_left = 26.0
+content_margin_right = 26.0
+texture = ExtResource("10_button")
+texture_margin_left = 18.0
+texture_margin_top = 12.0
+texture_margin_right = 18.0
+texture_margin_bottom = 14.0
+modulate_color = Color(0.58, 0.58, 0.62, 0.78)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_settings"]
+content_margin_left = 28.0
+content_margin_top = 24.0
+content_margin_right = 28.0
+content_margin_bottom = 24.0
+bg_color = Color(0.12, 0.095, 0.13, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.745, 0.278, 0.494, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="MainMenu" type="Control" unique_id=630513939]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -46,69 +76,56 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2")
 script = ExtResource("1")
-loading_screen_scene = ExtResource("4")
-volume_value_template = "%d%%"
-default_volume = 80.0
-default_fullscreen = true
-default_vsync = true
+loading_screen_scene = ExtResource("3")
 
-[node name="BackdropSprite" type="Sprite2D" parent="."]
-texture = ExtResource("3")
-centered = false
-
-[node name="SafeMargin" type="MarginContainer" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=414121816]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 64
-theme_override_constants/margin_top = 54
-theme_override_constants/margin_right = 64
-theme_override_constants/margin_bottom = 50
+mouse_filter = 2
+texture = ExtResource("4_background")
+expand_mode = 1
 
-[node name="Layout" type="HBoxContainer" parent="SafeMargin"]
-layout_mode = 2
-theme_override_constants/separation = 70
+[node name="HandGrip" type="TextureRect" parent="." unique_id=1873936630]
+layout_mode = 0
+offset_left = 1056.0
+offset_top = -27.0
+offset_right = 1207.0
+offset_bottom = 159.0
+pivot_offset = Vector2(140, 0)
+mouse_filter = 2
+texture = ExtResource("5_handgrip")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="TitleBlock" type="VBoxContainer" parent="SafeMargin/Layout"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 10
-alignment = 1
+[node name="MC" type="TextureRect" parent="." unique_id=1456681060]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.464
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 12.0
+offset_bottom = 19.0
+grow_horizontal = 0
+grow_vertical = 2
+pivot_offset = Vector2(343, 720)
+mouse_filter = 2
+texture = ExtResource("7_character")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Eyebrow" type="Label" parent="SafeMargin/Layout/TitleBlock"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.682353, 0.592157, 0.454902, 1)
-theme_override_font_sizes/font_size = 16
-text = "A CONDUCTOR'S LAST ROUTE"
+[node name="UI" type="Control" parent="." unique_id=396721982]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="GameTitle" type="Label" parent="SafeMargin/Layout/TitleBlock"]
-theme_type_variation = &"HeaderLabel"
-layout_mode = 2
-theme_override_colors/font_color = Color(0.937255, 0.839216, 0.623529, 1)
-theme_override_constants/line_spacing = -8
-theme_override_font_sizes/font_size = 70
-text = "WHERE DO\nYOU BELONG?"
-
-[node name="Subtitle" type="Label" parent="SafeMargin/Layout/TitleBlock"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.772549, 0.756863, 0.721569, 1)
-theme_override_font_sizes/font_size = 20
-text = "The dead do not always know\nwhere they are meant to leave."
-
-[node name="Route" type="Label" parent="SafeMargin/Layout/TitleBlock"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.505882, 0.490196, 0.466667, 1)
-theme_override_font_sizes/font_size = 13
-text = "MISTVALE  ·  ASHMOOR  ·  HEARTH  ·  DAWNREACH"
-
-[node name="RightStack" type="Control" parent="SafeMargin/Layout"]
-custom_minimum_size = Vector2(450, 590)
-layout_mode = 2
-
-[node name="MenuPanel" type="PanelContainer" parent="SafeMargin/Layout/RightStack"]
+[node name="MenuPanel" type="PanelContainer" parent="UI" unique_id=1543424530]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -116,128 +133,212 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("MenuPanelStyle")
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_menu")
 
-[node name="MenuBox" type="VBoxContainer" parent="SafeMargin/Layout/RightStack/MenuPanel"]
+[node name="MenuContent" type="Control" parent="UI/MenuPanel" unique_id=411398591]
 layout_mode = 2
-theme_override_constants/separation = 17
-alignment = 1
 
-[node name="Header" type="Label" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
-theme_type_variation = &"HeaderLabel"
+[node name="Title" type="TextureRect" parent="UI/MenuPanel/MenuContent" unique_id=1933617720]
+layout_mode = 0
+offset_left = 214.0
+offset_top = 48.0
+offset_right = 534.0
+offset_bottom = 349.0
+mouse_filter = 2
+texture = ExtResource("9_title")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ButtonStack" type="VBoxContainer" parent="UI/MenuPanel/MenuContent" unique_id=118907970]
+layout_mode = 0
+offset_left = 230.0
+offset_top = 382.0
+offset_right = 540.0
+offset_bottom = 647.0
+theme_override_constants/separation = 3
+
+[node name="StartButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=1848000711]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(310, 64)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_font_sizes/font_size = 24
-text = "BEGIN YOUR SHIFT"
+theme_override_colors/font_color = Color(0.06, 0.045, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.12, 0.04, 0.09, 1)
+theme_override_colors/font_hover_color = Color(0.25, 0.055, 0.15, 1)
+theme_override_colors/font_disabled_color = Color(0.22, 0.22, 0.24, 0.75)
+theme_override_fonts/font = ExtResource("11_irish")
+theme_override_font_sizes/font_size = 27
+theme_override_styles/normal = SubResource("StyleBoxTexture_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxTexture_button_hover")
+text = "New Game"
+alignment = 0
+
+[node name="ContinueButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=1193259710]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(310, 64)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.06, 0.045, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.12, 0.04, 0.09, 1)
+theme_override_colors/font_hover_color = Color(0.25, 0.055, 0.15, 1)
+theme_override_colors/font_disabled_color = Color(0.22, 0.22, 0.24, 0.75)
+theme_override_fonts/font = ExtResource("11_irish")
+theme_override_font_sizes/font_size = 27
+theme_override_styles/normal = SubResource("StyleBoxEmpty_menu")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_menu")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_menu")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_menu")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_menu")
+text = "Continue"
+
+[node name="MirroredButtonArt" type="TextureRect" parent="UI/MenuPanel/MenuContent/ButtonStack/ContinueButton" unique_id=1650845522]
+editor_description = "Scene-authored alternating button mirror. Toggle Flip H here in the Inspector."
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("10_button")
+expand_mode = 1
+stretch_mode = 5
+flip_h = true
+
+[node name="SettingsButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=2090027751]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(310, 64)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.06, 0.045, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.12, 0.04, 0.09, 1)
+theme_override_colors/font_hover_color = Color(0.25, 0.055, 0.15, 1)
+theme_override_colors/font_disabled_color = Color(0.22, 0.22, 0.24, 0.75)
+theme_override_fonts/font = ExtResource("11_irish")
+theme_override_font_sizes/font_size = 27
+theme_override_styles/normal = SubResource("StyleBoxTexture_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxTexture_button_hover")
+text = "Settings"
+alignment = 0
+
+[node name="QuitButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=779991537]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(310, 64)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.06, 0.045, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.12, 0.04, 0.09, 1)
+theme_override_colors/font_hover_color = Color(0.25, 0.055, 0.15, 1)
+theme_override_colors/font_disabled_color = Color(0.22, 0.22, 0.24, 0.75)
+theme_override_fonts/font = ExtResource("11_irish")
+theme_override_font_sizes/font_size = 27
+theme_override_styles/normal = SubResource("StyleBoxEmpty_menu")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_menu")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_menu")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_menu")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_menu")
+text = "Quit"
+
+[node name="MirroredButtonArt" type="TextureRect" parent="UI/MenuPanel/MenuContent/ButtonStack/QuitButton" unique_id=1349954202]
+editor_description = "Scene-authored alternating button mirror. Toggle Flip H here in the Inspector."
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("10_button")
+expand_mode = 1
+stretch_mode = 5
+flip_h = true
+
+[node name="ProgressHint" type="Label" parent="UI/MenuPanel/MenuContent" unique_id=1472578400]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 188.0
+offset_top = 657.0
+offset_right = 582.0
+offset_bottom = 708.0
+theme_override_colors/font_color = Color(0.92, 0.82, 0.87, 0.76)
+theme_override_colors/font_shadow_color = Color(0.06, 0.035, 0.055, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("11_irish")
+theme_override_font_sizes/font_size = 15
+text = "Five days. One journey."
 horizontal_alignment = 1
 
-[node name="Rule" type="HSeparator" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
-custom_minimum_size = Vector2(0, 22)
-layout_mode = 2
-
-[node name="ContinueButton" type="Button" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 62)
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "CONTINUE"
-
-[node name="StartButton" type="Button" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 62)
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "NEW GAME"
-
-[node name="SettingsButton" type="Button" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 62)
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "SETTINGS"
-
-[node name="QuitButton" type="Button" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 62)
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "QUIT"
-
-[node name="ProgressHint" type="Label" parent="SafeMargin/Layout/RightStack/MenuPanel/MenuBox"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.556863, 0.576471, 0.6, 1)
-theme_override_font_sizes/font_size = 13
-text = "Use mouse, arrows, or Tab to navigate."
-horizontal_alignment = 1
-
-[node name="SettingsPanel" type="PanelContainer" parent="SafeMargin/Layout/RightStack"]
+[node name="SettingsPanel" type="PanelContainer" parent="UI" unique_id=518228947]
 unique_name_in_owner = true
 visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("SettingsPanelStyle")
+layout_mode = 0
+offset_left = 130.0
+offset_top = 62.0
+offset_right = 640.0
+offset_bottom = 658.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_settings")
 
-[node name="SettingsBox" type="VBoxContainer" parent="SafeMargin/Layout/RightStack/SettingsPanel"]
+[node name="SettingsBox" type="VBoxContainer" parent="UI/SettingsPanel" unique_id=1863176633]
 layout_mode = 2
 theme_override_constants/separation = 17
 
-[node name="Header" type="Label" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
-theme_type_variation = &"HeaderLabel"
+[node name="Header" type="Label" parent="UI/SettingsPanel/SettingsBox" unique_id=1745319976]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_font_sizes/font_size = 26
-text = "SETTINGS"
+theme_type_variation = &"HeaderLabel"
+theme_override_colors/font_color = Color(1, 0.84, 0.91, 1)
+theme_override_fonts/font = ExtResource("11_irish")
+theme_override_font_sizes/font_size = 34
+text = "Settings"
 horizontal_alignment = 1
 
-[node name="Description" type="Label" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+[node name="Description" type="Label" parent="UI/SettingsPanel/SettingsBox" unique_id=1820397986]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.905882, 0.878431, 0.823529, 1)
+theme_override_colors/font_color = Color(0.91, 0.84, 0.88, 1)
 theme_override_font_sizes/font_size = 14
 text = "Audio and display settings are saved automatically."
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="VolumeTitle" type="Label" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+[node name="VolumeTitle" type="Label" parent="UI/SettingsPanel/SettingsBox" unique_id=1338462770]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_colors/font_color = Color(1, 0.73, 0.85, 1)
 theme_override_font_sizes/font_size = 16
 text = "MASTER VOLUME"
 
-[node name="VolumeRow" type="HBoxContainer" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+[node name="VolumeRow" type="HBoxContainer" parent="UI/SettingsPanel/SettingsBox" unique_id=1326597786]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="VolumeSlider" type="HSlider" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox/VolumeRow"]
+[node name="VolumeSlider" type="HSlider" parent="UI/SettingsPanel/SettingsBox/VolumeRow" unique_id=1485256467]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
 size_flags_horizontal = 3
 focus_neighbor_top = NodePath("../../SettingsBackButton")
 focus_neighbor_bottom = NodePath("../../DisplayMode")
-max_value = 100.0
-step = 1.0
 value = 80.0
 
-[node name="VolumeValue" type="Label" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox/VolumeRow"]
+[node name="VolumeValue" type="Label" parent="UI/SettingsPanel/SettingsBox/VolumeRow" unique_id=1151571345]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(55, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.905882, 0.878431, 0.823529, 1)
+theme_override_colors/font_color = Color(0.91, 0.84, 0.88, 1)
 theme_override_font_sizes/font_size = 16
 horizontal_alignment = 2
 
-[node name="DisplayTitle" type="Label" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+[node name="DisplayTitle" type="Label" parent="UI/SettingsPanel/SettingsBox" unique_id=1165168348]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_colors/font_color = Color(1, 0.73, 0.85, 1)
 theme_override_font_sizes/font_size = 16
 text = "DISPLAY MODE"
 
-[node name="DisplayMode" type="OptionButton" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+[node name="DisplayMode" type="OptionButton" parent="UI/SettingsPanel/SettingsBox" unique_id=1676661054]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
@@ -249,20 +350,20 @@ popup/item_0/id = 0
 popup/item_1/text = "Fullscreen"
 popup/item_1/id = 1
 
-[node name="VsyncToggle" type="CheckButton" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+[node name="VsyncToggle" type="CheckButton" parent="UI/SettingsPanel/SettingsBox" unique_id=649322286]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 focus_neighbor_top = NodePath("DisplayMode")
 focus_neighbor_bottom = NodePath("SettingsBackButton")
-text = "Vertical Sync"
 button_pressed = true
+text = "Vertical Sync"
 
-[node name="Spacer" type="Control" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+[node name="Spacer" type="Control" parent="UI/SettingsPanel/SettingsBox" unique_id=956808955]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="SettingsBackButton" type="Button" parent="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox"]
+[node name="SettingsBackButton" type="Button" parent="UI/SettingsPanel/SettingsBox" unique_id=1654230456]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
@@ -270,21 +371,7 @@ focus_neighbor_top = NodePath("VsyncToggle")
 focus_neighbor_bottom = NodePath("VolumeRow/VolumeSlider")
 text = "SAVE & BACK  [ESC]"
 
-[node name="Version" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 24.0
-offset_top = -38.0
-offset_right = 390.0
-offset_bottom = -12.0
-grow_vertical = 0
-theme_override_colors/font_color = Color(0.466667, 0.486275, 0.517647, 1)
-theme_override_font_sizes/font_size = 12
-text = "VERTICAL SLICE  ·  GODOT 4.7"
-
-[node name="Fade" type="ColorRect" parent="."]
+[node name="Fade" type="ColorRect" parent="." unique_id=1313484667]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
@@ -296,12 +383,11 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 1)
 
-[connection signal="pressed" from="SafeMargin/Layout/RightStack/MenuPanel/MenuBox/StartButton" to="." method="_start_game"]
-[connection signal="pressed" from="SafeMargin/Layout/RightStack/MenuPanel/MenuBox/SettingsButton" to="." method="_show_settings"]
-[connection signal="pressed" from="SafeMargin/Layout/RightStack/MenuPanel/MenuBox/QuitButton" to="." method="_quit_game"]
-[connection signal="value_changed" from="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox/VolumeRow/VolumeSlider" to="." method="_on_volume_changed"]
-[connection signal="item_selected" from="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox/DisplayMode" to="." method="_on_display_mode_selected"]
-[connection signal="toggled" from="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox/VsyncToggle" to="." method="_on_vsync_toggled"]
-[connection signal="pressed" from="SafeMargin/Layout/RightStack/SettingsPanel/SettingsBox/SettingsBackButton" to="." method="_save_and_close_settings"]
-
-[connection signal="pressed" from="SafeMargin/Layout/RightStack/MenuPanel/MenuBox/ContinueButton" to="." method="_continue_game"]
+[connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/StartButton" to="." method="_start_game"]
+[connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/ContinueButton" to="." method="_continue_game"]
+[connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/SettingsButton" to="." method="_show_settings"]
+[connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/QuitButton" to="." method="_quit_game"]
+[connection signal="value_changed" from="UI/SettingsPanel/SettingsBox/VolumeRow/VolumeSlider" to="." method="_on_volume_changed"]
+[connection signal="item_selected" from="UI/SettingsPanel/SettingsBox/DisplayMode" to="." method="_on_display_mode_selected"]
+[connection signal="toggled" from="UI/SettingsPanel/SettingsBox/VsyncToggle" to="." method="_on_vsync_toggled"]
+[connection signal="pressed" from="UI/SettingsPanel/SettingsBox/SettingsBackButton" to="." method="_save_and_close_settings"]

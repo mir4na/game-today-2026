@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
@@ -8,6 +8,21 @@
 [ext_resource type="Texture2D" path="res://assets/ui/gerbong_active.png" id="6_carriage_active"]
 [ext_resource type="Texture2D" path="res://assets/ui/gerbong_nonactive.png" id="7_carriage_inactive"]
 [ext_resource type="PackedScene" path="res://scenes/ui/maintenance_tracker.tscn" id="8_tracker"]
+[ext_resource type="Texture2D" path="res://assets/ui/Clock/Background_Unfilled.png" id="9_clock_unfilled"]
+[ext_resource type="Texture2D" path="res://assets/ui/Clock/Background_Filled.png" id="10_clock_filled"]
+[ext_resource type="Texture2D" path="res://assets/ui/Clock/Clock_Pointer.png" id="11_clock_pointer"]
+[ext_resource type="Texture2D" path="res://assets/ui/Clock/Background2.png" id="12_clock_frame"]
+[ext_resource type="Texture2D" path="res://assets/ui/Clock/Clock_Sign.png" id="13_clock_sign"]
+[ext_resource type="Texture2D" path="res://assets/ui/Clock/Clock_DaySymbol.png" id="14_clock_day"]
+[ext_resource type="Texture2D" path="res://assets/ui/Clock/Clock_NightSymbol.png" id="15_clock_night"]
+[ext_resource type="Shader" path="res://shaders/clock_progress_fill.gdshader" id="16_clock_fill_shader"]
+[ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="17_clock_font"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_clock_fill"]
+resource_local_to_scene = true
+shader = ExtResource("16_clock_fill_shader")
+shader_parameter/progress = 0.0
+shader_parameter/edge_softness = 0.003
 
 [sub_resource type="StyleBoxFlat" id="HudPanelStyle"]
 content_margin_left = 18.0
@@ -110,6 +125,7 @@ layer = 10
 script = ExtResource("1")
 clock_template = "%02d:%02d %s"
 tool_inventory_template = "BLESSINGS %d   •   [R] RADAR ×%d   •   AUDIT ×%d   •   SPEED LV.%d"
+clock_degrees_per_stop = 45.0
 prompt_screen_offset = Vector2(0, 0)
 prompt_edge_margin = Vector2(24, 20)
 
@@ -124,31 +140,35 @@ grow_vertical = 2
 mouse_filter = 2
 theme = ExtResource("2")
 
-[node name="MinimapPanel" type="PanelContainer" parent="Root"]
+[node name="MinimapPanel" type="Control" parent="Root"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -350.0
-offset_top = 24.0
+offset_left = -490.0
+offset_top = 34.0
 offset_right = -24.0
-offset_bottom = 132.0
+offset_bottom = 140.0
 grow_horizontal = 0
-theme_override_styles/panel = SubResource("HudPanelStyle")
+mouse_filter = 2
 
-[node name="MinimapBox" type="VBoxContainer" parent="Root/MinimapPanel"]
-layout_mode = 2
-
-[node name="TrainTitle" type="Label" parent="Root/MinimapPanel/MinimapBox"]
-theme_type_variation = &"HeaderLabel"
-layout_mode = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_font_sizes/font_size = 17
-text = "TRAIN"
+[node name="MinimapBox" type="Control" parent="Root/MinimapPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="TrainMinimap" parent="Root/MinimapPanel/MinimapBox" instance=ExtResource("3")]
 unique_name_in_owner = true
-layout_mode = 2
+layout_mode = 0
+offset_left = 11.8
+offset_top = 2.0
+offset_right = 235.8
+offset_bottom = 52.0
+scale = Vector2(2.025, 2.025)
 active_carriage_texture = ExtResource("6_carriage_active")
 inactive_carriage_texture = ExtResource("7_carriage_inactive")
 
@@ -250,7 +270,7 @@ mouse_filter = 2
 texture = ExtResource("5_dialogue_pointer")
 expand_mode = 1
 
-[node name="ClockPanel" type="PanelContainer" parent="Root"]
+[node name="ClockPanel" type="Control" parent="Root"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
@@ -259,21 +279,133 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -180.0
-offset_top = -92.0
+offset_left = -398.0
+offset_top = -358.0
 offset_right = -28.0
 offset_bottom = -28.0
 grow_horizontal = 0
 grow_vertical = 0
-theme_override_styles/panel = SubResource("ClockStyle")
+pivot_offset = Vector2(370, 346)
+scale = Vector2(0.666667, 0.666667)
+mouse_filter = 2
 
-[node name="ClockLabel" type="Label" parent="Root/ClockPanel"]
+[node name="ClockUnfilled" type="TextureRect" parent="Root/ClockPanel"]
+layout_mode = 0
+offset_right = 350.0
+offset_bottom = 179.0
+mouse_filter = 2
+texture = ExtResource("9_clock_unfilled")
+expand_mode = 1
+
+[node name="ClockFilled" type="TextureRect" parent="Root/ClockPanel"]
 unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_font_sizes/font_size = 23
-text = "04:00 PM"
+material = SubResource("ShaderMaterial_clock_fill")
+layout_mode = 0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 346.0
+offset_bottom = 175.0
+mouse_filter = 2
+texture = ExtResource("10_clock_filled")
+expand_mode = 1
+
+[node name="ClockPointer" type="TextureRect" parent="Root/ClockPanel"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 18.85
+offset_top = 95.67
+offset_right = 204.8
+offset_bottom = 175.36
+rotation = -0.47054
+pivot_offset = Vector2(156.15, 79.33)
+mouse_filter = 2
+texture = ExtResource("11_clock_pointer")
+expand_mode = 1
+
+[node name="ClockFrame" type="TextureRect" parent="Root/ClockPanel"]
+layout_mode = 0
+offset_right = 350.0
+offset_bottom = 346.0
+mouse_filter = 2
+texture = ExtResource("12_clock_frame")
+expand_mode = 1
+
+[node name="ClockSign" type="TextureRect" parent="Root/ClockPanel"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 179.0
+offset_right = 347.0
+offset_bottom = 313.0
+mouse_filter = 2
+texture = ExtResource("13_clock_sign")
+expand_mode = 1
+
+[node name="NextStopTitle" type="Label" parent="Root/ClockPanel"]
+layout_mode = 0
+offset_left = 25.0
+offset_top = 228.0
+offset_right = 326.0
+offset_bottom = 254.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.305882, 0.258824, 0.25098, 1)
+theme_override_fonts/font = ExtResource("17_clock_font")
+theme_override_font_sizes/font_size = 19
+text = "NEXT STOP"
 horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NextStopLabel" type="Label" parent="Root/ClockPanel"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 14.0
+offset_top = 256.0
+offset_right = 337.0
+offset_bottom = 302.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.94, 0.94, 0.94, 1)
+theme_override_colors/font_outline_color = Color(0.22, 0.18, 0.17, 0.28)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("17_clock_font")
+theme_override_font_sizes/font_size = 27
+text = "BRAMBLEFORD"
+horizontal_alignment = 1
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="ClockSymbolPivot" type="Control" parent="Root/ClockPanel"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 273.0
+offset_top = -15.0
+offset_right = 368.0
+offset_bottom = 80.0
+pivot_offset = Vector2(47.5, 47.5)
+mouse_filter = 2
+
+[node name="DaySymbol" type="TextureRect" parent="Root/ClockPanel/ClockSymbolPivot"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("14_clock_day")
+expand_mode = 1
+
+[node name="NightSymbol" type="TextureRect" parent="Root/ClockPanel/ClockSymbolPivot"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("15_clock_night")
+expand_mode = 1
 
 [node name="GuidebookButton" type="Button" parent="Root"]
 unique_name_in_owner = true

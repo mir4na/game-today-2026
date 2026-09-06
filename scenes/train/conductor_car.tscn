@@ -276,8 +276,6 @@ exterior_visual_path = NodePath("ArtRoot/Exterior")
 exterior_door_visual_path = NodePath("ArtRoot/Exterior/ClosedDoors")
 door_animation_path = NodePath("ArtRoot/Exterior/DoorAnimation")
 wheel_animation_path = NodePath("ArtRoot/Wheels/WheelAnimation")
-cinematic_interior_shade_path = NodePath("ArtRoot/CinematicInteriorShade")
-cinematic_interior_fade_seconds = 0.45
 
 [node name="ArtRoot" type="Node2D" parent="." unique_id=1500656962]
 unique_name_in_owner = true

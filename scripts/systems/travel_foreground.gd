@@ -15,6 +15,7 @@ extends CanvasLayer
 var _traveling: bool = false
 var _motion_strength: float = 0.0
 var _scenery_started: bool = false
+var _station_hidden: bool = false
 var _rng := RandomNumberGenerator.new()
 
 @onready var _travel_scenery: Node2D = %TravelScenery
@@ -35,6 +36,11 @@ func set_traveling(value: bool) -> void:
 	set_motion_strength(1.0 if value else 0.0)
 
 
+func set_station_hidden(value: bool) -> void:
+	_station_hidden = value
+	_refresh_scenery_visibility()
+
+
 func set_motion_strength(value: float) -> void:
 	var next_strength: float = clampf(value, 0.0, 1.0)
 	var was_traveling: bool = _traveling
@@ -48,7 +54,7 @@ func set_motion_strength(value: float) -> void:
 	_pole_timer.stop()
 	if _traveling:
 		_scenery_started = true
-		_travel_scenery.show()
+		_refresh_scenery_visibility()
 		_resume_or_start_animation(_cable_animation, cable_pass_animation, _passing_cables)
 		_cable_animation.speed_scale = _motion_strength
 		if _passing_pole.visible:
@@ -61,7 +67,11 @@ func set_motion_strength(value: float) -> void:
 		# would apply its RESET track and make the scenery visibly teleport.
 		_cable_animation.pause()
 		_pole_animation.pause()
-		_travel_scenery.show()
+		_refresh_scenery_visibility()
+
+
+func _refresh_scenery_visibility() -> void:
+	_travel_scenery.visible = _scenery_started and not _station_hidden
 
 func _resume_or_start_animation(animation: AnimationPlayer, animation_name: StringName, visual: CanvasItem) -> void:
 	visual.show()

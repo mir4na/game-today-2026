@@ -9,11 +9,13 @@ size = Vector2(180, 228)
 
 [node name="Newspaper" type="Area2D" unique_id=654820484 groups=["passenger_stop_obstacles"]]
 editor_description = "Scene-authored newspaper rack. Adjust its artwork, collision, and prompt directly through this scene's Inspector."
+z_index = 2
 script = ExtResource("1")
-prompt_text = "Read Newspaper"
+prompt_text = "Read newspaper"
 interaction_distance = 150.0
 prompt_anchor_path = NodePath("InteractionPromptAnchor")
 focus_visual_path = NodePath("Visual")
+raise_on_focus = false
 
 [node name="InteractionPromptAnchor" type="Marker2D" parent="." unique_id=377578827]
 editor_description = "Inspector-authored screen prompt anchor above the newspaper."
