@@ -11,6 +11,7 @@ signal boarding_actor_entered(actor_index: int, door_screen_position: Vector2)
 
 @export_category("Scene Copy")
 @export var show_station_title: bool = true
+@export var show_terminal_title: bool = true
 @export var opening_heading_template: String = "%s • INITIAL BOARDING"
 @export var exchange_heading_template: String = "%s • PASSENGER EXCHANGE"
 @export var opening_subtitle_text: String = "INITIAL BOARDING"
@@ -213,7 +214,7 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 	_motion_strength = -1.0
 	_set_train_motion_strength(1.0)
 	_play_letterbox_animation(letterbox_in_animation)
-	if show_station_title:
+	if _should_show_cinematic_title():
 		_play_cinematic_title_animation()
 	_update_visuals()
 	sequence_timeline_changed.emit(_elapsed)
@@ -328,7 +329,7 @@ func _set_train_motion_strength(value: float) -> void:
 
 
 func _update_scene_copy() -> void:
-	if not show_station_title:
+	if not _should_show_cinematic_title():
 		_heading_label.text = ""
 		_subtitle_label.text = ""
 		_cinematic_title.hide()
@@ -342,6 +343,10 @@ func _update_scene_copy() -> void:
 		_subtitle_label.text = opening_subtitle_text if _opening_mode else exchange_subtitle_text
 	_cinematic_title.visible = not _heading_label.text.is_empty() or not _subtitle_label.text.is_empty()
 	_update_status_copy()
+
+
+func _should_show_cinematic_title() -> bool:
+	return show_terminal_title if _terminal_mode else show_station_title
 
 
 func _update_status_copy() -> void:
