@@ -20,7 +20,43 @@ shader_parameter/dead_tint = Color(0.3, 0.52, 0.66, 0.24)
 atlas = ExtResource("3_3p8er")
 region = Rect2(1440, 0, 720, 900)
 
-[sub_resource type="SpriteFrames" id="SpriteFrames_3p8er"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_3p8er"]
+atlas = ExtResource("3_3p8er")
+region = Rect2(0, 0, 720, 900)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_eynjd"]
+atlas = ExtResource("3_3p8er")
+region = Rect2(720, 0, 720, 900)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mpufq"]
+atlas = ExtResource("3_3p8er")
+region = Rect2(1440, 0, 720, 900)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sctdi"]
+atlas = ExtResource("3_3p8er")
+region = Rect2(0, 900, 720, 900)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pmckc"]
+atlas = ExtResource("3_3p8er")
+region = Rect2(720, 900, 720, 900)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dliri"]
+atlas = ExtResource("3_3p8er")
+region = Rect2(1440, 900, 720, 900)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_240pv"]
+atlas = ExtResource("3_3p8er")
+region = Rect2(0, 1800, 720, 900)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7jkfk"]
+atlas = ExtResource("3_3p8er")
+region = Rect2(720, 1800, 720, 900)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jlteh"]
+atlas = ExtResource("3_3p8er")
+region = Rect2(1440, 1800, 720, 900)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_es1jp"]
 resource_local_to_scene = true
 animations = [{
 "frames": [{
@@ -31,7 +67,34 @@ animations = [{
 "name": &"idle",
 "speed": 10.0
 }, {
-"frames": [],
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3p8er")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_eynjd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mpufq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sctdi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pmckc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dliri")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_240pv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7jkfk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jlteh")
+}],
 "loop": 1,
 "name": &"walk",
 "speed": 10.0
@@ -49,7 +112,8 @@ position = Vector2(-7.111, -122.671)
 [node name="NPCVisual" parent="CharacterScale/PassengerVisual" index="1"]
 position = Vector2(0.492734, -51.923393)
 scale = Vector2(0.226389, 0.226389)
-sprite_frames = SubResource("SpriteFrames_3p8er")
+sprite_frames = SubResource("SpriteFrames_es1jp")
+animation = &"walk"
 
 [node name="CharacterArtwork" type="Sprite2D" parent="CharacterScale/PassengerVisual" index="2" unique_id=1418710910]
 material = ExtResource("3_cutout")
