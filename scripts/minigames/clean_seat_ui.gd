@@ -6,7 +6,7 @@ signal closed
 signal completed(event: Node)
 
 @export_category("Inspector Copy")
-@export var progress_template: String = "CLEANING  %d%%"
+@export var progress_template: String = "Cleaning  %d%%"
 
 @onready var _surface: CleanSeatSurface = %WipeSurface
 @onready var _progress_label: Label = %ProgressLabel

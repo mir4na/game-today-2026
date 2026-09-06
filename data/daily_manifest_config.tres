@@ -4,9 +4,6 @@
 
 [resource]
 script = ExtResource("1")
-total_passenger_count = 17
-balance_boarding_groups_across_carriages = true
-minimum_unique_name_count = 30
 female_passenger_names = PackedStringArray("Eleni", "Daphne", "Irene", "Kalliope", "Melina", "Nefeli", "Thalia", "Xenia", "Zoe", "Anthea", "Ariadne", "Despina", "Lydia", "Penelope", "Helena", "Dimitra", "Georgia", "Myrto")
 male_passenger_names = PackedStringArray("Andreas", "Dimitris", "Elias", "Leonidas", "Nikolas", "Stavros", "Theo", "Petros", "Yannis", "Alexios", "Christos", "Konstantinos", "Kyriakos", "Manolis", "Michalis", "Panagiotis", "Spyros", "Vasileios")
 service_train_number = "505"

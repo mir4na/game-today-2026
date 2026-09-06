@@ -9,6 +9,14 @@ signal radar_requested
 @export var clock_template: String = "%02d:%02d %s"
 @export var tool_status_template: String = "BLESSINGS %d\nAUDIT ×%d  •  SPEED LV.%d"
 @export var radar_button_template: String = "ACTIVATE RADAR   [R]  ×%d"
+@export_category("Journey Clock")
+@export_range(0.0, 1440.0, 1.0) var clock_default_start_minutes: float = 840.0
+@export_range(0.0, 1440.0, 1.0) var clock_default_end_minutes: float = 1320.0
+@export_range(-180.0, 180.0, 0.1) var clock_pointer_start_degrees: float = -26.96
+@export_range(1.0, 90.0, 0.5) var clock_degrees_per_stop: float = 45.0
+@export_range(1, 12, 1) var clock_stop_count: int = 4
+@export_range(0.1, 1.5, 0.05) var clock_station_step_duration: float = 0.5
+@export_range(0.1, 1.0, 0.01) var clock_symbol_flip_duration: float = 0.46
 @export_category("Interaction Prompt")
 @export var prompt_screen_offset: Vector2 = Vector2.ZERO
 @export var prompt_edge_margin: Vector2 = Vector2(24.0, 20.0)
@@ -29,8 +37,14 @@ signal radar_requested
 
 @onready var _root: Control = %Root
 @onready var _minimap: TrainMinimap = %TrainMinimap
-@onready var _clock_panel: PanelContainer = %ClockPanel
-@onready var _clock_label: Label = %ClockLabel
+@onready var _clock_panel: Control = %ClockPanel
+@onready var _clock_fill: TextureRect = %ClockFilled
+@onready var _clock_pointer: TextureRect = %ClockPointer
+@onready var _next_stop_title: Label = $Root/ClockPanel/NextStopTitle
+@onready var _next_stop_label: Label = %NextStopLabel
+@onready var _clock_symbol_pivot: Control = %ClockSymbolPivot
+@onready var _day_symbol: TextureRect = %DaySymbol
+@onready var _night_symbol: TextureRect = %NightSymbol
 @onready var _floating_prompt: Control = %FloatingPrompt
 @onready var _prompt_label: Label = %PromptLabel
 @onready var _dialogue_pointer: TextureRect = %DialoguePointer
@@ -48,19 +62,109 @@ var _prompt_target: Node2D
 var _prompt_source_text: String = ""
 var _prompt_wobble_time: float = 0.0
 var _prompt_reveal_scale: float = 1.0
+var _clock_is_night: bool = false
+var _clock_symbol_tween: Tween
+var _clock_progress_tween: Tween
+var _clock_progress: float = 0.0
+var _clock_target_progress: float = -1.0
+
+const CLOCK_FILL_ARC_DEGREES: float = 180.0
 
 func _process(delta: float) -> void:
 	_prompt_wobble_time += delta
 	_update_prompt_position()
 
-func set_clock(total_minutes: int) -> void:
-	var hour_24: int = total_minutes / 60
-	var minute: int = total_minutes % 60
-	var suffix: String = "AM" if hour_24 < 12 else "PM"
-	var hour_12: int = hour_24 % 12
-	if hour_12 == 0:
-		hour_12 = 12
-	_clock_label.text = clock_template % [hour_12, minute, suffix]
+func set_clock(total_minutes: int, journey_ratio: float = -1.0) -> void:
+	var ratio: float = journey_ratio
+	if ratio < 0.0:
+		ratio = inverse_lerp(
+			clock_default_start_minutes,
+			maxf(clock_default_end_minutes, clock_default_start_minutes + 1.0),
+			float(total_minutes)
+		)
+	set_clock_progress(ratio)
+
+
+func set_clock_route_stop_count(value: int) -> void:
+	clock_stop_count = maxi(value, 1)
+	if is_node_ready():
+		_apply_clock_progress(maxf(_clock_progress, 0.0))
+
+
+func set_clock_progress(value: float, animate: bool = false) -> void:
+	var progress: float = clampf(value, 0.0, 1.0)
+	if is_equal_approx(progress, _clock_target_progress):
+		return
+	_clock_target_progress = progress
+	if is_instance_valid(_clock_progress_tween) and _clock_progress_tween.is_valid():
+		_clock_progress_tween.kill()
+	if animate and is_inside_tree():
+		_clock_progress_tween = create_tween()
+		_clock_progress_tween.tween_method(
+			_apply_clock_progress,
+			_clock_progress,
+			_clock_target_progress,
+			clock_station_step_duration
+		).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+		return
+	_apply_clock_progress(progress)
+
+
+func _apply_clock_progress(progress: float) -> void:
+	_clock_progress = clampf(progress, 0.0, 1.0)
+	var completed_stops: float = _clock_progress * float(clock_stop_count)
+	var traveled_degrees: float = completed_stops * clock_degrees_per_stop
+	var fill_material := _clock_fill.material as ShaderMaterial
+	if fill_material != null:
+		# The shader covers a 180-degree semicircle. Deriving its progress from the
+		# exact hand angle keeps the filled boundary locked to the pointer.
+		fill_material.set_shader_parameter(
+			&"progress",
+			clampf(traveled_degrees / CLOCK_FILL_ARC_DEGREES, 0.0, 1.0)
+		)
+	_clock_pointer.rotation = deg_to_rad(
+		clock_pointer_start_degrees + traveled_degrees
+	)
+
+
+func set_next_stop(station_name: String) -> void:
+	var destination: String = station_name.strip_edges().to_upper()
+	_next_stop_label.text = destination if not destination.is_empty() else "—"
+
+
+func set_clock_night_mode(is_night: bool, animate: bool = true) -> void:
+	if is_night == _clock_is_night:
+		_show_clock_symbol(is_night)
+		return
+	_clock_is_night = is_night
+	if is_instance_valid(_clock_symbol_tween) and _clock_symbol_tween.is_valid():
+		_clock_symbol_tween.kill()
+	_clock_symbol_pivot.scale = Vector2.ONE
+	if not animate or not is_inside_tree():
+		_show_clock_symbol(is_night)
+		return
+	var half_duration: float = clock_symbol_flip_duration * 0.5
+	_clock_symbol_tween = create_tween()
+	_clock_symbol_tween.tween_property(
+		_clock_symbol_pivot,
+		^"scale",
+		Vector2(0.04, 1.08),
+		half_duration
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	_clock_symbol_tween.tween_callback(_show_clock_symbol.bind(is_night))
+	_clock_symbol_tween.tween_property(
+		_clock_symbol_pivot,
+		^"scale",
+		Vector2.ONE,
+		half_duration
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func _show_clock_symbol(is_night: bool) -> void:
+	_day_symbol.visible = not is_night
+	_night_symbol.visible = is_night
+	_next_stop_title.visible = not is_night
+	_next_stop_label.visible = not is_night
 
 func set_current_carriage_number(carriage_number: int) -> void:
 	_minimap.set_current_carriage_number(carriage_number)
@@ -298,7 +402,7 @@ func _on_radar_button_pressed() -> void:
 	radar_requested.emit()
 
 func set_night_walk_mode() -> void:
-	_clock_panel.visible = false
+	_clock_panel.visible = true
 	_tool_status_label.visible = true
 	_radar_button.visible = true
 	_floating_prompt.visible = not _prompt_label.text.is_empty()

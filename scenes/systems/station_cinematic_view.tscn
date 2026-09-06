@@ -1,0 +1,106 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/station_cinematic_view.gd" id="1_view"]
+[ext_resource type="Texture2D" path="res://assets/environment/Stasiun.png" id="2_station"]
+[ext_resource type="FontFile" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="3_sign_font"]
+
+[node name="StationCinematicView" type="Node2D"]
+unique_name_in_owner = true
+editor_description = "Station arrival shot. The camera zoom matches the centered 1920x1080 station art at its reduced 70% world scale."
+script = ExtResource("1_view")
+
+[node name="StationBackdrop" type="Node2D" parent="."]
+unique_name_in_owner = true
+editor_description = "Continuous station strip. The center copy frames the 1920x1080 shot while the side copies keep the platform connected as the camera travels from the player's carriage."
+visible = false
+modulate = Color(1, 1, 1, 1)
+z_index = 50
+z_as_relative = false
+position = Vector2(1900, 140)
+scale = Vector2(1.555555, 1.555555)
+
+[node name="LeftExtension" type="Sprite2D" parent="StationBackdrop"]
+position = Vector2(-1920, 0)
+texture = ExtResource("2_station")
+
+[node name="CenterArtwork" type="Sprite2D" parent="StationBackdrop"]
+texture = ExtResource("2_station")
+
+[node name="RightExtension" type="Sprite2D" parent="StationBackdrop"]
+position = Vector2(1920, 0)
+texture = ExtResource("2_station")
+
+[node name="StationSignLayer" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+visible = false
+layer = 21
+follow_viewport_enabled = true
+
+[node name="StationSign" type="Node2D" parent="StationSignLayer"]
+unique_name_in_owner = true
+editor_description = "Foreground station-name board. It masks Coach 1's station doorway, which is excluded from NPC boarding in main.gd."
+position = Vector2(3051.11, 528.889)
+scale = Vector2(1.555555, 1.555555)
+
+[node name="LeftPost" type="Polygon2D" parent="StationSignLayer/StationSign"]
+color = Color(0.243137, 0.176471, 0.145098, 1)
+polygon = PackedVector2Array(-196, 55, -158, 55, -158, 310, -196, 310)
+
+[node name="RightPost" type="Polygon2D" parent="StationSignLayer/StationSign"]
+color = Color(0.243137, 0.176471, 0.145098, 1)
+polygon = PackedVector2Array(158, 55, 196, 55, 196, 310, 158, 310)
+
+[node name="BoardShadow" type="Polygon2D" parent="StationSignLayer/StationSign"]
+position = Vector2(9, 11)
+color = Color(0.113725, 0.0823529, 0.0745098, 0.72)
+polygon = PackedVector2Array(-285, -82, 285, -82, 285, 82, -285, 82)
+
+[node name="Board" type="Polygon2D" parent="StationSignLayer/StationSign"]
+color = Color(0.286275, 0.207843, 0.164706, 1)
+polygon = PackedVector2Array(-285, -82, 285, -82, 285, 82, -285, 82)
+
+[node name="BoardInset" type="Polygon2D" parent="StationSignLayer/StationSign"]
+color = Color(0.917647, 0.811765, 0.619608, 1)
+polygon = PackedVector2Array(-267, -64, 267, -64, 267, 64, -267, 64)
+
+[node name="StationCaption" type="Label" parent="StationSignLayer/StationSign"]
+offset_left = -250.0
+offset_top = -53.0
+offset_right = 250.0
+offset_bottom = -19.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.298039, 0.211765, 0.172549, 1)
+theme_override_fonts/font = ExtResource("3_sign_font")
+theme_override_font_sizes/font_size = 20
+text = "STATION"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StationName" type="Label" parent="StationSignLayer/StationSign"]
+unique_name_in_owner = true
+offset_left = -260.0
+offset_top = -21.0
+offset_right = 260.0
+offset_bottom = 53.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.180392, 0.12549, 0.109804, 1)
+theme_override_colors/font_outline_color = Color(1, 0.913725, 0.745098, 0.85)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("3_sign_font")
+theme_override_font_sizes/font_size = 43
+text = "ALDERWICK"
+horizontal_alignment = 1
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="FrameTarget" type="Marker2D" parent="."]
+unique_name_in_owner = true
+editor_description = "Center point of the fully zoomed-out station shot."
+position = Vector2(1900, 140)
+
+[node name="StationCamera" type="Camera2D" parent="."]
+unique_name_in_owner = true
+enabled = false
+position = Vector2(1900, 140)
+zoom = Vector2(0.428571, 0.428571)
+position_smoothing_enabled = false

@@ -521,9 +521,9 @@ reset_stamp_animation = &"RESET"
 stamped_state_animation = &"STAMPED"
 apply_stamp_animation = &"apply_disembark_stamp"
 remove_stamp_animation = &"remove_disembark_stamp"
-unstamped_tooltip = "STAMP FOR NEXT-STOP DISEMBARK"
-stamped_tooltip = "REMOVE DISEMBARK STAMP"
-locked_tooltip = "CLEAN THE DIRTY SEAT BEFORE STAMPING TICKETS"
+unstamped_tooltip = "Stamp for next-stop disembark"
+stamped_tooltip = "Remove disembark stamp"
+locked_tooltip = "Clean the dirty seat before stamping tickets"
 
 [node name="TicketSurface" type="Control" parent="."]
 layout_mode = 1

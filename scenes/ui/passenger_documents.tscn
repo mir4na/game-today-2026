@@ -258,10 +258,10 @@ script = ExtResource("1_script")
 reset_animation = &"RESET"
 show_id_animation = &"show_id_card"
 show_ticket_animation = &"show_ticket"
-id_instruction = "[Q] VIEW TICKET    •    [E] CLOSE"
-unstamped_ticket_instruction = "[Q] VIEW ID    •    [SPACE] APPLY DISEMBARK STAMP    •    [E] CLOSE"
-stamped_ticket_instruction = "[Q] VIEW ID    •    [SPACE] REMOVE DISEMBARK STAMP    •    [E] CLOSE"
-locked_ticket_instruction = "CLEAN THE DIRTY SEAT BEFORE STAMPING TICKETS    •    [Q] VIEW ID    •    [E] CLOSE"
+id_instruction = "[Q] View ticket    •    [E] Close"
+unstamped_ticket_instruction = "[Q] View ID    •    [Space] Apply disembark stamp    •    [E] Close"
+stamped_ticket_instruction = "[Q] View ID    •    [Space] Remove disembark stamp    •    [E] Close"
+locked_ticket_instruction = "Clean the dirty seat before stamping tickets    •    [Q] View ID    •    [E] Close"
 
 [node name="PassengerTicket" parent="." instance=ExtResource("3_ticket")]
 unique_name_in_owner = true

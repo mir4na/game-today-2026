@@ -39,9 +39,9 @@ script = ExtResource("1_script")
 target_scene_path = "res://scenes/main/main.tscn"
 minimum_display_seconds = 0.9
 bar_fill_speed = 135.0
-loading_status_text = "PREPARING THE DAY SERVICE"
-ready_status_text = "SHIFT READY"
-failed_status_text = "THE SHIFT COULD NOT BE LOADED"
+loading_status_text = "Preparing the day service"
+ready_status_text = "Shift ready"
+failed_status_text = "The shift could not be loaded"
 progress_text_template = "%d%%"
 
 [node name="Background" type="ColorRect" parent="."]
@@ -101,7 +101,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.84, 0.83, 0.8, 1)
 theme_override_font_sizes/font_size = 17
-text = "PREPARING THE DAY SERVICE"
+text = "Preparing the day service"
 horizontal_alignment = 1
 
 [node name="ProgressBar" type="ProgressBar" parent="Center/Content"]
@@ -131,5 +131,5 @@ grow_horizontal = 2
 grow_vertical = 0
 theme_override_colors/font_color = Color(0.34, 0.37, 0.42, 1)
 theme_override_font_sizes/font_size = 13
-text = "THE TRAIN DEPARTS WHEN ALL RECORDS ARE READY"
+text = "The train departs when all records are ready"
 horizontal_alignment = 1

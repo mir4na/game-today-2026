@@ -3,17 +3,25 @@ extends Node2D
 
 signal exterior_fade_out_finished
 
+@export_category("Station Arrival & Departure")
+@export_range(2500.0, 6000.0, 50.0) var station_arrival_distance: float = 4400.0
+@export_range(2500.0, 6000.0, 50.0) var station_departure_distance: float = 4400.0
+
 var _scroll: float = 0.0
 var _night_strength: float = 0.0
 var _day_cycle_progress: float = 0.0
 var _sway_time: float = 0.0
 var _motion_strength: float = 1.0
 var _carriages: Array[CarriageVisual] = []
+var _cars_station_rest_position: Vector2
+var _station_arrival_progress: float = 1.0
+var _station_departure_progress: float = 0.0
 
 @onready var _cars: Node2D = %Cars
 @onready var _exterior_sequence: TrainExteriorBody = %ExteriorSequence
 
 func _ready() -> void:
+	_cars_station_rest_position = _cars.position
 	for child: Node in _cars.get_children():
 		if child is CarriageVisual:
 			_carriages.append(child as CarriageVisual)
@@ -46,14 +54,36 @@ func set_motion_strength(value: float) -> void:
 		carriage.set_motion_strength(_motion_strength)
 
 func show_exterior_body(duration: float, arrival_end: float, departure_start: float) -> void:
+	_station_arrival_progress = 0.0
+	_station_departure_progress = 0.0
+	_apply_station_travel_position()
 	for carriage: CarriageVisual in _carriages:
 		carriage.begin_exterior_mode()
 	_exterior_sequence.begin_sequence(duration, arrival_end, departure_start)
 
 func hide_exterior_body() -> void:
 	_exterior_sequence.end_sequence()
+	_station_arrival_progress = 1.0
+	_station_departure_progress = 0.0
+	_apply_station_travel_position()
 	for carriage: CarriageVisual in _carriages:
 		carriage.end_exterior_mode()
+
+func set_station_arrival_progress(value: float) -> void:
+	_station_arrival_progress = clampf(value, 0.0, 1.0)
+	_apply_station_travel_position()
+
+func set_station_departure_progress(value: float) -> void:
+	_station_departure_progress = clampf(value, 0.0, 1.0)
+	_apply_station_travel_position()
+
+func _apply_station_travel_position() -> void:
+	var arrival_offset: float = station_arrival_distance * (1.0 - _station_arrival_progress)
+	var departure_offset: float = -station_departure_distance * _station_departure_progress
+	_cars.position = _cars_station_rest_position + Vector2(arrival_offset + departure_offset, 0.0)
+
+func is_station_departure_complete() -> bool:
+	return _station_departure_progress >= 0.999
 
 func set_exterior_sequence_elapsed(value: float) -> void:
 	_exterior_sequence.set_sequence_elapsed(value)

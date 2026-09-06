@@ -20,10 +20,19 @@ signal completed(event: Node)
 @export_range(2, 8, 1) var loose_shelf_columns: int = 5
 @export var loose_shelf_origin_offset: Vector2 = Vector2(24.0, 48.0)
 @export var loose_piece_spacing: Vector2 = Vector2(12.0, 12.0)
+@export_category("Interaction Feel")
+@export_range(4.0, 40.0, 1.0) var drag_follow_speed: float = 24.0
+@export_range(0.05, 0.4, 0.01) var valid_snap_duration: float = 0.16
+@export_range(0.1, 0.6, 0.01) var invalid_return_duration: float = 0.28
+@export_range(0.2, 1.2, 0.05) var completion_hold_seconds: float = 0.65
 
 @onready var _shelf: Control = %Shelf
 @onready var _target_board: Control = %TargetBoard
 @onready var _pieces_root: Control = %Pieces
+@onready var _shade: ColorRect = $Shade
+@onready var _puzzle_window: Control = %PuzzleWindow
+@onready var _title: Label = $PuzzleWindow/Title
+@onready var _description: Label = $PuzzleWindow/Description
 
 var _active_event: Node
 var _pieces: Array[Control] = []
@@ -34,14 +43,41 @@ var _completed: bool = false
 var _dragged_piece: Control
 var _drag_start_position: Vector2
 var _drag_start_cell: Vector2i = Vector2i(-1, -1)
+var _drag_target_global_position: Vector2
+var _piece_motion_tweens: Dictionary = {}
+var _open_tween: Tween
+var _completion_tween: Tween
+var _window_rest_modulate: Color
+var _title_default_text: String
+var _description_default_text: String
 var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
 	_rng.randomize()
+	_window_rest_modulate = _puzzle_window.modulate
+	_title_default_text = _title.text
+	_description_default_text = _description.text
+	_puzzle_window.pivot_offset = _puzzle_window.size * 0.5
+	_target_board.pivot_offset = _target_board.size * 0.5
+	_reset_board_preview()
+
+
+func _process(delta: float) -> void:
+	if not is_instance_valid(_dragged_piece):
+		return
+	var follow_weight: float = 1.0 - exp(-drag_follow_speed * delta)
+	_dragged_piece.global_position = _dragged_piece.global_position.lerp(
+		_drag_target_global_position,
+		follow_weight
+	)
 
 
 func open_puzzle(event: Node) -> void:
+	_title.text = _title_default_text
+	_description.text = _description_default_text
+	_target_board.scale = Vector2.ONE
+	_reset_board_preview()
 	if event != _active_event:
 		_cancel_active_drag()
 		_active_event = event
@@ -50,6 +86,11 @@ func open_puzzle(event: Node) -> void:
 		_arrange_piece_homes()
 		_initialize_piece_positions()
 	show()
+	_play_open_animation()
+	for piece_index: int in range(_pieces.size()):
+		var piece: Control = _pieces[piece_index]
+		if piece.has_method(&"play_spawn_feedback"):
+			piece.call(&"play_spawn_feedback", float(piece_index) * 0.035)
 
 
 func request_close() -> void:
@@ -72,27 +113,37 @@ func _on_close_button_pressed() -> void:
 
 
 func _on_piece_grabbed(piece: Control, _grab_offset: Vector2) -> void:
+	_kill_piece_motion_tween(piece)
 	_dragged_piece = piece
 	_drag_start_position = piece.position
+	_drag_target_global_position = piece.global_position
 	_drag_start_cell = _placement_by_piece.get(piece, Vector2i(-1, -1))
 	_release_piece_cells(piece)
 	piece.z_index = 20
+	_update_drop_preview(piece, _drag_target_global_position)
 
 
 func _on_piece_dragged(piece: Control, pointer_position: Vector2, grab_offset: Vector2) -> void:
-	piece.global_position = pointer_position - grab_offset
+	_drag_target_global_position = pointer_position - grab_offset
+	_update_drop_preview(piece, _drag_target_global_position)
 
 
-func _on_piece_released(piece: Control, _pointer_position: Vector2, _grab_offset: Vector2) -> void:
+func _on_piece_released(piece: Control, pointer_position: Vector2, grab_offset: Vector2) -> void:
 	_dragged_piece = null
 	piece.z_index = 1
-	var relative: Vector2 = piece.global_position - _target_board.global_position
+	_reset_board_preview()
+	var intended_global_position: Vector2 = pointer_position - grab_offset
+	var relative: Vector2 = intended_global_position - _target_board.global_position
 	var cell := Vector2i(roundi(relative.x / cell_size), roundi(relative.y / cell_size))
 	var occupied_offsets: Array[Vector2i] = _get_piece_cell_offsets(piece)
 	if _can_place_cells(cell, occupied_offsets, _occupied_cells, grid_columns, grid_rows):
-		_place_piece(piece, cell, occupied_offsets)
+		_place_piece(piece, cell, occupied_offsets, true)
+		if piece.has_method(&"play_valid_drop"):
+			piece.call(&"play_valid_drop")
 	else:
-		piece.position = _home_positions[piece]
+		_animate_piece_to_local_position(piece, _home_positions[piece], invalid_return_duration, false)
+		if piece.has_method(&"play_invalid_drop"):
+			piece.call(&"play_invalid_drop")
 	_check_completion()
 
 
@@ -100,6 +151,8 @@ func _cancel_active_drag() -> void:
 	if not is_instance_valid(_dragged_piece):
 		return
 	_dragged_piece.call(&"cancel_drag")
+	_reset_board_preview()
+	_kill_piece_motion_tween(_dragged_piece)
 	_dragged_piece.position = _drag_start_position
 	_dragged_piece.z_index = 1
 	if _drag_start_cell.x >= 0:
@@ -123,8 +176,12 @@ func _can_place_cells(
 	return true
 
 
-func _place_piece(piece: Control, origin: Vector2i, occupied_offsets: Array[Vector2i]) -> void:
-	piece.global_position = _target_board.global_position + Vector2(origin) * cell_size
+func _place_piece(piece: Control, origin: Vector2i, occupied_offsets: Array[Vector2i], animate: bool = false) -> void:
+	var target_global_position: Vector2 = _target_board.global_position + Vector2(origin) * cell_size
+	if animate:
+		_animate_piece_to_global_position(piece, target_global_position, valid_snap_duration, true)
+	else:
+		piece.global_position = target_global_position
 	_placement_by_piece[piece] = origin
 	for offset: Vector2i in occupied_offsets:
 		_occupied_cells[origin + offset] = piece
@@ -147,8 +204,12 @@ func _initialize_piece_positions() -> void:
 	_placement_by_piece.clear()
 	_occupied_cells.clear()
 	for piece: Control in _pieces:
+		_kill_piece_motion_tween(piece)
 		piece.position = _home_positions[piece]
 		piece.z_index = 1
+		piece.mouse_filter = Control.MOUSE_FILTER_STOP
+		if piece.has_method(&"reset_feedback"):
+			piece.call(&"reset_feedback")
 
 
 func _rebuild_piece_set() -> void:
@@ -329,9 +390,90 @@ func _check_completion() -> void:
 	if _completed or _occupied_cells.size() < grid_columns * grid_rows:
 		return
 	_completed = true
-	await get_tree().create_timer(0.25, false).timeout
+	_reset_board_preview()
+	_title.text = "Aisle cleared!"
+	_description.text = "Everything fits. The coach connector is open."
+	for piece_index: int in range(_pieces.size()):
+		var piece: Control = _pieces[piece_index]
+		piece.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		if piece.has_method(&"play_completion_feedback"):
+			piece.call(&"play_completion_feedback", float(piece_index) * 0.035)
+	if _completion_tween and _completion_tween.is_valid():
+		_completion_tween.kill()
+	_completion_tween = create_tween()
+	_completion_tween.tween_property(_target_board, ^"scale", Vector2.ONE * 1.045, 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_completion_tween.tween_property(_target_board, ^"scale", Vector2.ONE, 0.16).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	await get_tree().create_timer(completion_hold_seconds, false).timeout
 	if not is_inside_tree():
 		return
 	hide()
 	completed.emit(_active_event)
 	_active_event = null
+
+
+func _play_open_animation() -> void:
+	if _open_tween and _open_tween.is_valid():
+		_open_tween.kill()
+	_puzzle_window.scale = Vector2.ONE * 0.88
+	_puzzle_window.modulate = Color(
+		_window_rest_modulate.r,
+		_window_rest_modulate.g,
+		_window_rest_modulate.b,
+		0.0
+	)
+	_shade.modulate.a = 0.0
+	_open_tween = create_tween().set_parallel(true)
+	_open_tween.tween_property(_shade, ^"modulate:a", 1.0, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_open_tween.tween_property(_puzzle_window, ^"scale", Vector2.ONE, 0.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_open_tween.tween_property(_puzzle_window, ^"modulate", _window_rest_modulate, 0.16).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+
+func _update_drop_preview(piece: Control, intended_global_position: Vector2) -> void:
+	_reset_board_preview()
+	var relative: Vector2 = intended_global_position - _target_board.global_position
+	var origin := Vector2i(roundi(relative.x / cell_size), roundi(relative.y / cell_size))
+	var cell_offsets: Array[Vector2i] = _get_piece_cell_offsets(piece)
+	var valid: bool = _can_place_cells(origin, cell_offsets, _occupied_cells, grid_columns, grid_rows)
+	var preview_color := Color(0.72, 1.22, 0.78, 1.0) if valid else Color(1.28, 0.62, 0.62, 1.0)
+	for offset: Vector2i in cell_offsets:
+		var cell: Vector2i = origin + offset
+		if cell.x < 0 or cell.y < 0 or cell.x >= grid_columns or cell.y >= grid_rows:
+			continue
+		var block_index: int = cell.y * grid_columns + cell.x
+		if block_index >= 0 and block_index < _target_board.get_child_count():
+			var block := _target_board.get_child(block_index) as CanvasItem
+			if is_instance_valid(block):
+				block.self_modulate = preview_color
+
+
+func _reset_board_preview() -> void:
+	if not is_instance_valid(_target_board):
+		return
+	for child: Node in _target_board.get_children():
+		if child is CanvasItem:
+			(child as CanvasItem).self_modulate = Color.WHITE
+
+
+func _animate_piece_to_global_position(piece: Control, target: Vector2, duration: float, overshoot: bool) -> void:
+	_kill_piece_motion_tween(piece)
+	var tween: Tween = create_tween()
+	_piece_motion_tweens[piece] = tween
+	tween.tween_property(piece, ^"global_position", target, duration).set_trans(
+		Tween.TRANS_BACK if overshoot else Tween.TRANS_QUAD
+	).set_ease(Tween.EASE_OUT)
+
+
+func _animate_piece_to_local_position(piece: Control, target: Vector2, duration: float, overshoot: bool) -> void:
+	_kill_piece_motion_tween(piece)
+	var tween: Tween = create_tween()
+	_piece_motion_tweens[piece] = tween
+	tween.tween_property(piece, ^"position", target, duration).set_trans(
+		Tween.TRANS_BACK if overshoot else Tween.TRANS_QUAD
+	).set_ease(Tween.EASE_OUT)
+
+
+func _kill_piece_motion_tween(piece: Control) -> void:
+	var tween := _piece_motion_tweens.get(piece) as Tween
+	if tween and tween.is_valid():
+		tween.kill()
+	_piece_motion_tweens.erase(piece)

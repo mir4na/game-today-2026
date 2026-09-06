@@ -63,20 +63,23 @@ editor_description = "Inspector-authored target used by the maintenance HUD trac
 position = Vector2(0, -205)
 
 [node name="TallSuitcase" type="Sprite2D" parent="LuggageVisual" unique_id=2123819379]
-editor_description = "Tall rear suitcase; texture and transform are Inspector-authored."
-position = Vector2(53, -87)
+editor_description = "Tall suitcase leaning across the aisle; texture and transform are Inspector-authored."
+position = Vector2(45, -72)
+rotation = -0.261799
 scale = Vector2(0.105, 0.105)
 texture = ExtResource("5_case_tall")
 
 [node name="CompactSuitcase" type="Sprite2D" parent="LuggageVisual" unique_id=33917941]
-editor_description = "Compact front suitcase; texture and transform are Inspector-authored."
-position = Vector2(-17.000006, -84.00001)
+editor_description = "Compact suitcase scattered to one side; texture and transform are Inspector-authored."
+position = Vector2(-51, -29)
+rotation = 0.191986
 scale = Vector2(0.12, 0.12)
 texture = ExtResource("3_case_compact")
 
 [node name="WideSuitcase" type="Sprite2D" parent="LuggageVisual" unique_id=251036188]
-editor_description = "Wide middle suitcase; texture and transform are Inspector-authored."
-position = Vector2(-19, -38)
+editor_description = "Wide suitcase lying loosely across the floor; texture and transform are Inspector-authored."
+position = Vector2(1, -10)
+rotation = -0.10472
 scale = Vector2(0.12, 0.12)
 texture = ExtResource("4_case_wide")
 

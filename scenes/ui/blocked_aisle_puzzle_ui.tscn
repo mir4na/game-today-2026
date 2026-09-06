@@ -74,7 +74,7 @@ theme_override_colors/font_color = Color(0.941176, 0.811765, 0.552941, 1)
 theme_override_colors/font_outline_color = Color(0.0352941, 0.0431373, 0.054902, 0.95)
 theme_override_constants/outline_size = 7
 theme_override_font_sizes/font_size = 30
-text = "BLOCKED AISLE"
+text = "Blocked aisle"
 horizontal_alignment = 1
 
 [node name="Description" type="Label" parent="PuzzleWindow"]

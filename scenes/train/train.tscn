@@ -316,7 +316,6 @@ unique_name_in_owner = true
 process_mode = 4
 visible = false
 script = ExtResource("7")
-use_departure_wipe = true
 door_close_duration = 0.55
 closed_hold_before_exit = 1.0
 
