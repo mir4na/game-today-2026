@@ -1,10 +1,11 @@
 shader_type canvas_item;
 render_mode unshaded, blend_add;
 
-// Scene-bounded inspection grid. The scan passes across one passenger coach;
-// every visual property remains editable from its ShaderMaterial resource.
+// Scene-bounded inspection grid. A radial wave expands from the player inside
+// the current passenger coach; every visual property remains editable here.
 uniform float scan_progress : hint_range(0.0, 1.0) = 0.0;
 uniform float scan_aspect : hint_range(0.25, 8.0) = 2.85;
+uniform vec2 scan_origin = vec2(0.5, 0.88);
 uniform float band_width : hint_range(0.04, 0.5, 0.01) = 0.24;
 uniform float grid_density : hint_range(3.0, 32.0, 1.0) = 11.0;
 uniform float grid_line_width : hint_range(0.005, 0.15, 0.005) = 0.035;
@@ -27,8 +28,16 @@ float grid_axis(float coordinate) {
 void fragment() {
 	float lifecycle = smoothstep(0.0, 0.025, scan_progress)
 		* (1.0 - smoothstep(0.975, 1.0, scan_progress));
-	float scan_x = mix(-band_width, 1.0 + band_width, scan_progress);
-	float distance_behind = scan_x - UV.x;
+	vec2 radial_delta = UV - scan_origin;
+	radial_delta.x *= scan_aspect;
+	float radial_distance = length(radial_delta);
+	float maximum_radius = 0.0;
+	maximum_radius = max(maximum_radius, length(vec2((0.0 - scan_origin.x) * scan_aspect, 0.0 - scan_origin.y)));
+	maximum_radius = max(maximum_radius, length(vec2((1.0 - scan_origin.x) * scan_aspect, 0.0 - scan_origin.y)));
+	maximum_radius = max(maximum_radius, length(vec2((0.0 - scan_origin.x) * scan_aspect, 1.0 - scan_origin.y)));
+	maximum_radius = max(maximum_radius, length(vec2((1.0 - scan_origin.x) * scan_aspect, 1.0 - scan_origin.y)));
+	float scan_radius = mix(-band_width, maximum_radius + band_width, scan_progress);
+	float distance_behind = scan_radius - radial_distance;
 	float inside_band = step(0.0, distance_behind) * step(distance_behind, band_width);
 	float trail = pow(clamp(1.0 - distance_behind / max(band_width, 0.001), 0.0, 1.0), trail_falloff);
 
@@ -39,7 +48,7 @@ void fragment() {
 	vec2 square_grid = vec2(warped_uv.x * scan_aspect, warped_uv.y) * grid_density;
 	float grid = max(grid_axis(square_grid.x), grid_axis(square_grid.y));
 
-	float leading_edge = 1.0 - smoothstep(edge_width, edge_width + edge_glow_width, abs(UV.x - scan_x));
+	float leading_edge = 1.0 - smoothstep(edge_width, edge_width + edge_glow_width, abs(radial_distance - scan_radius));
 	float band_alpha = inside_band * lifecycle;
 	float grid_alpha = grid * band_alpha * mix(0.34, 1.0, trail);
 	float fill_alpha = band_alpha * fill_strength * mix(0.35, 1.0, trail);

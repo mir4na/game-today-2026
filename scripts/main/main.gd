@@ -1674,14 +1674,15 @@ func _use_carriage_radar() -> void:
 		return
 	if not bool(_market_tool_state.call(&"consume_radar_charge")):
 		return
-	# Snapshot the selected coach when the grid starts. Passenger movement and
-	# every other gameplay system remain active while the visual travels.
+	# Snapshot the selected coach and the MC's scene-authored scan origin. Passenger
+	# movement and every other gameplay system remain active while the wave expands.
 	var anomaly_targets: Array[Passenger] = _get_anomalies_in_carriage(carriage_number)
 	var anomaly_detected: bool = not anomaly_targets.is_empty()
+	var radar_origin: Vector2 = _player.get_radar_origin_world_position()
 	_radar_scan_active = true
 	_hud.set_radar_active(true)
 
-	_train.play_radar_scan(carriage_number, radar_scan_seconds)
+	_train.play_radar_scan(carriage_number, radar_scan_seconds, radar_origin)
 	await _reveal_radar_targets_during_scan(
 		carriage_number,
 		anomaly_targets,
@@ -1729,7 +1730,7 @@ func _reveal_radar_targets_during_scan(
 			"passenger": passenger,
 			"delay": duration * _train.get_radar_scan_crossing_progress(
 				carriage_number,
-				passenger.global_position.x
+				passenger.get_interaction_world_position()
 			),
 		})
 	reveal_schedule.sort_custom(

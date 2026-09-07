@@ -36,6 +36,7 @@ const NIGHT_WINDOW_LIGHT := Color("3aa2e9")
 @export var exterior_wipe_bottom_parameter: StringName = &"wipe_bottom_screen_y"
 @export var radar_scan_progress_parameter: StringName = &"scan_progress"
 @export var radar_scan_aspect_parameter: StringName = &"scan_aspect"
+@export var radar_scan_origin_parameter: StringName = &"scan_origin"
 @export var radar_scan_band_width_parameter: StringName = &"band_width"
 @export_range(0.0, 2.0, 0.05) var cinematic_interior_fade_seconds: float = 0.45
 @export_range(0.1, 8.0, 0.1) var wheel_full_speed_scale: float = 3.5
@@ -218,7 +219,7 @@ func has_radar_scan_effect() -> bool:
 	)
 
 
-func play_radar_scan(duration: float) -> void:
+func play_radar_scan(duration: float, origin_world_position: Vector2) -> void:
 	if not has_radar_scan_effect():
 		return
 	var shader_material := _radar_scan_effect.material as ShaderMaterial
@@ -228,6 +229,8 @@ func play_radar_scan(duration: float) -> void:
 		radar_scan_aspect_parameter,
 		_radar_scan_effect.size.x / _radar_scan_effect.size.y
 	)
+	var origin_uv: Vector2 = _radar_world_position_to_uv(origin_world_position)
+	shader_material.set_shader_parameter(radar_scan_origin_parameter, origin_uv)
 	_set_radar_scan_progress(0.0)
 	_radar_scan_effect.show()
 	_radar_scan_tween = create_tween()
@@ -240,16 +243,38 @@ func play_radar_scan(duration: float) -> void:
 	_radar_scan_tween.tween_callback(_reset_radar_scan_effect)
 
 
-func get_radar_scan_crossing_progress(world_x: float) -> float:
+func get_radar_scan_crossing_progress(world_position: Vector2) -> float:
 	if not has_radar_scan_effect():
 		return 1.0
-	var local_point: Vector2 = _radar_scan_effect.get_global_transform().affine_inverse() * Vector2(world_x, global_position.y)
-	var target_uv: float = clampf(local_point.x / _radar_scan_effect.size.x, 0.0, 1.0)
 	var material := _radar_scan_effect.material as ShaderMaterial
 	var band_width: float = 0.0
+	var origin_uv := Vector2(0.5, 0.88)
 	if material != null:
 		band_width = maxf(0.0, float(material.get_shader_parameter(radar_scan_band_width_parameter)))
-	return clampf((target_uv + band_width) / (1.0 + band_width * 2.0), 0.0, 1.0)
+		origin_uv = material.get_shader_parameter(radar_scan_origin_parameter) as Vector2
+	var aspect: float = _radar_scan_effect.size.x / maxf(_radar_scan_effect.size.y, 1.0)
+	var target_uv: Vector2 = _radar_world_position_to_uv(world_position)
+	var target_delta: Vector2 = target_uv - origin_uv
+	target_delta.x *= aspect
+	var target_radius: float = target_delta.length()
+	var maximum_radius: float = 0.0
+	for corner: Vector2 in [Vector2.ZERO, Vector2.RIGHT, Vector2.DOWN, Vector2.ONE]:
+		var corner_delta: Vector2 = corner - origin_uv
+		corner_delta.x *= aspect
+		maximum_radius = maxf(maximum_radius, corner_delta.length())
+	return clampf(
+		(target_radius + band_width) / maxf(maximum_radius + band_width * 2.0, 0.001),
+		0.0,
+		1.0
+	)
+
+
+func _radar_world_position_to_uv(world_position: Vector2) -> Vector2:
+	var local_point: Vector2 = _radar_scan_effect.get_global_transform().affine_inverse() * world_position
+	return Vector2(
+		clampf(local_point.x / maxf(_radar_scan_effect.size.x, 1.0), 0.0, 1.0),
+		clampf(local_point.y / maxf(_radar_scan_effect.size.y, 1.0), 0.0, 1.0)
+	)
 
 func get_passenger_seat_slots() -> Array[Marker2D]:
 	return _get_marker_children(passenger_seat_slots_path)

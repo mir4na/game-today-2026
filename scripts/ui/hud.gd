@@ -38,6 +38,7 @@ signal radar_requested
 @onready var _root: Control = %Root
 @onready var _minimap: TrainMinimap = %TrainMinimap
 @onready var _clock_panel: Control = %ClockPanel
+@onready var _clock_sign_assembly: Control = $Root/ClockPanel/ClockSignAssembly
 @onready var _clock_briefing_animation: AnimationPlayer = %ClockBriefingAnimation
 @onready var _clock_fill: TextureRect = %ClockFilled
 @onready var _clock_pointer: TextureRect = %ClockPointer
@@ -75,7 +76,7 @@ var _radar_active: bool = false
 const CLOCK_FILL_ARC_DEGREES: float = 180.0
 
 func _ready() -> void:
-	_clock_panel.hide()
+	_clock_sign_assembly.hide()
 
 func _process(delta: float) -> void:
 	_prompt_wobble_time += delta
@@ -386,9 +387,10 @@ func _update_dialogue_pointer(target_local_x: float, prompt_width: float) -> voi
 	_dialogue_pointer.anchor_right = pointer_anchor
 
 func set_day_hud_visible(value: bool) -> void:
+	_clock_panel.visible = value
 	if not value:
 		_clock_briefing_animation.stop()
-		_clock_panel.hide()
+		_clock_sign_assembly.hide()
 	_tool_status_label.visible = value
 	_radar_button.visible = value
 	_floating_prompt.visible = value and not _prompt_label.text.is_empty()
@@ -396,6 +398,7 @@ func set_day_hud_visible(value: bool) -> void:
 
 
 func show_route_briefing() -> void:
+	_clock_panel.show()
 	_clock_briefing_animation.stop()
 	_clock_briefing_animation.play(&"route_briefing")
 
@@ -428,7 +431,8 @@ func _on_radar_button_pressed() -> void:
 
 func set_night_walk_mode() -> void:
 	_clock_briefing_animation.stop()
-	_clock_panel.hide()
+	_clock_sign_assembly.hide()
+	_clock_panel.show()
 	_tool_status_label.visible = true
 	_radar_button.visible = true
 	_floating_prompt.visible = not _prompt_label.text.is_empty()

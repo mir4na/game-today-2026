@@ -179,17 +179,17 @@ func can_play_radar_scan(carriage_number: int) -> bool:
 	return false
 
 
-func play_radar_scan(carriage_number: int, duration: float) -> void:
+func play_radar_scan(carriage_number: int, duration: float, origin_world_position: Vector2) -> void:
 	for carriage: CarriageVisual in _carriages:
 		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
-			carriage.play_radar_scan(duration)
+			carriage.play_radar_scan(duration, origin_world_position)
 			return
 
 
-func get_radar_scan_crossing_progress(carriage_number: int, world_x: float) -> float:
+func get_radar_scan_crossing_progress(carriage_number: int, world_position: Vector2) -> float:
 	for carriage: CarriageVisual in _carriages:
 		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
-			return carriage.get_radar_scan_crossing_progress(world_x)
+			return carriage.get_radar_scan_crossing_progress(world_position)
 	return 1.0
 
 func get_carriage_index_at_world_x(world_x: float) -> int:

@@ -24,6 +24,7 @@ var _market_speed_bonus: float = 0.0
 
 @onready var _animated_sprite: AnimatedSprite2D = %MCVisual
 @onready var _dialogue_anchor: Marker2D = %DialogueAnchor
+@onready var _radar_origin: Marker2D = %RadarOrigin
 @onready var _gravity: float = float(ProjectSettings.get_setting("physics/2d/default_gravity"))
 
 
@@ -59,6 +60,10 @@ func clear_interactable() -> void:
 
 func get_dialogue_anchor() -> Node2D:
 	return _dialogue_anchor
+
+
+func get_radar_origin_world_position() -> Vector2:
+	return _radar_origin.global_position
 
 
 func set_market_speed_bonus(value: float) -> void:

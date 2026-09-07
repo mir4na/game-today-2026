@@ -7,6 +7,7 @@ resource_local_to_scene = true
 shader = ExtResource("1_radar")
 shader_parameter/scan_progress = 0.0
 shader_parameter/scan_aspect = 2.85
+shader_parameter/scan_origin = Vector2(0.5, 0.88)
 shader_parameter/band_width = 0.24
 shader_parameter/grid_density = 11.0
 shader_parameter/grid_line_width = 0.035

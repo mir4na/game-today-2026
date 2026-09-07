@@ -8,6 +8,7 @@
 unique_name_in_owner = true
 editor_description = "Station arrival shot. The camera zoom matches the centered 1920x1080 station art at its reduced 70% world scale."
 script = ExtResource("1_view")
+return_duration = 1.1
 
 [node name="StationBackdrop" type="Node2D" parent="."]
 unique_name_in_owner = true

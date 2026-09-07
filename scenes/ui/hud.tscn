@@ -40,7 +40,7 @@ length = 3.2
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("ClockPanel:visible")
+tracks/0/path = NodePath("ClockPanel/ClockSignAssembly:visible")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -52,7 +52,7 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("ClockPanel:modulate:a")
+tracks/1/path = NodePath("ClockPanel/ClockSignAssembly:modulate:a")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -64,26 +64,26 @@ tracks/1/keys = {
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("ClockPanel:offset_top")
+tracks/2/path = NodePath("ClockPanel/ClockSignAssembly:offset_top")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
 "times": PackedFloat32Array(0, 0.34, 2.55, 3.2),
 "transitions": PackedFloat32Array(0.25, 1, 1, 1),
 "update": 0,
-"values": [-260.0, -300.0, -300.0, -230.0]
+"values": [40.0, 0.0, 0.0, 70.0]
 }
 tracks/3/type = "value"
 tracks/3/imported = false
 tracks/3/enabled = true
-tracks/3/path = NodePath("ClockPanel:offset_bottom")
+tracks/3/path = NodePath("ClockPanel/ClockSignAssembly:offset_bottom")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/keys = {
 "times": PackedFloat32Array(0, 0.34, 2.55, 3.2),
 "transitions": PackedFloat32Array(0.25, 1, 1, 1),
 "update": 0,
-"values": [40.0, 0.0, 0.0, 70.0]
+"values": [210.0, 170.0, 170.0, 240.0]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_clock_briefing"]
@@ -203,7 +203,7 @@ unique_name_in_owner = true
 editor_description = "Scene-authored minimap size. Adjust Scale here to resize the complete minimap while preserving its internal layout."
 layout_mode = 0
 offset_right = 224.0
-offset_bottom = 50.0
+offset_bottom = 27.0
 scale = Vector2(1.2, 1.2)
 
 [node name="ToolStatusLabel" type="Label" parent="Root" unique_id=1425442653]
@@ -306,7 +306,7 @@ expand_mode = 1
 
 [node name="ClockPanel" type="Control" parent="Root" unique_id=735151017]
 unique_name_in_owner = true
-editor_description = "Scene-authored bottom-center route briefing. ClockSignAssembly controls the sign above; ClockFace controls the centered clock below. Its entrance, hold, and downward fade are editable in ClockBriefingAnimation."
+editor_description = "Scene-authored bottom-center journey clock. ClockSignAssembly briefly announces the next stop while ClockFace remains visible throughout gameplay."
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -324,7 +324,7 @@ mouse_filter = 2
 
 [node name="ClockBriefingAnimation" type="AnimationPlayer" parent="Root"]
 unique_name_in_owner = true
-editor_description = "Scene-authored route briefing timing. The route_briefing animation enters for 0.34 seconds, remains readable until 2.55 seconds, then drops and fades out by 3.2 seconds."
+editor_description = "Scene-authored next-stop sign timing. The sign enters for 0.34 seconds, remains readable until 2.55 seconds, then drops and fades out by 3.2 seconds; ClockFace is not animated."
 libraries/ = SubResource("AnimationLibrary_clock_briefing")
 
 [node name="ClockSignAssembly" type="Control" parent="Root/ClockPanel" unique_id=184474026]

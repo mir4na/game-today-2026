@@ -37,6 +37,7 @@ signal boarding_actor_entered(actor_id: int, door_screen_position: Vector2)
 @export_range(3.0, 18.0, 0.05) var opening_departure_start: float = 11.340431
 @export_range(0.0, 2.0, 0.05) var door_close_motion_delay: float = 0.55
 @export_range(0.1, 2.0, 0.05) var camera_return_hold_seconds: float = 0.85
+@export_range(0.5, 1.0, 0.01) var camera_return_departure_progress: float = 0.82
 @export_category("Passenger Staging")
 @export_range(45.0, 140.0, 1.0) var platform_vertical_offset: float = 78.0
 @export_range(20.0, 120.0, 1.0) var platform_horizontal_offset: float = 82.0
@@ -228,11 +229,11 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 func skip_sequence() -> void:
 	if not visible or _camera_return_started:
 		return
-	# Preserve the camera handoff even when the rest of the station action is
-	# skipped. Departure completes only after the gameplay framing is restored.
+	# A skip completes the train pass first, then preserves the same smooth camera
+	# handoff used by the unskipped sequence.
 	_set_train_motion_strength(0.0)
 	_skip_requested = true
-	_elapsed = minf(_duration, _departure_start + door_close_motion_delay)
+	_elapsed = _duration
 	sequence_timeline_changed.emit(_elapsed)
 	_update_visuals()
 
@@ -242,9 +243,6 @@ func _process(delta: float) -> void:
 	# must keep walking while departure waits for the announcement to finish.
 	_ambient_elapsed += delta
 	var next_elapsed: float = minf(_elapsed + delta, _duration)
-	var door_closed_time: float = _departure_start + door_close_motion_delay
-	if not _camera_return_completed and next_elapsed >= door_closed_time:
-		next_elapsed = minf(next_elapsed, _get_departure_motion_start())
 	if _departure_blocked:
 		var departure_motion_start: float = _get_departure_motion_start()
 		if _elapsed <= departure_motion_start:
@@ -345,8 +343,7 @@ func _update_train_motion() -> void:
 
 
 func _update_camera_return() -> void:
-	var door_closed_time: float = _departure_start + door_close_motion_delay
-	if _elapsed >= door_closed_time:
+	if get_departure_progress() >= camera_return_departure_progress:
 		_start_camera_return_if_needed()
 
 
