@@ -961,7 +961,7 @@ func _refresh_maintenance_trackers() -> void:
 	):
 		tracker_entries.append({
 			"target": _active_blocked_aisle_event.call(&"get_tracker_anchor") as Node2D,
-			"label": "Blocked aisle",
+			"icon": _active_blocked_aisle_event.call(&"get_tracker_icon") as Texture2D,
 		})
 	if (
 		is_instance_valid(_active_dirty_seat_event)
@@ -970,7 +970,7 @@ func _refresh_maintenance_trackers() -> void:
 	):
 		tracker_entries.append({
 			"target": _active_dirty_seat_event.call(&"get_tracker_anchor") as Node2D,
-			"label": "Dirty seat",
+			"icon": _active_dirty_seat_event.call(&"get_tracker_icon") as Texture2D,
 		})
 	_hud.set_maintenance_targets(tracker_entries)
 

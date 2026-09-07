@@ -18,6 +18,7 @@ signal resolved(event: Node)
 @export_node_path("CollisionShape2D") var interaction_collision_path: NodePath
 @export_node_path("CollisionShape2D") var npc_exclusion_collision_path: NodePath
 @export_node_path("Marker2D") var tracker_anchor_path: NodePath
+@export var tracker_icon: Texture2D
 
 @onready var _left_spawn_anchor: Node2D = get_node_or_null(left_spawn_anchor_path) as Node2D
 @onready var _right_spawn_anchor: Node2D = get_node_or_null(right_spawn_anchor_path) as Node2D
@@ -90,6 +91,10 @@ func get_active_spawn_side() -> StringName:
 func get_tracker_anchor() -> Node2D:
 	var configured_anchor := get_node_or_null(tracker_anchor_path) as Node2D
 	return configured_anchor if is_instance_valid(configured_anchor) else self
+
+
+func get_tracker_icon() -> Texture2D:
+	return tracker_icon
 
 
 func _place_luggage_for_observer(observer_global_x: float) -> void:

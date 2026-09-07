@@ -9,16 +9,16 @@
 [ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="9_josefin_bold"]
 
 [sub_resource type="StyleBoxFlat" id="BoardBlockStyle"]
-bg_color = Color(0.823529, 0.933333, 0.921569, 0.3)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.882353, 0.976471, 0.960784, 0.72)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
+bg_color = Color(0.635294, 0.819608, 0.8, 0.045)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.776471, 0.913725, 0.890196, 0.12)
+corner_radius_top_left = 1
+corner_radius_top_right = 1
+corner_radius_bottom_right = 1
+corner_radius_bottom_left = 1
 
 [sub_resource type="StyleBoxFlat" id="RackShadowStyle"]
 bg_color = Color(0.0196078, 0.027451, 0.0313726, 0.78)
@@ -289,7 +289,7 @@ theme_override_styles/panel = SubResource("RackRivetStyle")
 
 [node name="TargetBoard" type="Control" parent="PuzzleWindow" unique_id=462383572]
 unique_name_in_owner = true
-editor_description = "The twelve wooden target blocks are authored here in the scene. Keep their 64 px grid spacing aligned with the root Cell Size value."
+editor_description = "Subtle snap guides over the luggage rack. They preserve the 64 px packing grid without visually reading as twelve separate blocks."
 anchors_preset = 0
 offset_left = 514.0
 offset_top = 154.0

@@ -1,8 +1,9 @@
-[gd_scene format=3 uid="uid://ci8rlqvlg325x"]
+[gd_scene load_steps=7 format=3 uid="uid://ci8rlqvlg325x"]
 
 [ext_resource type="Script" uid="uid://c3kbwydwqf3v3" path="res://scripts/minigames/dirty_seat_event.gd" id="1_event"]
 [ext_resource type="Material" path="res://resources/materials/interactable_outline.tres" id="2_outline"]
 [ext_resource type="Texture2D" uid="uid://b07y6ko2rc0lb" path="res://assets/minigame/dirty seat.png" id="3_dirty_seat"]
+[ext_resource type="Texture2D" uid="uid://bb8rkrjaeuw6n" path="res://assets/kereta/seat.png" id="4_seat_icon"]
 
 [sub_resource type="RectangleShape2D" id="InteractionShape"]
 size = Vector2(92, 154)
@@ -19,7 +20,8 @@ script = ExtResource("1_event")
 interaction_collision_path = NodePath("InteractionCollision")
 npc_exclusion_collision_path = NodePath("NpcExclusionArea/NpcExclusionCollision")
 tracker_anchor_path = NodePath("TrackerAnchor")
-prompt_text = "Clean dirty seat"
+tracker_icon = ExtResource("4_seat_icon")
+prompt_text = "Clean seat"
 interaction_distance = 132.0
 enabled = false
 prompt_anchor_path = NodePath("InteractionPromptAnchor")

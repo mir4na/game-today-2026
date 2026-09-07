@@ -198,8 +198,8 @@ func set_maintenance_targets(target_entries: Array[Dictionary]) -> void:
 			continue
 		var entry: Dictionary = target_entries[index]
 		var target := entry.get("target") as Node2D
-		var tracker_text: String = str(entry.get("label", "MAINTENANCE"))
-		tracker.call(&"set_target", target, tracker_text)
+		var tracker_icon := entry.get("icon") as Texture2D
+		tracker.call(&"set_target", target, tracker_icon)
 
 func set_prompt(text: String, target: Node2D = null) -> void:
 	if text.is_empty():
