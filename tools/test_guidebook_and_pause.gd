@@ -104,7 +104,9 @@ func _run() -> void:
 	_check(guide._content.text.contains("30 Blessings") and guide._content.text.contains("40 Blessings"), "Rules include the current paycheck scoring.")
 	guide._show_anomalies()
 	var entries: Node = guide._anomaly_list.get_node("Entries")
-	_check(entries.get_child_count() == 6, "Every anomaly has a photo entry.")
+	_check(entries.get_child_count() == 5, "Every configured anomaly has a photo entry.")
+	for expected_entry: String in ["Shadowless", "UnlistedDestination", "PortraitMismatch", "TimeInvalidTicket", "NewspaperDeath"]:
+		_check(entries.has_node(expected_entry), "The guidebook includes %s." % expected_entry)
 	for entry: Node in entries.get_children():
 		_check(entry.get_node("PhotoFrame/Placeholder").visible, "An empty entry displays its photo placeholder.")
 		var sample := GradientTexture2D.new()

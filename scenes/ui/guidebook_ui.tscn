@@ -537,11 +537,6 @@ layout_mode = 2
 heading = "SHADOWLESS"
 description = "The passenger casts no shadow."
 
-[node name="ImpossibleTicket" parent="Center/BookStage/Page/AnomalyList/Entries" unique_id=675937014 instance=ExtResource("3_entry")]
-layout_mode = 2
-heading = "IMPOSSIBLE TICKET"
-description = "The destination comes before the origin on today's route."
-
 [node name="UnlistedDestination" parent="Center/BookStage/Page/AnomalyList/Entries" unique_id=765249923 instance=ExtResource("3_entry")]
 layout_mode = 2
 heading = "UNLISTED DESTINATION"

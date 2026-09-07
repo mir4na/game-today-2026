@@ -102,7 +102,7 @@ The current roster contains 17 unique visual profiles: NPC 1, 3, 4, 6, 7, 9, 11,
 
 ## Adding an anomaly
 
-Configured deceased-anomaly values are `shadowless`, `impossible_ticket`, `unlisted_destination`, `portrait_mismatch`, `time_invalid_ticket`, and `newspaper_death`; `none` marks a normal passenger. `wrong_train_boarder` is a daytime ticket violation, not a deceased anomaly.
+Configured deceased-anomaly values are `shadowless`, `unlisted_destination`, `portrait_mismatch`, `time_invalid_ticket`, and `newspaper_death`; `none` marks a normal passenger. `wrong_train_boarder` is a daytime ticket violation, not a deceased anomaly.
 
 1. Add a new value to `anomaly_type` in `passenger_data.gd`.
 2. Add only its visible/body presentation to `passenger.gd` or the relevant interactable/environment script.
@@ -117,7 +117,7 @@ Duplicate `data/puzzles/first_departures.tres`, then edit:
 - `night_stop_clues`: newline-separated relational clues;
 - `correct_passenger_by_station`: `{ station_name: passenger_short_name }` entries.
 
-Assign the new Resource to `puzzle_resource` on `Main`. Keep one passenger per station and make clues reference discovered properties (“without a shadow”, “impossible journey”), ordering, adjacency, or non-adjacency rather than naming a direct answer. Verify that the clues yield one solution before shipping the puzzle.
+Assign the new Resource to `puzzle_resource` on `Main`. Keep one passenger per station and make clues reference discovered properties (“without a shadow”, “unlisted destination”), ordering, adjacency, or non-adjacency rather than naming a direct answer. Verify that the clues yield one solution before shipping the puzzle.
 
 ## Validation
 
