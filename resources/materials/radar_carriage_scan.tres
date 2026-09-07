@@ -5,15 +5,16 @@
 [resource]
 resource_local_to_scene = true
 shader = ExtResource("1_radar")
-shader_parameter/scan_origin_uv = Vector2(0.5, 0.72)
 shader_parameter/scan_progress = 0.0
 shader_parameter/scan_aspect = 2.85
-shader_parameter/ring_width = 0.009
-shader_parameter/ring_feather = 0.007
-shader_parameter/echo_gap = 0.095
-shader_parameter/echo_width_scale = 0.72
-shader_parameter/echo_strength = 0.2
-shader_parameter/source_radius = 0.04
-shader_parameter/source_strength = 0.18
-shader_parameter/ring_color = Color(0.2, 0.91, 1, 0.86)
-shader_parameter/echo_color = Color(0.05, 0.42, 0.72, 0.32)
+shader_parameter/band_width = 0.24
+shader_parameter/grid_density = 11.0
+shader_parameter/grid_line_width = 0.035
+shader_parameter/grid_feather = 0.018
+shader_parameter/edge_width = 0.004
+shader_parameter/edge_glow_width = 0.022
+shader_parameter/fill_strength = 0.04
+shader_parameter/trail_falloff = 2.25
+shader_parameter/warp_strength = 0.012
+shader_parameter/grid_color = Color(0.3, 0.94, 1, 0.58)
+shader_parameter/edge_color = Color(0.25, 0.92, 1, 0.78)

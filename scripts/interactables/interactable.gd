@@ -15,11 +15,15 @@ signal interaction_requested(interactable: Interactable)
 @export_node_path("CanvasItem") var focus_visual_path: NodePath
 @export var raise_on_focus: bool = true
 @export_range(1, 4096, 1) var focus_z_index: int = 100
+@export_range(0.05, 0.6, 0.01) var interaction_lock_fade_duration: float = 0.2
 
 var _focus_visual: CanvasItem
 var _focus_material: ShaderMaterial
 var _default_z_index: int
 var _default_z_as_relative: bool
+var _interaction_locked: bool = false
+var _interaction_lock_strength: float = 0.0
+var _interaction_lock_tween: Tween
 
 
 func _ready() -> void:
@@ -39,6 +43,8 @@ func _ready() -> void:
 	_focus_material.resource_local_to_scene = true
 	_focus_visual.material = _focus_material
 	_focus_material.set_shader_parameter(&"outline_enabled", false)
+	_focus_material.set_shader_parameter(&"interaction_lock_strength", 0.0)
+	_focus_material.set_shader_parameter(&"radar_detection_strength", 0.0)
 
 func get_prompt() -> String:
 	return "[E] %s" % prompt_text
@@ -72,3 +78,28 @@ func set_interaction_focus(value: bool) -> void:
 	else:
 		z_index = _default_z_index
 		z_as_relative = _default_z_as_relative
+
+
+func set_interaction_locked(value: bool, immediate: bool = false) -> void:
+	if value == _interaction_locked and not immediate:
+		return
+	_interaction_locked = value
+	if is_instance_valid(_interaction_lock_tween):
+		_interaction_lock_tween.kill()
+	var target_strength: float = 1.0 if value else 0.0
+	if immediate or not is_inside_tree() or not is_instance_valid(_focus_material):
+		_set_interaction_lock_strength(target_strength)
+		return
+	_interaction_lock_tween = create_tween()
+	_interaction_lock_tween.tween_method(
+		_set_interaction_lock_strength,
+		_interaction_lock_strength,
+		target_strength,
+		interaction_lock_fade_duration
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+func _set_interaction_lock_strength(value: float) -> void:
+	_interaction_lock_strength = clampf(value, 0.0, 1.0)
+	if is_instance_valid(_focus_material):
+		_focus_material.set_shader_parameter(&"interaction_lock_strength", _interaction_lock_strength)

@@ -27,18 +27,17 @@ const NIGHT_WINDOW_LIGHT := Color("3aa2e9")
 @export_node_path("AnimationPlayer") var wheel_animation_path: NodePath
 @export_node_path("CanvasItem") var cinematic_interior_shade_path: NodePath
 @export_node_path("Control") var radar_scan_effect_path: NodePath
-@export_node_path("CanvasItem") var radar_anomaly_glow_path: NodePath
 @export_node_path("Node") var dirty_seat_events_root_path: NodePath
+@export_category("Blocked Aisle Presentation")
+@export var blocked_grayscale_visual_group: StringName = &"blocked_carriage_visuals"
+@export_range(0.05, 0.8, 0.01) var blocked_grayscale_fade_seconds: float = 0.28
 @export var exterior_wipe_parameter: StringName = &"wipe_progress"
 @export var exterior_wipe_top_parameter: StringName = &"wipe_top_screen_y"
 @export var exterior_wipe_bottom_parameter: StringName = &"wipe_bottom_screen_y"
-@export var radar_scan_origin_parameter: StringName = &"scan_origin_uv"
 @export var radar_scan_progress_parameter: StringName = &"scan_progress"
 @export var radar_scan_aspect_parameter: StringName = &"scan_aspect"
-@export var radar_glow_aspect_parameter: StringName = &"glow_aspect"
+@export var radar_scan_band_width_parameter: StringName = &"band_width"
 @export_range(0.0, 2.0, 0.05) var cinematic_interior_fade_seconds: float = 0.45
-@export_range(0.0, 1.0, 0.05) var radar_glow_opacity: float = 1.0
-@export_range(0.05, 2.0, 0.05) var radar_glow_fade_seconds: float = 0.35
 @export_range(0.1, 8.0, 0.1) var wheel_full_speed_scale: float = 3.5
 @export_category("Door Animations")
 @export var door_reset_animation: StringName = &"RESET"
@@ -57,7 +56,6 @@ const NIGHT_WINDOW_LIGHT := Color("3aa2e9")
 @onready var _wheel_animation: AnimationPlayer = _get_optional_node(wheel_animation_path) as AnimationPlayer
 @onready var _cinematic_interior_shade: CanvasItem = _get_optional_node(cinematic_interior_shade_path) as CanvasItem
 @onready var _radar_scan_effect: Control = _get_optional_node(radar_scan_effect_path) as Control
-@onready var _radar_anomaly_glow: CanvasItem = _get_optional_node(radar_anomaly_glow_path) as CanvasItem
 @onready var _dirty_seat_events_root: Node = _get_optional_node(dirty_seat_events_root_path)
 
 var _window_lights: Array[Light2D] = []
@@ -65,17 +63,67 @@ var _window_flare_materials: Array[ShaderMaterial] = []
 var _exterior_wipe_material: ShaderMaterial
 var _cinematic_shade_tween: Tween
 var _radar_scan_tween: Tween
-var _radar_glow_tween: Tween
+var _blocked_grayscale_materials: Array[ShaderMaterial] = []
+var _blocked_grayscale_tween: Tween
+var _blocked_grayscale_strength: float = 0.0
 
 func _ready() -> void:
+	_prepare_blocked_grayscale_materials()
 	_prepare_exterior_wipe_material()
 	if is_instance_valid(_window_light_root):
 		_collect_window_lights(_window_light_root)
 	_validate_exterior_hierarchy()
 	_configure_dirty_seat_events(_dirty_seat_events_root)
 	_reset_radar_scan_effect()
-	_hide_radar_anomaly_glow()
 	end_exterior_mode()
+
+
+func set_blocked_by_aisle(value: bool, immediate: bool = false) -> void:
+	if is_instance_valid(_blocked_grayscale_tween):
+		_blocked_grayscale_tween.kill()
+	var target_strength: float = 1.0 if value else 0.0
+	if immediate or not is_inside_tree():
+		_set_blocked_grayscale_strength(target_strength)
+		return
+	_blocked_grayscale_tween = create_tween()
+	_blocked_grayscale_tween.tween_method(
+		_set_blocked_grayscale_strength,
+		_blocked_grayscale_strength,
+		target_strength,
+		blocked_grayscale_fade_seconds
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+func is_blocked_grayscale_active() -> bool:
+	return _blocked_grayscale_strength > 0.99
+
+
+func _prepare_blocked_grayscale_materials() -> void:
+	_blocked_grayscale_materials.clear()
+	var pending: Array[Node] = [self]
+	while not pending.is_empty():
+		var current: Node = pending.pop_back()
+		for child: Node in current.get_children():
+			pending.append(child)
+			if not child.is_in_group(blocked_grayscale_visual_group) or not child is CanvasItem:
+				continue
+			var visual := child as CanvasItem
+			var configured_material := visual.material as ShaderMaterial
+			if configured_material == null:
+				push_warning("%s grayscale visual %s requires a scene-authored ShaderMaterial." % [name, child.name])
+				continue
+			var local_material := configured_material.duplicate() as ShaderMaterial
+			local_material.resource_local_to_scene = true
+			visual.material = local_material
+			local_material.set_shader_parameter(&"grayscale_strength", 0.0)
+			_blocked_grayscale_materials.append(local_material)
+
+
+func _set_blocked_grayscale_strength(value: float) -> void:
+	_blocked_grayscale_strength = clampf(value, 0.0, 1.0)
+	for grayscale_material: ShaderMaterial in _blocked_grayscale_materials:
+		if is_instance_valid(grayscale_material):
+			grayscale_material.set_shader_parameter(&"grayscale_strength", _blocked_grayscale_strength)
 
 func set_environment(_scroll: float, night_strength: float, day_cycle_progress: float, sway_time: float) -> void:
 	if is_instance_valid(_night_overlay):
@@ -159,38 +207,6 @@ func set_motion_strength(value: float) -> void:
 		_wheel_animation.play(wheel_spin_animation)
 
 
-func show_radar_anomaly_glow(duration: float) -> void:
-	if not is_instance_valid(_radar_anomaly_glow):
-		return
-	var glow_material := _radar_anomaly_glow.material as ShaderMaterial
-	var glow_control := _radar_anomaly_glow as Control
-	if glow_material != null and glow_control != null and glow_control.size.y > 0.0:
-		glow_material.set_shader_parameter(
-			radar_glow_aspect_parameter,
-			glow_control.size.x / glow_control.size.y
-		)
-	if is_instance_valid(_radar_glow_tween):
-		_radar_glow_tween.kill()
-	_radar_anomaly_glow.modulate.a = 0.0
-	_radar_anomaly_glow.show()
-	var hold_seconds: float = maxf(0.0, duration - radar_glow_fade_seconds * 2.0)
-	_radar_glow_tween = create_tween()
-	_radar_glow_tween.tween_property(
-		_radar_anomaly_glow,
-		^"modulate:a",
-		radar_glow_opacity,
-		radar_glow_fade_seconds
-	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	_radar_glow_tween.tween_interval(hold_seconds)
-	_radar_glow_tween.tween_property(
-		_radar_anomaly_glow,
-		^"modulate:a",
-		0.0,
-		radar_glow_fade_seconds
-	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
-	_radar_glow_tween.tween_callback(_radar_anomaly_glow.hide)
-
-
 func has_radar_scan_effect() -> bool:
 	if not is_instance_valid(_radar_scan_effect):
 		return false
@@ -202,20 +218,12 @@ func has_radar_scan_effect() -> bool:
 	)
 
 
-func play_radar_scan(world_origin: Vector2, duration: float) -> void:
+func play_radar_scan(duration: float) -> void:
 	if not has_radar_scan_effect():
 		return
 	var shader_material := _radar_scan_effect.material as ShaderMaterial
 	if is_instance_valid(_radar_scan_tween):
 		_radar_scan_tween.kill()
-	var effect_local_origin: Vector2 = (
-		_radar_scan_effect.get_global_transform().affine_inverse() * world_origin
-	)
-	var origin_uv := Vector2(
-		clampf(effect_local_origin.x / _radar_scan_effect.size.x, 0.0, 1.0),
-		clampf(effect_local_origin.y / _radar_scan_effect.size.y, 0.0, 1.0)
-	)
-	shader_material.set_shader_parameter(radar_scan_origin_parameter, origin_uv)
 	shader_material.set_shader_parameter(
 		radar_scan_aspect_parameter,
 		_radar_scan_effect.size.x / _radar_scan_effect.size.y
@@ -228,12 +236,20 @@ func play_radar_scan(world_origin: Vector2, duration: float) -> void:
 		0.0,
 		1.0,
 		maxf(duration, 0.05)
-	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	var active_tween: Tween = _radar_scan_tween
-	await active_tween.finished
-	if _radar_scan_tween != active_tween:
-		return
-	_reset_radar_scan_effect()
+	)
+	_radar_scan_tween.tween_callback(_reset_radar_scan_effect)
+
+
+func get_radar_scan_crossing_progress(world_x: float) -> float:
+	if not has_radar_scan_effect():
+		return 1.0
+	var local_point: Vector2 = _radar_scan_effect.get_global_transform().affine_inverse() * Vector2(world_x, global_position.y)
+	var target_uv: float = clampf(local_point.x / _radar_scan_effect.size.x, 0.0, 1.0)
+	var material := _radar_scan_effect.material as ShaderMaterial
+	var band_width: float = 0.0
+	if material != null:
+		band_width = maxf(0.0, float(material.get_shader_parameter(radar_scan_band_width_parameter)))
+	return clampf((target_uv + band_width) / (1.0 + band_width * 2.0), 0.0, 1.0)
 
 func get_passenger_seat_slots() -> Array[Marker2D]:
 	return _get_marker_children(passenger_seat_slots_path)
@@ -289,13 +305,6 @@ func _reset_radar_scan_effect() -> void:
 	_set_radar_scan_progress(0.0)
 	if is_instance_valid(_radar_scan_effect):
 		_radar_scan_effect.hide()
-
-
-func _hide_radar_anomaly_glow() -> void:
-	if not is_instance_valid(_radar_anomaly_glow):
-		return
-	_radar_anomaly_glow.modulate.a = 0.0
-	_radar_anomaly_glow.hide()
 
 
 func _validate_exterior_hierarchy() -> void:

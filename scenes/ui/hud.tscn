@@ -1,60 +1,37 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene format=3 uid="uid://dk8ihi0buonf0"]
 
-[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1"]
-[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
-[ext_resource type="PackedScene" path="res://scenes/ui/train_minimap.tscn" id="3"]
-[ext_resource type="Texture2D" path="res://assets/ui/dialogue_bubble.png" id="4_dialogue_bubble"]
-[ext_resource type="Texture2D" path="res://assets/ui/dialogue_pointer.png" id="5_dialogue_pointer"]
-[ext_resource type="Texture2D" path="res://assets/ui/gerbong_active.png" id="6_carriage_active"]
-[ext_resource type="Texture2D" path="res://assets/ui/gerbong_nonactive.png" id="7_carriage_inactive"]
+[ext_resource type="Script" uid="uid://b3uclcl056y5l" path="res://scripts/ui/hud.gd" id="1"]
+[ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="2"]
+[ext_resource type="PackedScene" uid="uid://cxgfpcr3hg68b" path="res://scenes/ui/train_minimap.tscn" id="3"]
+[ext_resource type="Texture2D" uid="uid://cm00awa5lejd5" path="res://assets/ui/dialogue_bubble.png" id="4_dialogue_bubble"]
+[ext_resource type="Texture2D" uid="uid://cnxjqwj7xqhw8" path="res://assets/ui/dialogue_pointer.png" id="5_dialogue_pointer"]
+[ext_resource type="Texture2D" uid="uid://cy51u8nivsmgu" path="res://assets/ui/Clock/Group 78.png" id="7_cwdlq"]
+[ext_resource type="Texture2D" uid="uid://cvbygk5ecjcpy" path="res://assets/ui/Clock/Rectangle 168.png" id="8_o6xly"]
 [ext_resource type="PackedScene" path="res://scenes/ui/maintenance_tracker.tscn" id="8_tracker"]
-[ext_resource type="Texture2D" path="res://assets/ui/Clock/Background_Unfilled.png" id="9_clock_unfilled"]
-[ext_resource type="Texture2D" path="res://assets/ui/Clock/Background_Filled.png" id="10_clock_filled"]
-[ext_resource type="Texture2D" path="res://assets/ui/Clock/Clock_Pointer.png" id="11_clock_pointer"]
-[ext_resource type="Texture2D" path="res://assets/ui/Clock/Background2.png" id="12_clock_frame"]
-[ext_resource type="Texture2D" path="res://assets/ui/Clock/Clock_Sign.png" id="13_clock_sign"]
-[ext_resource type="Texture2D" path="res://assets/ui/Clock/Clock_DaySymbol.png" id="14_clock_day"]
-[ext_resource type="Texture2D" path="res://assets/ui/Clock/Clock_NightSymbol.png" id="15_clock_night"]
-[ext_resource type="Shader" path="res://shaders/clock_progress_fill.gdshader" id="16_clock_fill_shader"]
-[ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="17_clock_font"]
+[ext_resource type="Texture2D" uid="uid://c8y3exdjys06m" path="res://assets/ui/Clock/Background_Unfilled.png" id="9_clock_unfilled"]
+[ext_resource type="Texture2D" uid="uid://6c4pwd7p83gj" path="res://assets/ui/Clock/Background_Filled.png" id="10_clock_filled"]
+[ext_resource type="Texture2D" uid="uid://bcnypdn3pha20" path="res://assets/ui/Clock/Clock_Pointer.png" id="11_clock_pointer"]
+[ext_resource type="Texture2D" uid="uid://dq62suun5lmp4" path="res://assets/ui/Clock/Background2.png" id="12_clock_frame"]
+[ext_resource type="Texture2D" uid="uid://dsii3vbgdf437" path="res://assets/ui/Clock/Clock_DaySymbol.png" id="14_clock_day"]
+[ext_resource type="Texture2D" uid="uid://dlyishgw0i8u8" path="res://assets/ui/Clock/Clock_NightSymbol.png" id="15_clock_night"]
+[ext_resource type="Shader" uid="uid://ce1bimgy548dk" path="res://shaders/clock_progress_fill.gdshader" id="16_clock_fill_shader"]
+[ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="17_clock_font"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_clock_pole_left"]
+atlas = ExtResource("7_cwdlq")
+region = Rect2(0, 0, 22, 129)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_clock_pole_right"]
+atlas = ExtResource("7_cwdlq")
+region = Rect2(558, 0, 22, 129)
+filter_clip = true
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_clock_fill"]
 resource_local_to_scene = true
 shader = ExtResource("16_clock_fill_shader")
 shader_parameter/progress = 0.0
 shader_parameter/edge_softness = 0.003
-
-[sub_resource type="StyleBoxFlat" id="ClockStyle"]
-content_margin_left = 18.0
-content_margin_top = 14.0
-content_margin_right = 18.0
-content_margin_bottom = 14.0
-bg_color = Color(0.04, 0.05, 0.07, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.752941, 0.603922, 0.380392, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="NotificationStyle"]
-content_margin_left = 18.0
-content_margin_top = 14.0
-content_margin_right = 18.0
-content_margin_bottom = 14.0
-bg_color = Color(0.05, 0.07, 0.1, 0.96)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.843137, 0.690196, 0.419608, 1)
-corner_radius_top_left = 7
-corner_radius_top_right = 7
-corner_radius_bottom_right = 7
-corner_radius_bottom_left = 7
 
 [sub_resource type="StyleBoxFlat" id="GuidebookButtonNormal"]
 content_margin_left = 20.0
@@ -67,22 +44,6 @@ border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.752941, 0.603922, 0.380392, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="GuidebookButtonHover"]
-content_margin_left = 20.0
-content_margin_top = 12.0
-content_margin_right = 20.0
-content_margin_bottom = 12.0
-bg_color = Color(0.11, 0.16, 0.22, 0.96)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.933333, 0.827451, 0.607843, 1)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
@@ -104,17 +65,59 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="HUD" type="CanvasLayer"]
+[sub_resource type="StyleBoxFlat" id="GuidebookButtonHover"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+bg_color = Color(0.11, 0.16, 0.22, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.933333, 0.827451, 0.607843, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="ActionButtonDisabled"]
+content_margin_left = 20.0
+content_margin_top = 12.0
+content_margin_right = 20.0
+content_margin_bottom = 12.0
+bg_color = Color(0.105882, 0.109804, 0.117647, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.454902, 0.454902, 0.454902, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="NotificationStyle"]
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+bg_color = Color(0.05, 0.07, 0.1, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.843137, 0.690196, 0.419608, 1)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[node name="HUD" type="CanvasLayer" unique_id=83627724]
 layer = 10
 script = ExtResource("1")
-clock_template = "%02d:%02d %s"
-tool_status_template = "BLESSINGS %d\nAUDIT ×%d  •  SPEED LV.%d"
-radar_button_template = "ACTIVATE RADAR   [R]  ×%d"
-clock_degrees_per_stop = 45.0
-prompt_screen_offset = Vector2(0, 0)
-prompt_edge_margin = Vector2(24, 20)
 
-[node name="Root" type="Control" parent="."]
+[node name="Root" type="Control" parent="." unique_id=664657133]
 unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 15
@@ -125,7 +128,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme = ExtResource("2")
 
-[node name="MinimapAnchor" type="Control" parent="Root"]
+[node name="MinimapAnchor" type="Control" parent="Root" unique_id=1647348222]
 editor_description = "Independent top-right minimap anchor. Gameplay action buttons live elsewhere in the HUD and are unrelated to this node."
 layout_mode = 1
 anchors_preset = 1
@@ -137,17 +140,15 @@ offset_right = -24.0
 offset_bottom = 84.0
 grow_horizontal = 0
 
-[node name="TrainMinimap" parent="Root/MinimapAnchor" instance=ExtResource("3")]
+[node name="TrainMinimap" parent="Root/MinimapAnchor" unique_id=2026753613 instance=ExtResource("3")]
 unique_name_in_owner = true
 editor_description = "Scene-authored minimap size. Adjust Scale here to resize the complete minimap while preserving its internal layout."
 layout_mode = 0
 offset_right = 224.0
 offset_bottom = 50.0
 scale = Vector2(1.2, 1.2)
-active_carriage_texture = ExtResource("6_carriage_active")
-inactive_carriage_texture = ExtResource("7_carriage_inactive")
 
-[node name="ToolStatusLabel" type="Label" parent="Root"]
+[node name="ToolStatusLabel" type="Label" parent="Root" unique_id=1425442653]
 unique_name_in_owner = true
 editor_description = "Passive run status, independent from the minimap and side action buttons."
 layout_mode = 1
@@ -156,17 +157,17 @@ offset_top = 24.0
 offset_right = 260.0
 offset_bottom = 76.0
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.92)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.55)
+theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.92)
 theme_override_constants/line_spacing = 0
-theme_override_constants/outline_size = 4
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 2
+theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 14
 text = "BLESSINGS 0
 AUDIT ×0  •  SPEED LV.0"
 
-[node name="MaintenanceTrackers" type="Control" parent="Root"]
+[node name="MaintenanceTrackers" type="Control" parent="Root" unique_id=527339909]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -175,20 +176,23 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="TrackerPrimary" parent="Root/MaintenanceTrackers" instance=ExtResource("8_tracker")]
+[node name="TrackerPrimary" parent="Root/MaintenanceTrackers" unique_id=927069010 instance=ExtResource("8_tracker")]
+anchors_preset = 0
 
-[node name="TrackerSecondary" parent="Root/MaintenanceTrackers" instance=ExtResource("8_tracker")]
+[node name="TrackerSecondary" parent="Root/MaintenanceTrackers" unique_id=1907411717 instance=ExtResource("8_tracker")]
+anchors_preset = 0
 off_screen_lane_offset = 92.0
 
-[node name="FloatingPrompt" type="Control" parent="Root"]
+[node name="FloatingPrompt" type="Control" parent="Root" unique_id=266769048]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
+anchors_preset = 0
 offset_right = 180.0
 offset_bottom = 75.0
 mouse_filter = 2
 
-[node name="BubbleBackground" type="NinePatchRect" parent="Root/FloatingPrompt"]
+[node name="BubbleBackground" type="NinePatchRect" parent="Root/FloatingPrompt" unique_id=1692094871]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -196,14 +200,13 @@ anchor_bottom = 1.0
 offset_bottom = -27.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("4_dialogue_bubble")
 patch_margin_left = 24
 patch_margin_top = 20
 patch_margin_right = 24
 patch_margin_bottom = 20
 
-[node name="PromptLabel" type="Label" parent="Root/FloatingPrompt/BubbleBackground"]
+[node name="PromptLabel" type="Label" parent="Root/FloatingPrompt/BubbleBackground" unique_id=1220238962]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -216,17 +219,17 @@ offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.968627, 0.92549, 0.815686, 1)
-theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.95)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.72)
-theme_override_constants/outline_size = 4
+theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.95)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 3
+theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="DialoguePointer" type="TextureRect" parent="Root/FloatingPrompt"]
+[node name="DialoguePointer" type="TextureRect" parent="Root/FloatingPrompt" unique_id=2067216171]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 7
@@ -243,26 +246,110 @@ mouse_filter = 2
 texture = ExtResource("5_dialogue_pointer")
 expand_mode = 1
 
-[node name="ClockPanel" type="Control" parent="Root"]
+[node name="ClockPanel" type="Control" parent="Root" unique_id=735151017]
 unique_name_in_owner = true
-visible = false
+editor_description = "Scene-authored bottom-center clock. ClockSignAssembly controls the sign above; ClockFace controls the centered clock below."
 layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
+anchors_preset = 7
+anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -398.0
-offset_top = -358.0
-offset_right = -28.0
-offset_bottom = -28.0
-grow_horizontal = 0
+offset_left = -175.0
+offset_top = -300.0
+offset_right = 175.0
+grow_horizontal = 2
 grow_vertical = 0
-pivot_offset = Vector2(370, 346)
 scale = Vector2(0.666667, 0.666667)
+pivot_offset = Vector2(175, 300)
 mouse_filter = 2
 
-[node name="ClockUnfilled" type="TextureRect" parent="Root/ClockPanel"]
+[node name="ClockSignAssembly" type="Control" parent="Root/ClockPanel" unique_id=184474026]
+editor_description = "Station sign header. Its 350 px width matches ClockFace, keeping both elements centered."
+anchors_preset = 0
+offset_right = 350.0
+offset_bottom = 170.0
+mouse_filter = 2
+
+[node name="ClockSignPoles" type="Control" parent="Root/ClockPanel/ClockSignAssembly" unique_id=402474082]
+editor_description = "Two pole slices extend behind ClockFace so the station sign remains visibly attached."
+anchors_preset = 0
+offset_right = 350.0
+offset_bottom = 170.0
+mouse_filter = 2
+
+[node name="LeftPole" type="TextureRect" parent="Root/ClockPanel/ClockSignAssembly/ClockSignPoles" unique_id=140072059]
+layout_mode = 0
+offset_left = 68.0
+offset_top = 68.0
+offset_right = 83.0
+offset_bottom = 166.0
+mouse_filter = 2
+texture = SubResource("AtlasTexture_clock_pole_left")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightPole" type="TextureRect" parent="Root/ClockPanel/ClockSignAssembly/ClockSignPoles" unique_id=1308288395]
+layout_mode = 0
+offset_left = 267.0
+offset_top = 68.0
+offset_right = 282.0
+offset_bottom = 166.0
+mouse_filter = 2
+texture = SubResource("AtlasTexture_clock_pole_right")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ClockSign" type="TextureRect" parent="Root/ClockPanel/ClockSignAssembly" unique_id=391894367]
+layout_mode = 0
+offset_left = 3.5
+offset_right = 346.5
+offset_bottom = 76.50012
+mouse_filter = 2
+texture = ExtResource("8_o6xly")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NextStopTitle" type="Label" parent="Root/ClockPanel/ClockSignAssembly" unique_id=2074554735]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 25.0
+offset_top = 9.0
+offset_right = 325.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(0.305882, 0.258824, 0.25098, 1)
+theme_override_fonts/font = ExtResource("17_clock_font")
+theme_override_font_sizes/font_size = 19
+text = "NEXT STOP"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NextStopLabel" type="Label" parent="Root/ClockPanel/ClockSignAssembly" unique_id=896761359]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 14.0
+offset_top = 32.0
+offset_right = 336.0
+offset_bottom = 73.0
+theme_override_colors/font_color = Color(0.94, 0.94, 0.94, 1)
+theme_override_colors/font_outline_color = Color(0.22, 0.18, 0.17, 0.28)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("17_clock_font")
+theme_override_font_sizes/font_size = 27
+text = "BRAMBLEFORD"
+horizontal_alignment = 1
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="ClockFace" type="Control" parent="Root/ClockPanel" unique_id=2018867802]
+editor_description = "Centered clock face. Move this node to adjust the clock without disturbing the station sign."
+anchors_preset = 0
+offset_top = 120.5
+offset_right = 350.0
+offset_bottom = 299.5
+mouse_filter = 2
+
+[node name="ClockUnfilled" type="TextureRect" parent="Root/ClockPanel/ClockFace" unique_id=1921644227]
 layout_mode = 0
 offset_right = 350.0
 offset_bottom = 179.0
@@ -270,7 +357,7 @@ mouse_filter = 2
 texture = ExtResource("9_clock_unfilled")
 expand_mode = 1
 
-[node name="ClockFilled" type="TextureRect" parent="Root/ClockPanel"]
+[node name="ClockFilled" type="TextureRect" parent="Root/ClockPanel/ClockFace" unique_id=652018143]
 unique_name_in_owner = true
 material = SubResource("ShaderMaterial_clock_fill")
 layout_mode = 0
@@ -282,7 +369,7 @@ mouse_filter = 2
 texture = ExtResource("10_clock_filled")
 expand_mode = 1
 
-[node name="ClockPointer" type="TextureRect" parent="Root/ClockPanel"]
+[node name="ClockPointer" type="TextureRect" parent="Root/ClockPanel/ClockFace" unique_id=1810178768]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 18.85
@@ -295,7 +382,7 @@ mouse_filter = 2
 texture = ExtResource("11_clock_pointer")
 expand_mode = 1
 
-[node name="ClockFrame" type="TextureRect" parent="Root/ClockPanel"]
+[node name="ClockFrame" type="TextureRect" parent="Root/ClockPanel/ClockFace" unique_id=1713978416]
 layout_mode = 0
 offset_right = 350.0
 offset_bottom = 346.0
@@ -303,51 +390,9 @@ mouse_filter = 2
 texture = ExtResource("12_clock_frame")
 expand_mode = 1
 
-[node name="ClockSign" type="TextureRect" parent="Root/ClockPanel"]
-layout_mode = 0
-offset_left = 4.0
-offset_top = 179.0
-offset_right = 347.0
-offset_bottom = 313.0
-mouse_filter = 2
-texture = ExtResource("13_clock_sign")
-expand_mode = 1
-
-[node name="NextStopTitle" type="Label" parent="Root/ClockPanel"]
-layout_mode = 0
-offset_left = 25.0
-offset_top = 228.0
-offset_right = 326.0
-offset_bottom = 254.0
-mouse_filter = 2
-theme_override_colors/font_color = Color(0.305882, 0.258824, 0.25098, 1)
-theme_override_fonts/font = ExtResource("17_clock_font")
-theme_override_font_sizes/font_size = 19
-text = "NEXT STOP"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="NextStopLabel" type="Label" parent="Root/ClockPanel"]
+[node name="ClockSymbolPivot" type="Control" parent="Root/ClockPanel/ClockFace" unique_id=1736318714]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 14.0
-offset_top = 256.0
-offset_right = 337.0
-offset_bottom = 302.0
-mouse_filter = 2
-theme_override_colors/font_color = Color(0.94, 0.94, 0.94, 1)
-theme_override_colors/font_outline_color = Color(0.22, 0.18, 0.17, 0.28)
-theme_override_constants/outline_size = 2
-theme_override_fonts/font = ExtResource("17_clock_font")
-theme_override_font_sizes/font_size = 27
-text = "BRAMBLEFORD"
-horizontal_alignment = 1
-vertical_alignment = 1
-text_overrun_behavior = 3
-
-[node name="ClockSymbolPivot" type="Control" parent="Root/ClockPanel"]
-unique_name_in_owner = true
-layout_mode = 0
+anchors_preset = 0
 offset_left = 273.0
 offset_top = -15.0
 offset_right = 368.0
@@ -355,7 +400,7 @@ offset_bottom = 80.0
 pivot_offset = Vector2(47.5, 47.5)
 mouse_filter = 2
 
-[node name="DaySymbol" type="TextureRect" parent="Root/ClockPanel/ClockSymbolPivot"]
+[node name="DaySymbol" type="TextureRect" parent="Root/ClockPanel/ClockFace/ClockSymbolPivot" unique_id=1300180946]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -367,7 +412,7 @@ mouse_filter = 2
 texture = ExtResource("14_clock_day")
 expand_mode = 1
 
-[node name="NightSymbol" type="TextureRect" parent="Root/ClockPanel/ClockSymbolPivot"]
+[node name="NightSymbol" type="TextureRect" parent="Root/ClockPanel/ClockFace/ClockSymbolPivot" unique_id=1397011548]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
@@ -380,32 +425,37 @@ mouse_filter = 2
 texture = ExtResource("15_clock_night")
 expand_mode = 1
 
-[node name="GuidebookButton" type="Button" parent="Root"]
+[node name="GuidebookButton" type="Button" parent="Root" unique_id=1411831653]
 unique_name_in_owner = true
 editor_description = "Left-side guidebook action. Position, size, copy, and styling are scene-authored and can be adjusted here."
 layout_mode = 1
+anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = 28.0
 offset_top = -29.0
 offset_right = 248.0
 offset_bottom = 29.0
-mouse_default_cursor_shape = 2
+grow_vertical = 2
+tooltip_text = "Open the conductor's guidebook"
 focus_mode = 0
+mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_colors/font_hover_color = Color(1, 0.956863, 0.827451, 1)
 theme_override_colors/font_pressed_color = Color(0.843137, 0.690196, 0.419608, 1)
+theme_override_colors/font_hover_color = Color(1, 0.956863, 0.827451, 1)
+theme_override_colors/font_disabled_color = Color(0.670588, 0.670588, 0.670588, 1)
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("GuidebookButtonNormal")
-theme_override_styles/hover = SubResource("GuidebookButtonHover")
 theme_override_styles/pressed = SubResource("GuidebookButtonPressed")
+theme_override_styles/hover = SubResource("GuidebookButtonHover")
+theme_override_styles/disabled = SubResource("ActionButtonDisabled")
 text = "GUIDEBOOK   [TAB]"
-tooltip_text = "Open the conductor's guidebook"
 
-[node name="RadarButton" type="Button" parent="Root"]
+[node name="RadarButton" type="Button" parent="Root" unique_id=1059361648]
 unique_name_in_owner = true
 editor_description = "Independent right-side radar action. This button mirrors the R keyboard shortcut and shows the remaining charge count."
 layout_mode = 1
+anchors_preset = 6
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -415,24 +465,27 @@ offset_top = -29.0
 offset_right = -28.0
 offset_bottom = 29.0
 grow_horizontal = 0
-mouse_default_cursor_shape = 2
+grow_vertical = 2
+tooltip_text = "Scan the current passenger coach"
 focus_mode = 0
+mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_colors/font_hover_color = Color(1, 0.956863, 0.827451, 1)
 theme_override_colors/font_pressed_color = Color(0.843137, 0.690196, 0.419608, 1)
+theme_override_colors/font_hover_color = Color(1, 0.956863, 0.827451, 1)
+theme_override_colors/font_disabled_color = Color(0.670588, 0.670588, 0.670588, 1)
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("GuidebookButtonNormal")
-theme_override_styles/hover = SubResource("GuidebookButtonHover")
 theme_override_styles/pressed = SubResource("GuidebookButtonPressed")
+theme_override_styles/hover = SubResource("GuidebookButtonHover")
+theme_override_styles/disabled = SubResource("ActionButtonDisabled")
 text = "ACTIVATE RADAR   [R]  ×0"
-tooltip_text = "Scan the current passenger coach"
 
-[node name="NotificationPanel" type="PanelContainer" parent="Root"]
+[node name="NotificationPanel" type="PanelContainer" parent="Root" unique_id=1320290712]
 unique_name_in_owner = true
 visible = false
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
-anchors_preset = 10
+anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -245.0
@@ -442,7 +495,7 @@ offset_bottom = 112.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("NotificationStyle")
 
-[node name="NotificationLabel" type="Label" parent="Root/NotificationPanel"]
+[node name="NotificationLabel" type="Label" parent="Root/NotificationPanel" unique_id=2128017887]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)

@@ -4,7 +4,8 @@ extends Resource
 
 @export_category("Passenger Flow")
 @export_range(1, 40, 1) var total_passenger_count: int = 17
-@export_range(1, 20, 1) var initial_passenger_count: int = 10
+@export_range(1, 20, 1) var initial_passenger_count: int = 8
+@export_range(1, 40, 1) var maximum_onboard_passenger_count: int = 12
 @export_range(1, 4, 1) var deceased_passenger_count: int = 4
 @export_range(0, 4, 1) var minimum_initial_deceased: int = 1
 @export_range(1, 8, 1) var passenger_carriage_count: int = 4

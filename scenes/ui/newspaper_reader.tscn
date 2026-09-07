@@ -332,17 +332,41 @@ text = "Records show the victim boarded at Asterfall and worked as a tailor. Inv
 Edition printed before the afternoon service departed."
 
 [node name="CloseButton" type="Button" parent="Type1" unique_id=1061282681]
+editor_description = "Scene-authored newspaper close text. Position, size, and Josefin typography are editable here."
+z_index = 10
 layout_mode = 0
-offset_left = 916.6666
-offset_top = 721.6667
-offset_right = 1146.6666
-offset_bottom = 769.6667
+offset_left = 901.8571
+offset_top = -68.42859
+offset_right = 953.8571
+offset_bottom = -16.428589
+scale = Vector2(3, 3)
+tooltip_text = "Close newspaper [E]"
+focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.890196, 0.839216, 0.760784, 1)
-theme_override_colors/font_hover_color = Color(1, 0.945098, 0.85098, 1)
-theme_override_font_sizes/font_size = 16
-text = "CLOSE  [E / ESC]"
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0.65098, 0.223529, 0.176471, 1)
+theme_override_colors/font_hover_color = Color(0.65098, 0.223529, 0.176471, 1)
+theme_override_fonts/font = ExtResource("3_15k6j")
+theme_override_font_sizes/font_size = 30
+text = "X"
 flat = true
+
+[node name="CloseHint" type="Label" parent="Type1" unique_id=1359203138]
+editor_description = "Scene-authored keyboard hint below newspaper type 1."
+z_index = 10
+layout_mode = 0
+offset_left = 296.0
+offset_top = 696.0
+offset_right = 697.0
+offset_bottom = 730.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0.05, 0.035, 0.03, 0.85)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("3_15k6j")
+theme_override_font_sizes/font_size = 18
+text = "PRESS [E] TO CLOSE"
+horizontal_alignment = 1
 
 [node name="NewspaperPicture" type="Control" parent="Type1" unique_id=622688642]
 clip_contents = true
@@ -515,17 +539,40 @@ text = "Records show the victim traveled from Asterfall and was employed as a ta
 Edition printed before the afternoon service departed."
 
 [node name="CloseButton" type="Button" parent="Type2" unique_id=611735791]
+editor_description = "Scene-authored newspaper close text. Position, size, and Josefin typography are editable here."
+z_index = 10
 layout_mode = 0
-offset_left = 916.6666
-offset_top = 721.6666
-offset_right = 1146.6665
-offset_bottom = 769.6666
+offset_left = 906.0
+offset_top = 48.0
+offset_right = 958.0
+offset_bottom = 100.0
+tooltip_text = "Close newspaper [E]"
+focus_mode = 0
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.27451, 0.223529, 0.196078, 1)
-theme_override_colors/font_hover_color = Color(0.109804, 0.0862745, 0.0745098, 1)
-theme_override_font_sizes/font_size = 16
-text = "CLOSE  [E / ESC]"
+theme_override_colors/font_pressed_color = Color(0.65098, 0.223529, 0.176471, 1)
+theme_override_colors/font_hover_color = Color(0.65098, 0.223529, 0.176471, 1)
+theme_override_fonts/font = ExtResource("3_15k6j")
+theme_override_font_sizes/font_size = 30
+text = "X"
 flat = true
+
+[node name="CloseHint" type="Label" parent="Type2" unique_id=1528259364]
+editor_description = "Scene-authored keyboard hint below newspaper type 2."
+z_index = 10
+layout_mode = 0
+offset_left = 296.0
+offset_top = 696.0
+offset_right = 697.0
+offset_bottom = 730.0
+theme_override_colors/font_color = Color(0.890196, 0.839216, 0.760784, 1)
+theme_override_colors/font_shadow_color = Color(0.05, 0.035, 0.03, 0.85)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("3_15k6j")
+theme_override_font_sizes/font_size = 18
+text = "PRESS [E] TO CLOSE"
+horizontal_alignment = 1
 
 [node name="NewspaperPicture" type="Control" parent="Type2" unique_id=1096322499]
 anchors_preset = 0

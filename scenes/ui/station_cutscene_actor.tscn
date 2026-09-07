@@ -3,6 +3,7 @@
 [ext_resource type="ShaderMaterial" path="res://resources/materials/character_reference_cutout.tres" id="1_cutout"]
 
 [node name="StationCutsceneActor" type="Node2D"]
+editor_description = "Scene-authored platform actor. Boarding hands off to the real Passenger node when this visual crosses the open doorway."
 visible = false
 
 [node name="Shadow" type="Polygon2D" parent="."]

@@ -1,55 +1,54 @@
 shader_type canvas_item;
 render_mode unshaded, blend_add;
 
-// One-shot, scene-bounded radar wave. The controlling script only supplies
-// the player's local origin and animates scan_progress; all visual tuning lives
-// in the ShaderMaterial assigned to RadarScanEffect.
-uniform vec2 scan_origin_uv = vec2(0.5, 0.72);
+// Scene-bounded inspection grid. The scan passes across one passenger coach;
+// every visual property remains editable from its ShaderMaterial resource.
 uniform float scan_progress : hint_range(0.0, 1.0) = 0.0;
 uniform float scan_aspect : hint_range(0.25, 8.0) = 2.85;
-uniform float ring_width : hint_range(0.002, 0.12, 0.001) = 0.009;
-uniform float ring_feather : hint_range(0.001, 0.08, 0.001) = 0.007;
-uniform float echo_gap : hint_range(0.01, 0.5, 0.005) = 0.095;
-uniform float echo_width_scale : hint_range(0.25, 2.0, 0.05) = 0.72;
-uniform float echo_strength : hint_range(0.0, 1.0, 0.01) = 0.20;
-uniform float source_radius : hint_range(0.005, 0.2, 0.005) = 0.04;
-uniform float source_strength : hint_range(0.0, 1.0, 0.01) = 0.18;
-uniform vec4 ring_color : source_color = vec4(0.20, 0.91, 1.0, 0.86);
-uniform vec4 echo_color : source_color = vec4(0.05, 0.42, 0.72, 0.32);
+uniform float band_width : hint_range(0.04, 0.5, 0.01) = 0.24;
+uniform float grid_density : hint_range(3.0, 32.0, 1.0) = 11.0;
+uniform float grid_line_width : hint_range(0.005, 0.15, 0.005) = 0.035;
+uniform float grid_feather : hint_range(0.001, 0.08, 0.001) = 0.018;
+uniform float edge_width : hint_range(0.002, 0.08, 0.002) = 0.004;
+uniform float edge_glow_width : hint_range(0.005, 0.2, 0.005) = 0.022;
+uniform float fill_strength : hint_range(0.0, 0.5, 0.01) = 0.04;
+uniform float trail_falloff : hint_range(0.25, 6.0, 0.05) = 2.25;
+uniform float warp_strength : hint_range(0.0, 0.08, 0.002) = 0.012;
+uniform vec4 grid_color : source_color = vec4(0.30, 0.94, 1.0, 0.58);
+uniform vec4 edge_color : source_color = vec4(0.25, 0.92, 1.0, 0.78);
 
-float soft_ring(float distance_from_origin, float radius, float width, float feather) {
-	return 1.0 - smoothstep(width, width + feather, abs(distance_from_origin - radius));
+
+float grid_axis(float coordinate) {
+	float distance_to_line = min(fract(coordinate), 1.0 - fract(coordinate));
+	return 1.0 - smoothstep(grid_line_width, grid_line_width + grid_feather, distance_to_line);
 }
 
+
 void fragment() {
-	vec2 aspect = vec2(scan_aspect, 1.0);
-	vec2 origin = scan_origin_uv * aspect;
-	float distance_from_origin = length(UV * aspect - origin);
+	float lifecycle = smoothstep(0.0, 0.025, scan_progress)
+		* (1.0 - smoothstep(0.975, 1.0, scan_progress));
+	float scan_x = mix(-band_width, 1.0 + band_width, scan_progress);
+	float distance_behind = scan_x - UV.x;
+	float inside_band = step(0.0, distance_behind) * step(distance_behind, band_width);
+	float trail = pow(clamp(1.0 - distance_behind / max(band_width, 0.001), 0.0, 1.0), trail_falloff);
 
-	// Normalize the animation against the farthest corner. Progress 1.0 always
-	// carries the ring outside this coach, regardless of where the player stands.
-	float farthest_corner = max(
-		max(length(origin), length(vec2(scan_aspect, 0.0) - origin)),
-		max(length(vec2(0.0, 1.0) - origin), length(aspect - origin))
+	// A slight wave keeps the projected mesh from looking like a flat UI table.
+	vec2 warped_uv = UV;
+	warped_uv.x += sin(UV.y * 18.0 + scan_progress * 8.0) * warp_strength;
+	warped_uv.y += sin(UV.x * 15.0 - scan_progress * 6.0) * warp_strength * 0.55;
+	vec2 square_grid = vec2(warped_uv.x * scan_aspect, warped_uv.y) * grid_density;
+	float grid = max(grid_axis(square_grid.x), grid_axis(square_grid.y));
+
+	float leading_edge = 1.0 - smoothstep(edge_width, edge_width + edge_glow_width, abs(UV.x - scan_x));
+	float band_alpha = inside_band * lifecycle;
+	float grid_alpha = grid * band_alpha * mix(0.34, 1.0, trail);
+	float fill_alpha = band_alpha * fill_strength * mix(0.35, 1.0, trail);
+	float edge_alpha = leading_edge * lifecycle;
+	vec3 color = grid_color.rgb * (grid_alpha + fill_alpha) + edge_color.rgb * edge_alpha * edge_color.a;
+	float alpha = clamp(
+		grid_alpha * grid_color.a + fill_alpha + edge_alpha * edge_color.a,
+		0.0,
+		1.0
 	);
-	float radius = scan_progress * farthest_corner;
-	float lifecycle = smoothstep(0.0, 0.035, scan_progress)
-		* (1.0 - smoothstep(0.93, 1.0, scan_progress));
-	float primary = soft_ring(distance_from_origin, radius, ring_width, ring_feather) * lifecycle;
-
-	float echo_radius = max(radius - echo_gap, 0.0);
-	float echo_ready = smoothstep(echo_gap, echo_gap + ring_feather, radius);
-	float echo = soft_ring(
-		distance_from_origin,
-		echo_radius,
-		ring_width * echo_width_scale,
-		ring_feather
-	) * echo_ready * lifecycle * echo_strength;
-
-	float source = (1.0 - smoothstep(source_radius, source_radius + ring_feather, distance_from_origin))
-		* (1.0 - smoothstep(0.12, 0.38, scan_progress))
-		* source_strength;
-	float alpha = clamp(primary * ring_color.a + echo * echo_color.a + source * ring_color.a, 0.0, 1.0);
-	vec3 color = ring_color.rgb * (primary + source) + echo_color.rgb * echo;
 	COLOR = vec4(color, alpha);
 }

@@ -22,6 +22,9 @@ static func generate(
 	if scheduled_count < config.initial_passenger_count:
 		push_error("Total passenger count cannot be lower than the initial onboard count.")
 		return generated_manifest
+	if config.initial_passenger_count > config.maximum_onboard_passenger_count:
+		push_error("Initial passenger count cannot exceed maximum onboard capacity.")
+		return generated_manifest
 	if intermediate_stop_count == 0 and scheduled_count != config.initial_passenger_count:
 		push_error("A route without intermediate stations cannot schedule later boarders.")
 		return generated_manifest

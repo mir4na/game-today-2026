@@ -2,6 +2,8 @@ class_name StationCinematicView
 extends Node2D
 ## Owns the temporary wide station framing without changing the gameplay camera setup.
 
+signal camera_handoff_finished
+
 @export_category("Arrival Framing")
 @export_range(0.1, 4.0, 0.05) var zoom_out_start_seconds: float = 0.65
 @export_range(0.0, 2.0, 0.05) var full_frame_lead_seconds: float = 0.35
@@ -23,6 +25,7 @@ var _arrival_start_center: Vector2
 var _arrival_start_zoom: Vector2
 var _active: bool = false
 var _returning: bool = false
+var _camera_handed_off: bool = false
 var _return_tween: Tween
 
 @onready var _station_backdrop: Node2D = %StationBackdrop
@@ -70,6 +73,7 @@ func begin(source_camera: Camera2D, station_name: String) -> void:
 	_station_sign.modulate.a = 1.0
 	_station_sign_layer.show()
 	_returning = false
+	_camera_handed_off = false
 	_active = true
 	_station_camera.enabled = true
 	_source_camera.enabled = false
@@ -95,25 +99,31 @@ func return_to_gameplay() -> void:
 	_return_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	_return_tween.tween_property(_station_camera, "global_position", _gameplay_center, return_duration)
 	_return_tween.tween_property(_station_camera, "zoom", _gameplay_zoom, return_duration)
-	_return_tween.chain().tween_callback(_restore_gameplay_camera)
+	_return_tween.chain().tween_callback(_handoff_to_gameplay_camera)
 
 
 func finish() -> void:
 	if _return_tween and _return_tween.is_valid():
 		_return_tween.kill()
-	_restore_gameplay_camera()
-
-
-func _restore_gameplay_camera() -> void:
-	if is_instance_valid(_source_camera):
-		_source_camera.enabled = true
-		_source_camera.reset_smoothing()
-	_station_camera.enabled = false
+	_handoff_to_gameplay_camera()
 	_station_backdrop.hide()
 	_station_sign_layer.hide()
 	_station_backdrop.modulate.a = 1.0
 	_active = false
 	_returning = false
+	_camera_handed_off = false
+
+
+func _handoff_to_gameplay_camera() -> void:
+	if _camera_handed_off:
+		return
+	_camera_handed_off = true
+	if is_instance_valid(_source_camera):
+		_source_camera.enabled = true
+		_source_camera.reset_smoothing()
+	_station_camera.enabled = false
+	_returning = false
+	camera_handoff_finished.emit()
 
 
 func _smoothstep(value: float) -> float:

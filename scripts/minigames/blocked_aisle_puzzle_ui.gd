@@ -25,14 +25,16 @@ signal completed(event: Node)
 @export_range(0.05, 0.4, 0.01) var valid_snap_duration: float = 0.16
 @export_range(0.1, 0.6, 0.01) var invalid_return_duration: float = 0.28
 @export_range(0.2, 1.2, 0.05) var completion_hold_seconds: float = 0.65
+@export_category("Scene Preview Colors")
+@export var valid_drop_preview_color: Color = Color(0.59, 1.0, 0.77, 1.0)
+@export var invalid_drop_preview_color: Color = Color(1.0, 0.5, 0.51, 1.0)
 
 @onready var _shelf: Control = %Shelf
 @onready var _target_board: Control = %TargetBoard
 @onready var _pieces_root: Control = %Pieces
 @onready var _shade: ColorRect = $Shade
 @onready var _puzzle_window: Control = %PuzzleWindow
-@onready var _title: Label = $PuzzleWindow/Title
-@onready var _description: Label = $PuzzleWindow/Description
+@onready var _instruction_copy: Control = %InstructionCopy
 
 var _active_event: Node
 var _pieces: Array[Control] = []
@@ -48,16 +50,12 @@ var _piece_motion_tweens: Dictionary = {}
 var _open_tween: Tween
 var _completion_tween: Tween
 var _window_rest_modulate: Color
-var _title_default_text: String
-var _description_default_text: String
 var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
 	_rng.randomize()
 	_window_rest_modulate = _puzzle_window.modulate
-	_title_default_text = _title.text
-	_description_default_text = _description.text
 	_puzzle_window.pivot_offset = _puzzle_window.size * 0.5
 	_target_board.pivot_offset = _target_board.size * 0.5
 	_reset_board_preview()
@@ -74,8 +72,7 @@ func _process(delta: float) -> void:
 
 
 func open_puzzle(event: Node) -> void:
-	_title.text = _title_default_text
-	_description.text = _description_default_text
+	_instruction_copy.show()
 	_target_board.scale = Vector2.ONE
 	_reset_board_preview()
 	if event != _active_event:
@@ -391,8 +388,7 @@ func _check_completion() -> void:
 		return
 	_completed = true
 	_reset_board_preview()
-	_title.text = "Aisle cleared!"
-	_description.text = "Everything fits. The coach connector is open."
+	_instruction_copy.hide()
 	for piece_index: int in range(_pieces.size()):
 		var piece: Control = _pieces[piece_index]
 		piece.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -434,7 +430,7 @@ func _update_drop_preview(piece: Control, intended_global_position: Vector2) -> 
 	var origin := Vector2i(roundi(relative.x / cell_size), roundi(relative.y / cell_size))
 	var cell_offsets: Array[Vector2i] = _get_piece_cell_offsets(piece)
 	var valid: bool = _can_place_cells(origin, cell_offsets, _occupied_cells, grid_columns, grid_rows)
-	var preview_color := Color(0.72, 1.22, 0.78, 1.0) if valid else Color(1.28, 0.62, 0.62, 1.0)
+	var preview_color: Color = valid_drop_preview_color if valid else invalid_drop_preview_color
 	for offset: Vector2i in cell_offsets:
 		var cell: Vector2i = origin + offset
 		if cell.x < 0 or cell.y < 0 or cell.x >= grid_columns or cell.y >= grid_rows:
@@ -443,6 +439,7 @@ func _update_drop_preview(piece: Control, intended_global_position: Vector2) -> 
 		if block_index >= 0 and block_index < _target_board.get_child_count():
 			var block := _target_board.get_child(block_index) as CanvasItem
 			if is_instance_valid(block):
+				block.show()
 				block.self_modulate = preview_color
 
 
@@ -451,7 +448,9 @@ func _reset_board_preview() -> void:
 		return
 	for child: Node in _target_board.get_children():
 		if child is CanvasItem:
-			(child as CanvasItem).self_modulate = Color.WHITE
+			var preview := child as CanvasItem
+			preview.hide()
+			preview.self_modulate = Color.WHITE
 
 
 func _animate_piece_to_global_position(piece: Control, target: Vector2, duration: float, overshoot: bool) -> void:

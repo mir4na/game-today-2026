@@ -40,7 +40,7 @@ signal radar_requested
 @onready var _clock_panel: Control = %ClockPanel
 @onready var _clock_fill: TextureRect = %ClockFilled
 @onready var _clock_pointer: TextureRect = %ClockPointer
-@onready var _next_stop_title: Label = $Root/ClockPanel/NextStopTitle
+@onready var _next_stop_title: Label = %NextStopTitle
 @onready var _next_stop_label: Label = %NextStopLabel
 @onready var _clock_symbol_pivot: Control = %ClockSymbolPivot
 @onready var _day_symbol: TextureRect = %DaySymbol
@@ -51,6 +51,7 @@ signal radar_requested
 @onready var _notification_panel: PanelContainer = %NotificationPanel
 @onready var _notification_label: Label = %NotificationLabel
 @onready var _tool_status_label: Label = %ToolStatusLabel
+@onready var _guidebook_button: Button = %GuidebookButton
 @onready var _radar_button: Button = %RadarButton
 @onready var _maintenance_trackers: Array[Control] = [
 	$Root/MaintenanceTrackers/TrackerPrimary,
@@ -67,6 +68,8 @@ var _clock_symbol_tween: Tween
 var _clock_progress_tween: Tween
 var _clock_progress: float = 0.0
 var _clock_target_progress: float = -1.0
+var _service_sealed: bool = false
+var _radar_active: bool = false
 
 const CLOCK_FILL_ARC_DEGREES: float = 180.0
 
@@ -390,8 +393,19 @@ func set_cutscene_hidden(value: bool) -> void:
 
 
 func set_radar_active(value: bool) -> void:
-	_radar_button.disabled = value
+	_radar_active = value
+	_update_action_button_locks()
 	_radar_button.tooltip_text = "Radar scan in progress" if value else "Scan the current passenger coach"
+
+
+func set_service_sealed(value: bool) -> void:
+	_service_sealed = value
+	_update_action_button_locks()
+
+
+func _update_action_button_locks() -> void:
+	_guidebook_button.disabled = _service_sealed
+	_radar_button.disabled = _service_sealed or _radar_active
 
 
 func _on_guidebook_button_pressed() -> void:

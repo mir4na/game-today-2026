@@ -13,7 +13,7 @@
 [ext_resource type="PackedScene" path="res://scenes/train/train_interior_lighting.tscn" id="10_lighting"]
 [ext_resource type="PackedScene" uid="uid://buwn8armxkqjw" path="res://scenes/train/passenger_seat.tscn" id="11_seat"]
 [ext_resource type="Material" uid="uid://bbm87kup81qnp" path="res://resources/materials/radar_carriage_scan.tres" id="12_radar_scan"]
-[ext_resource type="Material" path="res://resources/materials/radar_anomaly_glow.tres" id="13_radar_glow"]
+[ext_resource type="Material" path="res://resources/materials/blocked_carriage_grayscale.tres" id="14_blocked_grayscale"]
 
 [sub_resource type="Gradient" id="Gradient_e78od"]
 offsets = PackedFloat32Array(0, 0.61778843, 1)
@@ -325,8 +325,8 @@ exterior_wipe_visual_paths = Array[NodePath]([NodePath("ArtRoot/Exterior/Exterio
 door_animation_path = NodePath("ArtRoot/Exterior/DoorAnimation")
 wheel_animation_path = NodePath("ArtRoot/Wheels/WheelAnimation")
 radar_scan_effect_path = NodePath("ArtRoot/RadarEffectBounds/RadarScanEffect")
-radar_anomaly_glow_path = NodePath("ArtRoot/RadarEffectBounds/RadarAnomalyGlow")
 dirty_seat_events_root_path = NodePath("PassengerLayout/PassengerSeatSlots")
+blocked_grayscale_visual_group = &"blocked_carriage_visuals"
 
 [node name="PassengerLayout" type="Node2D" parent="." unique_id=1260823063]
 editor_description = "Shared passenger ground baseline. Move this node vertically in the Inspector to align every seat, activity, and boarding position without changing the train floor."
@@ -397,8 +397,12 @@ position = Vector2(446, 0)
 [node name="DoorRight" type="Marker2D" parent="PassengerLayout/PassengerDoorSlots" unique_id=1253140837]
 position = Vector2(514, 0)
 
-[node name="ArtRoot" type="Node2D" parent="." unique_id=1724717493]
+[node name="ArtRoot" type="CanvasGroup" parent="." unique_id=1724717493 groups=["blocked_carriage_visuals"]]
 unique_name_in_owner = true
+editor_description = "Complete carriage artwork group. Its scene-authored grayscale material is used only when a blocked connector separates this coach from the player."
+material = ExtResource("14_blocked_grayscale")
+fit_margin = 8.0
+clear_margin = 8.0
 
 [node name="Interior" type="Node2D" parent="ArtRoot" unique_id=2101017426]
 unique_name_in_owner = true
@@ -470,7 +474,7 @@ scale = Vector2(0.374415, 0.374415)
 texture = ExtResource("2")
 centered = false
 
-[node name="InteriorLighting" parent="ArtRoot" unique_id=1422164408 instance=ExtResource("10_lighting")]
+[node name="InteriorLighting" parent="." unique_id=1422164408 instance=ExtResource("10_lighting")]
 
 [node name="RadarEffectBounds" type="Control" parent="ArtRoot" unique_id=545678927]
 editor_description = "Scene-authored clipping area for all radar visuals. Resize this rectangle to the visible passenger interior; child effects never draw outside it."
@@ -483,26 +487,18 @@ offset_right = 960.0
 offset_bottom = 525.0
 mouse_filter = 2
 
-[node name="RadarAnomalyGlow" type="ColorRect" parent="ArtRoot/RadarEffectBounds" unique_id=648864988]
-visible = false
-modulate = Color(1, 1, 1, 0)
-material = ExtResource("13_radar_glow")
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
 [node name="RadarScanEffect" type="ColorRect" parent="ArtRoot/RadarEffectBounds" unique_id=398318395]
-editor_description = "Scene-authored one-coach radar ring. Tune its width, feather, echo and colors through the assigned ShaderMaterial resource."
+editor_description = "Scene-authored coach inspection grid. Tune the grid cells, scan band, edge, warp, and colors through the assigned ShaderMaterial resource."
 visible = false
 material = ExtResource("12_radar_scan")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 45.0
+offset_right = -17.0
+offset_bottom = -9.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2

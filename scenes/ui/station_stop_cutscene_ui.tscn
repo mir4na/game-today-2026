@@ -223,15 +223,16 @@ screen_fade_duration = 0.85
 platform_vertical_offset = 78.0
 platform_horizontal_offset = 82.0
 door_visibility_margin = 48.0
-stop_duration = 15.340431
+stop_duration = 16.19043
 stop_deceleration_start = 2.0
 stop_arrival_end = 6.690431
 stop_departure_start = 11.340431
-opening_duration = 15.340431
+opening_duration = 16.19043
 opening_deceleration_start = 2.0
 opening_arrival_end = 6.690431
 opening_departure_start = 11.340431
 door_close_motion_delay = 0.55
+camera_return_hold_seconds = 0.85
 ambient_walk_speed_scale = 0.5
 departing_start_time = 7.390431
 departing_stagger_min = 0.1
@@ -252,6 +253,11 @@ minimum_path_curve = 7.0
 maximum_path_curve = 19.0
 maximum_step_lift = 8.0
 maximum_walk_tilt = 0.025
+doorway_step_ratio = 0.42
+doorway_pause_ratio = 0.04
+boarding_handoff_progress = 0.9
+doorway_landing_vertical_offset = 20.0
+doorway_inside_vertical_offset = 58.0
 
 [node name="Streaks" type="Node2D" parent="."]
 
@@ -304,6 +310,8 @@ width = 3.0
 default_color = Color(0.88, 0.92, 0.91, 1)
 
 [node name="ActorSlots" type="Node2D" parent="."]
+editor_description = "Station actor depth follows each character's foot position, so lower passengers correctly render in front of higher passengers."
+y_sort_enabled = true
 
 [node name="Actor0" parent="ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true

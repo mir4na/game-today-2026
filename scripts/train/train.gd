@@ -53,6 +53,22 @@ func set_motion_strength(value: float) -> void:
 	for carriage: CarriageVisual in _carriages:
 		carriage.set_motion_strength(_motion_strength)
 
+
+func set_blocked_connector_effect(observer_world_x: float, connector_world_x: float, immediate: bool = false) -> void:
+	var observer_is_left: bool = observer_world_x < connector_world_x
+	for carriage: CarriageVisual in _carriages:
+		if carriage.carriage_type != "passenger":
+			continue
+		var carriage_center_x: float = carriage.global_position.x + carriage.carriage_width * 0.5
+		var carriage_is_left: bool = carriage_center_x < connector_world_x
+		carriage.set_blocked_by_aisle(carriage_is_left != observer_is_left, immediate)
+
+
+func clear_blocked_connector_effect(immediate: bool = false) -> void:
+	for carriage: CarriageVisual in _carriages:
+		if carriage.carriage_type == "passenger":
+			carriage.set_blocked_by_aisle(false, immediate)
+
 func show_exterior_body(duration: float, arrival_end: float, departure_start: float) -> void:
 	_station_arrival_progress = 0.0
 	_station_departure_progress = 0.0
@@ -153,13 +169,6 @@ func get_passenger_carriage_number_at_world_x(world_x: float) -> int:
 	return 0
 
 
-func show_radar_anomaly_glow(carriage_number: int, duration: float) -> void:
-	for carriage: CarriageVisual in _carriages:
-		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
-			carriage.show_radar_anomaly_glow(duration)
-			return
-
-
 func can_play_radar_scan(carriage_number: int) -> bool:
 	for carriage: CarriageVisual in _carriages:
 		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
@@ -167,11 +176,18 @@ func can_play_radar_scan(carriage_number: int) -> bool:
 	return false
 
 
-func play_radar_scan(carriage_number: int, world_origin: Vector2, duration: float) -> void:
+func play_radar_scan(carriage_number: int, duration: float) -> void:
 	for carriage: CarriageVisual in _carriages:
 		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
-			await carriage.play_radar_scan(world_origin, duration)
+			carriage.play_radar_scan(duration)
 			return
+
+
+func get_radar_scan_crossing_progress(carriage_number: int, world_x: float) -> float:
+	for carriage: CarriageVisual in _carriages:
+		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
+			return carriage.get_radar_scan_crossing_progress(world_x)
+	return 1.0
 
 func get_carriage_index_at_world_x(world_x: float) -> int:
 	if _carriages.is_empty():
