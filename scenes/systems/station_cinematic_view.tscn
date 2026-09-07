@@ -23,6 +23,16 @@ scale = Vector2(1.555555, 1.555555)
 position = Vector2(-1920, 0)
 texture = ExtResource("2_station")
 
+[node name="FarLeftExtension" type="Sprite2D" parent="StationBackdrop"]
+editor_description = "Keeps the platform continuous while the camera follows the departing train."
+position = Vector2(-3840, 0)
+texture = ExtResource("2_station")
+
+[node name="OuterLeftExtension" type="Sprite2D" parent="StationBackdrop"]
+editor_description = "Final platform repeat for the full authored station departure distance."
+position = Vector2(-5760, 0)
+texture = ExtResource("2_station")
+
 [node name="CenterArtwork" type="Sprite2D" parent="StationBackdrop"]
 texture = ExtResource("2_station")
 

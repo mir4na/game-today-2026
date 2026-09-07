@@ -16,7 +16,7 @@ fill_to = Vector2(1, 0.5)
 
 [sub_resource type="Gradient" id="Gradient_visible_pool"]
 offsets = PackedFloat32Array(0, 0.34, 0.72, 1)
-colors = PackedColorArray(1, 0.91, 0.64, 0.22, 1, 0.82, 0.45, 0.12, 0.8, 0.66, 0.36, 0.035, 0.64, 0.72, 0.86, 0)
+colors = PackedColorArray(1, 0.93, 0.72, 0.3, 1, 0.84, 0.5, 0.17, 0.84, 0.7, 0.42, 0.05, 0.64, 0.72, 0.86, 0)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture_visible_pool"]
 gradient = SubResource("Gradient_visible_pool")
@@ -39,7 +39,7 @@ clear_margin = 12.0
 [node name="AmbientShade" type="Polygon2D" parent="."]
 editor_description = "Base interior darkness. Adjust this color and alpha to make an unlit coach brighter or darker."
 light_mask = 0
-color = Color(0.035, 0.055, 0.105, 0.26)
+color = Color(0.035, 0.055, 0.105, 0.14)
 polygon = PackedVector2Array(0, 214, 960, 214, 960, 525, 0, 525)
 
 [node name="LightPools" type="Node2D" parent="."]
@@ -105,7 +105,7 @@ editor_description = "Actual CanvasItem lighting for artwork that accepts Light2
 [node name="LeftCeilingLight" type="PointLight2D" parent="LocalLights"]
 position = Vector2(202, 356)
 color = Color(1, 0.86, 0.62, 1)
-energy = 0.42
+energy = 0.5
 range_item_cull_mask = 2
 texture = SubResource("GradientTexture_interior_light")
 texture_scale = 1.05
@@ -113,7 +113,7 @@ texture_scale = 1.05
 [node name="CenterCeilingLight" type="PointLight2D" parent="LocalLights"]
 position = Vector2(480, 346)
 color = Color(1, 0.9, 0.7, 1)
-energy = 0.5
+energy = 0.58
 range_item_cull_mask = 2
 texture = SubResource("GradientTexture_interior_light")
 texture_scale = 1.12
@@ -121,7 +121,7 @@ texture_scale = 1.12
 [node name="RightCeilingLight" type="PointLight2D" parent="LocalLights"]
 position = Vector2(758, 356)
 color = Color(1, 0.86, 0.62, 1)
-energy = 0.42
+energy = 0.5
 range_item_cull_mask = 2
 texture = SubResource("GradientTexture_interior_light")
 texture_scale = 1.05

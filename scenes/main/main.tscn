@@ -143,7 +143,7 @@ position = Vector2(0, 100)
 [node name="CameraBounds" type="Node2D" parent="GameplayWorld" unique_id=1958609035]
 editor_description = "Scene-authored gameplay camera limits. Move Min and Max in the Inspector to change the allowed view without editing scripts."
 script = ExtResource("42_camera_bounds")
-camera_path = NodePath("../PlayerSpawnPoint/Player/Camera2D")
+camera_path = NodePath("../TrainOccupants/PlayerSpawnPoint/Player/Camera2D")
 min_marker_path = NodePath("Min")
 max_marker_path = NodePath("Max")
 
@@ -161,14 +161,18 @@ color = Color(0.84, 0.88, 0.94, 1)
 
 [node name="StationCinematicView" parent="GameplayWorld" unique_id=1840407460 instance=ExtResource("45_station_view")]
 
-[node name="Passengers" type="Node2D" parent="GameplayWorld" unique_id=1237360660]
+[node name="TrainOccupants" type="Node2D" parent="GameplayWorld"]
+unique_name_in_owner = true
+editor_description = "Player and runtime passengers follow the exact station travel offset of Train/Cars during arrival and departure."
+
+[node name="Passengers" type="Node2D" parent="GameplayWorld/TrainOccupants" unique_id=1237360660]
 unique_name_in_owner = true
 
-[node name="PlayerSpawnPoint" type="Marker2D" parent="GameplayWorld" unique_id=1158105950]
+[node name="PlayerSpawnPoint" type="Marker2D" parent="GameplayWorld/TrainOccupants" unique_id=1158105950]
 editor_description = "Move this Marker2D in the Inspector to set the player's initial position inside the front passenger coach."
 position = Vector2(143, 430)
 
-[node name="Player" parent="GameplayWorld/PlayerSpawnPoint" unique_id=1358319638 instance=ExtResource("3")]
+[node name="Player" parent="GameplayWorld/TrainOccupants/PlayerSpawnPoint" unique_id=1358319638 instance=ExtResource("3")]
 unique_name_in_owner = true
 movement_enabled = false
 interaction_enabled = false
@@ -277,9 +281,10 @@ unique_name_in_owner = true
 unique_name_in_owner = true
 
 [connection signal="inventory_changed" from="MarketToolState" to="." method="_on_market_inventory_changed"]
-[connection signal="interaction_pressed" from="GameplayWorld/PlayerSpawnPoint/Player" to="." method="_on_interaction_pressed"]
-[connection signal="nearby_interactable_changed" from="GameplayWorld/PlayerSpawnPoint/Player" to="." method="_on_nearby_interactable_changed"]
+[connection signal="interaction_pressed" from="GameplayWorld/TrainOccupants/PlayerSpawnPoint/Player" to="." method="_on_interaction_pressed"]
+[connection signal="nearby_interactable_changed" from="GameplayWorld/TrainOccupants/PlayerSpawnPoint/Player" to="." method="_on_nearby_interactable_changed"]
 [connection signal="exterior_fade_out_finished" from="GameplayWorld/Train" to="." method="_on_train_exterior_fade_out_finished"]
+[connection signal="station_travel_offset_changed" from="GameplayWorld/Train" to="." method="_on_train_station_travel_offset_changed"]
 [connection signal="newspaper_read" from="GameplayWorld/Train/Cars/PassengerCoach4/Newspaper" to="." method="_on_newspaper_read"]
 [connection signal="radar_requested" from="HUD" to="." method="_on_radar_requested"]
 [connection signal="timeout" from="MaintenanceTimers/BlockedAisleTimer" to="." method="_on_blocked_aisle_timer_timeout"]

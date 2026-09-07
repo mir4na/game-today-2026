@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://dlyishgw0i8u8" path="res://assets/ui/Clock/Clock_NightSymbol.png" id="15_clock_night"]
 [ext_resource type="Shader" uid="uid://ce1bimgy548dk" path="res://shaders/clock_progress_fill.gdshader" id="16_clock_fill_shader"]
 [ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="17_clock_font"]
+[ext_resource type="Material" path="res://resources/materials/hud_black_outline.tres" id="18_hud_outline"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_clock_pole_left"]
 atlas = ExtResource("7_cwdlq")
@@ -32,6 +33,63 @@ resource_local_to_scene = true
 shader = ExtResource("16_clock_fill_shader")
 shader_parameter/progress = 0.0
 shader_parameter/edge_softness = 0.003
+
+[sub_resource type="Animation" id="Animation_clock_briefing"]
+resource_name = "route_briefing"
+length = 3.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ClockPanel:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 3.2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("ClockPanel:modulate:a")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.28, 2.55, 3.2),
+"transitions": PackedFloat32Array(0.35, 1, 1, 1),
+"update": 0,
+"values": [0.0, 1.0, 1.0, 0.0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("ClockPanel:offset_top")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.34, 2.55, 3.2),
+"transitions": PackedFloat32Array(0.25, 1, 1, 1),
+"update": 0,
+"values": [-260.0, -300.0, -300.0, -230.0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("ClockPanel:offset_bottom")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.34, 2.55, 3.2),
+"transitions": PackedFloat32Array(0.25, 1, 1, 1),
+"update": 0,
+"values": [40.0, 0.0, 0.0, 70.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_clock_briefing"]
+_data = {
+&"route_briefing": SubResource("Animation_clock_briefing")
+}
 
 [sub_resource type="StyleBoxFlat" id="GuidebookButtonNormal"]
 content_margin_left = 20.0
@@ -248,7 +306,7 @@ expand_mode = 1
 
 [node name="ClockPanel" type="Control" parent="Root" unique_id=735151017]
 unique_name_in_owner = true
-editor_description = "Scene-authored bottom-center clock. ClockSignAssembly controls the sign above; ClockFace controls the centered clock below."
+editor_description = "Scene-authored bottom-center route briefing. ClockSignAssembly controls the sign above; ClockFace controls the centered clock below. Its entrance, hold, and downward fade are editable in ClockBriefingAnimation."
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -264,6 +322,11 @@ scale = Vector2(0.666667, 0.666667)
 pivot_offset = Vector2(175, 300)
 mouse_filter = 2
 
+[node name="ClockBriefingAnimation" type="AnimationPlayer" parent="Root"]
+unique_name_in_owner = true
+editor_description = "Scene-authored route briefing timing. The route_briefing animation enters for 0.34 seconds, remains readable until 2.55 seconds, then drops and fades out by 3.2 seconds."
+libraries/ = SubResource("AnimationLibrary_clock_briefing")
+
 [node name="ClockSignAssembly" type="Control" parent="Root/ClockPanel" unique_id=184474026]
 editor_description = "Station sign header. Its 350 px width matches ClockFace, keeping both elements centered."
 anchors_preset = 0
@@ -271,12 +334,50 @@ offset_right = 350.0
 offset_bottom = 170.0
 mouse_filter = 2
 
+[node name="ClockSignOutline" type="TextureRect" parent="Root/ClockPanel/ClockSignAssembly" unique_id=2124821817]
+editor_description = "Black silhouette behind the station sign. Adjust Scale here to change the visible outline thickness."
+modulate = Color(0.0156863, 0.0196078, 0.027451, 0.96)
+layout_mode = 0
+offset_left = 3.5
+offset_right = 346.5
+offset_bottom = 76.50012
+scale = Vector2(1.028, 1.12)
+pivot_offset = Vector2(171.5, 38.25)
+mouse_filter = 2
+texture = ExtResource("8_o6xly")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="ClockSignPoles" type="Control" parent="Root/ClockPanel/ClockSignAssembly" unique_id=402474082]
 editor_description = "Two pole slices extend behind ClockFace so the station sign remains visibly attached."
 anchors_preset = 0
 offset_right = 350.0
 offset_bottom = 170.0
 mouse_filter = 2
+
+[node name="LeftPoleOutline" type="TextureRect" parent="Root/ClockPanel/ClockSignAssembly/ClockSignPoles" unique_id=1415805050]
+modulate = Color(0.0156863, 0.0196078, 0.027451, 0.96)
+layout_mode = 0
+offset_left = 65.0
+offset_top = 65.0
+offset_right = 86.0
+offset_bottom = 169.0
+mouse_filter = 2
+texture = SubResource("AtlasTexture_clock_pole_left")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RightPoleOutline" type="TextureRect" parent="Root/ClockPanel/ClockSignAssembly/ClockSignPoles" unique_id=1011589764]
+modulate = Color(0.0156863, 0.0196078, 0.027451, 0.96)
+layout_mode = 0
+offset_left = 264.0
+offset_top = 65.0
+offset_right = 285.0
+offset_bottom = 169.0
+mouse_filter = 2
+texture = SubResource("AtlasTexture_clock_pole_right")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="LeftPole" type="TextureRect" parent="Root/ClockPanel/ClockSignAssembly/ClockSignPoles" unique_id=140072059]
 layout_mode = 0
@@ -349,6 +450,18 @@ offset_right = 350.0
 offset_bottom = 299.5
 mouse_filter = 2
 
+[node name="ClockFaceOutline" type="TextureRect" parent="Root/ClockPanel/ClockFace" unique_id=1368557547]
+editor_description = "Black silhouette behind the semicircular clock body. Resize its offsets to tune the outline independently from the clock artwork."
+modulate = Color(0.0156863, 0.0196078, 0.027451, 0.96)
+layout_mode = 0
+offset_left = -5.0
+offset_top = -5.0
+offset_right = 355.0
+offset_bottom = 184.0
+mouse_filter = 2
+texture = ExtResource("9_clock_unfilled")
+expand_mode = 1
+
 [node name="ClockUnfilled" type="TextureRect" parent="Root/ClockPanel/ClockFace" unique_id=1921644227]
 layout_mode = 0
 offset_right = 350.0
@@ -402,6 +515,7 @@ mouse_filter = 2
 
 [node name="DaySymbol" type="TextureRect" parent="Root/ClockPanel/ClockFace/ClockSymbolPivot" unique_id=1300180946]
 unique_name_in_owner = true
+material = ExtResource("18_hud_outline")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -415,6 +529,7 @@ expand_mode = 1
 [node name="NightSymbol" type="TextureRect" parent="Root/ClockPanel/ClockFace/ClockSymbolPivot" unique_id=1397011548]
 unique_name_in_owner = true
 visible = false
+material = ExtResource("18_hud_outline")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

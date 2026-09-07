@@ -59,23 +59,45 @@ today_document_template = "[table=2][cell][font_size=18][b]SERVICE DETAILS[/b][/
 %s[/cell][/table]"
 completed_service_text = "DAY SERVICE COMPLETE"
 procedure_document = "[table=2][cell][font_size=18][b]INSPECT & DECIDE[/b][/font_size]
-Compare each passenger's ID, ticket, and appearance with today's service details and the Anomaly List.
+Compare each passenger's ID, ticket, and appearance with today's service and the Anomaly List.
 
 [font_size=18][b]DAYTIME DROP-OFFS[/b][/font_size]
-Stamp an ordinary passenger only when their required stop is next; wrong-train passengers leave at the next station and remaining living passengers leave at the terminal.
+Stamp an ordinary passenger only when their required stop is next.
 
 [font_size=18][b]KEEP ANOMALIES ABOARD[/b][/font_size]
-Keep anomalies aboard for night service because stamping one causes a penalty and does not remove it.
+Do not stamp anomalies; they remain aboard for night service.
+
+[font_size=18][b]PASS THE SHIFT[/b][/font_size]
+Meet today's paycheck target or restart the failed shift.
+
+[font_size=18][b]NIGHT SERVICE[/b][/font_size]
+Use Departure Statements to assign every remaining soul to a symbolic destination.
 
 [font_size=18][b]BLESSINGS & PENALTIES[/b][/font_size]
 [b]+30 Blessings[/b] — Correct passenger drop-off.
 [b]−20 Blessings[/b] — Incorrect passenger drop-off.
-[b]−40 Blessings[/b] — Anomaly wrongly stamped, counted once per shift.
-Keeping an anomaly aboard has no penalty.[/cell][cell][font_size=18][b]PASS THE SHIFT[/b][/font_size]
-Meet or exceed today's paycheck target; earlier savings do not count, and a failed shift may be restarted.
+[b]−40 Blessings[/b] — Anomaly wrongly stamped, once per shift.
+Keeping an anomaly aboard has no penalty.[/cell][cell][font_size=18][b]CONTROLS[/b][/font_size]
+[color=#985c45][b]A / D  ·  ARROWS[/b][/color]
+Walk
 
-[font_size=18][b]NIGHT SERVICE[/b][/font_size]
-Collect Departure Statements and assign every remaining soul to one symbolic destination before confirming.[/cell][/table]"
+[color=#985c45][b]E[/b][/color]
+Interact or close documents and minigames
+
+[color=#985c45][b]Q[/b][/color]
+Switch between ID and ticket
+
+[color=#985c45][b]SPACE[/b][/color]
+Stamp ticket
+
+[color=#985c45][b]TAB[/b][/color]
+Open or close guidebook
+
+[color=#985c45][b]R[/b][/color]
+Activate carriage radar
+
+[color=#985c45][b]ESC[/b][/color]
+Pause or resume shift[/cell][/table]"
 
 [node name="Shade" type="ColorRect" parent="." unique_id=1273576199]
 layout_mode = 1

@@ -19,7 +19,6 @@ signal camera_handoff_finished
 @export var night_tint: Color = Color(0.46, 0.58, 0.78, 1.0)
 
 var _source_camera: Camera2D
-var _gameplay_center: Vector2
 var _gameplay_zoom: Vector2
 var _arrival_start_center: Vector2
 var _arrival_start_zoom: Vector2
@@ -27,6 +26,8 @@ var _active: bool = false
 var _returning: bool = false
 var _camera_handed_off: bool = false
 var _return_tween: Tween
+var _return_start_center: Vector2
+var _return_start_zoom: Vector2
 
 @onready var _station_backdrop: Node2D = %StationBackdrop
 @onready var _station_sign_layer: CanvasLayer = %StationSignLayer
@@ -57,7 +58,6 @@ func begin(source_camera: Camera2D, station_name: String) -> void:
 	if _return_tween and _return_tween.is_valid():
 		_return_tween.kill()
 	_source_camera = source_camera
-	_gameplay_center = _source_camera.get_screen_center_position()
 	_gameplay_zoom = _source_camera.zoom
 	# Open directly on the foreground station sign, then reveal the complete
 	# station through the authored arrival zoom-out.
@@ -80,7 +80,7 @@ func begin(source_camera: Camera2D, station_name: String) -> void:
 
 
 func update_arrival(elapsed: float, arrival_end: float) -> void:
-	if not _active or _returning:
+	if not _active or _returning or _camera_handed_off:
 		return
 	var frame_end: float = maxf(arrival_end - full_frame_lead_seconds, zoom_out_start_seconds + 0.01)
 	var progress: float = clampf(inverse_lerp(zoom_out_start_seconds, frame_end, elapsed), 0.0, 1.0)
@@ -95,17 +95,31 @@ func return_to_gameplay() -> void:
 	_returning = true
 	if _return_tween and _return_tween.is_valid():
 		_return_tween.kill()
-	_return_tween = create_tween().set_parallel(true)
+	_return_start_center = _station_camera.global_position
+	_return_start_zoom = _station_camera.zoom
+	_return_tween = create_tween()
 	_return_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
-	_return_tween.tween_property(_station_camera, "global_position", _gameplay_center, return_duration)
-	_return_tween.tween_property(_station_camera, "zoom", _gameplay_zoom, return_duration)
-	_return_tween.chain().tween_callback(_handoff_to_gameplay_camera)
+	_return_tween.tween_method(_update_camera_return, 0.0, 1.0, return_duration)
+	_return_tween.tween_callback(_begin_following_gameplay_camera)
+
+
+func _process(_delta: float) -> void:
+	if _active and _camera_handed_off:
+		_follow_gameplay_camera_transform()
+
+
+func sync_follow_target() -> void:
+	# Train travel offsets are signal-driven. Sync immediately on that signal so
+	# a large skipped timeline step cannot leave the cinematic camera one frame
+	# behind the player and passengers.
+	if _active and _camera_handed_off:
+		_follow_gameplay_camera_transform()
 
 
 func finish() -> void:
 	if _return_tween and _return_tween.is_valid():
 		_return_tween.kill()
-	_handoff_to_gameplay_camera()
+	_activate_gameplay_camera()
 	_station_backdrop.hide()
 	_station_sign_layer.hide()
 	_station_backdrop.modulate.a = 1.0
@@ -114,16 +128,38 @@ func finish() -> void:
 	_camera_handed_off = false
 
 
-func _handoff_to_gameplay_camera() -> void:
+func _update_camera_return(progress: float) -> void:
+	if not is_instance_valid(_source_camera):
+		return
+	var eased_progress: float = _smoothstep(progress)
+	_station_camera.global_position = _return_start_center.lerp(
+		_source_camera.global_position,
+		eased_progress
+	)
+	_station_camera.zoom = _return_start_zoom.lerp(_source_camera.zoom, eased_progress)
+
+
+func _begin_following_gameplay_camera() -> void:
 	if _camera_handed_off:
 		return
 	_camera_handed_off = true
+	_returning = false
+	_follow_gameplay_camera_transform()
+	camera_handoff_finished.emit()
+
+
+func _follow_gameplay_camera_transform() -> void:
+	if is_instance_valid(_source_camera):
+		_station_camera.global_position = _source_camera.global_position
+		_station_camera.zoom = _source_camera.zoom
+
+
+func _activate_gameplay_camera() -> void:
 	if is_instance_valid(_source_camera):
 		_source_camera.enabled = true
 		_source_camera.reset_smoothing()
 	_station_camera.enabled = false
 	_returning = false
-	camera_handoff_finished.emit()
 
 
 func _smoothstep(value: float) -> float:

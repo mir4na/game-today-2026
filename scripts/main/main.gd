@@ -89,6 +89,7 @@ var _station_gameplay_actors_hidden: bool = false
 var _station_player_world_position: Vector2
 var _station_foreground_hidden: bool = false
 var _station_railroad_was_visible: bool = true
+var _train_occupants_station_rest_position: Vector2
 var _inspected_passenger: Passenger
 var _night_statement_active: bool = false
 var _night_statement_newly_recorded: bool = false
@@ -128,12 +129,14 @@ var _radar_scan_active: bool = false
 @onready var _travel_background: TravelBackground = %TravelBackground
 @onready var _travel_foreground: TravelForeground = %TravelForeground
 @onready var _station_cinematic_view: StationCinematicView = %StationCinematicView
-@onready var _gameplay_camera: Camera2D = $GameplayWorld/PlayerSpawnPoint/Player/Camera2D
+@onready var _train_occupants: Node2D = %TrainOccupants
+@onready var _gameplay_camera: Camera2D = $GameplayWorld/TrainOccupants/PlayerSpawnPoint/Player/Camera2D
 @onready var _railroad_ui_layer: CanvasLayer = $RailroadUILayer
 @onready var _sky_gradient: ColorRect = %NightSkyOverlay
 @onready var _night_atmosphere: ColorRect = %NightAtmosphere
 
 func _ready() -> void:
+	_train_occupants_station_rest_position = _train_occupants.position
 	if day_route.size() < 2:
 		push_error("Main/Day Route requires at least an opening and final station.")
 		return
@@ -1272,9 +1275,8 @@ func _station_cutscene_door_markers() -> Dictionary:
 func _hide_gameplay_actors_for_station_cutscene() -> void:
 	if _station_gameplay_actors_hidden:
 		return
-	# The station shot moves the complete Cars node, including the floor collision.
-	# Player is not parented to Cars, so letting physics continue here would make
-	# the hidden MC fall while the train is off-screen during a normal cutscene.
+	# TrainOccupants follows the same station offset as Cars. Physics stays off so
+	# the hidden MC cannot react to moving floor collision during the cutscene.
 	_station_player_world_position = _player.global_position
 	_player.velocity = Vector2.ZERO
 	_player.set_physics_process(false)
@@ -1397,9 +1399,9 @@ func _on_station_stop_finished() -> void:
 	_station_cutscene_context = &""
 	_station_cutscene_timeline_complete = false
 	_station_camera_return_complete = false
-	_station_cinematic_view.finish()
 	_ambience.end_station_sequence()
 	_train.hide_exterior_body()
+	_station_cinematic_view.finish()
 	_set_station_foreground_hidden(false)
 	_restore_gameplay_actors_after_station_cutscene()
 	_finish_staged_boarding()
@@ -1409,6 +1411,7 @@ func _on_station_stop_finished() -> void:
 	if finished_context == &"opening":
 		state = GameState.DAY
 		_hud.set_day_hud_visible(true)
+		_hud.show_route_briefing()
 		_update_passenger_minimap()
 		_set_passenger_ai_enabled(true)
 		_set_player_control_for_state()
@@ -1426,8 +1429,14 @@ func _on_station_stop_finished() -> void:
 	_station_exchange_processed = false
 	if state in [GameState.DAY, GameState.SUNSET]:
 		_hud.set_day_hud_visible(true)
+		_hud.show_route_briefing()
 	_update_passenger_minimap()
 	_set_player_control_for_state()
+
+
+func _on_train_station_travel_offset_changed(offset: Vector2) -> void:
+	_train_occupants.position = _train_occupants_station_rest_position + offset
+	_station_cinematic_view.sync_follow_target()
 
 func _passenger_cutscene_actor(passenger: Passenger) -> Dictionary:
 	var actor_data: Dictionary = passenger.get_station_cutscene_visual()

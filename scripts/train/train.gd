@@ -2,6 +2,7 @@ class_name TrainWorld
 extends Node2D
 
 signal exterior_fade_out_finished
+signal station_travel_offset_changed(offset: Vector2)
 
 @export_category("Station Arrival & Departure")
 @export_range(2500.0, 6000.0, 50.0) var station_arrival_distance: float = 4400.0
@@ -96,7 +97,9 @@ func set_station_departure_progress(value: float) -> void:
 func _apply_station_travel_position() -> void:
 	var arrival_offset: float = station_arrival_distance * (1.0 - _station_arrival_progress)
 	var departure_offset: float = -station_departure_distance * _station_departure_progress
-	_cars.position = _cars_station_rest_position + Vector2(arrival_offset + departure_offset, 0.0)
+	var travel_offset := Vector2(arrival_offset + departure_offset, 0.0)
+	_cars.position = _cars_station_rest_position + travel_offset
+	station_travel_offset_changed.emit(travel_offset)
 
 func is_station_departure_complete() -> bool:
 	return _station_departure_progress >= 0.999
