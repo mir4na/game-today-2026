@@ -13,7 +13,7 @@ signal radar_requested
 @export_range(0.0, 1440.0, 1.0) var clock_default_start_minutes: float = 840.0
 @export_range(0.0, 1440.0, 1.0) var clock_default_end_minutes: float = 1320.0
 @export_range(-180.0, 180.0, 0.1) var clock_pointer_start_degrees: float = -26.96
-@export_range(1.0, 90.0, 0.5) var clock_degrees_per_stop: float = 45.0
+@export_range(1.0, 90.0, 0.5) var clock_degrees_per_stop: float = 36.0
 @export_range(1, 12, 1) var clock_stop_count: int = 4
 @export_range(0.1, 1.5, 0.05) var clock_station_step_duration: float = 0.5
 @export_range(0.1, 1.0, 0.01) var clock_symbol_flip_duration: float = 0.46

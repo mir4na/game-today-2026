@@ -146,6 +146,24 @@ func get_passenger_door_markers() -> Dictionary:
 			result[carriage.carriage_number] = markers
 	return result
 
+
+func get_passenger_door_station_rest_positions() -> Dictionary:
+	# Door markers move together with Cars while the train enters the station.
+	# Return their eventual stopped world positions so waiting passengers can
+	# already stand on the stationary platform before the train arrives.
+	var result: Dictionary = {}
+	var rest_origin: Vector2 = _cars.get_parent().to_global(_cars_station_rest_position)
+	var travel_offset: Vector2 = rest_origin - _cars.global_position
+	for carriage: CarriageVisual in _carriages:
+		if carriage.carriage_type != "passenger":
+			continue
+		var positions: Array[Vector2] = []
+		for marker: Marker2D in carriage.get_passenger_door_slots():
+			positions.append(marker.global_position + travel_offset)
+		if not positions.is_empty():
+			result[carriage.carriage_number] = positions
+	return result
+
 func get_passenger_carriage_world_ranges() -> Dictionary:
 	var result: Dictionary = {}
 	for carriage: CarriageVisual in _carriages:

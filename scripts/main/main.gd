@@ -177,6 +177,7 @@ func _ready() -> void:
 	_hud.set_clock(int(_day_minutes), _day_station_clock_progress())
 	_hud.set_next_stop(_next_day_station())
 	_hud.set_clock_night_mode(false, false)
+	_pause_ui.configure_service_info(manifest_config.service_train_number, manifest_config.service_date_text)
 	_set_sky_cycle_progress(0.0)
 	_on_market_inventory_changed(_market_tool_state.call(&"get_snapshot"))
 	_update_passenger_minimap()
@@ -204,7 +205,7 @@ func _process(delta: float) -> void:
 		_day_minutes = minf(_day_minutes + delta, _next_arrival_minutes())
 	var route_progress: float = clampf((_day_minutes - START_MINUTES) / maxf(_final_arrival_minutes() - START_MINUTES, 1.0), 0.0, 1.0)
 	# Advance the dial with the moving train. One complete route leg contributes
-	# exactly one 45-degree clock step; station cutscenes pause this progress.
+	# exactly one 36-degree clock step; station cutscenes pause this progress.
 	_hud.set_clock(int(_day_minutes), route_progress)
 	var cycle_progress: float = route_progress * DAY_SERVICE_FINAL_CYCLE_PROGRESS
 	var service_night_strength: float = smoothstep(
@@ -1211,7 +1212,7 @@ func _start_station_stop_cutscene(station_name: String, departing_actors: Array[
 	_train.show_exterior_body(stop_timeline.x, stop_timeline.y, stop_timeline.z)
 	_station_cinematic_view.begin(
 		_gameplay_camera,
-		"" if terminal_arrival else station_name,
+		station_name,
 		_cinematic_camera_anchor
 	)
 	if terminal_arrival:
@@ -1222,6 +1223,7 @@ func _start_station_stop_cutscene(station_name: String, departing_actors: Array[
 			departing_actors,
 			boarding_actors,
 			_station_cutscene_door_markers(),
+			_station_cutscene_door_rest_positions(),
 			_station_ambient_cutscene_actors()
 		)
 
@@ -1274,6 +1276,12 @@ func _station_cutscene_door_markers() -> Dictionary:
 	var markers: Dictionary = _train.get_passenger_door_markers()
 	markers.erase(station_sign_blocked_carriage)
 	return markers
+
+
+func _station_cutscene_door_rest_positions() -> Dictionary:
+	var positions: Dictionary = _train.get_passenger_door_station_rest_positions()
+	positions.erase(station_sign_blocked_carriage)
+	return positions
 
 
 func _hide_gameplay_actors_for_station_cutscene() -> void:
@@ -1340,6 +1348,7 @@ func _on_day_intro_finished() -> void:
 		day_route[0],
 		boarding_actors,
 		_station_cutscene_door_markers(),
+		_station_cutscene_door_rest_positions(),
 		_station_ambient_cutscene_actors()
 	)
 
