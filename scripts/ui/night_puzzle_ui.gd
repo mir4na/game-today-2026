@@ -1,171 +1,229 @@
 class_name NightPuzzleUI
 extends Control
+## Scene-authored Night Assignment board. Passenger cards support native Godot
+## drag-and-drop while clicks remain available as an accessible fallback.
 
+signal closed
 signal departures_confirmed(assignments: Dictionary)
 
 @export_category("Inspector Copy")
-@export var selection_instruction: String
-@export var selected_instruction_template: String
-@export var empty_station_text: String
-@export var station_slot_template: String = "%s\n%s"
-@export var no_passenger_error: String
-@export var incomplete_assignment_error: String
-@export_multiline var statement_entry_template: String
-@export_multiline var missing_statement_template: String
-@export_multiline var no_collected_statements_text: String
-@export_multiline var missing_statements_error: String
+@export var instruction_text: String = "Each station is one node. A thread means the two stations are directly connected."
+@export_multiline var no_selection_text: String = "Drag a soul card, or select a card and a station.\nFinalizing seals the result."
+@export var selection_template: String = "%s selected — choose a station."
+@export var incomplete_assignment_error: String = "Assign every soul before finalizing."
+@export var assignment_count_template: String = "%d / %d SOULS ASSIGNED"
+@export var clue_count_template: String = "%d / %d STATEMENTS RECORDED"
 
 var _puzzle: DeparturePuzzleData
 var _selected_passenger: String = ""
 var _assignments: Dictionary = {}
-@onready var _statement_label: RichTextLabel = %StatementLabel
+var _passenger_data_by_name: Dictionary = {}
+var _collected_statements: Dictionary = {}
+
+@onready var _instruction_label: Label = %InstructionLabel
 @onready var _selection_label: Label = %SelectionLabel
+@onready var _assignment_count_label: Label = %AssignmentCountLabel
+@onready var _clue_count_label: Label = %ClueCountLabel
 @onready var _error_label: Label = %ErrorLabel
 @onready var _confirm_button: Button = %ConfirmButton
-@onready var _passenger_slots: Array[Button] = [%PassengerSlot1, %PassengerSlot2, %PassengerSlot3, %PassengerSlot4]
-@onready var _station_slots: Array[Button] = [%StationSlot1, %StationSlot2, %StationSlot3, %StationSlot4]
-@onready var _station_arrows: Array[Label] = [%StationArrow1, %StationArrow2, %StationArrow3]
-var _passenger_buttons: Dictionary = {}
-var _station_buttons: Dictionary = {}
-var _slot_passenger_names := PackedStringArray()
-var _slot_station_names := PackedStringArray()
-var _all_statements_collected: bool = false
+@onready var _board_anchor: Control = %BoardAnchor
+@onready var _passenger_cards: Array[NightPassengerCard] = [
+	%PassengerCard1,
+	%PassengerCard2,
+	%PassengerCard3,
+	%PassengerCard4,
+]
+@onready var _station_targets: Array[NightStationTarget] = [
+	%VesperwickTarget,
+	%HollowcrossTarget,
+	%BellhavenTarget,
+	%MorrowfieldTarget,
+]
 
-func open_puzzle(passengers: Array[PassengerData], puzzle: DeparturePuzzleData, collected_statements: Dictionary) -> void:
+
+func _ready() -> void:
+	_instruction_label.text = instruction_text
+	for card: NightPassengerCard in _passenger_cards:
+		card.selected.connect(_on_passenger_selected)
+	for target: NightStationTarget in _station_targets:
+		target.passenger_dropped.connect(_assign_passenger_to_station)
+		target.selected.connect(_on_station_selected)
+	hide()
+
+
+func open_puzzle(
+	passengers: Array[PassengerData],
+	puzzle: DeparturePuzzleData,
+	collected_statements: Dictionary
+) -> void:
+	var is_new_case: bool = _puzzle != puzzle
 	_puzzle = puzzle
+	if is_new_case:
+		_assignments.clear()
 	_selected_passenger = ""
-	_assignments.clear()
-	_passenger_buttons.clear()
-	_station_buttons.clear()
-	_slot_passenger_names.clear()
-	_slot_station_names.clear()
+	_passenger_data_by_name.clear()
+	_collected_statements = collected_statements.duplicate(true)
 	_error_label.text = ""
-	for button: Button in _passenger_slots:
-		button.hide()
-		button.disabled = false
-	for button: Button in _station_slots:
-		button.hide()
-	for arrow: Label in _station_arrows:
-		arrow.hide()
-	if passengers.size() > _passenger_slots.size() or puzzle.night_stations.size() > _station_slots.size():
-		push_error("Night puzzle scene only supports four passenger and station slots.")
+	_selection_label.text = no_selection_text
+
+	for card: NightPassengerCard in _passenger_cards:
+		card.hide()
+	for target: NightStationTarget in _station_targets:
+		target.hide()
+
+	if puzzle == null:
+		show_error("The night constellation is unavailable.")
+		show()
 		return
-	for i: int in range(passengers.size()):
-		var data: PassengerData = passengers[i]
-		var button: Button = _passenger_slots[i]
-		button.text = data.short_name.to_upper()
-		button.show()
-		_slot_passenger_names.append(data.short_name)
-		_passenger_buttons[data.short_name] = button
-	for i: int in range(puzzle.night_stations.size()):
-		var station: String = puzzle.night_stations[i]
-		var button: Button = _station_slots[i]
-		button.text = station_slot_template % [station.to_upper(), empty_station_text]
-		button.show()
-		_slot_station_names.append(station)
-		_station_buttons[station] = button
-		if i < puzzle.night_stations.size() - 1:
-			_station_arrows[i].show()
-	_statement_label.text = _compose_statement_document(passengers, collected_statements)
-	_all_statements_collected = _has_every_statement(passengers, puzzle, collected_statements)
-	_confirm_button.disabled = not _all_statements_collected
-	if not _all_statements_collected:
-		_error_label.text = missing_statements_error
-	_selection_label.text = selection_instruction
+	if passengers.size() > _passenger_cards.size() or puzzle.night_stations.size() > _station_targets.size():
+		show_error("This ledger supports four souls and four stations.")
+		show()
+		return
+
+	for index: int in range(passengers.size()):
+		var data: PassengerData = passengers[index]
+		_passenger_data_by_name[data.short_name] = data
+		var card: NightPassengerCard = _passenger_cards[index]
+		card.configure(
+			data,
+			str(_collected_statements.get(data.short_name, "")),
+			puzzle.get_anomaly_label(data.anomaly_type)
+		)
+		card.show()
+
+	for index: int in range(puzzle.night_stations.size()):
+		var target: NightStationTarget = _station_targets[index]
+		if target.station_name != puzzle.night_stations[index]:
+			push_error("Night constellation scene order does not match the puzzle resource.")
+		target.show()
+
+	_remove_invalid_assignments()
+	_update_assignment_visuals()
 	show()
-	if not passengers.is_empty():
-		_passenger_slots[0].grab_focus()
+	_present_board()
 
-func _on_passenger_slot_pressed(index: int) -> void:
-	if index < _slot_passenger_names.size():
-		_select_passenger(_slot_passenger_names[index])
 
-func _on_station_slot_pressed(index: int) -> void:
-	if index < _slot_station_names.size():
-		_assign_station(_slot_station_names[index])
+func refresh_collected_statements(collected_statements: Dictionary) -> void:
+	_collected_statements = collected_statements.duplicate(true)
+	if not visible or _puzzle == null:
+		return
+	for card: NightPassengerCard in _passenger_cards:
+		if not card.visible or not _passenger_data_by_name.has(card.passenger_name):
+			continue
+		var data := _passenger_data_by_name[card.passenger_name] as PassengerData
+		card.configure(
+			data,
+			str(_collected_statements.get(card.passenger_name, "")),
+			_puzzle.get_anomaly_label(data.anomaly_type)
+		)
+		card.set_assignment(_station_for_passenger(card.passenger_name))
+	_update_counts()
 
-func _on_passenger_slot_1_pressed() -> void:
-	_on_passenger_slot_pressed(0)
 
-func _on_passenger_slot_2_pressed() -> void:
-	_on_passenger_slot_pressed(1)
+func request_close() -> void:
+	if not visible:
+		return
+	hide()
+	closed.emit()
 
-func _on_passenger_slot_3_pressed() -> void:
-	_on_passenger_slot_pressed(2)
-
-func _on_passenger_slot_4_pressed() -> void:
-	_on_passenger_slot_pressed(3)
-
-func _on_station_slot_1_pressed() -> void:
-	_on_station_slot_pressed(0)
-
-func _on_station_slot_2_pressed() -> void:
-	_on_station_slot_pressed(1)
-
-func _on_station_slot_3_pressed() -> void:
-	_on_station_slot_pressed(2)
-
-func _on_station_slot_4_pressed() -> void:
-	_on_station_slot_pressed(3)
 
 func show_error(message: String) -> void:
 	_error_label.text = message
 
-func _select_passenger(passenger_name: String) -> void:
-	_selected_passenger = passenger_name
-	_selection_label.text = selected_instruction_template % passenger_name
-	for name: String in _passenger_buttons:
-		var button := _passenger_buttons[name] as Button
-		button.disabled = name == passenger_name
 
-func _assign_station(station: String) -> void:
-	if _selected_passenger.is_empty():
-		_error_label.text = no_passenger_error
-		return
-	# One passenger and one station per slot; assignments remain freely editable.
-	for old_station: String in _assignments.keys():
-		if _assignments[old_station] == _selected_passenger:
-			_assignments.erase(old_station)
-	if _assignments.has(station):
-		var displaced: String = _assignments[station]
-		if _passenger_buttons.has(displaced):
-			(_passenger_buttons[displaced] as Button).disabled = false
-	_assignments[station] = _selected_passenger
-	_update_station_buttons()
+func _on_passenger_selected(passenger_name: String) -> void:
+	_selected_passenger = passenger_name
+	_selection_label.text = selection_template % passenger_name
 	_error_label.text = ""
 
-func _update_station_buttons() -> void:
-	for station: String in _station_buttons:
-		var passenger_name: String = _assignments.get(station, empty_station_text)
-		(_station_buttons[station] as Button).text = station_slot_template % [station.to_upper(), passenger_name]
+
+func _on_station_selected(station_name: String) -> void:
+	if _selected_passenger.is_empty():
+		_selection_label.text = no_selection_text
+		return
+	_assign_passenger_to_station(station_name, _selected_passenger)
+
+
+func _assign_passenger_to_station(station_name: String, passenger_name: String) -> void:
+	if _puzzle == null or not _puzzle.night_stations.has(station_name):
+		return
+	if not _passenger_data_by_name.has(passenger_name):
+		return
+	for old_station: String in _assignments.keys():
+		if _assignments[old_station] == passenger_name:
+			_assignments.erase(old_station)
+	_assignments[station_name] = passenger_name
+	_selected_passenger = passenger_name
+	_selection_label.text = "%s assigned to %s." % [passenger_name, station_name]
+	_error_label.text = ""
+	_update_assignment_visuals()
+
+
+func _update_assignment_visuals() -> void:
+	for target: NightStationTarget in _station_targets:
+		if not target.visible:
+			continue
+		var passenger_name: String = str(_assignments.get(target.station_name, ""))
+		var portrait: Texture2D
+		if _passenger_data_by_name.has(passenger_name):
+			portrait = (_passenger_data_by_name[passenger_name] as PassengerData).id_photo
+		target.set_assignment(passenger_name, portrait)
+	for card: NightPassengerCard in _passenger_cards:
+		if card.visible:
+			card.set_assignment(_station_for_passenger(card.passenger_name))
+	_update_counts()
+
+
+func _update_counts() -> void:
+	var total: int = _passenger_data_by_name.size()
+	_assignment_count_label.text = assignment_count_template % [_assignments.size(), total]
+	var clue_count: int = 0
+	for passenger_name: String in _passenger_data_by_name:
+		if not str(_collected_statements.get(passenger_name, "")).is_empty():
+			clue_count += 1
+	_clue_count_label.text = clue_count_template % [clue_count, total]
+	_confirm_button.disabled = total == 0 or _assignments.size() != total
+
+
+func _station_for_passenger(passenger_name: String) -> String:
+	for station_name: String in _assignments:
+		if _assignments[station_name] == passenger_name:
+			return station_name
+	return ""
+
+
+func _remove_invalid_assignments() -> void:
+	for station_name: String in _assignments.keys():
+		if (
+			not _puzzle.night_stations.has(station_name)
+			or not _passenger_data_by_name.has(str(_assignments[station_name]))
+		):
+			_assignments.erase(station_name)
+
 
 func _confirm() -> void:
-	if not _all_statements_collected:
-		_error_label.text = missing_statements_error
-		return
-	if _puzzle == null or _assignments.size() != _puzzle.night_stations.size():
+	if _puzzle == null or _assignments.size() != _passenger_data_by_name.size():
 		_error_label.text = incomplete_assignment_error
 		return
-	departures_confirmed.emit(_assignments.duplicate())
+	departures_confirmed.emit(_assignments.duplicate(true))
 
-func _compose_statement_document(passengers: Array[PassengerData], collected_statements: Dictionary) -> String:
-	var lines := PackedStringArray()
-	for data: PassengerData in passengers:
-		var statement: String = str(collected_statements.get(data.short_name, "")).strip_edges()
-		if statement.is_empty():
-			lines.append(missing_statement_template % data.short_name.to_upper())
-		else:
-			lines.append(statement_entry_template % [data.short_name.to_upper(), statement])
-	if lines.is_empty():
-		return no_collected_statements_text
-	return "\n\n".join(lines)
 
-func _has_every_statement(passengers: Array[PassengerData], puzzle: DeparturePuzzleData, collected_statements: Dictionary) -> bool:
-	if passengers.is_empty():
-		return false
-	for data: PassengerData in passengers:
-		if puzzle.get_statement_for_passenger(data.short_name).is_empty():
-			return false
-		if str(collected_statements.get(data.short_name, "")).strip_edges().is_empty():
-			return false
-	return true
+func _present_board() -> void:
+	_board_anchor.pivot_offset = _board_anchor.size * 0.5
+	_board_anchor.modulate.a = 0.0
+	_board_anchor.scale = Vector2(0.97, 0.97)
+	var tween: Tween = create_tween()
+	tween.tween_property(_board_anchor, ^"modulate:a", 1.0, 0.2)
+	tween.parallel().tween_property(_board_anchor, ^"scale", Vector2.ONE, 0.3) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not visible:
+		return
+	var key_event := event as InputEventKey
+	if key_event != null and key_event.echo:
+		return
+	if event.is_action_pressed(&"interact"):
+		request_close()
+		get_viewport().set_input_as_handled()

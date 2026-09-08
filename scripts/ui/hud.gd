@@ -402,6 +402,7 @@ func _update_dialogue_pointer(target_local_x: float, prompt_width: float) -> voi
 
 func set_day_hud_visible(value: bool) -> void:
 	_clock_panel.visible = value
+	_guidebook_button.tooltip_text = "Open guidebook"
 	if not value:
 		_clock_briefing_animation.stop()
 		_clock_sign_assembly.hide()
@@ -458,6 +459,7 @@ func set_night_walk_mode() -> void:
 	_clock_briefing_animation.stop()
 	_clock_sign_assembly.hide()
 	_clock_panel.show()
+	_guidebook_button.tooltip_text = "Open Night Ledger"
 	_tool_status_label.visible = true
 	_market_item_bar.visible = true
 	_floating_prompt.visible = not _prompt_label.text.is_empty()

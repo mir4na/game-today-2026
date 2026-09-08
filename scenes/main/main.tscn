@@ -46,6 +46,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/night_transition_cutscene_ui.tscn" id="45_night_transition"]
 [ext_resource type="PackedScene" path="res://scenes/systems/station_cinematic_view.tscn" id="45_station_view"]
 [ext_resource type="PackedScene" path="res://scenes/ui/swiftstep_effect_ui.tscn" id="46_swiftstep_effect"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_soul_record_ui.tscn" id="47_soul_record"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_day_cycle_sky"]
 shader = ExtResource("39")
@@ -89,9 +90,9 @@ station_travel_durations_seconds = PackedFloat32Array(120, 120, 120, 120)
 radar_anomaly_light_seconds = 4.0
 debug_print_anomaly_roster = true
 night_shift_instruction = "Night shift
-Interview the deceased, then return to the ledger in the front passenger coach"
-departure_statement_recorded_template = "Departure statement recorded
-%d / %d collected"
+Read each soul's record, then open the Night Ledger from the lower-left button"
+departure_statement_recorded_template = "Constellation statement recorded
+%d / %d found"
 
 [node name="MarketToolState" parent="." unique_id=1541596097 instance=ExtResource("40_market_state")]
 unique_name_in_owner = true
@@ -269,6 +270,9 @@ unique_name_in_owner = true
 [node name="NightMarketUI" parent="ModalLayer" unique_id=372416607 instance=ExtResource("41_market_ui")]
 unique_name_in_owner = true
 
+[node name="NightSoulRecordUI" parent="ModalLayer" instance=ExtResource("47_soul_record")]
+unique_name_in_owner = true
+
 [node name="NightPuzzleUI" parent="ModalLayer" unique_id=1779434419 instance=ExtResource("8")]
 unique_name_in_owner = true
 
@@ -310,6 +314,9 @@ unique_name_in_owner = true
 [connection signal="veil_crossed" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_veil_crossed"]
 [connection signal="continue_requested" from="ModalLayer/NightMarketUI" to="." method="_on_night_market_continue"]
 [connection signal="purchase_requested" from="ModalLayer/NightMarketUI" to="." method="_on_market_purchase_requested"]
+[connection signal="closed" from="ModalLayer/NightSoulRecordUI" to="." method="_on_night_soul_record_closed"]
+[connection signal="statement_recorded" from="ModalLayer/NightSoulRecordUI" to="." method="_on_night_statement_recorded"]
+[connection signal="closed" from="ModalLayer/NightPuzzleUI" to="." method="_close_night_puzzle"]
 [connection signal="departures_confirmed" from="ModalLayer/NightPuzzleUI" to="." method="_on_departures_confirmed"]
 [connection signal="journey_continue_requested" from="ModalLayer/DepartureSequenceUI" to="." method="_on_journey_continue"]
 [connection signal="sequence_finished" from="ModalLayer/DepartureSequenceUI" to="." method="_on_night_sequence_finished"]

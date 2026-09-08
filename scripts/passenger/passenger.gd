@@ -15,7 +15,7 @@ signal documents_requested(passenger: Passenger)
 @export_node_path("CollisionShape2D") var navigation_probe_collision_path: NodePath
 @export_flags_2d_physics var navigation_blocker_mask: int = 4
 @export_category("Interaction Copy")
-@export var night_prompt_text: String = "Hear departure statement"
+@export var night_prompt_text: String = "Read soul record"
 @export_category("Visual Scale")
 @export var uses_authored_character_artwork: bool = false
 @export_category("Artwork Direction")

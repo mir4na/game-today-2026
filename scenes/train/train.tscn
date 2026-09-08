@@ -8,7 +8,6 @@
 [ext_resource type="Script" uid="uid://cc1e1727eckwm" path="res://scripts/train/train_exterior_body.gd" id="7"]
 [ext_resource type="Texture2D" uid="uid://d3kh2a47g41ko" path="res://assets/kereta/Jalan.png" id="7_v58c7"]
 [ext_resource type="PackedScene" uid="uid://ddhu4mk3fcp8n" path="res://scenes/minigames/blocked_aisle_event.tscn" id="8_blocked"]
-[ext_resource type="PackedScene" uid="uid://dg5g8fm8dx45y" path="res://scenes/interactables/conductor_desk.tscn" id="9_night_ledger"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yjxff"]
 size = Vector2(72.77644, 18.86792)
@@ -161,11 +160,6 @@ editor_description = "Coach 4 radar boundary. Keep this rectangle aligned to the
 offset_top = 190.0
 offset_right = 960.0
 offset_bottom = 525.0
-
-[node name="ConductorDesk" parent="Cars/PassengerCoach4" unique_id=1072375650 instance=ExtResource("9_night_ledger")]
-unique_name_in_owner = true
-editor_description = "Night drop-off ledger retained inside the front passenger coach after removing the dedicated conductor car."
-position = Vector2(746, 456)
 
 [node name="Newspaper" parent="Cars/PassengerCoach4" unique_id=891876982 instance=ExtResource("5")]
 unique_name_in_owner = true

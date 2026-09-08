@@ -5,15 +5,72 @@
 [resource]
 script = ExtResource("1")
 night_stations = PackedStringArray("Vesperwick", "Hollowcross", "Bellhaven", "Morrowfield")
+clockwise_statement_template = "%s is one node clockwise from %s."
+hub_statement_template = "%s waits at the only node connected directly to all three others."
+endpoint_statement_template = "%s waits at the endpoint, where the single thread stops."
+distance_statement_template = "Two threads separate %s from %s."
+single_passenger_statement = "This is the only soul awaiting assignment tonight."
 anomaly_descriptor_by_type = {
-"newspaper_death": "the passenger whose death appeared in the newspaper",
-"portrait_mismatch": "the passenger whose ID portrait belongs to someone else",
+"newspaper_death": "the passenger named as dead in the newspaper",
+"portrait_mismatch": "the passenger with the borrowed portrait",
 "shadowless": "the passenger without a shadow",
-"time_invalid_ticket": "the passenger carrying a ticket for another service day",
-"unlisted_destination": "the passenger whose destination is absent from the day route"
+"time_invalid_ticket": "the passenger with the wrong ticket date",
+"unlisted_destination": "the passenger whose destination is missing from the day route"
+}
+anomaly_label_by_type = {
+"newspaper_death": "NEWSPAPER DEATH",
+"portrait_mismatch": "BORROWED PORTRAIT",
+"shadowless": "NO SHADOW",
+"time_invalid_ticket": "WRONG TICKET DATE",
+"unlisted_destination": "UNLISTED DESTINATION"
 }
 fallback_descriptor_template = "the %s"
+fallback_anomaly_label = "UNRESOLVED ANOMALY"
 duplicate_descriptor_template = "%s who worked as the %s"
-immediately_before_template = "%s leaves immediately before %s."
-before_template = "%s leaves before %s."
-single_passenger_statement = "Only one unresolved departure remains on tonight's route."
+biography_opening_by_occupation = {
+"archivist": PackedStringArray("{name} worked as an archivist, restoring damaged registers and returning misplaced pages to their proper files.", "Colleagues trusted {name} with records that were too fragile to be copied."),
+"bookbinder": PackedStringArray("{name} bound journals and public records in a narrow workshop beside the railway.", "Every finished book carried a small thread mark hidden beneath its back cover."),
+"botanist": PackedStringArray("{name} studied plants that grew beside abandoned rail lines and kept each specimen in a separate paper sleeve.", "The final collection was meant for a greenhouse that had not yet opened."),
+"carpenter": PackedStringArray("{name} repaired benches, doors, and luggage racks for homes near the eastern line.", "Scraps from each job were kept and marked with the date they were cut."),
+"clockmaker": PackedStringArray("{name} repaired station clocks and refused to return one until every hand moved without hesitation.", "A small notebook recorded each stopped minute and the part that caused it."),
+"cook": PackedStringArray("{name} cooked evening meals at a boarding house near {origin}.", "Recipes were written from memory and adjusted for every guest who returned."),
+"courier": PackedStringArray("{name} delivered letters and parcels across the northern district, recording every handoff in a pocket ledger.", "Undelivered packages were always returned in person before the route ended."),
+"florist": PackedStringArray("{name} arranged flowers for departures, reunions, and memorials at the station arcade.", "One pressed bloom from every order was kept between the pages of a private catalogue."),
+"glassworker": PackedStringArray("{name} shaped panes for carriage windows and storefronts along the railway.", "Flawed pieces were kept because their fractures produced unusual patterns in the light."),
+"lamplighter": PackedStringArray("{name} maintained the platform lamps and was usually the last worker to leave after the final service.", "Every failed light was logged with its time, number, and weather conditions."),
+"nurse": PackedStringArray("{name} worked the late ward and carried handwritten notes for patients who had no family nearby.", "The notes were folded into a pocket diary after every shift."),
+"retired teacher": PackedStringArray("{name} spent decades teaching children to read maps, timetables, and old regional histories.", "Even after retiring, each lesson was planned in the same worn notebook."),
+"shopkeeper": PackedStringArray("{name} kept a small provisions shop close to {origin} and knew most customers by their regular orders.", "Receipts were stored in date order beneath the counter every evening."),
+"student": PackedStringArray("{name} traveled daily with a stack of annotated books and a notebook filled beyond its margins.", "Friends said no page was ever discarded, even after the subject had changed."),
+"surveyor": PackedStringArray("{name} measured old railway boundaries and marked routes that no longer appeared on public maps.", "Field notes were drawn in black ink and checked again before sunset."),
+"tailor": PackedStringArray("{name} worked as a tailor near the eastern railway and saved a strip of cloth from every completed order.", "Old fabric was often sewn into the hidden lining of a new coat.")
+}
+anomaly_record_by_type = {
+"newspaper_death": PackedStringArray("A newspaper recovered inside the carriage names {name} as dead before this service reached its final stop.", "The printed occupation and age match {name}'s identity record."),
+"portrait_mismatch": PackedStringArray("The name and number on {name}'s identity card are valid, but the portrait belongs to {portrait_owner}.", "The photograph changes back only when the card is removed from the train."),
+"shadowless": PackedStringArray("Platform footage shows light falling clearly behind {name}, yet no shadow forms beneath the body.", "The empty patch follows {name} through every carriage."),
+"time_invalid_ticket": PackedStringArray("{name}'s ticket is printed for {ticket_date}, a date outside today's service.", "The ticket stock and serial number are otherwise genuine."),
+"unlisted_destination": PackedStringArray("{name}'s ticket names {destination}, which is absent from every destination on the daytime route.", "The letters remain legible even when the ticket is held against the route map.")
+}
+resonance_medium_by_occupation = {
+"archivist": "After the veil, a sentence appears between two entries in {name}'s restored register.",
+"bookbinder": "After the veil, a sentence rises through the blank endpaper of {name}'s last book.",
+"botanist": "After the veil, roots inside {name}'s specimen book arrange themselves beneath a new sentence.",
+"carpenter": "After the veil, the grain on {name}'s final wood sample forms a line of writing.",
+"clockmaker": "After the veil, a sentence appears around the rim of {name}'s stopped clock.",
+"cook": "After the veil, a sentence replaces the last line of {name}'s unfinished recipe.",
+"courier": "After the veil, a blank delivery receipt in {name}'s pocket gains one final line.",
+"florist": "After the veil, pressed petals in {name}'s catalogue settle beneath a new sentence.",
+"glassworker": "After the veil, a sentence becomes visible inside the fracture of {name}'s final pane.",
+"lamplighter": "After the veil, soot on {name}'s final lamp log gathers into a sentence.",
+"nurse": "After the veil, a sentence appears on the unused page of {name}'s pocket diary.",
+"retired teacher": "After the veil, a sentence writes itself beneath the final lesson in {name}'s notebook.",
+"shopkeeper": "After the veil, a sentence appears on the back of {name}'s final receipt.",
+"student": "After the veil, a sentence fills the last empty margin in {name}'s notebook.",
+"surveyor": "After the veil, a sentence follows the edge of {name}'s unfinished boundary map.",
+"tailor": "After the veil, unfamiliar words appear as stitches inside {name}'s unfinished lining."
+}
+generic_biography_opening = PackedStringArray("{name} spent years working as a {occupation} near the railway.", "A small collection of work notes was found among {name}'s belongings.")
+generic_anomaly_record = PackedStringArray("Something in {name}'s travel record cannot be explained by the daytime service.", "The evidence remains unchanged after the train crosses the veil.")
+generic_resonance_medium = "After the veil, a new sentence appears among {name}'s belongings."
+resonance_closing_sentence = "The writing was not present before the train crossed the veil and fades anywhere outside the carriage."

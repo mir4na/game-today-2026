@@ -40,7 +40,7 @@ maximum_roaming_target_population = 3
 navigation_probe_path = NodePath("NpcNavigationProbe")
 navigation_probe_collision_path = NodePath("NpcNavigationProbe/ProbeCollision")
 navigation_blocker_mask = 4
-night_prompt_text = "Hear departure statement"
+night_prompt_text = "Read soul record"
 
 [node name="Shadow" type="Polygon2D" parent="."]
 unique_name_in_owner = true

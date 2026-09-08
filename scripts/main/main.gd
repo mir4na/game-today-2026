@@ -80,7 +80,6 @@ var _penalty_log := PackedStringArray()
 var _shift_checkpoint: Dictionary = {}
 var _progress_advanced: bool = false
 var _newspaper: NewspaperInteractable
-var _desk: ConductorDeskInteractable
 var _nearby_interactable: Interactable
 var _active_modal: Control
 var _modal_before_pause: Control
@@ -122,6 +121,7 @@ var _world_time_scale: float = 1.0
 @onready var _shift_report_ui: ShiftReportUI = %ShiftReportUI
 @onready var _night_transition_ui: NightTransitionCutsceneUI = %NightTransitionCutsceneUI
 @onready var _night_puzzle_ui: NightPuzzleUI = %NightPuzzleUI
+@onready var _night_soul_record_ui: Variant = %NightSoulRecordUI
 @onready var _sequence_ui: DepartureSequenceUI = %DepartureSequenceUI
 @onready var _pause_ui: PauseUI = %PauseUI
 @onready var _blocked_aisle_ui: Control = %BlockedAislePuzzleUI
@@ -324,6 +324,10 @@ func _input(event: InputEvent) -> void:
 		return
 	if _night_statement_active or _service_seal_active:
 		return
+	if state == GameState.NIGHT_PUZZLE and _night_puzzle_ui.visible:
+		_toggle_guidebook()
+		get_viewport().set_input_as_handled()
+		return
 	if not _guidebook_ui.visible and (
 		_active_modal != null
 		or state not in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
@@ -335,8 +339,11 @@ func _input(event: InputEvent) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _night_statement_active:
-		if event.is_action_pressed(&"interact") or event.is_action_pressed(&"ui_cancel"):
-			_close_night_statement_dialogue()
+		if event.is_action_pressed(&"interact"):
+			_night_soul_record_ui.call(&"request_close")
+			get_viewport().set_input_as_handled()
+		elif event.is_action_pressed(&"ui_cancel"):
+			_open_pause()
 			get_viewport().set_input_as_handled()
 		return
 	var market_shortcut: int = _market_item_shortcut(event)
@@ -379,8 +386,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		_open_pause()
 	elif _night_transition_ui.visible:
 		_night_transition_ui.skip_sequence()
+	elif _night_soul_record_ui.visible:
+		_open_pause()
 	elif _night_puzzle_ui.visible:
-		_close_night_puzzle()
+		_open_pause()
 	elif state not in [GameState.OPENING, GameState.SHIFT_REPORT, GameState.MARKET, GameState.COMPLETE]:
 		_open_pause()
 	get_viewport().set_input_as_handled()
@@ -850,8 +859,6 @@ func _collect_interactables(node: Node) -> void:
 			_interactables.append(interactable)
 			if interactable is NewspaperInteractable:
 				_newspaper = interactable as NewspaperInteractable
-			elif interactable is ConductorDeskInteractable:
-				_desk = interactable as ConductorDeskInteractable
 		_collect_interactables(child)
 
 
@@ -1058,10 +1065,7 @@ func _is_seal_allowed_interactable(interactable: Interactable) -> bool:
 func _on_interaction_pressed(interactable: Interactable) -> void:
 	if _service_seal_active and not _is_seal_allowed_interactable(interactable):
 		return
-	if interactable is ConductorDeskInteractable:
-		_on_desk_interacted()
-	else:
-		interactable.interact()
+	interactable.interact()
 
 func _on_nearby_interactable_changed(interactable: Interactable) -> void:
 	_nearby_interactable = interactable
@@ -1108,25 +1112,54 @@ func _on_night_passenger_interacted(passenger: Passenger) -> void:
 		return
 	var passenger_name: String = passenger.data.short_name
 	var statement: String = puzzle.get_statement_for_passenger(passenger_name)
-	var newly_recorded: bool = not statement.is_empty() and not _collected_departure_statements.has(passenger_name)
-	if newly_recorded:
-		_collected_departure_statements[passenger_name] = statement
+	if statement.is_empty():
+		_hud.notify(missing_night_statement_text, 2.0)
+		return
 	_night_statement_active = true
-	_night_statement_newly_recorded = newly_recorded
+	_night_statement_newly_recorded = false
+	_inspected_passenger = passenger
+	_inspected_passenger.set_inspection_paused(true)
+	_active_modal = _night_soul_record_ui
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
-	var spoken_statement: String = statement if not statement.is_empty() else missing_night_statement_text
-	_hud.set_prompt(night_statement_template % [passenger_name, spoken_statement], passenger.get_prompt_anchor())
+	_hud.set_prompt("")
+	_night_soul_record_ui.call(
+		&"open_record",
+		passenger.data,
+		puzzle,
+		_collected_departure_statements.has(passenger_name)
+	)
 
 func _close_night_statement_dialogue() -> void:
 	if not _night_statement_active:
 		return
+	if _night_soul_record_ui.visible:
+		_night_soul_record_ui.hide()
 	_night_statement_active = false
+	if is_instance_valid(_inspected_passenger):
+		_inspected_passenger.set_inspection_paused(false)
+	_inspected_passenger = null
+	if _active_modal == _night_soul_record_ui:
+		_active_modal = null
 	_hud.set_prompt("")
 	_set_player_control_for_state()
 	if _night_statement_newly_recorded:
 		_hud.notify(departure_statement_recorded_template % [_collected_departure_statements.size(), _get_departure_statement_total()], 3.0)
 	_night_statement_newly_recorded = false
+
+
+func _on_night_statement_recorded(passenger_name: String, statement: String) -> void:
+	if passenger_name.is_empty() or statement.is_empty():
+		return
+	if _collected_departure_statements.has(passenger_name):
+		return
+	_collected_departure_statements[passenger_name] = statement
+	_night_statement_newly_recorded = true
+	_night_puzzle_ui.refresh_collected_statements(_collected_departure_statements)
+
+
+func _on_night_soul_record_closed() -> void:
+	_close_night_statement_dialogue()
 
 func _on_station_assignment_toggled(passenger_name: String, should_assign: bool) -> void:
 	if state not in [GameState.DAY, GameState.SUNSET] or not _has_next_day_station() or _station_exchange_processed:
@@ -1546,10 +1579,6 @@ func _find_next_station_boarder(boarders: Array[PassengerData]) -> int:
 			return i
 	return -1
 
-func _on_desk_interacted() -> void:
-	if state == GameState.NIGHT:
-		_open_night_puzzle()
-
 func _open_guidebook() -> void:
 	_active_modal = _guidebook_ui
 	_player.movement_enabled = false
@@ -1593,9 +1622,15 @@ func _refresh_guidebook_progress() -> void:
 
 
 func _toggle_guidebook() -> void:
+	if state in [GameState.NIGHT, GameState.NIGHT_PUZZLE]:
+		if _night_puzzle_ui.visible:
+			_night_puzzle_ui.request_close()
+		elif not _service_seal_active and _active_modal == null:
+			_open_night_puzzle()
+		return
 	if _guidebook_ui.visible:
 		_guidebook_ui.request_close()
-	elif not _service_seal_active and _active_modal == null and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]:
+	elif not _service_seal_active and _active_modal == null and state in [GameState.DAY, GameState.SUNSET]:
 		_open_guidebook()
 
 
@@ -1905,7 +1940,6 @@ func _prepare_night_world() -> void:
 	for passenger: Passenger in _passengers:
 		if _is_active_passenger(passenger):
 			passenger.set_night_mode(true)
-	_desk.set_night_mode(true)
 	_hud.set_clock_progress(1.0)
 	_hud.set_clock_night_mode(true, true)
 
@@ -1952,11 +1986,11 @@ func _on_departures_confirmed(assignments: Dictionary) -> void:
 	if puzzle == null:
 		_night_puzzle_ui.show_error("The night assignment manifest is unavailable.")
 		return
+	var correct_count: int = 0
 	for station: String in puzzle.night_stations:
-		if assignments.get(station, "") != puzzle.correct_passenger_by_station.get(station, ""):
-			_night_puzzle_ui.show_error("Something is wrong with the symbolic assignments.")
-			return
-	_night_blessing_award = _market_tool_state.call(&"award_night_blessings", puzzle.night_stations.size())
+		if assignments.get(station, "") == puzzle.correct_passenger_by_station.get(station, ""):
+			correct_count += 1
+	_night_blessing_award = _market_tool_state.call(&"award_night_blessings", correct_count)
 	_night_puzzle_ui.hide()
 	_active_modal = _sequence_ui
 	state = GameState.COMPLETE
