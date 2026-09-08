@@ -63,6 +63,7 @@ var _dead_twitch_offset: Vector2 = Vector2.ZERO
 var _dead_twitch_rotation: float = 0.0
 var _escaping_navigation_blocker: bool = false
 var _settling_for_night: bool = false
+var _world_time_scale: float = 1.0
 
 const PASSENGER_WALK_SPEED: float = 92.0
 
@@ -91,25 +92,26 @@ func _ready() -> void:
 	_update_visual()
 
 func _process(delta: float) -> void:
+	var world_delta: float = delta * _world_time_scale
 	var previous_position: Vector2 = position
-	_sway_time += delta
+	_sway_time += world_delta
 	if _is_dead_night_visual_active():
-		_update_dead_idle(delta)
+		_update_dead_idle(world_delta)
 	if _inspection_paused:
 		_animation_move_speed = 0.0
 		_update_visual()
 		return
 	if _settling_for_night and not departed:
 		_ensure_safe_idle_position()
-		_update_boarding_handoff(delta)
+		_update_boarding_handoff(world_delta)
 		_settling_for_night = _ai_walking
 	elif _boarding_handoff_active and not night_mode and not departed and data != null:
 		_begin_navigation_blocker_escape_if_needed()
-		_update_boarding_handoff(delta)
+		_update_boarding_handoff(world_delta)
 	elif ai_enabled and not night_mode and not departed and data != null:
 		_begin_navigation_blocker_escape_if_needed()
 		_ensure_safe_idle_position()
-		_update_day_ai(delta)
+		_update_day_ai(world_delta)
 	_animation_move_speed = position.distance_to(previous_position) / delta if delta > 0.0 else 0.0
 	_update_visual()
 
@@ -176,6 +178,12 @@ func depart_train() -> void:
 
 func set_ai_enabled(value: bool) -> void:
 	ai_enabled = value and not departed and not night_mode and not boarding_staged and not _inspection_paused
+
+
+func set_world_time_scale(value: float) -> void:
+	_world_time_scale = clampf(value, 0.05, 1.0)
+	if is_instance_valid(_animated_sprite):
+		_animated_sprite.speed_scale = _world_time_scale
 
 
 func set_cross_carriage_roaming_enabled(value: bool) -> void:

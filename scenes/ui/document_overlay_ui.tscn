@@ -4,6 +4,7 @@
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/passenger_documents.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/ui/newspaper_reader.tscn" id="4_newspaper"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/round_close_button.tscn" id="5_close"]
 
 [sub_resource type="StyleBoxFlat" id="ReaderPanelStyle"]
 content_margin_left = 24.0
@@ -119,7 +120,7 @@ mouse_filter = 2
 unique_name_in_owner = true
 layout_mode = 0
 
-[node name="PassengerCloseButton" type="Button" parent="."]
+[node name="PassengerCloseButton" parent="." instance=ExtResource("5_close")]
 unique_name_in_owner = true
 z_index = 50
 custom_minimum_size = Vector2(54, 54)
@@ -133,18 +134,6 @@ offset_right = -24.0
 offset_bottom = 78.0
 grow_horizontal = 0
 focus_neighbor_bottom = NodePath("../PassengerDocumentCenter/PassengerDocumentAnchor/PassengerDocuments")
-mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_colors/font_hover_color = Color(1, 0.929412, 0.772549, 1)
-theme_override_colors/font_pressed_color = Color(1, 0.929412, 0.772549, 1)
-theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.95)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 31
-theme_override_styles/normal = SubResource("CloseButtonNormal")
-theme_override_styles/hover = SubResource("CloseButtonHover")
-theme_override_styles/pressed = SubResource("CloseButtonPressed")
-theme_override_styles/focus = SubResource("CloseButtonHover")
-text = "×"
 tooltip_text = "Close passenger documents [E / ESC]"
 
 [node name="NewspaperCenter" type="CenterContainer" parent="."]
@@ -203,9 +192,9 @@ theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 27
 text = "DOCUMENT"
 
-[node name="CloseButton" type="Button" parent="ReaderCenter/ReaderAnchor/ReaderPanel/ReaderLayout/Header"]
+[node name="CloseButton" parent="ReaderCenter/ReaderAnchor/ReaderPanel/ReaderLayout/Header" instance=ExtResource("5_close")]
 layout_mode = 2
-text = "CLOSE  [E / ESC]"
+tooltip_text = "Close document [E / ESC]"
 
 [node name="ReaderContent" type="RichTextLabel" parent="ReaderCenter/ReaderAnchor/ReaderPanel/ReaderLayout"]
 unique_name_in_owner = true

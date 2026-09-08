@@ -47,6 +47,9 @@ const DAY_SERVICE_FINAL_CYCLE_PROGRESS: float = 1.0
 const SUNSET_STATE_PROGRESS: float = 0.62
 const SERVICE_NIGHT_START_PROGRESS: float = 0.70
 const SERVICE_FULL_NIGHT_PROGRESS: float = 0.98
+const TOOL_AUDIT_SLIP: StringName = &"audit_slip"
+const TOOL_RADAR_CHARGE: StringName = &"radar_charge"
+const TOOL_SPEED_UPGRADE: StringName = &"speed_upgrade"
 
 var state: GameState = GameState.OPENING
 var _day_minutes: float = START_MINUTES
@@ -104,6 +107,8 @@ var _day_blessing_award: Dictionary = {}
 var _night_blessing_award: Dictionary = {}
 var _night_world_prepared: bool = false
 var _radar_scan_active: bool = false
+var _swiftstep_active: bool = false
+var _world_time_scale: float = 1.0
 
 @onready var _train: TrainWorld = %Train
 @onready var _player: ConductorPlayer = %Player
@@ -122,6 +127,7 @@ var _radar_scan_active: bool = false
 @onready var _blocked_aisle_ui: Control = %BlockedAislePuzzleUI
 @onready var _clean_seat_ui: Control = %CleanSeatUI
 @onready var _night_market_ui: Control = %NightMarketUI
+@onready var _swiftstep_effect_ui: Variant = %SwiftstepEffectUI
 @onready var _market_tool_state: Node = %MarketToolState
 @onready var _blocked_aisle_timer: Timer = %BlockedAisleTimer
 @onready var _dirty_seat_timer: Timer = %DirtySeatTimer
@@ -138,6 +144,7 @@ var _radar_scan_active: bool = false
 
 func _ready() -> void:
 	_train_occupants_station_rest_position = _train_occupants.position
+	_connect_hud_runtime_signals()
 	if day_route.size() < 2:
 		push_error("Main/Day Route requires at least an opening and final station.")
 		return
@@ -179,11 +186,27 @@ func _ready() -> void:
 	_hud.set_clock_night_mode(false, false)
 	_pause_ui.configure_service_info(manifest_config.service_train_number, manifest_config.service_date_text)
 	_set_sky_cycle_progress(0.0)
+	_travel_background.begin_route_leg(_route_index, true)
 	_on_market_inventory_changed(_market_tool_state.call(&"get_snapshot"))
 	_update_passenger_minimap()
 	_set_passenger_ai_enabled(false)
 	_active_modal = _day_intro_ui
 	_day_intro_ui.play_intro(day_number)
+
+
+func _connect_hud_runtime_signals() -> void:
+	var market_tool_callback := Callable(self, &"_on_market_tool_requested")
+	if not _hud.has_signal(&"market_tool_requested"):
+		push_error("HUD is missing the market_tool_requested signal.")
+		return
+	if not _hud.is_connected(&"market_tool_requested", market_tool_callback):
+		_hud.connect(&"market_tool_requested", market_tool_callback)
+	var swiftstep_finished_callback := Callable(self, &"_on_swiftstep_effect_finished")
+	if not _swiftstep_effect_ui.has_signal(&"effect_finished"):
+		push_error("Swiftstep Effect UI is missing the effect_finished signal.")
+	elif not _swiftstep_effect_ui.is_connected(&"effect_finished", swiftstep_finished_callback):
+		_swiftstep_effect_ui.connect(&"effect_finished", swiftstep_finished_callback)
+
 
 func _process(delta: float) -> void:
 	_station_stop_ui.set_departure_blocked(_station_stop_ui.visible and _ambience.is_announcement_playing())
@@ -202,7 +225,10 @@ func _process(delta: float) -> void:
 		return
 
 	if not _station_arrival_announced:
-		_day_minutes = minf(_day_minutes + delta, _next_arrival_minutes())
+		_day_minutes = minf(_day_minutes + delta * _world_time_scale, _next_arrival_minutes())
+		_travel_background.update_route_leg_remaining(
+			maxf(_next_arrival_minutes() - _day_minutes, 0.0)
+		)
 	var route_progress: float = clampf((_day_minutes - START_MINUTES) / maxf(_final_arrival_minutes() - START_MINUTES, 1.0), 0.0, 1.0)
 	# Advance the dial with the moving train. One complete route leg contributes
 	# exactly one 36-degree clock step; station cutscenes pause this progress.
@@ -281,7 +307,6 @@ func _day_station_clock_progress() -> float:
 
 func _set_sky_cycle_progress(value: float) -> void:
 	var clamped_progress: float = clampf(value, 0.0, 1.0)
-	_travel_background.set_cycle_progress(clamped_progress)
 	_train.set_day_cycle_progress(clamped_progress)
 	_station_cinematic_view.set_cycle_progress(clamped_progress)
 	var sky_material := _sky_gradient.material as ShaderMaterial
@@ -314,6 +339,16 @@ func _unhandled_input(event: InputEvent) -> void:
 			_close_night_statement_dialogue()
 			get_viewport().set_input_as_handled()
 		return
+	var market_shortcut: int = _market_item_shortcut(event)
+	if market_shortcut > 0:
+		if (
+			not _service_seal_active
+			and _active_modal == null
+			and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
+		):
+			_hud.request_market_item(market_shortcut)
+		get_viewport().set_input_as_handled()
+		return
 	if (
 		event.is_action_pressed(&"use_radar")
 		and not _service_seal_active
@@ -341,7 +376,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif _clean_seat_ui.visible:
 		_open_pause()
 	elif _station_stop_ui.visible:
-		_station_stop_ui.skip_sequence()
+		_open_pause()
 	elif _night_transition_ui.visible:
 		_night_transition_ui.skip_sequence()
 	elif _night_puzzle_ui.visible:
@@ -349,6 +384,20 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif state not in [GameState.OPENING, GameState.SHIFT_REPORT, GameState.MARKET, GameState.COMPLETE]:
 		_open_pause()
 	get_viewport().set_input_as_handled()
+
+
+func _market_item_shortcut(event: InputEvent) -> int:
+	var key_event := event as InputEventKey
+	if key_event != null and key_event.echo:
+		return 0
+	if event.is_action_pressed(&"use_market_item_1"):
+		return 1
+	if event.is_action_pressed(&"use_market_item_2"):
+		return 2
+	if event.is_action_pressed(&"use_market_item_3"):
+		return 3
+	return 0
+
 
 func _spawn_initial_passengers() -> void:
 	var dead_count: int = 0
@@ -491,6 +540,7 @@ func _spawn_passenger(data: PassengerData, seat_slot: Marker2D) -> Passenger:
 	passenger.position = _passenger_container.to_local(seat_slot.global_position)
 	passenger.documents_requested.connect(_on_passenger_documents_requested)
 	_passenger_container.add_child(passenger)
+	passenger.set_world_time_scale(_world_time_scale)
 	_passengers.append(passenger)
 	_seat_occupant_by_slot[seat_slot] = passenger
 	_seat_slot_by_passenger[passenger] = seat_slot
@@ -865,6 +915,7 @@ func _on_blocked_aisle_timer_timeout() -> void:
 	if is_instance_valid(blocked_connector):
 		_train.set_blocked_connector_effect(_player.global_position.x, blocked_connector.global_position.x)
 	_blocked_aisle_activated = true
+	_hud.notify("LUGGAGE IS BLOCKING A COACH CONNECTOR", 3.5)
 	_refresh_player_interactables()
 	_refresh_maintenance_trackers()
 
@@ -894,6 +945,7 @@ func _on_dirty_seat_timer_timeout() -> void:
 	_active_dirty_seat_event = vacant_candidates[_daily_rng.randi_range(0, vacant_candidates.size() - 1)]
 	_active_dirty_seat_event.call(&"set_event_active", true)
 	_dirty_seat_activated = true
+	_hud.notify("A PASSENGER SEAT NEEDS CLEANING", 3.5)
 	_clear_dropoff_assignments_for_dirty_seat()
 	_set_service_sealed(true)
 	_refresh_maintenance_trackers()
@@ -1098,9 +1150,7 @@ func _on_station_assignment_toggled(passenger_name: String, should_assign: bool)
 	else:
 		if assignment_index >= 0:
 			_station_assignment.remove_at(assignment_index)
-	var next_station: String = _next_day_station()
 	_document_overlay.configure_station_assignment(_station_assignment.has(canonical_name), true)
-	_hud.notify("%s\n%s FOR %s • %d SELECTED" % [canonical_name.to_upper(), "ASSIGNED" if should_assign else "REMOVED", next_station.to_upper(), _station_assignment.size()], 2.0)
 
 func _on_newspaper_read() -> void:
 	_newspaper_read = true
@@ -1381,6 +1431,12 @@ func _on_station_cutscene_camera_return_started() -> void:
 	_station_cinematic_view.return_to_gameplay()
 
 
+func _on_station_cutscene_skip_requested() -> void:
+	# Skipping lands on the exact post-cutscene composition on this frame.
+	_ambience.skip_station_sequence()
+	_station_cinematic_view.skip_to_gameplay()
+
+
 func _on_station_cinematic_camera_handoff_finished() -> void:
 	_station_camera_return_complete = true
 	_station_stop_ui.confirm_camera_return_complete()
@@ -1451,9 +1507,11 @@ func _on_station_stop_finished() -> void:
 	_route_index += 1
 	_hud.set_clock_progress(_day_station_clock_progress(), true)
 	if not _has_next_day_station():
+		_travel_background.set_tunnel_active(false, true)
 		_update_passenger_minimap()
 		_finalize_day_shift()
 		return
+	_travel_background.begin_route_leg(_route_index)
 	_hud.set_next_stop(_next_day_station())
 	_station_assignment.clear()
 	_station_arrival_announced = false
@@ -1545,15 +1603,21 @@ func _on_guidebook_requested() -> void:
 	_toggle_guidebook()
 
 
-func _on_radar_requested() -> void:
+func _on_market_tool_requested(tool_id: StringName) -> void:
 	if (
-		_radar_scan_active
-		or _service_seal_active
+		_service_seal_active
 		or _active_modal != null
 		or state not in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
 	):
 		return
-	_use_carriage_radar()
+	match tool_id:
+		TOOL_AUDIT_SLIP:
+			_use_audit_slip()
+		TOOL_RADAR_CHARGE:
+			if not _radar_scan_active:
+				_use_carriage_radar()
+		TOOL_SPEED_UPGRADE:
+			_use_swiftstep()
 
 func _on_modal_closed() -> void:
 	if is_instance_valid(_inspected_passenger):
@@ -1683,10 +1747,84 @@ func _on_night_market_continue() -> void:
 
 
 func _on_market_inventory_changed(snapshot: Dictionary) -> void:
-	_player.set_market_speed_bonus(float(snapshot.get("speed_bonus", 0.0)))
 	_hud.set_market_tool_inventory(snapshot)
 	if is_instance_valid(_night_market_ui) and _night_market_ui.visible:
 		_night_market_ui.call(&"set_snapshot", snapshot)
+
+
+func _use_audit_slip() -> void:
+	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
+	if int(snapshot.get("audit_slips", 0)) <= 0:
+		_hud.notify("NO AUDIT SLIPS REMAINING", 2.5)
+		return
+	var passenger := _nearby_interactable as Passenger
+	if not _is_active_passenger(passenger):
+		_hud.notify("MOVE NEAR A PASSENGER TO USE THE AUDIT SLIP", 2.5)
+		return
+	if not bool(_market_tool_state.call(&"consume_audit_slip")):
+		return
+	var normalized_name: String = _normalize_name(passenger.data.passenger_name)
+	var found_in_manifest: bool = false
+	for manifest_data: PassengerData in _daily_manifest:
+		if normalized_name in [
+			_normalize_name(manifest_data.passenger_name),
+			_normalize_name(manifest_data.short_name),
+		]:
+			found_in_manifest = true
+			break
+	if found_in_manifest:
+		_hud.notify(
+			"MANIFEST NAME CONFIRMED\n%s • LIFE STATUS UNDISCLOSED" % passenger.data.short_name.to_upper(),
+			3.5
+		)
+	else:
+		_hud.notify("NAME NOT FOUND IN TODAY'S MANIFEST", 3.5)
+
+
+func _use_swiftstep() -> void:
+	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
+	var speed_level: int = int(snapshot.get("speed_level", 0))
+	if speed_level <= 0:
+		_hud.notify("NO SWIFTSTEP SOLES OWNED", 2.5)
+		return
+	if _swiftstep_active:
+		_hud.notify("SWIFTSTEP IS ALREADY BENDING TIME", 2.0)
+		return
+	_swiftstep_active = true
+	_hud.set_swiftstep_active(true)
+	var next_time_scale: float = float(_swiftstep_effect_ui.call(&"activate", _player, speed_level))
+	_set_world_time_scale(next_time_scale)
+	_hud.notify(
+		"SWIFTSTEP SOLES ACTIVE\nTHE WORLD YIELDS FOR 15 SECONDS",
+		2.75
+	)
+
+
+func _on_swiftstep_effect_finished() -> void:
+	_set_world_time_scale(1.0)
+	_swiftstep_active = false
+	_hud.set_swiftstep_active(false)
+
+
+func _set_world_time_scale(value: float) -> void:
+	var previous_scale: float = _world_time_scale
+	_world_time_scale = clampf(value, 0.05, 1.0)
+	_train.set_world_time_scale(_world_time_scale)
+	_travel_background.set_world_time_scale(_world_time_scale)
+	_travel_foreground.set_world_time_scale(_world_time_scale)
+	_ambience.set_world_time_scale(_world_time_scale)
+	for passenger: Passenger in _passengers:
+		if is_instance_valid(passenger):
+			passenger.set_world_time_scale(_world_time_scale)
+	_rescale_running_timer(_blocked_aisle_timer, previous_scale, _world_time_scale)
+	_rescale_running_timer(_dirty_seat_timer, previous_scale, _world_time_scale)
+
+
+func _rescale_running_timer(timer: Timer, previous_scale: float, next_scale: float) -> void:
+	if not is_instance_valid(timer) or timer.is_stopped():
+		return
+	var world_seconds_remaining: float = timer.time_left * maxf(previous_scale, 0.05)
+	timer.start(world_seconds_remaining / maxf(next_scale, 0.05))
 
 
 func _use_carriage_radar() -> void:
@@ -1760,6 +1898,8 @@ func _prepare_night_world() -> void:
 	_collected_departure_statements.clear()
 	_train.set_night_strength(1.0)
 	_ambience.night_strength = 1.0
+	_travel_background.set_tunnel_active(false, true)
+	_travel_background.show_night_background()
 	_set_sky_cycle_progress(1.0)
 	_night_atmosphere.modulate.a = 1.0
 	for passenger: Passenger in _passengers:

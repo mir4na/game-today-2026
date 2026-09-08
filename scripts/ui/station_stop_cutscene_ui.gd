@@ -8,6 +8,7 @@ signal sequence_timeline_changed(elapsed: float)
 signal train_motion_changed(strength: float)
 signal camera_return_started
 signal boarding_actor_entered(actor_id: int, door_screen_position: Vector2)
+signal sequence_skip_requested
 
 @export_category("Scene Copy")
 @export var show_station_title: bool = true
@@ -18,9 +19,10 @@ signal boarding_actor_entered(actor_id: int, door_screen_position: Vector2)
 @export var exchange_subtitle_text: String = "PASSENGER EXCHANGE"
 @export var terminal_heading_text: String = ""
 @export var terminal_subtitle_text: String = ""
-@export var opening_status_template: String = "%d BOARDING     [E / SPACE / ESC] SKIP"
-@export var exchange_status_template: String = "%d OFF  •  %d ON     [E / SPACE / ESC] SKIP"
-@export var terminal_status_template: String = "%d DISEMBARKING     [E / SPACE / ESC] SKIP"
+@export var opening_status_template: String = "%d BOARDING"
+@export var exchange_status_template: String = "%d OFF  •  %d ON"
+@export var terminal_status_template: String = "%d DISEMBARKING"
+@export var skip_hint_text: String = "PRESS [SPACE] TO SKIP"
 @export_category("Scene Animation")
 @export var letterbox_in_animation: StringName = &"letterbox_in"
 @export var letterbox_out_animation: StringName = &"letterbox_out"
@@ -123,6 +125,7 @@ var _motion_rng := RandomNumberGenerator.new()
 @onready var _heading_label: Label = %HeadingLabel
 @onready var _subtitle_label: Label = %SubtitleLabel
 @onready var _status_label: Label = %StatusLabel
+@onready var _skip_hint: Label = %SkipHint
 @onready var _cinematic_title: Control = %CinematicTitle
 @onready var _screen_fade: ColorRect = %ScreenFade
 @onready var _station_actor_canvas: CanvasLayer = %StationActorCanvas
@@ -234,10 +237,11 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 	_build_actor_motion_profiles()
 	_build_ambient_motion_profiles()
 	_update_scene_copy()
+	_skip_hint.text = skip_hint_text
 	show()
 	_station_actor_canvas.show()
 	_cinematic_border_layer.show()
-	process_mode = Node.PROCESS_MODE_ALWAYS
+	process_mode = Node.PROCESS_MODE_PAUSABLE
 	_screen_fade.modulate.a = 1.0
 	_motion_strength = -1.0
 	_set_train_motion_strength(1.0)
@@ -251,13 +255,14 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 func skip_sequence() -> void:
 	if not visible or _camera_return_started:
 		return
-	# A skip completes the train pass first, then preserves the same smooth camera
-	# handoff used by the unskipped sequence.
-	_set_train_motion_strength(0.0)
 	_skip_requested = true
+	_camera_return_started = true
+	# Resolve every actor and train transform on this frame. Main then swaps
+	# directly to the gameplay camera instead of replaying the cinematic handoff.
 	_elapsed = _duration
 	sequence_timeline_changed.emit(_elapsed)
 	_update_visuals()
+	sequence_skip_requested.emit()
 
 
 func _process(delta: float) -> void:
@@ -280,7 +285,10 @@ func _process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible or _elapsed < screen_fade_duration:
 		return
-	if event.is_action_pressed(&"interact") or event.is_action_pressed(&"ui_accept") or event.is_action_pressed(&"ui_cancel"):
+	var key_event := event as InputEventKey
+	if key_event != null and key_event.echo:
+		return
+	if event.is_action_pressed(&"stamp_ticket"):
 		skip_sequence()
 		get_viewport().set_input_as_handled()
 
@@ -300,6 +308,15 @@ func complete_sequence() -> void:
 	_start_camera_return_if_needed()
 	_set_train_motion_strength(1.0)
 	_screen_fade.modulate.a = 0.0
+	if _skip_requested:
+		_letterbox_animation.stop()
+		_cinematic_title_animation.stop()
+		_station_actor_canvas.hide()
+		_cinematic_border_layer.hide()
+		process_mode = Node.PROCESS_MODE_DISABLED
+		hide()
+		sequence_finished.emit()
+		return
 	if _letterbox_animation.has_animation(letterbox_out_animation):
 		_letterbox_exit_started = true
 		_play_letterbox_animation(letterbox_out_animation)

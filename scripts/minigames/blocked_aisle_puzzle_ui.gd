@@ -449,7 +449,9 @@ func _reset_board_preview() -> void:
 	for child: Node in _target_board.get_children():
 		if child is CanvasItem:
 			var preview := child as CanvasItem
-			preview.hide()
+			# Rack compartments remain readable before and after dragging. Drop
+			# feedback only tints the occupied cells instead of creating the grid.
+			preview.show()
 			preview.self_modulate = Color.WHITE
 
 

@@ -3,12 +3,95 @@
 [ext_resource type="Texture2D" uid="uid://bb8rkrjaeuw6n" path="res://assets/kereta/seat.png" id="1_seat"]
 [ext_resource type="PackedScene" uid="uid://ci8rlqvlg325x" path="res://scenes/minigames/dirty_seat_event.tscn" id="2_dirty"]
 [ext_resource type="Material" path="res://resources/materials/blocked_carriage_sprite_grayscale.tres" id="3_blocked_grayscale"]
+[ext_resource type="Material" path="res://resources/materials/seat_interaction_outline.tres" id="4_interaction_outline"]
+[ext_resource type="Material" path="res://resources/materials/seat_interaction_glow.tres" id="5_interaction_glow"]
+
+[sub_resource type="Animation" id="Animation_flash_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("SeatInteractionGlow:modulate:a")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.28]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("SeatInteractionGlow:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.374415, 0.374415)]
+}
+
+[sub_resource type="Animation" id="Animation_interaction_flash"]
+resource_name = "interaction_flash"
+length = 1.1
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("SeatInteractionGlow:modulate:a")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.46, 1.1),
+"transitions": PackedFloat32Array(1.4, 1.2, 1),
+"update": 0,
+"values": [0.28, 1.0, 0.28]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("SeatInteractionGlow:scale")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.46, 1.1),
+"transitions": PackedFloat32Array(1.4, 1.2, 1),
+"update": 0,
+"values": [Vector2(0.374415, 0.374415), Vector2(0.397, 0.397), Vector2(0.374415, 0.374415)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_interaction_flash"]
+_data = {
+&"RESET": SubResource("Animation_flash_reset"),
+&"interaction_flash": SubResource("Animation_interaction_flash")
+}
 
 [node name="PassengerSeat" type="Marker2D" unique_id=448457507 groups=["passenger_seats"]]
 editor_description = "One modular passenger seat. This root is also the NPC occupancy marker; move the complete seat from this node in the Inspector."
 
 [node name="SeatArt" type="Node2D" parent="."]
-editor_description = "Seat-only artwork root. Attachments remain outside it so dirty-seat interactions keep their color."
+editor_description = "Complete seat artwork. Its scene-authored outline silhouette sits behind the seat while dirt remains a separate attachment above it."
+
+[node name="SeatInteractionGlow" type="Sprite2D" parent="SeatArt"]
+editor_description = "Pulsing gold silhouette shown while this seat is an active Clean Seat interactable. Its color is editable in seat_interaction_glow.tres."
+visible = false
+material = ExtResource("5_interaction_glow")
+modulate = Color(1, 1, 1, 0.28)
+scale = Vector2(0.374415, 0.374415)
+texture = ExtResource("1_seat")
+
+[node name="SeatOutline" type="Sprite2D" parent="SeatArt"]
+editor_description = "Black whole-seat outline shown while this seat needs cleaning. Its color and width are controlled by DirtySeatEvent."
+material = ExtResource("4_interaction_outline")
+scale = Vector2(0.374415, 0.374415)
+texture = ExtResource("1_seat")
+
+[node name="SeatInteractionFlash" type="AnimationPlayer" parent="SeatArt"]
+editor_description = "Scene-authored Dirty Seat pulse. Edit interaction_flash to tune its rhythm, opacity, and expansion."
+libraries/ = SubResource("AnimationLibrary_interaction_flash")
 
 [node name="SeatVisual" type="Sprite2D" parent="SeatArt" unique_id=2041782283 groups=["blocked_carriage_visuals"]]
 editor_description = "Independent seat artwork. Keep attachments under the sibling Attachments node."
@@ -23,3 +106,6 @@ editor_description = "Scene-based attachment point for dirt, lost items, or othe
 [node name="DirtySeatEvent" parent="Attachments" unique_id=228326528 instance=ExtResource("2_dirty")]
 position = Vector2(1, 70)
 seat_marker_path = NodePath("../..")
+flash_visual_path = NodePath("../../SeatArt/SeatInteractionGlow")
+flash_animation_player_path = NodePath("../../SeatArt/SeatInteractionFlash")
+flash_animation_name = &"interaction_flash"

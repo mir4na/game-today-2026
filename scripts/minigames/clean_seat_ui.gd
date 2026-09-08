@@ -6,13 +6,22 @@ signal closed
 signal completed(event: Node)
 
 @export_category("Inspector Copy")
-@export var progress_template: String = "Cleaning  %d%%"
+@export var progress_template: String = "CLEANING  %d%%"
 
 @onready var _surface: CleanSeatSurface = %WipeSurface
 @onready var _progress_label: Label = %ProgressLabel
+@onready var _shade: ColorRect = $Shade
+@onready var _cleaning_window: Control = %CleaningWindow
 
 var _active_event: Node
 var _completed: bool = false
+var _open_tween: Tween
+var _window_rest_modulate: Color
+
+
+func _ready() -> void:
+	_window_rest_modulate = _cleaning_window.modulate
+	_cleaning_window.pivot_offset = _cleaning_window.size * 0.5
 
 
 func open_cleaning(event: Node) -> void:
@@ -22,6 +31,7 @@ func open_cleaning(event: Node) -> void:
 		_progress_label.show()
 		_surface.reset_cleaning()
 	show()
+	_play_open_animation()
 
 
 func request_close() -> void:
@@ -61,3 +71,20 @@ func _on_surface_cleaned() -> void:
 	hide()
 	completed.emit(_active_event)
 	_active_event = null
+
+
+func _play_open_animation() -> void:
+	if is_instance_valid(_open_tween) and _open_tween.is_valid():
+		_open_tween.kill()
+	_cleaning_window.scale = Vector2.ONE * 0.88
+	_cleaning_window.modulate = Color(
+		_window_rest_modulate.r,
+		_window_rest_modulate.g,
+		_window_rest_modulate.b,
+		0.0
+	)
+	_shade.modulate.a = 0.0
+	_open_tween = create_tween().set_parallel(true)
+	_open_tween.tween_property(_shade, ^"modulate:a", 1.0, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_open_tween.tween_property(_cleaning_window, ^"scale", Vector2.ONE, 0.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_open_tween.tween_property(_cleaning_window, ^"modulate", _window_rest_modulate, 0.16).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)

@@ -60,12 +60,13 @@ func _run() -> void:
 	await process_frame
 	cleaning.open_cleaning(first_event)
 	var surface: CleanSeatSurface = cleaning.get_node("%WipeSurface")
-	_press(surface, Vector2(140, 122))
+	_press(surface, surface.size * Vector2(0.5, 0.28))
 	var saved_mask: PackedByteArray = surface._mask_image.get_data()
 	var saved_progress: String = cleaning._progress_label.text
 	_check(surface._calculate_progress() > 0.0 and surface._calculate_progress() < 0.98, "Wiping creates partial progress.")
 	var cleaning_close_button := cleaning.get_node("%CloseButton") as Button
-	_check(cleaning_close_button.text.contains("[E]"), "Clean Seat shows its E close button.")
+	var cleaning_close_hint := cleaning.get_node("%CloseHint") as Label
+	_check(cleaning_close_button.text == "X" and cleaning_close_hint.text.contains("[E]"), "Clean Seat shows its round close button and E close hint.")
 	_check_escape_is_reserved_for_pause(cleaning)
 	for attempt: int in 3:
 		if attempt == 0:
@@ -75,20 +76,20 @@ func _run() -> void:
 			_exit_with_interact(cleaning)
 		_check(not surface._wiping and not surface._cloth.visible, "Closing releases the cloth mid-wipe.")
 		cleaning.open_cleaning(first_event)
-		_motion(surface, Vector2(132, 350))
+		_motion(surface, surface.size * Vector2(0.47, 0.8))
 		_check(surface._mask_image.get_data() == saved_mask, "Reopening preserves cleaned pixels; hovering cannot keep wiping.")
 		_check(cleaning._progress_label.text == saved_progress, "Reopening preserves the displayed percentage.")
-	_press(surface, Vector2(132, 350))
+	_press(surface, surface.size * Vector2(0.47, 0.8))
 	_check(surface._mask_image.get_data() != saved_mask, "A new press resumes cleaning.")
 	# Finish through actual cloth input after resuming.
-	for y: int in range(0, 436, 20):
+	for y: int in range(0, ceili(surface.size.y) + 1, 16):
 		_motion(surface, Vector2(0, y))
-		_motion(surface, Vector2(280, y))
+		_motion(surface, Vector2(surface.size.x, y))
 	await create_timer(0.65).timeout
 	_check(_cleaned_events == [first_event] and not cleaning.visible, "Resumed cleaning completes its event exactly once.")
 	cleaning.open_cleaning(next_event)
 	_check(is_zero_approx(surface._calculate_progress()), "A new dirty-seat event starts dirty.")
-	_check(cleaning._progress_label.visible and not cleaning._success_label.visible, "New events restore progress feedback.")
+	_check(cleaning._progress_label.visible and cleaning._progress_label.text == cleaning.progress_template % 0, "New events restore progress feedback.")
 	cleaning.free()
 	var puzzle: BlockedAislePuzzleUI = load("res://scenes/ui/blocked_aisle_puzzle_ui.tscn").instantiate()
 	root.add_child(puzzle)
@@ -99,12 +100,14 @@ func _run() -> void:
 	piece.global_position = puzzle._target_board.global_position
 	var release := InputEventMouseButton.new()
 	release.button_index = MOUSE_BUTTON_LEFT
+	release.global_position = puzzle._target_board.global_position + Vector2(8, 8)
 	piece._gui_input(release)
 	var saved_position: Vector2 = piece.position
 	var saved_cells: Dictionary = puzzle._occupied_cells.duplicate()
 	_check(not saved_cells.is_empty(), "Dropping luggage places it on the rack.")
 	var puzzle_close_button := puzzle.get_node("%CloseButton") as Button
-	_check(puzzle_close_button.text.contains("[E]"), "Blocked Aisle shows its E close button.")
+	var puzzle_close_hint := puzzle.get_node("%CloseHint") as Label
+	_check(puzzle_close_button.text == "X" and puzzle_close_hint.text.contains("[E]"), "Blocked Aisle shows its round close button and E close hint.")
 	_check_escape_is_reserved_for_pause(puzzle)
 	for attempt: int in 3:
 		if attempt == 0:

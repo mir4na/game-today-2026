@@ -7,18 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/minigames/suitcases/suitcase_1x3.tscn" id="7_1x3"]
 [ext_resource type="PackedScene" path="res://scenes/minigames/suitcases/suitcase_2x2.tscn" id="8_2x2"]
 [ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="9_josefin_bold"]
-
-[sub_resource type="StyleBoxFlat" id="BoardBlockStyle"]
-bg_color = Color(0.635294, 0.819608, 0.8, 0.045)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.776471, 0.913725, 0.890196, 0.12)
-corner_radius_top_left = 1
-corner_radius_top_right = 1
-corner_radius_bottom_right = 1
-corner_radius_bottom_left = 1
+[ext_resource type="PackedScene" path="res://scenes/ui/components/round_close_button.tscn" id="10_close"]
 
 [sub_resource type="StyleBoxFlat" id="RackShadowStyle"]
 bg_color = Color(0.0196078, 0.027451, 0.0313726, 0.78)
@@ -73,9 +62,23 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="StyleBoxFlat" id="BoardBlockStyle"]
+bg_color = Color(0.105882, 0.160784, 0.180392, 0.72)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.552941, 0.682353, 0.701961, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_color = Color(0.0156863, 0.0235294, 0.027451, 0.75)
+shadow_size = 2
+
 [node name="BlockedAislePuzzleUI" type="Control" unique_id=1498016103]
-visible = false
 process_mode = 1
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -85,8 +88,8 @@ grow_vertical = 2
 theme = ExtResource("4_theme")
 script = ExtResource("1_ui")
 suitcase_piece_scenes = Array[PackedScene]([ExtResource("5_1x1"), ExtResource("6_1x2"), ExtResource("7_1x3"), ExtResource("8_2x2")])
-valid_drop_preview_color = Color(0.588235, 1.0, 0.768627, 1)
-invalid_drop_preview_color = Color(1.0, 0.501961, 0.509804, 1)
+valid_drop_preview_color = Color(0.588235, 1, 0.768627, 1)
+invalid_drop_preview_color = Color(1, 0.501961, 0.509804, 1)
 
 [node name="Shade" type="ColorRect" parent="." unique_id=2063978739]
 editor_description = "Full-screen dim behind the luggage puzzle. Adjust alpha here to tune background darkness."
@@ -153,16 +156,16 @@ offset_right = 430.0
 offset_bottom = 434.0
 mouse_filter = 2
 
-[node name="RackBackdrop" type="Control" parent="PuzzleWindow"]
+[node name="RackBackdrop" type="Control" parent="PuzzleWindow" unique_id=334921742]
 editor_description = "Scene-authored train luggage rack. Adjust its metal, cavity, straps, rails, and rivets here without changing puzzle logic."
-layout_mode = 0
+anchors_preset = 0
 offset_left = 497.0
 offset_top = 135.0
 offset_right = 789.0
 offset_bottom = 365.0
 mouse_filter = 2
 
-[node name="Shadow" type="Panel" parent="PuzzleWindow/RackBackdrop"]
+[node name="Shadow" type="Panel" parent="PuzzleWindow/RackBackdrop" unique_id=999341707]
 layout_mode = 0
 offset_left = 8.0
 offset_top = 10.0
@@ -171,14 +174,14 @@ offset_bottom = 230.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("RackShadowStyle")
 
-[node name="Frame" type="Panel" parent="PuzzleWindow/RackBackdrop"]
+[node name="Frame" type="Panel" parent="PuzzleWindow/RackBackdrop" unique_id=993781456]
 layout_mode = 0
 offset_right = 292.0
 offset_bottom = 222.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("RackFrameStyle")
 
-[node name="Cavity" type="Panel" parent="PuzzleWindow/RackBackdrop"]
+[node name="Cavity" type="Panel" parent="PuzzleWindow/RackBackdrop" unique_id=380285102]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 12.0
@@ -187,7 +190,7 @@ offset_bottom = 206.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("RackCavityStyle")
 
-[node name="BackSlat01" type="ColorRect" parent="PuzzleWindow/RackBackdrop"]
+[node name="BackSlat01" type="ColorRect" parent="PuzzleWindow/RackBackdrop" unique_id=1150391669]
 layout_mode = 0
 offset_left = 13.0
 offset_top = 47.0
@@ -196,7 +199,7 @@ offset_bottom = 50.0
 mouse_filter = 2
 color = Color(0.188235, 0.25098, 0.27451, 0.8)
 
-[node name="BackSlat02" type="ColorRect" parent="PuzzleWindow/RackBackdrop"]
+[node name="BackSlat02" type="ColorRect" parent="PuzzleWindow/RackBackdrop" unique_id=688732748]
 layout_mode = 0
 offset_left = 13.0
 offset_top = 86.0
@@ -205,7 +208,7 @@ offset_bottom = 89.0
 mouse_filter = 2
 color = Color(0.188235, 0.25098, 0.27451, 0.8)
 
-[node name="BackSlat03" type="ColorRect" parent="PuzzleWindow/RackBackdrop"]
+[node name="BackSlat03" type="ColorRect" parent="PuzzleWindow/RackBackdrop" unique_id=1987014963]
 layout_mode = 0
 offset_left = 13.0
 offset_top = 125.0
@@ -214,7 +217,7 @@ offset_bottom = 128.0
 mouse_filter = 2
 color = Color(0.188235, 0.25098, 0.27451, 0.8)
 
-[node name="BackSlat04" type="ColorRect" parent="PuzzleWindow/RackBackdrop"]
+[node name="BackSlat04" type="ColorRect" parent="PuzzleWindow/RackBackdrop" unique_id=243113352]
 layout_mode = 0
 offset_left = 13.0
 offset_top = 164.0
@@ -223,7 +226,7 @@ offset_bottom = 167.0
 mouse_filter = 2
 color = Color(0.188235, 0.25098, 0.27451, 0.8)
 
-[node name="RetainerStrapLeft" type="ColorRect" parent="PuzzleWindow/RackBackdrop"]
+[node name="RetainerStrapLeft" type="ColorRect" parent="PuzzleWindow/RackBackdrop" unique_id=1423829236]
 editor_description = "Muted fabric strap that visually secures luggage without marking puzzle cells."
 layout_mode = 0
 offset_left = 88.0
@@ -233,7 +236,7 @@ offset_bottom = 202.0
 mouse_filter = 2
 color = Color(0.419608, 0.266667, 0.309804, 0.72)
 
-[node name="RetainerStrapRight" type="ColorRect" parent="PuzzleWindow/RackBackdrop"]
+[node name="RetainerStrapRight" type="ColorRect" parent="PuzzleWindow/RackBackdrop" unique_id=1841562038]
 layout_mode = 0
 offset_left = 198.0
 offset_top = 16.0
@@ -242,7 +245,7 @@ offset_bottom = 202.0
 mouse_filter = 2
 color = Color(0.419608, 0.266667, 0.309804, 0.72)
 
-[node name="TopRail" type="ColorRect" parent="PuzzleWindow/RackBackdrop"]
+[node name="TopRail" type="ColorRect" parent="PuzzleWindow/RackBackdrop" unique_id=1349666787]
 layout_mode = 0
 offset_left = 8.0
 offset_top = 6.0
@@ -251,7 +254,7 @@ offset_bottom = 16.0
 mouse_filter = 2
 color = Color(0.494118, 0.572549, 0.596078, 1)
 
-[node name="TopRailHighlight" type="ColorRect" parent="PuzzleWindow/RackBackdrop"]
+[node name="TopRailHighlight" type="ColorRect" parent="PuzzleWindow/RackBackdrop" unique_id=487656780]
 layout_mode = 0
 offset_left = 13.0
 offset_top = 7.0
@@ -260,16 +263,16 @@ offset_bottom = 10.0
 mouse_filter = 2
 color = Color(0.729412, 0.792157, 0.803922, 0.9)
 
-[node name="BottomLip" type="Panel" parent="PuzzleWindow/RackBackdrop"]
+[node name="BottomLip" type="Panel" parent="PuzzleWindow/RackBackdrop" unique_id=447307895]
 layout_mode = 0
 offset_left = 4.0
-offset_top = 198.0
+offset_top = 209.0
 offset_right = 288.0
-offset_bottom = 225.0
+offset_bottom = 236.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("RackLipStyle")
 
-[node name="LeftRivet" type="Panel" parent="PuzzleWindow/RackBackdrop"]
+[node name="LeftRivet" type="Panel" parent="PuzzleWindow/RackBackdrop" unique_id=1605263009]
 layout_mode = 0
 offset_left = 19.0
 offset_top = 207.0
@@ -278,7 +281,7 @@ offset_bottom = 215.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("RackRivetStyle")
 
-[node name="RightRivet" type="Panel" parent="PuzzleWindow/RackBackdrop"]
+[node name="RightRivet" type="Panel" parent="PuzzleWindow/RackBackdrop" unique_id=302900460]
 layout_mode = 0
 offset_left = 265.0
 offset_top = 207.0
@@ -289,7 +292,7 @@ theme_override_styles/panel = SubResource("RackRivetStyle")
 
 [node name="TargetBoard" type="Control" parent="PuzzleWindow" unique_id=462383572]
 unique_name_in_owner = true
-editor_description = "Subtle snap guides over the luggage rack. They preserve the 64 px packing grid without visually reading as twelve separate blocks."
+editor_description = "Twelve scene-authored luggage compartments inside the rack. Every visible slot is one 64 px puzzle cell; suitcase artwork stays undivided."
 anchors_preset = 0
 offset_left = 514.0
 offset_top = 154.0
@@ -412,19 +415,19 @@ editor_description = "Scene-authored keyboard hint shown below the blocked aisle
 z_index = 30
 layout_mode = 0
 offset_left = 210.0
-offset_top = 465.0
+offset_top = 481.0
 offset_right = 610.0
-offset_bottom = 499.0
+offset_bottom = 515.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.0352941, 0.0431373, 0.054902, 0.95)
 theme_override_constants/outline_size = 5
 theme_override_fonts/font = ExtResource("9_josefin_bold")
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 24
 text = "PRESS [E] TO CLOSE"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="CloseButton" type="Button" parent="." unique_id=215828253]
+[node name="CloseButton" parent="." unique_id=215828253 instance=ExtResource("10_close")]
 unique_name_in_owner = true
 editor_description = "Scene-authored minigame exit. It mirrors the E interaction shortcut; Esc is reserved for Pause."
 z_index = 50
@@ -432,20 +435,11 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -78.0
-offset_top = 24.0
-offset_right = -24.0
-offset_bottom = 78.0
+offset_left = -230.0
+offset_top = 116.0
+offset_right = -174.0
+offset_bottom = 172.0
 grow_horizontal = 0
 tooltip_text = "Leave the minigame without resetting progress"
-focus_mode = 0
-mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.941176, 0.811765, 0.552941, 1)
-theme_override_colors/font_pressed_color = Color(1, 0.921569, 0.745098, 1)
-theme_override_colors/font_hover_color = Color(1, 0.921569, 0.745098, 1)
-theme_override_fonts/font = ExtResource("9_josefin_bold")
-theme_override_font_sizes/font_size = 30
-text = "X"
-flat = true
 
 [connection signal="pressed" from="CloseButton" to="." method="_on_close_button_pressed"]

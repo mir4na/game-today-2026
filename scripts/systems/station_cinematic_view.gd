@@ -125,6 +125,20 @@ func return_to_gameplay() -> void:
 	_return_tween.tween_callback(_begin_following_gameplay_camera)
 
 
+func skip_to_gameplay() -> void:
+	if not _active:
+		return
+	if _return_tween and _return_tween.is_valid():
+		_return_tween.kill()
+	_activate_gameplay_camera()
+	_station_backdrop.hide()
+	_station_sign_layer.hide()
+	_set_station_environment_alpha(0.0)
+	_returning = false
+	_camera_handed_off = true
+	camera_handoff_finished.emit()
+
+
 func _process(_delta: float) -> void:
 	if _active and _camera_handed_off:
 		_follow_gameplay_camera_transform()

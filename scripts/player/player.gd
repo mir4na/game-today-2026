@@ -20,7 +20,6 @@ signal interaction_pressed(interactable: Interactable)
 var _interactables: Array[Interactable] = []
 var _nearest: Interactable
 var _facing: float = 1.0
-var _market_speed_bonus: float = 0.0
 
 @onready var _animated_sprite: AnimatedSprite2D = %MCVisual
 @onready var _dialogue_anchor: Marker2D = %DialogueAnchor
@@ -35,7 +34,7 @@ func _physics_process(delta: float) -> void:
 	var direction: float = 0.0
 	if movement_enabled:
 		direction = Input.get_axis(&"move_left", &"move_right")
-	velocity.x = direction * get_effective_move_speed()
+	velocity.x = direction * move_speed
 	if not is_on_floor():
 		velocity.y += _gravity * delta
 	else:
@@ -64,13 +63,6 @@ func get_dialogue_anchor() -> Node2D:
 
 func get_radar_origin_world_position() -> Vector2:
 	return _radar_origin.global_position
-
-
-func set_market_speed_bonus(value: float) -> void:
-	_market_speed_bonus = maxf(0.0, value)
-
-func get_effective_move_speed() -> float:
-	return move_speed + _market_speed_bonus
 
 
 func _update_nearest() -> void:

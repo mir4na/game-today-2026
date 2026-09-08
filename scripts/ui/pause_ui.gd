@@ -32,7 +32,6 @@ var _closing: bool = false
 var _ticket_rest_position: Vector2
 var _ticket_rest_scale: Vector2
 var _menu_tween: Tween
-var _action_tweens: Dictionary = {}
 
 @onready var _shade: ColorRect = %Shade
 @onready var _ticket: Control = %Ticket
@@ -57,7 +56,6 @@ func _ready() -> void:
 	_ticket_rest_scale = _ticket.scale
 	_ticket.pivot_offset = _ticket.size * 0.5
 	_connect_option_selectors()
-	_connect_action_feedback()
 	_load_settings()
 	_refresh_option_values()
 	_apply_all_settings()
@@ -90,13 +88,6 @@ func _connect_option_selectors() -> void:
 		if is_instance_valid(selector):
 			selector.step_requested.connect(_on_option_step.bind(key))
 			selector.slider_value_changed.connect(_on_option_slider_changed.bind(key))
-
-
-func _connect_action_feedback() -> void:
-	for button: Button in [_restart_button, _main_menu_button]:
-		button.pivot_offset = button.size * 0.5
-		button.mouse_entered.connect(_animate_action_focus.bind(button))
-		button.focus_entered.connect(_animate_action_focus.bind(button))
 
 
 func _on_option_step(direction: int, key: StringName) -> void:
@@ -280,18 +271,6 @@ func _close_with_action(action: StringName) -> void:
 			main_menu_requested.emit()
 		_:
 			resume_requested.emit()
-
-
-func _animate_action_focus(button: Button) -> void:
-	var existing := _action_tweens.get(button) as Tween
-	if existing and existing.is_valid():
-		existing.kill()
-	button.pivot_offset = button.size * 0.5
-	button.scale = Vector2.ONE
-	var tween := create_tween()
-	_action_tweens[button] = tween
-	tween.tween_property(button, ^"scale", Vector2.ONE * 1.055, 0.09).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.tween_property(button, ^"scale", Vector2.ONE, 0.13).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _on_restart_button_pressed() -> void:

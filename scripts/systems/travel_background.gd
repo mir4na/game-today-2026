@@ -1,6 +1,6 @@
 class_name TravelBackground
 extends CanvasLayer
-## Switches and scrolls the fully scene-authored travel background hierarchy.
+## Scrolls one scene-authored background per route leg and owns the tunnel approach.
 
 signal period_changed(display_cycle_progress: float)
 
@@ -12,25 +12,27 @@ enum Period { SUNRISE, AFTERNOON, SUNSET, NIGHT }
 @export_node_path("Node2D") var sunset_root_path: NodePath
 @export_node_path("Node2D") var night_root_path: NodePath
 @export_node_path("Control") var tunnel_panel_path: NodePath
+@export_category("Route Leg Backgrounds")
+@export_enum("Beach", "City", "Desert", "Night Sky") var route_leg_1_background: int = Period.SUNRISE
+@export_enum("Beach", "City", "Desert", "Night Sky") var route_leg_2_background: int = Period.AFTERNOON
+@export_enum("Beach", "City", "Desert", "Night Sky") var route_leg_3_background: int = Period.SUNSET
+@export_enum("Beach", "City", "Desert", "Night Sky") var route_leg_4_background: int = Period.NIGHT
 @export_category("Parallax")
 @export_range(-1.0, 1.0, 0.05) var travel_direction: float = 1.0
-@export_category("Period Thresholds")
-@export_range(0.0, 1.0, 0.01) var afternoon_start: float = 0.25
-@export_range(0.0, 1.0, 0.01) var sunset_start: float = 0.56
-@export_range(0.0, 1.0, 0.01) var night_start: float = 0.82
-@export_category("Tunnel Transition")
+@export_category("Tunnel Approach")
+@export_range(1.0, 60.0, 0.5) var tunnel_approach_seconds: float = 15.0
 @export var minimum_viewport_size: Vector2 = Vector2(1280.0, 720.0)
-@export_range(0.1, 2.0, 0.05) var tunnel_enter_seconds: float = 0.7
-@export_range(0.0, 1.0, 0.05) var tunnel_hold_seconds: float = 0.18
-@export_range(0.1, 2.0, 0.05) var tunnel_exit_seconds: float = 0.8
+@export_range(0.1, 2.0, 0.05) var tunnel_enter_seconds: float = 0.85
+@export_range(0.1, 2.0, 0.05) var tunnel_exit_seconds: float = 0.7
 
 var _current_period: Period = Period.SUNRISE
-var _requested_period: Period = Period.SUNRISE
+var _current_route_leg: int = -1
 var _motion_strength: float = 0.0
 var _period_root: Node2D
 var _tunnel_panel: Control
-var _transition_tween: Tween
-var _transition_active: bool = false
+var _tunnel_tween: Tween
+var _tunnel_active: bool = false
+var _world_time_scale: float = 1.0
 
 
 func _ready() -> void:
@@ -38,8 +40,7 @@ func _ready() -> void:
 	if is_instance_valid(_tunnel_panel):
 		_tunnel_panel.hide()
 	_validate_scene_configuration()
-	_build_period(Period.SUNRISE)
-	period_changed.emit(_display_progress_for_period(Period.SUNRISE))
+	_set_route_leg_background(0)
 
 
 func _process(delta: float) -> void:
@@ -48,7 +49,7 @@ func _process(delta: float) -> void:
 	for child: Node in _period_root.get_children():
 		var layer := child as Node2D
 		if is_instance_valid(layer):
-			_scroll_layer(layer, delta)
+			_scroll_layer(layer, delta * _world_time_scale)
 
 
 func set_traveling(value: bool) -> void:
@@ -59,21 +60,81 @@ func set_motion_strength(value: float) -> void:
 	_motion_strength = clampf(value, 0.0, 1.0)
 
 
-func set_cycle_progress(value: float) -> void:
-	_requested_period = _period_for_progress(clampf(value, 0.0, 1.0))
-	if _requested_period == _current_period or _transition_active:
+func set_world_time_scale(value: float) -> void:
+	_world_time_scale = clampf(value, 0.05, 1.0)
+
+
+func begin_route_leg(route_leg_index: int, immediate: bool = false) -> void:
+	_set_route_leg_background(route_leg_index)
+	set_tunnel_active(false, immediate)
+
+
+func update_route_leg_remaining(remaining_seconds: float) -> void:
+	if remaining_seconds <= tunnel_approach_seconds:
+		set_tunnel_active(true)
+
+
+func show_night_background() -> void:
+	_build_period(Period.NIGHT)
+	period_changed.emit(_display_progress_for_period(Period.NIGHT))
+
+
+func set_tunnel_active(value: bool, immediate: bool = false) -> void:
+	if not is_instance_valid(_tunnel_panel):
 		return
-	_start_tunnel_transition(_requested_period)
+	if value == _tunnel_active:
+		return
+	if _tunnel_tween and _tunnel_tween.is_valid():
+		_tunnel_tween.kill()
+	var viewport_size := Vector2(
+		maxf(get_viewport().get_visible_rect().size.x, minimum_viewport_size.x),
+		maxf(get_viewport().get_visible_rect().size.y, minimum_viewport_size.y)
+	)
+	_tunnel_panel.size = viewport_size
+	_tunnel_active = value
+	if value:
+		_tunnel_panel.show()
+		if immediate:
+			_tunnel_panel.position.x = 0.0
+			return
+		_tunnel_panel.position.x = -viewport_size.x
+		_tunnel_tween = create_tween()
+		_tunnel_tween.tween_property(
+			_tunnel_panel,
+			^"position:x",
+			0.0,
+			tunnel_enter_seconds
+		).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+		return
+	if immediate:
+		_tunnel_panel.hide()
+		_tunnel_panel.position.x = -viewport_size.x
+		return
+	if not _tunnel_panel.visible:
+		_tunnel_panel.position.x = -viewport_size.x
+		return
+	_tunnel_tween = create_tween()
+	_tunnel_tween.tween_property(
+		_tunnel_panel,
+		^"position:x",
+		viewport_size.x,
+		tunnel_exit_seconds
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_tunnel_tween.tween_callback(_finish_tunnel_exit.bind(viewport_size.x))
 
 
-func _period_for_progress(progress: float) -> Period:
-	if progress >= night_start:
-		return Period.NIGHT
-	if progress >= sunset_start:
-		return Period.SUNSET
-	if progress >= afternoon_start:
-		return Period.AFTERNOON
-	return Period.SUNRISE
+func _set_route_leg_background(route_leg_index: int) -> void:
+	_current_route_leg = maxi(route_leg_index, 0)
+	var configured_periods: Array[int] = [
+		route_leg_1_background,
+		route_leg_2_background,
+		route_leg_3_background,
+		route_leg_4_background,
+	]
+	var period_index: int = configured_periods[clampi(_current_route_leg, 0, configured_periods.size() - 1)]
+	var next_period: Period = clampi(period_index, Period.SUNRISE, Period.NIGHT)
+	_build_period(next_period)
+	period_changed.emit(_display_progress_for_period(next_period))
 
 
 func _display_progress_for_period(period: Period) -> float:
@@ -127,45 +188,11 @@ func _scroll_layer(layer: Node2D, delta: float) -> void:
 		layer.position.x += wrap_width
 
 
-func _start_tunnel_transition(next_period: Period) -> void:
+func _finish_tunnel_exit(viewport_width: float) -> void:
 	if not is_instance_valid(_tunnel_panel):
-		_swap_period(next_period)
 		return
-	_transition_active = true
-	var viewport_width: float = maxf(get_viewport().get_visible_rect().size.x, minimum_viewport_size.x)
-	var viewport_height: float = maxf(get_viewport().get_visible_rect().size.y, minimum_viewport_size.y)
-	_tunnel_panel.size = Vector2(viewport_width, viewport_height)
+	_tunnel_panel.hide()
 	_tunnel_panel.position.x = -viewport_width
-	_tunnel_panel.show()
-	_transition_tween = create_tween()
-	_transition_tween.tween_property(
-		_tunnel_panel,
-		"position:x",
-		0.0,
-		tunnel_enter_seconds
-	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	_transition_tween.tween_callback(_swap_period.bind(next_period))
-	_transition_tween.tween_interval(tunnel_hold_seconds)
-	_transition_tween.tween_property(
-		_tunnel_panel,
-		"position:x",
-		viewport_width,
-		tunnel_exit_seconds
-	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_transition_tween.tween_callback(_finish_tunnel_transition)
-
-
-func _swap_period(next_period: Period) -> void:
-	_build_period(next_period)
-	period_changed.emit(_display_progress_for_period(next_period))
-
-
-func _finish_tunnel_transition() -> void:
-	if is_instance_valid(_tunnel_panel):
-		_tunnel_panel.hide()
-	_transition_active = false
-	if _requested_period != _current_period:
-		_start_tunnel_transition(_requested_period)
 
 
 func _validate_scene_configuration() -> void:
