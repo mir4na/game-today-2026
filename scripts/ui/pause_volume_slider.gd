@@ -6,7 +6,7 @@ signal value_changed(value: int)
 
 @export_range(0, 100, 1) var value: int = 80
 @export_range(1, 25, 1) var step: int = 10
-@export var ink_color: Color = Color("2f3040")
+@export var ink_color: Color = Color("353540")
 
 var _dragging: bool = false
 
@@ -19,6 +19,11 @@ func _ready() -> void:
 
 func set_value_no_signal(new_value: int) -> void:
 	value = clampi(new_value, 0, 100)
+	queue_redraw()
+
+
+func set_ink_color(new_color: Color) -> void:
+	ink_color = new_color
 	queue_redraw()
 
 

@@ -95,8 +95,11 @@ func _run() -> void:
 	game._finalize_day_shift()
 	_check(game._day_blessing_award.net_earnings == 120 and game._day_blessing_award.passed, "Main paycheck passes at the Day 2 threshold.")
 	game._on_shift_report_continue()
-	_check(game.state == AfterTheEndGame.GameState.NIGHT_TRANSITION, "Passing starts the symbolic night transition.")
-	_check(not game._night_market_ui.visible, "The paycheck no longer routes through the night market.")
+	_check(game.state == AfterTheEndGame.GameState.MARKET, "Passing routes through the Night Market before night service.")
+	_check(game._night_market_ui.visible, "The Night Market opens after the paycheck.")
+	game._on_night_market_continue()
+	_check(game.state == AfterTheEndGame.GameState.NIGHT_TRANSITION, "Leaving the Night Market starts the symbolic night transition.")
+	_check(game._night_market_ui.visible, "Night Market fog remains briefly above the starting night transition.")
 	game._night_transition_ui.skip_sequence()
 	_check(game.state == AfterTheEndGame.GameState.NIGHT, "Completing the transition enters night assignment gameplay.")
 	game._market_tool_state.call("purchase", &"radar_charge")
@@ -162,6 +165,19 @@ func _run() -> void:
 	menu.get_node("%StartButton").pressed.emit()
 	game = await _wait_for_game()
 	_check(game.day_number == 1 and game._market_tool_state.get("blessings") == 0, "New Game starts Day 1 with fresh inventory through the loading screen.")
+	game.state = AfterTheEndGame.GameState.DAY
+	game._active_modal = null
+	game._route_index = 0
+	game._day_minutes = game.START_MINUTES
+	game._station_arrival_announced = false
+	game._station_exchange_processed = false
+	game._on_debug_next_station_requested()
+	_check(
+		game._station_arrival_announced
+		and is_equal_approx(game._day_minutes, game._next_arrival_minutes())
+		and game._active_modal == game._station_stop_ui,
+		"Debug next-station action must enter the complete normal station-arrival flow."
+	)
 	game.free()
 	current_scene = null
 	DirAccess.remove_absolute(Progress.SAVE_PATH)
@@ -170,7 +186,7 @@ func _run() -> void:
 	if _failures > 0:
 		quit(1)
 		return
-	print("PASS: paycheck arithmetic, veil transition, pass boundary, payout idempotence, relaunch persistence, focused menu styling, retry rollback, anomaly deduplication, menu Continue, day advancement, five-day completion, corrupt-save handling.")
+	print("PASS: shift progression, Night Market routing, debug station skip, persistence, payout, retry, anomaly, and campaign boundaries.")
 	quit()
 
 func _wait_for_game() -> AfterTheEndGame:

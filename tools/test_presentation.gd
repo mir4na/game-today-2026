@@ -67,6 +67,18 @@ func _run() -> void:
 	_check(piece.position == placed_position, "Closing and reopening preserves the puzzle.")
 	puzzle.free()
 	event.free()
+	var blocked_event := load("res://scenes/minigames/blocked_aisle_event.tscn").instantiate() as BlockedAisleEvent
+	var dirty_event := load("res://scenes/minigames/dirty_seat_event.tscn").instantiate() as DirtySeatEvent
+	root.add_child(blocked_event)
+	root.add_child(dirty_event)
+	_check(is_equal_approx(blocked_event.passive_outline_width, 2.5), "Blocked-aisle outline stays thin while active.")
+	_check(is_equal_approx(dirty_event.passive_outline_width, 2.5), "Dirty-seat outline stays thin while active.")
+	for minigame_event: Interactable in [blocked_event, dirty_event]:
+		var visual := minigame_event.get_node(minigame_event.focus_visual_path) as CanvasItem
+		var outline_material := visual.material as ShaderMaterial
+		_check(is_equal_approx(float(outline_material.get_shader_parameter(&"outline_width")), 2.5), "Focused minigame outline uses its dedicated thin material.")
+	blocked_event.free()
+	dirty_event.free()
 	if _failures == 0:
 		print("PASS: both newspaper editions, reverse close, repeated/early close, reopen race, instant document close, blocked aisle dim/no hints/no reset.")
 	quit(1 if _failures else 0)

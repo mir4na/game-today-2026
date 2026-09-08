@@ -601,6 +601,30 @@ theme_override_styles/hover = SubResource("GuidebookButtonHover")
 theme_override_styles/disabled = SubResource("ActionButtonDisabled")
 text = "ACTIVATE RADAR   [R]  ×0"
 
+[node name="DebugNextStationButton" type="Button" parent="Root"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = -78.0
+offset_right = 248.0
+offset_bottom = -28.0
+grow_vertical = 0
+tooltip_text = "Debug only: trigger the normal arrival flow"
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_colors/font_pressed_color = Color(0.843137, 0.690196, 0.419608, 1)
+theme_override_colors/font_hover_color = Color(1, 0.956863, 0.827451, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("GuidebookButtonNormal")
+theme_override_styles/pressed = SubResource("GuidebookButtonPressed")
+theme_override_styles/hover = SubResource("GuidebookButtonHover")
+text = "Debug: next station"
+
 [node name="NotificationPanel" type="PanelContainer" parent="Root" unique_id=1320290712]
 unique_name_in_owner = true
 visible = false
@@ -626,3 +650,4 @@ vertical_alignment = 1
 
 [connection signal="pressed" from="Root/GuidebookButton" to="." method="_on_guidebook_button_pressed"]
 [connection signal="pressed" from="Root/RadarButton" to="." method="_on_radar_button_pressed"]
+[connection signal="pressed" from="Root/DebugNextStationButton" to="." method="_on_debug_next_station_button_pressed"]

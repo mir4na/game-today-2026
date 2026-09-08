@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://ci8rlqvlg325x"]
 
 [ext_resource type="Script" uid="uid://c3kbwydwqf3v3" path="res://scripts/minigames/dirty_seat_event.gd" id="1_event"]
-[ext_resource type="Material" path="res://resources/materials/interactable_outline.tres" id="2_outline"]
+[ext_resource type="Material" path="res://resources/materials/minigame_interactable_outline.tres" id="2_outline"]
 [ext_resource type="Texture2D" uid="uid://b07y6ko2rc0lb" path="res://assets/minigame/dirty seat.png" id="3_dirty_seat"]
 [ext_resource type="Texture2D" uid="uid://bb8rkrjaeuw6n" path="res://assets/kereta/seat.png" id="4_seat_icon"]
 
@@ -29,7 +29,7 @@ focus_visual_path = NodePath("StainVisual")
 raise_on_focus = false
 outline_while_enabled = true
 passive_outline_color = Color(0.015, 0.018, 0.024, 1)
-passive_outline_width = 5.0
+passive_outline_width = 2.5
 interaction_origin_path = NodePath("InteractionCollision")
 
 [node name="InteractionPromptAnchor" type="Marker2D" parent="." unique_id=626334026]

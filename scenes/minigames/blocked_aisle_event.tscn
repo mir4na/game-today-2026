@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://ddhu4mk3fcp8n"]
 
 [ext_resource type="Script" uid="uid://cwk1ib0qdlqxy" path="res://scripts/minigames/blocked_aisle_event.gd" id="1_event"]
-[ext_resource type="Material" path="res://resources/materials/interactable_outline.tres" id="2_outline"]
+[ext_resource type="Material" path="res://resources/materials/minigame_interactable_outline.tres" id="2_outline"]
 [ext_resource type="Texture2D" uid="uid://pgdobckyqop0" path="res://assets/minigame/suitcase/Group 54.png" id="3_case_compact"]
 [ext_resource type="Texture2D" uid="uid://reld0rjcihve" path="res://assets/minigame/suitcase/Group 56.png" id="4_case_wide"]
 [ext_resource type="Texture2D" uid="uid://bsf4ckf5qwmch" path="res://assets/minigame/suitcase/Group 57.png" id="5_case_tall"]
@@ -38,7 +38,7 @@ prompt_anchor_path = NodePath("LuggageVisual/InteractionPromptAnchor")
 focus_visual_path = NodePath("LuggageVisual")
 outline_while_enabled = true
 passive_outline_color = Color(0.015, 0.018, 0.024, 1)
-passive_outline_width = 5.0
+passive_outline_width = 2.5
 
 [node name="PlacementAnchors" type="Node2D" parent="." unique_id=2006043616]
 editor_description = "Move these anchors in the Inspector to control which side of the doorway receives the luggage pile."

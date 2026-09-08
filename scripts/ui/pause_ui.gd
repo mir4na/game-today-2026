@@ -13,6 +13,9 @@ const RESOLUTIONS: Array[Vector2i] = [
 	Vector2i(1600, 900),
 	Vector2i(1920, 1080),
 ]
+const DAY_INK: Color = Color("353540")
+const NIGHT_INK: Color = Color("f4e49e")
+const NIGHT_BUTTON_TINT: Color = Color("c9b7dc")
 
 @export_category("Ticket Animation")
 @export_range(0.1, 0.8, 0.01) var open_duration: float = 0.34
@@ -33,9 +36,13 @@ var _ticket_rest_position: Vector2
 var _ticket_rest_scale: Vector2
 var _menu_tween: Tween
 var _action_tweens: Dictionary = {}
+var _night_mode: bool = false
+var _menu_settings_mode: bool = false
 
 @onready var _shade: ColorRect = %Shade
 @onready var _ticket: Control = %Ticket
+@onready var _ticket_artwork: TextureRect = %TicketArtwork
+@onready var _options_title: TextureRect = %OptionsTitle
 @onready var _train_number_label: Label = %TrainNumber
 @onready var _service_date_label: Label = %ServiceDate
 @onready var _restart_button: Button = %RestartButton
@@ -61,6 +68,8 @@ func _ready() -> void:
 	_load_settings()
 	_refresh_option_values()
 	_apply_all_settings()
+	_apply_time_palette()
+	_apply_context_mode()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -82,6 +91,44 @@ func open_pause() -> void:
 	_refresh_option_values()
 	_play_open_animation()
 	(%DisplayModeOption as PauseOptionSelector).focus_first()
+
+
+func set_night_mode(enabled: bool) -> void:
+	_night_mode = enabled
+	if is_node_ready():
+		_apply_time_palette()
+
+
+func configure_menu_settings_mode(enabled: bool) -> void:
+	_menu_settings_mode = enabled
+	if is_node_ready():
+		_apply_context_mode()
+
+
+func _apply_context_mode() -> void:
+	var enabled: bool = _menu_settings_mode
+	_restart_button.visible = not enabled
+	_main_menu_button.text = "Back" if enabled else "Main menu"
+
+
+func _apply_time_palette() -> void:
+	var strength: float = 1.0 if _night_mode else 0.0
+	var artwork_material := _ticket_artwork.material as ShaderMaterial
+	if artwork_material:
+		artwork_material.set_shader_parameter(&"night_strength", strength)
+	var title_material := _options_title.material as ShaderMaterial
+	if title_material:
+		title_material.set_shader_parameter(&"night_strength", strength)
+	for selector_node: Variant in _selectors.values():
+		var selector := selector_node as PauseOptionSelector
+		if is_instance_valid(selector):
+			selector.set_night_mode(_night_mode)
+	var info_color: Color = NIGHT_INK if _night_mode else DAY_INK
+	_train_number_label.add_theme_color_override(&"font_color", info_color)
+	_service_date_label.add_theme_color_override(&"font_color", info_color)
+	var button_tint: Color = NIGHT_BUTTON_TINT if _night_mode else Color.WHITE
+	_restart_button.self_modulate = button_tint
+	_main_menu_button.self_modulate = button_tint
 
 
 func _connect_option_selectors() -> void:

@@ -24,5 +24,30 @@ func _run() -> void:
 	assert(pause_menu.get_node_or_null("Ticket/Actions/ResumeButton") == null, "Pause menu must not show a resume button.")
 	var master_slider := pause_menu.get_node("Ticket/OptionGrid/MasterVolumeOption/Content/VolumeSlider") as Control
 	assert(master_slider.visible, "Audio options must use the ticket slider control.")
+	pause_menu.set_night_mode(true)
+	var artwork := pause_menu.get_node("Ticket/TicketArtwork") as TextureRect
+	var artwork_material := artwork.material as ShaderMaterial
+	assert(is_equal_approx(float(artwork_material.get_shader_parameter(&"night_strength")), 1.0), "Night service must apply the night ticket palette.")
+	var display_option := pause_menu.get_node("Ticket/OptionGrid/DisplayModeOption") as PauseOptionSelector
+	var display_label := display_option.get_node("Content/OptionLabel") as Label
+	assert(display_label.get_theme_color(&"font_color").is_equal_approx(Color("f4e49e")), "Night service must recolor option labels.")
+	pause_menu.set_night_mode(false)
+	assert(display_label.get_theme_color(&"font_color").is_equal_approx(Color("353540")), "Day service must restore the exact original asset ink color.")
+	pause_menu.free()
+	var menu := load("res://scenes/menu/main_menu.tscn").instantiate() as MainMenu
+	root.add_child(menu)
+	await process_frame
+	var menu_train_sfx := menu.get_node("%TrainSfx") as AudioStreamPlayer
+	assert(menu_train_sfx.stream is AudioStreamOggVorbis and (menu_train_sfx.stream as AudioStreamOggVorbis).loop, "Main menu must loop the authored in-game train SFX.")
+	assert(menu_train_sfx.bus == &"SFX" and menu_train_sfx.volume_db <= -20.0, "Main-menu train SFX must stay quietly routed through the SFX bus.")
+	(menu.get_node("%SettingsButton") as Button).pressed.emit()
+	await process_frame
+	var menu_settings := menu.get_node("%SettingsUI") as PauseUI
+	assert(menu_settings.visible, "Main menu Settings must open the shared in-game settings UI.")
+	assert(menu_settings.get_node("Ticket/OptionGrid").get_child_count() == 8, "Main menu must expose the same eight options as in-game.")
+	assert(not (menu_settings.get_node("%RestartButton") as Button).visible, "Restart shift must stay hidden in main-menu settings mode.")
+	assert((menu_settings.get_node("%MainMenuButton") as Button).text == "Back", "The shared action must become Back in main-menu settings mode.")
+	menu_settings.resume_requested.emit()
+	assert(not menu_settings.visible, "Closing shared settings must return to the main menu.")
 	print("Pause menu runtime test passed.")
 	quit()

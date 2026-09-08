@@ -23,9 +23,16 @@ signal continue_requested
 @export_range(0.0, 5.0, 0.05) var item_hover_speed: float = 1.6
 @export_range(0.25, 3.0, 0.05) var light_rotation_intensity: float = 1.0
 @export_category("Transition")
+@export_range(0.2, 2.0, 0.05) var entrance_fog_rise_duration: float = 0.8
+@export_range(0.0, 1.0, 0.05) var entrance_fog_hold_seconds: float = 0.12
+@export_range(0.2, 2.0, 0.05) var gate_open_duration: float = 0.78
+@export_range(0.2, 2.0, 0.05) var entrance_fog_release_duration: float = 0.72
 @export_range(0.1, 1.5, 0.05) var entrance_duration: float = 0.62
 @export_range(0.1, 1.5, 0.05) var content_exit_duration: float = 0.52
 @export_range(0.1, 1.5, 0.05) var gate_close_duration: float = 0.68
+@export_range(0.2, 3.0, 0.05) var transition_fog_rise_duration: float = 1.15
+@export_range(0.0, 1.5, 0.05) var transition_fog_hold_seconds: float = 0.2
+@export_range(0.2, 2.0, 0.05) var transition_fog_release_duration: float = 0.8
 @export_category("Standalone Preview")
 @export_range(0, 999, 1) var preview_blessings: int = 100
 
@@ -46,10 +53,19 @@ var _left_wall_open_size: Vector2
 var _right_wall_open_position: Vector2
 var _right_wall_open_size: Vector2
 
+const LEFT_DOOR_CLOSED_X: float = 470.0
+const RIGHT_DOOR_CLOSED_X: float = 810.0
+const LEFT_WALL_CLOSED_POSITION := Vector2(0.0, 0.0)
+const LEFT_WALL_CLOSED_SIZE := Vector2(300.0, 720.0)
+const RIGHT_WALL_CLOSED_POSITION := Vector2(980.0, 0.0)
+const RIGHT_WALL_CLOSED_SIZE := Vector2(300.0, 720.0)
+
 @onready var _background: ColorRect = %Background
+@onready var _light_rig: Node2D = $LightRig
 @onready var _light_nodes: Array[Sprite2D] = [%Light1, %Light2, %Light3, %Light4, %Light5, %Light6, %Light7]
 @onready var _light_speeds: PackedFloat32Array = PackedFloat32Array([0.30, -0.255, 0.215, -0.175, 0.135, -0.095, 0.06])
 @onready var _angel_entrance: Node2D = %AngelEntrance
+@onready var _market_actors: Node2D = $MarketActors
 @onready var _angel_float: Node2D = %AngelFloat
 @onready var _item_entrances: Array[Node2D] = [%AuditEntrance, %RadarEntrance, %SpeedEntrance]
 @onready var _item_floats: Array[Node2D] = [%AuditFloat, %RadarFloat, %SpeedFloat]
@@ -61,6 +77,7 @@ var _right_wall_open_size: Vector2
 @onready var _header_root: Control = %HeaderRoot
 @onready var _blessings_label: Label = %BlessingsLabel
 @onready var _continue_button: Button = %ContinueButton
+@onready var _gate_layer: Control = $GateLayer
 @onready var _gate_motion: Node2D = %GateMotion
 @onready var _left_door: Sprite2D = %LeftDoor
 @onready var _right_door: Sprite2D = %RightDoor
@@ -68,6 +85,9 @@ var _right_wall_open_size: Vector2
 @onready var _right_wall: ColorRect = %RightWall
 @onready var _door_dust_burst: CPUParticles2D = %DoorDustBurst
 @onready var _door_dust_haze: CPUParticles2D = %DoorDustHaze
+@onready var _transition_fog: Control = %TransitionFog
+@onready var _transition_veil: ColorRect = %TransitionVeil
+@onready var _transition_fog_layers: Array[ColorRect] = [%FogBack, %FogMiddle, %FogFront]
 
 
 func _ready() -> void:
@@ -121,7 +141,7 @@ func _process(delta: float) -> void:
 
 func open_market(snapshot: Dictionary, _day_award: Dictionary) -> void:
 	_continue_sent = false
-	_input_locked = false
+	_input_locked = true
 	_motion_time = 0.0
 	_reset_gate()
 	show()
@@ -131,7 +151,6 @@ func open_market(snapshot: Dictionary, _day_award: Dictionary) -> void:
 		highlight.modulate.a = 0.0
 		highlight.scale = (_highlight_scales[highlight] as Vector2) * 0.88
 	_play_entrance_animation()
-	_focus_first_available_action()
 
 
 func _open_standalone_preview() -> void:
@@ -205,6 +224,10 @@ func _refresh_item_highlight(index: int) -> void:
 func _apply_item_highlight_state(index: int) -> void:
 	if index < 0 or index >= _item_buttons.size():
 		return
+	# A deferred focus refresh can outlive the market when a transition or retry
+	# immediately replaces the gameplay scene.
+	if not is_inside_tree() or get_viewport() == null:
+		return
 	var button: Button = _item_buttons[index]
 	var hovered: bool = button.get_global_rect().has_point(get_viewport().get_mouse_position())
 	_set_item_highlight(index, not button.disabled and (button.has_focus() or hovered))
@@ -240,6 +263,7 @@ func _play_entrance_animation() -> void:
 	if _market_tween and _market_tween.is_valid():
 		_market_tween.kill()
 	_background.modulate.a = 0.0
+	_gate_layer.modulate.a = 0.0
 	_header_root.modulate.a = 0.0
 	_header_root.position.y = -18.0
 	for light: Sprite2D in _light_nodes:
@@ -252,24 +276,89 @@ func _play_entrance_animation() -> void:
 		entrance.position = (_entrance_positions[entrance] as Vector2) + Vector2(0.0, 74.0)
 		entrance.scale = Vector2.ONE * 0.78
 		entrance.modulate.a = 0.0
-	_market_tween = create_tween().set_parallel(true)
-	_market_tween.tween_property(_background, ^"modulate:a", 1.0, entrance_duration * 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	_market_tween.tween_property(_header_root, ^"position:y", 0.0, entrance_duration * 0.7).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(0.12)
-	_market_tween.tween_property(_header_root, ^"modulate:a", 1.0, entrance_duration * 0.5).set_delay(0.12)
+
+	# Conceal the world first. The closed gate is installed only after the fog is
+	# dense, preventing the market set from popping over the train.
+	await _raise_entrance_fog()
+	if not is_inside_tree() or not visible:
+		return
+	_background.modulate.a = 1.0
+	_gate_layer.modulate.a = 1.0
 	for index: int in range(_light_nodes.size()):
 		var light: Sprite2D = _light_nodes[index]
 		var delay: float = float(_light_nodes.size() - 1 - index) * 0.035
-		_market_tween.tween_property(light, ^"modulate:a", 1.0, entrance_duration * 0.75).set_delay(delay)
-		_market_tween.tween_property(light, ^"scale", _light_scales[light], entrance_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(delay)
-	_market_tween.tween_property(_angel_entrance, ^"position", _entrance_positions[_angel_entrance], entrance_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(0.12)
-	_market_tween.tween_property(_angel_entrance, ^"scale", Vector2.ONE, entrance_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(0.12)
-	_market_tween.tween_property(_angel_entrance, ^"modulate:a", 1.0, entrance_duration * 0.55).set_delay(0.12)
+		light.modulate.a = 1.0
+		light.scale = (_light_scales[light] as Vector2) * (0.9 + delay * 0.08)
+	await _open_gate_and_release_entrance_fog()
+	if not is_inside_tree() or not visible:
+		return
+
+	# The merchant and merchandise are deliberately absent until the gate has
+	# cleared the opening. The angel leads, then the shelves arrive in a stagger.
+	_market_tween = create_tween().set_parallel(true)
+	_market_tween.tween_property(_header_root, ^"position:y", 0.0, entrance_duration * 0.78).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(0.12)
+	_market_tween.tween_property(_header_root, ^"modulate:a", 1.0, entrance_duration * 0.55).set_delay(0.12)
+	_market_tween.tween_property(_angel_entrance, ^"position", _entrance_positions[_angel_entrance], entrance_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_market_tween.tween_property(_angel_entrance, ^"scale", Vector2.ONE, entrance_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_market_tween.tween_property(_angel_entrance, ^"modulate:a", 1.0, entrance_duration * 0.55)
 	for index: int in range(_item_entrances.size()):
 		var entrance: Node2D = _item_entrances[index]
-		var delay: float = 0.2 + float(index) * 0.08
+		var delay: float = entrance_duration * 0.38 + float(index) * 0.1
 		_market_tween.tween_property(entrance, ^"position", _entrance_positions[entrance], entrance_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(delay)
 		_market_tween.tween_property(entrance, ^"scale", Vector2.ONE, entrance_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(delay)
 		_market_tween.tween_property(entrance, ^"modulate:a", 1.0, entrance_duration * 0.55).set_delay(delay)
+	await _market_tween.finished
+	if not is_inside_tree() or not visible:
+		return
+	_input_locked = false
+	set_snapshot(_snapshot)
+	_focus_first_available_action()
+
+
+func _raise_entrance_fog() -> void:
+	_transition_fog.show()
+	_transition_veil.self_modulate.a = 0.0
+	for fog_layer: ColorRect in _transition_fog_layers:
+		fog_layer.self_modulate.a = 0.0
+	_market_tween = create_tween().set_parallel(true)
+	_market_tween.tween_property(
+		_transition_veil,
+		^"self_modulate:a",
+		0.72,
+		entrance_fog_rise_duration
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	for index: int in range(_transition_fog_layers.size()):
+		_market_tween.tween_property(
+			_transition_fog_layers[index],
+			^"self_modulate:a",
+			1.0,
+			entrance_fog_rise_duration * (0.78 + float(index) * 0.11)
+		).set_delay(float(index) * 0.045).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	await _market_tween.finished
+	if entrance_fog_hold_seconds > 0.0 and is_inside_tree():
+		await get_tree().create_timer(entrance_fog_hold_seconds).timeout
+
+
+func _open_gate_and_release_entrance_fog() -> void:
+	_market_tween = create_tween().set_parallel(true)
+	_market_tween.tween_property(_left_door, ^"position", _left_door_open_position, gate_open_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_right_door, ^"position", _right_door_open_position, gate_open_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_left_wall, ^"position", _left_wall_open_position, gate_open_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_left_wall, ^"size", _left_wall_open_size, gate_open_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_right_wall, ^"position", _right_wall_open_position, gate_open_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_right_wall, ^"size", _right_wall_open_size, gate_open_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_transition_veil, ^"self_modulate:a", 0.0, entrance_fog_release_duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT).set_delay(gate_open_duration * 0.12)
+	for index: int in range(_transition_fog_layers.size()):
+		_market_tween.tween_property(
+			_transition_fog_layers[index],
+			^"self_modulate:a",
+			0.0,
+			entrance_fog_release_duration * (0.82 + float(index) * 0.09)
+		).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT).set_delay(gate_open_duration * (0.08 + float(index) * 0.035))
+	for light: Sprite2D in _light_nodes:
+		_market_tween.tween_property(light, ^"scale", _light_scales[light], gate_open_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	await _market_tween.finished
+	_transition_fog.hide()
 
 
 func _play_exit_animation() -> void:
@@ -297,16 +386,17 @@ func _play_exit_animation() -> void:
 		_market_tween.tween_property(light, ^"scale", (_light_scales[light] as Vector2) * 1.15, content_exit_duration)
 	await _market_tween.finished
 	await _close_gate()
+	await _flood_with_transition_fog()
 
 
 func _close_gate() -> void:
 	_market_tween = create_tween().set_parallel(true)
-	_market_tween.tween_property(_left_door, ^"position:x", 470.0, gate_close_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN_OUT)
-	_market_tween.tween_property(_right_door, ^"position:x", 810.0, gate_close_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN_OUT)
-	_market_tween.tween_property(_left_wall, ^"position", Vector2.ZERO, gate_close_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
-	_market_tween.tween_property(_left_wall, ^"size", Vector2(300.0, 720.0), gate_close_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
-	_market_tween.tween_property(_right_wall, ^"position", Vector2(980.0, 0.0), gate_close_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
-	_market_tween.tween_property(_right_wall, ^"size", Vector2(300.0, 720.0), gate_close_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_left_door, ^"position:x", LEFT_DOOR_CLOSED_X, gate_close_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_right_door, ^"position:x", RIGHT_DOOR_CLOSED_X, gate_close_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_left_wall, ^"position", LEFT_WALL_CLOSED_POSITION, gate_close_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_left_wall, ^"size", LEFT_WALL_CLOSED_SIZE, gate_close_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_right_wall, ^"position", RIGHT_WALL_CLOSED_POSITION, gate_close_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_right_wall, ^"size", RIGHT_WALL_CLOSED_SIZE, gate_close_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	await _market_tween.finished
 	_door_dust_burst.restart()
 	_door_dust_burst.emitting = true
@@ -318,16 +408,81 @@ func _close_gate() -> void:
 	await shake.finished
 
 
+func _flood_with_transition_fog() -> void:
+	_transition_fog.show()
+	_transition_veil.self_modulate.a = 0.0
+	for fog_layer: ColorRect in _transition_fog_layers:
+		fog_layer.self_modulate.a = 0.0
+	_market_tween = create_tween().set_parallel(true)
+	_market_tween.tween_property(
+		_transition_veil,
+		^"self_modulate:a",
+		0.78,
+		transition_fog_rise_duration
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	for index: int in range(_transition_fog_layers.size()):
+		var fog_layer: ColorRect = _transition_fog_layers[index]
+		var delay: float = float(index) * 0.09
+		_market_tween.tween_property(
+			fog_layer,
+			^"self_modulate:a",
+			1.0,
+			transition_fog_rise_duration
+		).set_delay(delay).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	await _market_tween.finished
+	if transition_fog_hold_seconds > 0.0:
+		await get_tree().create_timer(transition_fog_hold_seconds).timeout
+	_set_market_content_visible(false)
+
+
+func release_transition_fog() -> void:
+	if not visible:
+		return
+	if _market_tween and _market_tween.is_valid():
+		_market_tween.kill()
+	_market_tween = create_tween().set_parallel(true)
+	_market_tween.tween_property(
+		_transition_veil,
+		^"self_modulate:a",
+		0.0,
+		transition_fog_release_duration
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	for index: int in range(_transition_fog_layers.size()):
+		_market_tween.tween_property(
+			_transition_fog_layers[index],
+			^"self_modulate:a",
+			0.0,
+			transition_fog_release_duration * (0.75 + float(index) * 0.12)
+		).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	await _market_tween.finished
+	if is_inside_tree():
+		hide()
+
+
+func _set_market_content_visible(value: bool) -> void:
+	_background.visible = value
+	_light_rig.visible = value
+	_market_actors.visible = value
+	_header_root.visible = value
+	_gate_layer.visible = value
+
+
 func _reset_gate() -> void:
+	_set_market_content_visible(true)
+	_gate_layer.modulate.a = 0.0
+	_transition_fog.show()
+	_transition_veil.self_modulate.a = 0.0
+	for fog_layer: ColorRect in _transition_fog_layers:
+		fog_layer.self_modulate.a = 0.0
 	_gate_motion.position = Vector2.ZERO
 	_door_dust_burst.emitting = false
 	_door_dust_haze.emitting = false
-	_left_door.position = _left_door_open_position
-	_right_door.position = _right_door_open_position
-	_left_wall.position = _left_wall_open_position
-	_left_wall.size = _left_wall_open_size
-	_right_wall.position = _right_wall_open_position
-	_right_wall.size = _right_wall_open_size
+	_left_door.position = Vector2(LEFT_DOOR_CLOSED_X, _left_door_open_position.y)
+	_right_door.position = Vector2(RIGHT_DOOR_CLOSED_X, _right_door_open_position.y)
+	_left_wall.position = LEFT_WALL_CLOSED_POSITION
+	_left_wall.size = LEFT_WALL_CLOSED_SIZE
+	_right_wall.position = RIGHT_WALL_CLOSED_POSITION
+	_right_wall.size = RIGHT_WALL_CLOSED_SIZE
 
 
 func _on_audit_button_pressed() -> void:
