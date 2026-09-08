@@ -21,6 +21,7 @@
 [ext_resource type="Texture2D" uid="uid://bhedd1kpg1nq0" path="res://assets/ui/guidebook/Group 79.png" id="19_next_arrow"]
 [ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="20_title_font"]
 [ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="21_body_bold"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/round_close_button.tscn" id="22_close"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_button"]
 
@@ -459,26 +460,15 @@ texture = ExtResource("5_left_page")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="CloseButton" type="Button" parent="Center/BookStage/Page" unique_id=1435594907]
+[node name="CloseButton" parent="Center/BookStage/Page" unique_id=1435594907 instance=ExtResource("22_close")]
 unique_name_in_owner = true
 editor_description = "Scene-authored close control. Tab and Esc use the same action."
 layout_mode = 0
-offset_left = 943.0001
-offset_top = 14.369858
-offset_right = 986.0001
-offset_bottom = 59.369858
-pivot_offset = Vector2(21.5, 22.5)
-focus_mode = 0
-mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_color = Color(0.58, 0.25, 0.22, 1)
-theme_override_fonts/font = ExtResource("21_body_bold")
-theme_override_font_sizes/font_size = 38
-theme_override_styles/normal = SubResource("StyleBoxEmpty_button")
-theme_override_styles/pressed = SubResource("StyleBoxEmpty_button")
-theme_override_styles/hover = SubResource("StyleBoxEmpty_button")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_button")
-text = "X"
+offset_left = 930.0
+offset_top = 14.0
+offset_right = 986.0
+offset_bottom = 70.0
+tooltip_text = "Close guidebook [Tab / Esc]"
 
 [node name="PageTitle" type="Label" parent="Center/BookStage/Page" unique_id=1034829727]
 unique_name_in_owner = true

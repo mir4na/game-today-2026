@@ -17,8 +17,6 @@ const TOOL_SPEED_UPGRADE: StringName = &"speed_upgrade"
 @export_range(1, 99, 1) var audit_slip_cost: int = 3
 @export_range(1, 99, 1) var radar_charge_cost: int = 4
 @export var speed_upgrade_costs: PackedInt32Array = PackedInt32Array([6, 10, 15])
-@export_category("Speed Upgrade")
-@export_range(0.0, 300.0, 1.0) var speed_bonus_per_level: float = 45.0
 @export_category("Blessing Rewards")
 @export_range(0, 100, 1) var blessings_per_correct_dropoff: int = 30
 @export_range(0, 100, 1) var blessings_per_wrong_dropoff: int = 20
@@ -141,10 +139,6 @@ func consume_radar_charge() -> bool:
 	return true
 
 
-func get_speed_bonus() -> float:
-	return float(speed_level) * speed_bonus_per_level
-
-
 func get_snapshot() -> Dictionary:
 	return {
 		"blessings": blessings,
@@ -154,8 +148,7 @@ func get_snapshot() -> Dictionary:
 		"speed_max_level": speed_upgrade_costs.size(),
 		"audit_slip_cost": audit_slip_cost,
 		"radar_charge_cost": radar_charge_cost,
-		"speed_upgrade_cost": _next_speed_cost(),
-		"speed_bonus": get_speed_bonus()
+		"speed_upgrade_cost": _next_speed_cost()
 	}
 
 
@@ -179,7 +172,7 @@ func _purchase_speed_upgrade() -> Dictionary:
 		return {"success": false, "message": "NOT ENOUGH BLESSINGS"}
 	speed_level += 1
 	_emit_inventory_changed()
-	return {"success": true, "message": "MOVEMENT SPEED UPGRADED TO LEVEL %d" % speed_level}
+	return {"success": true, "message": "SWIFTSTEP POTENCY UPGRADED TO LEVEL %d" % speed_level}
 
 
 func _try_spend(cost: int) -> bool:

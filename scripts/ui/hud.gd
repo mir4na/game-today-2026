@@ -74,11 +74,13 @@ var _clock_progress: float = 0.0
 var _clock_target_progress: float = -1.0
 var _service_sealed: bool = false
 var _radar_active: bool = false
+var _swiftstep_active: bool = false
 
 const CLOCK_FILL_ARC_DEGREES: float = 180.0
 
 func _ready() -> void:
 	_clock_sign_assembly.hide()
+	set_swiftstep_active(false)
 
 func _process(delta: float) -> void:
 	_prompt_wobble_time += delta
@@ -424,6 +426,15 @@ func set_radar_active(value: bool) -> void:
 	_radar_slot.call(&"set_item_tooltip", "Radar scan in progress" if value else "Carriage Radar  [2]")
 
 
+func set_swiftstep_active(value: bool) -> void:
+	_swiftstep_active = value
+	_update_action_button_locks()
+	_swift_slot.call(
+		&"set_item_tooltip",
+		"Swiftstep is bending time" if value else "Swiftstep Soles  [3] — slow the world for 15 seconds"
+	)
+
+
 func set_service_sealed(value: bool) -> void:
 	_service_sealed = value
 	_update_action_button_locks()
@@ -433,7 +444,7 @@ func _update_action_button_locks() -> void:
 	_guidebook_button.disabled = _service_sealed
 	_audit_slot.call(&"set_interaction_locked", _service_sealed)
 	_radar_slot.call(&"set_interaction_locked", _service_sealed or _radar_active)
-	_swift_slot.call(&"set_interaction_locked", _service_sealed)
+	_swift_slot.call(&"set_interaction_locked", _service_sealed or _swiftstep_active)
 
 
 func _on_guidebook_button_pressed() -> void:

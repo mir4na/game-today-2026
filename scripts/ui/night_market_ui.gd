@@ -9,8 +9,8 @@ signal continue_requested
 @export var blessings_template: String = "Blessings  %d"
 @export var audit_stock_template: String = "%d owned  •  %d Blessings"
 @export var radar_stock_template: String = "%d owned  •  %d Blessings"
-@export var speed_level_template: String = "Level %d / %d  •  %d Blessings"
-@export var maximum_speed_text: String = "Maximum level"
+@export var speed_level_template: String = "Level %d / %d  •  15 seconds  •  %d Blessings"
+@export var maximum_speed_text: String = "Maximum time-bending level"
 @export_category("Floating Motion")
 @export_range(0.0, 20.0, 0.5) var angel_float_height: float = 8.0
 @export_range(0.0, 5.0, 0.05) var angel_float_speed: float = 1.15

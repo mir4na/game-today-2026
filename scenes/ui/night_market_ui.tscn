@@ -353,7 +353,7 @@ theme_override_styles/hover = SubResource("StyleBoxEmpty_item")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_item")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_item")
 flat = true
-tooltip_text = "Permanently improve walking speed for this run"
+tooltip_text = "Strengthen the 15-second Swiftstep time-bending effect"
 
 [node name="GateLayer" type="Control" parent="."]
 z_index = 1

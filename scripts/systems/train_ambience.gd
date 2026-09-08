@@ -29,6 +29,7 @@ var _brake_played: bool = false
 var _announcement_played: bool = false
 var _departure_restarted: bool = false
 var _audio_enabled: bool = false
+var _world_time_scale: float = 1.0
 
 @onready var _train_sfx: AudioStreamPlayer = $TrainSfx
 @onready var _brake_sfx: AudioStreamPlayer = $BrakeSfx
@@ -67,6 +68,18 @@ func end_station_sequence() -> void:
 	_station_sequence_active = false
 	if _audio_enabled:
 		_brake_sfx.stop()
+		_announcement_sfx.stop()
+
+
+func skip_station_sequence() -> void:
+	# Train travel audio belongs to gameplay and keeps running. These two one-shot
+	# players belong to the skipped station timeline and must end immediately.
+	_station_sequence_active = false
+	_brake_played = true
+	_announcement_played = true
+	if _audio_enabled:
+		_brake_sfx.stop()
+		_announcement_sfx.stop()
 
 func is_announcement_playing() -> bool:
 	return _audio_enabled and _announcement_sfx.playing
@@ -85,6 +98,15 @@ func pause_train_travel() -> void:
 func resume_train_travel() -> void:
 	motion_strength = 1.0
 	restart_train_sfx()
+
+
+func set_world_time_scale(value: float) -> void:
+	_world_time_scale = clampf(value, 0.05, 1.0)
+	_update_authored_train_volume()
+	if _audio_enabled:
+		var slowed_pitch: float = lerpf(0.68, 1.0, _world_time_scale)
+		_train_sfx.pitch_scale = slowed_pitch
+		_night_ambience.pitch_scale = slowed_pitch
 
 func _configure_train_sfx_loop() -> void:
 	var ogg_stream := _train_sfx.stream as AudioStreamOggVorbis
@@ -105,7 +127,7 @@ func _configure_night_ambience_loop() -> void:
 func _update_authored_train_volume() -> void:
 	if not is_node_ready():
 		return
-	var audible_strength: float = smoothstep(0.0, 0.18, motion_strength)
+	var audible_strength: float = smoothstep(0.0, 0.18, motion_strength * _world_time_scale)
 	_train_sfx.volume_db = train_sfx_volume_db + linear_to_db(maxf(audible_strength, 0.001))
 
 func _update_night_ambience_volume() -> void:
@@ -136,7 +158,7 @@ func _process(_delta: float) -> void:
 		return
 	var frames: int = _playback.get_frames_available()
 	for i: int in range(frames):
-		var movement: float = clampf(motion_strength, 0.0, 1.0)
+		var movement: float = clampf(motion_strength * _world_time_scale, 0.0, 1.0)
 		var base_frequency: float = lerpf(48.0, 34.0, night_strength) * lerpf(0.45, 1.0, movement)
 		var rumble: float = sin(_phase * TAU * base_frequency) * lerpf(0.035, 0.018, night_strength) * movement
 		var rail_click: float = 0.012 if movement > 0.18 and fmod(_phase, 0.72) < 0.018 else 0.0
