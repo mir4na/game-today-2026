@@ -1,39 +1,51 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=23 format=3]
 
-[ext_resource type="Script" path="res://scripts/ui/night_market_ui.gd" id="1"]
-[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
+[ext_resource type="Script" path="res://scripts/ui/night_market_ui.gd" id="1_script"]
+[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
+[ext_resource type="Shader" path="res://shaders/night_market_background.gdshader" id="3_background_shader"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/Angel.png" id="4_angel"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/Item_Audit.png" id="5_audit"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/Item_Radar.png" id="6_radar"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/Item_Switft.png" id="7_swift"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/ItemHighlight.png" id="8_highlight"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/itemshelf_frontview.png" id="9_shelf"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/Light_1.png" id="10_light1"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/Light_2.png" id="11_light2"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/Light_3.png" id="12_light3"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/Light_4.png" id="13_light4"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/Light_5.png" id="14_light5"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/Light_6.png" id="15_light6"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/Light_7.png" id="16_light7"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/Pintu.png" id="17_door"]
 
-[sub_resource type="StyleBoxFlat" id="MarketPanelStyle"]
-content_margin_left = 24.0
-content_margin_top = 20.0
-content_margin_right = 24.0
-content_margin_bottom = 20.0
-bg_color = Color(0.043, 0.063, 0.091, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.78, 0.64, 0.39, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_background"]
+shader = ExtResource("3_background_shader")
+shader_parameter/top_color = Color(0.207843, 0.207843, 0.25098, 1)
+shader_parameter/middle_color = Color(0.352941, 0.345098, 0.533333, 1)
+shader_parameter/bottom_color = Color(0.2, 0.105882, 0.231373, 1)
+shader_parameter/drift_speed = 0.075
+shader_parameter/drift_amount = 0.012
 
-[sub_resource type="StyleBoxFlat" id="ToolCardStyle"]
-content_margin_left = 18.0
-content_margin_top = 18.0
-content_margin_right = 18.0
-content_margin_bottom = 18.0
-bg_color = Color(0.09, 0.13, 0.18, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.31, 0.39, 0.49, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_light"]
+blend_mode = 1
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_item"]
+
+[sub_resource type="Gradient" id="Gradient_dust"]
+offsets = PackedFloat32Array(0, 0.58, 1)
+colors = PackedColorArray(1, 0.941176, 0.784314, 0.78, 0.854902, 0.752941, 0.698039, 0.46, 0.623529, 0.537255, 0.635294, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_dust"]
+gradient = SubResource("Gradient_dust")
+width = 24
+height = 24
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_dust_haze"]
+offsets = PackedFloat32Array(0, 0.4, 1)
+colors = PackedColorArray(0.933333, 0.854902, 0.737255, 0.38, 0.768627, 0.67451, 0.670588, 0.24, 0.509804, 0.423529, 0.541176, 0)
 
 [node name="NightMarketUI" type="Control"]
 visible = false
@@ -44,204 +56,449 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
-theme = ExtResource("2")
-script = ExtResource("1")
-blessings_template = "BLESSINGS  %d"
-purchase_button_template = "BUY  •  %d BLESSINGS"
-speed_button_template = "UPGRADE  •  %d BLESSINGS"
-day_reward_template = "+%d BLESSINGS  •  DROP-OFFS +%d  •  PENALTY −%d"
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
 
-[node name="Shade" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="."]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_background")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.008, 0.012, 0.023, 0.98)
+mouse_filter = 2
+color = Color(1, 1, 1, 1)
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="LightRig" type="Node2D" parent="."]
+position = Vector2(640, 174)
+
+[node name="Light7" type="Sprite2D" parent="LightRig"]
+unique_name_in_owner = true
+material = SubResource("CanvasItemMaterial_light")
+self_modulate = Color(0.78, 0.78, 0.95, 0.035)
+scale = Vector2(0.72, 0.72)
+texture = ExtResource("16_light7")
+
+[node name="Light6" type="Sprite2D" parent="LightRig"]
+unique_name_in_owner = true
+material = SubResource("CanvasItemMaterial_light")
+self_modulate = Color(0.8, 0.8, 0.96, 0.045)
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("15_light6")
+
+[node name="Light5" type="Sprite2D" parent="LightRig"]
+unique_name_in_owner = true
+material = SubResource("CanvasItemMaterial_light")
+self_modulate = Color(0.82, 0.82, 0.97, 0.055)
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("14_light5")
+
+[node name="Light4" type="Sprite2D" parent="LightRig"]
+unique_name_in_owner = true
+material = SubResource("CanvasItemMaterial_light")
+self_modulate = Color(0.84, 0.84, 0.98, 0.07)
+texture = ExtResource("13_light4")
+
+[node name="Light3" type="Sprite2D" parent="LightRig"]
+unique_name_in_owner = true
+material = SubResource("CanvasItemMaterial_light")
+self_modulate = Color(0.86, 0.86, 0.99, 0.085)
+scale = Vector2(1.08, 1.08)
+texture = ExtResource("12_light3")
+
+[node name="Light2" type="Sprite2D" parent="LightRig"]
+unique_name_in_owner = true
+material = SubResource("CanvasItemMaterial_light")
+self_modulate = Color(0.9, 0.9, 1, 0.11)
+scale = Vector2(1.17, 1.17)
+texture = ExtResource("11_light2")
+
+[node name="Light1" type="Sprite2D" parent="LightRig"]
+unique_name_in_owner = true
+material = SubResource("CanvasItemMaterial_light")
+self_modulate = Color(0.96, 0.96, 1, 0.2)
+scale = Vector2(1.25, 1.25)
+texture = ExtResource("10_light1")
+
+[node name="MarketActors" type="Node2D" parent="."]
+z_index = 2
+
+[node name="AngelEntrance" type="Node2D" parent="MarketActors"]
+unique_name_in_owner = true
+position = Vector2(640, 282)
+
+[node name="AngelFloat" type="Node2D" parent="MarketActors/AngelEntrance"]
+unique_name_in_owner = true
+
+[node name="Angel" type="Sprite2D" parent="MarketActors/AngelEntrance/AngelFloat"]
+scale = Vector2(0.56, 0.56)
+texture = ExtResource("4_angel")
+
+[node name="AuditEntrance" type="Node2D" parent="MarketActors"]
+unique_name_in_owner = true
+position = Vector2(276, 534)
+
+[node name="AuditFloat" type="Node2D" parent="MarketActors/AuditEntrance"]
+unique_name_in_owner = true
+
+[node name="AuditHighlight" type="Sprite2D" parent="MarketActors/AuditEntrance/AuditFloat"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+position = Vector2(0, -69)
+scale = Vector2(0.61, 0.61)
+texture = ExtResource("8_highlight")
+
+[node name="ShelfPerspective" type="Node2D" parent="MarketActors/AuditEntrance/AuditFloat"]
+scale = Vector2(1, 0.42)
+
+[node name="AuditShelfSpin" type="Node2D" parent="MarketActors/AuditEntrance/AuditFloat/ShelfPerspective"]
+unique_name_in_owner = true
+
+[node name="Shelf" type="Sprite2D" parent="MarketActors/AuditEntrance/AuditFloat/ShelfPerspective/AuditShelfSpin"]
+scale = Vector2(0.36, 0.36)
+texture = ExtResource("9_shelf")
+
+[node name="AuditItem" type="Sprite2D" parent="MarketActors/AuditEntrance/AuditFloat"]
+unique_name_in_owner = true
+position = Vector2(0, -92)
+scale = Vector2(0.55, 0.55)
+texture = ExtResource("5_audit")
+
+[node name="Name" type="Label" parent="MarketActors/AuditEntrance/AuditFloat"]
+z_index = 20
+offset_left = -145.0
+offset_top = 58.0
+offset_right = 145.0
+offset_bottom = 84.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.952941, 0.847059, 0.427451, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.105882, 0.231373, 0.95)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 18
+text = "Audit slip"
+horizontal_alignment = 1
+
+[node name="AuditInfoLabel" type="Label" parent="MarketActors/AuditEntrance/AuditFloat"]
+unique_name_in_owner = true
+z_index = 20
+offset_left = -150.0
+offset_top = 83.0
+offset_right = 150.0
+offset_bottom = 108.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.941176, 0.917647, 0.85098, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.105882, 0.231373, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+
+[node name="AuditButton" type="Button" parent="MarketActors/AuditEntrance/AuditFloat"]
+unique_name_in_owner = true
+z_index = 21
+offset_left = -150.0
+offset_top = -192.0
+offset_right = 150.0
+offset_bottom = 112.0
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_item")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_item")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_item")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_item")
+flat = true
+tooltip_text = "Purchase one Audit slip"
+
+[node name="RadarEntrance" type="Node2D" parent="MarketActors"]
+unique_name_in_owner = true
+position = Vector2(640, 605)
+
+[node name="RadarFloat" type="Node2D" parent="MarketActors/RadarEntrance"]
+unique_name_in_owner = true
+
+[node name="RadarHighlight" type="Sprite2D" parent="MarketActors/RadarEntrance/RadarFloat"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+position = Vector2(0, -76)
+scale = Vector2(0.63, 0.63)
+texture = ExtResource("8_highlight")
+
+[node name="ShelfPerspective" type="Node2D" parent="MarketActors/RadarEntrance/RadarFloat"]
+scale = Vector2(1, 0.42)
+
+[node name="RadarShelfSpin" type="Node2D" parent="MarketActors/RadarEntrance/RadarFloat/ShelfPerspective"]
+unique_name_in_owner = true
+
+[node name="Shelf" type="Sprite2D" parent="MarketActors/RadarEntrance/RadarFloat/ShelfPerspective/RadarShelfSpin"]
+scale = Vector2(0.36, 0.36)
+texture = ExtResource("9_shelf")
+
+[node name="RadarItem" type="Sprite2D" parent="MarketActors/RadarEntrance/RadarFloat"]
+unique_name_in_owner = true
+position = Vector2(0, -110)
+scale = Vector2(0.48, 0.48)
+texture = ExtResource("6_radar")
+
+[node name="Name" type="Label" parent="MarketActors/RadarEntrance/RadarFloat"]
+z_index = 20
+offset_left = -145.0
+offset_top = 51.0
+offset_right = 145.0
+offset_bottom = 77.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.952941, 0.847059, 0.427451, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.105882, 0.231373, 0.95)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 18
+text = "Carriage radar"
+horizontal_alignment = 1
+
+[node name="RadarInfoLabel" type="Label" parent="MarketActors/RadarEntrance/RadarFloat"]
+unique_name_in_owner = true
+z_index = 20
+offset_left = -150.0
+offset_top = 76.0
+offset_right = 150.0
+offset_bottom = 101.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.941176, 0.917647, 0.85098, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.105882, 0.231373, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+
+[node name="RadarButton" type="Button" parent="MarketActors/RadarEntrance/RadarFloat"]
+unique_name_in_owner = true
+z_index = 21
+offset_left = -150.0
+offset_top = -210.0
+offset_right = 150.0
+offset_bottom = 105.0
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_item")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_item")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_item")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_item")
+flat = true
+tooltip_text = "Purchase one Carriage radar charge"
+
+[node name="SpeedEntrance" type="Node2D" parent="MarketActors"]
+unique_name_in_owner = true
+position = Vector2(1004, 534)
+
+[node name="SpeedFloat" type="Node2D" parent="MarketActors/SpeedEntrance"]
+unique_name_in_owner = true
+
+[node name="SpeedHighlight" type="Sprite2D" parent="MarketActors/SpeedEntrance/SpeedFloat"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+position = Vector2(0, -72)
+scale = Vector2(0.61, 0.61)
+texture = ExtResource("8_highlight")
+
+[node name="ShelfPerspective" type="Node2D" parent="MarketActors/SpeedEntrance/SpeedFloat"]
+scale = Vector2(1, 0.42)
+
+[node name="SpeedShelfSpin" type="Node2D" parent="MarketActors/SpeedEntrance/SpeedFloat/ShelfPerspective"]
+unique_name_in_owner = true
+
+[node name="Shelf" type="Sprite2D" parent="MarketActors/SpeedEntrance/SpeedFloat/ShelfPerspective/SpeedShelfSpin"]
+scale = Vector2(0.36, 0.36)
+texture = ExtResource("9_shelf")
+
+[node name="SpeedItem" type="Sprite2D" parent="MarketActors/SpeedEntrance/SpeedFloat"]
+unique_name_in_owner = true
+position = Vector2(0, -101)
+scale = Vector2(0.53, 0.53)
+texture = ExtResource("7_swift")
+
+[node name="Name" type="Label" parent="MarketActors/SpeedEntrance/SpeedFloat"]
+z_index = 20
+offset_left = -145.0
+offset_top = 58.0
+offset_right = 145.0
+offset_bottom = 84.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.952941, 0.847059, 0.427451, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.105882, 0.231373, 0.95)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 18
+text = "Swiftstep soles"
+horizontal_alignment = 1
+
+[node name="SpeedInfoLabel" type="Label" parent="MarketActors/SpeedEntrance/SpeedFloat"]
+unique_name_in_owner = true
+z_index = 20
+offset_left = -150.0
+offset_top = 83.0
+offset_right = 150.0
+offset_bottom = 108.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.941176, 0.917647, 0.85098, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.105882, 0.231373, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+
+[node name="SpeedButton" type="Button" parent="MarketActors/SpeedEntrance/SpeedFloat"]
+unique_name_in_owner = true
+z_index = 21
+offset_left = -150.0
+offset_top = -202.0
+offset_right = 150.0
+offset_bottom = 112.0
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_item")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_item")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_item")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_item")
+flat = true
+tooltip_text = "Permanently improve walking speed for this run"
+
+[node name="GateLayer" type="Control" parent="."]
+z_index = 1
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
-[node name="Panel" type="PanelContainer" parent="Center"]
-custom_minimum_size = Vector2(1120, 620)
-layout_mode = 2
-theme_override_styles/panel = SubResource("MarketPanelStyle")
+[node name="LeftWall" type="ColorRect" parent="GateLayer"]
+unique_name_in_owner = true
+offset_top = 277.0
+offset_right = 90.0
+offset_bottom = 720.0
+mouse_filter = 2
+color = Color(0.831373, 0.760784, 0.717647, 1)
 
-[node name="Outer" type="VBoxContainer" parent="Center/Panel"]
-layout_mode = 2
-theme_override_constants/separation = 13
+[node name="RightWall" type="ColorRect" parent="GateLayer"]
+unique_name_in_owner = true
+offset_left = 1190.0
+offset_top = 277.0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+color = Color(0.831373, 0.760784, 0.717647, 1)
 
-[node name="Eyebrow" type="Label" parent="Center/Panel/Outer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.69, 0.75, 1)
+[node name="GateMotion" type="Node2D" parent="GateLayer"]
+unique_name_in_owner = true
+
+[node name="LeftDoor" type="Sprite2D" parent="GateLayer/GateMotion"]
+unique_name_in_owner = true
+position = Vector2(170, 435)
+scale = Vector2(0.76, 0.76)
+texture = ExtResource("17_door")
+
+[node name="RightDoor" type="Sprite2D" parent="GateLayer/GateMotion"]
+unique_name_in_owner = true
+position = Vector2(1110, 435)
+scale = Vector2(0.76, 0.76)
+texture = ExtResource("17_door")
+flip_h = true
+
+[node name="DoorDustBurst" type="CPUParticles2D" parent="GateLayer"]
+unique_name_in_owner = true
+z_index = 4
+position = Vector2(640, 684)
+emitting = false
+amount = 42
+lifetime = 1.45
+one_shot = true
+explosiveness = 0.96
+randomness = 0.28
+texture = SubResource("GradientTexture2D_dust")
+emission_shape = 3
+emission_rect_extents = Vector2(215, 7)
+direction = Vector2(0, -1)
+spread = 108.0
+gravity = Vector2(0, 8)
+initial_velocity_min = 40.0
+initial_velocity_max = 92.0
+angular_velocity_min = -36.0
+angular_velocity_max = 36.0
+scale_amount_min = 3.0
+scale_amount_max = 6.5
+color_ramp = SubResource("Gradient_dust")
+
+[node name="DoorDustHaze" type="CPUParticles2D" parent="GateLayer"]
+unique_name_in_owner = true
+z_index = 3
+position = Vector2(640, 704)
+emitting = false
+amount = 20
+lifetime = 2.4
+one_shot = true
+explosiveness = 0.88
+randomness = 0.38
+texture = SubResource("GradientTexture2D_dust")
+emission_shape = 3
+emission_rect_extents = Vector2(380, 6)
+direction = Vector2(0, -1)
+spread = 112.0
+gravity = Vector2(0, -3)
+initial_velocity_min = 12.0
+initial_velocity_max = 34.0
+angular_velocity_min = -16.0
+angular_velocity_max = 16.0
+scale_amount_min = 5.5
+scale_amount_max = 11.0
+color_ramp = SubResource("Gradient_dust_haze")
+
+[node name="HeaderRoot" type="Control" parent="."]
+unique_name_in_owner = true
+z_index = 3
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="HeaderRoot"]
+theme_type_variation = &"HeaderLabel"
+offset_left = 34.0
+offset_top = 24.0
+offset_right = 360.0
+offset_bottom = 68.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.952941, 0.847059, 0.427451, 1)
+theme_override_font_sizes/font_size = 32
+text = "Night market"
+
+[node name="RewardLabel" type="Label" parent="HeaderRoot"]
+offset_left = 36.0
+offset_top = 69.0
+offset_right = 620.0
+offset_bottom = 96.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.776471, 0.827451, 0.807843, 1)
 theme_override_font_sizes/font_size = 14
-text = "SOUL LINE SUPPLY COUNTER"
-horizontal_alignment = 1
+text = "Choose what you need before night service"
 
-[node name="Title" type="Label" parent="Center/Panel/Outer"]
-theme_type_variation = &"HeaderLabel"
-layout_mode = 2
-theme_override_colors/font_color = Color(0.94, 0.83, 0.61, 1)
-theme_override_font_sizes/font_size = 34
-text = "NIGHT MARKET"
-horizontal_alignment = 1
-
-[node name="BlessingsLabel" type="Label" parent="Center/Panel/Outer"]
+[node name="BlessingsLabel" type="Label" parent="HeaderRoot"]
 unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.59, 0.84, 0.68, 1)
+offset_left = 880.0
+offset_top = 29.0
+offset_right = 1160.0
+offset_bottom = 66.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.952941, 0.847059, 0.427451, 1)
 theme_override_font_sizes/font_size = 22
-horizontal_alignment = 1
+horizontal_alignment = 2
 
-[node name="Instruction" type="Label" parent="Center/Panel/Outer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.81, 0.78, 1)
-theme_override_font_sizes/font_size = 15
-text = "Purchase consumables for investigations or permanently improve movement speed for this run."
-horizontal_alignment = 1
-
-[node name="Cards" type="HBoxContainer" parent="Center/Panel/Outer"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 14
-
-[node name="AuditCard" type="PanelContainer" parent="Center/Panel/Outer/Cards"]
-custom_minimum_size = Vector2(342, 310)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("ToolCardStyle")
-
-[node name="Box" type="VBoxContainer" parent="Center/Panel/Outer/Cards/AuditCard"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Title" type="Label" parent="Center/Panel/Outer/Cards/AuditCard/Box"]
-theme_type_variation = &"HeaderLabel"
-layout_mode = 2
-theme_override_colors/font_color = Color(0.94, 0.83, 0.61, 1)
-theme_override_font_sizes/font_size = 23
-text = "AUDIT SLIP"
-
-[node name="Type" type="Label" parent="Center/Panel/Outer/Cards/AuditCard/Box"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.61, 0.68, 0.76, 1)
-text = "CONSUMABLE"
-
-[node name="Description" type="Label" parent="Center/Panel/Outer/Cards/AuditCard/Box"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_font_sizes/font_size = 16
-text = "Reserved for the revised night-deduction system. It cannot be purchased until its new interaction is finalized."
-autowrap_mode = 2
-
-[node name="AuditStockLabel" type="Label" parent="Center/Panel/Outer/Cards/AuditCard/Box"]
+[node name="ContinueButton" type="Button" parent="HeaderRoot"]
 unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.59, 0.84, 0.68, 1)
+offset_left = 1012.0
+offset_top = 82.0
+offset_right = 1244.0
+offset_bottom = 135.0
+mouse_default_cursor_shape = 2
+text = "Begin night shift"
 
-[node name="AuditButton" type="Button" parent="Center/Panel/Outer/Cards/AuditCard/Box"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-
-[node name="RadarCard" type="PanelContainer" parent="Center/Panel/Outer/Cards"]
-custom_minimum_size = Vector2(342, 310)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("ToolCardStyle")
-
-[node name="Box" type="VBoxContainer" parent="Center/Panel/Outer/Cards/RadarCard"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Title" type="Label" parent="Center/Panel/Outer/Cards/RadarCard/Box"]
-theme_type_variation = &"HeaderLabel"
-layout_mode = 2
-theme_override_colors/font_color = Color(0.94, 0.83, 0.61, 1)
-theme_override_font_sizes/font_size = 23
-text = "CARRIAGE RADAR"
-
-[node name="Type" type="Label" parent="Center/Panel/Outer/Cards/RadarCard/Box"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.61, 0.68, 0.76, 1)
-text = "CONSUMABLE CHARGE"
-
-[node name="Description" type="Label" parent="Center/Panel/Outer/Cards/RadarCard/Box"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_font_sizes/font_size = 16
-text = "Press R inside a passenger coach. If an anomaly is aboard that coach, its interior glows red temporarily."
-autowrap_mode = 2
-
-[node name="RadarStockLabel" type="Label" parent="Center/Panel/Outer/Cards/RadarCard/Box"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.59, 0.84, 0.68, 1)
-
-[node name="RadarButton" type="Button" parent="Center/Panel/Outer/Cards/RadarCard/Box"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-
-[node name="SpeedCard" type="PanelContainer" parent="Center/Panel/Outer/Cards"]
-custom_minimum_size = Vector2(342, 310)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("ToolCardStyle")
-
-[node name="Box" type="VBoxContainer" parent="Center/Panel/Outer/Cards/SpeedCard"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Title" type="Label" parent="Center/Panel/Outer/Cards/SpeedCard/Box"]
-theme_type_variation = &"HeaderLabel"
-layout_mode = 2
-theme_override_colors/font_color = Color(0.94, 0.83, 0.61, 1)
-theme_override_font_sizes/font_size = 23
-text = "SWIFTSTEP SOLES"
-
-[node name="Type" type="Label" parent="Center/Panel/Outer/Cards/SpeedCard/Box"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.61, 0.68, 0.76, 1)
-text = "PERMANENT RUN UPGRADE"
-
-[node name="Description" type="Label" parent="Center/Panel/Outer/Cards/SpeedCard/Box"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_font_sizes/font_size = 16
-text = "Increase the conductor's walking speed. Each level stacks with the previous upgrade."
-autowrap_mode = 2
-
-[node name="SpeedLevelLabel" type="Label" parent="Center/Panel/Outer/Cards/SpeedCard/Box"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.59, 0.84, 0.68, 1)
-
-[node name="SpeedButton" type="Button" parent="Center/Panel/Outer/Cards/SpeedCard/Box"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-
-[node name="FeedbackLabel" type="Label" parent="Center/Panel/Outer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 28)
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-horizontal_alignment = 1
-
-[node name="ContinueButton" type="Button" parent="Center/Panel/Outer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 54)
-layout_mode = 2
-text = "ENTER NIGHT SERVICE"
-
-[connection signal="pressed" from="Center/Panel/Outer/Cards/AuditCard/Box/AuditButton" to="." method="_on_audit_button_pressed"]
-[connection signal="pressed" from="Center/Panel/Outer/Cards/RadarCard/Box/RadarButton" to="." method="_on_radar_button_pressed"]
-[connection signal="pressed" from="Center/Panel/Outer/Cards/SpeedCard/Box/SpeedButton" to="." method="_on_speed_button_pressed"]
-[connection signal="pressed" from="Center/Panel/Outer/ContinueButton" to="." method="_on_continue_button_pressed"]
+[connection signal="pressed" from="MarketActors/AuditEntrance/AuditFloat/AuditButton" to="." method="_on_audit_button_pressed"]
+[connection signal="pressed" from="MarketActors/RadarEntrance/RadarFloat/RadarButton" to="." method="_on_radar_button_pressed"]
+[connection signal="pressed" from="MarketActors/SpeedEntrance/SpeedFloat/SpeedButton" to="." method="_on_speed_button_pressed"]
+[connection signal="pressed" from="HeaderRoot/ContinueButton" to="." method="_on_continue_button_pressed"]

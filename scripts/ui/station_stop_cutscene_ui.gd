@@ -36,6 +36,8 @@ signal boarding_actor_entered(actor_index: int, door_screen_position: Vector2)
 @export_range(20.0, 120.0, 1.0) var platform_horizontal_offset: float = 82.0
 @export_range(0.0, 160.0, 1.0) var door_visibility_margin: float = 48.0
 @export_range(0.2, 1.0, 0.05) var zoomed_out_actor_scale: float = 0.45
+@export_range(0.1, 2.0, 0.01) var station_reference_camera_zoom: float = 0.428571
+@export_range(1.0, 4.0, 0.05) var maximum_actor_camera_scale: float = 2.5
 @export_range(0.0, 12.0, 0.05) var departing_start_time: float = 7.390431
 @export_range(0.02, 0.6, 0.01) var departing_stagger_min: float = 0.1
 @export_range(0.02, 0.6, 0.01) var departing_stagger_max: float = 0.22
@@ -78,6 +80,7 @@ var _departing_motion_profiles: Array[Dictionary] = []
 var _boarding_motion_profiles: Array[Dictionary] = []
 var _ambient_motion_profiles: Array[Dictionary] = []
 var _door_markers: Dictionary = {}
+var _door_rest_positions: Dictionary = {}
 var _finished: bool = false
 var _timeline_completed: bool = false
 var _opening_mode: bool = false
@@ -112,22 +115,22 @@ var _motion_rng := RandomNumberGenerator.new()
 @onready var _cinematic_title_animation: AnimationPlayer = %CinematicTitleAnimation
 
 
-func play_stop(station_name: String, departing_actors: Array[Dictionary], boarding_actors: Array[Dictionary], door_markers: Dictionary = {}, ambient_actors: Array[Dictionary] = []) -> void:
+func play_stop(station_name: String, departing_actors: Array[Dictionary], boarding_actors: Array[Dictionary], door_markers: Dictionary = {}, door_rest_positions: Dictionary = {}, ambient_actors: Array[Dictionary] = []) -> void:
 	_opening_mode = false
 	_duration = stop_duration
 	_deceleration_start = stop_deceleration_start
 	_arrival_end = stop_arrival_end
 	_departure_start = stop_departure_start
-	_begin_sequence(station_name, departing_actors, boarding_actors, door_markers, ambient_actors)
+	_begin_sequence(station_name, departing_actors, boarding_actors, door_markers, door_rest_positions, ambient_actors)
 
 
-func play_opening(station_name: String, boarding_actors: Array[Dictionary], door_markers: Dictionary = {}, ambient_actors: Array[Dictionary] = []) -> void:
+func play_opening(station_name: String, boarding_actors: Array[Dictionary], door_markers: Dictionary = {}, door_rest_positions: Dictionary = {}, ambient_actors: Array[Dictionary] = []) -> void:
 	_opening_mode = true
 	_duration = opening_duration
 	_deceleration_start = opening_deceleration_start
 	_arrival_end = opening_arrival_end
 	_departure_start = opening_departure_start
-	_begin_sequence(station_name, [], boarding_actors, door_markers, ambient_actors)
+	_begin_sequence(station_name, [], boarding_actors, door_markers, door_rest_positions, ambient_actors)
 
 
 func get_stop_timeline() -> Vector3:
@@ -169,12 +172,13 @@ func set_departure_blocked(blocked: bool) -> void:
 	_departure_blocked = blocked
 
 
-func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], boarding_actors: Array[Dictionary], door_markers: Dictionary, ambient_actors: Array[Dictionary]) -> void:
+func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], boarding_actors: Array[Dictionary], door_markers: Dictionary, door_rest_positions: Dictionary, ambient_actors: Array[Dictionary]) -> void:
 	_station_name = station_name
 	_departing_actors = departing_actors.duplicate(true)
 	_boarding_actors = boarding_actors.duplicate(true)
 	_ambient_actors = ambient_actors.duplicate(true)
 	_door_markers = door_markers.duplicate()
+	_door_rest_positions = door_rest_positions.duplicate(true)
 	_elapsed = 0.0
 	_ambient_elapsed = 0.0
 	_ambient_platform_y_cache = NAN
@@ -468,6 +472,21 @@ func _update_exchange_actors() -> void:
 		var profile: Dictionary = _boarding_motion_profiles[actor_index]
 		var start_time: float = float(profile["start_time"])
 		if _elapsed < start_time:
+			var waiting_door_position: Vector2 = _actor_rest_door_screen_position(
+				_boarding_actors[actor_index],
+				actor_index + _departing_actors.size()
+			)
+			var waiting_position: Vector2 = _profile_platform_position(waiting_door_position, profile)
+			_set_actor_slot(
+				actor_index + _departing_actors.size(),
+				_boarding_actors[actor_index],
+				waiting_position,
+				0.0,
+				-float(profile["side"]),
+				1.0,
+				1.0,
+				0.0
+			)
 			continue
 		var walk_duration: float = float(profile["walk_duration"])
 		var progress: float = clampf((_elapsed - start_time) / walk_duration, 0.0, 1.0)
@@ -560,9 +579,10 @@ func _ambient_platform_y() -> float:
 
 
 func _profile_platform_position(door_position: Vector2, profile: Dictionary) -> Vector2:
+	var camera_scale: float = _camera_zoom_scale()
 	return door_position + Vector2(
-		platform_horizontal_offset * float(profile["side"]) * float(profile["horizontal_scale"]),
-		platform_vertical_offset * float(profile["vertical_scale"])
+		platform_horizontal_offset * float(profile["side"]) * float(profile["horizontal_scale"]) * camera_scale,
+		platform_vertical_offset * float(profile["vertical_scale"]) * camera_scale
 	)
 
 
@@ -674,6 +694,19 @@ func _actor_door_position(actor_data: Dictionary, actor_index: int) -> Vector2:
 	return Vector2(size.x * 0.5, size.y * 0.72)
 
 
+func _actor_rest_door_screen_position(actor_data: Dictionary, actor_index: int) -> Vector2:
+	var carriage_number: int = int(actor_data.get("carriage", 0))
+	var preferred_positions: Array = _door_rest_positions.get(carriage_number, [])
+	if not preferred_positions.is_empty():
+		var world_position: Vector2 = preferred_positions[actor_index % preferred_positions.size()]
+		return get_viewport().get_canvas_transform() * world_position
+
+	# This fallback is only for scenes that do not provide station-rest anchors.
+	# Keep the actor visible near its future door without caching the moving door.
+	var fallback_door: Vector2 = _actor_door_position(actor_data, actor_index)
+	return fallback_door
+
+
 func _marker_from_array(markers: Array, actor_index: int) -> Marker2D:
 	if markers.is_empty():
 		return null
@@ -737,8 +770,20 @@ func _set_actor_slot(slot_index: int, actor_data: Dictionary, actor_position: Ve
 	slot.position = actor_position
 	slot.rotation = actor_rotation
 	slot.modulate.a = clampf(visibility, 0.0, 1.0)
-	slot.scale = Vector2.ONE * zoomed_out_actor_scale * transition_scale
+	slot.scale = Vector2.ONE * zoomed_out_actor_scale * transition_scale * _camera_zoom_scale()
 	slot.visible = true
+
+
+func _camera_zoom_scale() -> float:
+	var active_camera: Camera2D = get_viewport().get_camera_2d()
+	if not is_instance_valid(active_camera):
+		return 1.0
+	var current_zoom: float = (absf(active_camera.zoom.x) + absf(active_camera.zoom.y)) * 0.5
+	return clampf(
+		current_zoom / maxf(station_reference_camera_zoom, 0.01),
+		0.65,
+		maximum_actor_camera_scale
+	)
 
 
 func _update_departure_streaks() -> void:

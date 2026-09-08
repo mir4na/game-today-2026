@@ -3,7 +3,7 @@ extends Control
 ## Entry screen for the prototype, with persistent audio and display settings.
 
 const SETTINGS_PATH: String = "user://where_do_you_belong_settings.cfg"
-const SETTINGS_VERSION: int = 2
+const SETTINGS_VERSION: int = 3
 const DEFAULT_FULLSCREEN: bool = true
 const ShiftProgress = preload("res://scripts/systems/shift_progress.gd")
 
@@ -165,6 +165,7 @@ func _load_settings() -> void:
 
 func _save_settings() -> void:
 	var config := ConfigFile.new()
+	config.load(SETTINGS_PATH)
 	config.set_value("meta", "version", SETTINGS_VERSION)
 	config.set_value("audio", "master_volume", _volume_slider.value)
 	config.set_value("display", "fullscreen", _display_mode.selected == 1)

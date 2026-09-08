@@ -1,103 +1,360 @@
 class_name NightMarketUI
 extends Control
-## Market shown between the daylight paycheck and night service.
+## Animated angel market shown between the daylight paycheck and night service.
 
 signal purchase_requested(tool_id: StringName)
 signal continue_requested
 
 @export_category("Inspector Copy")
-@export var blessings_template: String = "BLESSINGS  %d"
-@export var audit_stock_template: String = "INVENTORY: %d SLIP(S)"
-@export var radar_stock_template: String = "INVENTORY: %d CHARGE(S)"
-@export var speed_level_template: String = "CURRENT LEVEL: %d / %d   (+%d SPEED)"
-@export var purchase_button_template: String = "BUY  •  %d BLESSINGS"
-@export var speed_button_template: String = "UPGRADE  •  %d BLESSINGS"
-@export var maximum_speed_text: String = "MAXIMUM LEVEL REACHED"
-@export var unavailable_item_text: String = "UNDER REVISION"
-@export var day_reward_template: String = "+%d BLESSINGS  •  DROP-OFFS +%d  •  PENALTY −%d"
-
-@onready var _blessings_label: Label = %BlessingsLabel
-@onready var _audit_stock_label: Label = %AuditStockLabel
-@onready var _radar_stock_label: Label = %RadarStockLabel
-@onready var _speed_level_label: Label = %SpeedLevelLabel
-@onready var _audit_button: Button = %AuditButton
-@onready var _radar_button: Button = %RadarButton
-@onready var _speed_button: Button = %SpeedButton
-@onready var _feedback_label: Label = %FeedbackLabel
-@onready var _continue_button: Button = %ContinueButton
+@export var blessings_template: String = "Blessings  %d"
+@export var audit_stock_template: String = "%d owned  •  %d Blessings"
+@export var radar_stock_template: String = "%d owned  •  %d Blessings"
+@export var speed_level_template: String = "Level %d / %d  •  %d Blessings"
+@export var maximum_speed_text: String = "Maximum level"
+@export_category("Floating Motion")
+@export_range(0.0, 20.0, 0.5) var angel_float_height: float = 8.0
+@export_range(0.0, 5.0, 0.05) var angel_float_speed: float = 1.15
+@export_range(0.0, 5.0, 0.05) var angel_sway_degrees: float = 1.25
+@export_range(0.0, 16.0, 0.5) var shelf_float_height: float = 6.0
+@export_range(0.0, 5.0, 0.05) var shelf_float_speed: float = 1.35
+@export_range(0.0, 5.0, 0.05) var shelf_sway_degrees: float = 1.1
+@export_range(0.0, 90.0, 1.0) var shelf_rotation_degrees_per_second: float = 22.0
+@export_range(0.0, 10.0, 0.5) var item_hover_height: float = 3.5
+@export_range(0.0, 5.0, 0.05) var item_hover_speed: float = 1.6
+@export_range(0.25, 3.0, 0.05) var light_rotation_intensity: float = 1.0
+@export_category("Transition")
+@export_range(0.1, 1.5, 0.05) var entrance_duration: float = 0.62
+@export_range(0.1, 1.5, 0.05) var content_exit_duration: float = 0.52
+@export_range(0.1, 1.5, 0.05) var gate_close_duration: float = 0.68
+@export_category("Standalone Preview")
+@export_range(0, 999, 1) var preview_blessings: int = 100
 
 var _snapshot: Dictionary = {}
 var _continue_sent: bool = false
+var _input_locked: bool = false
+var _motion_time: float = 0.0
+var _market_tween: Tween
+var _highlight_tweens: Dictionary = {}
+var _entrance_positions: Dictionary = {}
+var _light_scales: Dictionary = {}
+var _highlight_scales: Dictionary = {}
+var _item_rest_positions: Dictionary = {}
+var _left_door_open_position: Vector2
+var _right_door_open_position: Vector2
+var _left_wall_open_position: Vector2
+var _left_wall_open_size: Vector2
+var _right_wall_open_position: Vector2
+var _right_wall_open_size: Vector2
+
+@onready var _background: ColorRect = %Background
+@onready var _light_nodes: Array[Sprite2D] = [%Light1, %Light2, %Light3, %Light4, %Light5, %Light6, %Light7]
+@onready var _light_speeds: PackedFloat32Array = PackedFloat32Array([0.30, -0.255, 0.215, -0.175, 0.135, -0.095, 0.06])
+@onready var _angel_entrance: Node2D = %AngelEntrance
+@onready var _angel_float: Node2D = %AngelFloat
+@onready var _item_entrances: Array[Node2D] = [%AuditEntrance, %RadarEntrance, %SpeedEntrance]
+@onready var _item_floats: Array[Node2D] = [%AuditFloat, %RadarFloat, %SpeedFloat]
+@onready var _shelf_spins: Array[Node2D] = [%AuditShelfSpin, %RadarShelfSpin, %SpeedShelfSpin]
+@onready var _item_sprites: Array[Sprite2D] = [%AuditItem, %RadarItem, %SpeedItem]
+@onready var _item_highlights: Array[Sprite2D] = [%AuditHighlight, %RadarHighlight, %SpeedHighlight]
+@onready var _item_buttons: Array[Button] = [%AuditButton, %RadarButton, %SpeedButton]
+@onready var _item_info_labels: Array[Label] = [%AuditInfoLabel, %RadarInfoLabel, %SpeedInfoLabel]
+@onready var _header_root: Control = %HeaderRoot
+@onready var _blessings_label: Label = %BlessingsLabel
+@onready var _continue_button: Button = %ContinueButton
+@onready var _gate_motion: Node2D = %GateMotion
+@onready var _left_door: Sprite2D = %LeftDoor
+@onready var _right_door: Sprite2D = %RightDoor
+@onready var _left_wall: ColorRect = %LeftWall
+@onready var _right_wall: ColorRect = %RightWall
+@onready var _door_dust_burst: CPUParticles2D = %DoorDustBurst
+@onready var _door_dust_haze: CPUParticles2D = %DoorDustHaze
 
 
-func open_market(snapshot: Dictionary, day_award: Dictionary) -> void:
+func _ready() -> void:
+	_entrance_positions[_angel_entrance] = _angel_entrance.position
+	for entrance: Node2D in _item_entrances:
+		_entrance_positions[entrance] = entrance.position
+	for light: Sprite2D in _light_nodes:
+		_light_scales[light] = light.scale
+	for highlight: Sprite2D in _item_highlights:
+		_highlight_scales[highlight] = highlight.scale
+	for item_sprite: Sprite2D in _item_sprites:
+		_item_rest_positions[item_sprite] = item_sprite.position
+	_left_door_open_position = _left_door.position
+	_right_door_open_position = _right_door.position
+	_left_wall_open_position = _left_wall.position
+	_left_wall_open_size = _left_wall.size
+	_right_wall_open_position = _right_wall.position
+	_right_wall_open_size = _right_wall.size
+	_connect_item_feedback()
+	if get_tree().current_scene == self:
+		call_deferred(&"_open_standalone_preview")
+
+
+func _process(delta: float) -> void:
+	if not visible:
+		return
+	_motion_time += delta
+	_angel_float.position.y = sin(_motion_time * angel_float_speed) * angel_float_height
+	_angel_float.rotation = deg_to_rad(sin(_motion_time * angel_float_speed * 0.63) * angel_sway_degrees)
+	for index: int in range(_item_floats.size()):
+		var phase: float = float(index) * 1.85
+		var item_float: Node2D = _item_floats[index]
+		item_float.position.y = sin(_motion_time * shelf_float_speed + phase) * shelf_float_height
+		item_float.rotation = deg_to_rad(sin(_motion_time * shelf_float_speed * 0.72 + phase) * shelf_sway_degrees)
+		var direction: float = -1.0 if index == 1 else 1.0
+		var speed_variation: float = 1.0 + float(index) * 0.12
+		var axis_phase: float = (
+			_motion_time * deg_to_rad(shelf_rotation_degrees_per_second) * direction * speed_variation
+			+ float(index) * TAU / 3.0
+		)
+		# Rotate the circular source before its parent applies the perspective
+		# squash, creating the original horizontal turntable motion.
+		_shelf_spins[index].rotation = axis_phase
+		_shelf_spins[index].scale = Vector2.ONE
+		var item_sprite: Sprite2D = _item_sprites[index]
+		var item_rest_position: Vector2 = _item_rest_positions[item_sprite]
+		item_sprite.position.y = item_rest_position.y + sin(_motion_time * item_hover_speed + phase + 0.8) * item_hover_height
+	for index: int in range(_light_nodes.size()):
+		_light_nodes[index].rotation += delta * _light_speeds[index] * light_rotation_intensity
+
+
+func open_market(snapshot: Dictionary, _day_award: Dictionary) -> void:
 	_continue_sent = false
+	_input_locked = false
+	_motion_time = 0.0
+	_reset_gate()
 	show()
 	set_snapshot(snapshot)
-	_feedback_label.modulate = Color("9ed8ae")
-	_feedback_label.text = day_reward_template % [
-		int(day_award.get("earned", 0)),
-		int(day_award.get("dropoff_reward", 0)),
-		int(day_award.get("penalty_deduction", 0)),
-	]
+	for index: int in range(_item_highlights.size()):
+		var highlight: Sprite2D = _item_highlights[index]
+		highlight.modulate.a = 0.0
+		highlight.scale = (_highlight_scales[highlight] as Vector2) * 0.88
+	_play_entrance_animation()
 	_focus_first_available_action()
+
+
+func _open_standalone_preview() -> void:
+	open_market(
+		{
+			"blessings": preview_blessings,
+			"audit_slips": 1,
+			"radar_charges": 2,
+			"speed_level": 0,
+			"speed_max_level": 3,
+			"audit_slip_cost": 3,
+			"radar_charge_cost": 4,
+			"speed_upgrade_cost": 6,
+		},
+		{
+			"earned": 120,
+			"dropoff_reward": 180,
+			"penalty_deduction": 60,
+		}
+	)
 
 
 func set_snapshot(snapshot: Dictionary) -> void:
 	_snapshot = snapshot.duplicate(true)
 	var blessings: int = int(_snapshot.get("blessings", 0))
+	var audit_cost: int = int(_snapshot.get("audit_slip_cost", 0))
 	var radar_cost: int = int(_snapshot.get("radar_charge_cost", 0))
 	var speed_cost: int = int(_snapshot.get("speed_upgrade_cost", -1))
 	var speed_level: int = int(_snapshot.get("speed_level", 0))
 	var speed_maximum: int = int(_snapshot.get("speed_max_level", 0))
 	_blessings_label.text = blessings_template % blessings
-	_audit_stock_label.text = audit_stock_template % int(_snapshot.get("audit_slips", 0))
-	_radar_stock_label.text = radar_stock_template % int(_snapshot.get("radar_charges", 0))
-	_speed_level_label.text = speed_level_template % [
-		speed_level,
-		speed_maximum,
-		int(round(float(_snapshot.get("speed_bonus", 0.0))))
-	]
-	_audit_button.text = unavailable_item_text
-	_radar_button.text = purchase_button_template % radar_cost
-	_speed_button.text = maximum_speed_text if speed_cost < 0 else speed_button_template % speed_cost
-	# Keep this scene-authored market slot reserved until Audit Slip receives a
-	# new night-deduction interaction.
-	_audit_button.disabled = true
-	_radar_button.disabled = blessings < radar_cost
-	_speed_button.disabled = speed_cost < 0 or blessings < speed_cost
+	_item_info_labels[0].text = audit_stock_template % [int(_snapshot.get("audit_slips", 0)), audit_cost]
+	_item_info_labels[1].text = radar_stock_template % [int(_snapshot.get("radar_charges", 0)), radar_cost]
+	_item_info_labels[2].text = maximum_speed_text if speed_cost < 0 else speed_level_template % [speed_level, speed_maximum, speed_cost]
+	_item_buttons[0].disabled = _input_locked or blessings < audit_cost
+	_item_buttons[1].disabled = _input_locked or blessings < radar_cost
+	_item_buttons[2].disabled = _input_locked or speed_cost < 0 or blessings < speed_cost
+	_continue_button.disabled = _input_locked
+	for index: int in range(_item_buttons.size()):
+		_item_entrances[index].self_modulate = Color(0.62, 0.62, 0.68, 1.0) if _item_buttons[index].disabled else Color.WHITE
+		if _item_buttons[index].disabled:
+			_set_item_highlight(index, false)
 
 
-func show_purchase_result(result: Dictionary, snapshot: Dictionary) -> void:
+func show_purchase_result(_result: Dictionary, snapshot: Dictionary) -> void:
 	set_snapshot(snapshot)
-	var success: bool = bool(result.get("success", false))
-	_feedback_label.modulate = Color("9ed8ae") if success else Color("ee9a93")
-	_feedback_label.text = str(result.get("message", ""))
 	_focus_first_available_action()
 
 
+func _connect_item_feedback() -> void:
+	for index: int in range(_item_buttons.size()):
+		var button: Button = _item_buttons[index]
+		button.mouse_entered.connect(_set_item_highlight.bind(index, true))
+		button.mouse_exited.connect(_refresh_item_highlight.bind(index))
+		button.focus_entered.connect(_set_item_highlight.bind(index, true))
+		button.focus_exited.connect(_refresh_item_highlight.bind(index))
+
+
 func _focus_first_available_action() -> void:
-	for button: Button in [_audit_button, _radar_button, _speed_button]:
+	for button: Button in _item_buttons:
 		if not button.disabled:
 			button.grab_focus()
 			return
 	_continue_button.grab_focus()
 
 
+func _refresh_item_highlight(index: int) -> void:
+	call_deferred(&"_apply_item_highlight_state", index)
+
+
+func _apply_item_highlight_state(index: int) -> void:
+	if index < 0 or index >= _item_buttons.size():
+		return
+	var button: Button = _item_buttons[index]
+	var hovered: bool = button.get_global_rect().has_point(get_viewport().get_mouse_position())
+	_set_item_highlight(index, not button.disabled and (button.has_focus() or hovered))
+
+
+func _set_item_highlight(index: int, active: bool) -> void:
+	if index < 0 or index >= _item_highlights.size():
+		return
+	if _item_buttons[index].disabled:
+		active = false
+	var highlight: Sprite2D = _item_highlights[index]
+	var existing := _highlight_tweens.get(highlight) as Tween
+	if existing and existing.is_valid():
+		existing.kill()
+	var rest_scale: Vector2 = _highlight_scales.get(highlight, highlight.scale)
+	var tween := create_tween().set_parallel(true)
+	_highlight_tweens[highlight] = tween
+	tween.tween_property(highlight, ^"modulate:a", 0.82 if active else 0.0, 0.18).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(highlight, ^"scale", rest_scale * (1.06 if active else 0.88), 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func _pulse_item(index: int) -> void:
+	if index < 0 or index >= _item_floats.size():
+		return
+	var item_float: Node2D = _item_floats[index]
+	item_float.scale = Vector2.ONE
+	var tween := create_tween()
+	tween.tween_property(item_float, ^"scale", Vector2.ONE * 1.075, 0.09).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(item_float, ^"scale", Vector2.ONE, 0.17).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func _play_entrance_animation() -> void:
+	if _market_tween and _market_tween.is_valid():
+		_market_tween.kill()
+	_background.modulate.a = 0.0
+	_header_root.modulate.a = 0.0
+	_header_root.position.y = -18.0
+	for light: Sprite2D in _light_nodes:
+		light.modulate.a = 0.0
+		light.scale = (_light_scales[light] as Vector2) * 0.82
+	_angel_entrance.position = (_entrance_positions[_angel_entrance] as Vector2) + Vector2(0.0, -46.0)
+	_angel_entrance.scale = Vector2.ONE * 0.9
+	_angel_entrance.modulate.a = 0.0
+	for entrance: Node2D in _item_entrances:
+		entrance.position = (_entrance_positions[entrance] as Vector2) + Vector2(0.0, 74.0)
+		entrance.scale = Vector2.ONE * 0.78
+		entrance.modulate.a = 0.0
+	_market_tween = create_tween().set_parallel(true)
+	_market_tween.tween_property(_background, ^"modulate:a", 1.0, entrance_duration * 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_market_tween.tween_property(_header_root, ^"position:y", 0.0, entrance_duration * 0.7).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(0.12)
+	_market_tween.tween_property(_header_root, ^"modulate:a", 1.0, entrance_duration * 0.5).set_delay(0.12)
+	for index: int in range(_light_nodes.size()):
+		var light: Sprite2D = _light_nodes[index]
+		var delay: float = float(_light_nodes.size() - 1 - index) * 0.035
+		_market_tween.tween_property(light, ^"modulate:a", 1.0, entrance_duration * 0.75).set_delay(delay)
+		_market_tween.tween_property(light, ^"scale", _light_scales[light], entrance_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(delay)
+	_market_tween.tween_property(_angel_entrance, ^"position", _entrance_positions[_angel_entrance], entrance_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(0.12)
+	_market_tween.tween_property(_angel_entrance, ^"scale", Vector2.ONE, entrance_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(0.12)
+	_market_tween.tween_property(_angel_entrance, ^"modulate:a", 1.0, entrance_duration * 0.55).set_delay(0.12)
+	for index: int in range(_item_entrances.size()):
+		var entrance: Node2D = _item_entrances[index]
+		var delay: float = 0.2 + float(index) * 0.08
+		_market_tween.tween_property(entrance, ^"position", _entrance_positions[entrance], entrance_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(delay)
+		_market_tween.tween_property(entrance, ^"scale", Vector2.ONE, entrance_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(delay)
+		_market_tween.tween_property(entrance, ^"modulate:a", 1.0, entrance_duration * 0.55).set_delay(delay)
+
+
+func _play_exit_animation() -> void:
+	if _market_tween and _market_tween.is_valid():
+		_market_tween.kill()
+	_input_locked = true
+	set_snapshot(_snapshot)
+	for index: int in range(_item_highlights.size()):
+		_set_item_highlight(index, false)
+	_market_tween = create_tween().set_parallel(true)
+	_market_tween.tween_property(_header_root, ^"position:y", -28.0, content_exit_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	_market_tween.tween_property(_header_root, ^"modulate:a", 0.0, content_exit_duration * 0.72)
+	_market_tween.tween_property(_angel_entrance, ^"position:y", (_entrance_positions[_angel_entrance] as Vector2).y - 120.0, content_exit_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	_market_tween.tween_property(_angel_entrance, ^"scale", Vector2.ONE * 0.82, content_exit_duration)
+	_market_tween.tween_property(_angel_entrance, ^"modulate:a", 0.0, content_exit_duration * 0.78)
+	for index: int in range(_item_entrances.size()):
+		var entrance: Node2D = _item_entrances[index]
+		var horizontal_exit: float = -210.0 if index == 0 else (210.0 if index == 2 else 0.0)
+		var vertical_exit: float = 95.0 if index != 1 else 180.0
+		_market_tween.tween_property(entrance, ^"position", (_entrance_positions[entrance] as Vector2) + Vector2(horizontal_exit, vertical_exit), content_exit_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN).set_delay(float(index) * 0.035)
+		_market_tween.tween_property(entrance, ^"scale", Vector2.ONE * 0.72, content_exit_duration)
+		_market_tween.tween_property(entrance, ^"modulate:a", 0.0, content_exit_duration * 0.72)
+	for light: Sprite2D in _light_nodes:
+		_market_tween.tween_property(light, ^"modulate:a", 0.0, content_exit_duration * 0.8)
+		_market_tween.tween_property(light, ^"scale", (_light_scales[light] as Vector2) * 1.15, content_exit_duration)
+	await _market_tween.finished
+	await _close_gate()
+
+
+func _close_gate() -> void:
+	_market_tween = create_tween().set_parallel(true)
+	_market_tween.tween_property(_left_door, ^"position:x", 470.0, gate_close_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_right_door, ^"position:x", 810.0, gate_close_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_left_wall, ^"position", Vector2.ZERO, gate_close_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_left_wall, ^"size", Vector2(300.0, 720.0), gate_close_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_right_wall, ^"position", Vector2(980.0, 0.0), gate_close_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_market_tween.tween_property(_right_wall, ^"size", Vector2(300.0, 720.0), gate_close_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	await _market_tween.finished
+	_door_dust_burst.restart()
+	_door_dust_burst.emitting = true
+	_door_dust_haze.restart()
+	_door_dust_haze.emitting = true
+	var shake := create_tween()
+	for shake_x: float in [9.0, -8.0, 6.0, -4.0, 2.0, 0.0]:
+		shake.tween_property(_gate_motion, ^"position:x", shake_x, 0.045).set_trans(Tween.TRANS_SINE)
+	await shake.finished
+
+
+func _reset_gate() -> void:
+	_gate_motion.position = Vector2.ZERO
+	_door_dust_burst.emitting = false
+	_door_dust_haze.emitting = false
+	_left_door.position = _left_door_open_position
+	_right_door.position = _right_door_open_position
+	_left_wall.position = _left_wall_open_position
+	_left_wall.size = _left_wall_open_size
+	_right_wall.position = _right_wall_open_position
+	_right_wall.size = _right_wall_open_size
+
+
 func _on_audit_button_pressed() -> void:
+	if _input_locked or _item_buttons[0].disabled:
+		return
+	_pulse_item(0)
 	purchase_requested.emit(&"audit_slip")
 
 
 func _on_radar_button_pressed() -> void:
+	if _input_locked or _item_buttons[1].disabled:
+		return
+	_pulse_item(1)
 	purchase_requested.emit(&"radar_charge")
 
 
 func _on_speed_button_pressed() -> void:
+	if _input_locked or _item_buttons[2].disabled:
+		return
+	_pulse_item(2)
 	purchase_requested.emit(&"speed_upgrade")
 
 
 func _on_continue_button_pressed() -> void:
-	if _continue_sent:
+	if _continue_sent or _input_locked:
 		return
 	_continue_sent = true
-	continue_requested.emit()
+	await _play_exit_animation()
+	if is_inside_tree():
+		continue_requested.emit()
