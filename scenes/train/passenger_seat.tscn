@@ -3,12 +3,19 @@
 [ext_resource type="Texture2D" uid="uid://bb8rkrjaeuw6n" path="res://assets/kereta/seat.png" id="1_seat"]
 [ext_resource type="PackedScene" uid="uid://ci8rlqvlg325x" path="res://scenes/minigames/dirty_seat_event.tscn" id="2_dirty"]
 [ext_resource type="Material" path="res://resources/materials/blocked_carriage_sprite_grayscale.tres" id="3_blocked_grayscale"]
+[ext_resource type="Material" path="res://resources/materials/seat_interaction_outline.tres" id="4_interaction_outline"]
 
 [node name="PassengerSeat" type="Marker2D" unique_id=448457507 groups=["passenger_seats"]]
 editor_description = "One modular passenger seat. This root is also the NPC occupancy marker; move the complete seat from this node in the Inspector."
 
 [node name="SeatArt" type="Node2D" parent="."]
-editor_description = "Seat-only artwork root. Attachments remain outside it so dirty-seat interactions keep their color."
+editor_description = "Complete seat artwork. Its scene-authored outline silhouette sits behind the seat while dirt remains a separate attachment above it."
+
+[node name="SeatOutline" type="Sprite2D" parent="SeatArt"]
+editor_description = "Black whole-seat outline shown while this seat needs cleaning. Its color and width are controlled by DirtySeatEvent."
+material = ExtResource("4_interaction_outline")
+scale = Vector2(0.374415, 0.374415)
+texture = ExtResource("1_seat")
 
 [node name="SeatVisual" type="Sprite2D" parent="SeatArt" unique_id=2041782283 groups=["blocked_carriage_visuals"]]
 editor_description = "Independent seat artwork. Keep attachments under the sibling Attachments node."

@@ -1,7 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://ci8rlqvlg325x"]
+[gd_scene load_steps=6 format=3 uid="uid://ci8rlqvlg325x"]
 
 [ext_resource type="Script" uid="uid://c3kbwydwqf3v3" path="res://scripts/minigames/dirty_seat_event.gd" id="1_event"]
-[ext_resource type="Material" path="res://resources/materials/interactable_outline.tres" id="2_outline"]
 [ext_resource type="Texture2D" uid="uid://b07y6ko2rc0lb" path="res://assets/minigame/dirty seat.png" id="3_dirty_seat"]
 [ext_resource type="Texture2D" uid="uid://bb8rkrjaeuw6n" path="res://assets/kereta/seat.png" id="4_seat_icon"]
 
@@ -25,7 +24,7 @@ prompt_text = "Clean seat"
 interaction_distance = 132.0
 enabled = false
 prompt_anchor_path = NodePath("InteractionPromptAnchor")
-focus_visual_path = NodePath("StainVisual")
+focus_visual_path = NodePath("../../SeatArt/SeatOutline")
 raise_on_focus = false
 outline_while_enabled = true
 passive_outline_color = Color(0.015, 0.018, 0.024, 1)
@@ -40,9 +39,8 @@ position = Vector2(0, -120)
 editor_description = "Inspector-authored target used by the maintenance HUD tracker."
 position = Vector2(0, -165)
 
-[node name="StainVisual" type="CanvasGroup" parent="." unique_id=2104374979]
-editor_description = "Dirty-seat artwork. Adjust its Sprite2D transform here; visibility follows the event root."
-material = ExtResource("2_outline")
+[node name="StainVisual" type="Node2D" parent="." unique_id=2104374979]
+editor_description = "Dirt-only overlay. The interaction outline is applied to the complete SeatArt group in passenger_seat.tscn."
 
 [node name="DirtySeatSprite" type="Sprite2D" parent="StainVisual" unique_id=858405311]
 editor_description = "The user-provided dirty-seat overlay, aligned to the complete seat artwork through the Inspector."

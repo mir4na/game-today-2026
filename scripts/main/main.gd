@@ -47,6 +47,9 @@ const DAY_SERVICE_FINAL_CYCLE_PROGRESS: float = 1.0
 const SUNSET_STATE_PROGRESS: float = 0.62
 const SERVICE_NIGHT_START_PROGRESS: float = 0.70
 const SERVICE_FULL_NIGHT_PROGRESS: float = 0.98
+const TOOL_AUDIT_SLIP: StringName = &"audit_slip"
+const TOOL_RADAR_CHARGE: StringName = &"radar_charge"
+const TOOL_SPEED_UPGRADE: StringName = &"speed_upgrade"
 
 var state: GameState = GameState.OPENING
 var _day_minutes: float = START_MINUTES
@@ -138,6 +141,7 @@ var _radar_scan_active: bool = false
 
 func _ready() -> void:
 	_train_occupants_station_rest_position = _train_occupants.position
+	_connect_hud_runtime_signals()
 	if day_route.size() < 2:
 		push_error("Main/Day Route requires at least an opening and final station.")
 		return
@@ -184,6 +188,16 @@ func _ready() -> void:
 	_set_passenger_ai_enabled(false)
 	_active_modal = _day_intro_ui
 	_day_intro_ui.play_intro(day_number)
+
+
+func _connect_hud_runtime_signals() -> void:
+	var market_tool_callback := Callable(self, &"_on_market_tool_requested")
+	if not _hud.has_signal(&"market_tool_requested"):
+		push_error("HUD is missing the market_tool_requested signal.")
+		return
+	if not _hud.is_connected(&"market_tool_requested", market_tool_callback):
+		_hud.connect(&"market_tool_requested", market_tool_callback)
+
 
 func _process(delta: float) -> void:
 	_station_stop_ui.set_departure_blocked(_station_stop_ui.visible and _ambience.is_announcement_playing())
@@ -314,6 +328,16 @@ func _unhandled_input(event: InputEvent) -> void:
 			_close_night_statement_dialogue()
 			get_viewport().set_input_as_handled()
 		return
+	var market_shortcut: int = _market_item_shortcut(event)
+	if market_shortcut > 0:
+		if (
+			not _service_seal_active
+			and _active_modal == null
+			and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
+		):
+			_hud.request_market_item(market_shortcut)
+		get_viewport().set_input_as_handled()
+		return
 	if (
 		event.is_action_pressed(&"use_radar")
 		and not _service_seal_active
@@ -349,6 +373,20 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif state not in [GameState.OPENING, GameState.SHIFT_REPORT, GameState.MARKET, GameState.COMPLETE]:
 		_open_pause()
 	get_viewport().set_input_as_handled()
+
+
+func _market_item_shortcut(event: InputEvent) -> int:
+	var key_event := event as InputEventKey
+	if key_event != null and key_event.echo:
+		return 0
+	if event.is_action_pressed(&"use_market_item_1"):
+		return 1
+	if event.is_action_pressed(&"use_market_item_2"):
+		return 2
+	if event.is_action_pressed(&"use_market_item_3"):
+		return 3
+	return 0
+
 
 func _spawn_initial_passengers() -> void:
 	var dead_count: int = 0
@@ -1098,9 +1136,7 @@ func _on_station_assignment_toggled(passenger_name: String, should_assign: bool)
 	else:
 		if assignment_index >= 0:
 			_station_assignment.remove_at(assignment_index)
-	var next_station: String = _next_day_station()
 	_document_overlay.configure_station_assignment(_station_assignment.has(canonical_name), true)
-	_hud.notify("%s\n%s FOR %s • %d SELECTED" % [canonical_name.to_upper(), "ASSIGNED" if should_assign else "REMOVED", next_station.to_upper(), _station_assignment.size()], 2.0)
 
 func _on_newspaper_read() -> void:
 	_newspaper_read = true
@@ -1545,15 +1581,21 @@ func _on_guidebook_requested() -> void:
 	_toggle_guidebook()
 
 
-func _on_radar_requested() -> void:
+func _on_market_tool_requested(tool_id: StringName) -> void:
 	if (
-		_radar_scan_active
-		or _service_seal_active
+		_service_seal_active
 		or _active_modal != null
 		or state not in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
 	):
 		return
-	_use_carriage_radar()
+	match tool_id:
+		TOOL_AUDIT_SLIP:
+			_use_audit_slip()
+		TOOL_RADAR_CHARGE:
+			if not _radar_scan_active:
+				_use_carriage_radar()
+		TOOL_SPEED_UPGRADE:
+			_show_swiftstep_status()
 
 func _on_modal_closed() -> void:
 	if is_instance_valid(_inspected_passenger):
@@ -1687,6 +1729,50 @@ func _on_market_inventory_changed(snapshot: Dictionary) -> void:
 	_hud.set_market_tool_inventory(snapshot)
 	if is_instance_valid(_night_market_ui) and _night_market_ui.visible:
 		_night_market_ui.call(&"set_snapshot", snapshot)
+
+
+func _use_audit_slip() -> void:
+	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
+	if int(snapshot.get("audit_slips", 0)) <= 0:
+		_hud.notify("NO AUDIT SLIPS REMAINING", 2.5)
+		return
+	var passenger := _nearby_interactable as Passenger
+	if not _is_active_passenger(passenger):
+		_hud.notify("MOVE NEAR A PASSENGER TO USE THE AUDIT SLIP", 2.5)
+		return
+	if not bool(_market_tool_state.call(&"consume_audit_slip")):
+		return
+	var normalized_name: String = _normalize_name(passenger.data.passenger_name)
+	var found_in_manifest: bool = false
+	for manifest_data: PassengerData in _daily_manifest:
+		if normalized_name in [
+			_normalize_name(manifest_data.passenger_name),
+			_normalize_name(manifest_data.short_name),
+		]:
+			found_in_manifest = true
+			break
+	if found_in_manifest:
+		_hud.notify(
+			"MANIFEST NAME CONFIRMED\n%s • LIFE STATUS UNDISCLOSED" % passenger.data.short_name.to_upper(),
+			3.5
+		)
+	else:
+		_hud.notify("NAME NOT FOUND IN TODAY'S MANIFEST", 3.5)
+
+
+func _show_swiftstep_status() -> void:
+	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
+	var speed_level: int = int(snapshot.get("speed_level", 0))
+	if speed_level <= 0:
+		_hud.notify("NO SWIFTSTEP SOLES OWNED", 2.5)
+		return
+	_hud.notify(
+		"SWIFTSTEP SOLES ACTIVE\nLEVEL %d • +%d MOVEMENT SPEED" % [
+			speed_level,
+			int(round(float(snapshot.get("speed_bonus", 0.0)))),
+		],
+		2.75
+	)
 
 
 func _use_carriage_radar() -> void:

@@ -17,6 +17,10 @@
 [ext_resource type="Shader" uid="uid://ce1bimgy548dk" path="res://shaders/clock_progress_fill.gdshader" id="16_clock_fill_shader"]
 [ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="17_clock_font"]
 [ext_resource type="Material" path="res://resources/materials/hud_black_outline.tres" id="18_hud_outline"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_market_item_slot.tscn" id="19_market_slot"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/Item_Audit.png" id="20_audit_item"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/Item_Radar.png" id="21_radar_item"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/Item_Switft.png" id="22_swift_item"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_clock_pole_left"]
 atlas = ExtResource("7_cwdlq")
@@ -33,6 +37,7 @@ resource_local_to_scene = true
 shader = ExtResource("16_clock_fill_shader")
 shader_parameter/progress = 0.0
 shader_parameter/edge_softness = 0.003
+shader_parameter/fill_origin = Vector2(0.477, 1)
 
 [sub_resource type="Animation" id="Animation_clock_briefing"]
 resource_name = "route_briefing"
@@ -175,8 +180,8 @@ corner_radius_bottom_left = 7
 layer = 10
 script = ExtResource("1")
 clock_template = "%02d:%02d %s"
-tool_status_template = "BLESSINGS %d\nAUDIT ×%d  •  SPEED LV.%d"
-radar_button_template = "ACTIVATE RADAR   [R]  ×%d"
+tool_status_template = "BLESSINGS %d"
+clock_pointer_start_degrees = -29.8
 clock_degrees_per_stop = 36.0
 prompt_screen_offset = Vector2(0, 0)
 prompt_edge_margin = Vector2(24, 20)
@@ -228,10 +233,11 @@ theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 2
 theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 14
-text = "BLESSINGS 0
-AUDIT ×0  •  SPEED LV.0"
+text = "BLESSINGS 0"
 
 [node name="MaintenanceTrackers" type="Control" parent="Root" unique_id=527339909]
+editor_description = "Off-screen minigame pointers. The high Z index keeps these above the Night Market item bar."
+z_index = 200
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -461,9 +467,9 @@ editor_description = "Black silhouette behind the semicircular clock body. Resiz
 modulate = Color(0.0156863, 0.0196078, 0.027451, 0.96)
 layout_mode = 0
 offset_left = -5.0
-offset_top = -5.0
+offset_top = -2.5
 offset_right = 355.0
-offset_bottom = 184.0
+offset_bottom = 181.5
 mouse_filter = 2
 texture = ExtResource("9_clock_unfilled")
 expand_mode = 1
@@ -488,15 +494,26 @@ mouse_filter = 2
 texture = ExtResource("10_clock_filled")
 expand_mode = 1
 
-[node name="ClockPointer" type="TextureRect" parent="Root/ClockPanel/ClockFace" unique_id=1810178768]
+[node name="ClockNeedlePivot" type="Control" parent="Root/ClockPanel/ClockFace"]
 unique_name_in_owner = true
+editor_description = "Scene-authored rotation center aligned to the center-bottom of the hub in Background2.png. Move this node to tune the complete needle."
 layout_mode = 0
-offset_left = 18.85
-offset_top = 95.67
-offset_right = 204.8
-offset_bottom = 175.36
-rotation = -0.47054
-pivot_offset = Vector2(156.15, 79.33)
+offset_left = 167.1
+offset_top = 175.2
+offset_right = 167.1
+offset_bottom = 175.2
+rotation = -0.520109
+mouse_filter = 2
+
+[node name="ClockPointer" type="TextureRect" parent="Root/ClockPanel/ClockFace/ClockNeedlePivot" unique_id=1810178768]
+editor_description = "One outlined needle at the asset's original 1:1 ratio. Its broad edge is centered on ClockNeedlePivot so the tip follows the dial marks."
+material = ExtResource("18_hud_outline")
+layout_mode = 0
+offset_left = -138.92
+offset_top = -79.69
+offset_right = 47.03
+offset_bottom = 0.0
+pivot_offset = Vector2(138.92, 79.69)
 mouse_filter = 2
 texture = ExtResource("11_clock_pointer")
 expand_mode = 1
@@ -512,11 +529,11 @@ expand_mode = 1
 [node name="ClockSymbolPivot" type="Control" parent="Root/ClockPanel/ClockFace" unique_id=1736318714]
 unique_name_in_owner = true
 anchors_preset = 0
-offset_left = 273.0
-offset_top = -15.0
-offset_right = 368.0
-offset_bottom = 80.0
-pivot_offset = Vector2(47.5, 47.5)
+offset_left = 284.0
+offset_top = -4.0
+offset_right = 360.0
+offset_bottom = 72.0
+pivot_offset = Vector2(38, 38)
 mouse_filter = 2
 
 [node name="DaySymbol" type="TextureRect" parent="Root/ClockPanel/ClockFace/ClockSymbolPivot" unique_id=1300180946]
@@ -572,34 +589,55 @@ theme_override_styles/hover = SubResource("GuidebookButtonHover")
 theme_override_styles/disabled = SubResource("ActionButtonDisabled")
 text = "GUIDEBOOK   [TAB]"
 
-[node name="RadarButton" type="Button" parent="Root" unique_id=1059361648]
+[node name="MarketItemBar" type="VBoxContainer" parent="Root"]
 unique_name_in_owner = true
-editor_description = "Independent right-side radar action. This button mirrors the R keyboard shortcut and shows the remaining charge count."
+editor_description = "Scene-authored Night Market inventory. Slots appear only while their item is owned; buttons map to number keys 1, 2, and 3."
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -282.0
-offset_top = -29.0
-offset_right = -28.0
-offset_bottom = 29.0
+offset_left = -112.0
+offset_top = -142.0
+offset_right = -24.0
+offset_bottom = 142.0
 grow_horizontal = 0
 grow_vertical = 2
-tooltip_text = "Scan the current passenger coach"
-focus_mode = 0
-mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_colors/font_pressed_color = Color(0.843137, 0.690196, 0.419608, 1)
-theme_override_colors/font_hover_color = Color(1, 0.956863, 0.827451, 1)
-theme_override_colors/font_disabled_color = Color(0.670588, 0.670588, 0.670588, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("GuidebookButtonNormal")
-theme_override_styles/pressed = SubResource("GuidebookButtonPressed")
-theme_override_styles/hover = SubResource("GuidebookButtonHover")
-theme_override_styles/disabled = SubResource("ActionButtonDisabled")
-text = "ACTIVATE RADAR   [R]  ×0"
+theme_override_constants/separation = 10
+
+[node name="AuditSlot" parent="Root/MarketItemBar" instance=ExtResource("19_market_slot")]
+unique_name_in_owner = true
+layout_mode = 2
+tool_id = &"audit_slip"
+item_name = "Audit Slip"
+shortcut_number = 1
+amount_template = "×%d"
+
+[node name="Icon" parent="Root/MarketItemBar/AuditSlot" index="1"]
+texture = ExtResource("20_audit_item")
+
+[node name="RadarSlot" parent="Root/MarketItemBar" instance=ExtResource("19_market_slot")]
+unique_name_in_owner = true
+layout_mode = 2
+tool_id = &"radar_charge"
+item_name = "Carriage Radar"
+shortcut_number = 2
+amount_template = "×%d"
+
+[node name="Icon" parent="Root/MarketItemBar/RadarSlot" index="1"]
+texture = ExtResource("21_radar_item")
+
+[node name="SwiftSlot" parent="Root/MarketItemBar" instance=ExtResource("19_market_slot")]
+unique_name_in_owner = true
+layout_mode = 2
+tool_id = &"speed_upgrade"
+item_name = "Swiftstep Soles"
+shortcut_number = 3
+amount_template = "LV.%d"
+
+[node name="Icon" parent="Root/MarketItemBar/SwiftSlot" index="1"]
+texture = ExtResource("22_swift_item")
 
 [node name="NotificationPanel" type="PanelContainer" parent="Root" unique_id=1320290712]
 unique_name_in_owner = true
@@ -625,4 +663,10 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [connection signal="pressed" from="Root/GuidebookButton" to="." method="_on_guidebook_button_pressed"]
-[connection signal="pressed" from="Root/RadarButton" to="." method="_on_radar_button_pressed"]
+[connection signal="tool_requested" from="Root/MarketItemBar/AuditSlot" to="." method="_on_market_item_requested"]
+[connection signal="tool_requested" from="Root/MarketItemBar/RadarSlot" to="." method="_on_market_item_requested"]
+[connection signal="tool_requested" from="Root/MarketItemBar/SwiftSlot" to="." method="_on_market_item_requested"]
+
+[editable path="Root/MarketItemBar/AuditSlot"]
+[editable path="Root/MarketItemBar/RadarSlot"]
+[editable path="Root/MarketItemBar/SwiftSlot"]
