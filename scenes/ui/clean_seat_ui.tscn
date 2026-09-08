@@ -18,7 +18,7 @@ shader = ExtResource("7_foam_shader")
 
 [node name="CleanSeatUI" type="Control"]
 visible = false
-process_mode = 3
+process_mode = 1
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -173,19 +173,25 @@ theme_override_constants/outline_size = 5
 text = "Cleaning  0%"
 horizontal_alignment = 1
 
-[node name="SuccessLabel" type="Label" parent="CleaningWindow"]
+[node name="CloseButton" type="Button" parent="."]
 unique_name_in_owner = true
-visible = false
-offset_left = 45.0
-offset_top = 582.0
-offset_right = 815.0
-offset_bottom = 612.0
-theme_override_colors/font_color = Color(0.513726, 0.890196, 0.603922, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_colors/font_outline_color = Color(0.01, 0.015, 0.025, 0.95)
-theme_override_constants/outline_size = 5
-text = "Seat clean"
-horizontal_alignment = 1
+editor_description = "Scene-authored minigame exit. It mirrors the E interaction shortcut; Esc is reserved for Pause."
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -194.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 72.0
+grow_horizontal = 0
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.941176, 0.811765, 0.552941, 1)
+theme_override_font_sizes/font_size = 17
+text = "CLOSE   [E]"
+tooltip_text = "Leave the minigame without resetting progress"
 
 [connection signal="cleaning_progress" from="CleaningWindow/WipeSurface" to="." method="_on_cleaning_progress"]
 [connection signal="cleaned" from="CleaningWindow/WipeSurface" to="." method="_on_surface_cleaned"]
+[connection signal="pressed" from="CloseButton" to="." method="_on_close_button_pressed"]

@@ -13,22 +13,22 @@ enum ViewMode {
 }
 
 @export_category("Newspaper Cases")
-@export_group("Ordinary News", "non_death_")
+@export_group("Type 1 — Non-Death", "non_death_")
 @export var non_death_headline: String
 @export_multiline var non_death_primary_template: String
 @export var non_death_secondary_headline: String
 @export_multiline var non_death_secondary_template: String
-@export_group("Ordinary News — Alternate", "non_death_alt_")
+@export_group("Type 2 — Non-Death", "non_death_alt_")
 @export var non_death_alt_headline: String
 @export_multiline var non_death_alt_primary_template: String
 @export var non_death_alt_secondary_headline: String
 @export_multiline var non_death_alt_secondary_template: String
-@export_group("Matching Death", "matching_death_")
+@export_group("Type 1 — Death", "matching_death_")
 @export var matching_death_headline: String
 @export_multiline var matching_death_primary_template: String
 @export var matching_death_secondary_headline: String
 @export_multiline var matching_death_secondary_template: String
-@export_group("Matching Death — Alternate", "matching_death_alt_")
+@export_group("Type 2 — Death", "matching_death_alt_")
 @export var matching_death_alt_headline: String
 @export_multiline var matching_death_alt_primary_template: String
 @export var matching_death_alt_secondary_headline: String
@@ -102,9 +102,9 @@ func get_random_outside_subject(
 func compose_non_death_newspaper(
 	subject_name: String,
 	edition_station: String,
-	rng: RandomNumberGenerator = null
+	_rng: RandomNumberGenerator = null
 ) -> String:
-	var use_alternate: bool = _roll_alternate_copy(rng, non_death_alt_primary_template)
+	var use_alternate: bool = _newspaper_reader.get_selected_variant() == 1
 	var headline: String = non_death_alt_headline if use_alternate else non_death_headline
 	var primary_template: String = non_death_alt_primary_template if use_alternate else non_death_primary_template
 	var secondary_headline: String = non_death_alt_secondary_headline if use_alternate else non_death_secondary_headline
@@ -115,18 +115,19 @@ func compose_non_death_newspaper(
 		secondary_headline,
 		secondary_template % edition_station
 	)
+	_newspaper_reader.set_case_is_death(false)
 	return _compose_newspaper_document()
 
 
 func compose_matching_death_newspaper(
 	subject: PassengerData,
 	edition_station: String,
-	rng: RandomNumberGenerator = null
+	_rng: RandomNumberGenerator = null
 ) -> String:
 	if subject == null:
 		push_error("Matching-death newspaper requires a generated passenger subject.")
 		return ""
-	var use_alternate: bool = _roll_alternate_copy(rng, matching_death_alt_primary_template)
+	var use_alternate: bool = _newspaper_reader.get_selected_variant() == 1
 	var headline: String = matching_death_alt_headline if use_alternate else matching_death_headline
 	var primary_template: String = matching_death_alt_primary_template if use_alternate else matching_death_primary_template
 	var secondary_headline: String = matching_death_alt_secondary_headline if use_alternate else matching_death_secondary_headline
@@ -137,6 +138,7 @@ func compose_matching_death_newspaper(
 		secondary_headline,
 		secondary_template % [subject.origin_station, subject.occupation.to_lower(), edition_station]
 	)
+	_newspaper_reader.set_case_is_death(true)
 	return _compose_newspaper_document()
 
 
@@ -173,12 +175,6 @@ func _set_newspaper_copy(headline: String, primary_body: String, secondary_headl
 	_newspaper_primary_body = primary_body
 	_newspaper_secondary_headline = secondary_headline
 	_newspaper_secondary_body = secondary_body
-
-
-func _roll_alternate_copy(rng: RandomNumberGenerator, alternate_primary_template: String) -> bool:
-	if rng == null or alternate_primary_template.strip_edges().is_empty():
-		return false
-	return rng.randi_range(0, 1) == 1
 
 
 func _compose_newspaper_document() -> String:

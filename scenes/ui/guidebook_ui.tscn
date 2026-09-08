@@ -1,383 +1,578 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene format=3 uid="uid://4vcwjjpkoty4"]
 
-[ext_resource type="Script" path="res://scripts/ui/guidebook_ui.gd" id="1"]
-[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
-
+[ext_resource type="Script" uid="uid://dxrey15fbihf5" path="res://scripts/ui/guidebook_ui.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
 [ext_resource type="PackedScene" path="res://scenes/ui/guidebook_anomaly_entry.tscn" id="3_entry"]
+[ext_resource type="Texture2D" uid="uid://btlo71vf6jeas" path="res://assets/ui/guidebook/Rectangle 205.png" id="4_book"]
+[ext_resource type="Texture2D" uid="uid://dn0fbedxnq4pc" path="res://assets/ui/guidebook/Rectangle 204.png" id="5_left_page"]
+[ext_resource type="Texture2D" uid="uid://bo2jn3fmnefjs" path="res://assets/ui/guidebook/Rectangle 211.png" id="6_paper_pink_tall"]
+[ext_resource type="Texture2D" uid="uid://cwyhj1hy33qrl" path="res://assets/ui/guidebook/Rectangle 212.png" id="7_paper_yellow"]
+[ext_resource type="Texture2D" uid="uid://dpr2nwn2p3as0" path="res://assets/ui/guidebook/Rectangle 213.png" id="8_paper_blue"]
+[ext_resource type="Texture2D" uid="uid://d3e8tgwkjk4wm" path="res://assets/ui/guidebook/Rectangle 214.png" id="9_paper_pink_wide"]
+[ext_resource type="Texture2D" uid="uid://6nep0ysf7ayb" path="res://assets/ui/guidebook/Vector 441.png" id="10_ribbon"]
+[ext_resource type="Texture2D" uid="uid://iugd0xxevq15" path="res://assets/ui/guidebook/Group 99.png" id="11_clip"]
+[ext_resource type="Texture2D" uid="uid://cud380pah15w1" path="res://assets/ui/guidebook/Group 80.png" id="12_today_tab"]
+[ext_resource type="Texture2D" uid="uid://r6jlep02q07n" path="res://assets/ui/guidebook/Group 81.png" id="13_anomaly_tab"]
+[ext_resource type="Texture2D" uid="uid://b24hx5moki6od" path="res://assets/ui/guidebook/Group 82.png" id="14_rules_tab"]
+[ext_resource type="Texture2D" uid="uid://qu22btq5gf10" path="res://assets/ui/guidebook/Kereta.png" id="15_train"]
+[ext_resource type="Texture2D" uid="uid://btb8n8c782ti4" path="res://assets/ui/guidebook/ANOMALY LIST.png" id="16_anomaly_text"]
+[ext_resource type="Texture2D" uid="uid://kp6mmoipon5u" path="res://assets/ui/guidebook/RulEs.png" id="17_rules_text"]
+[ext_resource type="Texture2D" uid="uid://bko185mxqvkft" path="res://assets/ui/guidebook/Vector 436.png" id="18_next_bg"]
+[ext_resource type="Texture2D" uid="uid://bhedd1kpg1nq0" path="res://assets/ui/guidebook/Group 79.png" id="19_next_arrow"]
+[ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="20_title_font"]
+[ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="21_body_bold"]
 
-[sub_resource type="StyleBoxFlat" id="BookCoverStyle"]
-content_margin_left = 12.0
-content_margin_top = 12.0
-content_margin_right = 12.0
-content_margin_bottom = 12.0
-bg_color = Color(0.160784, 0.0901961, 0.054902, 1)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.454902, 0.278431, 0.14902, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.55)
-shadow_size = 18
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_button"]
 
-[sub_resource type="StyleBoxFlat" id="LeftPageStyle"]
-content_margin_left = 0.0
-content_margin_top = 0.0
-content_margin_right = 0.0
-content_margin_bottom = 0.0
-bg_color = Color(0.827451, 0.756863, 0.623529, 1)
-corner_radius_top_left = 9
-corner_radius_bottom_left = 9
-
-[sub_resource type="StyleBoxFlat" id="RightPageStyle"]
-content_margin_left = 0.0
-content_margin_top = 0.0
-content_margin_right = 0.0
-content_margin_bottom = 0.0
-bg_color = Color(0.921569, 0.87451, 0.764706, 1)
-corner_radius_top_right = 9
-corner_radius_bottom_right = 9
-
-[sub_resource type="StyleBoxFlat" id="SummaryStyle"]
-content_margin_left = 13.0
-content_margin_top = 11.0
-content_margin_right = 13.0
-content_margin_bottom = 11.0
-bg_color = Color(0.698039, 0.603922, 0.45098, 0.55)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.372549, 0.258824, 0.160784, 0.55)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
-[sub_resource type="StyleBoxFlat" id="SectionButtonStyle"]
-content_margin_left = 13.0
-content_margin_top = 8.0
-content_margin_right = 10.0
-content_margin_bottom = 8.0
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 3
-border_color = Color(0.360784, 0.247059, 0.145098, 0.35)
-
-[sub_resource type="StyleBoxFlat" id="SectionButtonHoverStyle"]
-content_margin_left = 13.0
-content_margin_top = 8.0
-content_margin_right = 10.0
-content_margin_bottom = 8.0
-bg_color = Color(0.741176, 0.658824, 0.521569, 0.72)
-border_width_left = 3
-border_color = Color(0.486275, 0.247059, 0.180392, 1)
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-
-[sub_resource type="StyleBoxFlat" id="SectionButtonActiveStyle"]
-content_margin_left = 13.0
-content_margin_top = 8.0
-content_margin_right = 10.0
-content_margin_bottom = 8.0
-bg_color = Color(0.486275, 0.219608, 0.176471, 0.92)
-border_width_left = 4
-border_color = Color(0.301961, 0.145098, 0.117647, 1)
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-
-[sub_resource type="StyleBoxFlat" id="CloseButtonStyle"]
-content_margin_left = 15.0
-content_margin_top = 7.0
-content_margin_right = 15.0
-content_margin_bottom = 7.0
-bg_color = Color(0.360784, 0.192157, 0.141176, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.533333, 0.34902, 0.211765, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
-[node name="GuidebookUI" type="Control"]
-visible = false
+[node name="GuidebookUI" type="Control" unique_id=29174819]
 process_mode = 3
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
-theme = ExtResource("2")
-script = ExtResource("1")
-day_badge_template = "DAY %d"
-train_badge_template = "TRAIN  %s"
-date_badge_template = "%s"
-today_document_template = "[font_size=22][b]DAY %d • %s[/b][/font_size]\n[b]Train number[/b]  %s\n\n[font_size=20][b]PASS TARGET: %d BLESSINGS[/b][/font_size]\n[b]Net earnings so far[/b]  %d Blessings\n[b]Still needed[/b]  %d Blessings\n[color=#6b4a35]Today's earnings after penalties; earlier savings do not count.[/color]\n\n[font_size=20][b]PASSENGERS[/b][/font_size]\n[b]Boarded today[/b]  %d\n[b]Passengers aboard[/b]  %d\n[b]Stamped aboard[/b]  %d\n[color=#6b4a35]Boarded today includes everyone who has joined this shift, even after they leave. Stamped passengers are assigned to the next stop.[/color]\n\n[font_size=20][b]ROUTE REFERENCE[/b][/font_size]\n[b]Scheduled stops completed[/b]  %d / %d\n[b]Day code[/b]  %s\n[b]Current station[/b]  %s\n[b]Next station[/b]  %s\n\n%s"
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+today_document_template = "[table=2][cell][font_size=18][b]SERVICE DETAILS[/b][/font_size]
+[b]Day[/b]  %d
+[b]Date[/b]  %s
+[b]Train number[/b]  %s
+
+[font_size=18][b]SHIFT TARGET[/b][/font_size]
+[b]Required[/b]  %d Blessings
+[b]Earned today[/b]  %d Blessings
+[b]Still needed[/b]  %d Blessings
+
+[color=#6b5a4f]Only this shift's earnings count toward today's target.[/color][/cell][cell][font_size=18][b]PASSENGERS[/b][/font_size]
+[b]Boarded today[/b]  %d
+[b]Currently aboard[/b]  %d
+[b]Stamped aboard[/b]  %d
+
+[font_size=18][b]ROUTE PROGRESS[/b][/font_size]
+[b]Stops completed[/b]  %d / %d
+[b]Day code[/b]  %s
+[b]Current station[/b]  %s
+[b]Next station[/b]  %s
+
+%s[/cell][/table]"
 completed_service_text = "DAY SERVICE COMPLETE"
-procedure_document = "[font_size=20][b]INSPECT & DECIDE[/b][/font_size]\nCompare each passenger's ID and ticket with today's service details. Observe the passenger for signs listed in the Anomaly List before deciding who should leave.\n\n[font_size=20][b]DAYTIME DROP-OFFS[/b][/font_size]\nA stamped ticket assigns its passenger to the next daylight station. Stamp ordinary passengers when their required stop is next. A passenger on the wrong train must leave at the next station. At the terminal, all remaining living passengers leave automatically.\n\n[font_size=20][b]KEEP ANOMALIES ABOARD[/b][/font_size]\nAnomalies belong to night service. Do not stamp their tickets. A mistaken anomaly stamp incurs a penalty, and the anomaly remains aboard.\n\n[font_size=20][b]BLESSINGS & PENALTIES[/b][/font_size]\n[b]+30 Blessings[/b] — Each correct passenger drop-off.\n[b]−20 Blessings[/b] — Each incorrect passenger drop-off.\n[b]−40 Blessings[/b] — Each anomaly wrongly stamped, counted once per anomaly per shift.\nKeeping an anomaly aboard does not incur a penalty.\n\n[font_size=20][b]PASS THE SHIFT[/b][/font_size]\nYour paycheck compares this shift's earnings after penalties with the day's target. Meet or exceed the target to pass; savings from earlier shifts do not count toward it. You can restart the shift to try again.\n\n[font_size=20][b]NIGHT SERVICE[/b][/font_size]\nCollect the remaining souls' Departure Statements. Use their clues to assign each soul to a night station in the Night Drop-Off Ledger. Every required slot must contain exactly one soul before confirmation."
+procedure_document = "[table=2][cell][font_size=18][b]INSPECT & DECIDE[/b][/font_size]
+Compare each passenger's ID, ticket, and appearance with today's service and the Anomaly List.
 
-[node name="Shade" type="ColorRect" parent="."]
+[font_size=18][b]DAYTIME DROP-OFFS[/b][/font_size]
+Stamp an ordinary passenger only when their required stop is next.
+
+[font_size=18][b]KEEP ANOMALIES ABOARD[/b][/font_size]
+Do not stamp anomalies; they remain aboard for night service.
+
+[font_size=18][b]PASS THE SHIFT[/b][/font_size]
+Meet today's paycheck target or restart the failed shift.
+
+[font_size=18][b]NIGHT SERVICE[/b][/font_size]
+Use Departure Statements to assign every remaining soul to a symbolic destination.
+
+[font_size=18][b]BLESSINGS & PENALTIES[/b][/font_size]
+[b]+30 Blessings[/b] — Correct passenger drop-off.
+[b]−20 Blessings[/b] — Incorrect passenger drop-off.
+[b]−40 Blessings[/b] — Anomaly wrongly stamped, once per shift.
+Keeping an anomaly aboard has no penalty.[/cell][cell][font_size=18][b]CONTROLS[/b][/font_size]
+[color=#985c45][b]A / D  ·  ARROWS[/b][/color]
+Walk
+
+[color=#985c45][b]E[/b][/color]
+Interact or close documents and minigames
+
+[color=#985c45][b]Q[/b][/color]
+Switch between ID and ticket
+
+[color=#985c45][b]SPACE[/b][/color]
+Stamp ticket
+
+[color=#985c45][b]TAB[/b][/color]
+Open or close guidebook
+
+[color=#985c45][b]R[/b][/color]
+Activate carriage radar
+
+[color=#985c45][b]ESC[/b][/color]
+Pause or resume shift[/cell][/table]"
+
+[node name="Shade" type="ColorRect" parent="." unique_id=1273576199]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.0156863, 0.0196078, 0.027451, 0.86)
+mouse_filter = 2
+color = Color(0.025, 0.027, 0.035, 0.84)
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="Center" type="Control" parent="." unique_id=1910463936]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
-[node name="BookCover" type="PanelContainer" parent="Center"]
-custom_minimum_size = Vector2(1160, 650)
-layout_mode = 2
-theme_override_styles/panel = SubResource("BookCoverStyle")
-
-[node name="Pages" type="HBoxContainer" parent="Center/BookCover"]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="LeftPage" type="PanelContainer" parent="Center/BookCover/Pages"]
-custom_minimum_size = Vector2(330, 0)
-layout_mode = 2
-theme_override_styles/panel = SubResource("LeftPageStyle")
-
-[node name="Margin" type="MarginContainer" parent="Center/BookCover/Pages/LeftPage"]
-layout_mode = 2
-theme_override_constants/margin_left = 22
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 18
-
-[node name="Column" type="VBoxContainer" parent="Center/BookCover/Pages/LeftPage/Margin"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="BookTitle" type="Label" parent="Center/BookCover/Pages/LeftPage/Margin/Column"]
-theme_type_variation = &"HeaderLabel"
-layout_mode = 2
-theme_override_colors/font_color = Color(0.243137, 0.145098, 0.0941176, 1)
-theme_override_font_sizes/font_size = 24
-text = "CONDUCTOR'S GUIDEBOOK"
-horizontal_alignment = 1
-
-[node name="BookSubtitle" type="Label" parent="Center/BookCover/Pages/LeftPage/Margin/Column"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.396078, 0.294118, 0.211765, 1)
-theme_override_font_sizes/font_size = 12
-text = "WHERE DO YOU BELONG?"
-horizontal_alignment = 1
-
-[node name="Summary" type="PanelContainer" parent="Center/BookCover/Pages/LeftPage/Margin/Column"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("SummaryStyle")
-
-[node name="Column" type="VBoxContainer" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Summary"]
-layout_mode = 2
-theme_override_constants/separation = 2
-
-[node name="DayBadge" type="Label" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Summary/Column"]
+[node name="NextPage" type="Control" parent="Center" unique_id=1467108965]
 unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.235294, 0.141176, 0.0941176, 1)
-theme_override_font_sizes/font_size = 20
-text = "DAY 1"
+editor_description = "Scene-authored next-section control using Vector 436 and Group 79."
+anchors_preset = 0
+offset_left = 939.3
+offset_top = 509.74
+offset_right = 1034.3
+offset_bottom = 571.74
+pivot_offset = Vector2(47.5, 31)
 
-[node name="TrainBadge" type="Label" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Summary/Column"]
+[node name="Background" type="TextureRect" parent="Center/NextPage" unique_id=1751611747]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("18_next_bg")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Arrow" type="TextureRect" parent="Center/NextPage" unique_id=1381751383]
+layout_mode = 0
+offset_left = 53.0
+offset_top = 9.0
+offset_right = 83.0
+offset_bottom = 49.0
+scale = Vector2(1.2, 1.2)
+mouse_filter = 2
+texture = ExtResource("19_next_arrow")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NextPageButton" type="Button" parent="Center/NextPage" unique_id=1942137481]
 unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.301961, 0.203922, 0.133333, 1)
-theme_override_font_sizes/font_size = 15
-text = "TRAIN —"
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 1
+mouse_default_cursor_shape = 2
+theme_override_fonts/font = ExtResource("20_title_font")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_button")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_button")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_button")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_button")
 
-[node name="DateBadge" type="Label" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Summary/Column"]
+[node name="BookStage" type="Control" parent="Center" unique_id=435559372]
 unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.301961, 0.203922, 0.133333, 1)
-theme_override_font_sizes/font_size = 14
-text = "SERVICE DATE"
+editor_description = "Complete scene-authored guidebook composition. Change this node's scale to resize the entire guidebook while keeping its layout intact."
+custom_minimum_size = Vector2(1160, 660)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -580.0
+offset_top = -330.0
+offset_right = 580.0
+offset_bottom = 330.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.73, 0.73)
+pivot_offset = Vector2(580, 330)
+mouse_filter = 2
 
-[node name="SectionCaption" type="Label" parent="Center/BookCover/Pages/LeftPage/Margin/Column"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.419608, 0.298039, 0.2, 1)
-theme_override_font_sizes/font_size = 12
-text = "SECTIONS"
+[node name="LoosePapers" type="Control" parent="Center/BookStage" unique_id=1773659718]
+editor_description = "Decorative paper assets behind the open book."
+anchors_preset = 0
+offset_right = 1160.0
+offset_bottom = 660.0
+mouse_filter = 2
 
-[node name="Sections" type="VBoxContainer" parent="Center/BookCover/Pages/LeftPage/Margin/Column"]
-layout_mode = 2
-theme_override_constants/separation = 2
-
-[node name="TodayButton" type="Button" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Sections"]
+[node name="PinkTall" type="TextureRect" parent="Center/BookStage/LoosePapers" unique_id=966289851]
 unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.223529, 0.137255, 0.0941176, 1)
-theme_override_colors/font_hover_color = Color(0.160784, 0.0901961, 0.054902, 1)
-theme_override_colors/font_disabled_color = Color(0.968627, 0.901961, 0.764706, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("SectionButtonStyle")
-theme_override_styles/hover = SubResource("SectionButtonHoverStyle")
-theme_override_styles/pressed = SubResource("SectionButtonHoverStyle")
-theme_override_styles/focus = SubResource("SectionButtonHoverStyle")
-theme_override_styles/disabled = SubResource("SectionButtonActiveStyle")
-text = "TODAY'S SERVICE"
-alignment = 0
+layout_mode = 0
+offset_left = 42.0
+offset_top = 42.0
+offset_right = 414.0
+offset_bottom = 626.0
+pivot_offset = Vector2(186, 292)
+mouse_filter = 2
+texture = ExtResource("6_paper_pink_tall")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="ProcedureButton" type="Button" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Sections"]
+[node name="PinkWide2" type="TextureRect" parent="Center/BookStage/LoosePapers" unique_id=1607360315]
 unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.223529, 0.137255, 0.0941176, 1)
-theme_override_colors/font_disabled_color = Color(0.968627, 0.901961, 0.764706, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("SectionButtonStyle")
-theme_override_styles/hover = SubResource("SectionButtonHoverStyle")
-theme_override_styles/pressed = SubResource("SectionButtonHoverStyle")
-theme_override_styles/focus = SubResource("SectionButtonHoverStyle")
-theme_override_styles/disabled = SubResource("SectionButtonActiveStyle")
-text = "RULES"
-alignment = 0
+layout_mode = 0
+offset_left = -98.465515
+offset_top = 280.35626
+offset_right = 421.53455
+offset_bottom = 640.35626
+rotation = 1.3262314
+scale = Vector2(0.8, 0.8)
+pivot_offset = Vector2(260, 180)
+mouse_filter = 2
+texture = ExtResource("9_paper_pink_wide")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="AnomaliesButton" type="Button" parent="Center/BookCover/Pages/LeftPage/Margin/Column/Sections"]
+[node name="YellowSheet" type="TextureRect" parent="Center/BookStage/LoosePapers" unique_id=1047525751]
 unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.223529, 0.137255, 0.0941176, 1)
-theme_override_colors/font_disabled_color = Color(0.968627, 0.901961, 0.764706, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("SectionButtonStyle")
-theme_override_styles/hover = SubResource("SectionButtonHoverStyle")
-theme_override_styles/pressed = SubResource("SectionButtonHoverStyle")
-theme_override_styles/focus = SubResource("SectionButtonHoverStyle")
-theme_override_styles/disabled = SubResource("SectionButtonActiveStyle")
-text = "ANOMALY LIST"
-alignment = 0
+layout_mode = 0
+offset_left = -6.7671814
+offset_top = 78.50687
+offset_right = 343.23282
+offset_bottom = 486.50687
+scale = Vector2(0.8, 0.8)
+pivot_offset = Vector2(175, 204)
+mouse_filter = 2
+texture = ExtResource("7_paper_yellow")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Hint" type="Label" parent="Center/BookCover/Pages/LeftPage/Margin/Column"]
-layout_mode = 2
-size_flags_vertical = 10
-theme_override_colors/font_color = Color(0.396078, 0.294118, 0.211765, 1)
-theme_override_font_sizes/font_size = 12
-text = "Select a section to turn to that page."
-horizontal_alignment = 1
-
-[node name="Spine" type="ColorRect" parent="Center/BookCover/Pages"]
-custom_minimum_size = Vector2(14, 0)
-layout_mode = 2
-color = Color(0.278431, 0.160784, 0.0901961, 1)
-
-[node name="RightPage" type="PanelContainer" parent="Center/BookCover/Pages"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("RightPageStyle")
-
-[node name="Margin" type="MarginContainer" parent="Center/BookCover/Pages/RightPage"]
-layout_mode = 2
-theme_override_constants/margin_left = 32
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 26
-theme_override_constants/margin_bottom = 20
-
-[node name="Column" type="VBoxContainer" parent="Center/BookCover/Pages/RightPage/Margin"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="Header" type="HBoxContainer" parent="Center/BookCover/Pages/RightPage/Margin/Column"]
-layout_mode = 2
-
-[node name="PageTitle" type="Label" parent="Center/BookCover/Pages/RightPage/Margin/Column/Header"]
-theme_type_variation = &"HeaderLabel"
+[node name="BlueSheet" type="TextureRect" parent="Center/BookStage/LoosePapers" unique_id=668370752]
 unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.25098, 0.145098, 0.0941176, 1)
-theme_override_font_sizes/font_size = 27
-text = "TODAY'S SERVICE"
+layout_mode = 0
+offset_left = 652.60284
+offset_top = 228.63019
+offset_right = 1146.6027
+offset_bottom = 624.63025
+rotation = -0.052431874
+scale = Vector2(0.7, 0.7)
+pivot_offset = Vector2(247, 198)
+mouse_filter = 2
+texture = ExtResource("8_paper_blue")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="CloseButton" type="Button" parent="Center/BookCover/Pages/RightPage/Margin/Column/Header"]
+[node name="PinkWide" type="TextureRect" parent="Center/BookStage/LoosePapers" unique_id=1277780918]
 unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.960784, 0.894118, 0.760784, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("CloseButtonStyle")
-text = "CLOSE  [TAB / ESC]"
+layout_mode = 0
+offset_left = 598.79474
+offset_top = -45.67121
+offset_right = 1118.7948
+offset_bottom = 314.3288
+scale = Vector2(0.8, 0.8)
+pivot_offset = Vector2(260, 180)
+mouse_filter = 2
+texture = ExtResource("9_paper_pink_wide")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Rule" type="HSeparator" parent="Center/BookCover/Pages/RightPage/Margin/Column"]
-layout_mode = 2
-theme_override_colors/separator = Color(0.454902, 0.321569, 0.211765, 0.65)
-
-[node name="Content" type="RichTextLabel" parent="Center/BookCover/Pages/RightPage/Margin/Column"]
+[node name="Ribbon" type="TextureRect" parent="Center/BookStage/LoosePapers" unique_id=742279104]
 unique_name_in_owner = true
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_colors/default_color = Color(0.188235, 0.145098, 0.113725, 1)
+layout_mode = 0
+offset_left = 431.1231
+offset_top = 604.7261
+offset_right = 573.1231
+offset_bottom = 790.7261
+scale = Vector2(0.6, 0.6)
+pivot_offset = Vector2(71, 93)
+mouse_filter = 2
+texture = ExtResource("10_ribbon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SectionTabs" type="Control" parent="Center/BookStage" unique_id=1388151723]
+editor_description = "Artwork and invisible hit areas for Today's Service, Anomaly List, and Rules."
+anchors_preset = 0
+offset_left = 1000.0
+offset_top = 64.0
+offset_right = 1160.0
+offset_bottom = 410.0
+
+[node name="TodayTab" type="Control" parent="Center/BookStage/SectionTabs" unique_id=1439698673]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_right = 158.0
+offset_bottom = 82.0
+pivot_offset = Vector2(79, 41)
+
+[node name="Artwork" type="TextureRect" parent="Center/BookStage/SectionTabs/TodayTab" unique_id=364865559]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("12_today_tab")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="Center/BookStage/SectionTabs/TodayTab" unique_id=1367780742]
+layout_mode = 0
+offset_left = 103.0
+offset_top = 11.0
+offset_right = 147.0
+offset_bottom = 69.0
+mouse_filter = 2
+texture = ExtResource("15_train")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TodayButton" type="Button" parent="Center/BookStage/SectionTabs/TodayTab" unique_id=1610957505]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 1
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_button")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_button")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_button")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_button")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_button")
+
+[node name="AnomalyTab" type="Control" parent="Center/BookStage/SectionTabs" unique_id=613962503]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_top = 86.0
+offset_right = 196.0
+offset_bottom = 159.0
+pivot_offset = Vector2(98, 36.5)
+
+[node name="Artwork" type="TextureRect" parent="Center/BookStage/SectionTabs/AnomalyTab" unique_id=172384935]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("13_anomaly_tab")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TitleArt" type="TextureRect" parent="Center/BookStage/SectionTabs/AnomalyTab" unique_id=649330613]
+layout_mode = 0
+offset_left = 53.0
+offset_top = 13.0
+offset_right = 163.0
+offset_bottom = 58.0
+mouse_filter = 2
+texture = ExtResource("16_anomaly_text")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="AnomaliesButton" type="Button" parent="Center/BookStage/SectionTabs/AnomalyTab" unique_id=2119986551]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 1
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_button")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_button")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_button")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_button")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_button")
+
+[node name="RulesTab" type="Control" parent="Center/BookStage/SectionTabs" unique_id=1758282775]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_top = 165.0
+offset_right = 174.0
+offset_bottom = 239.0
+pivot_offset = Vector2(87, 37)
+
+[node name="Artwork" type="TextureRect" parent="Center/BookStage/SectionTabs/RulesTab" unique_id=1780310958]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("14_rules_tab")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TitleArt" type="TextureRect" parent="Center/BookStage/SectionTabs/RulesTab" unique_id=1058575254]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 25.0
+offset_right = 139.0
+offset_bottom = 47.0
+mouse_filter = 2
+texture = ExtResource("17_rules_text")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ProcedureButton" type="Button" parent="Center/BookStage/SectionTabs/RulesTab" unique_id=1980732282]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 1
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_button")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_button")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_button")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_button")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_button")
+
+[node name="Page" type="Control" parent="Center/BookStage" unique_id=1377825426]
+unique_name_in_owner = true
+editor_description = "Main spread, page shading, clip, close button, and runtime content."
+anchors_preset = 0
+offset_left = 48.0
+offset_top = 14.0
+offset_right = 1048.0
+offset_bottom = 648.0
+pivot_offset = Vector2(500, 317)
+
+[node name="BookPaper" type="TextureRect" parent="Center/BookStage/Page" unique_id=1448993772]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4_book")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeftPageTone" type="TextureRect" parent="Center/BookStage/Page" unique_id=1466701195]
+layout_mode = 0
+offset_right = 500.0
+offset_bottom = 634.0
+mouse_filter = 2
+texture = ExtResource("5_left_page")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CloseButton" type="Button" parent="Center/BookStage/Page" unique_id=1435594907]
+unique_name_in_owner = true
+editor_description = "Scene-authored close control. Tab and Esc use the same action."
+layout_mode = 0
+offset_left = 943.0001
+offset_top = 14.369858
+offset_right = 986.0001
+offset_bottom = 59.369858
+pivot_offset = Vector2(21.5, 22.5)
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0.58, 0.25, 0.22, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 38
+theme_override_styles/normal = SubResource("StyleBoxEmpty_button")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_button")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_button")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_button")
+text = "X"
+
+[node name="PageTitle" type="Label" parent="Center/BookStage/Page" unique_id=1034829727]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 56.0
+offset_top = 54.589035
+offset_right = 925.0
+offset_bottom = 118.589035
+theme_override_colors/font_color = Color(0.25, 0.21, 0.19, 1)
+theme_override_fonts/font = ExtResource("20_title_font")
+theme_override_font_sizes/font_size = 54
+text = "Today's Service"
+
+[node name="Content" type="RichTextLabel" parent="Center/BookStage/Page" unique_id=1856155807]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 58.0
+offset_top = 132.0
+offset_right = 940.0
+offset_bottom = 570.0
+focus_mode = 0
+mouse_filter = 2
+theme_override_colors/default_color = Color(0.25, 0.22, 0.2, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
-theme_override_font_sizes/normal_font_size = 17
-theme_override_font_sizes/bold_font_size = 18
+theme_override_constants/table_h_separation = 54
+theme_override_constants/table_v_separation = 12
+theme_override_fonts/bold_font = ExtResource("21_body_bold")
+theme_override_font_sizes/normal_font_size = 15
+theme_override_font_sizes/bold_font_size = 15
 bbcode_enabled = true
-fit_content = false
-scroll_active = true
-selection_enabled = true
+scroll_active = false
 
-[node name="AnomalyList" type="ScrollContainer" parent="Center/BookCover/Pages/RightPage/Margin/Column"]
+[node name="AnomalyList" type="Control" parent="Center/BookStage/Page" unique_id=637261252]
 unique_name_in_owner = true
 visible = false
-layout_mode = 2
-size_flags_vertical = 3
-horizontal_scroll_mode = 0
+anchors_preset = 0
+offset_left = 58.0
+offset_top = 132.0
+offset_right = 940.0
+offset_bottom = 570.0
+mouse_filter = 2
 
-[node name="Entries" type="VBoxContainer" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 20
+[node name="Entries" type="GridContainer" parent="Center/BookStage/Page/AnomalyList" unique_id=1276518421]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 16
+columns = 2
 
-[node name="Shadowless" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+[node name="Shadowless" parent="Center/BookStage/Page/AnomalyList/Entries" unique_id=920499715 instance=ExtResource("3_entry")]
 layout_mode = 2
 heading = "SHADOWLESS"
-description = "No shadow appears beneath the passenger."
+description = "The passenger casts no shadow."
 
-[node name="ImpossibleTicket" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
-layout_mode = 2
-heading = "IMPOSSIBLE TICKET"
-description = "The destination lies before the passenger's origin in today's direction of travel."
-
-[node name="UnlistedDestination" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+[node name="UnlistedDestination" parent="Center/BookStage/Page/AnomalyList/Entries" unique_id=765249923 instance=ExtResource("3_entry")]
 layout_mode = 2
 heading = "UNLISTED DESTINATION"
-description = "The destination does not appear on today's route."
+description = "The destination is absent from today's route."
 
-[node name="PortraitMismatch" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+[node name="PortraitMismatch" parent="Center/BookStage/Page/AnomalyList/Entries" unique_id=1524288881 instance=ExtResource("3_entry")]
 layout_mode = 2
 heading = "PORTRAIT MISMATCH"
-description = "The ID portrait does not match its owner."
+description = "The ID portrait does not match the passenger."
 
-[node name="TimeInvalidTicket" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+[node name="TimeInvalidTicket" parent="Center/BookStage/Page/AnomalyList/Entries" unique_id=216565996 instance=ExtResource("3_entry")]
 layout_mode = 2
 heading = "TIME-INVALID TICKET"
-description = "The service date or day code differs from today's service."
+description = "The date or day code does not match today's service."
 
-[node name="NewspaperDeath" parent="Center/BookCover/Pages/RightPage/Margin/Column/AnomalyList/Entries" instance=ExtResource("3_entry")]
+[node name="NewspaperDeath" parent="Center/BookStage/Page/AnomalyList/Entries" unique_id=1716115659 instance=ExtResource("3_entry")]
 layout_mode = 2
 heading = "NEWSPAPER DEATH"
-description = "A death report always identifies an anomaly aboard. Match the printed name with passenger documents."
+description = "Match the passenger named in a death report with their documents."
 
-[node name="Footer" type="Label" parent="Center/BookCover/Pages/RightPage/Margin/Column"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.435294, 0.333333, 0.25098, 1)
-theme_override_font_sizes/font_size = 12
-text = "Official conductor reference • Daily values update automatically"
-horizontal_alignment = 2
+[node name="Clip" type="TextureRect" parent="Center/BookStage" unique_id=1818967348]
+unique_name_in_owner = true
+editor_description = "Metal clip layered above the open book."
+layout_mode = 0
+offset_left = 381.36987
+offset_top = -33.01368
+offset_right = 445.36987
+offset_bottom = 48.98632
+pivot_offset = Vector2(32, 41)
+mouse_filter = 2
+texture = ExtResource("11_clip")
+expand_mode = 1
+stretch_mode = 5
 
-[connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/TodayButton" to="." method="_show_today"]
-[connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/ProcedureButton" to="." method="_show_procedure"]
-[connection signal="pressed" from="Center/BookCover/Pages/LeftPage/Margin/Column/Sections/AnomaliesButton" to="." method="_show_anomalies"]
-[connection signal="pressed" from="Center/BookCover/Pages/RightPage/Margin/Column/Header/CloseButton" to="." method="request_close"]
+[connection signal="pressed" from="Center/NextPage/NextPageButton" to="." method="_show_next_section"]
+[connection signal="pressed" from="Center/BookStage/SectionTabs/TodayTab/TodayButton" to="." method="_show_today"]
+[connection signal="pressed" from="Center/BookStage/SectionTabs/AnomalyTab/AnomaliesButton" to="." method="_show_anomalies"]
+[connection signal="pressed" from="Center/BookStage/SectionTabs/RulesTab/ProcedureButton" to="." method="_show_procedure"]
+[connection signal="pressed" from="Center/BookStage/Page/CloseButton" to="." method="request_close"]

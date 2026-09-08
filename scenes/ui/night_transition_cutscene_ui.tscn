@@ -1,0 +1,382 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/night_transition_cutscene_ui.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
+[ext_resource type="Shader" uid="uid://dq13hfpieecwx" path="res://shaders/night_atmosphere.gdshader" id="3_fog_shader"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_back"]
+frequency = 0.004
+fractal_octaves = 5
+fractal_lacunarity = 2.0
+fractal_gain = 0.6
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture_back"]
+noise = SubResource("FastNoiseLite_back")
+seamless = true
+
+[sub_resource type="ShaderMaterial" id="FogMaterial_back"]
+shader = ExtResource("3_fog_shader")
+shader_parameter/noise_texture = SubResource("NoiseTexture_back")
+shader_parameter/density = 1.0
+shader_parameter/speed = Vector2(0.055, 0.012)
+shader_parameter/fog_scale = Vector2(0.34, 0.46)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_front"]
+seed = 91
+frequency = 0.007
+fractal_octaves = 4
+fractal_lacunarity = 2.2
+fractal_gain = 0.52
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture_front"]
+noise = SubResource("FastNoiseLite_front")
+seamless = true
+
+[sub_resource type="ShaderMaterial" id="FogMaterial_front"]
+shader = ExtResource("3_fog_shader")
+shader_parameter/noise_texture = SubResource("NoiseTexture_front")
+shader_parameter/density = 1.0
+shader_parameter/speed = Vector2(-0.075, 0.018)
+shader_parameter/fog_scale = Vector2(0.58, 0.4)
+
+[sub_resource type="Animation" id="Animation_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("BackdropTint:self_modulate:a")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("FogBack:self_modulate:a")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("FogFront:self_modulate:a")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("VeilFlash:self_modulate:a")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("VeilSymbol:self_modulate:a")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("NightTitle:self_modulate:a")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("TopBar:self_modulate:a")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("BottomBar:self_modulate:a")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_transition"]
+resource_name = "transition"
+length = 10.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("BackdropTint:self_modulate:a")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2.0, 4.8, 7.2, 10.0),
+"transitions": PackedFloat32Array(1, 1.3, 1, 1.2, 1),
+"update": 0,
+"values": [0.0, 0.1, 0.52, 0.18, 0.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("FogBack:self_modulate:a")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 1.5, 4.7, 5.5, 7.5, 9.5, 10.0),
+"transitions": PackedFloat32Array(1, 1.4, 1.2, 1, 1.25, 1.2, 1),
+"update": 0,
+"values": [0.0, 0.12, 0.88, 1.0, 0.54, 0.06, 0.0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("FogFront:self_modulate:a")
+tracks/2/interp = 2
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 2.8, 4.9, 5.6, 6.6, 8.6, 10.0),
+"transitions": PackedFloat32Array(1, 1.4, 1.2, 1, 1.2, 1.3, 1),
+"update": 0,
+"values": [0.0, 0.08, 0.82, 1.0, 0.68, 0.04, 0.0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("VeilFlash:self_modulate:a")
+tracks/3/interp = 2
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 4.65, 5.2, 5.7, 7.0, 10.0),
+"transitions": PackedFloat32Array(1, 1.5, 1, 1.4, 1.2, 1),
+"update": 0,
+"values": [0.0, 0.0, 0.86, 0.22, 0.0, 0.0]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("VeilSymbol:self_modulate:a")
+tracks/4/interp = 2
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 4.55, 5.05, 5.45, 6.2, 10.0),
+"transitions": PackedFloat32Array(1, 1.6, 1, 1.3, 1.2, 1),
+"update": 0,
+"values": [0.0, 0.0, 0.92, 0.7, 0.0, 0.0]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("NightTitle:self_modulate:a")
+tracks/5/interp = 2
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 6.6, 7.3, 8.7, 9.5, 10.0),
+"transitions": PackedFloat32Array(1, 1.5, 1, 1, 1.4, 1),
+"update": 0,
+"values": [0.0, 0.0, 1.0, 1.0, 0.0, 0.0]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("TopBar:self_modulate:a")
+tracks/6/interp = 2
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0, 0.45, 9.4, 10.0),
+"transitions": PackedFloat32Array(1.4, 1, 1.4, 1),
+"update": 0,
+"values": [0.0, 1.0, 1.0, 0.0]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("BottomBar:self_modulate:a")
+tracks/7/interp = 2
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 0.45, 9.4, 10.0),
+"transitions": PackedFloat32Array(1.4, 1, 1.4, 1),
+"update": 0,
+"values": [0.0, 1.0, 1.0, 0.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_transition"]
+_data = {
+&"RESET": SubResource("Animation_reset"),
+&"transition": SubResource("Animation_transition")
+}
+
+[node name="NightTransitionCutsceneUI" type="Control"]
+visible = false
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+transition_animation = &"transition"
+veil_crossing_time = 5.25
+skip_unlock_seconds = 1.5
+
+[node name="BackdropTint" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.035, 0.12, 0.18, 0.78)
+
+[node name="FogBack" type="ColorRect" parent="."]
+material = SubResource("FogMaterial_back")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -60.0
+offset_right = 80.0
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.63, 0.76, 0.82, 1)
+
+[node name="FogFront" type="ColorRect" parent="."]
+material = SubResource("FogMaterial_front")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -100.0
+offset_top = -80.0
+offset_right = 100.0
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.76, 0.84, 0.87, 1)
+
+[node name="VeilFlash" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.72, 0.9, 0.95, 1)
+
+[node name="VeilSymbol" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.88, 0.97, 1, 1)
+theme_override_colors/font_shadow_color = Color(0.08, 0.24, 0.31, 0.75)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 4
+theme_override_font_sizes/font_size = 86
+text = "◇"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NightTitle" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = 76.0
+offset_right = 300.0
+offset_bottom = 126.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"HeaderLabel"
+theme_override_colors/font_color = Color(0.86, 0.95, 0.98, 1)
+theme_override_colors/font_shadow_color = Color(0.02, 0.08, 0.12, 0.9)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 30
+text = "NIGHT SERVICE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TopBar" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 56.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.008, 0.012, 0.018, 1)
+
+[node name="BottomBar" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -56.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.008, 0.012, 0.018, 1)
+
+[node name="TransitionAnimation" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+&"": SubResource("AnimationLibrary_transition")
+}
+
+[connection signal="animation_finished" from="TransitionAnimation" to="." method="_on_transition_animation_finished"]

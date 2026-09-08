@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c2kx16gwe45jl"
-path="res://.godot/imported/NPC17 - Rheina.png-aae8d44cb0d9cc361e5cfa5c16f56e87.ctex"
+uid="uid://iugd0xxevq15"
+path="res://.godot/imported/Group 99.png-7ddfb0352eda84628526f4f9fee77784.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/Where Do You Belong_/NPC17 - Rheina.png"
-dest_files=["res://.godot/imported/NPC17 - Rheina.png-aae8d44cb0d9cc361e5cfa5c16f56e87.ctex"]
+source_file="res://assets/ui/guidebook/Group 99.png"
+dest_files=["res://.godot/imported/Group 99.png-7ddfb0352eda84628526f4f9fee77784.ctex"]
 
 [params]
 

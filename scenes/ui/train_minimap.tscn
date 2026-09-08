@@ -1,12 +1,13 @@
-[gd_scene load_steps=5 format=3 uid="uid://cxgfpcr3hg68b"]
+[gd_scene load_steps=6 format=3 uid="uid://cxgfpcr3hg68b"]
 
 [ext_resource type="Script" uid="uid://0j8h84yllxdm" path="res://scripts/ui/train_minimap.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://ddbii5vyjx3mi" path="res://assets/ui/gerbong_active.png" id="2_active"]
 [ext_resource type="Texture2D" uid="uid://1nweqvgg1u7s" path="res://assets/ui/gerbong_nonactive.png" id="3_inactive"]
 [ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="4_theme"]
+[ext_resource type="Material" path="res://resources/materials/hud_black_outline.tres" id="5_outline"]
 
 [node name="TrainMinimap" type="Control" unique_id=1538774286]
-custom_minimum_size = Vector2(224, 50)
+custom_minimum_size = Vector2(224, 27)
 layout_mode = 3
 anchors_preset = 0
 size_flags_horizontal = 4
@@ -60,9 +61,10 @@ anchors_preset = 0
 offset_left = 2.0
 offset_top = 2.0
 offset_right = 56.0
-offset_bottom = 48.0
+offset_bottom = 25.0
 
 [node name="Box" type="TextureRect" parent="Slot0" unique_id=756454706]
+material = ExtResource("5_outline")
 layout_mode = 0
 offset_right = 54.0
 offset_bottom = 23.0
@@ -83,25 +85,16 @@ theme_override_font_sizes/font_size = 10
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Label" type="Label" parent="Slot0" unique_id=1181851844]
-layout_mode = 0
-offset_top = 25.0
-offset_right = 54.0
-offset_bottom = 46.0
-theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
-theme_override_font_sizes/font_size = 14
-text = "4"
-horizontal_alignment = 1
-
 [node name="Slot1" type="Control" parent="." unique_id=1641753493]
 unique_name_in_owner = true
 anchors_preset = 0
 offset_left = 57.0
 offset_top = 2.0
 offset_right = 111.0
-offset_bottom = 48.0
+offset_bottom = 25.0
 
 [node name="Box" type="TextureRect" parent="Slot1" unique_id=683516816]
+material = ExtResource("5_outline")
 layout_mode = 0
 offset_right = 54.0
 offset_bottom = 23.0
@@ -122,25 +115,16 @@ theme_override_font_sizes/font_size = 10
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Label" type="Label" parent="Slot1" unique_id=2579984]
-layout_mode = 0
-offset_top = 25.0
-offset_right = 54.0
-offset_bottom = 46.0
-theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
-theme_override_font_sizes/font_size = 14
-text = "3"
-horizontal_alignment = 1
-
 [node name="Slot2" type="Control" parent="." unique_id=247919059]
 unique_name_in_owner = true
 anchors_preset = 0
 offset_left = 112.0
 offset_top = 2.0
 offset_right = 166.0
-offset_bottom = 48.0
+offset_bottom = 25.0
 
 [node name="Box" type="TextureRect" parent="Slot2" unique_id=303909592]
+material = ExtResource("5_outline")
 layout_mode = 0
 offset_right = 54.0
 offset_bottom = 23.0
@@ -161,25 +145,16 @@ theme_override_font_sizes/font_size = 10
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Label" type="Label" parent="Slot2" unique_id=602372540]
-layout_mode = 0
-offset_top = 25.0
-offset_right = 54.0
-offset_bottom = 46.0
-theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
-theme_override_font_sizes/font_size = 14
-text = "2"
-horizontal_alignment = 1
-
 [node name="Slot3" type="Control" parent="." unique_id=592430716]
 unique_name_in_owner = true
 anchors_preset = 0
 offset_left = 167.0
 offset_top = 2.0
 offset_right = 221.0
-offset_bottom = 48.0
+offset_bottom = 25.0
 
 [node name="Box" type="TextureRect" parent="Slot3" unique_id=906714206]
+material = ExtResource("5_outline")
 layout_mode = 0
 offset_right = 54.0
 offset_bottom = 23.0
@@ -199,13 +174,3 @@ theme_override_constants/line_spacing = -7
 theme_override_font_sizes/font_size = 10
 horizontal_alignment = 1
 vertical_alignment = 1
-
-[node name="Label" type="Label" parent="Slot3" unique_id=1329828188]
-layout_mode = 0
-offset_top = 25.0
-offset_right = 54.0
-offset_bottom = 46.0
-theme_override_colors/font_color = Color(0.913725, 0.87451, 0.811765, 1)
-theme_override_font_sizes/font_size = 14
-text = "1"
-horizontal_alignment = 1

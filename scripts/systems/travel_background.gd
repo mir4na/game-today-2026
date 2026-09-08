@@ -1,63 +1,17 @@
 class_name TravelBackground
 extends CanvasLayer
-## Layered railway backdrop with period-specific parallax and tunnel transitions.
+## Switches and scrolls the fully scene-authored travel background hierarchy.
 
 signal period_changed(display_cycle_progress: float)
 
 enum Period { SUNRISE, AFTERNOON, SUNSET, NIGHT }
 
-const VIEWPORT_REFERENCE_WIDTH: float = 1280.0
-const ART_REFERENCE_WIDTH: float = 5356.0
-const ART_REFERENCE_HEIGHT: float = 1320.0
-const PERIOD_TEXTURES: Dictionary = {
-	Period.SUNRISE: [
-		# The reference uses layer 1 as the full sunrise color field, with the
-		# cropped cloud artwork composed over it near the top of the canvas.
-		{"texture": preload("res://assets/environment/sunrise_layer1.png"), "speed": 56.0, "alpha": 1.0, "fill_canvas": true},
-		{"texture": preload("res://assets/environment/sunrise_layer2.png"), "speed": 18.0, "alpha": 1.0, "cloud": true, "y_offset": -240.0},
-	],
-	Period.AFTERNOON: [
-		{"texture": preload("res://assets/environment/afternoon_layer4.png"), "speed": 18.0, "alpha": 1.0, "cloud": true},
-		{"texture": preload("res://assets/environment/afternoon_layer3.png"), "speed": 30.0, "alpha": 1.0, "align": "bottom"},
-		{"texture": preload("res://assets/environment/afternoon_layer2.png"), "speed": 43.0, "alpha": 1.0, "align": "bottom"},
-		{"texture": preload("res://assets/environment/afternoon_layer1.png"), "speed": 58.0, "alpha": 1.0, "align": "bottom"},
-	],
-	Period.SUNSET: [
-		{"texture": preload("res://assets/environment/sunset_layer4.png"), "speed": 28.0, "alpha": 1.0, "align": "top"},
-		{"texture": preload("res://assets/environment/sunset_layer3.png"), "speed": 18.0, "alpha": 1.0, "cloud": true},
-		{"texture": preload("res://assets/environment/sunset_layer2.png"), "speed": 45.0, "alpha": 1.0, "align": "top", "vary_height": true},
-		{"texture": preload("res://assets/environment/sunset_layer1.png"), "speed": 60.0, "alpha": 1.0, "align": "bottom", "y_offset": 24.0},
-	],
-	Period.NIGHT: [
-		{"texture": preload("res://assets/environment/night_layer2.png"), "speed": 5.0, "alpha": 1.0, "align": "bottom"},
-		{"texture": preload("res://assets/environment/night_layer1.png"), "speed": 18.0, "alpha": 1.0, "cloud": true, "y_offset": -18.0},
-	],
-}
-
-@export_category("Background Layout")
-@export_range(0.1, 2.0, 0.05) var art_scale_multiplier: float = 1.05
-@export var background_position: Vector2 = Vector2(0.0, 220.0)
-@export_range(0.0, 1.0, 0.01) var cloud_vertical_ratio: float = 0.55
-@export_group("Sunrise Override", "sunrise_")
-@export_range(0.1, 2.0, 0.05) var sunrise_scale: float = 1.0
-@export var sunrise_offset: Vector2 = Vector2.ZERO
-@export_group("Afternoon Override", "afternoon_")
-@export_range(0.1, 2.0, 0.05) var afternoon_scale: float = 1.0
-@export var afternoon_offset: Vector2 = Vector2.ZERO
-@export_group("Sunset Override", "sunset_")
-@export_range(0.1, 2.0, 0.05) var sunset_scale: float = 1.0
-@export var sunset_offset: Vector2 = Vector2.ZERO
-@export_group("Night Override", "night_")
-@export_range(0.1, 2.0, 0.05) var night_scale: float = 1.0
-@export var night_offset: Vector2 = Vector2.ZERO
-@export_group("")
-@export_category("Afternoon & Sunset Floor")
-@export_range(0.45, 0.95, 0.01) var floor_horizon_ratio: float = 0.66
-@export var afternoon_floor_color: Color = Color("8d684c")
-@export var sunset_floor_color: Color = Color("70483f")
-@export_category("Sunset Tree Variation")
-@export_range(1.0, 1.3, 0.01) var sunset_tree_min_height: float = 1.0
-@export_range(1.0, 1.3, 0.01) var sunset_tree_max_height: float = 1.3
+@export_category("Scene Periods")
+@export_node_path("Node2D") var sunrise_root_path: NodePath
+@export_node_path("Node2D") var afternoon_root_path: NodePath
+@export_node_path("Node2D") var sunset_root_path: NodePath
+@export_node_path("Node2D") var night_root_path: NodePath
+@export_node_path("Control") var tunnel_panel_path: NodePath
 @export_category("Parallax")
 @export_range(-1.0, 1.0, 0.05) var travel_direction: float = 1.0
 @export_category("Period Thresholds")
@@ -65,6 +19,7 @@ const PERIOD_TEXTURES: Dictionary = {
 @export_range(0.0, 1.0, 0.01) var sunset_start: float = 0.56
 @export_range(0.0, 1.0, 0.01) var night_start: float = 0.82
 @export_category("Tunnel Transition")
+@export var minimum_viewport_size: Vector2 = Vector2(1280.0, 720.0)
 @export_range(0.1, 2.0, 0.05) var tunnel_enter_seconds: float = 0.7
 @export_range(0.0, 1.0, 0.05) var tunnel_hold_seconds: float = 0.18
 @export_range(0.1, 2.0, 0.05) var tunnel_exit_seconds: float = 0.8
@@ -79,6 +34,10 @@ var _transition_active: bool = false
 
 
 func _ready() -> void:
+	_tunnel_panel = get_node_or_null(tunnel_panel_path) as Control
+	if is_instance_valid(_tunnel_panel):
+		_tunnel_panel.hide()
+	_validate_scene_configuration()
 	_build_period(Period.SUNRISE)
 	period_changed.emit(_display_progress_for_period(Period.SUNRISE))
 
@@ -86,9 +45,10 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if _motion_strength <= 0.001 or not is_instance_valid(_period_root):
 		return
-	for layer: Node in _period_root.get_children():
-		if layer is Node2D:
-			_scroll_layer(layer as Node2D, delta)
+	for child: Node in _period_root.get_children():
+		var layer := child as Node2D
+		if is_instance_valid(layer):
+			_scroll_layer(layer, delta)
 
 
 func set_traveling(value: bool) -> void:
@@ -129,130 +89,37 @@ func _display_progress_for_period(period: Period) -> float:
 
 
 func _build_period(period: Period) -> void:
-	if is_instance_valid(_period_root):
-		_period_root.queue_free()
-	_period_root = Node2D.new()
-	_period_root.name = "%sLayers" % Period.keys()[period]
-	_period_root.position = background_position + _period_offset(period)
-	add_child(_period_root)
-	move_child(_period_root, 0)
-	var viewport_width: float = maxf(get_viewport().get_visible_rect().size.x, VIEWPORT_REFERENCE_WIDTH)
-	var viewport_height: float = maxf(get_viewport().get_visible_rect().size.y, 720.0)
-	var art_scale: float = (
-		(viewport_width / ART_REFERENCE_WIDTH)
-		* art_scale_multiplier
-		* _period_scale(period)
-	)
-	var canvas_width: float = ART_REFERENCE_WIDTH * art_scale
-	var canvas_height: float = ART_REFERENCE_HEIGHT * art_scale
-	_add_period_floor(period, viewport_width, viewport_height)
-	var layer_index: int = 0
-	for layer_spec: Dictionary in PERIOD_TEXTURES[period]:
-		var texture: Texture2D = layer_spec["texture"] as Texture2D
-		var layer_root := Node2D.new()
-		layer_root.name = "ParallaxLayer%d" % layer_index
-		layer_root.set_meta(&"scroll_speed", float(layer_spec["speed"]))
-		layer_root.set_meta(&"wrap_width", canvas_width)
-		_period_root.add_child(layer_root)
-		var fill_canvas: bool = bool(layer_spec.get("fill_canvas", false))
-		var is_cloud: bool = bool(layer_spec.get("cloud", false))
-		var vertical_alignment: String = str(layer_spec.get("align", "bottom"))
-		var layer_y: float = canvas_height * cloud_vertical_ratio if is_cloud else (
-			0.0 if vertical_alignment == "top" else canvas_height - float(texture.get_height()) * art_scale
-		)
-		layer_y += float(layer_spec.get("y_offset", 0.0))
-		var centered_x: float = (ART_REFERENCE_WIDTH - float(texture.get_width())) * 0.5 * art_scale
-		var copy_count: int = maxi(2, ceili(viewport_width / maxf(canvas_width, 1.0)) + 2)
-		for copy_index: int in range(copy_count):
-			var sprite := Sprite2D.new()
-			sprite.texture = texture
-			sprite.centered = false
-			sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-			var base_vertical_scale: float = (
-				canvas_height / float(texture.get_height()) if fill_canvas else art_scale
-			)
-			var height_multiplier: float = (
-				_sunset_tree_height_multiplier(copy_index)
-				if bool(layer_spec.get("vary_height", false))
-				else 1.0
-			)
-			sprite.scale = Vector2(
-				art_scale,
-				base_vertical_scale * height_multiplier
-			)
-			sprite.position = Vector2(
-				float(copy_index) * canvas_width + centered_x,
-				layer_y - float(texture.get_height()) * base_vertical_scale * (height_multiplier - 1.0)
-			)
-			sprite.modulate.a = float(layer_spec["alpha"])
-			layer_root.add_child(sprite)
-		layer_index += 1
+	var next_root: Node2D = _period_scene_root(period)
+	if not is_instance_valid(next_root):
+		push_error("Travel Background is missing the scene root for %s." % Period.keys()[period])
+		return
+	for configured_period: Period in Period.values():
+		var configured_root: Node2D = _period_scene_root(configured_period)
+		if is_instance_valid(configured_root):
+			configured_root.visible = configured_root == next_root
+	_period_root = next_root
 	_current_period = period
 
 
-func _add_period_floor(period: Period, viewport_width: float, viewport_height: float) -> void:
-	if period != Period.AFTERNOON and period != Period.SUNSET:
-		return
-	var floor_color: Color = afternoon_floor_color if period == Period.AFTERNOON else sunset_floor_color
-	var floor_top: float = viewport_height * floor_horizon_ratio - _period_root.position.y
-	var floor_bottom: float = viewport_height - _period_root.position.y
-	var floor_left: float = -viewport_width - _period_root.position.x
-	var floor_right: float = viewport_width * 2.0 - _period_root.position.x
-	var floor := Polygon2D.new()
-	floor.name = "BrownFloor"
-	floor.color = floor_color
-	floor.polygon = PackedVector2Array([
-		Vector2(floor_left, floor_top),
-		Vector2(floor_right, floor_top),
-		Vector2(floor_right, floor_bottom),
-		Vector2(floor_left, floor_bottom),
-	])
-	_period_root.add_child(floor)
-
-
-func _sunset_tree_height_multiplier(copy_index: int) -> float:
-	var variation: float = 0.0
-	match copy_index % 4:
-		1:
-			variation = 0.58
-		2:
-			variation = 1.0
-		3:
-			variation = 0.28
-	var minimum_height: float = minf(sunset_tree_min_height, sunset_tree_max_height)
-	var maximum_height: float = maxf(sunset_tree_min_height, sunset_tree_max_height)
-	return lerpf(minimum_height, maximum_height, variation)
-
-
-func _period_scale(period: Period) -> float:
+func _period_scene_root(period: Period) -> Node2D:
+	var configured_path: NodePath
 	match period:
 		Period.AFTERNOON:
-			return afternoon_scale
+			configured_path = afternoon_root_path
 		Period.SUNSET:
-			return sunset_scale
+			configured_path = sunset_root_path
 		Period.NIGHT:
-			return night_scale
+			configured_path = night_root_path
 		_:
-			return sunrise_scale
-
-
-func _period_offset(period: Period) -> Vector2:
-	match period:
-		Period.AFTERNOON:
-			return afternoon_offset
-		Period.SUNSET:
-			return sunset_offset
-		Period.NIGHT:
-			return night_offset
-		_:
-			return sunrise_offset
+			configured_path = sunrise_root_path
+	return get_node_or_null(configured_path) as Node2D
 
 
 func _scroll_layer(layer: Node2D, delta: float) -> void:
-	var wrap_width: float = float(layer.get_meta(&"wrap_width", 0.0))
+	var wrap_width: float = float(layer.get(&"wrap_width"))
 	if wrap_width <= 0.0:
 		return
-	var speed: float = float(layer.get_meta(&"scroll_speed", 0.0))
+	var speed: float = float(layer.get(&"scroll_speed"))
 	layer.position.x += speed * travel_direction * _motion_strength * delta
 	if travel_direction >= 0.0 and layer.position.x >= 0.0:
 		layer.position.x -= wrap_width
@@ -261,11 +128,15 @@ func _scroll_layer(layer: Node2D, delta: float) -> void:
 
 
 func _start_tunnel_transition(next_period: Period) -> void:
+	if not is_instance_valid(_tunnel_panel):
+		_swap_period(next_period)
+		return
 	_transition_active = true
-	_tunnel_panel = _create_tunnel_panel()
-	add_child(_tunnel_panel)
-	var viewport_width: float = maxf(get_viewport().get_visible_rect().size.x, 1280.0)
+	var viewport_width: float = maxf(get_viewport().get_visible_rect().size.x, minimum_viewport_size.x)
+	var viewport_height: float = maxf(get_viewport().get_visible_rect().size.y, minimum_viewport_size.y)
+	_tunnel_panel.size = Vector2(viewport_width, viewport_height)
 	_tunnel_panel.position.x = -viewport_width
+	_tunnel_panel.show()
 	_transition_tween = create_tween()
 	_transition_tween.tween_property(
 		_tunnel_panel,
@@ -291,29 +162,20 @@ func _swap_period(next_period: Period) -> void:
 
 func _finish_tunnel_transition() -> void:
 	if is_instance_valid(_tunnel_panel):
-		_tunnel_panel.queue_free()
-	_tunnel_panel = null
+		_tunnel_panel.hide()
 	_transition_active = false
 	if _requested_period != _current_period:
 		_start_tunnel_transition(_requested_period)
 
 
-func _create_tunnel_panel() -> Control:
-	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
-	var panel := Control.new()
-	panel.name = "TunnelTransition"
-	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.size = Vector2(maxf(viewport_size.x, 1280.0), maxf(viewport_size.y, 720.0))
-	var darkness := ColorRect.new()
-	darkness.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	darkness.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	darkness.color = Color("090b10")
-	panel.add_child(darkness)
-	for line_y: float in [138.0, 360.0, 582.0]:
-		var tunnel_line := ColorRect.new()
-		tunnel_line.position = Vector2(0.0, line_y)
-		tunnel_line.size = Vector2(panel.size.x, 3.0)
-		tunnel_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		tunnel_line.color = Color(0.18, 0.2, 0.23, 0.22)
-		panel.add_child(tunnel_line)
-	return panel
+func _validate_scene_configuration() -> void:
+	for period: Period in Period.values():
+		var root_for_period: Node2D = _period_scene_root(period)
+		if not is_instance_valid(root_for_period):
+			push_error("Travel Background needs an Inspector-assigned root for %s." % Period.keys()[period])
+			continue
+		for child: Node in root_for_period.get_children():
+			if child is Node2D and child.get_script() == null:
+				push_warning("Travel Background layer '%s' needs its scene-authored parallax script." % child.get_path())
+	if not is_instance_valid(_tunnel_panel):
+		push_warning("Travel Background has no Inspector-assigned tunnel panel.")

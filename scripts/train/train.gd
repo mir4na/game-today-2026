@@ -2,6 +2,7 @@ class_name TrainWorld
 extends Node2D
 
 signal exterior_fade_out_finished
+signal station_travel_offset_changed(offset: Vector2)
 
 @export_category("Station Arrival & Departure")
 @export_range(2500.0, 6000.0, 50.0) var station_arrival_distance: float = 4400.0
@@ -53,6 +54,22 @@ func set_motion_strength(value: float) -> void:
 	for carriage: CarriageVisual in _carriages:
 		carriage.set_motion_strength(_motion_strength)
 
+
+func set_blocked_connector_effect(observer_world_x: float, connector_world_x: float, immediate: bool = false) -> void:
+	var observer_is_left: bool = observer_world_x < connector_world_x
+	for carriage: CarriageVisual in _carriages:
+		if carriage.carriage_type != "passenger":
+			continue
+		var carriage_center_x: float = carriage.global_position.x + carriage.carriage_width * 0.5
+		var carriage_is_left: bool = carriage_center_x < connector_world_x
+		carriage.set_blocked_by_aisle(carriage_is_left != observer_is_left, immediate)
+
+
+func clear_blocked_connector_effect(immediate: bool = false) -> void:
+	for carriage: CarriageVisual in _carriages:
+		if carriage.carriage_type == "passenger":
+			carriage.set_blocked_by_aisle(false, immediate)
+
 func show_exterior_body(duration: float, arrival_end: float, departure_start: float) -> void:
 	_station_arrival_progress = 0.0
 	_station_departure_progress = 0.0
@@ -80,7 +97,9 @@ func set_station_departure_progress(value: float) -> void:
 func _apply_station_travel_position() -> void:
 	var arrival_offset: float = station_arrival_distance * (1.0 - _station_arrival_progress)
 	var departure_offset: float = -station_departure_distance * _station_departure_progress
-	_cars.position = _cars_station_rest_position + Vector2(arrival_offset + departure_offset, 0.0)
+	var travel_offset := Vector2(arrival_offset + departure_offset, 0.0)
+	_cars.position = _cars_station_rest_position + travel_offset
+	station_travel_offset_changed.emit(travel_offset)
 
 func is_station_departure_complete() -> bool:
 	return _station_departure_progress >= 0.999
@@ -171,13 +190,6 @@ func get_passenger_carriage_number_at_world_x(world_x: float) -> int:
 	return 0
 
 
-func show_radar_anomaly_glow(carriage_number: int, duration: float) -> void:
-	for carriage: CarriageVisual in _carriages:
-		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
-			carriage.show_radar_anomaly_glow(duration)
-			return
-
-
 func can_play_radar_scan(carriage_number: int) -> bool:
 	for carriage: CarriageVisual in _carriages:
 		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
@@ -185,11 +197,25 @@ func can_play_radar_scan(carriage_number: int) -> bool:
 	return false
 
 
-func play_radar_scan(carriage_number: int, world_origin: Vector2, duration: float) -> void:
+func play_radar_scan(carriage_number: int, duration: float, origin_world_position: Vector2) -> void:
 	for carriage: CarriageVisual in _carriages:
 		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
-			await carriage.play_radar_scan(world_origin, duration)
+			carriage.play_radar_scan(duration, origin_world_position)
 			return
+
+
+func show_radar_anomaly_signal(carriage_number: int, duration: float) -> void:
+	for carriage: CarriageVisual in _carriages:
+		if carriage.carriage_type == "passenger" and carriage.carriage_number == carriage_number:
+			carriage.show_radar_anomaly_signal(duration)
+			return
+
+
+func clear_radar_anomaly_signals(immediate: bool = false) -> void:
+	for carriage: CarriageVisual in _carriages:
+		if carriage.carriage_type == "passenger":
+			carriage.clear_radar_anomaly_signal(immediate)
+
 
 func get_carriage_index_at_world_x(world_x: float) -> int:
 	if _carriages.is_empty():

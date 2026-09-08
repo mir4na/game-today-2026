@@ -44,14 +44,33 @@ func _run() -> void:
 			_check(not game._get_generated_passenger_names().has(game._newspaper_subject_name), "Ordinary news uses a non-passenger subject.")
 		for variant: int in 2:
 			reader.set_variant(variant)
-			overlay.show_newspaper(saved_document)
-			_check(overlay._newspaper_primary_body in saved_document, "Both layouts display the selected case.")
+			var variant_document: String
+			var expected_headline: String
+			if death_case:
+				variant_document = overlay.compose_matching_death_newspaper(subject, game.day_route[0])
+				expected_headline = overlay.matching_death_alt_headline if variant == 1 else overlay.matching_death_headline
+			else:
+				variant_document = overlay.compose_non_death_newspaper(game._newspaper_subject_name, game.day_route[0])
+				expected_headline = overlay.non_death_alt_headline if variant == 1 else overlay.non_death_headline
+			_check(overlay._newspaper_headline == expected_headline, "Each visual type selects its assigned story.")
+			_check(overlay._newspaper_primary_body in variant_document, "Each layout displays its assigned case copy.")
+			_check(reader._case_is_death == death_case, "The picture switches between its death and non-death scene nodes.")
+			for picture: Control in reader._death_pictures:
+				_check(picture.visible == death_case, "Death artwork visibility matches the article case.")
+			for picture: Control in reader._non_death_pictures:
+				_check(picture.visible != death_case, "Non-death artwork visibility matches the article case.")
+			overlay.show_newspaper(variant_document)
 			overlay.request_close()
 			await create_timer(0.1).timeout
-			overlay.show_newspaper(saved_document)
+			overlay.show_newspaper(variant_document)
 			_check(game._newspaper_document == saved_document, "Reopening never rerolls the case or subject.")
 			overlay.request_close()
 			await create_timer(0.1).timeout
+			if subject != null:
+				var death_copy: String = overlay.compose_matching_death_newspaper(subject, game.day_route[0])
+				var ordinary_copy: String = overlay.compose_non_death_newspaper("Sample Reporter", game.day_route[0])
+				var density_difference: int = absi(death_copy.split(" ", false).size() - ordinary_copy.split(" ", false).size())
+				_check(density_difference <= 8, "Death and non-death copy keep a similar text density for each type.")
 		# Sample generated manifests across seeds for both cases.
 		for sample_seed: int in range(40):
 			var rng := RandomNumberGenerator.new()
@@ -74,5 +93,5 @@ func _run() -> void:
 		await process_frame
 		await process_frame
 	if _failures == 0:
-		print("PASS: two cases in both layouts, matching anomaly aboard, ordinary news, stable rereads, 80 seeded manifests and case weights.")
+		print("PASS: type-specific stories and pictures, balanced copy, matching anomaly aboard, stable rereads, 80 seeded manifests and case weights.")
 	quit(1 if _failures else 0)

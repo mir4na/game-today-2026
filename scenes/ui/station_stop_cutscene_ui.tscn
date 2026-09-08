@@ -205,12 +205,17 @@ grow_vertical = 2
 mouse_filter = 0
 theme = ExtResource("3_theme")
 script = ExtResource("1")
+show_station_title = false
+show_terminal_title = true
 opening_heading_template = "%s"
 exchange_heading_template = "%s"
 opening_subtitle_text = "INITIAL BOARDING"
 exchange_subtitle_text = "PASSENGER EXCHANGE"
+terminal_heading_text = "EASTMERE"
+terminal_subtitle_text = ""
 opening_status_template = "%d BOARDING     [E / SPACE / ESC] SKIP"
 exchange_status_template = "%d OFF  •  %d ON     [E / SPACE / ESC] SKIP"
+terminal_status_template = "%d DISEMBARKING     [E / SPACE / ESC] SKIP"
 letterbox_in_animation = &"letterbox_in"
 letterbox_out_animation = &"letterbox_out"
 title_reveal_animation = &"title_reveal"
@@ -218,18 +223,27 @@ screen_fade_duration = 0.85
 platform_vertical_offset = 78.0
 platform_horizontal_offset = 82.0
 door_visibility_margin = 48.0
-station_reference_camera_zoom = 0.428571
-maximum_actor_camera_scale = 2.5
-stop_duration = 15.340431
+actor_world_scale_multiplier = 1.0
+stop_duration = 16.19043
 stop_deceleration_start = 2.0
 stop_arrival_end = 6.690431
 stop_departure_start = 11.340431
-opening_duration = 15.340431
+opening_duration = 16.19043
 opening_deceleration_start = 2.0
 opening_arrival_end = 6.690431
 opening_departure_start = 11.340431
 door_close_motion_delay = 0.55
+camera_return_hold_seconds = 0.85
+camera_return_departure_progress = 0.82
+ambient_actor_count = 6
 ambient_walk_speed_scale = 0.5
+ambient_walk_duration_min = 8.0
+ambient_walk_duration_max = 11.0
+ambient_lane_spread = 42.0
+ambient_edge_margin = 72.0
+boarding_entry_lead_min = 2.2
+boarding_entry_lead_max = 4.8
+concourse_entry_interval = 3
 departing_start_time = 7.390431
 departing_stagger_min = 0.1
 departing_stagger_max = 0.22
@@ -249,6 +263,11 @@ minimum_path_curve = 7.0
 maximum_path_curve = 19.0
 maximum_step_lift = 8.0
 maximum_walk_tilt = 0.025
+doorway_step_ratio = 0.42
+doorway_pause_ratio = 0.04
+boarding_handoff_progress = 0.9
+doorway_landing_vertical_offset = 20.0
+doorway_inside_vertical_offset = 58.0
 
 [node name="Streaks" type="Node2D" parent="."]
 
@@ -300,114 +319,124 @@ points = PackedVector2Array(0, 0, 210, 0)
 width = 3.0
 default_color = Color(0.88, 0.92, 0.91, 1)
 
-[node name="ActorSlots" type="Node2D" parent="."]
+[node name="StationActorCanvas" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+editor_description = "World-following station crowd canvas. Actors stay on the platform when the cinematic camera leaves and remain below the station sign canvas."
+visible = false
+layer = 20
+follow_viewport_enabled = true
+follow_viewport_scale = 1.0
 
-[node name="Actor0" parent="ActorSlots" instance=ExtResource("2")]
+[node name="ActorSlots" type="Node2D" parent="StationActorCanvas"]
+editor_description = "Station actor depth follows each character's foot position, so lower passengers correctly render in front of higher passengers."
+y_sort_enabled = true
+
+[node name="Actor0" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor1" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor1" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor2" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor2" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor3" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor3" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor4" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor4" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor5" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor5" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor6" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor6" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor7" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor7" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor8" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor8" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor9" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor9" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor10" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor10" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor11" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor11" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor12" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor12" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor13" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor13" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor14" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor14" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor15" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor15" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor16" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor16" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor17" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor17" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor18" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor18" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor19" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor19" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor20" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor20" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor21" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor21" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor22" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor22" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor23" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor23" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor24" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor24" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor25" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor25" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor26" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor26" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor27" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor27" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor28" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor28" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor29" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor29" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor30" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor30" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor31" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor31" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor32" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor32" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor33" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor33" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor34" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor34" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
-[node name="Actor35" parent="ActorSlots" instance=ExtResource("2")]
+[node name="Actor35" parent="StationActorCanvas/ActorSlots" instance=ExtResource("2")]
 unique_name_in_owner = true
 
 [node name="CinematicBorderLayer" type="CanvasLayer" parent="."]

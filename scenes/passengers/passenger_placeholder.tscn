@@ -1,0 +1,40 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/passengers/passenger.tscn" id="1_base"]
+
+[node name="PassengerPlaceholder" instance=ExtResource("1_base")]
+
+[node name="BodyTint" type="Node2D" parent="CharacterScale/PassengerVisual" index="0"]
+unique_name_in_owner = true
+
+[node name="Body" type="Polygon2D" parent="CharacterScale/PassengerVisual/BodyTint"]
+polygon = PackedVector2Array(-33, -132, 33, -132, 33, 0, -33, 0)
+color = Color(1, 1, 1, 1)
+
+[node name="Head" type="Polygon2D" parent="CharacterScale/PassengerVisual/BodyTint"]
+polygon = PackedVector2Array(-21, -160.5, -15, -180, 0, -189, 15, -180, 21, -160.5, 15, -141, 0, -132, -15, -141)
+color = Color(1, 1, 1, 1)
+
+[node name="LeftArm" type="Line2D" parent="CharacterScale/PassengerVisual/BodyTint"]
+points = PackedVector2Array(-22.5, -66, -45, -37.5)
+width = 13.5
+default_color = Color(0.86, 0.86, 0.86, 1)
+
+[node name="RightArm" type="Line2D" parent="CharacterScale/PassengerVisual/BodyTint"]
+points = PackedVector2Array(22.5, -66, 45, -37.5)
+width = 13.5
+default_color = Color(0.86, 0.86, 0.86, 1)
+
+[node name="LeftLeg" type="Line2D" parent="CharacterScale/PassengerVisual" index="1"]
+unique_name_in_owner = true
+points = PackedVector2Array(-18, -6, -22.5, 37.5)
+width = 15.0
+default_color = Color(0.164706, 0.160784, 0.188235, 1)
+
+[node name="RightLeg" type="Line2D" parent="CharacterScale/PassengerVisual" index="2"]
+unique_name_in_owner = true
+points = PackedVector2Array(18, -6, 22.5, 37.5)
+width = 15.0
+default_color = Color(0.164706, 0.160784, 0.188235, 1)
+
+[editable path="CharacterScale/PassengerVisual"]

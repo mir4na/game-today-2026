@@ -2,61 +2,13 @@
 
 [ext_resource type="Script" uid="uid://bfstuunjhbkt" path="res://scripts/train/train.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://j33im4mh4yg7" path="res://scenes/train/passenger_coach.tscn" id="3"]
-[ext_resource type="Shader" uid="uid://bxn1i0yabk62m" path="res://shaders/radar_anomaly_glow.gdshader" id="4_nmy2o"]
 [ext_resource type="PackedScene" uid="uid://cugd4ar6xupi2" path="res://scenes/interactables/newspaper.tscn" id="5"]
-[ext_resource type="Shader" uid="uid://df3d6yvnee1ie" path="res://shaders/radar_carriage_scan.gdshader" id="5_dmmtq"]
 [ext_resource type="Texture2D" uid="uid://bnios2cwcllit" path="res://assets/kereta/Antar kertea.png" id="6_iuhv6"]
 [ext_resource type="Texture2D" uid="uid://cxa3lskemwyal" path="res://assets/kereta/Lantai.png" id="6_v58c7"]
 [ext_resource type="Script" uid="uid://cc1e1727eckwm" path="res://scripts/train/train_exterior_body.gd" id="7"]
 [ext_resource type="Texture2D" uid="uid://d3kh2a47g41ko" path="res://assets/kereta/Jalan.png" id="7_v58c7"]
 [ext_resource type="PackedScene" uid="uid://ddhu4mk3fcp8n" path="res://scenes/minigames/blocked_aisle_event.tscn" id="8_blocked"]
 [ext_resource type="PackedScene" uid="uid://dg5g8fm8dx45y" path="res://scenes/interactables/conductor_desk.tscn" id="9_night_ledger"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_nmy2o"]
-resource_local_to_scene = true
-shader = ExtResource("4_nmy2o")
-shader_parameter/glow_color = Color(1, 0.035, 0.02, 0.78)
-shader_parameter/edge_feather = 0.12
-shader_parameter/center_strength = 0.9
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_dmmtq"]
-resource_local_to_scene = true
-shader = ExtResource("5_dmmtq")
-shader_parameter/scan_origin_uv = Vector2(0.5, 0.72)
-shader_parameter/scan_progress = 0.0
-shader_parameter/scan_aspect = 2.85
-shader_parameter/front_width = 0.018
-shader_parameter/front_softness = 0.012
-shader_parameter/trail_length = 0.14
-shader_parameter/trail_strength = 0.2
-shader_parameter/residue_strength = 0.05
-shader_parameter/grid_strength = 0.08
-shader_parameter/boundary_strength = 0.28
-shader_parameter/front_color = Color(0.28, 0.94, 1, 0.96)
-shader_parameter/trail_color = Color(0.06, 0.42, 0.72, 0.34)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_nm3wd"]
-resource_local_to_scene = true
-shader = ExtResource("4_nmy2o")
-shader_parameter/glow_color = Color(1, 0.035, 0.02, 0.78)
-shader_parameter/edge_feather = 0.12
-shader_parameter/center_strength = 0.9
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_n5jb8"]
-resource_local_to_scene = true
-shader = ExtResource("5_dmmtq")
-shader_parameter/scan_origin_uv = Vector2(0.5, 0.72)
-shader_parameter/scan_progress = 0.0
-shader_parameter/scan_aspect = 2.85
-shader_parameter/front_width = 0.018
-shader_parameter/front_softness = 0.012
-shader_parameter/trail_length = 0.14
-shader_parameter/trail_strength = 0.2
-shader_parameter/residue_strength = 0.05
-shader_parameter/grid_strength = 0.08
-shader_parameter/boundary_strength = 0.28
-shader_parameter/front_color = Color(0.28, 0.94, 1, 0.96)
-shader_parameter/trail_color = Color(0.06, 0.42, 0.72, 0.34)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yjxff"]
 size = Vector2(72.77644, 18.86792)
@@ -205,14 +157,10 @@ position = Vector2(-12, 0)
 carriage_number = 4
 
 [node name="RadarEffectBounds" parent="Cars/PassengerCoach4/ArtRoot" parent_id_path=PackedInt32Array(398983735, 1724717493) index="2" unique_id=545678927]
-offset_top = 0.0
-offset_bottom = 335.0
-
-[node name="RadarAnomalyGlow" parent="Cars/PassengerCoach4/ArtRoot/RadarEffectBounds" index="0" unique_id=648864988]
-material = SubResource("ShaderMaterial_nmy2o")
-
-[node name="RadarScanEffect" parent="Cars/PassengerCoach4/ArtRoot/RadarEffectBounds" index="1" unique_id=398318395]
-material = SubResource("ShaderMaterial_dmmtq")
+editor_description = "Coach 4 radar boundary. Keep this rectangle aligned to the visible passenger interior; radar visuals are clipped here."
+offset_top = 190.0
+offset_right = 960.0
+offset_bottom = 525.0
 
 [node name="ConductorDesk" parent="Cars/PassengerCoach4" unique_id=1072375650 instance=ExtResource("9_night_ledger")]
 unique_name_in_owner = true
@@ -231,22 +179,31 @@ interaction_distance = 105.0
 position = Vector2(960, 0)
 carriage_number = 3
 
+[node name="RadarEffectBounds" parent="Cars/PassengerCoach3/ArtRoot" parent_id_path=PackedInt32Array(534537403, 1724717493) index="2" unique_id=545678927]
+editor_description = "Coach 3 radar boundary. Keep this rectangle aligned to the visible passenger interior; radar visuals are clipped here."
+offset_top = 190.0
+offset_right = 960.0
+offset_bottom = 525.0
+
 [node name="PassengerCoach2" parent="Cars" unique_id=213345118 instance=ExtResource("3")]
 position = Vector2(1920, 0)
 carriage_number = 2
 
 [node name="RadarEffectBounds" parent="Cars/PassengerCoach2/ArtRoot" parent_id_path=PackedInt32Array(213345118, 1724717493) index="2" unique_id=545678927]
-offset_top = 0.0
-offset_bottom = 335.0
-
-[node name="RadarAnomalyGlow" parent="Cars/PassengerCoach2/ArtRoot/RadarEffectBounds" index="0" unique_id=648864988]
-material = SubResource("ShaderMaterial_nm3wd")
-
-[node name="RadarScanEffect" parent="Cars/PassengerCoach2/ArtRoot/RadarEffectBounds" index="1" unique_id=398318395]
-material = SubResource("ShaderMaterial_n5jb8")
+editor_description = "Coach 2 radar boundary. Keep this rectangle aligned to the visible passenger interior; radar visuals are clipped here."
+offset_top = 190.0
+offset_right = 960.0
+offset_bottom = 525.0
 
 [node name="PassengerCoach1" parent="Cars" unique_id=297172719 instance=ExtResource("3")]
 position = Vector2(2880, 0)
+carriage_number = 1
+
+[node name="RadarEffectBounds" parent="Cars/PassengerCoach1/ArtRoot" parent_id_path=PackedInt32Array(297172719, 1724717493) index="2" unique_id=545678927]
+editor_description = "Coach 1 radar boundary. Keep this rectangle aligned to the visible passenger interior; radar visuals are clipped here."
+offset_top = 190.0
+offset_right = 960.0
+offset_bottom = 525.0
 
 [node name="CarConnections" type="Node2D" parent="Cars" unique_id=2071011326]
 z_index = 4
@@ -378,4 +335,6 @@ position = Vector2(3809, 312)
 shape = SubResource("RightBoundaryShape")
 
 [editable path="Cars/PassengerCoach4"]
+[editable path="Cars/PassengerCoach3"]
 [editable path="Cars/PassengerCoach2"]
+[editable path="Cars/PassengerCoach1"]

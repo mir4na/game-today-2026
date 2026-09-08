@@ -4,15 +4,16 @@
 
 [resource]
 script = ExtResource("1")
-night_stations = PackedStringArray("Mistvale", "Ashmoor", "Hearth", "Dawnreach")
+night_stations = PackedStringArray("Vesperwick", "Hollowcross", "Bellhaven", "Morrowfield")
 anomaly_descriptor_by_type = {
-"impossible_ticket": "the passenger whose destination had already been passed",
 "newspaper_death": "the passenger whose death appeared in the newspaper",
 "portrait_mismatch": "the passenger whose ID portrait belongs to someone else",
 "shadowless": "the passenger without a shadow",
 "time_invalid_ticket": "the passenger carrying a ticket for another service day",
 "unlisted_destination": "the passenger whose destination is absent from the day route"
 }
+fallback_descriptor_template = "the %s"
+duplicate_descriptor_template = "%s who worked as the %s"
 immediately_before_template = "%s leaves immediately before %s."
 before_template = "%s leaves before %s."
 single_passenger_statement = "Only one unresolved departure remains on tonight's route."

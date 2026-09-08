@@ -104,7 +104,9 @@ func _run() -> void:
 	_check(guide._content.text.contains("30 Blessings") and guide._content.text.contains("40 Blessings"), "Rules include the current paycheck scoring.")
 	guide._show_anomalies()
 	var entries: Node = guide._anomaly_list.get_node("Entries")
-	_check(entries.get_child_count() == 6, "Every anomaly has a photo entry.")
+	_check(entries.get_child_count() == 5, "Every configured anomaly has a photo entry.")
+	for expected_entry: String in ["Shadowless", "UnlistedDestination", "PortraitMismatch", "TimeInvalidTicket", "NewspaperDeath"]:
+		_check(entries.has_node(expected_entry), "The guidebook includes %s." % expected_entry)
 	for entry: Node in entries.get_children():
 		_check(entry.get_node("PhotoFrame/Placeholder").visible, "An empty entry displays its photo placeholder.")
 		var sample := GradientTexture2D.new()
@@ -122,6 +124,21 @@ func _run() -> void:
 	_check(game._day_minutes > before, "Newspaper does not pause the shift clock.")
 	game._document_overlay.request_close()
 	await create_timer(1.0).timeout
+	var esc := InputEventAction.new()
+	esc.action = &"ui_cancel"
+	esc.pressed = true
+	game._clean_seat_ui.show()
+	game._active_modal = game._clean_seat_ui
+	game._player.movement_enabled = false
+	game._player.interaction_enabled = false
+	game._unhandled_input(esc)
+	_check(paused and game._active_modal == game._pause_ui, "Esc opens Pause over an active minigame.")
+	_check(game._clean_seat_ui.visible, "Pausing keeps the current minigame open underneath.")
+	game._pause_ui._unhandled_input(esc)
+	_check(not paused and game._active_modal == game._clean_seat_ui, "Resume restores the active minigame.")
+	_check(not game._player.movement_enabled and not game._player.interaction_enabled, "Resume does not enable gameplay controls behind a minigame.")
+	game._clean_seat_ui.hide()
+	game._active_modal = null
 	game._open_pause()
 	_check(paused, "Pause pauses the scene tree.")
 	before = game._day_minutes
@@ -131,9 +148,6 @@ func _run() -> void:
 	game._process(0.2)
 	_check(game._day_minutes == before and game._passengers[0].position == npc_position, "Pause freezes shift time and NPC movement.")
 	_check(game._train._sway_time == sway_before, "Pause freezes train animation processing.")
-	var esc := InputEventAction.new()
-	esc.action = &"ui_cancel"
-	esc.pressed = true
 	game._pause_ui._unhandled_input(esc)
 	_check(not paused and game._active_modal == null, "Esc resumes from Pause while the scene tree is paused.")
 	# A delayed newspaper dismissal must not release the new station modal.

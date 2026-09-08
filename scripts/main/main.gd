@@ -2,7 +2,7 @@ class_name AfterTheEndGame
 extends Node2D
 ## Owns the vertical-slice state and coordinates data, world presentation and UI.
 
-enum GameState { OPENING, DAY, SUNSET, SHIFT_REPORT, MARKET, NIGHT, NIGHT_PUZZLE, COMPLETE }
+enum GameState { OPENING, DAY, SUNSET, SHIFT_REPORT, NIGHT_TRANSITION, MARKET, NIGHT, NIGHT_PUZZLE, COMPLETE }
 enum NewspaperCase { NON_DEATH_NEWS, MATCHING_PASSENGER_DEATH }
 enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 
@@ -18,7 +18,8 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export_category("Day Route")
 @export var day_route: PackedStringArray
 @export_category("Station Service")
-@export_range(5.0, 300.0, 1.0) var station_travel_seconds: float = 120.0
+## Travel time per route leg, excluding station cutscenes and pauses.
+@export var station_travel_durations_seconds: PackedFloat32Array = PackedFloat32Array([120.0, 120.0, 120.0, 120.0])
 @export_range(0, 8, 1) var station_sign_blocked_carriage: int = 1
 @export_category("Passenger Placement")
 @export_range(120.0, 240.0, 5.0) var minimum_passenger_seat_spacing: float = 120.0
@@ -28,7 +29,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export_category("Market Tools")
 @export_range(0.25, 5.0, 0.05) var radar_scan_seconds: float = 1.6
 @export_range(0.1, 5.0, 0.05) var radar_result_reveal_seconds: float = 1.25
-@export_range(1.0, 30.0, 0.5) var radar_glow_seconds: float = 6.0
+@export_range(1.0, 30.0, 0.5) var radar_anomaly_light_seconds: float = 4.0
 @export_category("Newspaper")
 @export_enum("Random", "Force Non-Death", "Force Death") var newspaper_edition_mode: int = NewspaperEditionMode.RANDOM
 @export_category("Debug")
@@ -79,13 +80,16 @@ var _newspaper: NewspaperInteractable
 var _desk: ConductorDeskInteractable
 var _nearby_interactable: Interactable
 var _active_modal: Control
+var _modal_before_pause: Control
 var _station_cutscene_context: StringName = &""
 var _station_cutscene_timeline_complete: bool = false
+var _station_camera_return_complete: bool = false
 var _station_cutscene_motion_strength: float = 1.0
 var _station_gameplay_actors_hidden: bool = false
 var _station_player_world_position: Vector2
 var _station_foreground_hidden: bool = false
 var _station_railroad_was_visible: bool = true
+var _train_occupants_station_rest_position: Vector2
 var _inspected_passenger: Passenger
 var _night_statement_active: bool = false
 var _night_statement_newly_recorded: bool = false
@@ -95,10 +99,11 @@ var _active_blocked_aisle_event: Node
 var _active_dirty_seat_event: Node
 var _blocked_aisle_activated: bool = false
 var _dirty_seat_activated: bool = false
+var _service_seal_active: bool = false
 var _day_blessing_award: Dictionary = {}
 var _night_blessing_award: Dictionary = {}
+var _night_world_prepared: bool = false
 var _radar_scan_active: bool = false
-var _radar_maintenance_pause_states: Dictionary = {}
 
 @onready var _train: TrainWorld = %Train
 @onready var _player: ConductorPlayer = %Player
@@ -110,6 +115,7 @@ var _radar_maintenance_pause_states: Dictionary = {}
 @onready var _day_intro_ui: DayIntroUI = %DayIntroUI
 @onready var _station_stop_ui: StationStopCutsceneUI = %StationStopCutsceneUI
 @onready var _shift_report_ui: ShiftReportUI = %ShiftReportUI
+@onready var _night_transition_ui: NightTransitionCutsceneUI = %NightTransitionCutsceneUI
 @onready var _night_puzzle_ui: NightPuzzleUI = %NightPuzzleUI
 @onready var _sequence_ui: DepartureSequenceUI = %DepartureSequenceUI
 @onready var _pause_ui: PauseUI = %PauseUI
@@ -123,12 +129,15 @@ var _radar_maintenance_pause_states: Dictionary = {}
 @onready var _travel_background: TravelBackground = %TravelBackground
 @onready var _travel_foreground: TravelForeground = %TravelForeground
 @onready var _station_cinematic_view: StationCinematicView = %StationCinematicView
-@onready var _gameplay_camera: Camera2D = $GameplayWorld/PlayerSpawnPoint/Player/Camera2D
+@onready var _train_occupants: Node2D = %TrainOccupants
+@onready var _gameplay_camera: Camera2D = $GameplayWorld/TrainOccupants/PlayerSpawnPoint/Player/Camera2D
+@onready var _cinematic_camera_anchor: Marker2D = $GameplayWorld/TrainOccupants/PlayerSpawnPoint/Player/CinematicCameraAnchor
 @onready var _railroad_ui_layer: CanvasLayer = $RailroadUILayer
 @onready var _sky_gradient: ColorRect = %NightSkyOverlay
 @onready var _night_atmosphere: ColorRect = %NightAtmosphere
 
 func _ready() -> void:
+	_train_occupants_station_rest_position = _train_occupants.position
 	if day_route.size() < 2:
 		push_error("Main/Day Route requires at least an opening and final station.")
 		return
@@ -163,7 +172,7 @@ func _ready() -> void:
 	_debug_print_active_anomaly_roster("INITIAL BOARDING")
 	_collect_interactables(self)
 	_configure_maintenance_events()
-	_player.set_interactables(_interactables)
+	_refresh_player_interactables()
 	_hud.set_clock_route_stop_count(day_route.size() - 1)
 	_hud.set_clock(int(_day_minutes), _day_station_clock_progress())
 	_hud.set_next_stop(_next_day_station())
@@ -187,8 +196,8 @@ func _process(delta: float) -> void:
 	_update_carriage_indicator()
 	if state != GameState.DAY and state != GameState.SUNSET:
 		return
-	# Radar pauses only shift systems. Train sway, wheels, scenery, lighting,
-	# ambience, and local passenger activity continue to process normally.
+	# A radar scan suspends only route time. Every other gameplay system keeps
+	# processing, so the remaining time to the next station is unchanged.
 	if not world_simulation_active or _radar_scan_active:
 		return
 
@@ -224,7 +233,7 @@ func _update_travel_foreground() -> void:
 	# In-game overlays leave the scenery running; only pause and the opening
 	# intro suspend it. Station stops still own the train's motion.
 	var scenery_active: bool = _active_modal not in [_pause_ui, _day_intro_ui]
-	var is_traveling: bool = scenery_active and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
+	var is_traveling: bool = scenery_active and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT_TRANSITION, GameState.NIGHT]
 	if state in [GameState.DAY, GameState.SUNSET]:
 		is_traveling = is_traveling and not _station_arrival_announced
 	_travel_background.set_traveling(is_traveling)
@@ -249,10 +258,21 @@ func _next_day_station() -> String:
 	return day_route[clampi(_route_index + 1, 0, day_route.size() - 1)]
 
 func _next_arrival_minutes() -> float:
-	return minf(START_MINUTES + float(_route_index + 1) * station_travel_seconds, _final_arrival_minutes())
+	var arrival: float = START_MINUTES
+	for leg: int in range(mini(_route_index + 1, day_route.size() - 1)):
+		arrival += _get_station_travel_seconds(leg)
+	return arrival
 
 func _final_arrival_minutes() -> float:
-	return START_MINUTES + station_travel_seconds * float(day_route.size() - 1)
+	var arrival: float = START_MINUTES
+	for leg: int in range(day_route.size() - 1):
+		arrival += _get_station_travel_seconds(leg)
+	return arrival
+
+func _get_station_travel_seconds(leg: int) -> float:
+	if station_travel_durations_seconds.is_empty():
+		return 120.0
+	return maxf(5.0, station_travel_durations_seconds[clampi(leg, 0, station_travel_durations_seconds.size() - 1)])
 
 
 func _day_station_clock_progress() -> float:
@@ -277,7 +297,7 @@ func _input(event: InputEvent) -> void:
 		return
 	if event is InputEventKey and event.echo:
 		return
-	if _radar_scan_active or _night_statement_active:
+	if _night_statement_active or _service_seal_active:
 		return
 	if not _guidebook_ui.visible and (
 		_active_modal != null
@@ -289,10 +309,6 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _radar_scan_active:
-		if event.is_pressed():
-			get_viewport().set_input_as_handled()
-		return
 	if _night_statement_active:
 		if event.is_action_pressed(&"interact") or event.is_action_pressed(&"ui_cancel"):
 			_close_night_statement_dialogue()
@@ -300,6 +316,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if (
 		event.is_action_pressed(&"use_radar")
+		and not _service_seal_active
 		and _active_modal == null
 		and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
 	):
@@ -308,22 +325,27 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if not event.is_action_pressed(&"ui_cancel"):
 		return
-	if _day_intro_ui.visible:
+	if _pause_ui.visible:
+		_resume_from_pause()
+	elif _day_intro_ui.visible:
 		_day_intro_ui.skip_intro()
 	elif _document_overlay.visible:
-		_document_overlay.request_close()
+		if _document_overlay.is_showing_newspaper():
+			_open_pause()
+		else:
+			_document_overlay.request_close()
 	elif _guidebook_ui.visible:
 		_guidebook_ui.request_close()
 	elif _blocked_aisle_ui.visible:
-		_blocked_aisle_ui.call(&"request_close")
+		_open_pause()
 	elif _clean_seat_ui.visible:
-		_clean_seat_ui.call(&"request_close")
+		_open_pause()
 	elif _station_stop_ui.visible:
 		_station_stop_ui.skip_sequence()
+	elif _night_transition_ui.visible:
+		_night_transition_ui.skip_sequence()
 	elif _night_puzzle_ui.visible:
 		_close_night_puzzle()
-	elif _pause_ui.visible:
-		_resume_from_pause()
 	elif state not in [GameState.OPENING, GameState.SHIFT_REPORT, GameState.MARKET, GameState.COMPLETE]:
 		_open_pause()
 	get_viewport().set_input_as_handled()
@@ -519,13 +541,12 @@ func _find_available_seat(carriage: int) -> Marker2D:
 
 
 func _find_station_boarding_seat(preferred_carriage: int) -> Marker2D:
-	if preferred_carriage != station_sign_blocked_carriage:
-		var preferred_seat: Marker2D = _find_available_seat(preferred_carriage)
-		if preferred_seat != null:
-			return preferred_seat
+	var preferred_seat: Marker2D = _find_available_seat(preferred_carriage)
+	if preferred_seat != null:
+		return preferred_seat
 	var fallback_carriages: Array[int] = []
 	for carriage: int in range(1, manifest_config.passenger_carriage_count + 1):
-		if carriage != preferred_carriage and carriage != station_sign_blocked_carriage:
+		if carriage != preferred_carriage:
 			fallback_carriages.append(carriage)
 	for index: int in range(fallback_carriages.size() - 1, 0, -1):
 		var swap_index: int = _daily_rng.randi_range(0, index)
@@ -564,8 +585,6 @@ func _release_passenger_seat(passenger: Passenger) -> Marker2D:
 func _get_passenger_activity_positions() -> PackedVector2Array:
 	var positions := PackedVector2Array()
 	for activity_slot: Marker2D in _train.get_all_passenger_activity_slots():
-		if _train.get_passenger_carriage_number_at_world_x(activity_slot.global_position.x) == station_sign_blocked_carriage:
-			continue
 		positions.append(_passenger_container.to_local(activity_slot.global_position))
 	return positions
 
@@ -573,8 +592,6 @@ func _get_passenger_carriage_ranges() -> Dictionary:
 	var result: Dictionary = {}
 	var world_ranges: Dictionary = _train.get_passenger_carriage_world_ranges()
 	for carriage_key: Variant in world_ranges:
-		if int(carriage_key) == station_sign_blocked_carriage:
-			continue
 		var world_range: Vector2 = world_ranges[carriage_key]
 		var local_start: float = _passenger_container.to_local(Vector2(world_range.x, _passenger_container.global_position.y)).x
 		var local_end: float = _passenger_container.to_local(Vector2(world_range.y, _passenger_container.global_position.y)).x
@@ -844,9 +861,12 @@ func _on_blocked_aisle_timer_timeout() -> void:
 		return
 	_active_blocked_aisle_event = candidates[_daily_rng.randi_range(0, candidates.size() - 1)]
 	_active_blocked_aisle_event.call(&"set_event_active", true, _player.global_position.x)
+	var blocked_connector := _active_blocked_aisle_event as Node2D
+	if is_instance_valid(blocked_connector):
+		_train.set_blocked_connector_effect(_player.global_position.x, blocked_connector.global_position.x)
 	_blocked_aisle_activated = true
+	_refresh_player_interactables()
 	_refresh_maintenance_trackers()
-	_hud.notify("LUGGAGE HAS BLOCKED A COACH CONNECTOR\nFind the obstruction and repack it", 4.0)
 
 
 func _on_dirty_seat_timer_timeout() -> void:
@@ -855,7 +875,7 @@ func _on_dirty_seat_timer_timeout() -> void:
 		return
 	if _dirty_seat_activated or state not in [GameState.DAY, GameState.SUNSET]:
 		return
-	if _station_stop_ui.visible:
+	if _active_modal != null:
 		_dirty_seat_timer.start(1.0)
 		return
 	var vacant_candidates: Array[Node] = []
@@ -874,9 +894,9 @@ func _on_dirty_seat_timer_timeout() -> void:
 	_active_dirty_seat_event = vacant_candidates[_daily_rng.randi_range(0, vacant_candidates.size() - 1)]
 	_active_dirty_seat_event.call(&"set_event_active", true)
 	_dirty_seat_activated = true
-	_refresh_maintenance_trackers()
 	_clear_dropoff_assignments_for_dirty_seat()
-	_hud.notify("A PASSENGER SEAT NEEDS CLEANING\nAll drop-off stamps are locked until it is clean", 4.0)
+	_set_service_sealed(true)
+	_refresh_maintenance_trackers()
 
 
 func _clear_dropoff_assignments_for_dirty_seat() -> void:
@@ -922,11 +942,12 @@ func _on_maintenance_minigame_completed(event: Node) -> void:
 		_active_dirty_seat_event = null
 		if is_instance_valid(_document_overlay):
 			_document_overlay.configure_stamp_lock(false)
-		_hud.notify("Seat clean\nDrop-off stamps are available again", 3.0)
+		_set_service_sealed(false)
 	else:
 		if event == _active_blocked_aisle_event:
 			_active_blocked_aisle_event = null
-		_hud.notify("Aisle cleared\nThe coach connector is open", 3.0)
+			_train.clear_blocked_connector_effect()
+	_refresh_player_interactables()
 	_refresh_maintenance_trackers()
 	_active_modal = null
 	_set_player_control_for_state()
@@ -941,7 +962,7 @@ func _refresh_maintenance_trackers() -> void:
 	):
 		tracker_entries.append({
 			"target": _active_blocked_aisle_event.call(&"get_tracker_anchor") as Node2D,
-			"label": "Blocked aisle",
+			"icon": _active_blocked_aisle_event.call(&"get_tracker_icon") as Texture2D,
 		})
 	if (
 		is_instance_valid(_active_dirty_seat_event)
@@ -950,11 +971,41 @@ func _refresh_maintenance_trackers() -> void:
 	):
 		tracker_entries.append({
 			"target": _active_dirty_seat_event.call(&"get_tracker_anchor") as Node2D,
-			"label": "Dirty seat",
+			"icon": _active_dirty_seat_event.call(&"get_tracker_icon") as Texture2D,
 		})
 	_hud.set_maintenance_targets(tracker_entries)
 
+
+func _set_service_sealed(value: bool, immediate: bool = false) -> void:
+	if value == _service_seal_active and not immediate:
+		return
+	_service_seal_active = value
+	_hud.set_service_sealed(value)
+	_refresh_player_interactables(immediate)
+
+
+func _refresh_player_interactables(immediate: bool = false) -> void:
+	if not is_instance_valid(_player):
+		return
+	var available_interactables: Array[Interactable] = []
+	for interactable: Interactable in _interactables:
+		if not is_instance_valid(interactable):
+			continue
+		var is_allowed: bool = not _service_seal_active or _is_seal_allowed_interactable(interactable)
+		interactable.set_interaction_locked(not is_allowed, immediate)
+		if is_allowed:
+			available_interactables.append(interactable)
+	_player.set_interactables(available_interactables)
+
+
+func _is_seal_allowed_interactable(interactable: Interactable) -> bool:
+	if not is_instance_valid(interactable):
+		return false
+	return interactable == _active_dirty_seat_event or interactable == _active_blocked_aisle_event
+
 func _on_interaction_pressed(interactable: Interactable) -> void:
+	if _service_seal_active and not _is_seal_allowed_interactable(interactable):
+		return
 	if interactable is ConductorDeskInteractable:
 		_on_desk_interacted()
 	else:
@@ -1038,7 +1089,6 @@ func _on_station_assignment_toggled(passenger_name: String, should_assign: bool)
 	if should_assign and _is_dropoff_locked():
 		_document_overlay.configure_station_assignment(false)
 		_document_overlay.configure_stamp_lock(true)
-		_hud.notify("CLEANING REQUIRED\nClean the dirty seat before stamping tickets", 2.5)
 		return
 	if should_assign:
 		if assignment_index < 0:
@@ -1099,7 +1149,6 @@ func _process_station_arrival() -> void:
 	var departing_actors: Array[Dictionary] = []
 	var boarding_actors: Array[Dictionary] = []
 	for departing_passenger: Passenger in departing:
-		var departure_carriage: int = departing_passenger.get_runtime_carriage()
 		_release_passenger_seat(departing_passenger)
 		departing_actors.append(_passenger_cutscene_actor(departing_passenger))
 		var required_dropoff_station: String = departing_passenger.data.get_required_day_dropoff_station()
@@ -1110,19 +1159,26 @@ func _process_station_arrival() -> void:
 			_penalty_log.append("%s: left at %s; expected %s  (−%d Blessings)" % [
 				departing_passenger.data.passenger_name, arrival_station, required_dropoff_station,
 				int(_market_tool_state.get("blessings_per_wrong_dropoff")),
-			])
+		])
 		departing_passenger.depart_train()
-		if is_terminal_arrival:
-			continue
-		var boarding_seat: Marker2D = _find_station_boarding_seat(departure_carriage)
-		if boarding_seat == null:
-			continue
-		var boarding_carriage: int = _train.get_passenger_carriage_number_at_world_x(boarding_seat.global_position.x)
-		var boarder_index: int = _find_boarder_for_carriage(available_boarders, boarding_carriage)
+
+	# Station boarding is capacity-based and independent from drop-offs. A player
+	# who keeps all eight opening passengers can still receive later boarders,
+	# but the active roster can never exceed the configured onboard maximum.
+	var available_capacity: int = maxi(
+		0,
+		manifest_config.maximum_onboard_passenger_count - _active_passenger_count()
+	)
+	while not is_terminal_arrival and boarded < available_capacity and not available_boarders.is_empty():
+		var boarder_index: int = _find_next_station_boarder(available_boarders)
 		if boarder_index < 0:
-			continue
+			break
 		var boarder_data: PassengerData = available_boarders[boarder_index]
 		available_boarders.remove_at(boarder_index)
+		var boarding_seat: Marker2D = _find_station_boarding_seat(boarder_data.current_carriage)
+		if boarding_seat == null:
+			break
+		var boarding_carriage: int = _train.get_passenger_carriage_number_at_world_x(boarding_seat.global_position.x)
 		boarder_data.current_carriage = boarding_carriage
 		var boarder: Passenger = _spawn_passenger(boarder_data, boarding_seat)
 		if boarder == null:
@@ -1132,14 +1188,16 @@ func _process_station_arrival() -> void:
 		boarding_actors.append(_passenger_cutscene_actor(boarder))
 		boarded += 1
 
-	_validate_active_passenger_constraints("%s station exchange" % arrival_station)
-	_debug_print_active_anomaly_roster("%s STATION EXCHANGE" % arrival_station.to_upper())
-	_player.set_interactables(_interactables)
-	_start_station_stop_cutscene(arrival_station, departing_actors, boarding_actors)
+	var exchange_context: String = "terminal exchange" if is_terminal_arrival else "%s station exchange" % arrival_station
+	_validate_active_passenger_constraints(exchange_context)
+	_debug_print_active_anomaly_roster(exchange_context.to_upper())
+	_refresh_player_interactables()
+	_start_station_stop_cutscene(arrival_station, departing_actors, boarding_actors, is_terminal_arrival)
 
-func _start_station_stop_cutscene(station_name: String, departing_actors: Array[Dictionary], boarding_actors: Array[Dictionary]) -> void:
-	_station_cutscene_context = &"station_exchange"
+func _start_station_stop_cutscene(station_name: String, departing_actors: Array[Dictionary], boarding_actors: Array[Dictionary], terminal_arrival: bool = false) -> void:
+	_station_cutscene_context = &"terminal_exchange" if terminal_arrival else &"station_exchange"
 	_station_cutscene_timeline_complete = false
+	_station_camera_return_complete = false
 	_ambience.begin_station_sequence()
 	_active_modal = _station_stop_ui
 	_player.movement_enabled = false
@@ -1152,23 +1210,79 @@ func _start_station_stop_cutscene(station_name: String, departing_actors: Array[
 	_set_station_foreground_hidden(true)
 	var stop_timeline: Vector3 = _station_stop_ui.get_stop_timeline()
 	_train.show_exterior_body(stop_timeline.x, stop_timeline.y, stop_timeline.z)
-	_station_cinematic_view.begin(_gameplay_camera, station_name)
-	_station_stop_ui.play_stop(
+	_station_cinematic_view.begin(
+		_gameplay_camera,
 		station_name,
-		departing_actors,
-		boarding_actors,
-		_station_cutscene_door_markers(),
-		_station_cutscene_door_rest_positions(),
-		_station_ambient_cutscene_actors()
+		_cinematic_camera_anchor
 	)
+	_station_stop_ui.set_station_crowd_layout(_station_cinematic_view.get_station_crowd_layout())
+	if terminal_arrival:
+		_station_stop_ui.play_terminal(
+			departing_actors,
+			_station_cutscene_door_markers(),
+			_station_ambient_cutscene_actors(departing_actors)
+		)
+	else:
+		var excluded_exchange_actors: Array = departing_actors + boarding_actors
+		_station_stop_ui.play_stop(
+			station_name,
+			departing_actors,
+			boarding_actors,
+			_station_cutscene_door_markers(),
+			_station_cutscene_door_rest_positions(),
+			_station_ambient_cutscene_actors(excluded_exchange_actors)
+		)
 
 
-func _station_ambient_cutscene_actors() -> Array[Dictionary]:
+func _station_ambient_cutscene_actors(excluded_actors: Array = []) -> Array[Dictionary]:
+	# Reuse identities that are not present in this shot. Previously departed
+	# passengers may appear later as ordinary commuters, keeping every platform
+	# populated without cloning someone who is aboard, boarding, or disembarking.
 	var result: Array[Dictionary] = []
+	var excluded_names: Dictionary = {}
+	for actor_data: Dictionary in excluded_actors:
+		excluded_names[String(actor_data.get("name", ""))] = true
+	var active_data_ids: Dictionary = {}
 	for passenger: Passenger in _passengers:
-		if is_instance_valid(passenger) and passenger.data != null:
-			result.append(_passenger_cutscene_actor(passenger))
+		if _is_active_passenger(passenger) and passenger.data != null:
+			active_data_ids[passenger.data.get_instance_id()] = true
+	for data: PassengerData in _daily_manifest:
+		if (
+			data == null
+			or active_data_ids.has(data.get_instance_id())
+			or excluded_names.has(data.passenger_name)
+		):
+			continue
+		var actor_data: Dictionary = _passenger_data_cutscene_actor(data)
+		if not actor_data.is_empty():
+			result.append(actor_data)
 	return result
+
+
+func _passenger_data_cutscene_actor(data: PassengerData) -> Dictionary:
+	var configured_scene: PackedScene = passenger_scene
+	if data.identity_profile != null and data.identity_profile.passenger_scene != null:
+		configured_scene = data.identity_profile.passenger_scene
+	if configured_scene == null:
+		return {}
+	var preview := configured_scene.instantiate() as Passenger
+	if preview == null:
+		return {}
+	preview.data = data
+	preview.process_mode = Node.PROCESS_MODE_DISABLED
+	preview.hide()
+	_passenger_container.add_child(preview)
+	var actor_data: Dictionary = preview.get_station_cutscene_visual()
+	actor_data.merge({
+		"name": data.passenger_name,
+		"carriage": data.current_carriage,
+		# A platform extra has no gameplay handoff. Zero prevents it from ever
+		# being resolved as one of the real boarding Passenger nodes.
+		"runtime_actor_id": 0,
+	}, true)
+	_passenger_container.remove_child(preview)
+	preview.free()
+	return actor_data
 
 
 func _station_cutscene_door_markers() -> Dictionary:
@@ -1186,14 +1300,16 @@ func _station_cutscene_door_rest_positions() -> Dictionary:
 func _hide_gameplay_actors_for_station_cutscene() -> void:
 	if _station_gameplay_actors_hidden:
 		return
-	# The station shot moves the complete Cars node, including the floor collision.
-	# Player is not parented to Cars, so letting physics continue here would make
-	# the hidden MC fall while the train is off-screen during a normal cutscene.
+	# TrainOccupants follows the same station offset as Cars. Physics stays off so
+	# the hidden MC cannot react to moving floor collision during the cutscene.
 	_station_player_world_position = _player.global_position
 	_player.velocity = Vector2.ZERO
 	_player.set_physics_process(false)
 	_player.hide()
-	_passenger_container.hide()
+	# Keep the passenger layer alive beneath the train exterior. Staged boarders
+	# become visible one by one at the doorway and continue walking inside the
+	# coach, while passengers already aboard remain visible through its openings.
+	_passenger_container.show()
 	_station_gameplay_actors_hidden = true
 
 
@@ -1232,6 +1348,7 @@ func _on_day_intro_finished() -> void:
 			boarding_actors.append(_passenger_cutscene_actor(passenger))
 	_station_cutscene_context = &"opening"
 	_station_cutscene_timeline_complete = false
+	_station_camera_return_complete = false
 	_ambience.begin_station_sequence()
 	_active_modal = _station_stop_ui
 	_hud.set_cutscene_hidden(true)
@@ -1239,13 +1356,14 @@ func _on_day_intro_finished() -> void:
 	_set_station_foreground_hidden(true)
 	var opening_timeline: Vector3 = _station_stop_ui.get_opening_timeline()
 	_train.show_exterior_body(opening_timeline.x, opening_timeline.y, opening_timeline.z)
-	_station_cinematic_view.begin(_gameplay_camera, day_route[0])
+	_station_cinematic_view.begin(_gameplay_camera, day_route[0], _cinematic_camera_anchor)
+	_station_stop_ui.set_station_crowd_layout(_station_cinematic_view.get_station_crowd_layout())
 	_station_stop_ui.play_opening(
 		day_route[0],
 		boarding_actors,
 		_station_cutscene_door_markers(),
 		_station_cutscene_door_rest_positions(),
-		_station_ambient_cutscene_actors()
+		_station_ambient_cutscene_actors(boarding_actors)
 	)
 
 func _on_station_cutscene_timeline_changed(elapsed: float) -> void:
@@ -1253,10 +1371,21 @@ func _on_station_cutscene_timeline_changed(elapsed: float) -> void:
 	_train.set_station_arrival_progress(_station_stop_ui.get_arrival_progress())
 	_train.set_station_departure_progress(_station_stop_ui.get_departure_progress())
 	_station_cinematic_view.update_arrival(elapsed, _station_stop_ui.get_active_arrival_end())
+	_station_stop_ui.set_world_camera_scale(_station_cinematic_view.get_active_camera_scale())
+	_station_stop_ui.set_station_environment_alpha(
+		_station_cinematic_view.get_station_environment_alpha()
+	)
 
 
 func _on_station_cutscene_camera_return_started() -> void:
 	_station_cinematic_view.return_to_gameplay()
+
+
+func _on_station_cinematic_camera_handoff_finished() -> void:
+	_station_camera_return_complete = true
+	_station_stop_ui.confirm_camera_return_complete()
+	_try_complete_station_cutscene()
+
 
 func _on_station_cutscene_timeline_completed() -> void:
 	_station_cutscene_timeline_complete = true
@@ -1270,6 +1399,7 @@ func _on_train_exterior_fade_out_finished() -> void:
 func _try_complete_station_cutscene() -> void:
 	if (
 		_station_cutscene_timeline_complete
+		and _station_camera_return_complete
 		and _station_stop_ui.visible
 		and _train.is_station_departure_complete()
 	):
@@ -1283,23 +1413,26 @@ func _on_station_cutscene_train_motion_changed(strength: float) -> void:
 	_ambience.motion_strength = _station_cutscene_motion_strength
 	_station_stop_ui.set_departure_blocked(_ambience.is_announcement_playing())
 
-func _on_station_cutscene_boarding_actor_entered(actor_index: int, _door_screen_position: Vector2) -> void:
-	if actor_index < 0 or actor_index >= _boarding_passengers.size():
+func _on_station_cutscene_boarding_actor_entered(actor_id: int, _door_screen_position: Vector2) -> void:
+	for passenger: Passenger in _boarding_passengers:
+		if not is_instance_valid(passenger) or passenger.get_instance_id() != actor_id:
+			continue
+		if _is_active_passenger(passenger):
+			# The cutscene actor carries this Passenger node's instance ID. Handoff
+			# therefore reveals the exact NPC that walked in from the platform,
+			# independent of animation order or a missing door marker.
+			passenger.finish_boarding()
 		return
-	var passenger: Passenger = _boarding_passengers[actor_index]
-	if _is_active_passenger(passenger):
-		# The overlay may use an on-screen fallback door when the passenger's real
-		# carriage is outside the cinematic camera. Keep the world NPC at the
-		# scene-authored door where it was staged so carriage allocation is intact.
-		passenger.finish_boarding()
+	push_warning("Station boarding handoff could not find runtime passenger %d." % actor_id)
 
 func _on_station_stop_finished() -> void:
 	var finished_context: StringName = _station_cutscene_context
 	_station_cutscene_context = &""
 	_station_cutscene_timeline_complete = false
-	_station_cinematic_view.finish()
+	_station_camera_return_complete = false
 	_ambience.end_station_sequence()
 	_train.hide_exterior_body()
+	_station_cinematic_view.finish()
 	_set_station_foreground_hidden(false)
 	_restore_gameplay_actors_after_station_cutscene()
 	_finish_staged_boarding()
@@ -1309,13 +1442,12 @@ func _on_station_stop_finished() -> void:
 	if finished_context == &"opening":
 		state = GameState.DAY
 		_hud.set_day_hud_visible(true)
-		_hud.notify("DEPARTING %s\nNEXT: %s • TRAVEL %s\nCheck ID and ticket; stamp only daylight passengers" % [_current_day_station().to_upper(), _next_day_station().to_upper(), _travel_duration_label()], 5.0)
+		_hud.show_route_briefing()
 		_update_passenger_minimap()
 		_set_passenger_ai_enabled(true)
 		_set_player_control_for_state()
 		_schedule_maintenance_events()
 		return
-	var serviced_station: String = _next_day_station()
 	_route_index += 1
 	_hud.set_clock_progress(_day_station_clock_progress(), true)
 	if not _has_next_day_station():
@@ -1328,28 +1460,28 @@ func _on_station_stop_finished() -> void:
 	_station_exchange_processed = false
 	if state in [GameState.DAY, GameState.SUNSET]:
 		_hud.set_day_hud_visible(true)
-	_hud.notify("DEPARTING %s\nNEXT: %s • TRAVEL %s\n%d / %d passengers aboard" % [serviced_station.to_upper(), _next_day_station().to_upper(), _travel_duration_label(), _active_passenger_count(), manifest_config.initial_passenger_count], 4.0)
+		_hud.show_route_briefing()
 	_update_passenger_minimap()
 	_set_player_control_for_state()
+
+
+func _on_train_station_travel_offset_changed(offset: Vector2) -> void:
+	_train_occupants.position = _train_occupants_station_rest_position + offset
+	_station_cinematic_view.sync_follow_target()
 
 func _passenger_cutscene_actor(passenger: Passenger) -> Dictionary:
 	var actor_data: Dictionary = passenger.get_station_cutscene_visual()
 	actor_data.merge({
 		"name": passenger.data.passenger_name,
 		"carriage": passenger.get_runtime_carriage(),
+		"runtime_actor_id": passenger.get_instance_id(),
 	}, true)
 	return actor_data
 
-func _find_boarder_for_carriage(boarders: Array[PassengerData], carriage: int) -> int:
-	# Preserve the mystery roster if a player mistakenly assigns a deceased passenger.
-	for i: int in range(boarders.size()):
-		if boarders[i].is_dead and boarders[i].current_carriage == carriage and _can_add_passenger_without_trait_overflow(boarders[i]):
-			return i
+func _find_next_station_boarder(boarders: Array[PassengerData]) -> int:
+	# Board scheduled anomalies first so available capacity preserves the night roster.
 	for i: int in range(boarders.size()):
 		if boarders[i].is_dead and _can_add_passenger_without_trait_overflow(boarders[i]):
-			return i
-	for i: int in range(boarders.size()):
-		if boarders[i].current_carriage == carriage and _can_add_passenger_without_trait_overflow(boarders[i]):
 			return i
 	for i: int in range(boarders.size()):
 		if _can_add_passenger_without_trait_overflow(boarders[i]):
@@ -1405,12 +1537,23 @@ func _refresh_guidebook_progress() -> void:
 func _toggle_guidebook() -> void:
 	if _guidebook_ui.visible:
 		_guidebook_ui.request_close()
-	elif _active_modal == null and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]:
+	elif not _service_seal_active and _active_modal == null and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]:
 		_open_guidebook()
 
 
 func _on_guidebook_requested() -> void:
 	_toggle_guidebook()
+
+
+func _on_radar_requested() -> void:
+	if (
+		_radar_scan_active
+		or _service_seal_active
+		or _active_modal != null
+		or state not in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
+	):
+		return
+	_use_carriage_radar()
 
 func _on_modal_closed() -> void:
 	if is_instance_valid(_inspected_passenger):
@@ -1423,6 +1566,9 @@ func _on_modal_closed() -> void:
 	_set_player_control_for_state()
 
 func _open_pause() -> void:
+	if _pause_ui.visible:
+		return
+	_modal_before_pause = _active_modal
 	_active_modal = _pause_ui
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
@@ -1433,7 +1579,8 @@ func _open_pause() -> void:
 func _resume_from_pause() -> void:
 	get_tree().paused = false
 	_pause_ui.hide()
-	_active_modal = null
+	_active_modal = _modal_before_pause if is_instance_valid(_modal_before_pause) and _modal_before_pause.visible else null
+	_modal_before_pause = null
 	_set_player_control_for_state()
 
 func _normalize_name(value: String) -> String:
@@ -1443,12 +1590,14 @@ func _finalize_day_shift() -> void:
 	if _shift_report_finalized:
 		return
 	_shift_report_finalized = true
+	_train.clear_blocked_connector_effect(true)
 	_retained_anomalies = 0
 	for data: PassengerData in _get_dead_passenger_data():
 		if not _incorrectly_stamped_anomalies.has(data.passenger_name):
 			_retained_anomalies += 1
 	_set_train_stopped_for_night_transition()
 	state = GameState.SHIFT_REPORT
+	_set_service_sealed(false)
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
@@ -1475,7 +1624,30 @@ func _on_shift_report_continue() -> void:
 		_restart_game()
 		return
 	_shift_report_ui.hide()
-	_open_night_market()
+	_start_night_transition()
+
+
+func _start_night_transition() -> void:
+	state = GameState.NIGHT_TRANSITION
+	_player.movement_enabled = false
+	_player.interaction_enabled = false
+	_hud.set_prompt("")
+	_hud.set_cutscene_hidden(true)
+	_active_modal = _night_transition_ui
+	_resume_train_for_night()
+	_night_transition_ui.play_transition()
+
+
+func _on_night_transition_veil_crossed() -> void:
+	_prepare_night_world()
+
+
+func _on_night_transition_finished() -> void:
+	if state != GameState.NIGHT_TRANSITION:
+		return
+	_active_modal = null
+	_hud.set_cutscene_hidden(false)
+	_enter_night()
 
 
 func _open_night_market() -> void:
@@ -1529,44 +1701,34 @@ func _use_carriage_radar() -> void:
 		return
 	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
 	if int(snapshot.get("radar_charges", 0)) <= 0:
-		_hud.notify("NO RADAR CHARGES REMAINING\nPurchase more at the Night Market", 3.0)
+		_hud.notify("NO RADAR CHARGES REMAINING", 3.0)
 		return
 	if not bool(_market_tool_state.call(&"consume_radar_charge")):
 		return
+	# Radar only reports whether this coach contains an anomaly. It never marks,
+	# outlines, or identifies the passenger responsible for the signal.
+	var anomaly_detected: bool = _carriage_has_anomaly(carriage_number)
+	var radar_origin: Vector2 = _player.get_radar_origin_world_position()
 	_radar_scan_active = true
-	_set_player_control_for_state()
-	_hud.set_radar_hidden(true)
-	_set_maintenance_timers_radar_paused(true)
-	_set_passenger_cross_carriage_roaming(false)
+	_hud.set_radar_active(true)
 
-	await _train.play_radar_scan(
-		carriage_number,
-		_player.get_radar_origin_world_position(),
-		radar_scan_seconds
-	)
-
-	# Read the result after the sweep. NPCs may keep behaving naturally inside
-	# the coach, while cross-coach movement is locked for a stable scan target.
-	var anomaly_detected: bool = _carriage_contains_anomaly(carriage_number)
+	_train.clear_radar_anomaly_signals()
+	_train.play_radar_scan(carriage_number, radar_scan_seconds, radar_origin)
+	await get_tree().create_timer(radar_scan_seconds, false).timeout
+	if not _radar_scan_active:
+		return
 	if anomaly_detected:
-		_train.show_radar_anomaly_glow(carriage_number, radar_glow_seconds)
-	await get_tree().create_timer(radar_result_reveal_seconds).timeout
+		_train.show_radar_anomaly_signal(carriage_number, radar_anomaly_light_seconds)
 
-	_set_passenger_cross_carriage_roaming(true)
-	_set_maintenance_timers_radar_paused(false)
-	_hud.set_radar_hidden(false)
+	# This timer follows the normal pause state, so opening the pause menu also
+	# pauses the radar phase along with the rest of gameplay.
+	await get_tree().create_timer(radar_result_reveal_seconds, false).timeout
+
 	_radar_scan_active = false
-	_set_player_control_for_state()
-	if anomaly_detected:
-		_hud.notify(
-			"RADAR POSITIVE\nANOMALY SIGNAL DETECTED IN COACH %d" % carriage_number,
-			minf(radar_glow_seconds, 3.5)
-		)
-	else:
-		_hud.notify("RADAR CLEAR\nNO ANOMALY SIGNAL IN COACH %d" % carriage_number, 3.5)
+	_hud.set_radar_active(false)
 
 
-func _carriage_contains_anomaly(carriage_number: int) -> bool:
+func _carriage_has_anomaly(carriage_number: int) -> bool:
 	for passenger: Passenger in _passengers:
 		if (
 			_is_active_passenger(passenger)
@@ -1577,38 +1739,25 @@ func _carriage_contains_anomaly(carriage_number: int) -> bool:
 			return true
 	return false
 
-
-func _set_maintenance_timers_radar_paused(value: bool) -> void:
-	var maintenance_timers: Array[Timer] = [_blocked_aisle_timer, _dirty_seat_timer]
-	if value:
-		_radar_maintenance_pause_states.clear()
-		for timer: Timer in maintenance_timers:
-			if not is_instance_valid(timer):
-				continue
-			_radar_maintenance_pause_states[timer] = timer.paused
-			timer.paused = true
-		return
-	for timer: Timer in maintenance_timers:
-		if not is_instance_valid(timer):
-			continue
-		timer.paused = bool(_radar_maintenance_pause_states.get(timer, false))
-	_radar_maintenance_pause_states.clear()
-
-
-func _set_passenger_cross_carriage_roaming(value: bool) -> void:
-	for passenger: Passenger in _passengers:
-		if _is_active_passenger(passenger):
-			passenger.set_cross_carriage_roaming_enabled(value)
-
 func _enter_night() -> void:
+	_prepare_night_world()
+	state = GameState.NIGHT
+	_resume_train_for_night()
+	_hud.set_night_walk_mode()
+	_hud.notify(night_shift_instruction, 5.0)
+	_set_player_control_for_state()
+
+
+func _prepare_night_world() -> void:
+	if _night_world_prepared:
+		return
 	var puzzle_template := puzzle_resource as DeparturePuzzleData
 	if puzzle_template == null:
 		push_error("The configured departure puzzle resource is invalid.")
 		return
+	_night_world_prepared = true
 	_runtime_puzzle = puzzle_template.create_runtime(_get_dead_passenger_data(), _daily_rng)
 	_collected_departure_statements.clear()
-	state = GameState.NIGHT
-	_resume_train_after_night_market()
 	_train.set_night_strength(1.0)
 	_ambience.night_strength = 1.0
 	_set_sky_cycle_progress(1.0)
@@ -1617,13 +1766,8 @@ func _enter_night() -> void:
 		if _is_active_passenger(passenger):
 			passenger.set_night_mode(true)
 	_desk.set_night_mode(true)
-	_hud.set_night_walk_mode()
-	var first_night_stop: String = _runtime_puzzle.night_stations[0] if not _runtime_puzzle.night_stations.is_empty() else "NIGHT ROUTE"
-	_hud.set_next_stop(first_night_stop)
 	_hud.set_clock_progress(1.0)
 	_hud.set_clock_night_mode(true, true)
-	_hud.notify(night_shift_instruction, 5.0)
-	_set_player_control_for_state()
 
 func _set_train_stopped_for_night_transition() -> void:
 	_station_cutscene_motion_strength = 0.0
@@ -1632,7 +1776,7 @@ func _set_train_stopped_for_night_transition() -> void:
 	_travel_foreground.set_motion_strength(0.0)
 	_ambience.pause_train_travel()
 
-func _resume_train_after_night_market() -> void:
+func _resume_train_for_night() -> void:
 	_station_cutscene_motion_strength = 1.0
 	_train.set_motion_strength(1.0)
 	_travel_background.set_motion_strength(1.0)
@@ -1666,11 +1810,11 @@ func _close_night_puzzle() -> void:
 func _on_departures_confirmed(assignments: Dictionary) -> void:
 	var puzzle: DeparturePuzzleData = _get_departure_puzzle()
 	if puzzle == null:
-		_night_puzzle_ui.show_error("The night departure manifest is unavailable.")
+		_night_puzzle_ui.show_error("The night assignment manifest is unavailable.")
 		return
 	for station: String in puzzle.night_stations:
 		if assignments.get(station, "") != puzzle.correct_passenger_by_station.get(station, ""):
-			_night_puzzle_ui.show_error("Something is wrong with the night drop-off assignments.")
+			_night_puzzle_ui.show_error("Something is wrong with the symbolic assignments.")
 			return
 	_night_blessing_award = _market_tool_state.call(&"award_night_blessings", puzzle.night_stations.size())
 	_night_puzzle_ui.hide()
@@ -1695,14 +1839,9 @@ func _record_incorrect_anomaly(data: PassengerData, station: String) -> void:
 	])
 
 
-func _travel_duration_label() -> String:
-	var total_seconds: int = maxi(0, int(round(station_travel_seconds)))
-	return "%02d:%02d" % [total_seconds / 60, total_seconds % 60]
-
 func _set_player_control_for_state() -> void:
 	var can_walk: bool = (
-		not _radar_scan_active
-		and _active_modal == null
+		_active_modal == null
 		and not _night_statement_active
 		and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
 	)

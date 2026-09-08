@@ -30,16 +30,16 @@ grow_vertical = 2
 mouse_filter = 0
 theme = ExtResource("2")
 script = ExtResource("1")
-selection_instruction = "Select a deceased passenger, then choose their night stop."
-selected_instruction_template = "%s selected. Choose a station."
+selection_instruction = "Select a deceased passenger, then choose their symbolic destination."
+selected_instruction_template = "%s selected. Choose a destination."
 empty_station_text = "— empty —"
 station_slot_template = "%s\n%s"
 no_passenger_error = "Select a passenger first."
-incomplete_assignment_error = "Every night stop requires one deceased passenger."
+incomplete_assignment_error = "Every destination requires one deceased passenger."
 statement_entry_template = "[color=#c9ad79][b]%s[/b][/color]\n\"%s\""
 missing_statement_template = "[color=#756f68][b]%s[/b] — statement not collected[/color]"
 no_collected_statements_text = "[color=#756f68]No departure statements have been collected. Interview the deceased passengers first.[/color]"
-missing_statements_error = "Interview every deceased passenger before confirming the night route."
+missing_statements_error = "Interview every deceased passenger before confirming their assignments."
 
 [node name="Shade" type="ColorRect" parent="."]
 layout_mode = 1
@@ -71,7 +71,7 @@ theme_type_variation = &"HeaderLabel"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_font_sizes/font_size = 29
-text = "NIGHT DROP-OFF LEDGER"
+text = "NIGHT ASSIGNMENT LEDGER"
 horizontal_alignment = 1
 
 [node name="SelectionLabel" type="Label" parent="Margin/Outer"]
@@ -79,7 +79,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.905882, 0.878431, 0.823529, 1)
 theme_override_font_sizes/font_size = 16
-text = "Select a deceased passenger, then choose their night stop."
+text = "Select a deceased passenger, then choose their symbolic destination."
 horizontal_alignment = 1
 
 [node name="Columns" type="HBoxContainer" parent="Margin/Outer"]
@@ -237,7 +237,7 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
-text = "CONFIRM NIGHT STOPS"
+text = "CONFIRM ASSIGNMENTS"
 
 [connection signal="pressed" from="Margin/Outer/Columns/PassengerPanel/Box/PassengerSlots/PassengerSlot1" to="." method="_on_passenger_slot_1_pressed"]
 [connection signal="pressed" from="Margin/Outer/Columns/PassengerPanel/Box/PassengerSlots/PassengerSlot2" to="." method="_on_passenger_slot_2_pressed"]

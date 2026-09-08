@@ -13,6 +13,7 @@ signal resolved(event: Node)
 @export_node_path("Marker2D") var seat_marker_path: NodePath
 @export_node_path("CollisionShape2D") var npc_exclusion_collision_path: NodePath
 @export_node_path("Marker2D") var tracker_anchor_path: NodePath
+@export var tracker_icon: Texture2D
 
 @onready var _interaction_collision: CollisionShape2D = get_node_or_null(interaction_collision_path) as CollisionShape2D
 @onready var _npc_exclusion_collision: CollisionShape2D = get_node_or_null(npc_exclusion_collision_path) as CollisionShape2D
@@ -47,10 +48,15 @@ func get_tracker_anchor() -> Node2D:
 	return configured_anchor if is_instance_valid(configured_anchor) else self
 
 
+func get_tracker_icon() -> Texture2D:
+	return tracker_icon
+
+
 func set_event_active(value: bool) -> void:
 	_resolved = false if value else _resolved
 	visible = value
 	enabled = value
+	refresh_interaction_outline()
 	if is_instance_valid(_interaction_collision):
 		_interaction_collision.set_deferred(&"disabled", not value)
 	_set_collision_enabled(_npc_exclusion_collision, value)
@@ -61,6 +67,7 @@ func mark_solved() -> void:
 		return
 	_resolved = true
 	enabled = false
+	refresh_interaction_outline()
 	if is_instance_valid(_interaction_collision):
 		_interaction_collision.set_deferred(&"disabled", true)
 	_set_collision_enabled(_npc_exclusion_collision, false)

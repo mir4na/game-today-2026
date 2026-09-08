@@ -1,10 +1,462 @@
 [gd_scene format=3 uid="uid://c8qmx71qn8rq6"]
 
 [ext_resource type="Script" uid="uid://drexucppoxj53" path="res://scripts/systems/travel_background.gd" id="1_background"]
+[ext_resource type="Script" uid="uid://ex4btlcn1np6" path="res://scripts/systems/travel_background_layer.gd" id="2_layer"]
+[ext_resource type="Texture2D" uid="uid://dbqqsg22v4k4c" path="res://assets/environment/sunrise_layer1.png" id="3_sunrise_1"]
+[ext_resource type="Texture2D" uid="uid://codthpcrlbh1f" path="res://assets/environment/sunrise_layer2.png" id="4_sunrise_2"]
+[ext_resource type="Texture2D" uid="uid://dw44j8kmamimx" path="res://assets/environment/afternoon_layer4.png" id="5_afternoon_4"]
+[ext_resource type="Texture2D" uid="uid://d2juf5g5sydqo" path="res://assets/environment/afternoon_layer3.png" id="6_afternoon_3"]
+[ext_resource type="Texture2D" uid="uid://xqswt78v56jn" path="res://assets/environment/afternoon_layer2.png" id="7_afternoon_2"]
+[ext_resource type="Texture2D" uid="uid://dnw3xncrqeq8s" path="res://assets/environment/afternoon_layer1.png" id="8_afternoon_1"]
+[ext_resource type="Texture2D" uid="uid://btcuui13u0oeg" path="res://assets/environment/sunset_layer4.png" id="9_sunset_4"]
+[ext_resource type="Texture2D" uid="uid://buldxna664idg" path="res://assets/environment/sunset_layer3.png" id="10_sunset_3"]
+[ext_resource type="Texture2D" uid="uid://bomyuablcylj8" path="res://assets/environment/sunset_layer2.png" id="11_sunset_2"]
+[ext_resource type="Texture2D" uid="uid://li3c23vv68qq" path="res://assets/environment/sunset_layer1.png" id="12_sunset_1"]
+[ext_resource type="Texture2D" uid="uid://b7nac5xbg55qb" path="res://assets/environment/night_layer2.png" id="13_night_2"]
+[ext_resource type="Texture2D" uid="uid://bncr0xj2vcjt4" path="res://assets/environment/night_layer1.png" id="14_night_1"]
+
+[sub_resource type="Gradient" id="Gradient_beach"]
+offsets = PackedFloat32Array(0, 0.58, 1)
+colors = PackedColorArray(0.407843, 0.811765, 0.929412, 1, 0.807843, 0.956863, 0.901961, 1, 0.701961, 0.917647, 0.823529, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture_beach"]
+gradient = SubResource("Gradient_beach")
+width = 1280
+height = 316
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[sub_resource type="Gradient" id="Gradient_city"]
+offsets = PackedFloat32Array(0, 0.55, 1)
+colors = PackedColorArray(0.498039, 0.47451, 0.619608, 1, 0.733333, 0.603922, 0.639216, 1, 0.968627, 0.733333, 0.584314, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture_city"]
+gradient = SubResource("Gradient_city")
+width = 1280
+height = 316
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[sub_resource type="Gradient" id="Gradient_desert"]
+offsets = PackedFloat32Array(0, 0.52, 1)
+colors = PackedColorArray(0.996078, 0.556863, 0.45098, 1, 1, 0.941176, 0.592157, 1, 1, 0.705882, 0.454902, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture_desert"]
+gradient = SubResource("Gradient_desert")
+width = 1280
+height = 316
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[sub_resource type="Gradient" id="Gradient_night"]
+offsets = PackedFloat32Array(0, 0.58, 1)
+colors = PackedColorArray(0.019608, 0.164706, 0.270588, 1, 0.047059, 0.329412, 0.501961, 1, 0.203922, 0.639216, 0.901961, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture_night"]
+gradient = SubResource("Gradient_night")
+width = 1280
+height = 316
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
 
 [node name="TravelBackground" type="CanvasLayer" unique_id=2116512518]
+editor_description = "Fully scene-authored travel background. Every period, parallax strip, repeated artwork sprite, transform, texture, and tunnel visual is editable in this scene."
 layer = -9
 script = ExtResource("1_background")
+sunrise_root_path = NodePath("Periods/Beach")
+afternoon_root_path = NodePath("Periods/City")
+sunset_root_path = NodePath("Periods/Desert")
+night_root_path = NodePath("Periods/NightSky")
+tunnel_panel_path = NodePath("TunnelTransition")
 tunnel_enter_seconds = 2.0
 tunnel_hold_seconds = 1.0
 tunnel_exit_seconds = 2.0
+
+[node name="Periods" type="Node2D" parent="." unique_id=644464395]
+editor_description = "All backgrounds use a 1280 x 315.459 source composition. Uniform 1:1 scaling fills the 1280 x 720 viewport without stretching, while this centered offset crops the excess width equally on both sides."
+position = Vector2(-820.72723, 0)
+scale = Vector2(2.2823863, 2.2823863)
+
+[node name="Beach" type="Node2D" parent="Periods" unique_id=2000701556]
+editor_description = "Pantai, composed on a 1280 x 315 canvas. SkyGradient fills the canvas, Clouds sit at the top, and Ocean is aligned to the bottom."
+
+[node name="Ocean" type="Node2D" parent="Periods/Beach" unique_id=334273249]
+editor_description = "Pantai foreground. MainArtwork is the editable center copy; PreviousCopy and NextCopy keep the 1280 px loop seamless."
+z_index = 1
+script = ExtResource("2_layer")
+scroll_speed = 56.0
+
+[node name="PreviousCopy" type="Sprite2D" parent="Periods/Beach/Ocean" unique_id=713818805]
+position = Vector2(-1280, 233.96565)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("3_sunrise_1")
+centered = false
+
+[node name="MainArtwork" type="Sprite2D" parent="Periods/Beach/Ocean" unique_id=995966381]
+position = Vector2(0, 233.96565)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("3_sunrise_1")
+centered = false
+
+[node name="NextCopy" type="Sprite2D" parent="Periods/Beach/Ocean" unique_id=903368409]
+position = Vector2(1280, 233.96565)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("3_sunrise_1")
+centered = false
+
+[node name="Clouds" type="Node2D" parent="Periods/Beach" unique_id=958491070]
+editor_description = "Pantai cloud layer placed 46 px below the top edge to match the reference. Move this node to adjust every looping cloud copy together."
+position = Vector2(0, 46)
+script = ExtResource("2_layer")
+scroll_speed = 18.0
+
+[node name="PreviousCopy" type="Sprite2D" parent="Periods/Beach/Clouds" unique_id=1136809565]
+position = Vector2(-1280, 0)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("4_sunrise_2")
+centered = false
+
+[node name="MainArtwork" type="Sprite2D" parent="Periods/Beach/Clouds" unique_id=649255127]
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("4_sunrise_2")
+centered = false
+
+[node name="NextCopy" type="Sprite2D" parent="Periods/Beach/Clouds" unique_id=60775440]
+position = Vector2(1280, 0)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("4_sunrise_2")
+centered = false
+
+[node name="SkyGradient" type="TextureRect" parent="Periods/Beach" unique_id=2145027393]
+editor_description = "Pantai sky backing. Edit this GradientTexture2D in the Inspector to adjust the cyan-to-mint sky."
+z_index = -10
+offset_right = 1280.0
+offset_bottom = 315.4593
+mouse_filter = 2
+texture = SubResource("GradientTexture_beach")
+expand_mode = 1
+
+[node name="City" type="Node2D" parent="Periods" unique_id=1721979668]
+editor_description = "City, composed on a 1280 x 315 source canvas and scaled to the viewport by Periods. Every building layer is aligned to the bottom edge."
+visible = false
+
+[node name="Clouds" type="Node2D" parent="Periods/City" unique_id=1181281061]
+editor_description = "City cloud layer placed 46 px below the source-canvas top edge."
+z_index = -2
+position = Vector2(0, 46)
+script = ExtResource("2_layer")
+scroll_speed = 18.0
+
+[node name="PreviousCopy" type="Sprite2D" parent="Periods/City/Clouds" unique_id=551725628]
+position = Vector2(-1280, 0)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("5_afternoon_4")
+centered = false
+
+[node name="MainArtwork" type="Sprite2D" parent="Periods/City/Clouds" unique_id=1781352050]
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("5_afternoon_4")
+centered = false
+
+[node name="NextCopy" type="Sprite2D" parent="Periods/City/Clouds" unique_id=1145659559]
+position = Vector2(1280, 0)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("5_afternoon_4")
+centered = false
+
+[node name="FarBuildings" type="Node2D" parent="Periods/City" unique_id=442191597]
+editor_description = "Farthest city silhouettes, centered horizontally and aligned to the source-canvas bottom edge."
+z_index = -1
+script = ExtResource("2_layer")
+scroll_speed = 30.0
+
+[node name="PreviousCopy" type="Sprite2D" parent="Periods/City/FarBuildings" unique_id=1024565009]
+position = Vector2(-1017.23676, 70.0224)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("6_afternoon_3")
+centered = false
+
+[node name="MainArtwork" type="Sprite2D" parent="Periods/City/FarBuildings" unique_id=1731814583]
+position = Vector2(262.76324, 70.0224)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("6_afternoon_3")
+centered = false
+
+[node name="NextCopy" type="Sprite2D" parent="Periods/City/FarBuildings" unique_id=1788869437]
+position = Vector2(1542.7633, 70.0224)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("6_afternoon_3")
+centered = false
+
+[node name="MiddleBuildings" type="Node2D" parent="Periods/City" unique_id=1992575938]
+editor_description = "Middle city silhouettes, centered horizontally and aligned to the source-canvas bottom edge."
+script = ExtResource("2_layer")
+scroll_speed = 43.0
+
+[node name="PreviousCopy" type="Sprite2D" parent="Periods/City/MiddleBuildings" unique_id=1491582828]
+position = Vector2(-1142.1061, 70.0224)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("7_afternoon_2")
+centered = false
+
+[node name="MainArtwork" type="Sprite2D" parent="Periods/City/MiddleBuildings" unique_id=2094993738]
+position = Vector2(137.89395, 70.0224)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("7_afternoon_2")
+centered = false
+
+[node name="NextCopy" type="Sprite2D" parent="Periods/City/MiddleBuildings" unique_id=238703893]
+position = Vector2(1417.894, 70.0224)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("7_afternoon_2")
+centered = false
+
+[node name="NearBuildings" type="Node2D" parent="Periods/City" unique_id=688905068]
+editor_description = "Nearest city silhouettes, centered horizontally and aligned to the source-canvas bottom edge."
+z_index = 1
+script = ExtResource("2_layer")
+scroll_speed = 58.0
+
+[node name="PreviousCopy" type="Sprite2D" parent="Periods/City/NearBuildings" unique_id=1532152295]
+position = Vector2(-1188.3495, 128.81255)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("8_afternoon_1")
+centered = false
+
+[node name="MainArtwork" type="Sprite2D" parent="Periods/City/NearBuildings" unique_id=364939614]
+position = Vector2(91.65048, 128.81255)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("8_afternoon_1")
+centered = false
+
+[node name="NextCopy" type="Sprite2D" parent="Periods/City/NearBuildings" unique_id=1751460238]
+position = Vector2(1371.6505, 128.81255)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("8_afternoon_1")
+centered = false
+
+[node name="SkyGradient" type="TextureRect" parent="Periods/City" unique_id=751614721]
+editor_description = "City sky backing. Edit this GradientTexture2D in the Inspector to adjust the purple-to-peach sky."
+z_index = -10
+offset_right = 1280.0
+offset_bottom = 315.4593
+mouse_filter = 2
+texture = SubResource("GradientTexture_city")
+expand_mode = 1
+
+[node name="Desert" type="Node2D" parent="Periods" unique_id=452051171]
+editor_description = "Desert, composed on a 1280 x 315 canvas. Clouds sit behind the trees, the distant landscape fills the canvas, and ForegroundDune is aligned to the bottom."
+visible = false
+
+[node name="DistantLandscape" type="Node2D" parent="Periods/Desert" unique_id=815020747]
+editor_description = "Full-canvas desert layer containing the center tree and pale side dunes. Move this node to adjust all three looping copies together."
+z_index = -1
+script = ExtResource("2_layer")
+scroll_speed = 28.0
+
+[node name="PreviousCopy" type="Sprite2D" parent="Periods/Desert/DistantLandscape" unique_id=680072120]
+position = Vector2(-1280, 0)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("9_sunset_4")
+centered = false
+
+[node name="MainArtwork" type="Sprite2D" parent="Periods/Desert/DistantLandscape" unique_id=33516666]
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("9_sunset_4")
+centered = false
+
+[node name="NextCopy" type="Sprite2D" parent="Periods/Desert/DistantLandscape" unique_id=963164840]
+position = Vector2(1280, 0)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("9_sunset_4")
+centered = false
+
+[node name="Clouds" type="Node2D" parent="Periods/Desert" unique_id=704230754]
+editor_description = "Desert cloud layer placed 46 px below the top edge to match the reference."
+z_index = -2
+position = Vector2(0, 46)
+script = ExtResource("2_layer")
+scroll_speed = 18.0
+
+[node name="PreviousCopy" type="Sprite2D" parent="Periods/Desert/Clouds" unique_id=202553578]
+position = Vector2(-1280, 0)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("10_sunset_3")
+centered = false
+
+[node name="MainArtwork" type="Sprite2D" parent="Periods/Desert/Clouds" unique_id=311140358]
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("10_sunset_3")
+centered = false
+
+[node name="NextCopy" type="Sprite2D" parent="Periods/Desert/Clouds" unique_id=529340692]
+position = Vector2(1280, 0)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("10_sunset_3")
+centered = false
+
+[node name="Trees" type="Node2D" parent="Periods/Desert" unique_id=172522698]
+editor_description = "Left and right foreground trees. The 4897 px source is centered inside the original 5356 px design width."
+script = ExtResource("2_layer")
+scroll_speed = 45.0
+
+[node name="PreviousCopy" type="Sprite2D" parent="Periods/Desert/Trees" unique_id=1758841177]
+position = Vector2(-1225.1531, 0)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("11_sunset_2")
+centered = false
+
+[node name="MainArtwork" type="Sprite2D" parent="Periods/Desert/Trees" unique_id=921449164]
+position = Vector2(54.8469, 0)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("11_sunset_2")
+centered = false
+
+[node name="NextCopy" type="Sprite2D" parent="Periods/Desert/Trees" unique_id=139586185]
+position = Vector2(1334.8469, 0)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("11_sunset_2")
+centered = false
+
+[node name="ForegroundDune" type="Node2D" parent="Periods/Desert" unique_id=1314350547]
+editor_description = "Nearest red dune, aligned exactly to the lower edge of the 315 px composition."
+z_index = 1
+script = ExtResource("2_layer")
+scroll_speed = 60.0
+
+[node name="PreviousCopy" type="Sprite2D" parent="Periods/Desert/ForegroundDune" unique_id=926430256]
+position = Vector2(-1280, 199.31293)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("12_sunset_1")
+centered = false
+
+[node name="MainArtwork" type="Sprite2D" parent="Periods/Desert/ForegroundDune" unique_id=1980266971]
+position = Vector2(0, 199.31293)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("12_sunset_1")
+centered = false
+
+[node name="NextCopy" type="Sprite2D" parent="Periods/Desert/ForegroundDune" unique_id=2093877129]
+position = Vector2(1280, 199.31293)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("12_sunset_1")
+centered = false
+
+[node name="SkyGradient" type="TextureRect" parent="Periods/Desert" unique_id=168855754]
+editor_description = "Desert sky backing. Edit this GradientTexture2D in the Inspector to adjust the orange-to-yellow sky."
+z_index = -10
+offset_right = 1280.0
+offset_bottom = 315.4593
+mouse_filter = 2
+texture = SubResource("GradientTexture_desert")
+expand_mode = 1
+
+[node name="NightSky" type="Node2D" parent="Periods" unique_id=274363155]
+editor_description = "Night Sky, composed on a 1280 x 315 source canvas and scaled to the viewport by Periods. Stars begin at the top and Clouds sit below them."
+visible = false
+
+[node name="Stars" type="Node2D" parent="Periods/NightSky" unique_id=455812363]
+editor_description = "Night star field aligned to the source-canvas top edge and centered inside the original design width."
+z_index = -2
+script = ExtResource("2_layer")
+scroll_speed = 5.0
+
+[node name="PreviousCopy" type="Sprite2D" parent="Periods/NightSky/Stars" unique_id=1140035766]
+position = Vector2(-1243.1964, 0)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("13_night_2")
+centered = false
+
+[node name="MainArtwork" type="Sprite2D" parent="Periods/NightSky/Stars" unique_id=1818492884]
+position = Vector2(36.803585, 0)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("13_night_2")
+centered = false
+
+[node name="NextCopy" type="Sprite2D" parent="Periods/NightSky/Stars" unique_id=384944003]
+position = Vector2(1316.8036, 0)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("13_night_2")
+centered = false
+
+[node name="Clouds" type="Node2D" parent="Periods/NightSky" unique_id=1740771912]
+editor_description = "Night cloud layer placed 46 px below the source-canvas top edge."
+z_index = -1
+position = Vector2(0, 46)
+script = ExtResource("2_layer")
+scroll_speed = 18.0
+
+[node name="PreviousCopy" type="Sprite2D" parent="Periods/NightSky/Clouds" unique_id=707359971]
+position = Vector2(-1280, 0)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("14_night_1")
+centered = false
+
+[node name="MainArtwork" type="Sprite2D" parent="Periods/NightSky/Clouds" unique_id=642673353]
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("14_night_1")
+centered = false
+
+[node name="NextCopy" type="Sprite2D" parent="Periods/NightSky/Clouds" unique_id=448237625]
+position = Vector2(1280, 0)
+scale = Vector2(0.23898432, 0.23898432)
+texture = ExtResource("14_night_1")
+centered = false
+
+[node name="SkyGradient" type="TextureRect" parent="Periods/NightSky" unique_id=55333172]
+editor_description = "Night sky backing. Edit this GradientTexture2D in the Inspector to adjust the navy-to-blue sky."
+z_index = -10
+offset_right = 1280.0
+offset_bottom = 315.4593
+mouse_filter = 2
+texture = SubResource("GradientTexture_night")
+expand_mode = 1
+
+[node name="TunnelTransition" type="Control" parent="." unique_id=201962027]
+editor_description = "Scene-authored tunnel wipe. Edit this panel and its children to change the transition artwork."
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+
+[node name="Darkness" type="ColorRect" parent="TunnelTransition" unique_id=1918202106]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0352941, 0.0431373, 0.0627451, 1)
+
+[node name="UpperWallLine" type="ColorRect" parent="TunnelTransition" unique_id=105106962]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 138.0
+offset_bottom = 141.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.18, 0.2, 0.23, 0.22)
+
+[node name="MiddleWallLine" type="ColorRect" parent="TunnelTransition" unique_id=249571320]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 360.0
+offset_bottom = 363.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.18, 0.2, 0.23, 0.22)
+
+[node name="LowerWallLine" type="ColorRect" parent="TunnelTransition" unique_id=2097886544]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 582.0
+offset_bottom = 585.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.18, 0.2, 0.23, 0.22)

@@ -12,8 +12,8 @@
 [ext_resource type="Material" path="res://resources/materials/window_light_mask.tres" id="9_window_light"]
 [ext_resource type="PackedScene" path="res://scenes/train/train_interior_lighting.tscn" id="10_lighting"]
 [ext_resource type="PackedScene" uid="uid://buwn8armxkqjw" path="res://scenes/train/passenger_seat.tscn" id="11_seat"]
-[ext_resource type="Material" path="res://resources/materials/radar_carriage_scan.tres" id="12_radar_scan"]
-[ext_resource type="Material" path="res://resources/materials/radar_anomaly_glow.tres" id="13_radar_glow"]
+[ext_resource type="Material" uid="uid://bbm87kup81qnp" path="res://resources/materials/radar_carriage_scan.tres" id="12_radar_scan"]
+[ext_resource type="Material" path="res://resources/materials/blocked_carriage_grayscale.tres" id="14_blocked_grayscale"]
 
 [sub_resource type="Gradient" id="Gradient_e78od"]
 offsets = PackedFloat32Array(0, 0.61778843, 1)
@@ -325,8 +325,12 @@ exterior_wipe_visual_paths = Array[NodePath]([NodePath("ArtRoot/Exterior/Exterio
 door_animation_path = NodePath("ArtRoot/Exterior/DoorAnimation")
 wheel_animation_path = NodePath("ArtRoot/Wheels/WheelAnimation")
 radar_scan_effect_path = NodePath("ArtRoot/RadarEffectBounds/RadarScanEffect")
-radar_anomaly_glow_path = NodePath("ArtRoot/RadarEffectBounds/RadarAnomalyGlow")
 dirty_seat_events_root_path = NodePath("PassengerLayout/PassengerSeatSlots")
+blocked_grayscale_visual_group = &"blocked_carriage_visuals"
+radar_anomaly_light_color = Color(1, 0.015, 0.01, 1)
+radar_anomaly_energy_multiplier = 3.6
+radar_anomaly_fade_in_seconds = 0.22
+radar_anomaly_fade_out_seconds = 0.55
 
 [node name="PassengerLayout" type="Node2D" parent="." unique_id=1260823063]
 editor_description = "Shared passenger ground baseline. Move this node vertically in the Inspector to align every seat, activity, and boarding position without changing the train floor."
@@ -337,10 +341,6 @@ editor_description = "One Marker2D for each visible passenger seat. Adjust horiz
 
 [node name="Seat1" parent="PassengerLayout/PassengerSeatSlots" unique_id=1173216612 instance=ExtResource("11_seat")]
 position = Vector2(67, 0)
-
-[node name="DirtySeatEvent" parent="PassengerLayout/PassengerSeatSlots/Seat1/Attachments" index="0"]
-editor_description = "Edge seat beside a coach connector. Random Dirty Seat events are disabled here to avoid overlapping Blocked Aisle."
-random_spawn_enabled = false
 
 [node name="Seat2" parent="PassengerLayout/PassengerSeatSlots" unique_id=2075857442 instance=ExtResource("11_seat")]
 position = Vector2(124, 0)
@@ -375,10 +375,6 @@ position = Vector2(835, 0)
 [node name="Seat12" parent="PassengerLayout/PassengerSeatSlots" unique_id=1160981160 instance=ExtResource("11_seat")]
 position = Vector2(892, 0)
 
-[node name="DirtySeatEvent" parent="PassengerLayout/PassengerSeatSlots/Seat12/Attachments" index="0"]
-editor_description = "Edge seat beside a coach connector. Random Dirty Seat events are disabled here to avoid overlapping Blocked Aisle."
-random_spawn_enabled = false
-
 [node name="PassengerActivitySlots" type="Node2D" parent="PassengerLayout" unique_id=1069195525]
 editor_description = "AI standing and roaming targets. These inherit the same ground baseline as seats and doors."
 visible = false
@@ -405,8 +401,12 @@ position = Vector2(446, 0)
 [node name="DoorRight" type="Marker2D" parent="PassengerLayout/PassengerDoorSlots" unique_id=1253140837]
 position = Vector2(514, 0)
 
-[node name="ArtRoot" type="Node2D" parent="." unique_id=1724717493]
+[node name="ArtRoot" type="CanvasGroup" parent="." unique_id=1724717493 groups=["blocked_carriage_visuals"]]
 unique_name_in_owner = true
+editor_description = "Complete carriage artwork group. Its scene-authored grayscale material is used only when a blocked connector separates this coach from the player."
+material = ExtResource("14_blocked_grayscale")
+fit_margin = 8.0
+clear_margin = 8.0
 
 [node name="Interior" type="Node2D" parent="ArtRoot" unique_id=2101017426]
 unique_name_in_owner = true
@@ -478,10 +478,10 @@ scale = Vector2(0.374415, 0.374415)
 texture = ExtResource("2")
 centered = false
 
-[node name="InteriorLighting" parent="ArtRoot" unique_id=1422164408 instance=ExtResource("10_lighting")]
+[node name="InteriorLighting" parent="." unique_id=1422164408 instance=ExtResource("10_lighting")]
 
 [node name="RadarEffectBounds" type="Control" parent="ArtRoot" unique_id=545678927]
-editor_description = "Inspector-authored carriage silhouette for radar VFX. Resize this rectangle to the interior roof, walls, and floor; the scan wave normalizes itself to these four sides."
+editor_description = "Scene-authored clipping area for all radar visuals. Resize this rectangle to the visible passenger interior; child effects never draw outside it."
 z_index = 20
 clip_contents = true
 layout_mode = 3
@@ -491,26 +491,18 @@ offset_right = 960.0
 offset_bottom = 525.0
 mouse_filter = 2
 
-[node name="RadarAnomalyGlow" type="ColorRect" parent="ArtRoot/RadarEffectBounds" unique_id=648864988]
-visible = false
-modulate = Color(1, 1, 1, 0)
-material = ExtResource("13_radar_glow")
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
 [node name="RadarScanEffect" type="ColorRect" parent="ArtRoot/RadarEffectBounds" unique_id=398318395]
-editor_description = "Scene-authored one-coach radar sweep. Its wavefront grows from the player and follows all four sides of RadarEffectBounds. Tune front, trail, grid, boundary light, and colors in the assigned ShaderMaterial."
+editor_description = "Scene-authored coach inspection grid. Tune the grid cells, scan band, edge, warp, and colors through the assigned ShaderMaterial resource."
 visible = false
 material = ExtResource("12_radar_scan")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 45.0
+offset_right = -17.0
+offset_bottom = -9.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -522,14 +514,14 @@ z_index = 4
 color = Color(0.025, 0.047, 0.09, 0.34)
 polygon = PackedVector2Array(0, 190, 960, 190, 960, 525, 0, 525)
 
-[node name="ExteriorWipeBounds" type="Node2D" parent="ArtRoot"]
+[node name="ExteriorWipeBounds" type="Node2D" parent="ArtRoot" unique_id=566281936]
 editor_description = "Inspector-authored vertical bounds for the exterior top-to-bottom wipe. Move the Top and Bottom markers to match the complete exterior artwork."
 
-[node name="Top" type="Marker2D" parent="ArtRoot/ExteriorWipeBounds"]
+[node name="Top" type="Marker2D" parent="ArtRoot/ExteriorWipeBounds" unique_id=1877278255]
 editor_description = "The roof edge where the exterior fade begins."
 position = Vector2(0, 214)
 
-[node name="Bottom" type="Marker2D" parent="ArtRoot/ExteriorWipeBounds"]
+[node name="Bottom" type="Marker2D" parent="ArtRoot/ExteriorWipeBounds" unique_id=718850155]
 editor_description = "The lowest exterior edge where the fade completes."
 position = Vector2(0, 630)
 

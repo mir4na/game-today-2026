@@ -141,7 +141,12 @@ func _check_motion(game: AfterTheEndGame, label: String) -> void:
 	var cable_x: float = foreground._passing_cables.position.x
 	var pole_x: float = foreground._passing_pole.position.x
 	var layer_x: float = layer.position.x
-	await create_timer(0.15).timeout
+	# Advance deterministically: cold headless rendering can spend the entire
+	# timer frame compiling resources before AnimationPlayer receives a tick.
+	foreground._cable_animation.advance(0.15)
+	foreground._pole_animation.advance(0.15)
+	game._travel_background._process(0.15)
+	await process_frame
 	_check(not is_equal_approx(cable_x, foreground._passing_cables.position.x), "Cables move during %s." % label)
 	_check(not is_equal_approx(pole_x, foreground._passing_pole.position.x), "Poles move during %s." % label)
 	_check(not is_equal_approx(layer_x, layer.position.x), "Background moves during %s." % label)

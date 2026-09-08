@@ -16,7 +16,8 @@ size = Vector2(28, 220)
 size = Vector2(142, 190)
 
 [node name="BlockedAisleEvent" type="Area2D" unique_id=2130907540 groups=["blocked_aisle_events"]]
-z_index = 9
+editor_description = "Scene-authored blocked-aisle event. Its local z-index keeps the luggage above the connector interior while allowing the station-cutscene exterior to cover it."
+z_index = 0
 collision_layer = 0
 collision_mask = 0
 script = ExtResource("1_event")
@@ -28,12 +29,16 @@ door_blocker_collision_path = NodePath("DoorPassageBlocker/DoorBlockerCollision"
 interaction_collision_path = NodePath("InteractionCollision")
 npc_exclusion_collision_path = NodePath("LuggageVisual/NpcExclusionArea/NpcExclusionCollision")
 tracker_anchor_path = NodePath("LuggageVisual/TrackerAnchor")
-prompt_text = "Repack blocked aisle"
+tracker_icon = ExtResource("3_case_compact")
+prompt_text = "Repack luggage"
 interaction_distance = 150.0
 enabled = false
 interaction_origin_path = NodePath("InteractionCollision")
 prompt_anchor_path = NodePath("LuggageVisual/InteractionPromptAnchor")
 focus_visual_path = NodePath("LuggageVisual")
+outline_while_enabled = true
+passive_outline_color = Color(0.015, 0.018, 0.024, 1)
+passive_outline_width = 5.0
 
 [node name="PlacementAnchors" type="Node2D" parent="." unique_id=2006043616]
 editor_description = "Move these anchors in the Inspector to control which side of the doorway receives the luggage pile."
@@ -62,23 +67,20 @@ editor_description = "Inspector-authored target used by the maintenance HUD trac
 position = Vector2(0, -205)
 
 [node name="TallSuitcase" type="Sprite2D" parent="LuggageVisual" unique_id=2123819379]
-editor_description = "Tall suitcase leaning across the aisle; texture and transform are Inspector-authored."
-position = Vector2(45, -72)
-rotation = -0.261799
+editor_description = "Tall rear suitcase; texture and transform are Inspector-authored."
+position = Vector2(53, -87)
 scale = Vector2(0.105, 0.105)
 texture = ExtResource("5_case_tall")
 
 [node name="CompactSuitcase" type="Sprite2D" parent="LuggageVisual" unique_id=33917941]
-editor_description = "Compact suitcase scattered to one side; texture and transform are Inspector-authored."
-position = Vector2(-51, -29)
-rotation = 0.191986
+editor_description = "Compact front suitcase; texture and transform are Inspector-authored."
+position = Vector2(-17.000006, -84.00001)
 scale = Vector2(0.12, 0.12)
 texture = ExtResource("3_case_compact")
 
 [node name="WideSuitcase" type="Sprite2D" parent="LuggageVisual" unique_id=251036188]
-editor_description = "Wide suitcase lying loosely across the floor; texture and transform are Inspector-authored."
-position = Vector2(1, -10)
-rotation = -0.10472
+editor_description = "Wide middle suitcase; texture and transform are Inspector-authored."
+position = Vector2(-19, -38)
 scale = Vector2(0.12, 0.12)
 texture = ExtResource("4_case_wide")
 

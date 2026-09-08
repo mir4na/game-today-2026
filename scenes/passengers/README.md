@@ -1,6 +1,6 @@
 # NPC sprite animations
 
-Each `npc_1.tscn` through `npc_17.tscn` has its own `SpriteFrames` resource, using the same `idle` and `walk` animation names as the player.
+Each `npc_1.tscn` through `npc_16.tscn` has its own `SpriteFrames` resource, using the same `idle` and `walk` animation names as the player.
 
 1. Open the NPC scene you want to configure.
 2. Select `CharacterScale/PassengerVisual/NPCVisual` (`AnimatedSprite2D`).

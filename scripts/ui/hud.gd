@@ -3,10 +3,12 @@ extends CanvasLayer
 ## Persistent, low-profile HUD. Modal screens live in sibling UI scenes.
 
 signal guidebook_requested
+signal radar_requested
 
 @export_category("Inspector Copy")
 @export var clock_template: String = "%02d:%02d %s"
-@export var tool_inventory_template: String = "BLESSINGS %d   •   [R] RADAR ×%d   •   AUDIT ×%d   •   SPEED LV.%d"
+@export var tool_status_template: String = "BLESSINGS %d\nAUDIT ×%d  •  SPEED LV.%d"
+@export var radar_button_template: String = "ACTIVATE RADAR   [R]  ×%d"
 @export_category("Journey Clock")
 @export_range(0.0, 1440.0, 1.0) var clock_default_start_minutes: float = 840.0
 @export_range(0.0, 1440.0, 1.0) var clock_default_end_minutes: float = 1320.0
@@ -36,8 +38,11 @@ signal guidebook_requested
 @onready var _root: Control = %Root
 @onready var _minimap: TrainMinimap = %TrainMinimap
 @onready var _clock_panel: Control = %ClockPanel
+@onready var _clock_sign_assembly: Control = $Root/ClockPanel/ClockSignAssembly
+@onready var _clock_briefing_animation: AnimationPlayer = %ClockBriefingAnimation
 @onready var _clock_fill: TextureRect = %ClockFilled
 @onready var _clock_pointer: TextureRect = %ClockPointer
+@onready var _next_stop_title: Label = %NextStopTitle
 @onready var _next_stop_label: Label = %NextStopLabel
 @onready var _clock_symbol_pivot: Control = %ClockSymbolPivot
 @onready var _day_symbol: TextureRect = %DaySymbol
@@ -47,8 +52,9 @@ signal guidebook_requested
 @onready var _dialogue_pointer: TextureRect = %DialoguePointer
 @onready var _notification_panel: PanelContainer = %NotificationPanel
 @onready var _notification_label: Label = %NotificationLabel
-@onready var _tool_panel: PanelContainer = %ToolPanel
-@onready var _tool_inventory_label: Label = %ToolInventoryLabel
+@onready var _tool_status_label: Label = %ToolStatusLabel
+@onready var _guidebook_button: Button = %GuidebookButton
+@onready var _radar_button: Button = %RadarButton
 @onready var _maintenance_trackers: Array[Control] = [
 	$Root/MaintenanceTrackers/TrackerPrimary,
 	$Root/MaintenanceTrackers/TrackerSecondary,
@@ -64,8 +70,13 @@ var _clock_symbol_tween: Tween
 var _clock_progress_tween: Tween
 var _clock_progress: float = 0.0
 var _clock_target_progress: float = -1.0
+var _service_sealed: bool = false
+var _radar_active: bool = false
 
 const CLOCK_FILL_ARC_DEGREES: float = 180.0
+
+func _ready() -> void:
+	_clock_sign_assembly.hide()
 
 func _process(delta: float) -> void:
 	_prompt_wobble_time += delta
@@ -160,6 +171,8 @@ func set_clock_night_mode(is_night: bool, animate: bool = true) -> void:
 func _show_clock_symbol(is_night: bool) -> void:
 	_day_symbol.visible = not is_night
 	_night_symbol.visible = is_night
+	_next_stop_title.visible = not is_night
+	_next_stop_label.visible = not is_night
 
 func set_current_carriage_number(carriage_number: int) -> void:
 	_minimap.set_current_carriage_number(carriage_number)
@@ -169,12 +182,12 @@ func set_passenger_counts_by_carriage(counts: Dictionary) -> void:
 
 
 func set_market_tool_inventory(snapshot: Dictionary) -> void:
-	_tool_inventory_label.text = tool_inventory_template % [
+	_tool_status_label.text = tool_status_template % [
 		int(snapshot.get("blessings", 0)),
-		int(snapshot.get("radar_charges", 0)),
 		int(snapshot.get("audit_slips", 0)),
 		int(snapshot.get("speed_level", 0))
 	]
+	_radar_button.text = radar_button_template % int(snapshot.get("radar_charges", 0))
 
 
 func set_maintenance_targets(target_entries: Array[Dictionary]) -> void:
@@ -185,8 +198,8 @@ func set_maintenance_targets(target_entries: Array[Dictionary]) -> void:
 			continue
 		var entry: Dictionary = target_entries[index]
 		var target := entry.get("target") as Node2D
-		var tracker_text: String = str(entry.get("label", "MAINTENANCE"))
-		tracker.call(&"set_target", target, tracker_text)
+		var tracker_icon := entry.get("icon") as Texture2D
+		tracker.call(&"set_target", target, tracker_icon)
 
 func set_prompt(text: String, target: Node2D = null) -> void:
 	if text.is_empty():
@@ -375,24 +388,53 @@ func _update_dialogue_pointer(target_local_x: float, prompt_width: float) -> voi
 
 func set_day_hud_visible(value: bool) -> void:
 	_clock_panel.visible = value
-	_tool_panel.visible = value
+	if not value:
+		_clock_briefing_animation.stop()
+		_clock_sign_assembly.hide()
+	_tool_status_label.visible = value
+	_radar_button.visible = value
 	_floating_prompt.visible = value and not _prompt_label.text.is_empty()
 	# The train minimap remains visible through the night walk.
+
+
+func show_route_briefing() -> void:
+	_clock_panel.show()
+	_clock_briefing_animation.stop()
+	_clock_briefing_animation.play(&"route_briefing")
 
 func set_cutscene_hidden(value: bool) -> void:
 	_root.visible = not value
 
 
-func set_radar_hidden(value: bool) -> void:
-	_root.visible = not value
+func set_radar_active(value: bool) -> void:
+	_radar_active = value
+	_update_action_button_locks()
+	_radar_button.tooltip_text = "Radar scan in progress" if value else "Scan the current passenger coach"
+
+
+func set_service_sealed(value: bool) -> void:
+	_service_sealed = value
+	_update_action_button_locks()
+
+
+func _update_action_button_locks() -> void:
+	_guidebook_button.disabled = _service_sealed
+	_radar_button.disabled = _service_sealed or _radar_active
 
 
 func _on_guidebook_button_pressed() -> void:
 	guidebook_requested.emit()
 
+
+func _on_radar_button_pressed() -> void:
+	radar_requested.emit()
+
 func set_night_walk_mode() -> void:
-	_clock_panel.visible = true
-	_tool_panel.visible = true
+	_clock_briefing_animation.stop()
+	_clock_sign_assembly.hide()
+	_clock_panel.show()
+	_tool_status_label.visible = true
+	_radar_button.visible = true
 	_floating_prompt.visible = not _prompt_label.text.is_empty()
 
 func notify(message: String, seconds: float = 3.0) -> void:

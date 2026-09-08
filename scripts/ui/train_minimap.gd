@@ -60,6 +60,7 @@ func _refresh() -> void:
 		var box := slot.get_node("Box") as TextureRect
 		var marker_label := slot.get_node("Box/MarkerLabel") as Label
 		box.texture = active_carriage_texture if selected else inactive_carriage_texture
+		box.modulate = Color.WHITE
 		marker_label.modulate = selected_marker_color if selected else normal_marker_color
 		var passenger_count: int = int(_passenger_counts_by_carriage.get(carriage_number, 0))
 		marker_label.text = _marker_text(mini(passenger_count, 10))
