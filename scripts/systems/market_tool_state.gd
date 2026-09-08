@@ -11,8 +11,8 @@ const TOOL_SPEED_UPGRADE: StringName = &"speed_upgrade"
 @export_category("Starting Inventory")
 @export_range(0, 999, 1) var starting_blessings: int = 0
 @export_range(0, 20, 1) var starting_audit_slips: int = 1
-@export_range(0, 20, 1) var starting_radar_charges: int = 1
-@export_range(0, 8, 1) var starting_speed_level: int = 0
+@export_range(0, 20, 1) var starting_radar_charges: int = 0
+@export_range(0, 8, 1) var starting_speed_level: int = 1
 @export_category("Market Costs")
 @export_range(1, 99, 1) var audit_slip_cost: int = 3
 @export_range(1, 99, 1) var radar_charge_cost: int = 4

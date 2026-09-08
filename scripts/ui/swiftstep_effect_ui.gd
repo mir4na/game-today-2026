@@ -10,12 +10,19 @@ signal effect_finished
 @export_range(0.1, 2.0, 0.05) var release_duration_seconds: float = 0.8
 @export_category("World Speed By Upgrade Level")
 @export var world_time_scales: PackedFloat32Array = PackedFloat32Array([0.30, 0.20, 0.12])
+@export_category("Player Color Preservation")
+@export var world_lighting_path: NodePath
 
 @onready var _screen_effect: ColorRect = %ScreenEffect
+@onready var _player_color_copy: Sprite2D = %PlayerColorCopy
 @onready var _effect_timer: Timer = %EffectTimer
 
 var _effect_material: ShaderMaterial
 var _player: Node2D
+var _player_visual: AnimatedSprite2D
+var _player_visual_was_visible: bool = false
+var _player_visual_original_self_modulate: Color = Color.WHITE
+var _world_lighting: CanvasModulate
 var _effect_tween: Tween
 var _elapsed_seconds: float = 0.0
 var _active: bool = false
@@ -26,7 +33,10 @@ func _ready() -> void:
 	if _effect_material != null:
 		_effect_material = _effect_material.duplicate() as ShaderMaterial
 		_screen_effect.material = _effect_material
+	if not world_lighting_path.is_empty():
+		_world_lighting = get_node_or_null(world_lighting_path) as CanvasModulate
 	_screen_effect.hide()
+	_player_color_copy.hide()
 	set_process(false)
 
 
@@ -42,6 +52,7 @@ func activate(player: Node2D, upgrade_level: int) -> float:
 	_set_shader_parameter(&"burst_strength", 1.0)
 	_set_shader_parameter(&"flow_direction", -1.0)
 	_update_player_screen_position()
+	_prepare_player_color_copy()
 
 	_kill_effect_tween()
 	_effect_tween = create_tween().set_parallel(true)
@@ -65,6 +76,7 @@ func _process(delta: float) -> void:
 	_elapsed_seconds += delta
 	_set_shader_parameter(&"elapsed_seconds", _elapsed_seconds)
 	_update_player_screen_position()
+	_update_player_color_copy()
 
 
 func _on_effect_timer_timeout() -> void:
@@ -81,6 +93,7 @@ func _on_effect_timer_timeout() -> void:
 
 func _finish_effect() -> void:
 	_active = false
+	_restore_player_visual()
 	_player = null
 	_screen_effect.hide()
 	set_process(false)
@@ -95,6 +108,59 @@ func _update_player_screen_position() -> void:
 		return
 	var screen_position: Vector2 = _player.get_global_transform_with_canvas().origin
 	_effect_material.set_shader_parameter(&"player_screen_uv", screen_position / viewport_size)
+
+
+func _prepare_player_color_copy() -> void:
+	_player_visual = null
+	if is_instance_valid(_player):
+		_player_visual = _player.get_node_or_null("MCVisual") as AnimatedSprite2D
+	if not is_instance_valid(_player_visual):
+		_player_color_copy.hide()
+		return
+	_player_visual_was_visible = _player_visual.visible
+	_player_visual_original_self_modulate = _player_visual.self_modulate
+	if not _player.is_visible_in_tree() or not _player_visual_was_visible:
+		_player_color_copy.hide()
+		return
+	_update_player_color_copy()
+	_player_color_copy.show()
+	_player_visual.self_modulate.a = 0.0
+
+
+func _update_player_color_copy() -> void:
+	if not is_instance_valid(_player_visual) or not is_instance_valid(_player) or not _player.is_visible_in_tree():
+		_player_color_copy.hide()
+		return
+	var frames := _player_visual.sprite_frames
+	if frames == null or not frames.has_animation(_player_visual.animation):
+		_player_color_copy.hide()
+		return
+	var frame_texture := frames.get_frame_texture(_player_visual.animation, _player_visual.frame)
+	if frame_texture == null:
+		_player_color_copy.hide()
+		return
+	_player_color_copy.texture = frame_texture
+	_player_color_copy.centered = _player_visual.centered
+	_player_color_copy.offset = _player_visual.offset
+	_player_color_copy.flip_h = _player_visual.flip_h
+	_player_color_copy.flip_v = _player_visual.flip_v
+	_player_color_copy.transform = _player_visual.get_global_transform_with_canvas()
+	var display_tint := _player_visual.modulate * _player_visual_original_self_modulate
+	if is_instance_valid(_world_lighting):
+		display_tint *= _world_lighting.color
+	_player_color_copy.self_modulate = display_tint
+
+
+func _restore_player_visual() -> void:
+	_player_color_copy.hide()
+	if is_instance_valid(_player_visual):
+		_player_visual.self_modulate = _player_visual_original_self_modulate
+		_player_visual.visible = _player_visual_was_visible
+	_player_visual = null
+
+
+func _exit_tree() -> void:
+	_restore_player_visual()
 
 
 func _set_effect_strength(value: float) -> void:

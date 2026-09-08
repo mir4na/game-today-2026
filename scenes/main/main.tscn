@@ -240,6 +240,7 @@ expand_mode = 1
 
 [node name="SwiftstepEffectUI" parent="." instance=ExtResource("46_swiftstep_effect")]
 unique_name_in_owner = true
+world_lighting_path = NodePath("../GameplayWorld/WorldLighting")
 
 [node name="HUD" parent="." unique_id=1053587110 instance=ExtResource("4")]
 unique_name_in_owner = true

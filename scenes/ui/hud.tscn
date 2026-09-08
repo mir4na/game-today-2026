@@ -529,6 +529,23 @@ icon = ExtResource("23_guidebook_button")
 expand_icon = true
 script = ExtResource("24_hover")
 
+[node name="GuidebookOutline" type="TextureRect" parent="Root/GuidebookButton"]
+show_behind_parent = true
+self_modulate = Color(0.015, 0.018, 0.024, 0.98)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("23_guidebook_button")
+expand_mode = 1
+
 [node name="MarketItemBar" type="VBoxContainer" parent="Root" unique_id=258053490]
 unique_name_in_owner = true
 editor_description = "Scene-authored Night Market inventory. Slots appear only while their item is owned; shortcut numbers stay hidden from the HUD."

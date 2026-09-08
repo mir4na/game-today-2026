@@ -2,7 +2,8 @@ extends RefCounted
 ## A checkpoint is the start of a day, never an in-progress payout or purchase.
 
 const SAVE_PATH: String = "user://shift_progress.cfg"
-const VERSION: int = 1
+const VERSION: int = 2
+const LEGACY_STARTER_RADAR_VERSION: int = 1
 const DAY_COUNT: int = 5
 
 
@@ -16,7 +17,10 @@ static func start_new_run(path: String = SAVE_PATH) -> Dictionary:
 
 static func load_checkpoint(path: String = SAVE_PATH) -> Dictionary:
 	var file := ConfigFile.new()
-	if file.load(path) != OK or file.get_value("progress", "version", 0) != VERSION:
+	if file.load(path) != OK:
+		return {}
+	var saved_version: int = int(file.get_value("progress", "version", 0))
+	if saved_version not in [LEGACY_STARTER_RADAR_VERSION, VERSION]:
 		return {}
 	var checkpoint: Variant = file.get_value("progress", "checkpoint", {})
 	if not checkpoint is Dictionary:
@@ -31,7 +35,21 @@ static func load_checkpoint(path: String = SAVE_PATH) -> Dictionary:
 		var value: Variant = checkpoint.inventory.get(key, 0)
 		if not value is int or value < 0:
 			return {}
+	if saved_version == LEGACY_STARTER_RADAR_VERSION:
+		checkpoint = _migrate_legacy_starter_item(checkpoint)
+		save_checkpoint(checkpoint, path)
 	return checkpoint.duplicate(true)
+
+
+static func _migrate_legacy_starter_item(checkpoint: Dictionary) -> Dictionary:
+	var migrated: Dictionary = checkpoint.duplicate(true)
+	var inventory: Dictionary = migrated.inventory
+	# Version 1 granted one Radar charge and no Swiftstep. Remove only that
+	# legacy free charge, preserving any additional charges the player bought.
+	inventory["radar_charges"] = maxi(0, int(inventory.get("radar_charges", 0)) - 1)
+	inventory["speed_level"] = maxi(1, int(inventory.get("speed_level", 0)))
+	migrated.inventory = inventory
+	return migrated
 
 static func make_checkpoint(day: int, inventory: Dictionary, seed_value: int) -> Dictionary:
 	var saved_inventory: Dictionary = {}
