@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://bic2qisprdiaw" path="res://assets/MainMenu/Overlay1.png" id="13_overlay_1"]
 [ext_resource type="Texture2D" uid="uid://c486uin4euwuu" path="res://assets/MainMenu/Overlay2.png" id="14_overlay_2"]
 [ext_resource type="Shader" uid="uid://c3brnqlmhxjre" path="res://shaders/main_menu_color_grade.gdshader" id="15_color_grade"]
+[ext_resource type="Script" path="res://scripts/ui/hover_scale_button.gd" id="16_hover"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_window_travel"]
 resource_local_to_scene = true
@@ -377,6 +378,7 @@ theme_override_styles/disabled = SubResource("StyleBoxTexture_button_disabled")
 theme_override_styles/focus = SubResource("StyleBoxTexture_button_hover")
 text = "New Game"
 alignment = 0
+script = ExtResource("16_hover")
 
 [node name="ContinueButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=1193259710]
 unique_name_in_owner = true
@@ -399,6 +401,7 @@ theme_override_styles/hover = SubResource("StyleBoxEmpty_menu")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_menu")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_menu")
 text = "Continue"
+script = ExtResource("16_hover")
 
 [node name="MirroredButtonArt" type="TextureRect" parent="UI/MenuPanel/MenuContent/ButtonStack/ContinueButton" unique_id=1650845522]
 editor_description = "Scene-authored alternating button mirror. Toggle Flip H here in the Inspector."
@@ -437,6 +440,7 @@ theme_override_styles/disabled = SubResource("StyleBoxTexture_button_disabled")
 theme_override_styles/focus = SubResource("StyleBoxTexture_button_hover")
 text = "Settings"
 alignment = 0
+script = ExtResource("16_hover")
 
 [node name="QuitButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=779991537]
 unique_name_in_owner = true
@@ -458,6 +462,7 @@ theme_override_styles/hover = SubResource("StyleBoxEmpty_menu")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_menu")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_menu")
 text = "Quit"
+script = ExtResource("16_hover")
 
 [node name="MirroredButtonArt" type="TextureRect" parent="UI/MenuPanel/MenuContent/ButtonStack/QuitButton" unique_id=1349954202]
 editor_description = "Scene-authored alternating button mirror. Toggle Flip H here in the Inspector."
@@ -549,6 +554,7 @@ popup/item_0/text = "Windowed"
 popup/item_0/id = 0
 popup/item_1/text = "Fullscreen"
 popup/item_1/id = 1
+script = ExtResource("16_hover")
 
 [node name="VsyncToggle" type="CheckButton" parent="UI/SettingsPanel/SettingsBox" unique_id=649322286]
 unique_name_in_owner = true
@@ -558,6 +564,7 @@ focus_neighbor_top = NodePath("DisplayMode")
 focus_neighbor_bottom = NodePath("SettingsBackButton")
 button_pressed = true
 text = "Vertical Sync"
+script = ExtResource("16_hover")
 
 [node name="Spacer" type="Control" parent="UI/SettingsPanel/SettingsBox" unique_id=956808955]
 layout_mode = 2
@@ -570,6 +577,7 @@ layout_mode = 2
 focus_neighbor_top = NodePath("VsyncToggle")
 focus_neighbor_bottom = NodePath("VolumeRow/VolumeSlider")
 text = "SAVE & BACK  [ESC]"
+script = ExtResource("16_hover")
 
 [node name="LoadingScreenUI" parent="." unique_id=723568613 instance=ExtResource("3")]
 unique_name_in_owner = true

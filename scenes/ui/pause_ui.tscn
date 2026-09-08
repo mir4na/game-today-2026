@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/pause_ui.gd" id="1_script"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" path="res://assets/ui/PauseMenu/OptionsText.png" id="4_options"]
 [ext_resource type="Texture2D" path="res://assets/ui/PauseMenu/Button.png" id="5_button"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_option_selector.tscn" id="6_selector"]
+[ext_resource type="Script" path="res://scripts/ui/hover_scale_button.gd" id="7_hover"]
 
 [sub_resource type="StyleBoxTexture" id="ActionButtonStyle"]
 texture = ExtResource("5_button")
@@ -168,6 +169,7 @@ theme_override_styles/hover = SubResource("ActionButtonStyle")
 theme_override_styles/pressed = SubResource("ActionButtonStyle")
 theme_override_styles/focus = SubResource("ActionButtonStyle")
 text = "Restart shift"
+script = ExtResource("7_hover")
 
 [node name="MainMenuButton" type="Button" parent="Ticket/Actions"]
 unique_name_in_owner = true
@@ -182,6 +184,7 @@ theme_override_styles/hover = SubResource("ActionButtonStyle")
 theme_override_styles/pressed = SubResource("ActionButtonStyle")
 theme_override_styles/focus = SubResource("ActionButtonStyle")
 text = "Main menu"
+script = ExtResource("7_hover")
 
 [node name="ServiceInfo" type="VBoxContainer" parent="Ticket"]
 layout_mode = 0

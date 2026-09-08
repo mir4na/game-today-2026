@@ -423,7 +423,7 @@ func set_cutscene_hidden(value: bool) -> void:
 func set_radar_active(value: bool) -> void:
 	_radar_active = value
 	_update_action_button_locks()
-	_radar_slot.call(&"set_item_tooltip", "Radar scan in progress" if value else "Carriage Radar  [2]")
+	_radar_slot.call(&"set_item_tooltip", "Radar scan in progress" if value else "Carriage Radar")
 
 
 func set_swiftstep_active(value: bool) -> void:
@@ -431,7 +431,7 @@ func set_swiftstep_active(value: bool) -> void:
 	_update_action_button_locks()
 	_swift_slot.call(
 		&"set_item_tooltip",
-		"Swiftstep is bending time" if value else "Swiftstep Soles  [3] — slow the world for 15 seconds"
+		"Swiftstep is bending time" if value else "Swiftstep Soles — slow the world for 15 seconds"
 	)
 
 

@@ -915,6 +915,7 @@ func _on_blocked_aisle_timer_timeout() -> void:
 	if is_instance_valid(blocked_connector):
 		_train.set_blocked_connector_effect(_player.global_position.x, blocked_connector.global_position.x)
 	_blocked_aisle_activated = true
+	_hud.notify("LUGGAGE IS BLOCKING A COACH CONNECTOR", 3.5)
 	_refresh_player_interactables()
 	_refresh_maintenance_trackers()
 
@@ -944,6 +945,7 @@ func _on_dirty_seat_timer_timeout() -> void:
 	_active_dirty_seat_event = vacant_candidates[_daily_rng.randi_range(0, vacant_candidates.size() - 1)]
 	_active_dirty_seat_event.call(&"set_event_active", true)
 	_dirty_seat_activated = true
+	_hud.notify("A PASSENGER SEAT NEEDS CLEANING", 3.5)
 	_clear_dropoff_assignments_for_dirty_seat()
 	_set_service_sealed(true)
 	_refresh_maintenance_trackers()

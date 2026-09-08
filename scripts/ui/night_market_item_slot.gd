@@ -6,13 +6,11 @@ signal tool_requested(tool_id: StringName)
 
 @export var tool_id: StringName
 @export var item_name: String = "Night Market item"
-@export_range(1, 3, 1) var shortcut_number: int = 1
 @export var amount_template: String = "×%d"
 @export_range(1.0, 1.2, 0.01) var hover_scale: float = 1.08
 @export_range(0.05, 0.3, 0.01) var hover_duration: float = 0.12
 
 @onready var _button: Button = %ItemButton
-@onready var _shortcut_label: Label = %ShortcutLabel
 @onready var _amount_label: Label = %AmountLabel
 
 var _owned_amount: int = 0
@@ -22,8 +20,7 @@ var _hover_tween: Tween
 
 func _ready() -> void:
 	pivot_offset = size * 0.5
-	_shortcut_label.text = str(shortcut_number)
-	_button.tooltip_text = "%s  [%d]" % [item_name, shortcut_number]
+	_button.tooltip_text = item_name
 	_button.mouse_entered.connect(_set_hovered.bind(true))
 	_button.mouse_exited.connect(_set_hovered.bind(false))
 	_refresh_presentation()

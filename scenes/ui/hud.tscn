@@ -18,9 +18,12 @@
 [ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="17_clock_font"]
 [ext_resource type="Material" path="res://resources/materials/hud_black_outline.tres" id="18_hud_outline"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_market_item_slot.tscn" id="19_market_slot"]
+[ext_resource type="Shader" uid="uid://b7v5jwqdcye4y" path="res://shaders/ui_texture_outline.gdshader" id="20_4mi7y"]
 [ext_resource type="Texture2D" uid="uid://2mae3aagu2ei" path="res://assets/nightmarket/Item_Audit.png" id="20_audit_item"]
 [ext_resource type="Texture2D" uid="uid://t3ymikc81x7u" path="res://assets/nightmarket/Item_Radar.png" id="21_radar_item"]
 [ext_resource type="Texture2D" uid="uid://bi2b0di5uipvm" path="res://assets/nightmarket/Item_Switft.png" id="22_swift_item"]
+[ext_resource type="Texture2D" uid="uid://d11pgqc341s0t" path="res://assets/ui/guidebook/Group 136.png" id="23_guidebook_button"]
+[ext_resource type="Script" path="res://scripts/ui/hover_scale_button.gd" id="24_hover"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_clock_pole_left"]
 atlas = ExtResource("7_cwdlq")
@@ -96,85 +99,27 @@ _data = {
 &"route_briefing": SubResource("Animation_clock_briefing")
 }
 
-[sub_resource type="StyleBoxFlat" id="GuidebookButtonNormal"]
-content_margin_left = 20.0
-content_margin_top = 12.0
-content_margin_right = 20.0
-content_margin_bottom = 12.0
-bg_color = Color(0.05, 0.07, 0.1, 0.92)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.752941, 0.603922, 0.380392, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[sub_resource type="StyleBoxEmpty" id="GuidebookButtonTransparent"]
 
-[sub_resource type="StyleBoxFlat" id="GuidebookButtonPressed"]
-content_margin_left = 20.0
-content_margin_top = 12.0
-content_margin_right = 20.0
-content_margin_bottom = 12.0
-bg_color = Color(0.025, 0.035, 0.05, 0.98)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.843137, 0.690196, 0.419608, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pkwgd"]
+resource_local_to_scene = true
+shader = ExtResource("20_4mi7y")
+shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
+shader_parameter/outline_size = 9.0
 
-[sub_resource type="StyleBoxFlat" id="GuidebookButtonHover"]
-content_margin_left = 20.0
-content_margin_top = 12.0
-content_margin_right = 20.0
-content_margin_bottom = 12.0
-bg_color = Color(0.11, 0.16, 0.22, 0.96)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.933333, 0.827451, 0.607843, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_d5po8"]
+resource_local_to_scene = true
+shader = ExtResource("20_4mi7y")
+shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
+shader_parameter/outline_size = 9.0
 
-[sub_resource type="StyleBoxFlat" id="ActionButtonDisabled"]
-content_margin_left = 20.0
-content_margin_top = 12.0
-content_margin_right = 20.0
-content_margin_bottom = 12.0
-bg_color = Color(0.105882, 0.109804, 0.117647, 0.92)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.454902, 0.454902, 0.454902, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7yoph"]
+resource_local_to_scene = true
+shader = ExtResource("20_4mi7y")
+shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
+shader_parameter/outline_size = 9.0
 
-[sub_resource type="StyleBoxFlat" id="NotificationStyle"]
-content_margin_left = 18.0
-content_margin_top = 14.0
-content_margin_right = 18.0
-content_margin_bottom = 14.0
-bg_color = Color(0.05, 0.07, 0.1, 0.96)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.843137, 0.690196, 0.419608, 1)
-corner_radius_top_left = 7
-corner_radius_top_right = 7
-corner_radius_bottom_right = 7
-corner_radius_bottom_left = 7
+[sub_resource type="StyleBoxEmpty" id="NotificationTextOnlyStyle"]
 
 [node name="HUD" type="CanvasLayer" unique_id=83627724]
 layer = 10
@@ -447,9 +392,9 @@ text_overrun_behavior = 3
 [node name="ClockFace" type="Control" parent="Root/ClockPanel" unique_id=2018867802]
 editor_description = "Centered clock face. Move this node to adjust the clock without disturbing the station sign."
 anchors_preset = 0
-offset_top = 120.5
+offset_top = 108.5
 offset_right = 350.0
-offset_bottom = 299.5
+offset_bottom = 287.5
 mouse_filter = 2
 
 [node name="ClockFaceOutline" type="TextureRect" parent="Root/ClockPanel/ClockFace" unique_id=1368557547]
@@ -559,33 +504,34 @@ libraries/ = SubResource("AnimationLibrary_clock_briefing")
 
 [node name="GuidebookButton" type="Button" parent="Root" unique_id=1411831653]
 unique_name_in_owner = true
-editor_description = "Bottom-left guidebook action. Position, size, copy, and styling are scene-authored and can be adjusted here."
+editor_description = "Bottom-left Guidebook action using the complete Group 136 artwork. Position, size, icon tint, and styling are scene-authored here."
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 28.0
-offset_top = -86.0
-offset_right = 248.0
-offset_bottom = -28.0
+offset_left = 18.0
+offset_top = -145.0
+offset_right = 130.0
+offset_bottom = -14.0
 grow_vertical = 0
-tooltip_text = "Open the conductor's guidebook"
+tooltip_text = "Open guidebook"
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_colors/font_pressed_color = Color(0.843137, 0.690196, 0.419608, 1)
-theme_override_colors/font_hover_color = Color(1, 0.956863, 0.827451, 1)
-theme_override_colors/font_disabled_color = Color(0.670588, 0.670588, 0.670588, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("GuidebookButtonNormal")
-theme_override_styles/pressed = SubResource("GuidebookButtonPressed")
-theme_override_styles/hover = SubResource("GuidebookButtonHover")
-theme_override_styles/disabled = SubResource("ActionButtonDisabled")
-text = "GUIDEBOOK   [TAB]"
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(0.82, 0.82, 0.86, 1)
+theme_override_colors/icon_hover_color = Color(1.08, 1.08, 1.08, 1)
+theme_override_colors/icon_disabled_color = Color(0.45, 0.45, 0.5, 0.72)
+theme_override_styles/normal = SubResource("GuidebookButtonTransparent")
+theme_override_styles/pressed = SubResource("GuidebookButtonTransparent")
+theme_override_styles/hover = SubResource("GuidebookButtonTransparent")
+theme_override_styles/disabled = SubResource("GuidebookButtonTransparent")
+icon = ExtResource("23_guidebook_button")
+expand_icon = true
+script = ExtResource("24_hover")
 
 [node name="MarketItemBar" type="VBoxContainer" parent="Root" unique_id=258053490]
 unique_name_in_owner = true
-editor_description = "Scene-authored Night Market inventory. Slots appear only while their item is owned; buttons map to number keys 1, 2, and 3."
+editor_description = "Scene-authored Night Market inventory. Slots appear only while their item is owned; shortcut numbers stay hidden from the HUD."
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
@@ -607,6 +553,7 @@ tool_id = &"audit_slip"
 item_name = "Audit Slip"
 
 [node name="Icon" parent="Root/MarketItemBar/AuditSlot" index="1"]
+material = SubResource("ShaderMaterial_pkwgd")
 texture = ExtResource("20_audit_item")
 
 [node name="RadarSlot" parent="Root/MarketItemBar" unique_id=943347102 instance=ExtResource("19_market_slot")]
@@ -614,9 +561,9 @@ unique_name_in_owner = true
 layout_mode = 2
 tool_id = &"radar_charge"
 item_name = "Carriage Radar"
-shortcut_number = 2
 
 [node name="Icon" parent="Root/MarketItemBar/RadarSlot" index="1"]
+material = SubResource("ShaderMaterial_d5po8")
 texture = ExtResource("21_radar_item")
 
 [node name="SwiftSlot" parent="Root/MarketItemBar" unique_id=2093275063 instance=ExtResource("19_market_slot")]
@@ -624,34 +571,44 @@ unique_name_in_owner = true
 layout_mode = 2
 tool_id = &"speed_upgrade"
 item_name = "Swiftstep Soles"
-shortcut_number = 3
 amount_template = "LV.%d"
 
 [node name="Icon" parent="Root/MarketItemBar/SwiftSlot" index="1"]
+material = SubResource("ShaderMaterial_7yoph")
 texture = ExtResource("22_swift_item")
 
 [node name="NotificationPanel" type="PanelContainer" parent="Root" unique_id=1320290712]
 unique_name_in_owner = true
+editor_description = "Text-only HUD announcement. Its position and transparent presentation are scene-authored here; there is intentionally no box behind it."
 visible = false
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -245.0
-offset_top = 42.0
-offset_right = 245.0
-offset_bottom = 112.0
+offset_left = -400.0
+offset_top = 48.0
+offset_right = 400.0
+offset_bottom = 108.0
 grow_horizontal = 2
-theme_override_styles/panel = SubResource("NotificationStyle")
+mouse_filter = 2
+theme_override_styles/panel = SubResource("NotificationTextOnlyStyle")
 
 [node name="NotificationLabel" type="Label" parent="Root/NotificationPanel" unique_id=2128017887]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_font_sizes/font_size = 20
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.972549, 0.890196, 0.713726, 1)
+theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.96)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.72)
+theme_override_constants/outline_size = 6
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 3
+theme_override_fonts/font = ExtResource("17_clock_font")
+theme_override_font_sizes/font_size = 23
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 2
 
 [connection signal="pressed" from="Root/GuidebookButton" to="." method="_on_guidebook_button_pressed"]
 [connection signal="tool_requested" from="Root/MarketItemBar/AuditSlot" to="." method="_on_market_item_requested"]

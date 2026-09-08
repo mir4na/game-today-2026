@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/night_market_ui.gd" id="1_script"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
@@ -17,6 +17,7 @@
 [ext_resource type="Texture2D" path="res://assets/nightmarket/Light_6.png" id="15_light6"]
 [ext_resource type="Texture2D" path="res://assets/nightmarket/Light_7.png" id="16_light7"]
 [ext_resource type="Texture2D" path="res://assets/nightmarket/Pintu.png" id="17_door"]
+[ext_resource type="Script" path="res://scripts/ui/hover_scale_button.gd" id="18_hover"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_background"]
 shader = ExtResource("3_background_shader")
@@ -497,6 +498,7 @@ offset_right = 1244.0
 offset_bottom = 135.0
 mouse_default_cursor_shape = 2
 text = "Begin night shift"
+script = ExtResource("18_hover")
 
 [connection signal="pressed" from="MarketActors/AuditEntrance/AuditFloat/AuditButton" to="." method="_on_audit_button_pressed"]
 [connection signal="pressed" from="MarketActors/RadarEntrance/RadarFloat/RadarButton" to="." method="_on_radar_button_pressed"]

@@ -336,10 +336,11 @@ Edition printed before the afternoon service departed."
 editor_description = "Scene-authored newspaper close text. Position, size, and Josefin typography are editable here."
 z_index = 10
 layout_mode = 0
-offset_left = 920.0
-offset_top = 18.0
-offset_right = 976.0
-offset_bottom = 74.0
+offset_left = 957.8095
+offset_top = 0.6190319
+offset_right = 1013.8095
+offset_bottom = 56.619034
+scale = Vector2(1.8, 1.8)
 tooltip_text = "Close newspaper [E]"
 
 [node name="CloseHint" type="Label" parent="Type1" unique_id=1359203138]

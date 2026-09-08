@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="1_font"]
+[ext_resource type="Script" path="res://scripts/ui/hover_scale_button.gd" id="2_hover"]
 
 [sub_resource type="StyleBoxFlat" id="CloseNormal"]
 content_margin_left = 0.0
@@ -77,6 +78,7 @@ theme_override_styles/pressed = SubResource("ClosePressed")
 theme_override_styles/focus = SubResource("CloseHover")
 theme_override_styles/disabled = SubResource("CloseDisabled")
 text = "X"
+script = ExtResource("2_hover")
 
 [node name="Glyph" type="Label" parent="."]
 unique_name_in_owner = true

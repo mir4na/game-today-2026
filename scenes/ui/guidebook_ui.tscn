@@ -122,6 +122,7 @@ mouse_filter = 2
 [node name="NextPage" type="Control" parent="Center" unique_id=1467108965]
 unique_name_in_owner = true
 editor_description = "Scene-authored next-section control using Vector 436 and Group 79."
+visible = false
 anchors_preset = 0
 offset_left = 939.3
 offset_top = 509.74
@@ -468,6 +469,7 @@ offset_left = 930.0
 offset_top = 14.0
 offset_right = 986.0
 offset_bottom = 70.0
+scale = Vector2(1.2, 1.2)
 tooltip_text = "Close guidebook [Tab / Esc]"
 
 [node name="PageTitle" type="Label" parent="Center/BookStage/Page" unique_id=1034829727]
