@@ -32,9 +32,6 @@ signal documents_requested(passenger: Passenger)
 @export var dead_shadow_offset: Vector2 = Vector2(9.0, 5.0)
 @export_range(1.0, 1.5, 0.01) var dead_shadow_scale: float = 1.12
 @export var dead_twitch_interval_seconds: Vector2 = Vector2(4.0, 8.0)
-@export_category("Radar Detection Presentation")
-@export_range(0.05, 1.0, 0.01) var radar_detection_fade_in_seconds: float = 0.18
-@export_range(0.05, 1.5, 0.01) var radar_detection_fade_out_seconds: float = 0.42
 var documents_checked: bool = false
 var night_mode: bool = false
 var departed: bool = false
@@ -66,7 +63,6 @@ var _dead_twitch_offset: Vector2 = Vector2.ZERO
 var _dead_twitch_rotation: float = 0.0
 var _escaping_navigation_blocker: bool = false
 var _settling_for_night: bool = false
-var _radar_detection_tween: Tween
 
 const PASSENGER_WALK_SPEED: float = 92.0
 
@@ -122,39 +118,6 @@ func interact() -> void:
 		return
 	documents_requested.emit(self)
 
-
-func show_radar_detection(duration: float) -> void:
-	if not is_instance_valid(_focus_material):
-		return
-	if is_instance_valid(_radar_detection_tween):
-		_radar_detection_tween.kill()
-	_focus_material.set_shader_parameter(&"radar_detection_strength", 0.0)
-	var hold_seconds: float = maxf(
-		0.0,
-		duration - radar_detection_fade_in_seconds - radar_detection_fade_out_seconds
-	)
-	_radar_detection_tween = create_tween()
-	_radar_detection_tween.tween_method(
-		_set_radar_detection_strength,
-		0.0,
-		1.0,
-		radar_detection_fade_in_seconds
-	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	_radar_detection_tween.tween_interval(hold_seconds)
-	_radar_detection_tween.tween_method(
-		_set_radar_detection_strength,
-		1.0,
-		0.0,
-		radar_detection_fade_out_seconds
-	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
-
-
-func _set_radar_detection_strength(value: float) -> void:
-	if is_instance_valid(_focus_material):
-		_focus_material.set_shader_parameter(
-			&"radar_detection_strength",
-			clampf(value, 0.0, 1.0)
-		)
 
 func get_dialogue_anchor() -> Node2D:
 	# Keep the scene-authored marker editable and attached to the animated visual.

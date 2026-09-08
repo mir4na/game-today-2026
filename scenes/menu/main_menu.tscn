@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b40w51ayqw254" path="res://scripts/menu/main_menu.gd" id="1"]
 [ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="2"]
-[ext_resource type="PackedScene" path="res://scenes/ui/loading_screen_ui.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://j5aa62op4yf5" path="res://scenes/ui/loading_screen_ui.tscn" id="3"]
 [ext_resource type="Texture2D" uid="uid://b6pdcpef2bsjy" path="res://assets/MainMenu/Background.png" id="4_background"]
 [ext_resource type="Texture2D" uid="uid://d4dwaetsv56u3" path="res://assets/MainMenu/HandGrip.png" id="5_handgrip"]
 [ext_resource type="Texture2D" uid="uid://c47i3vl54x2a6" path="res://assets/MainMenu/Character.png" id="7_character"]
@@ -294,9 +294,9 @@ anchors_preset = -1
 anchor_left = 0.464
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -15.0
+offset_top = -1.0
 offset_right = 12.0
-offset_bottom = 4.0
+offset_bottom = 18.0
 grow_horizontal = 0
 grow_vertical = 2
 pivot_offset = Vector2(343, 720)
@@ -351,7 +351,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="ButtonStack" type="Control" parent="UI/MenuPanel/MenuContent" unique_id=118907970]
-layout_mode = 0
+anchors_preset = 0
 offset_left = 230.0
 offset_top = 382.0
 offset_right = 540.0
@@ -571,16 +571,15 @@ focus_neighbor_top = NodePath("VsyncToggle")
 focus_neighbor_bottom = NodePath("VolumeRow/VolumeSlider")
 text = "SAVE & BACK  [ESC]"
 
-[node name="LoadingScreenUI" parent="." instance=ExtResource("3")]
+[node name="LoadingScreenUI" parent="." unique_id=723568613 instance=ExtResource("3")]
 unique_name_in_owner = true
 visible = false
 modulate = Color(1, 1, 1, 0)
+layout_mode = 1
 
-[node name="LoadingTransitionAnimation" type="AnimationPlayer" parent="."]
+[node name="LoadingTransitionAnimation" type="AnimationPlayer" parent="." unique_id=1326694017]
 unique_name_in_owner = true
-libraries = {
-&"": SubResource("AnimationLibrary_loading_transition")
-}
+libraries/ = SubResource("AnimationLibrary_loading_transition")
 
 [connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/StartButton" to="." method="_start_game"]
 [connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/ContinueButton" to="." method="_continue_game"]

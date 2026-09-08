@@ -50,7 +50,7 @@ polygon = PackedVector2Array(-48, 0, -44.346, -3.061, -33.941, -5.657, -18.369, 
 color = Color(0.05, 0.05, 0.06, 0.8)
 
 [node name="CharacterScale" type="CanvasGroup" parent="."]
-editor_description = "NPC artwork composite. Its scene-authored material controls interaction outlines, sealed grayscale, and the local red radar response."
+editor_description = "NPC artwork composite. Its scene-authored material controls interaction outlines and sealed grayscale."
 position = Vector2(0, 35.25)
 scale = Vector2(0.9, 0.9)
 material = ExtResource("2_outline")

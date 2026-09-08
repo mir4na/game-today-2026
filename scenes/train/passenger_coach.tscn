@@ -327,6 +327,10 @@ wheel_animation_path = NodePath("ArtRoot/Wheels/WheelAnimation")
 radar_scan_effect_path = NodePath("ArtRoot/RadarEffectBounds/RadarScanEffect")
 dirty_seat_events_root_path = NodePath("PassengerLayout/PassengerSeatSlots")
 blocked_grayscale_visual_group = &"blocked_carriage_visuals"
+radar_anomaly_light_color = Color(1, 0.015, 0.01, 1)
+radar_anomaly_energy_multiplier = 3.6
+radar_anomaly_fade_in_seconds = 0.22
+radar_anomaly_fade_out_seconds = 0.55
 
 [node name="PassengerLayout" type="Node2D" parent="." unique_id=1260823063]
 editor_description = "Shared passenger ground baseline. Move this node vertically in the Inspector to align every seat, activity, and boarding position without changing the train floor."

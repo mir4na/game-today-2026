@@ -41,6 +41,10 @@ var _station_environment_alpha: float = 1.0
 @onready var _station_sign: Node2D = %StationSign
 @onready var _station_name_label: Label = %StationName
 @onready var _frame_target: Marker2D = %FrameTarget
+@onready var _platform_baseline: Marker2D = %PlatformBaseline
+@onready var _left_entrance: Marker2D = %LeftEntrance
+@onready var _right_entrance: Marker2D = %RightEntrance
+@onready var _bottom_entrance: Marker2D = %BottomEntrance
 @onready var _station_camera: Camera2D = %StationCamera
 
 
@@ -141,6 +145,15 @@ func get_active_camera_scale() -> float:
 
 func get_station_environment_alpha() -> float:
 	return _station_environment_alpha
+
+
+func get_station_crowd_layout() -> Dictionary:
+	return {
+		"platform_baseline_y": _platform_baseline.global_position.y,
+		"left_entrance": _left_entrance.global_position,
+		"right_entrance": _right_entrance.global_position,
+		"bottom_entrance": _bottom_entrance.global_position,
+	}
 
 
 func finish() -> void:

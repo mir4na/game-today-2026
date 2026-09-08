@@ -85,7 +85,7 @@ manifest_config = ExtResource("37")
 maintenance_minigame_unlock_day = 1
 day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere")
 station_travel_durations_seconds = PackedFloat32Array(120, 120, 120, 120)
-radar_detection_seconds = 4.0
+radar_anomaly_light_seconds = 4.0
 debug_print_anomaly_roster = true
 night_shift_instruction = "Night shift
 Interview the deceased, then return to the ledger in the front passenger coach"

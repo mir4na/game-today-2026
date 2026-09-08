@@ -29,7 +29,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export_category("Market Tools")
 @export_range(0.25, 5.0, 0.05) var radar_scan_seconds: float = 1.6
 @export_range(0.1, 5.0, 0.05) var radar_result_reveal_seconds: float = 1.25
-@export_range(1.0, 30.0, 0.5) var radar_detection_seconds: float = 6.0
+@export_range(1.0, 30.0, 0.5) var radar_anomaly_light_seconds: float = 4.0
 @export_category("Newspaper")
 @export_enum("Random", "Force Non-Death", "Force Death") var newspaper_edition_mode: int = NewspaperEditionMode.RANDOM
 @export_category("Debug")
@@ -1215,30 +1215,43 @@ func _start_station_stop_cutscene(station_name: String, departing_actors: Array[
 		station_name,
 		_cinematic_camera_anchor
 	)
+	_station_stop_ui.set_station_crowd_layout(_station_cinematic_view.get_station_crowd_layout())
 	if terminal_arrival:
-		_station_stop_ui.play_terminal(departing_actors, _station_cutscene_door_markers())
+		_station_stop_ui.play_terminal(
+			departing_actors,
+			_station_cutscene_door_markers(),
+			_station_ambient_cutscene_actors(departing_actors)
+		)
 	else:
+		var excluded_exchange_actors: Array = departing_actors + boarding_actors
 		_station_stop_ui.play_stop(
 			station_name,
 			departing_actors,
 			boarding_actors,
 			_station_cutscene_door_markers(),
 			_station_cutscene_door_rest_positions(),
-			_station_ambient_cutscene_actors()
+			_station_ambient_cutscene_actors(excluded_exchange_actors)
 		)
 
 
-func _station_ambient_cutscene_actors() -> Array[Dictionary]:
-	# Platform extras use manifest identities that have not entered the train yet.
-	# This keeps the station populated without cloning a passenger who is already
-	# boarding, aboard, or leaving in the same shot.
+func _station_ambient_cutscene_actors(excluded_actors: Array = []) -> Array[Dictionary]:
+	# Reuse identities that are not present in this shot. Previously departed
+	# passengers may appear later as ordinary commuters, keeping every platform
+	# populated without cloning someone who is aboard, boarding, or disembarking.
 	var result: Array[Dictionary] = []
-	var spawned_data_ids: Dictionary = {}
+	var excluded_names: Dictionary = {}
+	for actor_data: Dictionary in excluded_actors:
+		excluded_names[String(actor_data.get("name", ""))] = true
+	var active_data_ids: Dictionary = {}
 	for passenger: Passenger in _passengers:
-		if is_instance_valid(passenger) and passenger.data != null:
-			spawned_data_ids[passenger.data.get_instance_id()] = true
+		if _is_active_passenger(passenger) and passenger.data != null:
+			active_data_ids[passenger.data.get_instance_id()] = true
 	for data: PassengerData in _daily_manifest:
-		if data == null or spawned_data_ids.has(data.get_instance_id()):
+		if (
+			data == null
+			or active_data_ids.has(data.get_instance_id())
+			or excluded_names.has(data.passenger_name)
+		):
 			continue
 		var actor_data: Dictionary = _passenger_data_cutscene_actor(data)
 		if not actor_data.is_empty():
@@ -1344,12 +1357,13 @@ func _on_day_intro_finished() -> void:
 	var opening_timeline: Vector3 = _station_stop_ui.get_opening_timeline()
 	_train.show_exterior_body(opening_timeline.x, opening_timeline.y, opening_timeline.z)
 	_station_cinematic_view.begin(_gameplay_camera, day_route[0], _cinematic_camera_anchor)
+	_station_stop_ui.set_station_crowd_layout(_station_cinematic_view.get_station_crowd_layout())
 	_station_stop_ui.play_opening(
 		day_route[0],
 		boarding_actors,
 		_station_cutscene_door_markers(),
 		_station_cutscene_door_rest_positions(),
-		_station_ambient_cutscene_actors()
+		_station_ambient_cutscene_actors(boarding_actors)
 	)
 
 func _on_station_cutscene_timeline_changed(elapsed: float) -> void:
@@ -1691,20 +1705,20 @@ func _use_carriage_radar() -> void:
 		return
 	if not bool(_market_tool_state.call(&"consume_radar_charge")):
 		return
-	# Snapshot the selected coach and the MC's scene-authored scan origin. Passenger
-	# movement and every other gameplay system remain active while the wave expands.
-	var anomaly_targets: Array[Passenger] = _get_anomalies_in_carriage(carriage_number)
-	var anomaly_detected: bool = not anomaly_targets.is_empty()
+	# Radar only reports whether this coach contains an anomaly. It never marks,
+	# outlines, or identifies the passenger responsible for the signal.
+	var anomaly_detected: bool = _carriage_has_anomaly(carriage_number)
 	var radar_origin: Vector2 = _player.get_radar_origin_world_position()
 	_radar_scan_active = true
 	_hud.set_radar_active(true)
 
+	_train.clear_radar_anomaly_signals()
 	_train.play_radar_scan(carriage_number, radar_scan_seconds, radar_origin)
-	await _reveal_radar_targets_during_scan(
-		carriage_number,
-		anomaly_targets,
-		radar_scan_seconds
-	)
+	await get_tree().create_timer(radar_scan_seconds, false).timeout
+	if not _radar_scan_active:
+		return
+	if anomaly_detected:
+		_train.show_radar_anomaly_signal(carriage_number, radar_anomaly_light_seconds)
 
 	# This timer follows the normal pause state, so opening the pause menu also
 	# pauses the radar phase along with the rest of gameplay.
@@ -1712,17 +1726,9 @@ func _use_carriage_radar() -> void:
 
 	_radar_scan_active = false
 	_hud.set_radar_active(false)
-	if anomaly_detected:
-		_hud.notify(
-			"RADAR POSITIVE\nANOMALY SIGNAL DETECTED IN COACH %d" % carriage_number,
-			minf(radar_detection_seconds, 3.5)
-		)
-	else:
-		_hud.notify("RADAR CLEAR\nNO ANOMALY SIGNAL IN COACH %d" % carriage_number, 3.5)
 
 
-func _get_anomalies_in_carriage(carriage_number: int) -> Array[Passenger]:
-	var result: Array[Passenger] = []
+func _carriage_has_anomaly(carriage_number: int) -> bool:
 	for passenger: Passenger in _passengers:
 		if (
 			_is_active_passenger(passenger)
@@ -1730,43 +1736,8 @@ func _get_anomalies_in_carriage(carriage_number: int) -> Array[Passenger]:
 			and passenger.data != null
 			and passenger.data.is_dead
 		):
-			result.append(passenger)
-	return result
-
-
-func _reveal_radar_targets_during_scan(
-	carriage_number: int,
-	targets: Array[Passenger],
-	duration: float
-) -> void:
-	var reveal_schedule: Array[Dictionary] = []
-	for passenger: Passenger in targets:
-		if not is_instance_valid(passenger):
-			continue
-		reveal_schedule.append({
-			"passenger": passenger,
-			"delay": duration * _train.get_radar_scan_crossing_progress(
-				carriage_number,
-				passenger.get_interaction_world_position()
-			),
-		})
-	reveal_schedule.sort_custom(
-		func(left: Dictionary, right: Dictionary) -> bool:
-			return float(left.get("delay", 0.0)) < float(right.get("delay", 0.0))
-	)
-	var elapsed: float = 0.0
-	for reveal: Dictionary in reveal_schedule:
-		var reveal_delay: float = clampf(float(reveal.get("delay", duration)), elapsed, duration)
-		if reveal_delay > elapsed:
-			await get_tree().create_timer(reveal_delay - elapsed, false).timeout
-		elapsed = reveal_delay
-		if not _radar_scan_active:
-			return
-		var passenger := reveal.get("passenger") as Passenger
-		if is_instance_valid(passenger) and _is_active_passenger(passenger):
-			passenger.show_radar_detection(radar_detection_seconds)
-	if elapsed < duration:
-		await get_tree().create_timer(duration - elapsed, false).timeout
+			return true
+	return false
 
 func _enter_night() -> void:
 	_prepare_night_world()
