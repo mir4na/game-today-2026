@@ -64,6 +64,7 @@ func set_event_active(value: bool, observer_global_x: float = NAN) -> void:
 		_reset_visual_animation()
 		hide()
 	enabled = value
+	refresh_interaction_outline()
 	_set_collision_enabled(_door_blocker_collision, value)
 	_set_collision_enabled(_interaction_collision, value)
 	_set_collision_enabled(_npc_exclusion_collision, value)
@@ -74,6 +75,7 @@ func mark_solved() -> void:
 		return
 	_resolved = true
 	enabled = false
+	refresh_interaction_outline()
 	_set_collision_enabled(_door_blocker_collision, false)
 	_set_collision_enabled(_interaction_collision, false)
 	_set_collision_enabled(_npc_exclusion_collision, false)

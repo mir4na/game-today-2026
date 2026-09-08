@@ -9,6 +9,8 @@ unique_name_in_owner = true
 editor_description = "Station arrival shot. The camera zoom matches the centered 1920x1080 station art at its reduced 70% world scale."
 script = ExtResource("1_view")
 return_duration = 1.1
+station_fade_start_progress = 0.08
+station_fade_end_progress = 0.82
 
 [node name="StationBackdrop" type="Node2D" parent="."]
 unique_name_in_owner = true
@@ -41,11 +43,11 @@ texture = ExtResource("2_station")
 position = Vector2(1920, 0)
 texture = ExtResource("2_station")
 
-[node name="StationSignLayer" type="CanvasLayer" parent="."]
+[node name="StationSignLayer" type="Node2D" parent="."]
 unique_name_in_owner = true
 visible = false
-layer = 21
-follow_viewport_enabled = true
+z_index = 70
+z_as_relative = false
 
 [node name="StationSign" type="Node2D" parent="StationSignLayer"]
 unique_name_in_owner = true

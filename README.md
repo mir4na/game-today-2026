@@ -91,7 +91,7 @@ Every static hierarchy and visual is scene-owned: menu panels and backdrop, HUD 
 
 The runtime never writes into passenger Resources, so the same data can safely be reused by UI and visual nodes.
 
-The current roster contains 17 unique visual profiles: NPC 1, 3, 4, 6, 7, 9, 11, 14, 15, and 17 are female; the remaining profiles are male. NPC 18 was removed because it duplicated NPC 10.
+The current roster contains 16 unique visual profiles: NPC 1, 3, 4, 6, 7, 9, 11, 14, and 15 are female; the remaining profiles are male. NPC 18 was removed because it duplicated NPC 10.
 
 ### Document formats
 

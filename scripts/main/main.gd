@@ -131,6 +131,7 @@ var _radar_scan_active: bool = false
 @onready var _station_cinematic_view: StationCinematicView = %StationCinematicView
 @onready var _train_occupants: Node2D = %TrainOccupants
 @onready var _gameplay_camera: Camera2D = $GameplayWorld/TrainOccupants/PlayerSpawnPoint/Player/Camera2D
+@onready var _cinematic_camera_anchor: Marker2D = $GameplayWorld/TrainOccupants/PlayerSpawnPoint/Player/CinematicCameraAnchor
 @onready var _railroad_ui_layer: CanvasLayer = $RailroadUILayer
 @onready var _sky_gradient: ColorRect = %NightSkyOverlay
 @onready var _night_atmosphere: ColorRect = %NightAtmosphere
@@ -865,7 +866,6 @@ func _on_blocked_aisle_timer_timeout() -> void:
 	_blocked_aisle_activated = true
 	_refresh_player_interactables()
 	_refresh_maintenance_trackers()
-	_hud.notify("LUGGAGE HAS BLOCKED A COACH CONNECTOR\nFind the obstruction and repack it", 4.0)
 
 
 func _on_dirty_seat_timer_timeout() -> void:
@@ -1209,7 +1209,11 @@ func _start_station_stop_cutscene(station_name: String, departing_actors: Array[
 	_set_station_foreground_hidden(true)
 	var stop_timeline: Vector3 = _station_stop_ui.get_stop_timeline()
 	_train.show_exterior_body(stop_timeline.x, stop_timeline.y, stop_timeline.z)
-	_station_cinematic_view.begin(_gameplay_camera, "" if terminal_arrival else station_name)
+	_station_cinematic_view.begin(
+		_gameplay_camera,
+		"" if terminal_arrival else station_name,
+		_cinematic_camera_anchor
+	)
 	if terminal_arrival:
 		_station_stop_ui.play_terminal(departing_actors, _station_cutscene_door_markers())
 	else:
@@ -1331,7 +1335,7 @@ func _on_day_intro_finished() -> void:
 	_set_station_foreground_hidden(true)
 	var opening_timeline: Vector3 = _station_stop_ui.get_opening_timeline()
 	_train.show_exterior_body(opening_timeline.x, opening_timeline.y, opening_timeline.z)
-	_station_cinematic_view.begin(_gameplay_camera, day_route[0])
+	_station_cinematic_view.begin(_gameplay_camera, day_route[0], _cinematic_camera_anchor)
 	_station_stop_ui.play_opening(
 		day_route[0],
 		boarding_actors,
@@ -1344,6 +1348,10 @@ func _on_station_cutscene_timeline_changed(elapsed: float) -> void:
 	_train.set_station_arrival_progress(_station_stop_ui.get_arrival_progress())
 	_train.set_station_departure_progress(_station_stop_ui.get_departure_progress())
 	_station_cinematic_view.update_arrival(elapsed, _station_stop_ui.get_active_arrival_end())
+	_station_stop_ui.set_world_camera_scale(_station_cinematic_view.get_active_camera_scale())
+	_station_stop_ui.set_station_environment_alpha(
+		_station_cinematic_view.get_station_environment_alpha()
+	)
 
 
 func _on_station_cutscene_camera_return_started() -> void:

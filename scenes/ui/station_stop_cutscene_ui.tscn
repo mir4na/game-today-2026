@@ -223,6 +223,7 @@ screen_fade_duration = 0.85
 platform_vertical_offset = 78.0
 platform_horizontal_offset = 82.0
 door_visibility_margin = 48.0
+actor_world_scale_multiplier = 1.0
 stop_duration = 16.19043
 stop_deceleration_start = 2.0
 stop_arrival_end = 6.690431

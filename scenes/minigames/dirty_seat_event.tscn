@@ -27,6 +27,9 @@ enabled = false
 prompt_anchor_path = NodePath("InteractionPromptAnchor")
 focus_visual_path = NodePath("StainVisual")
 raise_on_focus = false
+outline_while_enabled = true
+passive_outline_color = Color(0.015, 0.018, 0.024, 1)
+passive_outline_width = 5.0
 interaction_origin_path = NodePath("InteractionCollision")
 
 [node name="InteractionPromptAnchor" type="Marker2D" parent="." unique_id=626334026]

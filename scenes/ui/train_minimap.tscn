@@ -18,8 +18,6 @@ carriage_numbers = PackedInt32Array(4, 3, 2, 1)
 slot_paths = Array[NodePath]([NodePath("Slot0"), NodePath("Slot1"), NodePath("Slot2"), NodePath("Slot3")])
 active_carriage_texture = ExtResource("2_active")
 inactive_carriage_texture = ExtResource("3_inactive")
-active_carriage_modulate = Color(1, 1, 1, 1)
-inactive_carriage_modulate = Color(0.48, 0.52, 0.6, 0.78)
 selected_marker_color = Color(0.0941176, 0.12549, 0.168627, 1)
 normal_marker_color = Color(0.941176, 0.811765, 0.552941, 1)
 

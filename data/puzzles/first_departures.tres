@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-night_stations = PackedStringArray("Mistvale", "Ashmoor", "Hearth", "Dawnreach")
+night_stations = PackedStringArray("Vesperwick", "Hollowcross", "Bellhaven", "Morrowfield")
 anomaly_descriptor_by_type = {
 "newspaper_death": "the passenger whose death appeared in the newspaper",
 "portrait_mismatch": "the passenger whose ID portrait belongs to someone else",

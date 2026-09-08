@@ -36,6 +36,9 @@ enabled = false
 interaction_origin_path = NodePath("InteractionCollision")
 prompt_anchor_path = NodePath("LuggageVisual/InteractionPromptAnchor")
 focus_visual_path = NodePath("LuggageVisual")
+outline_while_enabled = true
+passive_outline_color = Color(0.015, 0.018, 0.024, 1)
+passive_outline_width = 5.0
 
 [node name="PlacementAnchors" type="Node2D" parent="." unique_id=2006043616]
 editor_description = "Move these anchors in the Inspector to control which side of the doorway receives the luggage pile."

@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/ui/maintenance_tracker.gd" id="1_tracker"]
 [ext_resource type="Texture2D" path="res://assets/ui/dialogue_pointer.png" id="2_pointer"]
 [ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="4_theme"]
+[ext_resource type="Material" path="res://resources/materials/hud_black_outline.tres" id="5_outline"]
 
 [sub_resource type="StyleBoxFlat" id="TrackerBubbleStyle"]
 bg_color = Color(0.0588235, 0.0862745, 0.117647, 0.96)
@@ -39,6 +40,7 @@ mouse_filter = 2
 theme_override_styles/panel = SubResource("TrackerBubbleStyle")
 
 [node name="Icon" type="TextureRect" parent="."]
+material = ExtResource("5_outline")
 layout_mode = 0
 offset_left = 16.0
 offset_top = 14.0
@@ -49,6 +51,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Pointer" type="TextureRect" parent="."]
+material = ExtResource("5_outline")
 layout_mode = 0
 offset_left = 27.0
 offset_top = 57.0

@@ -56,6 +56,7 @@ func set_event_active(value: bool) -> void:
 	_resolved = false if value else _resolved
 	visible = value
 	enabled = value
+	refresh_interaction_outline()
 	if is_instance_valid(_interaction_collision):
 		_interaction_collision.set_deferred(&"disabled", not value)
 	_set_collision_enabled(_npc_exclusion_collision, value)
@@ -66,6 +67,7 @@ func mark_solved() -> void:
 		return
 	_resolved = true
 	enabled = false
+	refresh_interaction_outline()
 	if is_instance_valid(_interaction_collision):
 		_interaction_collision.set_deferred(&"disabled", true)
 	_set_collision_enabled(_npc_exclusion_collision, false)

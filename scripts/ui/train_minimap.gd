@@ -7,8 +7,6 @@ extends Control
 @export_category("Carriage State Textures")
 @export var active_carriage_texture: Texture2D
 @export var inactive_carriage_texture: Texture2D
-@export var active_carriage_modulate: Color = Color.WHITE
-@export var inactive_carriage_modulate: Color = Color(0.48, 0.52, 0.6, 0.78)
 @export_category("Passenger Marker Colors")
 @export var selected_marker_color: Color
 @export var normal_marker_color: Color
@@ -62,7 +60,7 @@ func _refresh() -> void:
 		var box := slot.get_node("Box") as TextureRect
 		var marker_label := slot.get_node("Box/MarkerLabel") as Label
 		box.texture = active_carriage_texture if selected else inactive_carriage_texture
-		box.modulate = active_carriage_modulate if selected else inactive_carriage_modulate
+		box.modulate = Color.WHITE
 		marker_label.modulate = selected_marker_color if selected else normal_marker_color
 		var passenger_count: int = int(_passenger_counts_by_carriage.get(carriage_number, 0))
 		marker_label.text = _marker_text(mini(passenger_count, 10))

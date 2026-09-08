@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-total_passenger_count = 17
+total_passenger_count = 16
 initial_passenger_count = 8
 maximum_onboard_passenger_count = 12
 female_passenger_names = PackedStringArray("Eleni", "Daphne", "Irene", "Kalliope", "Melina", "Nefeli", "Thalia", "Xenia", "Zoe", "Anthea", "Ariadne", "Despina", "Lydia", "Penelope", "Helena", "Dimitra", "Georgia", "Myrto")
@@ -19,5 +19,5 @@ invalid_service_dates_by_day_code = {
 "270607": "07 JUN 2027"
 }
 anomaly_types = PackedStringArray("shadowless", "unlisted_destination", "portrait_mismatch", "time_invalid_ticket", "newspaper_death")
-unlisted_destination_names = PackedStringArray("Mistvale", "Greyhaven", "Hollowfen")
+unlisted_destination_names = PackedStringArray("Vesperwick", "Greyhaven", "Hollowfen")
 ai_behaviors = PackedStringArray("still", "wander", "carriage_roamer", "window_watcher", "restless")

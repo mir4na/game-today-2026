@@ -127,3 +127,7 @@ position = Vector2(0, -36)
 editor_description = "Gameplay framing. Negative Position Y places the train lower on screen. World limits are supplied by CameraBounds/Min and Max in Main."
 position = Vector2(0, -40)
 zoom = Vector2(1.35, 1.35)
+
+[node name="CinematicCameraAnchor" type="Marker2D" parent="."]
+editor_description = "Scene-authored camera target used when a station cutscene moves back toward the MC. Keep it aligned with Camera2D by default; move it to tune the cinematic handoff framing."
+position = Vector2(0, -40)

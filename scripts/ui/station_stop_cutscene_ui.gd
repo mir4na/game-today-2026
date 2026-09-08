@@ -42,7 +42,7 @@ signal boarding_actor_entered(actor_id: int, door_screen_position: Vector2)
 @export_range(45.0, 140.0, 1.0) var platform_vertical_offset: float = 78.0
 @export_range(20.0, 120.0, 1.0) var platform_horizontal_offset: float = 82.0
 @export_range(0.0, 160.0, 1.0) var door_visibility_margin: float = 48.0
-@export_range(0.2, 1.0, 0.05) var zoomed_out_actor_scale: float = 0.45
+@export_range(0.5, 1.5, 0.05) var actor_world_scale_multiplier: float = 1.0
 @export_range(0.0, 12.0, 0.05) var departing_start_time: float = 7.390431
 @export_range(0.02, 0.6, 0.01) var departing_stagger_min: float = 0.1
 @export_range(0.02, 0.6, 0.01) var departing_stagger_max: float = 0.22
@@ -102,6 +102,8 @@ var _departure_blocked: bool = false
 var _entered_boarding_actor_indices: Dictionary = {}
 var _ambient_elapsed: float = 0.0
 var _ambient_platform_y_cache: float = NAN
+var _world_camera_scale: float = 1.0
+var _station_environment_alpha: float = 1.0
 var _motion_rng := RandomNumberGenerator.new()
 
 @onready var _actor_slots: Array[Node2D] = [
@@ -190,6 +192,14 @@ func get_departure_progress() -> float:
 
 func set_departure_blocked(blocked: bool) -> void:
 	_departure_blocked = blocked
+
+
+func set_world_camera_scale(value: float) -> void:
+	_world_camera_scale = maxf(value, 0.001)
+
+
+func set_station_environment_alpha(value: float) -> void:
+	_station_environment_alpha = clampf(value, 0.0, 1.0)
 
 
 func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], boarding_actors: Array[Dictionary], door_markers: Dictionary, ambient_actors: Array[Dictionary]) -> void:
@@ -540,7 +550,7 @@ func _update_exchange_actors() -> void:
 			actor_position,
 			_walk_rotation(progress, profile),
 			float(profile["side"]),
-			_smoothstep(0.08, doorway_step_ratio, progress),
+			_smoothstep(0.08, doorway_step_ratio, progress) * _station_environment_alpha,
 			1.0,
 			1.0
 		)
@@ -574,7 +584,7 @@ func _update_exchange_actors() -> void:
 			actor_position,
 			_walk_rotation(progress, profile),
 			-float(profile["side"]),
-			1.0,
+			_station_environment_alpha,
 			1.0,
 			1.0
 		)
@@ -611,7 +621,7 @@ func _update_ambient_actors(first_slot_index: int) -> void:
 			actor_position,
 			_walk_rotation(progress, profile),
 			direction,
-			1.0,
+			_station_environment_alpha,
 			1.0,
 			ambient_walk_speed_scale
 		)
@@ -816,7 +826,10 @@ func _set_actor_slot(slot_index: int, actor_data: Dictionary, actor_position: Ve
 	slot.position = actor_position
 	slot.rotation = actor_rotation
 	slot.modulate.a = clampf(visibility, 0.0, 1.0)
-	slot.scale = Vector2.ONE * zoomed_out_actor_scale * transition_scale
+	# Actor slots live in screen space while the train and station live in world
+	# space. Apply the active canvas zoom so people grow and shrink with the train
+	# throughout the camera move instead of remaining miniature on screen.
+	slot.scale = Vector2.ONE * _world_camera_scale * actor_world_scale_multiplier * transition_scale
 	slot.visible = true
 
 
