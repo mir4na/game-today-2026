@@ -3,17 +3,16 @@ extends CanvasLayer
 ## Persistent, low-profile HUD. Modal screens live in sibling UI scenes.
 
 signal guidebook_requested
-signal radar_requested
 signal debug_next_station_requested
+signal market_tool_requested(tool_id: StringName)
 
 @export_category("Inspector Copy")
 @export var clock_template: String = "%02d:%02d %s"
-@export var tool_status_template: String = "BLESSINGS %d\nAUDIT ×%d  •  SPEED LV.%d"
-@export var radar_button_template: String = "ACTIVATE RADAR   [R]  ×%d"
+@export var tool_status_template: String = "BLESSINGS %d"
 @export_category("Journey Clock")
 @export_range(0.0, 1440.0, 1.0) var clock_default_start_minutes: float = 840.0
 @export_range(0.0, 1440.0, 1.0) var clock_default_end_minutes: float = 1320.0
-@export_range(-180.0, 180.0, 0.1) var clock_pointer_start_degrees: float = -26.96
+@export_range(-180.0, 180.0, 0.1) var clock_pointer_start_degrees: float = -29.8
 @export_range(1.0, 90.0, 0.5) var clock_degrees_per_stop: float = 36.0
 @export_range(1, 12, 1) var clock_stop_count: int = 5
 @export_range(0.1, 1.5, 0.05) var clock_station_step_duration: float = 0.5
@@ -45,7 +44,7 @@ signal debug_next_station_requested
 @onready var _clock_sign_assembly: Control = $Root/ClockPanel/ClockSignAssembly
 @onready var _clock_briefing_animation: AnimationPlayer = %ClockBriefingAnimation
 @onready var _clock_fill: TextureRect = %ClockFilled
-@onready var _clock_pointer: TextureRect = %ClockPointer
+@onready var _clock_pointer_pivot: Control = %ClockNeedlePivot
 @onready var _next_stop_title: Label = %NextStopTitle
 @onready var _next_stop_label: Label = %NextStopLabel
 @onready var _clock_symbol_pivot: Control = %ClockSymbolPivot
@@ -58,8 +57,11 @@ signal debug_next_station_requested
 @onready var _notification_label: Label = %NotificationLabel
 @onready var _tool_status_label: Label = %ToolStatusLabel
 @onready var _guidebook_button: Button = %GuidebookButton
-@onready var _radar_button: Button = %RadarButton
 @onready var _debug_next_station_button: Button = %DebugNextStationButton
+@onready var _market_item_bar: VBoxContainer = %MarketItemBar
+@onready var _audit_slot: Control = %AuditSlot
+@onready var _radar_slot: Control = %RadarSlot
+@onready var _swift_slot: Control = %SwiftSlot
 @onready var _maintenance_trackers: Array[Control] = [
 	$Root/MaintenanceTrackers/TrackerPrimary,
 	$Root/MaintenanceTrackers/TrackerSecondary,
@@ -77,12 +79,14 @@ var _clock_progress: float = 0.0
 var _clock_target_progress: float = -1.0
 var _service_sealed: bool = false
 var _radar_active: bool = false
+var _swiftstep_active: bool = false
 
 const CLOCK_FILL_ARC_DEGREES: float = 180.0
 
 func _ready() -> void:
 	_clock_sign_assembly.hide()
 	_debug_next_station_button.visible = false
+	set_swiftstep_active(false)
 
 func _process(delta: float) -> void:
 	_prompt_wobble_time += delta
@@ -136,7 +140,7 @@ func _apply_clock_progress(progress: float) -> void:
 			&"progress",
 			clampf(traveled_degrees / CLOCK_FILL_ARC_DEGREES, 0.0, 1.0)
 		)
-	_clock_pointer.rotation = deg_to_rad(
+	_clock_pointer_pivot.rotation = deg_to_rad(
 		clock_pointer_start_degrees + traveled_degrees
 	)
 
@@ -215,12 +219,22 @@ func set_passenger_counts_by_carriage(counts: Dictionary) -> void:
 
 
 func set_market_tool_inventory(snapshot: Dictionary) -> void:
-	_tool_status_label.text = tool_status_template % [
-		int(snapshot.get("blessings", 0)),
-		int(snapshot.get("audit_slips", 0)),
-		int(snapshot.get("speed_level", 0))
-	]
-	_radar_button.text = radar_button_template % int(snapshot.get("radar_charges", 0))
+	_tool_status_label.text = tool_status_template % int(snapshot.get("blessings", 0))
+	_audit_slot.call(&"set_owned_amount", int(snapshot.get("audit_slips", 0)))
+	_radar_slot.call(&"set_owned_amount", int(snapshot.get("radar_charges", 0)))
+	_swift_slot.call(&"set_owned_amount", int(snapshot.get("speed_level", 0)))
+	_update_action_button_locks()
+
+
+func request_market_item(shortcut_number: int) -> bool:
+	match shortcut_number:
+		1:
+			return bool(_audit_slot.call(&"request_use"))
+		2:
+			return bool(_radar_slot.call(&"request_use"))
+		3:
+			return bool(_swift_slot.call(&"request_use"))
+	return false
 
 
 func set_maintenance_targets(target_entries: Array[Dictionary]) -> void:
@@ -425,7 +439,7 @@ func set_day_hud_visible(value: bool) -> void:
 		_clock_briefing_animation.stop()
 		_clock_sign_assembly.hide()
 	_tool_status_label.visible = value
-	_radar_button.visible = value
+	_market_item_bar.visible = value
 	_floating_prompt.visible = value and not _prompt_label.text.is_empty()
 	# The train minimap remains visible through the night walk.
 
@@ -446,7 +460,16 @@ func set_cutscene_hidden(value: bool) -> void:
 func set_radar_active(value: bool) -> void:
 	_radar_active = value
 	_update_action_button_locks()
-	_radar_button.tooltip_text = "Radar scan in progress" if value else "Scan the current passenger coach"
+	_radar_slot.call(&"set_item_tooltip", "Radar scan in progress" if value else "Carriage Radar")
+
+
+func set_swiftstep_active(value: bool) -> void:
+	_swiftstep_active = value
+	_update_action_button_locks()
+	_swift_slot.call(
+		&"set_item_tooltip",
+		"Swiftstep is bending time" if value else "Swiftstep Soles — slow the world for 15 seconds"
+	)
 
 
 func set_service_sealed(value: bool) -> void:
@@ -456,15 +479,17 @@ func set_service_sealed(value: bool) -> void:
 
 func _update_action_button_locks() -> void:
 	_guidebook_button.disabled = _service_sealed
-	_radar_button.disabled = _service_sealed or _radar_active
+	_audit_slot.call(&"set_interaction_locked", _service_sealed)
+	_radar_slot.call(&"set_interaction_locked", _service_sealed or _radar_active)
+	_swift_slot.call(&"set_interaction_locked", _service_sealed or _swiftstep_active)
 
 
 func _on_guidebook_button_pressed() -> void:
 	guidebook_requested.emit()
 
 
-func _on_radar_button_pressed() -> void:
-	radar_requested.emit()
+func _on_market_item_requested(tool_id: StringName) -> void:
+	market_tool_requested.emit(tool_id)
 
 
 func _on_debug_next_station_button_pressed() -> void:
@@ -476,7 +501,7 @@ func set_night_walk_mode() -> void:
 	_clock_sign_assembly.hide()
 	_clock_panel.show()
 	_tool_status_label.visible = true
-	_radar_button.visible = true
+	_market_item_bar.visible = true
 	_floating_prompt.visible = not _prompt_label.text.is_empty()
 
 func notify(message: String, seconds: float = 3.0) -> void:

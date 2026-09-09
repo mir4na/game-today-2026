@@ -14,6 +14,7 @@ var _night_strength: float = 0.0
 var _day_cycle_progress: float = 0.0
 var _sway_time: float = 0.0
 var _motion_strength: float = 1.0
+var _world_time_scale: float = 1.0
 var _carriages: Array[CarriageVisual] = []
 var _cars_station_rest_position: Vector2
 var _station_arrival_progress: float = 1.0
@@ -34,8 +35,9 @@ func _ready() -> void:
 	_exterior_sequence.hide()
 
 func _process(delta: float) -> void:
-	_sway_time += delta * _motion_strength
-	_scroll = fmod(_scroll + delta * lerpf(95.0, 48.0, _night_strength) * _motion_strength, 10000.0)
+	var world_delta: float = delta * _world_time_scale
+	_sway_time += world_delta * _motion_strength
+	_scroll = fmod(_scroll + world_delta * lerpf(95.0, 48.0, _night_strength) * _motion_strength, 10000.0)
 	for carriage: CarriageVisual in _carriages:
 		carriage.set_environment(_scroll, _night_strength, _day_cycle_progress, _sway_time)
 		if _exterior_sequence.visible:
@@ -54,7 +56,13 @@ func set_day_cycle_progress(value: float) -> void:
 func set_motion_strength(value: float) -> void:
 	_motion_strength = clampf(value, 0.0, 1.0)
 	for carriage: CarriageVisual in _carriages:
-		carriage.set_motion_strength(_motion_strength)
+		carriage.set_motion_strength(_motion_strength * _world_time_scale)
+
+
+func set_world_time_scale(value: float) -> void:
+	_world_time_scale = clampf(value, 0.05, 1.0)
+	for carriage: CarriageVisual in _carriages:
+		carriage.set_motion_strength(_motion_strength * _world_time_scale)
 
 
 func set_blocked_connector_effect(observer_world_x: float, connector_world_x: float, immediate: bool = false) -> void:

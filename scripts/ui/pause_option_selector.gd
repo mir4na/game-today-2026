@@ -26,10 +26,6 @@ func _ready() -> void:
 	_label.text = option_label
 	_left_button.pressed.connect(_request_step.bind(-1))
 	_right_button.pressed.connect(_request_step.bind(1))
-	_left_button.mouse_entered.connect(_preview_focus.bind(-1))
-	_right_button.mouse_entered.connect(_preview_focus.bind(1))
-	_left_button.focus_entered.connect(_preview_focus.bind(-1))
-	_right_button.focus_entered.connect(_preview_focus.bind(1))
 	_slider.connect(&"value_changed", _on_slider_value_changed)
 	_slider.mouse_entered.connect(_preview_slider_focus)
 	_slider.focus_entered.connect(_preview_slider_focus)
@@ -97,13 +93,6 @@ func _on_slider_value_changed(value: int) -> void:
 
 func _preview_slider_focus() -> void:
 	_preview_control(_slider, 1.035)
-
-
-func _preview_focus(direction: int) -> void:
-	if _pulse_tween and _pulse_tween.is_valid():
-		return
-	var arrow: TextureButton = _left_button if direction < 0 else _right_button
-	_preview_control(arrow, 1.18)
 
 
 func _preview_control(control: Control, target_scale: float) -> void:

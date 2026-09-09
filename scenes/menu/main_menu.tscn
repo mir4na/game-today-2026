@@ -15,6 +15,7 @@
 [ext_resource type="Shader" uid="uid://c3brnqlmhxjre" path="res://shaders/main_menu_color_grade.gdshader" id="15_color_grade"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_ui.tscn" id="16_settings_ui"]
 [ext_resource type="AudioStream" uid="uid://cvebdtih26t64" path="res://assets/sfx/Train Sfx.ogg" id="17_train_sfx"]
+[ext_resource type="Script" path="res://scripts/ui/hover_scale_button.gd" id="18_hover"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_window_travel"]
 resource_local_to_scene = true
@@ -244,6 +245,7 @@ script = ExtResource("1")
 unique_name_in_owner = true
 stream = ExtResource("17_train_sfx")
 volume_db = -24.0
+bus = &"SFX"
 
 [node name="Background" type="TextureRect" parent="." unique_id=414121816]
 layout_mode = 1
@@ -368,6 +370,7 @@ theme_override_styles/disabled = SubResource("StyleBoxTexture_button_disabled")
 theme_override_styles/focus = SubResource("StyleBoxTexture_button_hover")
 text = "New Game"
 alignment = 0
+script = ExtResource("18_hover")
 
 [node name="ContinueButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=1193259710]
 unique_name_in_owner = true
@@ -390,6 +393,7 @@ theme_override_styles/hover = SubResource("StyleBoxEmpty_menu")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_menu")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_menu")
 text = "Continue"
+script = ExtResource("18_hover")
 
 [node name="MirroredButtonArt" type="TextureRect" parent="UI/MenuPanel/MenuContent/ButtonStack/ContinueButton" unique_id=1650845522]
 editor_description = "Scene-authored alternating button mirror. Toggle Flip H here in the Inspector."
@@ -428,6 +432,7 @@ theme_override_styles/disabled = SubResource("StyleBoxTexture_button_disabled")
 theme_override_styles/focus = SubResource("StyleBoxTexture_button_hover")
 text = "Settings"
 alignment = 0
+script = ExtResource("18_hover")
 
 [node name="QuitButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=779991537]
 unique_name_in_owner = true
@@ -449,6 +454,7 @@ theme_override_styles/hover = SubResource("StyleBoxEmpty_menu")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_menu")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_menu")
 text = "Quit"
+script = ExtResource("18_hover")
 
 [node name="MirroredButtonArt" type="TextureRect" parent="UI/MenuPanel/MenuContent/ButtonStack/QuitButton" unique_id=1349954202]
 editor_description = "Scene-authored alternating button mirror. Toggle Flip H here in the Inspector."

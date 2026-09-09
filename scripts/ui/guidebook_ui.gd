@@ -200,7 +200,6 @@ func _setup_scene_motion() -> void:
 	_register_hover(_today_button, _today_tab)
 	_register_hover(_anomalies_button, _anomaly_tab)
 	_register_hover(_procedure_button, _rules_tab)
-	_register_hover(_close_button, _close_button)
 	_register_hover(_next_page_button, _next_page)
 	_scene_motion_ready = true
 	_update_tab_presentation()

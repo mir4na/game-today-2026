@@ -31,13 +31,13 @@ func _run() -> void:
 	for day: int in range(1, 6):
 		game.day_number = day
 		game._open_guidebook()
-		_check(guide._content.text.contains("PASS TARGET: %d BLESSINGS" % game._get_day_pass_target()), "Today's Service shows the paycheck target for day %d." % day)
+		_check(guide._content.text.contains("[b]Required[/b]  %d Blessings" % game._get_day_pass_target()), "Today's Service shows the paycheck target for day %d." % day)
 	game.day_number = original_day
 	game._open_guidebook()
 	_check(not game._day_intro_ui.has_node("Center/Content/TargetLabel"), "The opening chapter card does not display the paycheck target.")
 	var starting_balance: int = game._market_tool_state.blessings
 	var initial_count: int = game._active_passenger_count()
-	_check(guide._content.text.contains("[b]Passengers aboard[/b]  %d" % initial_count), "Today shows the actual opening passenger count.")
+	_check(guide._content.text.contains("[b]Currently aboard[/b]  %d" % initial_count), "Today shows the actual opening passenger count.")
 	_check(guide._content.text.contains("[b]Boarded today[/b]  %d" % initial_count), "Opening passengers count toward the cumulative total.")
 	_check(guide._content.text.contains("[b]Train number[/b]  %s" % game.manifest_config.service_train_number), "Guidebook displays the generated service number.")
 	var stamp_subject: Passenger = game._passengers[0]
@@ -73,19 +73,19 @@ func _run() -> void:
 	game._route_index = 1
 	game._passengers.back().depart_train()
 	game._process(0.01)
-	_check(guide._content.text.contains("[b]Net earnings so far[/b]  30 Blessings"), "Live earnings use +30/-20/-40 scoring.")
+	_check(guide._content.text.contains("[b]Earned today[/b]  30 Blessings"), "Live earnings use +30/-20/-40 scoring.")
 	_check(guide._content.text.contains("[b]Still needed[/b]  %d Blessings" % maxi(0, game._get_day_pass_target() - 30)), "The remaining target reflects net earnings.")
-	_check(guide._content.text.contains("[b]Scheduled stops completed[/b]  1 / %d" % (game.day_route.size() - 1)), "Route progress excludes the departure station.")
-	_check(guide._content.text.contains("[b]Passengers aboard[/b]  %d" % (initial_count - 1)), "Departed passengers disappear from the live count.")
+	_check(guide._content.text.contains("[b]Stops completed[/b]  1 / %d" % (game.day_route.size() - 1)), "Route progress excludes the departure station.")
+	_check(guide._content.text.contains("[b]Currently aboard[/b]  %d" % (initial_count - 1)), "Departed passengers disappear from the live count.")
 	_check(guide._boarded_today == initial_count, "Departures do not reduce the cumulative boarding total.")
 	_check(guide._stamped_aboard == 0, "A departed stamped passenger is excluded even before assignments are cleared.")
 	game._station_assignment.clear()
 	guide._show_procedure()
 	game._correct_drop_offs = 0
 	game._process(0.01)
-	_check(guide._page_title.text == "RULES", "Live updates preserve the selected section.")
+	_check(guide._page_title.text == "Rules", "Live updates preserve the selected section.")
 	guide._show_today()
-	_check(guide._content.text.contains("[b]Net earnings so far[/b]  -60 Blessings"), "Negative earnings are shown without hiding penalties.")
+	_check(guide._content.text.contains("[b]Earned today[/b]  -60 Blessings"), "Negative earnings are shown without hiding penalties.")
 	game._correct_drop_offs = 20
 	game._process(0.01)
 	_check(guide._content.text.contains("[b]Still needed[/b]  0 Blessings"), "Exceeding the target leaves zero still needed.")
@@ -135,6 +135,7 @@ func _run() -> void:
 	_check(paused and game._active_modal == game._pause_ui, "Esc opens Pause over an active minigame.")
 	_check(game._clean_seat_ui.visible, "Pausing keeps the current minigame open underneath.")
 	game._pause_ui._unhandled_input(esc)
+	await create_timer(game._pause_ui.close_duration + 0.05).timeout
 	_check(not paused and game._active_modal == game._clean_seat_ui, "Resume restores the active minigame.")
 	_check(not game._player.movement_enabled and not game._player.interaction_enabled, "Resume does not enable gameplay controls behind a minigame.")
 	game._clean_seat_ui.hide()
@@ -149,6 +150,7 @@ func _run() -> void:
 	_check(game._day_minutes == before and game._passengers[0].position == npc_position, "Pause freezes shift time and NPC movement.")
 	_check(game._train._sway_time == sway_before, "Pause freezes train animation processing.")
 	game._pause_ui._unhandled_input(esc)
+	await create_timer(game._pause_ui.close_duration + 0.05).timeout
 	_check(not paused and game._active_modal == null, "Esc resumes from Pause while the scene tree is paused.")
 	# A delayed newspaper dismissal must not release the new station modal.
 	game._on_newspaper_read()

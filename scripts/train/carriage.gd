@@ -27,6 +27,7 @@ const NIGHT_WINDOW_LIGHT := Color("3aa2e9")
 @export_node_path("AnimationPlayer") var wheel_animation_path: NodePath
 @export_node_path("CanvasItem") var cinematic_interior_shade_path: NodePath
 @export_node_path("Control") var radar_scan_effect_path: NodePath
+@export_node_path("CanvasItem") var radar_anomaly_overlay_path: NodePath
 @export_node_path("Node") var dirty_seat_events_root_path: NodePath
 @export_category("Blocked Aisle Presentation")
 @export var blocked_grayscale_visual_group: StringName = &"blocked_carriage_visuals"
@@ -40,6 +41,11 @@ const NIGHT_WINDOW_LIGHT := Color("3aa2e9")
 @export_category("Radar Anomaly Lighting")
 @export var radar_anomaly_light_color: Color = Color(1.0, 0.08, 0.055, 1.0)
 @export_range(1.0, 4.0, 0.05) var radar_anomaly_energy_multiplier: float = 2.15
+@export_range(0.1, 1.0, 0.05) var radar_anomaly_overlay_alpha_scale: float = 0.42
+@export_range(0.1, 1.0, 0.05) var radar_anomaly_overlay_alpha_cap: float = 0.72
+@export_range(0.05, 1.0, 0.05) var radar_anomaly_light_energy_scale: float = 0.22
+@export_range(0.1, 1.5, 0.05) var radar_anomaly_flare_strength_scale: float = 0.55
+@export_range(0.1, 1.5, 0.05) var radar_anomaly_flare_strength_cap: float = 0.9
 @export_range(0.05, 1.0, 0.01) var radar_anomaly_fade_in_seconds: float = 0.22
 @export_range(0.05, 2.0, 0.01) var radar_anomaly_fade_out_seconds: float = 0.55
 @export_range(0.0, 2.0, 0.05) var cinematic_interior_fade_seconds: float = 0.45
@@ -61,6 +67,7 @@ const NIGHT_WINDOW_LIGHT := Color("3aa2e9")
 @onready var _wheel_animation: AnimationPlayer = _get_optional_node(wheel_animation_path) as AnimationPlayer
 @onready var _cinematic_interior_shade: CanvasItem = _get_optional_node(cinematic_interior_shade_path) as CanvasItem
 @onready var _radar_scan_effect: Control = _get_optional_node(radar_scan_effect_path) as Control
+@onready var _radar_anomaly_overlay: CanvasItem = _get_optional_node(radar_anomaly_overlay_path) as CanvasItem
 @onready var _dirty_seat_events_root: Node = _get_optional_node(dirty_seat_events_root_path)
 
 var _window_lights: Array[Light2D] = []
@@ -162,6 +169,11 @@ func _set_window_light(window_color: Color, strength: float, day_cycle_progress:
 
 func _apply_window_light() -> void:
 	var signal_strength: float = _radar_anomaly_strength
+	if is_instance_valid(_radar_anomaly_overlay):
+		_radar_anomaly_overlay.visible = signal_strength > 0.001
+		var overlay_modulate := _radar_anomaly_overlay.modulate
+		overlay_modulate.a = signal_strength
+		_radar_anomaly_overlay.modulate = overlay_modulate
 	# WindowLightRoot is a scene-authored signal layer. Keep it out of the
 	# regular coach grade, then reveal it only while this coach reports an anomaly.
 	_window_light_root.visible = signal_strength > 0.001
@@ -173,7 +185,11 @@ func _apply_window_light() -> void:
 	)
 	# Sprite-based window masks inherit this tint from WindowLightRoot.
 	var overlay_color := effective_color
-	overlay_color.a = clampf(effective_strength * 0.42, 0.0, 0.72)
+	overlay_color.a = clampf(
+		effective_strength * radar_anomaly_overlay_alpha_scale,
+		0.0,
+		radar_anomaly_overlay_alpha_cap
+	)
 	_window_light_root.modulate = overlay_color
 
 	# CanvasItem modulation does not reliably recolor Light2D nodes, so tint the
@@ -181,11 +197,18 @@ func _apply_window_light() -> void:
 	for window_light: Light2D in _window_lights:
 		if is_instance_valid(window_light):
 			window_light.color = effective_color
-			window_light.energy = maxf(0.0, effective_strength * 0.22)
+			window_light.energy = maxf(0.0, effective_strength * radar_anomaly_light_energy_scale)
 	for flare_material: ShaderMaterial in _window_flare_materials:
 		if is_instance_valid(flare_material):
 			flare_material.set_shader_parameter(&"cycle_progress", _base_day_cycle_progress)
-			flare_material.set_shader_parameter(&"flare_strength", clampf(effective_strength * 0.55, 0.0, 0.9))
+			flare_material.set_shader_parameter(
+				&"flare_strength",
+				clampf(
+					effective_strength * radar_anomaly_flare_strength_scale,
+					0.0,
+					radar_anomaly_flare_strength_cap
+				)
+			)
 
 func _collect_window_lights(parent: Node) -> void:
 	for child: Node in parent.get_children():

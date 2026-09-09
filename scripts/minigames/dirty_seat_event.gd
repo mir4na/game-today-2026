@@ -14,9 +14,15 @@ signal resolved(event: Node)
 @export_node_path("CollisionShape2D") var npc_exclusion_collision_path: NodePath
 @export_node_path("Marker2D") var tracker_anchor_path: NodePath
 @export var tracker_icon: Texture2D
+@export_category("Interaction Flash")
+@export_node_path("CanvasItem") var flash_visual_path: NodePath
+@export_node_path("AnimationPlayer") var flash_animation_player_path: NodePath
+@export var flash_animation_name: StringName = &"interaction_flash"
 
 @onready var _interaction_collision: CollisionShape2D = get_node_or_null(interaction_collision_path) as CollisionShape2D
 @onready var _npc_exclusion_collision: CollisionShape2D = get_node_or_null(npc_exclusion_collision_path) as CollisionShape2D
+@onready var _flash_visual: CanvasItem = get_node_or_null(flash_visual_path) as CanvasItem
+@onready var _flash_animation_player: AnimationPlayer = get_node_or_null(flash_animation_player_path) as AnimationPlayer
 
 var _resolved: bool = false
 
@@ -57,6 +63,7 @@ func set_event_active(value: bool) -> void:
 	visible = value
 	enabled = value
 	refresh_interaction_outline()
+	_set_flash_active(value)
 	if is_instance_valid(_interaction_collision):
 		_interaction_collision.set_deferred(&"disabled", not value)
 	_set_collision_enabled(_npc_exclusion_collision, value)
@@ -68,6 +75,7 @@ func mark_solved() -> void:
 	_resolved = true
 	enabled = false
 	refresh_interaction_outline()
+	_set_flash_active(false)
 	if is_instance_valid(_interaction_collision):
 		_interaction_collision.set_deferred(&"disabled", true)
 	_set_collision_enabled(_npc_exclusion_collision, false)
@@ -82,3 +90,14 @@ func is_resolved() -> bool:
 func _set_collision_enabled(collision: CollisionShape2D, value: bool) -> void:
 	if is_instance_valid(collision):
 		collision.set_deferred(&"disabled", not value)
+
+
+func _set_flash_active(value: bool) -> void:
+	if is_instance_valid(_flash_visual):
+		_flash_visual.visible = value
+	if not is_instance_valid(_flash_animation_player):
+		return
+	if value and _flash_animation_player.has_animation(flash_animation_name):
+		_flash_animation_player.play(flash_animation_name)
+	else:
+		_flash_animation_player.stop()

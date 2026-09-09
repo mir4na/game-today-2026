@@ -17,6 +17,13 @@
 [ext_resource type="Shader" uid="uid://ce1bimgy548dk" path="res://shaders/clock_progress_fill.gdshader" id="16_clock_fill_shader"]
 [ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="17_clock_font"]
 [ext_resource type="Material" path="res://resources/materials/hud_black_outline.tres" id="18_hud_outline"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_market_item_slot.tscn" id="19_market_slot"]
+[ext_resource type="Shader" uid="uid://b7v5jwqdcye4y" path="res://shaders/ui_texture_outline.gdshader" id="20_4mi7y"]
+[ext_resource type="Texture2D" uid="uid://2mae3aagu2ei" path="res://assets/nightmarket/Item_Audit.png" id="20_audit_item"]
+[ext_resource type="Texture2D" uid="uid://t3ymikc81x7u" path="res://assets/nightmarket/Item_Radar.png" id="21_radar_item"]
+[ext_resource type="Texture2D" uid="uid://bi2b0di5uipvm" path="res://assets/nightmarket/Item_Switft.png" id="22_swift_item"]
+[ext_resource type="Texture2D" uid="uid://d11pgqc341s0t" path="res://assets/ui/guidebook/Group 136.png" id="23_guidebook_button"]
+[ext_resource type="Script" path="res://scripts/ui/hover_scale_button.gd" id="24_hover"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_clock_pole_left"]
 atlas = ExtResource("7_cwdlq")
@@ -33,6 +40,7 @@ resource_local_to_scene = true
 shader = ExtResource("16_clock_fill_shader")
 shader_parameter/progress = 0.0
 shader_parameter/edge_softness = 0.003
+shader_parameter/fill_origin = Vector2(0.477, 1)
 
 [sub_resource type="Animation" id="Animation_clock_briefing"]
 resource_name = "route_briefing"
@@ -91,95 +99,31 @@ _data = {
 &"route_briefing": SubResource("Animation_clock_briefing")
 }
 
-[sub_resource type="StyleBoxFlat" id="GuidebookButtonNormal"]
-content_margin_left = 20.0
-content_margin_top = 12.0
-content_margin_right = 20.0
-content_margin_bottom = 12.0
-bg_color = Color(0.05, 0.07, 0.1, 0.92)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.752941, 0.603922, 0.380392, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[sub_resource type="StyleBoxEmpty" id="GuidebookButtonTransparent"]
 
-[sub_resource type="StyleBoxFlat" id="GuidebookButtonPressed"]
-content_margin_left = 20.0
-content_margin_top = 12.0
-content_margin_right = 20.0
-content_margin_bottom = 12.0
-bg_color = Color(0.025, 0.035, 0.05, 0.98)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.843137, 0.690196, 0.419608, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pkwgd"]
+resource_local_to_scene = true
+shader = ExtResource("20_4mi7y")
+shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
+shader_parameter/outline_size = 9.0
 
-[sub_resource type="StyleBoxFlat" id="GuidebookButtonHover"]
-content_margin_left = 20.0
-content_margin_top = 12.0
-content_margin_right = 20.0
-content_margin_bottom = 12.0
-bg_color = Color(0.11, 0.16, 0.22, 0.96)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.933333, 0.827451, 0.607843, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_d5po8"]
+resource_local_to_scene = true
+shader = ExtResource("20_4mi7y")
+shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
+shader_parameter/outline_size = 9.0
 
-[sub_resource type="StyleBoxFlat" id="ActionButtonDisabled"]
-content_margin_left = 20.0
-content_margin_top = 12.0
-content_margin_right = 20.0
-content_margin_bottom = 12.0
-bg_color = Color(0.105882, 0.109804, 0.117647, 0.92)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.454902, 0.454902, 0.454902, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7yoph"]
+resource_local_to_scene = true
+shader = ExtResource("20_4mi7y")
+shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
+shader_parameter/outline_size = 9.0
 
-[sub_resource type="StyleBoxFlat" id="NotificationStyle"]
-content_margin_left = 18.0
-content_margin_top = 14.0
-content_margin_right = 18.0
-content_margin_bottom = 14.0
-bg_color = Color(0.05, 0.07, 0.1, 0.96)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.843137, 0.690196, 0.419608, 1)
-corner_radius_top_left = 7
-corner_radius_top_right = 7
-corner_radius_bottom_right = 7
-corner_radius_bottom_left = 7
+[sub_resource type="StyleBoxEmpty" id="NotificationTextOnlyStyle"]
 
 [node name="HUD" type="CanvasLayer" unique_id=83627724]
 layer = 10
 script = ExtResource("1")
-clock_template = "%02d:%02d %s"
-tool_status_template = "BLESSINGS %d\nAUDIT ×%d  •  SPEED LV.%d"
-radar_button_template = "ACTIVATE RADAR   [R]  ×%d"
-clock_degrees_per_stop = 36.0
-prompt_screen_offset = Vector2(0, 0)
-prompt_edge_margin = Vector2(24, 20)
 
 [node name="Root" type="Control" parent="." unique_id=664657133]
 unique_name_in_owner = true
@@ -208,9 +152,10 @@ grow_horizontal = 0
 unique_name_in_owner = true
 editor_description = "Scene-authored minimap size. Adjust Scale here to resize the complete minimap while preserving its internal layout."
 layout_mode = 0
-offset_right = 224.0
+offset_left = -57.0
+offset_right = 167.0
 offset_bottom = 27.0
-scale = Vector2(1.2, 1.2)
+scale = Vector2(1.5, 1.5)
 
 [node name="ToolStatusLabel" type="Label" parent="Root" unique_id=1425442653]
 unique_name_in_owner = true
@@ -228,10 +173,11 @@ theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 2
 theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 14
-text = "BLESSINGS 0
-AUDIT ×0  •  SPEED LV.0"
+text = "BLESSINGS 0"
 
 [node name="MaintenanceTrackers" type="Control" parent="Root" unique_id=527339909]
+editor_description = "Off-screen minigame pointers. The high Z index keeps these above the Night Market item bar."
+z_index = 200
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -327,11 +273,6 @@ grow_vertical = 0
 scale = Vector2(0.666667, 0.666667)
 pivot_offset = Vector2(175, 300)
 mouse_filter = 2
-
-[node name="ClockBriefingAnimation" type="AnimationPlayer" parent="Root"]
-unique_name_in_owner = true
-editor_description = "Scene-authored next-stop sign timing. The sign enters for 0.34 seconds, remains readable until 2.55 seconds, then drops and fades out by 3.2 seconds; ClockFace is not animated."
-libraries/ = SubResource("AnimationLibrary_clock_briefing")
 
 [node name="ClockSignAssembly" type="Control" parent="Root/ClockPanel" unique_id=184474026]
 editor_description = "Station sign header. Its 350 px width matches ClockFace, keeping both elements centered."
@@ -451,9 +392,9 @@ text_overrun_behavior = 3
 [node name="ClockFace" type="Control" parent="Root/ClockPanel" unique_id=2018867802]
 editor_description = "Centered clock face. Move this node to adjust the clock without disturbing the station sign."
 anchors_preset = 0
-offset_top = 120.5
+offset_top = 108.5
 offset_right = 350.0
-offset_bottom = 299.5
+offset_bottom = 287.5
 mouse_filter = 2
 
 [node name="ClockFaceOutline" type="TextureRect" parent="Root/ClockPanel/ClockFace" unique_id=1368557547]
@@ -461,9 +402,9 @@ editor_description = "Black silhouette behind the semicircular clock body. Resiz
 modulate = Color(0.0156863, 0.0196078, 0.027451, 0.96)
 layout_mode = 0
 offset_left = -5.0
-offset_top = -5.0
+offset_top = -2.5
 offset_right = 355.0
-offset_bottom = 184.0
+offset_bottom = 181.5
 mouse_filter = 2
 texture = ExtResource("9_clock_unfilled")
 expand_mode = 1
@@ -488,15 +429,25 @@ mouse_filter = 2
 texture = ExtResource("10_clock_filled")
 expand_mode = 1
 
-[node name="ClockPointer" type="TextureRect" parent="Root/ClockPanel/ClockFace" unique_id=1810178768]
+[node name="ClockNeedlePivot" type="Control" parent="Root/ClockPanel/ClockFace" unique_id=1197693786]
 unique_name_in_owner = true
+editor_description = "Scene-authored rotation center aligned to the center-bottom of the hub in Background2.png. Move this node to tune the complete needle."
+anchors_preset = 0
+offset_left = 167.1
+offset_top = 175.2
+offset_right = 167.1
+offset_bottom = 175.2
+rotation = -0.520109
+mouse_filter = 2
+
+[node name="ClockPointer" type="TextureRect" parent="Root/ClockPanel/ClockFace/ClockNeedlePivot" unique_id=1810178768]
+editor_description = "One outlined needle at the asset's original 1:1 ratio. Its broad edge is centered on ClockNeedlePivot so the tip follows the dial marks."
+material = ExtResource("18_hud_outline")
 layout_mode = 0
-offset_left = 18.85
-offset_top = 95.67
-offset_right = 204.8
-offset_bottom = 175.36
-rotation = -0.47054
-pivot_offset = Vector2(156.15, 79.33)
+offset_left = -138.92
+offset_top = -79.69
+offset_right = 47.03
+pivot_offset = Vector2(138.92, 79.69)
 mouse_filter = 2
 texture = ExtResource("11_clock_pointer")
 expand_mode = 1
@@ -512,11 +463,11 @@ expand_mode = 1
 [node name="ClockSymbolPivot" type="Control" parent="Root/ClockPanel/ClockFace" unique_id=1736318714]
 unique_name_in_owner = true
 anchors_preset = 0
-offset_left = 273.0
-offset_top = -15.0
-offset_right = 368.0
-offset_bottom = 80.0
-pivot_offset = Vector2(47.5, 47.5)
+offset_left = 284.0
+offset_top = -4.0
+offset_right = 360.0
+offset_bottom = 72.0
+pivot_offset = Vector2(38, 38)
 mouse_filter = 2
 
 [node name="DaySymbol" type="TextureRect" parent="Root/ClockPanel/ClockFace/ClockSymbolPivot" unique_id=1300180946]
@@ -546,60 +497,102 @@ mouse_filter = 2
 texture = ExtResource("15_clock_night")
 expand_mode = 1
 
+[node name="ClockBriefingAnimation" type="AnimationPlayer" parent="Root" unique_id=478647926]
+unique_name_in_owner = true
+editor_description = "Scene-authored next-stop sign timing. The sign enters for 0.34 seconds, remains readable until 2.55 seconds, then drops and fades out by 3.2 seconds; ClockFace is not animated."
+libraries/ = SubResource("AnimationLibrary_clock_briefing")
+
 [node name="GuidebookButton" type="Button" parent="Root" unique_id=1411831653]
 unique_name_in_owner = true
-editor_description = "Left-side guidebook action. Position, size, copy, and styling are scene-authored and can be adjusted here."
+editor_description = "Bottom-left Guidebook action using the complete Group 136 artwork. Position, size, icon tint, and styling are scene-authored here."
 layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_left = 28.0
-offset_top = -29.0
-offset_right = 248.0
-offset_bottom = 29.0
-grow_vertical = 2
-tooltip_text = "Open the conductor's guidebook"
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = -145.0
+offset_right = 130.0
+offset_bottom = -14.0
+grow_vertical = 0
+tooltip_text = "Open guidebook"
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_colors/font_pressed_color = Color(0.843137, 0.690196, 0.419608, 1)
-theme_override_colors/font_hover_color = Color(1, 0.956863, 0.827451, 1)
-theme_override_colors/font_disabled_color = Color(0.670588, 0.670588, 0.670588, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("GuidebookButtonNormal")
-theme_override_styles/pressed = SubResource("GuidebookButtonPressed")
-theme_override_styles/hover = SubResource("GuidebookButtonHover")
-theme_override_styles/disabled = SubResource("ActionButtonDisabled")
-text = "GUIDEBOOK   [TAB]"
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(0.82, 0.82, 0.86, 1)
+theme_override_colors/icon_hover_color = Color(1.08, 1.08, 1.08, 1)
+theme_override_colors/icon_disabled_color = Color(0.45, 0.45, 0.5, 0.72)
+theme_override_styles/normal = SubResource("GuidebookButtonTransparent")
+theme_override_styles/pressed = SubResource("GuidebookButtonTransparent")
+theme_override_styles/hover = SubResource("GuidebookButtonTransparent")
+theme_override_styles/disabled = SubResource("GuidebookButtonTransparent")
+icon = ExtResource("23_guidebook_button")
+expand_icon = true
+script = ExtResource("24_hover")
 
-[node name="RadarButton" type="Button" parent="Root" unique_id=1059361648]
+[node name="GuidebookOutline" type="TextureRect" parent="Root/GuidebookButton"]
+show_behind_parent = true
+self_modulate = Color(0.015, 0.018, 0.024, 0.98)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("23_guidebook_button")
+expand_mode = 1
+
+[node name="MarketItemBar" type="VBoxContainer" parent="Root" unique_id=258053490]
 unique_name_in_owner = true
-editor_description = "Independent right-side radar action. This button mirrors the R keyboard shortcut and shows the remaining charge count."
+editor_description = "Scene-authored Night Market inventory. Slots appear only while their item is owned; shortcut numbers stay hidden from the HUD."
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -282.0
-offset_top = -29.0
-offset_right = -28.0
-offset_bottom = 29.0
+offset_left = -112.0
+offset_top = -142.0
+offset_right = -24.0
+offset_bottom = 142.0
 grow_horizontal = 0
 grow_vertical = 2
-tooltip_text = "Scan the current passenger coach"
-focus_mode = 0
-mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_colors/font_pressed_color = Color(0.843137, 0.690196, 0.419608, 1)
-theme_override_colors/font_hover_color = Color(1, 0.956863, 0.827451, 1)
-theme_override_colors/font_disabled_color = Color(0.670588, 0.670588, 0.670588, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("GuidebookButtonNormal")
-theme_override_styles/pressed = SubResource("GuidebookButtonPressed")
-theme_override_styles/hover = SubResource("GuidebookButtonHover")
-theme_override_styles/disabled = SubResource("ActionButtonDisabled")
-text = "ACTIVATE RADAR   [R]  ×0"
+theme_override_constants/separation = 10
+
+[node name="AuditSlot" parent="Root/MarketItemBar" unique_id=907689913 instance=ExtResource("19_market_slot")]
+unique_name_in_owner = true
+layout_mode = 2
+tool_id = &"audit_slip"
+item_name = "Audit Slip"
+
+[node name="Icon" parent="Root/MarketItemBar/AuditSlot" index="1"]
+material = SubResource("ShaderMaterial_pkwgd")
+texture = ExtResource("20_audit_item")
+
+[node name="RadarSlot" parent="Root/MarketItemBar" unique_id=943347102 instance=ExtResource("19_market_slot")]
+unique_name_in_owner = true
+layout_mode = 2
+tool_id = &"radar_charge"
+item_name = "Carriage Radar"
+
+[node name="Icon" parent="Root/MarketItemBar/RadarSlot" index="1"]
+material = SubResource("ShaderMaterial_d5po8")
+texture = ExtResource("21_radar_item")
+
+[node name="SwiftSlot" parent="Root/MarketItemBar" unique_id=2093275063 instance=ExtResource("19_market_slot")]
+unique_name_in_owner = true
+layout_mode = 2
+tool_id = &"speed_upgrade"
+item_name = "Swiftstep Soles"
+amount_template = "LV.%d"
+
+[node name="Icon" parent="Root/MarketItemBar/SwiftSlot" index="1"]
+material = SubResource("ShaderMaterial_7yoph")
+texture = ExtResource("22_swift_item")
 
 [node name="DebugNextStationButton" type="Button" parent="Root"]
 unique_name_in_owner = true
@@ -620,34 +613,50 @@ theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_colors/font_pressed_color = Color(0.843137, 0.690196, 0.419608, 1)
 theme_override_colors/font_hover_color = Color(1, 0.956863, 0.827451, 1)
 theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("GuidebookButtonNormal")
-theme_override_styles/pressed = SubResource("GuidebookButtonPressed")
-theme_override_styles/hover = SubResource("GuidebookButtonHover")
+theme_override_styles/normal = SubResource("GuidebookButtonTransparent")
+theme_override_styles/pressed = SubResource("GuidebookButtonTransparent")
+theme_override_styles/hover = SubResource("GuidebookButtonTransparent")
 text = "Debug: next station"
 
 [node name="NotificationPanel" type="PanelContainer" parent="Root" unique_id=1320290712]
 unique_name_in_owner = true
+editor_description = "Text-only HUD announcement. Its position and transparent presentation are scene-authored here; there is intentionally no box behind it."
 visible = false
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -245.0
-offset_top = 42.0
-offset_right = 245.0
-offset_bottom = 112.0
+offset_left = -400.0
+offset_top = 48.0
+offset_right = 400.0
+offset_bottom = 108.0
 grow_horizontal = 2
-theme_override_styles/panel = SubResource("NotificationStyle")
+mouse_filter = 2
+theme_override_styles/panel = SubResource("NotificationTextOnlyStyle")
 
 [node name="NotificationLabel" type="Label" parent="Root/NotificationPanel" unique_id=2128017887]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_font_sizes/font_size = 20
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.972549, 0.890196, 0.713726, 1)
+theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.96)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.72)
+theme_override_constants/outline_size = 6
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 3
+theme_override_fonts/font = ExtResource("17_clock_font")
+theme_override_font_sizes/font_size = 23
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 2
 
 [connection signal="pressed" from="Root/GuidebookButton" to="." method="_on_guidebook_button_pressed"]
-[connection signal="pressed" from="Root/RadarButton" to="." method="_on_radar_button_pressed"]
 [connection signal="pressed" from="Root/DebugNextStationButton" to="." method="_on_debug_next_station_button_pressed"]
+[connection signal="tool_requested" from="Root/MarketItemBar/AuditSlot" to="." method="_on_market_item_requested"]
+[connection signal="tool_requested" from="Root/MarketItemBar/RadarSlot" to="." method="_on_market_item_requested"]
+[connection signal="tool_requested" from="Root/MarketItemBar/SwiftSlot" to="." method="_on_market_item_requested"]
+
+[editable path="Root/MarketItemBar/AuditSlot"]
+[editable path="Root/MarketItemBar/RadarSlot"]
+[editable path="Root/MarketItemBar/SwiftSlot"]

@@ -9,8 +9,8 @@ signal continue_requested
 @export var blessings_template: String = "Blessings  %d"
 @export var audit_stock_template: String = "%d owned  •  %d Blessings"
 @export var radar_stock_template: String = "%d owned  •  %d Blessings"
-@export var speed_level_template: String = "Level %d / %d  •  %d Blessings"
-@export var maximum_speed_text: String = "Maximum level"
+@export var speed_level_template: String = "Level %d / %d  •  15 seconds  •  %d Blessings"
+@export var maximum_speed_text: String = "Maximum time-bending level"
 @export_category("Floating Motion")
 @export_range(0.0, 20.0, 0.5) var angel_float_height: float = 8.0
 @export_range(0.0, 5.0, 0.05) var angel_float_speed: float = 1.15
@@ -33,6 +33,9 @@ signal continue_requested
 @export_range(0.2, 3.0, 0.05) var transition_fog_rise_duration: float = 1.15
 @export_range(0.0, 1.5, 0.05) var transition_fog_hold_seconds: float = 0.2
 @export_range(0.2, 2.0, 0.05) var transition_fog_release_duration: float = 0.8
+@export_category("Button Feedback")
+@export_range(1.0, 1.2, 0.01) var item_button_hover_scale: float = 1.06
+@export_range(0.05, 0.35, 0.01) var item_button_hover_duration: float = 0.14
 @export_category("Standalone Preview")
 @export_range(0, 999, 1) var preview_blessings: int = 100
 
@@ -42,6 +45,7 @@ var _input_locked: bool = false
 var _motion_time: float = 0.0
 var _market_tween: Tween
 var _highlight_tweens: Dictionary = {}
+var _item_float_tweens: Dictionary = {}
 var _entrance_positions: Dictionary = {}
 var _light_scales: Dictionary = {}
 var _highlight_scales: Dictionary = {}
@@ -150,6 +154,7 @@ func open_market(snapshot: Dictionary, _day_award: Dictionary) -> void:
 		var highlight: Sprite2D = _item_highlights[index]
 		highlight.modulate.a = 0.0
 		highlight.scale = (_highlight_scales[highlight] as Vector2) * 0.88
+		_item_floats[index].scale = Vector2.ONE
 	_play_entrance_animation()
 
 
@@ -247,16 +252,38 @@ func _set_item_highlight(index: int, active: bool) -> void:
 	_highlight_tweens[highlight] = tween
 	tween.tween_property(highlight, ^"modulate:a", 0.82 if active else 0.0, 0.18).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	tween.tween_property(highlight, ^"scale", rest_scale * (1.06 if active else 0.88), 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_animate_item_hover(index, active and _item_buttons[index].is_hovered())
+
+
+func _animate_item_hover(index: int, active: bool) -> void:
+	var item_float: Node2D = _item_floats[index]
+	var existing := _item_float_tweens.get(item_float) as Tween
+	if is_instance_valid(existing):
+		existing.kill()
+	var tween := create_tween()
+	_item_float_tweens[item_float] = tween
+	tween.tween_property(
+		item_float,
+		^"scale",
+		Vector2.ONE * (item_button_hover_scale if active else 1.0),
+		item_button_hover_duration
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _pulse_item(index: int) -> void:
 	if index < 0 or index >= _item_floats.size():
 		return
 	var item_float: Node2D = _item_floats[index]
-	item_float.scale = Vector2.ONE
+	var existing := _item_float_tweens.get(item_float) as Tween
+	if is_instance_valid(existing):
+		existing.kill()
+	var resting_scale: Vector2 = Vector2.ONE * (
+		item_button_hover_scale if _item_buttons[index].is_hovered() else 1.0
+	)
 	var tween := create_tween()
-	tween.tween_property(item_float, ^"scale", Vector2.ONE * 1.075, 0.09).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.tween_property(item_float, ^"scale", Vector2.ONE, 0.17).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_item_float_tweens[item_float] = tween
+	tween.tween_property(item_float, ^"scale", Vector2.ONE * 1.1, 0.09).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(item_float, ^"scale", resting_scale, 0.17).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _play_entrance_animation() -> void:

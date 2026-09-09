@@ -60,7 +60,7 @@ fill_from = Vector2(0.5, 0)
 fill_to = Vector2(0.5, 1)
 
 [node name="TravelBackground" type="CanvasLayer" unique_id=2116512518]
-editor_description = "Fully scene-authored travel background. Every period, parallax strip, repeated artwork sprite, transform, texture, and tunnel visual is editable in this scene."
+editor_description = "Fully scene-authored travel background. Each route leg selects exactly one Period root below; TunnelTransition covers the final approach."
 layer = -9
 script = ExtResource("1_background")
 sunrise_root_path = NodePath("Periods/Beach")
@@ -68,9 +68,13 @@ afternoon_root_path = NodePath("Periods/City")
 sunset_root_path = NodePath("Periods/Desert")
 night_root_path = NodePath("Periods/NightSky")
 tunnel_panel_path = NodePath("TunnelTransition")
-tunnel_enter_seconds = 2.0
-tunnel_hold_seconds = 1.0
-tunnel_exit_seconds = 2.0
+route_leg_1_background = 0
+route_leg_2_background = 1
+route_leg_3_background = 2
+route_leg_4_background = 3
+tunnel_approach_seconds = 15.0
+tunnel_enter_seconds = 0.85
+tunnel_exit_seconds = 0.7
 
 [node name="Periods" type="Node2D" parent="." unique_id=644464395]
 editor_description = "All backgrounds use a 1280 x 315.459 source composition. Uniform 1:1 scaling fills the 1280 x 720 viewport without stretching, while this centered offset crops the excess width equally on both sides."
@@ -413,7 +417,7 @@ texture = SubResource("GradientTexture_night")
 expand_mode = 1
 
 [node name="TunnelTransition" type="Control" parent="." unique_id=201962027]
-editor_description = "Scene-authored tunnel wipe. Edit this panel and its children to change the transition artwork."
+editor_description = "Scene-authored tunnel view held over the last 15 seconds of each route leg. Edit this node and its children to change the tunnel artwork."
 visible = false
 layout_mode = 3
 anchors_preset = 0

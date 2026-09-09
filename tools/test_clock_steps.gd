@@ -24,7 +24,7 @@ func _run() -> void:
 		hud.set_clock_progress(progress)
 		var expected_degrees: float = hud.clock_pointer_start_degrees + 36.0 * float(step)
 		assert(
-			is_equal_approx(rad_to_deg(hud._clock_pointer.rotation), expected_degrees),
+			is_equal_approx(rad_to_deg(hud._clock_pointer_pivot.rotation), expected_degrees),
 			"Clock pointer must advance exactly 36 degrees per service step."
 		)
 		var fill_material := hud._clock_fill.material as ShaderMaterial

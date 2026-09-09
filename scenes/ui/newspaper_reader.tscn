@@ -23,6 +23,7 @@
 [ext_resource type="Texture2D" uid="uid://cvsli236qi2rk" path="res://assets/ui/id_card.png" id="16_4yesj"]
 [ext_resource type="Texture2D" uid="uid://bd3gsinxrrynl" path="res://assets/kereta/Pintu kanan.png" id="18_5uy8i"]
 [ext_resource type="Texture2D" uid="uid://qfgbxjo8e3mf" path="res://assets/kereta/Pintu kiri.png" id="19_r42ts"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/round_close_button.tscn" id="20_close"]
 
 [sub_resource type="Animation" id="Animation_present_reset"]
 resource_name = "RESET"
@@ -331,25 +332,16 @@ text = "Records show the victim boarded at Asterfall and worked as a tailor. Inv
 
 Edition printed before the afternoon service departed."
 
-[node name="CloseButton" type="Button" parent="Type1" unique_id=1061282681]
+[node name="CloseButton" parent="Type1" unique_id=1061282681 instance=ExtResource("20_close")]
 editor_description = "Scene-authored newspaper close text. Position, size, and Josefin typography are editable here."
 z_index = 10
 layout_mode = 0
-offset_left = 901.8571
-offset_top = -68.42859
-offset_right = 953.8571
-offset_bottom = -16.428589
-scale = Vector2(3, 3)
+offset_left = 957.8095
+offset_top = 0.6190319
+offset_right = 1013.8095
+offset_bottom = 56.619034
+scale = Vector2(1.8, 1.8)
 tooltip_text = "Close newspaper [E]"
-focus_mode = 0
-mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0.65098, 0.223529, 0.176471, 1)
-theme_override_colors/font_hover_color = Color(0.65098, 0.223529, 0.176471, 1)
-theme_override_fonts/font = ExtResource("3_15k6j")
-theme_override_font_sizes/font_size = 30
-text = "X"
-flat = true
 
 [node name="CloseHint" type="Label" parent="Type1" unique_id=1359203138]
 editor_description = "Scene-authored keyboard hint below newspaper type 1."
@@ -538,24 +530,15 @@ text = "Records show the victim traveled from Asterfall and was employed as a ta
 
 Edition printed before the afternoon service departed."
 
-[node name="CloseButton" type="Button" parent="Type2" unique_id=611735791]
+[node name="CloseButton" parent="Type2" unique_id=611735791 instance=ExtResource("20_close")]
 editor_description = "Scene-authored newspaper close text. Position, size, and Josefin typography are editable here."
 z_index = 10
 layout_mode = 0
-offset_left = 906.0
-offset_top = 48.0
-offset_right = 958.0
-offset_bottom = 100.0
+offset_left = 920.0
+offset_top = 18.0
+offset_right = 976.0
+offset_bottom = 74.0
 tooltip_text = "Close newspaper [E]"
-focus_mode = 0
-mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.27451, 0.223529, 0.196078, 1)
-theme_override_colors/font_pressed_color = Color(0.65098, 0.223529, 0.176471, 1)
-theme_override_colors/font_hover_color = Color(0.65098, 0.223529, 0.176471, 1)
-theme_override_fonts/font = ExtResource("3_15k6j")
-theme_override_font_sizes/font_size = 30
-text = "X"
-flat = true
 
 [node name="CloseHint" type="Label" parent="Type2" unique_id=1528259364]
 editor_description = "Scene-authored keyboard hint below newspaper type 2."
