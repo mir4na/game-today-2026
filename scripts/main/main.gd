@@ -187,7 +187,9 @@ func _ready() -> void:
 	_collect_interactables(self)
 	_configure_maintenance_events()
 	_refresh_player_interactables()
-	_hud.set_clock_route_stop_count(day_route.size() - 1)
+	# Four daylight arrivals plus one final Night Service step occupy the five
+	# 36-degree divisions of the semicircular clock.
+	_hud.set_clock_route_stop_count(day_route.size())
 	_hud.set_clock(int(_day_minutes), _day_station_clock_progress())
 	_hud.set_next_stop(_next_day_station())
 	_hud.set_clock_night_mode(false, false)
@@ -224,6 +226,13 @@ func _process(delta: float) -> void:
 		_refresh_guidebook_progress()
 	_update_passenger_minimap()
 	_update_carriage_indicator()
+	_hud.set_debug_next_station_available(
+		state in [GameState.DAY, GameState.SUNSET]
+		and _has_next_day_station()
+		and not _station_arrival_announced
+		and _active_modal == null
+		and not _radar_scan_active
+	)
 	if state != GameState.DAY and state != GameState.SUNSET:
 		return
 	# A radar scan suspends only route time. Every other gameplay system keeps
@@ -236,10 +245,17 @@ func _process(delta: float) -> void:
 		_travel_background.update_route_leg_remaining(
 			maxf(_next_arrival_minutes() - _day_minutes, 0.0)
 		)
+	_update_day_route_presentation()
+
+	if not _station_arrival_announced and _has_next_day_station() and _day_minutes >= _next_arrival_minutes():
+		_announce_next_station()
+
+
+func _update_day_route_presentation() -> void:
 	var route_progress: float = clampf((_day_minutes - START_MINUTES) / maxf(_final_arrival_minutes() - START_MINUTES, 1.0), 0.0, 1.0)
-	# Advance the dial with the moving train. One complete route leg contributes
-	# exactly one 36-degree clock step; station cutscenes pause this progress.
-	_hud.set_clock(int(_day_minutes), route_progress)
+	# Day service uses all but the final clock division. One complete route leg
+	# contributes exactly 36 degrees; Night Service owns the remaining step.
+	_hud.set_clock(int(_day_minutes), _day_travel_clock_progress(route_progress))
 	var cycle_progress: float = route_progress * DAY_SERVICE_FINAL_CYCLE_PROGRESS
 	var service_night_strength: float = smoothstep(
 		SERVICE_NIGHT_START_PROGRESS,
@@ -251,12 +267,24 @@ func _process(delta: float) -> void:
 	_set_sky_cycle_progress(cycle_progress)
 	_night_atmosphere.modulate.a = service_night_strength
 
-	if not _station_arrival_announced and _has_next_day_station() and _day_minutes >= _next_arrival_minutes():
-		_announce_next_station()
-
 	if state == GameState.DAY and cycle_progress >= SUNSET_STATE_PROGRESS:
 		state = GameState.SUNSET
 		_hud.notify("THE LAST LIGHT FADES BEYOND THE RAILS", 3.0)
+
+
+func _on_debug_next_station_requested() -> void:
+	if (
+		not OS.is_debug_build()
+		or state not in [GameState.DAY, GameState.SUNSET]
+		or not _has_next_day_station()
+		or _station_arrival_announced
+		or _active_modal != null
+		or _radar_scan_active
+	):
+		return
+	_day_minutes = _next_arrival_minutes()
+	_update_day_route_presentation()
+	_announce_next_station()
 
 func _update_travel_foreground() -> void:
 	if _station_stop_ui.visible:
@@ -309,8 +337,14 @@ func _get_station_travel_seconds(leg: int) -> float:
 
 
 func _day_station_clock_progress() -> float:
-	var station_legs: int = maxi(day_route.size() - 1, 1)
-	return clampf(float(_route_index) / float(station_legs), 0.0, 1.0)
+	var total_clock_steps: int = maxi(day_route.size(), 1)
+	return clampf(float(_route_index) / float(total_clock_steps), 0.0, 1.0)
+
+
+func _day_travel_clock_progress(route_progress: float) -> float:
+	var total_clock_steps: int = maxi(day_route.size(), 1)
+	var daylight_steps: int = maxi(day_route.size() - 1, 0)
+	return clampf(route_progress, 0.0, 1.0) * float(daylight_steps) / float(total_clock_steps)
 
 func _set_sky_cycle_progress(value: float) -> void:
 	var clamped_progress: float = clampf(value, 0.0, 1.0)
@@ -1770,6 +1804,7 @@ func _open_pause() -> void:
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
+	_pause_ui.set_night_mode(state == GameState.NIGHT)
 	_pause_ui.open_pause()
 	get_tree().paused = true
 
@@ -1824,7 +1859,7 @@ func _on_shift_report_continue() -> void:
 		_restart_game()
 		return
 	_shift_report_ui.hide()
-	_start_night_transition()
+	_open_night_market()
 
 
 func _start_night_transition() -> void:
@@ -1851,6 +1886,9 @@ func _on_night_transition_finished() -> void:
 
 
 func _open_night_market() -> void:
+	# The train remains stopped after the final station while the conductor shops.
+	# Departure and the night-transition cutscene begin only after the gate closes.
+	_set_train_stopped_for_night_transition()
 	state = GameState.MARKET
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
@@ -1877,9 +1915,9 @@ func _on_market_purchase_requested(tool_id: StringName) -> void:
 func _on_night_market_continue() -> void:
 	if state != GameState.MARKET:
 		return
-	_night_market_ui.hide()
 	_active_modal = null
-	_enter_night()
+	_start_night_transition()
+	_night_market_ui.call(&"release_transition_fog")
 
 
 func _on_market_inventory_changed(snapshot: Dictionary) -> void:
@@ -2018,6 +2056,11 @@ func _enter_night() -> void:
 	state = GameState.NIGHT
 	_resume_train_for_night()
 	_hud.set_night_walk_mode()
+	# The fifth and final 36-degree step belongs exclusively to Night Service.
+	# Both the filled arc and pointer animate from 144 to 180 degrees together.
+	_hud.set_clock_progress(1.0, true)
+	_hud.set_clock_night_mode(true, true)
+	_pause_ui.set_night_mode(true)
 	_hud.notify(night_shift_instruction, 5.0)
 	_set_player_control_for_state()
 
@@ -2042,8 +2085,6 @@ func _prepare_night_world() -> void:
 	for passenger: Passenger in _passengers:
 		if _is_active_passenger(passenger):
 			passenger.set_night_mode(true)
-	_hud.set_clock_progress(1.0)
-	_hud.set_clock_night_mode(true, true)
 
 func _set_train_stopped_for_night_transition() -> void:
 	_station_cutscene_motion_strength = 0.0

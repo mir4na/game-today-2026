@@ -7,6 +7,11 @@ signal slider_value_changed(value: int)
 @export var option_label: String = "Option"
 @export var uses_slider: bool = false
 
+const DAY_INK: Color = Color("353540")
+const NIGHT_INK: Color = Color("f4e49e")
+const DAY_PANEL: Color = Color.TRANSPARENT
+const NIGHT_PANEL: Color = Color(0.957, 0.894, 0.620, 0.12)
+
 var _pulse_tween: Tween
 
 @onready var _label: Label = %OptionLabel
@@ -35,6 +40,21 @@ func set_value_text(value: String) -> void:
 
 func set_slider_value(value: int) -> void:
 	_slider.call(&"set_value_no_signal", value)
+
+
+func set_night_mode(enabled: bool) -> void:
+	var ink_color: Color = NIGHT_INK if enabled else DAY_INK
+	_label.add_theme_color_override(&"font_color", ink_color)
+	_value.add_theme_color_override(&"font_color", ink_color)
+	_slider.call(&"set_ink_color", ink_color)
+	var panel_style := get_theme_stylebox(&"panel").duplicate() as StyleBoxFlat
+	if panel_style:
+		panel_style.bg_color = NIGHT_PANEL if enabled else DAY_PANEL
+		add_theme_stylebox_override(&"panel", panel_style)
+	for arrow: TextureButton in [_left_button, _right_button]:
+		var arrow_material := arrow.material as ShaderMaterial
+		if arrow_material:
+			arrow_material.set_shader_parameter(&"night_strength", 1.0 if enabled else 0.0)
 
 
 func focus_first() -> void:

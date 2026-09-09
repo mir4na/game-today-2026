@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/pause_ui.gd" id="1_script"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
@@ -6,7 +6,17 @@
 [ext_resource type="Texture2D" path="res://assets/ui/PauseMenu/OptionsText.png" id="4_options"]
 [ext_resource type="Texture2D" path="res://assets/ui/PauseMenu/Button.png" id="5_button"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_option_selector.tscn" id="6_selector"]
-[ext_resource type="Script" path="res://scripts/ui/hover_scale_button.gd" id="7_hover"]
+[ext_resource type="Shader" path="res://shaders/pause_menu_palette.gdshader" id="7_palette"]
+[ext_resource type="Script" path="res://scripts/ui/hover_scale_button.gd" id="8_hover"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ticket_palette"]
+resource_local_to_scene = true
+shader = ExtResource("7_palette")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_title_palette"]
+resource_local_to_scene = true
+shader = ExtResource("7_palette")
+shader_parameter/monochrome_tint = true
 
 [sub_resource type="StyleBoxTexture" id="ActionButtonStyle"]
 texture = ExtResource("5_button")
@@ -78,6 +88,7 @@ stretch_mode = 6
 
 [node name="TicketArtwork" type="TextureRect" parent="Ticket"]
 unique_name_in_owner = true
+material = SubResource("ShaderMaterial_ticket_palette")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -90,6 +101,8 @@ expand_mode = 1
 stretch_mode = 6
 
 [node name="OptionsTitle" type="TextureRect" parent="Ticket"]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_title_palette")
 layout_mode = 0
 offset_left = 699.0
 offset_top = 27.0
@@ -169,7 +182,7 @@ theme_override_styles/hover = SubResource("ActionButtonStyle")
 theme_override_styles/pressed = SubResource("ActionButtonStyle")
 theme_override_styles/focus = SubResource("ActionButtonStyle")
 text = "Restart shift"
-script = ExtResource("7_hover")
+script = ExtResource("8_hover")
 
 [node name="MainMenuButton" type="Button" parent="Ticket/Actions"]
 unique_name_in_owner = true
@@ -184,7 +197,7 @@ theme_override_styles/hover = SubResource("ActionButtonStyle")
 theme_override_styles/pressed = SubResource("ActionButtonStyle")
 theme_override_styles/focus = SubResource("ActionButtonStyle")
 text = "Main menu"
-script = ExtResource("7_hover")
+script = ExtResource("8_hover")
 
 [node name="ServiceInfo" type="VBoxContainer" parent="Ticket"]
 layout_mode = 0
@@ -198,7 +211,7 @@ alignment = 1
 [node name="TrainNumber" type="Label" parent="Ticket/ServiceInfo"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.184314, 0.188235, 0.25098, 1)
+theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
 theme_override_font_sizes/font_size = 14
 text = "Train 505"
 horizontal_alignment = 2
@@ -206,7 +219,7 @@ horizontal_alignment = 2
 [node name="ServiceDate" type="Label" parent="Ticket/ServiceInfo"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.184314, 0.188235, 0.25098, 1)
+theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
 theme_override_font_sizes/font_size = 12
 text = "07 JUN 2026"
 horizontal_alignment = 2

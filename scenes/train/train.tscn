@@ -147,6 +147,7 @@ size = Vector2(48, 720)
 
 [node name="Train" type="Node2D" unique_id=36082991]
 script = ExtResource("1")
+station_vertical_offset = -24.0
 
 [node name="Cars" type="Node2D" parent="." unique_id=793357466]
 unique_name_in_owner = true

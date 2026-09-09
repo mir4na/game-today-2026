@@ -106,6 +106,7 @@ editor_description = "Scene-based attachment point for dirt, lost items, or othe
 [node name="DirtySeatEvent" parent="Attachments" unique_id=228326528 instance=ExtResource("2_dirty")]
 position = Vector2(1, 70)
 seat_marker_path = NodePath("../..")
+focus_visual_path = NodePath("../../SeatArt/SeatOutline")
 flash_visual_path = NodePath("../../SeatArt/SeatInteractionGlow")
 flash_animation_player_path = NodePath("../../SeatArt/SeatInteractionFlash")
 flash_animation_name = &"interaction_flash"

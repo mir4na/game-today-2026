@@ -609,6 +609,30 @@ amount_template = "LV.%d"
 material = SubResource("ShaderMaterial_7yoph")
 texture = ExtResource("22_swift_item")
 
+[node name="DebugNextStationButton" type="Button" parent="Root"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = -78.0
+offset_right = 248.0
+offset_bottom = -28.0
+grow_vertical = 0
+tooltip_text = "Debug only: trigger the normal arrival flow"
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_colors/font_pressed_color = Color(0.843137, 0.690196, 0.419608, 1)
+theme_override_colors/font_hover_color = Color(1, 0.956863, 0.827451, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("GuidebookButtonTransparent")
+theme_override_styles/pressed = SubResource("GuidebookButtonTransparent")
+theme_override_styles/hover = SubResource("GuidebookButtonTransparent")
+text = "Debug: next station"
+
 [node name="NotificationPanel" type="PanelContainer" parent="Root" unique_id=1320290712]
 unique_name_in_owner = true
 editor_description = "Text-only HUD announcement. Its position and transparent presentation are scene-authored here; there is intentionally no box behind it."
@@ -644,6 +668,7 @@ autowrap_mode = 2
 
 [connection signal="pressed" from="Root/GuidebookButton" to="." method="_on_guidebook_button_pressed"]
 [connection signal="pressed" from="Root/DebugNightButton" to="." method="_on_debug_night_button_pressed"]
+[connection signal="pressed" from="Root/DebugNextStationButton" to="." method="_on_debug_next_station_button_pressed"]
 [connection signal="tool_requested" from="Root/MarketItemBar/AuditSlot" to="." method="_on_market_item_requested"]
 [connection signal="tool_requested" from="Root/MarketItemBar/RadarSlot" to="." method="_on_market_item_requested"]
 [connection signal="tool_requested" from="Root/MarketItemBar/SwiftSlot" to="." method="_on_market_item_requested"]

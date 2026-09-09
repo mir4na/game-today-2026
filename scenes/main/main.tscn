@@ -294,6 +294,7 @@ unique_name_in_owner = true
 [connection signal="timeout" from="MaintenanceTimers/DirtySeatTimer" to="." method="_on_dirty_seat_timer_timeout"]
 [connection signal="guidebook_requested" from="HUD" to="." method="_on_guidebook_requested"]
 [connection signal="debug_night_requested" from="HUD" to="." method="_on_debug_night_requested"]
+[connection signal="debug_next_station_requested" from="HUD" to="." method="_on_debug_next_station_requested"]
 [connection signal="closed" from="ModalLayer/DocumentOverlayUI" to="." method="_on_modal_closed"]
 [connection signal="station_assignment_toggled" from="ModalLayer/DocumentOverlayUI" to="." method="_on_station_assignment_toggled"]
 [connection signal="closed" from="ModalLayer/GuidebookUI" to="." method="_on_modal_closed"]

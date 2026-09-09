@@ -3,6 +3,7 @@ extends CanvasLayer
 ## Persistent, low-profile HUD. Modal screens live in sibling UI scenes.
 
 signal guidebook_requested
+signal debug_next_station_requested
 signal market_tool_requested(tool_id: StringName)
 signal debug_night_requested
 
@@ -14,9 +15,12 @@ signal debug_night_requested
 @export_range(0.0, 1440.0, 1.0) var clock_default_end_minutes: float = 1320.0
 @export_range(-180.0, 180.0, 0.1) var clock_pointer_start_degrees: float = -29.8
 @export_range(1.0, 90.0, 0.5) var clock_degrees_per_stop: float = 36.0
-@export_range(1, 12, 1) var clock_stop_count: int = 4
+@export_range(1, 12, 1) var clock_stop_count: int = 5
 @export_range(0.1, 1.5, 0.05) var clock_station_step_duration: float = 0.5
-@export_range(0.1, 1.0, 0.01) var clock_symbol_flip_duration: float = 0.46
+@export_range(0.8, 3.0, 0.05) var clock_symbol_flip_duration: float = 1.65
+@export_range(0.01, 0.2, 0.01) var clock_symbol_edge_scale: float = 0.04
+@export_range(1.0, 1.2, 0.01) var clock_symbol_edge_bulge: float = 1.07
+@export_range(0.0, 8.0, 0.1) var clock_symbol_spin_tilt_degrees: float = 2.2
 @export_category("Interaction Prompt")
 @export var prompt_screen_offset: Vector2 = Vector2.ZERO
 @export var prompt_edge_margin: Vector2 = Vector2(24.0, 20.0)
@@ -55,6 +59,7 @@ signal debug_night_requested
 @onready var _tool_status_label: Label = %ToolStatusLabel
 @onready var _debug_night_button: Button = %DebugNightButton
 @onready var _guidebook_button: Button = %GuidebookButton
+@onready var _debug_next_station_button: Button = %DebugNextStationButton
 @onready var _market_item_bar: VBoxContainer = %MarketItemBar
 @onready var _audit_slot: Control = %AuditSlot
 @onready var _radar_slot: Control = %RadarSlot
@@ -82,6 +87,7 @@ const CLOCK_FILL_ARC_DEGREES: float = 180.0
 
 func _ready() -> void:
 	_clock_sign_assembly.hide()
+	_debug_next_station_button.visible = false
 	set_swiftstep_active(false)
 
 func _process(delta: float) -> void:
@@ -148,30 +154,57 @@ func set_next_stop(station_name: String) -> void:
 
 func set_clock_night_mode(is_night: bool, animate: bool = true) -> void:
 	if is_night == _clock_is_night:
+		if is_instance_valid(_clock_symbol_tween) and _clock_symbol_tween.is_valid():
+			return
 		_show_clock_symbol(is_night)
 		return
 	_clock_is_night = is_night
 	if is_instance_valid(_clock_symbol_tween) and _clock_symbol_tween.is_valid():
 		_clock_symbol_tween.kill()
 	_clock_symbol_pivot.scale = Vector2.ONE
+	_clock_symbol_pivot.rotation = 0.0
 	if not animate or not is_inside_tree():
 		_show_clock_symbol(is_night)
 		return
-	var half_duration: float = clock_symbol_flip_duration * 0.5
+	# Seven horizontal coin turns create an explicit slow -> fast -> slow rhythm.
+	# The face changes only at the thinnest point of the fastest center turn, so
+	# the day/night swap is concealed by the edge of the spinning medallion.
+	var spin_weights := PackedFloat32Array([1.7, 1.25, 0.9, 0.62, 0.9, 1.25, 1.7])
+	var total_weight: float = 0.0
+	for weight: float in spin_weights:
+		total_weight += weight
+	var swap_index: int = spin_weights.size() / 2
 	_clock_symbol_tween = create_tween()
-	_clock_symbol_tween.tween_property(
-		_clock_symbol_pivot,
-		^"scale",
-		Vector2(0.04, 1.08),
-		half_duration
-	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	_clock_symbol_tween.tween_callback(_show_clock_symbol.bind(is_night))
-	_clock_symbol_tween.tween_property(
-		_clock_symbol_pivot,
-		^"scale",
-		Vector2.ONE,
-		half_duration
-	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	for spin_index: int in spin_weights.size():
+		var spin_duration: float = clock_symbol_flip_duration * spin_weights[spin_index] / total_weight
+		var edge_duration: float = spin_duration * 0.5
+		var tilt_sign: float = -1.0 if spin_index % 2 == 0 else 1.0
+		_clock_symbol_tween.tween_property(
+			_clock_symbol_pivot,
+			^"scale",
+			Vector2(clock_symbol_edge_scale, clock_symbol_edge_bulge),
+			edge_duration
+		).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		_clock_symbol_tween.parallel().tween_property(
+			_clock_symbol_pivot,
+			^"rotation",
+			deg_to_rad(clock_symbol_spin_tilt_degrees * tilt_sign),
+			edge_duration
+		).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		if spin_index == swap_index:
+			_clock_symbol_tween.tween_callback(_show_clock_symbol.bind(is_night))
+		_clock_symbol_tween.tween_property(
+			_clock_symbol_pivot,
+			^"scale",
+			Vector2.ONE,
+			edge_duration
+		).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		_clock_symbol_tween.parallel().tween_property(
+			_clock_symbol_pivot,
+			^"rotation",
+			0.0,
+			edge_duration
+		).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 
 func _show_clock_symbol(is_night: bool) -> void:
@@ -405,7 +438,7 @@ func _update_dialogue_pointer(target_local_x: float, prompt_width: float) -> voi
 func set_day_hud_visible(value: bool) -> void:
 	_clock_panel.visible = value
 	_guidebook_button.tooltip_text = "Open guidebook"
-	_debug_night_button.visible = value
+	_debug_night_button.visible = OS.is_debug_build() and value
 	if not value:
 		_clock_briefing_animation.stop()
 		_clock_sign_assembly.hide()
@@ -413,6 +446,10 @@ func set_day_hud_visible(value: bool) -> void:
 	_market_item_bar.visible = value
 	_floating_prompt.visible = value and not _prompt_label.text.is_empty()
 	# The train minimap remains visible through the night walk.
+
+
+func set_debug_next_station_available(value: bool) -> void:
+	_debug_next_station_button.visible = OS.is_debug_build() and value
 
 
 func show_route_briefing() -> void:
@@ -460,7 +497,13 @@ func _on_market_item_requested(tool_id: StringName) -> void:
 
 
 func _on_debug_night_button_pressed() -> void:
-	debug_night_requested.emit()
+	if OS.is_debug_build():
+		debug_night_requested.emit()
+
+
+func _on_debug_next_station_button_pressed() -> void:
+	if OS.is_debug_build():
+		debug_next_station_requested.emit()
 
 func set_night_walk_mode() -> void:
 	_clock_briefing_animation.stop()

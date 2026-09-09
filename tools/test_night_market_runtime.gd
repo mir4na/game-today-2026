@@ -25,7 +25,22 @@ func _run() -> void:
 	await create_timer(0.3).timeout
 	assert(market.visible, "Night market must open.")
 	assert(market.get_node("LightRig").get_child_count() == 7, "Night market requires all seven light layers.")
-	assert(not market.get_node("MarketActors/AuditEntrance/AuditFloat/AuditButton").disabled, "Audit must use its existing purchasable backend.")
+	var audit_button := market.get_node("MarketActors/AuditEntrance/AuditFloat/AuditButton") as Button
+	var angel_entrance := market.get_node("MarketActors/AngelEntrance") as Node2D
+	var left_door := market.get_node("GateLayer/GateMotion/LeftDoor") as Sprite2D
+	var right_door := market.get_node("GateLayer/GateMotion/RightDoor") as Sprite2D
+	var gate_layer := market.get_node("GateLayer") as Control
+	var entrance_fog := market.get_node("TransitionFog/FogFront") as ColorRect
+	assert(audit_button.disabled, "Purchases must remain locked while the entrance cinematic plays.")
+	assert(angel_entrance.modulate.a < 0.01, "The angel must wait until the fog and gate opening finish.")
+	assert(is_equal_approx(left_door.position.x, 470.0) and is_equal_approx(right_door.position.x, 810.0), "The market gate must begin closed behind the incoming fog.")
+	assert(gate_layer.modulate.a < 0.01, "The closed gate must stay concealed until the entrance fog is dense.")
+	assert(entrance_fog.self_modulate.a > 0.05, "Fog must arrive before the market gate opens.")
+	await create_timer(2.9).timeout
+	assert(not audit_button.disabled, "The market must unlock after fog, gate, angel, and item entrances finish.")
+	assert(angel_entrance.modulate.a > 0.99, "The angel must enter after the gate is open.")
+	assert(gate_layer.modulate.a > 0.99, "The gate must be revealed only after fog conceals the set change.")
+	assert(is_equal_approx(left_door.position.x, 170.0) and is_equal_approx(right_door.position.x, 1110.0), "The gate must finish opening before purchases unlock.")
 	market.call(&"_set_item_highlight", 1, true)
 	await create_timer(0.25).timeout
 	var radar_highlight := market.get_node("MarketActors/RadarEntrance/RadarFloat/RadarHighlight") as Sprite2D
@@ -41,13 +56,16 @@ func _run() -> void:
 
 	market.continue_requested.connect(func() -> void: signal_state["continued"] = true)
 	market.get_node("HeaderRoot/ContinueButton").pressed.emit()
-	await create_timer(2.0).timeout
+	await create_timer(3.5).timeout
 	assert(bool(signal_state["continued"]), "Continue must emit only after the exit and gate-close animation.")
-	var left_door := market.get_node("GateLayer/GateMotion/LeftDoor") as Sprite2D
-	var right_door := market.get_node("GateLayer/GateMotion/RightDoor") as Sprite2D
 	assert(is_equal_approx(left_door.position.x, 470.0) and is_equal_approx(right_door.position.x, 810.0), "Mirrored doors must meet at the center.")
+	var transition_fog := market.get_node("TransitionFog/FogFront") as ColorRect
+	assert(transition_fog.self_modulate.a > 0.95, "Dense fog must cover the market only after its exit and gate animations finish.")
 	if DisplayServer.get_name() != "headless":
 		await process_frame
 		root.get_texture().get_image().save_png("res://.godot/night_market_gate_preview.png")
-	print("PASS: animated Night Market assets, selection highlight, purchase, and gate exit.")
+	market.release_transition_fog()
+	await create_timer(1.2).timeout
+	assert(not market.visible, "Transition fog must release into Night Service and then hide the market.")
+	print("PASS: fog-first Night Market entrance, gate reveal, selection, purchase, and fog-covered exit.")
 	quit()
