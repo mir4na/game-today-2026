@@ -19,7 +19,7 @@
 [ext_resource type="Material" path="res://resources/materials/hud_black_outline.tres" id="18_hud_outline"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_market_item_slot.tscn" id="19_market_slot"]
 [ext_resource type="Shader" uid="uid://b7v5jwqdcye4y" path="res://shaders/ui_texture_outline.gdshader" id="20_4mi7y"]
-[ext_resource type="Texture2D" uid="uid://2mae3aagu2ei" path="res://assets/nightmarket/Item_Audit.png" id="20_audit_item"]
+[ext_resource type="Texture2D" uid="uid://2mae3aagu2ei" path="res://assets/nightmarket/Item_Audit.png" id="20_veil_note_item"]
 [ext_resource type="Texture2D" uid="uid://t3ymikc81x7u" path="res://assets/nightmarket/Item_Radar.png" id="21_radar_item"]
 [ext_resource type="Texture2D" uid="uid://bi2b0di5uipvm" path="res://assets/nightmarket/Item_Switft.png" id="22_swift_item"]
 [ext_resource type="Texture2D" uid="uid://d11pgqc341s0t" path="res://assets/ui/guidebook/Group 136.png" id="23_guidebook_button"]
@@ -578,15 +578,15 @@ grow_horizontal = 0
 grow_vertical = 2
 theme_override_constants/separation = 10
 
-[node name="AuditSlot" parent="Root/MarketItemBar" unique_id=907689913 instance=ExtResource("19_market_slot")]
+[node name="VeilNoteSlot" parent="Root/MarketItemBar" unique_id=907689913 instance=ExtResource("19_market_slot")]
 unique_name_in_owner = true
 layout_mode = 2
-tool_id = &"audit_slip"
-item_name = "Audit Slip"
+tool_id = &"veil_note"
+item_name = "Veil Note — reveal one additional Night Shift statement"
 
-[node name="Icon" parent="Root/MarketItemBar/AuditSlot" index="1"]
+[node name="Icon" parent="Root/MarketItemBar/VeilNoteSlot" index="1"]
 material = SubResource("ShaderMaterial_pkwgd")
-texture = ExtResource("20_audit_item")
+texture = ExtResource("20_veil_note_item")
 
 [node name="RadarSlot" parent="Root/MarketItemBar" unique_id=943347102 instance=ExtResource("19_market_slot")]
 unique_name_in_owner = true
@@ -669,10 +669,10 @@ autowrap_mode = 2
 [connection signal="pressed" from="Root/GuidebookButton" to="." method="_on_guidebook_button_pressed"]
 [connection signal="pressed" from="Root/DebugNightButton" to="." method="_on_debug_night_button_pressed"]
 [connection signal="pressed" from="Root/DebugNextStationButton" to="." method="_on_debug_next_station_button_pressed"]
-[connection signal="tool_requested" from="Root/MarketItemBar/AuditSlot" to="." method="_on_market_item_requested"]
+[connection signal="tool_requested" from="Root/MarketItemBar/VeilNoteSlot" to="." method="_on_market_item_requested"]
 [connection signal="tool_requested" from="Root/MarketItemBar/RadarSlot" to="." method="_on_market_item_requested"]
 [connection signal="tool_requested" from="Root/MarketItemBar/SwiftSlot" to="." method="_on_market_item_requested"]
 
-[editable path="Root/MarketItemBar/AuditSlot"]
+[editable path="Root/MarketItemBar/VeilNoteSlot"]
 [editable path="Root/MarketItemBar/RadarSlot"]
 [editable path="Root/MarketItemBar/SwiftSlot"]

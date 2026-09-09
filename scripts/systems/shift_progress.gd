@@ -2,8 +2,9 @@ extends RefCounted
 ## A checkpoint is the start of a day, never an in-progress payout or purchase.
 
 const SAVE_PATH: String = "user://shift_progress.cfg"
-const VERSION: int = 2
+const VERSION: int = 3
 const LEGACY_STARTER_RADAR_VERSION: int = 1
+const AUDIT_SLIP_VERSION: int = 2
 const DAY_COUNT: int = 5
 
 
@@ -20,7 +21,7 @@ static func load_checkpoint(path: String = SAVE_PATH) -> Dictionary:
 	if file.load(path) != OK:
 		return {}
 	var saved_version: int = int(file.get_value("progress", "version", 0))
-	if saved_version not in [LEGACY_STARTER_RADAR_VERSION, VERSION]:
+	if saved_version not in [LEGACY_STARTER_RADAR_VERSION, AUDIT_SLIP_VERSION, VERSION]:
 		return {}
 	var checkpoint: Variant = file.get_value("progress", "checkpoint", {})
 	if not checkpoint is Dictionary:
@@ -31,12 +32,16 @@ static func load_checkpoint(path: String = SAVE_PATH) -> Dictionary:
 		return {}
 	if not checkpoint.get("completed", null) is bool or not checkpoint.get("inventory", null) is Dictionary:
 		return {}
-	for key: String in ["blessings", "audit_slips", "radar_charges", "speed_level"]:
+	var inventory_keys: Array[String] = ["blessings", "radar_charges", "speed_level"]
+	inventory_keys.append("veil_notes" if saved_version == VERSION else "audit_slips")
+	for key: String in inventory_keys:
 		var value: Variant = checkpoint.inventory.get(key, 0)
 		if not value is int or value < 0:
 			return {}
 	if saved_version == LEGACY_STARTER_RADAR_VERSION:
 		checkpoint = _migrate_legacy_starter_item(checkpoint)
+	if saved_version in [LEGACY_STARTER_RADAR_VERSION, AUDIT_SLIP_VERSION]:
+		checkpoint = _migrate_audit_slip(checkpoint)
 		save_checkpoint(checkpoint, path)
 	return checkpoint.duplicate(true)
 
@@ -51,11 +56,26 @@ static func _migrate_legacy_starter_item(checkpoint: Dictionary) -> Dictionary:
 	migrated.inventory = inventory
 	return migrated
 
+
+static func _migrate_audit_slip(checkpoint: Dictionary) -> Dictionary:
+	var migrated: Dictionary = checkpoint.duplicate(true)
+	var inventory: Dictionary = migrated.inventory
+	inventory["veil_notes"] = clampi(int(inventory.get("audit_slips", 0)), 0, 1)
+	inventory.erase("audit_slips")
+	migrated.inventory = inventory
+	return migrated
+
 static func make_checkpoint(day: int, inventory: Dictionary, seed_value: int) -> Dictionary:
 	var saved_inventory: Dictionary = {}
-	for key: String in ["blessings", "audit_slips", "radar_charges", "speed_level"]:
+	for key: String in ["blessings", "radar_charges", "speed_level"]:
 		if inventory.has(key):
 			saved_inventory[key] = maxi(0, int(inventory[key]))
+	if inventory.has("veil_notes") or inventory.has("audit_slips"):
+		saved_inventory["veil_notes"] = clampi(
+			int(inventory.get("veil_notes", inventory.get("audit_slips", 0))),
+			0,
+			1
+		)
 	return {"day": clampi(day, 1, DAY_COUNT), "seed": seed_value, "inventory": saved_inventory, "completed": false}
 
 static func new_seed() -> int:

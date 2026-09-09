@@ -5,12 +5,16 @@ extends Control
 signal selected(passenger_name: String)
 
 @export var drag_preview_scene: PackedScene
+@export_category("Scene Layout Variants")
+@export var regular_statement_bottom: float = 91.0
+@export var compact_statement_bottom: float = 108.0
+@export var hide_assignment_in_compact: bool = true
 
 var passenger_name: String = ""
 var assigned_station: String = ""
 var _passenger_data: PassengerData
 
-@onready var _portrait: TextureRect = %Portrait
+@onready var _portrait: NightCharacterPortrait = %Portrait
 @onready var _assigned_overlay: ColorRect = %AssignedOverlay
 @onready var _name_label: Label = %PassengerName
 @onready var _anomaly_label: Label = %AnomalyLabel
@@ -21,7 +25,7 @@ var _passenger_data: PassengerData
 func configure(data: PassengerData, statement: String, anomaly_label: String) -> void:
 	_passenger_data = data
 	passenger_name = data.short_name
-	_portrait.texture = data.get_character_artwork()
+	_portrait.set_passenger(data)
 	_name_label.text = data.short_name.to_upper()
 	_anomaly_label.text = anomaly_label
 	# Keep the ledger wording byte-for-byte identical to the sentence selected
@@ -30,6 +34,16 @@ func configure(data: PassengerData, statement: String, anomaly_label: String) ->
 	_statement_label.tooltip_text = statement
 	_statement_label.modulate = Color("453b38") if not statement.is_empty() else Color("8f8178")
 	show()
+
+
+func set_compact_mode(enabled: bool) -> void:
+	# Five records share the same fixed ledger page. In that layout the gray
+	# portrait overlay already communicates assignment, so the repeated station
+	# caption yields its row to the exact hidden statement.
+	_assignment_label.visible = not (enabled and hide_assignment_in_compact)
+	_statement_label.offset_bottom = (
+		compact_statement_bottom if enabled else regular_statement_bottom
+	)
 
 
 func set_assignment(station: String) -> void:

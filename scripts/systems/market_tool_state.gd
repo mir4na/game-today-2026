@@ -4,17 +4,17 @@ extends Node
 
 signal inventory_changed(snapshot: Dictionary)
 
-const TOOL_AUDIT_SLIP: StringName = &"audit_slip"
+const TOOL_VEIL_NOTE: StringName = &"veil_note"
 const TOOL_RADAR_CHARGE: StringName = &"radar_charge"
 const TOOL_SPEED_UPGRADE: StringName = &"speed_upgrade"
 
 @export_category("Starting Inventory")
 @export_range(0, 999, 1) var starting_blessings: int = 0
-@export_range(0, 20, 1) var starting_audit_slips: int = 1
+@export_range(0, 1, 1) var starting_veil_notes: int = 1
 @export_range(0, 20, 1) var starting_radar_charges: int = 0
 @export_range(0, 8, 1) var starting_speed_level: int = 1
 @export_category("Market Costs")
-@export_range(1, 99, 1) var audit_slip_cost: int = 3
+@export_range(1, 99, 1) var veil_note_cost: int = 3
 @export_range(1, 99, 1) var radar_charge_cost: int = 4
 @export var speed_upgrade_costs: PackedInt32Array = PackedInt32Array([6, 10, 15])
 @export_category("Blessing Rewards")
@@ -25,7 +25,7 @@ const TOOL_SPEED_UPGRADE: StringName = &"speed_upgrade"
 @export_range(0, 100, 1) var blessings_per_failed_night_attempt: int = 10
 
 var blessings: int = 0
-var audit_slips: int = 0
+var veil_notes: int = 0
 var radar_charges: int = 0
 var speed_level: int = 0
 var _day_blessings_awarded: bool = false
@@ -45,7 +45,7 @@ func reset_inventory() -> void:
 
 func _set_starting_inventory() -> void:
 	blessings = maxi(0, starting_blessings)
-	audit_slips = maxi(0, starting_audit_slips)
+	veil_notes = clampi(starting_veil_notes, 0, 1)
 	radar_charges = maxi(0, starting_radar_charges)
 	speed_level = clampi(starting_speed_level, 0, speed_upgrade_costs.size())
 	_day_blessings_awarded = false
@@ -92,7 +92,13 @@ func award_day_blessings(correct_dropoffs: int, wrong_dropoffs: int, incorrect_a
 func restore_shift_inventory(snapshot: Dictionary) -> void:
 	_set_starting_inventory()
 	blessings = maxi(0, int(snapshot.get("blessings", starting_blessings)))
-	audit_slips = maxi(0, int(snapshot.get("audit_slips", starting_audit_slips)))
+	# Version 2 saves used the old Audit Slip name. Keep those runs playable,
+	# then clamp the redesigned Veil Note to its one-item capacity.
+	veil_notes = clampi(
+		int(snapshot.get("veil_notes", snapshot.get("audit_slips", starting_veil_notes))),
+		0,
+		1
+	)
 	radar_charges = maxi(0, int(snapshot.get("radar_charges", starting_radar_charges)))
 	speed_level = clampi(int(snapshot.get("speed_level", starting_speed_level)), 0, speed_upgrade_costs.size())
 	_emit_inventory_changed()
@@ -125,19 +131,19 @@ func award_night_blessings(correct_night_dropoffs: int, attempt_count: int = 1) 
 
 func purchase(tool_id: StringName) -> Dictionary:
 	match tool_id:
-		TOOL_AUDIT_SLIP:
-			return _purchase_consumable(audit_slip_cost, TOOL_AUDIT_SLIP)
+		TOOL_VEIL_NOTE:
+			return _purchase_veil_note()
 		TOOL_RADAR_CHARGE:
-			return _purchase_consumable(radar_charge_cost, TOOL_RADAR_CHARGE)
+			return _purchase_radar_charge()
 		TOOL_SPEED_UPGRADE:
 			return _purchase_speed_upgrade()
 	return {"success": false, "message": "UNKNOWN MARKET ITEM"}
 
 
-func consume_audit_slip() -> bool:
-	if audit_slips <= 0:
+func consume_veil_note() -> bool:
+	if veil_notes <= 0:
 		return false
-	audit_slips -= 1
+	veil_notes -= 1
 	_emit_inventory_changed()
 	return true
 
@@ -153,23 +159,29 @@ func consume_radar_charge() -> bool:
 func get_snapshot() -> Dictionary:
 	return {
 		"blessings": blessings,
-		"audit_slips": audit_slips,
+		"veil_notes": veil_notes,
 		"radar_charges": radar_charges,
 		"speed_level": speed_level,
 		"speed_max_level": speed_upgrade_costs.size(),
-		"audit_slip_cost": audit_slip_cost,
+		"veil_note_cost": veil_note_cost,
 		"radar_charge_cost": radar_charge_cost,
 		"speed_upgrade_cost": _next_speed_cost()
 	}
 
 
-func _purchase_consumable(cost: int, tool_id: StringName) -> Dictionary:
-	if not _try_spend(cost):
+func _purchase_veil_note() -> Dictionary:
+	if veil_notes >= 1:
+		return {"success": false, "message": "ONLY ONE VEIL NOTE MAY BE CARRIED"}
+	if not _try_spend(veil_note_cost):
 		return {"success": false, "message": "NOT ENOUGH BLESSINGS"}
-	if tool_id == TOOL_AUDIT_SLIP:
-		audit_slips += 1
-		_emit_inventory_changed()
-		return {"success": true, "message": "AUDIT SLIP ADDED"}
+	veil_notes = 1
+	_emit_inventory_changed()
+	return {"success": true, "message": "VEIL NOTE ADDED"}
+
+
+func _purchase_radar_charge() -> Dictionary:
+	if not _try_spend(radar_charge_cost):
+		return {"success": false, "message": "NOT ENOUGH BLESSINGS"}
 	radar_charges += 1
 	_emit_inventory_changed()
 	return {"success": true, "message": "RADAR CHARGE ADDED"}

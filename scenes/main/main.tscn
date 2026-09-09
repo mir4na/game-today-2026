@@ -46,6 +46,7 @@
 [ext_resource type="PackedScene" path="res://scenes/systems/station_cinematic_view.tscn" id="45_station_view"]
 [ext_resource type="PackedScene" path="res://scenes/ui/swiftstep_effect_ui.tscn" id="46_swiftstep_effect"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_soul_record_ui.tscn" id="47_soul_record"]
+[ext_resource type="PackedScene" path="res://scenes/ui/veil_note_reveal_ui.tscn" id="48_veil_note_reveal"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_day_cycle_sky"]
 shader = ExtResource("39")
@@ -275,6 +276,9 @@ unique_name_in_owner = true
 [node name="NightPuzzleUI" parent="ModalLayer" unique_id=1779434419 instance=ExtResource("8")]
 unique_name_in_owner = true
 
+[node name="VeilNoteRevealUI" parent="ModalLayer" instance=ExtResource("48_veil_note_reveal")]
+unique_name_in_owner = true
+
 [node name="PauseUI" parent="ModalLayer" unique_id=680489697 instance=ExtResource("10")]
 unique_name_in_owner = true
 
@@ -318,6 +322,7 @@ unique_name_in_owner = true
 [connection signal="closed" from="ModalLayer/NightPuzzleUI" to="." method="_close_night_puzzle"]
 [connection signal="departures_confirmed" from="ModalLayer/NightPuzzleUI" to="." method="_on_departures_confirmed"]
 [connection signal="validation_finished" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_validation_finished"]
+[connection signal="reveal_finished" from="ModalLayer/VeilNoteRevealUI" to="." method="_on_veil_note_reveal_finished"]
 [connection signal="main_menu_requested" from="ModalLayer/PauseUI" to="." method="_return_to_main_menu"]
 [connection signal="restart_requested" from="ModalLayer/PauseUI" to="." method="_restart_game"]
 [connection signal="resume_requested" from="ModalLayer/PauseUI" to="." method="_resume_from_pause"]

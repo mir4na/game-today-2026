@@ -4,7 +4,7 @@
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
 [ext_resource type="Shader" path="res://shaders/night_market_background.gdshader" id="3_background_shader"]
 [ext_resource type="Texture2D" path="res://assets/nightmarket/Angel.png" id="4_angel"]
-[ext_resource type="Texture2D" path="res://assets/nightmarket/Item_Audit.png" id="5_audit"]
+[ext_resource type="Texture2D" path="res://assets/nightmarket/Item_Audit.png" id="5_veil_note"]
 [ext_resource type="Texture2D" path="res://assets/nightmarket/Item_Radar.png" id="6_radar"]
 [ext_resource type="Texture2D" path="res://assets/nightmarket/Item_Switft.png" id="7_swift"]
 [ext_resource type="Texture2D" path="res://assets/nightmarket/ItemHighlight.png" id="8_highlight"]
@@ -194,37 +194,37 @@ unique_name_in_owner = true
 scale = Vector2(0.56, 0.56)
 texture = ExtResource("4_angel")
 
-[node name="AuditEntrance" type="Node2D" parent="MarketActors"]
+[node name="VeilNoteEntrance" type="Node2D" parent="MarketActors"]
 unique_name_in_owner = true
 position = Vector2(276, 534)
 
-[node name="AuditFloat" type="Node2D" parent="MarketActors/AuditEntrance"]
+[node name="VeilNoteFloat" type="Node2D" parent="MarketActors/VeilNoteEntrance"]
 unique_name_in_owner = true
 
-[node name="AuditHighlight" type="Sprite2D" parent="MarketActors/AuditEntrance/AuditFloat"]
+[node name="VeilNoteHighlight" type="Sprite2D" parent="MarketActors/VeilNoteEntrance/VeilNoteFloat"]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0)
 position = Vector2(0, -69)
 scale = Vector2(0.61, 0.61)
 texture = ExtResource("8_highlight")
 
-[node name="ShelfPerspective" type="Node2D" parent="MarketActors/AuditEntrance/AuditFloat"]
+[node name="ShelfPerspective" type="Node2D" parent="MarketActors/VeilNoteEntrance/VeilNoteFloat"]
 scale = Vector2(1, 0.42)
 
-[node name="AuditShelfSpin" type="Node2D" parent="MarketActors/AuditEntrance/AuditFloat/ShelfPerspective"]
+[node name="VeilNoteShelfSpin" type="Node2D" parent="MarketActors/VeilNoteEntrance/VeilNoteFloat/ShelfPerspective"]
 unique_name_in_owner = true
 
-[node name="Shelf" type="Sprite2D" parent="MarketActors/AuditEntrance/AuditFloat/ShelfPerspective/AuditShelfSpin"]
+[node name="Shelf" type="Sprite2D" parent="MarketActors/VeilNoteEntrance/VeilNoteFloat/ShelfPerspective/VeilNoteShelfSpin"]
 scale = Vector2(0.36, 0.36)
 texture = ExtResource("9_shelf")
 
-[node name="AuditItem" type="Sprite2D" parent="MarketActors/AuditEntrance/AuditFloat"]
+[node name="VeilNoteItem" type="Sprite2D" parent="MarketActors/VeilNoteEntrance/VeilNoteFloat"]
 unique_name_in_owner = true
 position = Vector2(0, -92)
 scale = Vector2(0.55, 0.55)
-texture = ExtResource("5_audit")
+texture = ExtResource("5_veil_note")
 
-[node name="Name" type="Label" parent="MarketActors/AuditEntrance/AuditFloat"]
+[node name="Name" type="Label" parent="MarketActors/VeilNoteEntrance/VeilNoteFloat"]
 z_index = 20
 offset_left = -145.0
 offset_top = 58.0
@@ -235,10 +235,10 @@ theme_override_colors/font_color = Color(0.952941, 0.847059, 0.427451, 1)
 theme_override_colors/font_outline_color = Color(0.2, 0.105882, 0.231373, 0.95)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 18
-text = "Audit slip"
+text = "Veil Note"
 horizontal_alignment = 1
 
-[node name="AuditInfoLabel" type="Label" parent="MarketActors/AuditEntrance/AuditFloat"]
+[node name="VeilNoteInfoLabel" type="Label" parent="MarketActors/VeilNoteEntrance/VeilNoteFloat"]
 unique_name_in_owner = true
 z_index = 20
 offset_left = -150.0
@@ -252,7 +252,7 @@ theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 
-[node name="AuditButton" type="Button" parent="MarketActors/AuditEntrance/AuditFloat"]
+[node name="VeilNoteButton" type="Button" parent="MarketActors/VeilNoteEntrance/VeilNoteFloat"]
 unique_name_in_owner = true
 z_index = 21
 offset_left = -150.0
@@ -265,7 +265,7 @@ theme_override_styles/hover = SubResource("StyleBoxEmpty_item")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_item")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_item")
 flat = true
-tooltip_text = "Purchase one Audit slip"
+tooltip_text = "Purchase one Veil Note. You may carry only one."
 
 [node name="RadarEntrance" type="Node2D" parent="MarketActors"]
 unique_name_in_owner = true
@@ -619,7 +619,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.764706, 0.803922, 0.839216, 1)
 
-[connection signal="pressed" from="MarketActors/AuditEntrance/AuditFloat/AuditButton" to="." method="_on_audit_button_pressed"]
+[connection signal="pressed" from="MarketActors/VeilNoteEntrance/VeilNoteFloat/VeilNoteButton" to="." method="_on_veil_note_button_pressed"]
 [connection signal="pressed" from="MarketActors/RadarEntrance/RadarFloat/RadarButton" to="." method="_on_radar_button_pressed"]
 [connection signal="pressed" from="MarketActors/SpeedEntrance/SpeedFloat/SpeedButton" to="." method="_on_speed_button_pressed"]
 [connection signal="pressed" from="HeaderRoot/ContinueButton" to="." method="_on_continue_button_pressed"]

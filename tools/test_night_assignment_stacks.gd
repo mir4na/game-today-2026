@@ -37,6 +37,13 @@ func _run() -> void:
 	await process_frame
 
 	var board := game._night_puzzle_ui as NightPuzzleUI
+	var first_card := board._passenger_cards[0] as NightPassengerCard
+	var first_card_portrait := first_card.get_node("%Portrait") as NightCharacterPortrait
+	_check(
+		first_card_portrait.get_source_artwork() == passengers[0].get_character_artwork(),
+		"A ledger portrait must retain the same real character identity shown in the carriage."
+	)
+	_check(first_card_portrait.texture is AtlasTexture, "Ledger portrait boxes must show an upper-body crop.")
 	var first_station: String = puzzle.night_stations[0]
 	var first_name: String = passengers[0].short_name
 	var second_name: String = passengers[1].short_name
@@ -48,7 +55,6 @@ func _run() -> void:
 	var first_target := board._station_targets[0] as NightStationTarget
 	_check(first_target.get_node("%AssignmentFaces").get_child_count() == 2, "A stacked station must render one face token per assigned NPC.")
 
-	var first_card := board._passenger_cards[0] as NightPassengerCard
 	_check(first_card.get_node("%StatementLabel").text == statements[first_name], "The ledger card must show the exact biography sentence.")
 	_check((first_card.get_node("%AssignedOverlay") as ColorRect).visible, "An assigned ledger portrait must show its gray overlay.")
 	# Scene linkage is the invariant that keeps the visual preview editable.
@@ -60,9 +66,10 @@ func _run() -> void:
 		var preview_sprite := preview.get_node("%CharacterSprite") as TextureRect
 		_check(preview_sprite.texture == passengers[0].get_character_artwork(), "Dragging must use the NPC character artwork.")
 		preview.free()
-	var expected_name: String = str(puzzle.correct_passenger_by_station.get(
-		puzzle.night_stations[0], ""
-	))
+	var expected_passengers: Array[String] = puzzle.get_expected_passengers_for_station(
+		puzzle.night_stations[0]
+	)
+	var expected_name: String = expected_passengers[0] if not expected_passengers.is_empty() else ""
 	_check(
 		game._night_assignment_contains(
 			{puzzle.night_stations[0]: [expected_name, "another soul"]},

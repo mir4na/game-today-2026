@@ -25,26 +25,42 @@ signal validation_finished(succeeded: bool, attempt_count: int)
 @export var validation_reading_template: String = "READING %s"
 @export var validation_failed_template: String = "THE STATION PATH REJECTS ATTEMPT %d"
 @export var validation_success_text: String = "THE STATION PATH IS ALIGNED"
+@export_category("Five-Soul Ledger Layout")
+@export var regular_card_origin: Vector2 = Vector2(29.0, 82.0)
+@export_range(80.0, 140.0, 1.0) var regular_card_spacing: float = 120.0
+@export var compact_card_origin: Vector2 = Vector2(61.0, 82.0)
+@export_range(0.5, 1.0, 0.01) var compact_card_scale: float = 0.8
+@export_range(70.0, 120.0, 1.0) var compact_card_spacing: float = 92.0
+@export_category("Scene-Based Station Paths")
+@export var station_path_layout_scenes: Array[PackedScene] = []
 
 var _puzzle: DeparturePuzzleData
 var _selected_passenger: String = ""
 var _assignments: Dictionary = {}
 var _passenger_data_by_name: Dictionary = {}
 var _collected_statements: Dictionary = {}
+var _veil_note_statement: String = ""
 var _validating: bool = false
 var _focus_tween: Tween
 var _ledger_rest_position: Vector2
 var _station_path_rest_position: Vector2
+var _current_instruction: String = ""
+var _station_path_layout: NightStationPathLayout
+var _station_targets: Array[NightStationTarget] = []
 
 @onready var _instruction_label: Label = %InstructionLabel
 @onready var _selection_label: Label = %SelectionLabel
 @onready var _assignment_count_label: Label = %AssignmentCountLabel
 @onready var _clue_count_label: Label = %ClueCountLabel
+@onready var _service_level_label: Label = %LedgerTitleSmall
+@onready var _veil_note_panel: Control = %VeilNotePanel
+@onready var _veil_note_label: Label = %VeilNoteStatement
 @onready var _error_label: Label = %ErrorLabel
 @onready var _confirm_button: Button = %ConfirmButton
 @onready var _board_anchor: Control = %BoardAnchor
 @onready var _ledger_anchor: Control = %LedgerAnchor
 @onready var _station_path_anchor: Control = %StationPathAnchor
+@onready var _station_path_layout_host: Control = %PathLayoutHost
 @onready var _validation_light: TextureRect = %ValidationLightToken
 @onready var _validation_status: Label = %ValidationStatusLabel
 @onready var _legend_label: Label = $BoardAnchor/StationPathAnchor/LegendLabel
@@ -54,12 +70,7 @@ var _station_path_rest_position: Vector2
 	%PassengerCard2,
 	%PassengerCard3,
 	%PassengerCard4,
-]
-@onready var _station_targets: Array[NightStationTarget] = [
-	%VesperwickTarget,
-	%HollowcrossTarget,
-	%BellhavenTarget,
-	%MorrowfieldTarget,
+	%PassengerCard5,
 ]
 
 
@@ -67,12 +78,10 @@ func _ready() -> void:
 	_ledger_rest_position = _ledger_anchor.position
 	_station_path_rest_position = _station_path_anchor.position
 	_station_path_anchor.pivot_offset = station_path_focus_pivot
-	_instruction_label.text = instruction_text
+	_current_instruction = instruction_text
+	_instruction_label.text = _current_instruction
 	for card: NightPassengerCard in _passenger_cards:
 		card.selected.connect(_on_passenger_selected)
-	for target: NightStationTarget in _station_targets:
-		target.passenger_dropped.connect(_assign_passenger_to_station)
-		target.selected.connect(_on_station_selected)
 	_reset_validation_presentation()
 	hide()
 
@@ -80,7 +89,8 @@ func _ready() -> void:
 func open_puzzle(
 	passengers: Array[PassengerData],
 	puzzle: DeparturePuzzleData,
-	collected_statements: Dictionary
+	collected_statements: Dictionary,
+	veil_note_statement: String = ""
 ) -> void:
 	var is_new_case: bool = _puzzle != puzzle
 	_puzzle = puzzle
@@ -89,24 +99,30 @@ func open_puzzle(
 	_selected_passenger = ""
 	_passenger_data_by_name.clear()
 	_collected_statements = collected_statements.duplicate(true)
+	set_veil_note_statement(veil_note_statement)
 	_validating = false
 	_error_label.text = ""
-	_selection_label.text = instruction_text
+	_current_instruction = puzzle.get_assignment_instruction() if puzzle != null else instruction_text
+	_instruction_label.text = _current_instruction
+	_selection_label.text = _current_instruction
+	_service_level_label.text = puzzle.get_service_label() if puzzle != null else "NIGHT ASSIGNMENT"
 	_reset_validation_presentation()
 
 	for card: NightPassengerCard in _passenger_cards:
 		card.hide()
-	for target: NightStationTarget in _station_targets:
-		target.hide()
-
 	if puzzle == null:
 		show_error("The night station path is unavailable.")
 		show()
 		return
-	if passengers.size() > _passenger_cards.size() or puzzle.night_stations.size() > _station_targets.size():
-		show_error("This ledger supports four souls and four stations.")
+	_configure_station_path(puzzle)
+	if not is_instance_valid(_station_path_layout):
 		show()
 		return
+	if passengers.size() > _passenger_cards.size() or puzzle.night_stations.size() > _station_targets.size():
+		show_error("This ledger supports five souls and four stations.")
+		show()
+		return
+	_layout_passenger_cards(passengers.size())
 
 	for index: int in range(passengers.size()):
 		var data: PassengerData = passengers[index]
@@ -119,16 +135,58 @@ func open_puzzle(
 		)
 		card.show()
 
-	for index: int in range(puzzle.night_stations.size()):
-		var target: NightStationTarget = _station_targets[index]
-		if target.station_name != puzzle.night_stations[index]:
-			push_error("Night station path scene order does not match the puzzle resource.")
-		target.show()
-
 	_remove_invalid_assignments()
 	_update_assignment_visuals()
 	show()
 	_present_board()
+
+
+func _layout_passenger_cards(passenger_count: int) -> void:
+	var use_compact_layout: bool = passenger_count > 4
+	var origin: Vector2 = compact_card_origin if use_compact_layout else regular_card_origin
+	var spacing: float = compact_card_spacing if use_compact_layout else regular_card_spacing
+	var card_scale: float = compact_card_scale if use_compact_layout else 1.0
+	for index: int in range(_passenger_cards.size()):
+		var card: NightPassengerCard = _passenger_cards[index]
+		card.position = origin + Vector2(0.0, spacing * index)
+		card.scale = Vector2.ONE * card_scale
+		card.set_compact_mode(use_compact_layout)
+
+
+func _configure_station_path(puzzle: DeparturePuzzleData) -> void:
+	if is_instance_valid(_station_path_layout):
+		_station_path_layout.free()
+	_station_path_layout = null
+	_station_targets.clear()
+	var layout_scene: PackedScene = puzzle.get_station_path_layout_scene()
+	if layout_scene == null and not station_path_layout_scenes.is_empty():
+		var scene_index: int = clampi(
+			puzzle.service_level - 1,
+			0,
+			station_path_layout_scenes.size() - 1
+		)
+		layout_scene = station_path_layout_scenes[scene_index]
+	if layout_scene == null:
+		show_error("Night Service Level %d has no scene-authored station path." % puzzle.service_level)
+		return
+	_station_path_layout = layout_scene.instantiate() as NightStationPathLayout
+	if _station_path_layout == null:
+		show_error("The configured station path scene is invalid.")
+		return
+	_station_path_layout_host.add_child(_station_path_layout)
+	_station_targets = _station_path_layout.get_station_targets()
+	for target: NightStationTarget in _station_targets:
+		target.visible = puzzle.night_stations.has(target.station_name)
+		target.passenger_dropped.connect(_assign_passenger_to_station)
+		target.selected.connect(_on_station_selected)
+
+
+func set_veil_note_statement(statement: String) -> void:
+	_veil_note_statement = statement.strip_edges()
+	if not is_node_ready():
+		return
+	_veil_note_label.text = _veil_note_statement
+	_veil_note_panel.visible = not _veil_note_statement.is_empty()
 
 
 func refresh_collected_statements(collected_statements: Dictionary) -> void:
@@ -165,7 +223,7 @@ func _on_passenger_selected(passenger_name: String) -> void:
 	if _validating:
 		return
 	_selected_passenger = passenger_name
-	_selection_label.text = instruction_text
+	_selection_label.text = _current_instruction
 	_error_label.text = ""
 
 
@@ -173,7 +231,7 @@ func _on_station_selected(station_name: String) -> void:
 	if _validating:
 		return
 	if _selected_passenger.is_empty():
-		_selection_label.text = instruction_text
+		_selection_label.text = _current_instruction
 		return
 	_assign_passenger_to_station(station_name, _selected_passenger)
 
@@ -199,7 +257,7 @@ func _assign_passenger_to_station(station_name: String, passenger_name: String) 
 		station_passengers.append(passenger_name)
 	_assignments[station_name] = station_passengers
 	_selected_passenger = passenger_name
-	_selection_label.text = instruction_text
+	_selection_label.text = _current_instruction
 	_error_label.text = ""
 	_update_assignment_visuals()
 
@@ -301,9 +359,9 @@ func play_validation(station_results: Dictionary, attempt_count: int) -> void:
 	_validation_status.modulate = Color("b34345")
 	if result_hold_seconds > 0.0:
 		await get_tree().create_timer(result_hold_seconds).timeout
-	_assignments.clear()
+		_assignments.clear()
 	_selected_passenger = ""
-	_selection_label.text = instruction_text
+	_selection_label.text = _current_instruction
 	_error_label.text = ""
 	_update_assignment_visuals()
 	for target: NightStationTarget in _station_targets:
@@ -399,18 +457,9 @@ func _fade_validation_light() -> void:
 
 
 func _get_validation_order() -> Array[NightStationTarget]:
-	# This order follows authored graph threads continuously:
-	# Vesperwick -> Bellhaven -> Hollowcross -> Morrowfield.
-	var result: Array[NightStationTarget] = []
-	for target: NightStationTarget in [
-		%VesperwickTarget,
-		%BellhavenTarget,
-		%HollowcrossTarget,
-		%MorrowfieldTarget,
-	]:
-		if target.visible:
-			result.append(target)
-	return result
+	if not is_instance_valid(_station_path_layout):
+		return []
+	return _station_path_layout.get_validation_targets()
 
 
 func _validation_chrome() -> Array[CanvasItem]:

@@ -48,7 +48,7 @@ const DAY_SERVICE_FINAL_CYCLE_PROGRESS: float = 1.0
 const SUNSET_STATE_PROGRESS: float = 0.62
 const SERVICE_NIGHT_START_PROGRESS: float = 0.70
 const SERVICE_FULL_NIGHT_PROGRESS: float = 0.98
-const TOOL_AUDIT_SLIP: StringName = &"audit_slip"
+const TOOL_VEIL_NOTE: StringName = &"veil_note"
 const TOOL_RADAR_CHARGE: StringName = &"radar_charge"
 const TOOL_SPEED_UPGRADE: StringName = &"speed_upgrade"
 
@@ -69,6 +69,7 @@ var _seat_slot_by_passenger: Dictionary = {}
 var _boarding_passengers: Array[Passenger] = []
 var _interactables: Array[Interactable] = []
 var _collected_departure_statements: Dictionary = {}
+var _collected_veil_note_statement: String = ""
 var _runtime_puzzle: DeparturePuzzleData
 var _daily_rng := RandomNumberGenerator.new()
 var _daily_seed: int = 0
@@ -131,6 +132,7 @@ var _world_time_scale: float = 1.0
 @onready var _blocked_aisle_ui: Control = %BlockedAislePuzzleUI
 @onready var _clean_seat_ui: Control = %CleanSeatUI
 @onready var _night_market_ui: Control = %NightMarketUI
+@onready var _veil_note_reveal_ui: Variant = %VeilNoteRevealUI
 @onready var _swiftstep_effect_ui: Variant = %SwiftstepEffectUI
 @onready var _market_tool_state: Node = %MarketToolState
 @onready var _blocked_aisle_timer: Timer = %BlockedAisleTimer
@@ -498,7 +500,11 @@ func _choose_newspaper_case() -> void:
 		NewspaperEditionMode.FORCE_DEATH:
 			_newspaper_case = NewspaperCase.MATCHING_PASSENGER_DEATH
 		_:
-			_newspaper_case = _roll_random_newspaper_case()
+			_newspaper_case = (
+				NewspaperCase.MATCHING_PASSENGER_DEATH
+				if manifest_config.should_guarantee_newspaper_anomaly(day_number)
+				else _roll_random_newspaper_case()
+			)
 
 func _roll_random_newspaper_case() -> NewspaperCase:
 	var non_death_weight: float = maxf(0.0, manifest_config.non_death_news_weight)
@@ -1778,8 +1784,11 @@ func _on_market_tool_requested(tool_id: StringName) -> void:
 	):
 		return
 	match tool_id:
-		TOOL_AUDIT_SLIP:
-			_use_audit_slip()
+		TOOL_VEIL_NOTE:
+			if state != GameState.NIGHT:
+				_hud.notify("VEIL NOTE CAN ONLY BE OPENED DURING NIGHT SHIFT", 2.5)
+			else:
+				_use_veil_note()
 		TOOL_RADAR_CHARGE:
 			if not _radar_scan_active:
 				_use_carriage_radar()
@@ -1926,33 +1935,40 @@ func _on_market_inventory_changed(snapshot: Dictionary) -> void:
 		_night_market_ui.call(&"set_snapshot", snapshot)
 
 
-func _use_audit_slip() -> void:
+func _use_veil_note() -> void:
 	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
-	if int(snapshot.get("audit_slips", 0)) <= 0:
-		_hud.notify("NO AUDIT SLIPS REMAINING", 2.5)
+	if int(snapshot.get("veil_notes", 0)) <= 0:
+		_hud.notify("NO VEIL NOTE REMAINS", 2.5)
 		return
-	var passenger := _nearby_interactable as Passenger
-	if not _is_active_passenger(passenger):
-		_hud.notify("MOVE NEAR A PASSENGER TO USE THE AUDIT SLIP", 2.5)
+	if not _collected_veil_note_statement.is_empty():
+		_hud.notify("THIS NIGHT'S VEIL NOTE HAS ALREADY BEEN RECORDED", 2.5)
 		return
-	if not bool(_market_tool_state.call(&"consume_audit_slip")):
+	var puzzle: DeparturePuzzleData = _get_departure_puzzle()
+	if puzzle == null:
+		_hud.notify("THE VEIL NOTE CANNOT FIND THIS NIGHT'S PATH", 2.5)
 		return
-	var normalized_name: String = _normalize_name(passenger.data.passenger_name)
-	var found_in_manifest: bool = false
-	for manifest_data: PassengerData in _daily_manifest:
-		if normalized_name in [
-			_normalize_name(manifest_data.passenger_name),
-			_normalize_name(manifest_data.short_name),
-		]:
-			found_in_manifest = true
-			break
-	if found_in_manifest:
-		_hud.notify(
-			"MANIFEST NAME CONFIRMED\n%s • LIFE STATUS UNDISCLOSED" % passenger.data.short_name.to_upper(),
-			3.5
-		)
-	else:
-		_hud.notify("NAME NOT FOUND IN TODAY'S MANIFEST", 3.5)
+	var extra_statement: String = puzzle.get_veil_note_statement()
+	if extra_statement.is_empty():
+		_hud.notify("THE VEIL NOTE IS BLANK", 2.5)
+		return
+	if not bool(_market_tool_state.call(&"consume_veil_note")):
+		return
+	_collected_veil_note_statement = extra_statement
+	_night_puzzle_ui.set_veil_note_statement(_collected_veil_note_statement)
+	_active_modal = _veil_note_reveal_ui
+	_player.movement_enabled = false
+	_player.interaction_enabled = false
+	_hud.set_prompt("")
+	var target_position: Vector2 = _hud.get_night_ledger_button_center()
+	if not bool(_veil_note_reveal_ui.call(&"play_reveal", extra_statement, target_position)):
+		_active_modal = null
+		_set_player_control_for_state()
+
+
+func _on_veil_note_reveal_finished() -> void:
+	if _active_modal == _veil_note_reveal_ui:
+		_active_modal = null
+	_set_player_control_for_state()
 
 
 func _use_swiftstep() -> void:
@@ -2074,8 +2090,13 @@ func _prepare_night_world() -> void:
 		return
 	_night_world_prepared = true
 	_night_assignment_attempts = 0
-	_runtime_puzzle = puzzle_template.create_runtime(_get_dead_passenger_data(), _daily_rng)
+	_runtime_puzzle = puzzle_template.create_runtime(
+		_get_dead_passenger_data(),
+		_daily_rng,
+		day_number
+	)
 	_collected_departure_statements.clear()
+	_collected_veil_note_statement = ""
 	_train.set_night_strength(1.0)
 	_ambience.night_strength = 1.0
 	_travel_background.set_tunnel_active(false, true)
@@ -2106,7 +2127,12 @@ func _open_night_puzzle() -> void:
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
 	_active_modal = _night_puzzle_ui
-	_night_puzzle_ui.open_puzzle(_get_dead_passenger_data(), _get_departure_puzzle(), _collected_departure_statements)
+	_night_puzzle_ui.open_puzzle(
+		_get_dead_passenger_data(),
+		_get_departure_puzzle(),
+		_collected_departure_statements,
+		_collected_veil_note_statement
+	)
 
 func _get_departure_statement_total() -> int:
 	var puzzle: DeparturePuzzleData = _get_departure_puzzle()
@@ -2132,16 +2158,13 @@ func _on_departures_confirmed(assignments: Dictionary) -> void:
 	_night_assignment_attempts += 1
 	var station_results: Dictionary = {}
 	for station: String in puzzle.night_stations:
-		var expected_passenger: String = str(
-			puzzle.correct_passenger_by_station.get(station, "")
-		)
+		var expected_passengers: Array[String] = puzzle.get_expected_passengers_for_station(station)
 		var assigned_passengers: Array[String] = _night_passengers_assigned_to(
 			assignments, station
 		)
-		station_results[station] = (
-			assigned_passengers.size() == 1
-			and assigned_passengers[0] == expected_passenger
-		)
+		expected_passengers.sort()
+		assigned_passengers.sort()
+		station_results[station] = assigned_passengers == expected_passengers
 	_night_puzzle_ui.play_validation(station_results, _night_assignment_attempts)
 
 
@@ -2162,7 +2185,7 @@ func _on_night_validation_finished(succeeded: bool, attempt_count: int) -> void:
 	if puzzle == null:
 		_night_puzzle_ui.show_error("The night assignment manifest is unavailable.")
 		return
-	var correct_count: int = puzzle.correct_passenger_by_station.size()
+	var correct_count: int = puzzle.get_assignment_count()
 	_night_blessing_award = _market_tool_state.call(
 		&"award_night_blessings",
 		correct_count,

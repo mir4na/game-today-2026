@@ -30,7 +30,7 @@ var _closing: bool = false
 @onready var _shade: ColorRect = %Shade
 @onready var _record_anchor: Control = %RecordAnchor
 @onready var _title_label: Label = %RecordTitle
-@onready var _portrait: TextureRect = %Portrait
+@onready var _portrait: NightCharacterPortrait = %Portrait
 @onready var _name_label: Label = %PassengerName
 @onready var _details_label: Label = %PassengerDetails
 @onready var _instruction_label: Label = %InstructionLabel
@@ -54,7 +54,9 @@ func open_record(data: PassengerData, puzzle: DeparturePuzzleData, already_recor
 	_passenger_name = data.short_name
 	_correct_statement = puzzle.get_statement_for_passenger(_passenger_name)
 	_recorded = already_recorded
-	_portrait.texture = data.id_photo
+	# A Borrowed Portrait changes the daytime ID photo. The Soul Record depicts
+	# the soul being inspected, so it always uses that NPC's real character art.
+	_portrait.set_passenger(data)
 	_name_label.text = data.short_name.to_upper()
 	_details_label.text = "%s  •  %s" % [
 		data.occupation.to_upper(),

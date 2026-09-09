@@ -1,21 +1,40 @@
 [gd_resource type="Resource" script_class="DeparturePuzzleData" format=3 uid="uid://dwxivcklwykx0"]
 
 [ext_resource type="Script" uid="uid://dylbvy4ioe7bs" path="res://scripts/systems/departure_puzzle_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_1.tscn" id="2_path_1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_2.tscn" id="3_path_2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_3.tscn" id="4_path_3"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_4.tscn" id="5_path_4"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_5.tscn" id="6_path_5"]
 
 [resource]
 script = ExtResource("1")
 night_stations = PackedStringArray("Vesperwick", "Hollowcross", "Bellhaven", "Morrowfield")
-clockwise_statement_template = "%s appears one mark clockwise from %s in the recovered pattern."
-hub_statement_template = "%s rests at the one mark touched by all three paths."
-endpoint_statement_template = "%s rests where the lone path reaches its end."
-distance_statement_template = "The recovered pattern leaves two paths between %s and %s."
+station_path_layout_scenes = Array[PackedScene]([ExtResource("2_path_1"), ExtResource("3_path_2"), ExtResource("4_path_3"), ExtResource("5_path_4"), ExtResource("6_path_5")])
+clockwise_statement_template = "%s rests one station clockwise from %s around the closed route."
+hub_statement_template = "%s rests at the only station where three routes meet."
+endpoint_statement_template = "%s rests where a single route ends."
+distance_statement_template = "The shortest route between %s and %s crosses %d small marks."
 single_passenger_statement = "This is the only soul awaiting assignment tonight."
+veil_note_statement_template = "%s and %s belong at stations joined by one line."
+veil_note_distance_statement_template = "%s and %s are separated by %d small marks."
+direct_station_statement_template = "%s belongs at %s."
+between_statement_template = "%s rests on the only route between %s and %s."
+outside_loop_statement_template = "%s rests beyond the only closed loop."
+linked_pair_statement_template = "%s has a direct route to both %s and %s."
+path_through_statement_template = "The shortest path from %s to %s passes through %s."
+highest_mark_statement_template = "%s rests at the highest station mark."
+lowest_mark_statement_template = "%s rests at the lowest station mark."
+opposite_mark_statement_template = "%s rests at the station opposite %s."
+same_station_statement_template = "%s and %s rest at the same station."
+shared_station_link_statement_template = "The station shared by %s and %s is joined directly to %s."
+shared_station_counterclockwise_statement_template = "The station shared by %s and %s is one station counterclockwise from %s."
 anomaly_descriptor_by_type = {
-"newspaper_death": "the passenger named as dead in the newspaper",
-"portrait_mismatch": "the passenger with the borrowed portrait",
-"shadowless": "the passenger without a shadow",
-"time_invalid_ticket": "the passenger with the wrong ticket date",
-"unlisted_destination": "the passenger whose destination is missing from the day route"
+"newspaper_death": "the newspaper victim",
+"portrait_mismatch": "the passenger with a borrowed portrait",
+"shadowless": "the shadowless passenger",
+"time_invalid_ticket": "the wrong-date ticket holder",
+"unlisted_destination": "the off-route passenger"
 }
 anomaly_label_by_type = {
 "newspaper_death": "NEWSPAPER DEATH",
@@ -77,4 +96,4 @@ resonance_closing_sentence = "The writing was not present before the train cross
 biography_opening_support = PackedStringArray("Several surviving pages contain circles, crossed-out route marks, and small corrections whose purpose was never explained.")
 biography_evidence_support = PackedStringArray("A second diagram runs toward the edge of the page, where water damage has erased every useful label.")
 biography_veil_support = PackedStringArray("Other marks wander across the page without forming a complete route, then disappear when the carriage lights return.")
-hidden_statement_context_by_paragraph = PackedStringArray("One rough pattern among {name}'s surviving notes is drawn so that {statement}.", "A thin pencil mark beside the copied evidence is arranged so that {statement}.", "When the page is opened beyond the veil, its faded lines settle so that {statement}.")
+hidden_statement_context_by_paragraph = PackedStringArray("An old note in {name}'s files reads: {statement}.", "Beside the copied evidence, {name} wrote: {statement}.", "Beyond the veil, {name}'s faded page reveals: {statement}.")

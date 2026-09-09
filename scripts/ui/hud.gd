@@ -61,7 +61,7 @@ signal debug_night_requested
 @onready var _guidebook_button: Button = %GuidebookButton
 @onready var _debug_next_station_button: Button = %DebugNextStationButton
 @onready var _market_item_bar: VBoxContainer = %MarketItemBar
-@onready var _audit_slot: Control = %AuditSlot
+@onready var _veil_note_slot: Control = %VeilNoteSlot
 @onready var _radar_slot: Control = %RadarSlot
 @onready var _swift_slot: Control = %SwiftSlot
 @onready var _maintenance_trackers: Array[Control] = [
@@ -222,7 +222,7 @@ func set_passenger_counts_by_carriage(counts: Dictionary) -> void:
 
 func set_market_tool_inventory(snapshot: Dictionary) -> void:
 	_tool_status_label.text = tool_status_template % int(snapshot.get("blessings", 0))
-	_audit_slot.call(&"set_owned_amount", int(snapshot.get("audit_slips", 0)))
+	_veil_note_slot.call(&"set_owned_amount", int(snapshot.get("veil_notes", 0)))
 	_radar_slot.call(&"set_owned_amount", int(snapshot.get("radar_charges", 0)))
 	_swift_slot.call(&"set_owned_amount", int(snapshot.get("speed_level", 0)))
 	_update_action_button_locks()
@@ -231,7 +231,7 @@ func set_market_tool_inventory(snapshot: Dictionary) -> void:
 func request_market_item(shortcut_number: int) -> bool:
 	match shortcut_number:
 		1:
-			return bool(_audit_slot.call(&"request_use"))
+			return bool(_veil_note_slot.call(&"request_use"))
 		2:
 			return bool(_radar_slot.call(&"request_use"))
 		3:
@@ -483,13 +483,17 @@ func set_service_sealed(value: bool) -> void:
 
 func _update_action_button_locks() -> void:
 	_guidebook_button.disabled = _service_sealed
-	_audit_slot.call(&"set_interaction_locked", _service_sealed)
+	_veil_note_slot.call(&"set_interaction_locked", _service_sealed)
 	_radar_slot.call(&"set_interaction_locked", _service_sealed or _radar_active)
 	_swift_slot.call(&"set_interaction_locked", _service_sealed or _swiftstep_active)
 
 
 func _on_guidebook_button_pressed() -> void:
 	guidebook_requested.emit()
+
+
+func get_night_ledger_button_center() -> Vector2:
+	return _guidebook_button.get_global_rect().get_center()
 
 
 func _on_market_item_requested(tool_id: StringName) -> void:

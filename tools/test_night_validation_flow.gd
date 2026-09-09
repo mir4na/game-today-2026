@@ -44,14 +44,19 @@ func _run() -> void:
 		target.failure_burst_seconds = 0.01
 
 	var puzzle: DeparturePuzzleData = game._get_departure_puzzle()
-	var correct_names: Array[String] = []
-	for station: String in puzzle.night_stations:
-		correct_names.append(str(puzzle.correct_passenger_by_station[station]))
-	for index: int in range(puzzle.night_stations.size()):
+	var correct_names: Array = puzzle.correct_station_by_passenger.keys()
+	for passenger_value: Variant in correct_names:
+		var passenger_name: String = str(passenger_value)
 		board._assign_passenger_to_station(
-			puzzle.night_stations[index],
-			correct_names[(index + 1) % correct_names.size()]
+			str(puzzle.correct_station_by_passenger[passenger_value]),
+			passenger_name
 		)
+	var first_name: String = str(correct_names[0])
+	var correct_station: String = str(puzzle.correct_station_by_passenger[first_name])
+	var wrong_station: String = puzzle.night_stations[0]
+	if wrong_station == correct_station:
+		wrong_station = puzzle.night_stations[1]
+	board._assign_passenger_to_station(wrong_station, first_name)
 	board._confirm()
 	var failed_result: Array = await board.validation_finished
 	_check(not bool(failed_result[0]), "Any wrong station must reject the whole night attempt.")
@@ -65,10 +70,11 @@ func _run() -> void:
 		game._collected_departure_statements[data.short_name] = puzzle.get_statement_for_passenger(data.short_name)
 	game._open_night_puzzle()
 	await process_frame
-	for station: String in puzzle.night_stations:
+	for passenger_value: Variant in puzzle.correct_station_by_passenger:
+		var passenger_name: String = str(passenger_value)
 		board._assign_passenger_to_station(
-			station,
-			str(puzzle.correct_passenger_by_station[station])
+			str(puzzle.correct_station_by_passenger[passenger_value]),
+			passenger_name
 		)
 	board._confirm()
 	var success_result: Array = await board.validation_finished
@@ -80,7 +86,10 @@ func _run() -> void:
 	_check(game.get_node_or_null("ModalLayer/DepartureSequenceUI") == null, "The obsolete assignment result screen must be removed.")
 	var award: Dictionary = game._night_blessing_award
 	_check(int(award.get("failed_attempts", -1)) == 1, "Only failed attempts may reduce the reward.")
-	_check(int(award.get("base_reward", -1)) == 80, "Four correctly released souls must produce the configured 80-Blessing base reward.")
+	_check(
+		int(award.get("base_reward", -1)) == puzzle.get_assignment_count() * 20,
+		"Every correctly released soul must contribute the configured night reward."
+	)
 	_check(int(award.get("attempt_deduction", -1)) == 10, "One rejected attempt must deduct the configured 10 Blessings.")
 	_check(
 		int(award.get("earned", -1))

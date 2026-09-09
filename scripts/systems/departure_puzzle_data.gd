@@ -5,11 +5,27 @@ extends Resource
 
 @export_category("Station Path")
 @export var night_stations: PackedStringArray = PackedStringArray()
+@export var station_path_layout_scenes: Array[PackedScene] = []
 @export_multiline var clockwise_statement_template: String
 @export_multiline var hub_statement_template: String
 @export_multiline var endpoint_statement_template: String
 @export_multiline var distance_statement_template: String
 @export_multiline var single_passenger_statement: String
+@export_multiline var veil_note_statement_template: String = "%s and %s belong at stations joined by one line."
+@export_multiline var veil_note_distance_statement_template: String = "%s and %s are separated by %d small marks."
+
+@export_category("Five-Level Progression")
+@export_multiline var direct_station_statement_template: String = "%s belongs at %s."
+@export_multiline var between_statement_template: String = "%s rests between %s and %s, with one line reaching each."
+@export_multiline var outside_loop_statement_template: String = "%s rests beyond the only closed loop."
+@export_multiline var linked_pair_statement_template: String = "%s shares one line with both %s and %s."
+@export_multiline var path_through_statement_template: String = "The shortest path from %s to %s passes through %s."
+@export_multiline var highest_mark_statement_template: String = "%s rests at the highest station mark."
+@export_multiline var lowest_mark_statement_template: String = "%s rests at the lowest station mark."
+@export_multiline var opposite_mark_statement_template: String = "%s rests opposite %s on the station path."
+@export_multiline var same_station_statement_template: String = "%s and %s rest at the same station."
+@export_multiline var shared_station_link_statement_template: String = "The station shared by %s and %s is joined directly to %s."
+@export_multiline var shared_station_counterclockwise_statement_template: String = "The station shared by %s and %s is one mark counterclockwise from %s."
 
 @export_category("Anomaly Language")
 @export var anomaly_descriptor_by_type: Dictionary = {}
@@ -30,15 +46,18 @@ extends Resource
 @export var biography_evidence_support: PackedStringArray = PackedStringArray()
 @export var biography_veil_support: PackedStringArray = PackedStringArray()
 @export var hidden_statement_context_by_paragraph: PackedStringArray = PackedStringArray([
-	"One rough pattern among {name}'s surviving notes is drawn so that {statement}.",
-	"A thin pencil mark beside the copied evidence is arranged so that {statement}.",
-	"When the page is opened beyond the veil, its faded lines settle so that {statement}.",
+	"An old note in {name}'s files reads: {statement}.",
+	"Beside the copied evidence, {name} wrote: {statement}.",
+	"Beyond the veil, {name}'s faded page reveals: {statement}.",
 ])
 
 ## Populated only on a duplicated runtime puzzle.
 var statement_by_passenger: Dictionary = {}
 var correct_passenger_by_station: Dictionary = {}
+var correct_station_by_passenger: Dictionary = {}
 var biography_by_passenger: Dictionary = {}
+var veil_note_statement: String = ""
+var service_level: int = 1
 
 
 func get_statement_for_passenger(passenger_name: String) -> String:
@@ -50,59 +69,146 @@ func get_biography_for_passenger(passenger_name: String) -> Array:
 	return (record as Array).duplicate(true) if record is Array else []
 
 
+func get_veil_note_statement() -> String:
+	return veil_note_statement.strip_edges()
+
+
 func get_anomaly_label(anomaly_type: String) -> String:
 	return str(anomaly_label_by_type.get(anomaly_type, fallback_anomaly_label)).strip_edges()
 
 
-func create_runtime(passengers: Array[PassengerData], rng: RandomNumberGenerator) -> DeparturePuzzleData:
+func get_expected_passengers_for_station(station_name: String) -> Array[String]:
+	var result: Array[String] = []
+	for passenger_value: Variant in correct_station_by_passenger:
+		var passenger_name: String = str(passenger_value)
+		if str(correct_station_by_passenger[passenger_value]) == station_name:
+			result.append(passenger_name)
+	return result
+
+
+func get_assignment_count() -> int:
+	return correct_station_by_passenger.size()
+
+
+func get_assignment_instruction() -> String:
+	match service_level:
+		1:
+			return "Drag each soul to a station. Small marks show route distance."
+		2:
+			return "Drag each soul to a station. One station remains empty."
+		3, 4:
+			return "Drag each soul to a station. Each station holds one soul."
+		_:
+			return "Drag each soul to a station. One station holds two souls."
+
+
+func get_service_label() -> String:
+	return "NIGHT SERVICE  •  LEVEL %d" % service_level
+
+
+func get_route_edges() -> Array[Vector2i]:
+	if service_level == 1:
+		# Level 1 uses its reduced local order: Vesperwick, Hollowcross,
+		# Morrowfield.
+		return [Vector2i(0, 1), Vector2i(1, 2)]
+	var edges: Array[Vector2i] = [
+		Vector2i(0, 1), # Vesperwick - Hollowcross
+		Vector2i(1, 3), # Hollowcross - Morrowfield
+		Vector2i(1, 2), # Hollowcross - Bellhaven
+	]
+	if service_level >= 3:
+		edges.append(Vector2i(0, 2)) # Opens the first loop.
+	if service_level >= 4:
+		edges.append(Vector2i(2, 3)) # Opens a second loop.
+	if service_level >= 5:
+		edges.append(Vector2i(0, 3)) # Completes the interlinked final path.
+	return edges
+
+
+func get_station_path_layout_scene(level: int = service_level) -> PackedScene:
+	if station_path_layout_scenes.is_empty():
+		return null
+	return station_path_layout_scenes[clampi(level - 1, 0, station_path_layout_scenes.size() - 1)]
+
+
+func get_small_mark_distance(first_station: String, second_station: String) -> int:
+	var layout: NightStationPathLayout = _instantiate_path_layout()
+	if layout == null:
+		return -1
+	var distance: int = layout.get_small_mark_distance(first_station, second_station)
+	layout.free()
+	return distance
+
+
+func get_path_segment_count() -> int:
+	var layout: NightStationPathLayout = _instantiate_path_layout()
+	if layout == null:
+		return 0
+	var count: int = layout.get_path_segments().size()
+	layout.free()
+	return count
+
+
+func get_small_mark_count() -> int:
+	var layout: NightStationPathLayout = _instantiate_path_layout()
+	if layout == null:
+		return 0
+	var count: int = layout.get_path_markers().size()
+	layout.free()
+	return count
+
+
+func _instantiate_path_layout() -> NightStationPathLayout:
+	var layout_scene: PackedScene = get_station_path_layout_scene()
+	if layout_scene == null:
+		return null
+	return layout_scene.instantiate() as NightStationPathLayout
+
+
+func create_runtime(
+	passengers: Array[PassengerData],
+	rng: RandomNumberGenerator,
+	requested_level: int = 0
+) -> DeparturePuzzleData:
 	var runtime := duplicate(true) as DeparturePuzzleData
 	runtime.resource_local_to_scene = true
 	runtime.statement_by_passenger = {}
 	runtime.correct_passenger_by_station = {}
+	runtime.correct_station_by_passenger = {}
 	runtime.biography_by_passenger = {}
-	var station_count: int = mini(passengers.size(), night_stations.size())
-	var runtime_stations := PackedStringArray()
-	for index: int in range(station_count):
-		runtime_stations.append(night_stations[index])
-	runtime.night_stations = runtime_stations
-	if station_count == 0:
+	runtime.veil_note_statement = ""
+	runtime.service_level = runtime._resolve_service_level(requested_level, passengers.size())
+	runtime.night_stations = runtime._stations_for_level(runtime.service_level)
+	if passengers.is_empty() or runtime.night_stations.is_empty():
 		return runtime
 
 	var ordered: Array[PassengerData] = passengers.duplicate()
 	_shuffle_passengers(ordered, rng)
-	for index: int in range(station_count):
-		runtime.correct_passenger_by_station[runtime.night_stations[index]] = ordered[index].short_name
+	var assignment_stations: PackedStringArray = runtime._assignment_stations_for_level(
+		runtime.service_level,
+		ordered.size()
+	)
+	for index: int in range(ordered.size()):
+		var passenger_name: String = ordered[index].short_name
+		var station_name: String = assignment_stations[index]
+		runtime.correct_station_by_passenger[passenger_name] = station_name
+		# Preserve the original one-passenger lookup for old content and tools. New
+		# validation uses correct_station_by_passenger so Level 5 can stack souls.
+		if not runtime.correct_passenger_by_station.has(station_name):
+			runtime.correct_passenger_by_station[station_name] = passenger_name
+	runtime.veil_note_statement = runtime._build_veil_note_statement(ordered, rng)
 
 	var descriptors: PackedStringArray = runtime._build_unique_descriptors(ordered)
-	var clues := PackedStringArray()
-	if station_count == 1:
-		clues.append(single_passenger_statement)
-	elif station_count == 4:
-		# Scene order: Vesperwick, Hollowcross, Bellhaven, Morrowfield.
-		# The first three form the clockwise loop, Hollowcross is the hub,
-		# and Morrowfield is the single-thread endpoint.
-		clues.append(clockwise_statement_template % [
-			runtime._sentence_case(descriptors[2]), descriptors[0]
-		])
-		clues.append(hub_statement_template % runtime._sentence_case(descriptors[1]))
-		clues.append(endpoint_statement_template % runtime._sentence_case(descriptors[3]))
-		clues.append(distance_statement_template % [descriptors[3], descriptors[2]])
-	else:
-		# Keep reduced debug rosters usable even though the authored UI presents
-		# the complete four-node case.
-		for index: int in range(station_count):
-			clues.append("%s belongs at %s." % [
-				runtime._sentence_case(descriptors[index]), runtime.night_stations[index]
-			])
+	var clues: PackedStringArray = runtime._build_progression_clues(descriptors, assignment_stations)
 
 	_shuffle_strings(clues, rng)
 	var statement_holders: Array[PassengerData] = passengers.duplicate()
 	_shuffle_passengers(statement_holders, rng)
 	var paragraph_placements := PackedInt32Array()
-	for index: int in range(station_count):
+	for index: int in range(passengers.size()):
 		paragraph_placements.append(index % 3)
 	_shuffle_ints(paragraph_placements, rng)
-	for index: int in range(station_count):
+	for index: int in range(passengers.size()):
 		var holder: PassengerData = statement_holders[index]
 		var biography: Array = runtime._compose_biography(
 			holder,
@@ -114,6 +220,164 @@ func create_runtime(passengers: Array[PassengerData], rng: RandomNumberGenerator
 		runtime.statement_by_passenger[holder.short_name] = hidden_statement
 		runtime.biography_by_passenger[holder.short_name] = biography
 	return runtime
+
+
+func _resolve_service_level(requested_level: int, passenger_count: int) -> int:
+	if requested_level > 0:
+		return clampi(requested_level, 1, 5)
+	if passenger_count >= 5:
+		return 5
+	if passenger_count >= 4:
+		return 3
+	return 1
+
+
+func _stations_for_level(level: int) -> PackedStringArray:
+	if night_stations.size() < 4 or level > 1:
+		return night_stations.duplicate()
+	# Level 1 presents a readable three-stop chain: top -> hub -> endpoint.
+	return PackedStringArray([night_stations[0], night_stations[1], night_stations[3]])
+
+
+func _assignment_stations_for_level(level: int, passenger_count: int) -> PackedStringArray:
+	var result := PackedStringArray()
+	if passenger_count <= 0 or night_stations.is_empty():
+		return result
+	var authored_indices: PackedInt32Array
+	match level:
+		1:
+			authored_indices = PackedInt32Array([0, 1, 2])
+		2:
+			authored_indices = PackedInt32Array([0, 1, 3])
+		_:
+			authored_indices = PackedInt32Array([0, 1, 2, 3, 1])
+	for index: int in range(passenger_count):
+		var authored_index: int = authored_indices[index] if index < authored_indices.size() else 1
+		result.append(night_stations[clampi(authored_index, 0, night_stations.size() - 1)])
+	return result
+
+
+func _build_progression_clues(
+	descriptors: PackedStringArray,
+	assignment_stations: PackedStringArray
+) -> PackedStringArray:
+	var clues := PackedStringArray()
+	if descriptors.size() == 1:
+		clues.append(single_passenger_statement)
+		return clues
+	if service_level == 1 and descriptors.size() >= 3:
+		clues.append(direct_station_statement_template % [
+			_sentence_case(descriptors[0]), assignment_stations[0]
+		])
+		clues.append(between_statement_template % [
+			_sentence_case(descriptors[1]), descriptors[0], descriptors[2]
+		])
+		clues.append(_build_distance_statement(
+			descriptors[2], descriptors[0], assignment_stations[2], assignment_stations[0]
+		))
+	elif service_level == 2 and descriptors.size() >= 3:
+		clues.append(highest_mark_statement_template % _sentence_case(descriptors[0]))
+		clues.append(_build_distance_statement(
+			descriptors[1], descriptors[0], assignment_stations[1], assignment_stations[0]
+		))
+		clues.append(lowest_mark_statement_template % _sentence_case(descriptors[2]))
+	elif service_level == 3 and descriptors.size() >= 4:
+		clues.append(clockwise_statement_template % [
+			_sentence_case(descriptors[2]), descriptors[0]
+		])
+		clues.append(hub_statement_template % _sentence_case(descriptors[1]))
+		clues.append(endpoint_statement_template % _sentence_case(descriptors[3]))
+		clues.append(_build_distance_statement(
+			descriptors[3], descriptors[2], assignment_stations[3], assignment_stations[2]
+		))
+	elif service_level == 4 and descriptors.size() >= 4:
+		clues.append(highest_mark_statement_template % _sentence_case(descriptors[0]))
+		clues.append(clockwise_statement_template % [
+			_sentence_case(descriptors[2]), descriptors[0]
+		])
+		clues.append(linked_pair_statement_template % [
+			_sentence_case(descriptors[1]), descriptors[0], descriptors[3]
+		])
+		clues.append(opposite_mark_statement_template % [
+			_sentence_case(descriptors[3]), descriptors[0]
+		])
+	elif service_level >= 5 and descriptors.size() >= 5:
+		clues.append(highest_mark_statement_template % _sentence_case(descriptors[0]))
+		clues.append(clockwise_statement_template % [
+			_sentence_case(descriptors[2]), descriptors[0]
+		])
+		clues.append(opposite_mark_statement_template % [
+			_sentence_case(descriptors[3]), descriptors[0]
+		])
+		clues.append(same_station_statement_template % [
+			_sentence_case(descriptors[1]), descriptors[4]
+		])
+		clues.append(shared_station_counterclockwise_statement_template % [
+			descriptors[1], descriptors[4], descriptors[0]
+		])
+	# Direct station lines keep editor/debug rosters playable if their size does
+	# not match the campaign's authored 3/3/4/4/5 progression.
+	while clues.size() < descriptors.size():
+		var index: int = clues.size()
+		clues.append(direct_station_statement_template % [
+			_sentence_case(descriptors[index]), assignment_stations[index]
+		])
+	if clues.size() > descriptors.size():
+		clues.resize(descriptors.size())
+	return clues
+
+
+func _build_distance_statement(
+	first_descriptor: String,
+	second_descriptor: String,
+	first_station: String,
+	second_station: String
+) -> String:
+	var distance: int = maxi(0, get_small_mark_distance(first_station, second_station))
+	return distance_statement_template % [first_descriptor, second_descriptor, distance]
+
+
+func _build_veil_note_statement(
+	ordered_passengers: Array[PassengerData],
+	rng: RandomNumberGenerator
+) -> String:
+	if ordered_passengers.is_empty():
+		return ""
+	if ordered_passengers.size() == 1:
+		return single_passenger_statement.strip_edges()
+	var available_pairs: Array[Dictionary] = []
+	for first_index: int in range(ordered_passengers.size()):
+		var first_name: String = ordered_passengers[first_index].short_name
+		var first_station: String = str(correct_station_by_passenger.get(first_name, ""))
+		for second_index: int in range(first_index + 1, ordered_passengers.size()):
+			var second_name: String = ordered_passengers[second_index].short_name
+			var second_station: String = str(correct_station_by_passenger.get(second_name, ""))
+			if first_station == second_station:
+				continue
+			var distance: int = get_small_mark_distance(first_station, second_station)
+			if distance >= 0:
+				available_pairs.append({
+					"first": first_index,
+					"second": second_index,
+					"distance": distance,
+				})
+	if available_pairs.is_empty():
+		return ""
+	var selected_pair: Dictionary = available_pairs[rng.randi_range(0, available_pairs.size() - 1)]
+	return (veil_note_distance_statement_template % [
+		ordered_passengers[int(selected_pair["first"])].short_name,
+		ordered_passengers[int(selected_pair["second"])].short_name,
+		int(selected_pair["distance"]),
+	]).strip_edges()
+
+
+func _stations_share_line(first_station: String, second_station: String) -> bool:
+	var layout: NightStationPathLayout = _instantiate_path_layout()
+	if layout == null:
+		return false
+	var shares_route: bool = layout.stations_share_direct_route(first_station, second_station)
+	layout.free()
+	return shares_route
 
 
 func _compose_biography(

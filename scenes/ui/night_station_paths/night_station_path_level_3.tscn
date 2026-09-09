@@ -1,0 +1,135 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/night_station_path_layout.gd" id="1_layout"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_station_target.tscn" id="2_station"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_path_marker.tscn" id="3_marker"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_path_segment.tscn" id="4_segment"]
+[ext_resource type="Texture2D" path="res://assets/NightShift/Star 2.png" id="5_hollow"]
+[ext_resource type="Texture2D" path="res://assets/NightShift/Star 8.png" id="6_bell"]
+[ext_resource type="Texture2D" path="res://assets/NightShift/Star 10.png" id="7_morrow"]
+[ext_resource type="Texture2D" path="res://assets/NightShift/Star 5.png" id="8_small_b"]
+[ext_resource type="Texture2D" path="res://assets/NightShift/Star 6.png" id="9_small_c"]
+[ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="10_font"]
+
+[node name="NightStationPathLevel3" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("1_layout")
+service_level = 3
+validation_order = PackedStringArray("Vesperwick", "Bellhaven", "Hollowcross", "Morrowfield")
+
+[node name="RouteVesperLeft" parent="." instance=ExtResource("4_segment")]
+from_anchor_path = NodePath("../VesperwickTarget")
+to_anchor_path = NodePath("../LeftTopMark")
+[node name="RouteLeftHollow" parent="." instance=ExtResource("4_segment")]
+from_anchor_path = NodePath("../LeftTopMark")
+to_anchor_path = NodePath("../HollowcrossTarget")
+[node name="RouteVesperRightA" parent="." instance=ExtResource("4_segment")]
+from_anchor_path = NodePath("../VesperwickTarget")
+to_anchor_path = NodePath("../RightTopMarkA")
+[node name="RouteRightARightB" parent="." instance=ExtResource("4_segment")]
+from_anchor_path = NodePath("../RightTopMarkA")
+to_anchor_path = NodePath("../RightTopMarkB")
+[node name="RouteRightBBell" parent="." instance=ExtResource("4_segment")]
+from_anchor_path = NodePath("../RightTopMarkB")
+to_anchor_path = NodePath("../BellhavenTarget")
+[node name="RouteHollowMiddle" parent="." instance=ExtResource("4_segment")]
+from_anchor_path = NodePath("../HollowcrossTarget")
+to_anchor_path = NodePath("../MiddleMark")
+[node name="RouteMiddleBell" parent="." instance=ExtResource("4_segment")]
+from_anchor_path = NodePath("../MiddleMark")
+to_anchor_path = NodePath("../BellhavenTarget")
+[node name="RouteHollowTail" parent="." instance=ExtResource("4_segment")]
+from_anchor_path = NodePath("../HollowcrossTarget")
+to_anchor_path = NodePath("../TailMark")
+[node name="RouteTailMorrow" parent="." instance=ExtResource("4_segment")]
+from_anchor_path = NodePath("../TailMark")
+to_anchor_path = NodePath("../MorrowfieldTarget")
+
+[node name="LeftTopMark" parent="." instance=ExtResource("3_marker")]
+offset_left = 675.0
+offset_top = 249.0
+offset_right = 705.0
+offset_bottom = 281.0
+path_node_id = &"l3_left_top"
+[node name="RightTopMarkA" parent="." instance=ExtResource("3_marker")]
+offset_left = 895.0
+offset_top = 214.0
+offset_right = 925.0
+offset_bottom = 246.0
+texture = ExtResource("8_small_b")
+path_node_id = &"l3_right_a"
+[node name="RightTopMarkB" parent="." instance=ExtResource("3_marker")]
+offset_left = 980.0
+offset_top = 284.0
+offset_right = 1010.0
+offset_bottom = 316.0
+path_node_id = &"l3_right_b"
+[node name="MiddleMark" parent="." instance=ExtResource("3_marker")]
+offset_left = 797.0
+offset_top = 362.0
+offset_right = 833.0
+offset_bottom = 398.0
+texture = ExtResource("9_small_c")
+path_node_id = &"l3_middle"
+[node name="TailMark" parent="." instance=ExtResource("3_marker")]
+offset_left = 545.0
+offset_top = 464.0
+offset_right = 575.0
+offset_bottom = 496.0
+texture = ExtResource("8_small_b")
+path_node_id = &"l3_tail"
+
+[node name="ClockwiseLabel" type="Label" parent="."]
+offset_left = 777.0
+offset_top = 275.0
+offset_right = 853.0
+offset_bottom = 313.0
+mouse_filter = 2
+tooltip_text = "Clockwise around the closed route"
+theme_override_colors/font_color = Color(0.690196, 0.298039, 0.290196, 0.86)
+theme_override_fonts/font = ExtResource("10_font")
+theme_override_font_sizes/font_size = 18
+text = "↻"
+horizontal_alignment = 1
+
+[node name="VesperwickTarget" parent="." instance=ExtResource("2_station")]
+offset_left = 725.0
+offset_top = 56.0
+offset_right = 905.0
+offset_bottom = 212.0
+station_name = "Vesperwick"
+[node name="HollowcrossTarget" parent="." instance=ExtResource("2_station")]
+offset_left = 470.0
+offset_top = 286.0
+offset_right = 650.0
+offset_bottom = 442.0
+station_name = "Hollowcross"
+[node name="Star" parent="HollowcrossTarget" index="2"]
+texture = ExtResource("5_hollow")
+[node name="BellhavenTarget" parent="." instance=ExtResource("2_station")]
+offset_left = 980.0
+offset_top = 286.0
+offset_right = 1160.0
+offset_bottom = 442.0
+station_name = "Bellhaven"
+[node name="Star" parent="BellhavenTarget" index="2"]
+texture = ExtResource("6_bell")
+[node name="MorrowfieldTarget" parent="." instance=ExtResource("2_station")]
+offset_left = 470.0
+offset_top = 481.0
+offset_right = 650.0
+offset_bottom = 637.0
+station_name = "Morrowfield"
+[node name="Star" parent="MorrowfieldTarget" index="2"]
+texture = ExtResource("7_morrow")
+
+[editable path="VesperwickTarget"]
+[editable path="HollowcrossTarget"]
+[editable path="BellhavenTarget"]
+[editable path="MorrowfieldTarget"]

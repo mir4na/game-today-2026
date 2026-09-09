@@ -20,7 +20,7 @@ func _run() -> void:
 		return
 	var market: MarketToolState = MarketScene.instantiate()
 	root.add_child(market)
-	var initial: Dictionary = {"blessings": 500, "audit_slips": 2, "radar_charges": 3, "speed_level": 1}
+	var initial: Dictionary = {"blessings": 500, "veil_notes": 1, "radar_charges": 3, "speed_level": 1}
 	market.restore_shift_inventory(initial)
 	var award: Dictionary = market.award_day_blessings(6, 1, 1, 100)
 	_check(award.net_earnings == 120 and award.passed and market.blessings == 620, "Receipt must use +30/-20/-40 independently of the starting balance.")
@@ -70,11 +70,16 @@ func _run() -> void:
 	var authored_number: String = authored_config.service_train_number
 	_check(authored_config.create_daily_service(2, checkpoint.seed).service_train_number == service_number, "Continue restores the daily service number from its checkpoint seed.")
 	var generated_numbers: Dictionary = {}
+	var expected_night_counts := PackedInt32Array([3, 3, 4, 4, 5])
 	for sample_day: int in range(1, 6):
 		var daily_config: DailyManifestConfig = authored_config.create_daily_service(sample_day, checkpoint.seed)
 		generated_numbers[daily_config.service_train_number] = true
 		_check(daily_config.service_train_number == authored_config.create_daily_service(sample_day, checkpoint.seed).service_train_number, "Daily service generation is repeatable.")
 		_check(not daily_config.alternate_train_numbers.has(daily_config.service_train_number), "Wrong-train numbers remain distinct from the current service.")
+		_check(
+			daily_config.deceased_passenger_count == expected_night_counts[sample_day - 1],
+			"Night Service must follow the authored 3, 3, 4, 4, 5 anomaly progression."
+		)
 	_check(generated_numbers.size() > 1 and authored_config.service_train_number == authored_number, "Daily randomization varies without modifying the authored config.")
 	scene_probe.free()
 	_check(game._market_tool_state.get("blessings") == 500, "Continue restores the day-start inventory.")
@@ -164,7 +169,12 @@ func _run() -> void:
 	current_scene = menu
 	menu.get_node("%StartButton").pressed.emit()
 	game = await _wait_for_game()
-	_check(game.day_number == 1 and game._market_tool_state.get("blessings") == 0, "New Game starts Day 1 with fresh inventory through the loading screen.")
+	_check(
+		game.day_number == 1
+		and game._market_tool_state.get("blessings") == 0
+		and game._market_tool_state.get("veil_notes") == 1,
+		"New Game starts Day 1 with its scene-authored Veil Note through the loading screen."
+	)
 	game.state = AfterTheEndGame.GameState.DAY
 	game._active_modal = null
 	game._route_index = 0

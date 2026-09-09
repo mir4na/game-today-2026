@@ -1,0 +1,99 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/night_station_path_layout.gd" id="1_layout"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_station_target.tscn" id="2_station"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_path_marker.tscn" id="3_marker"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_path_segment.tscn" id="4_segment"]
+[ext_resource type="Texture2D" path="res://assets/NightShift/Star 2.png" id="5_hollow"]
+[ext_resource type="Texture2D" path="res://assets/NightShift/Star 10.png" id="6_morrow"]
+[ext_resource type="Texture2D" path="res://assets/NightShift/Star 5.png" id="7_small_b"]
+[ext_resource type="Texture2D" path="res://assets/NightShift/Star 11.png" id="8_small_c"]
+
+[node name="NightStationPathLevel1" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("1_layout")
+service_level = 1
+validation_order = PackedStringArray("Vesperwick", "Hollowcross", "Morrowfield")
+
+[node name="RouteVesperA" parent="." instance=ExtResource("4_segment")]
+from_anchor_path = NodePath("../VesperwickTarget")
+to_anchor_path = NodePath("../MarkA")
+
+[node name="RouteAHollow" parent="." instance=ExtResource("4_segment")]
+from_anchor_path = NodePath("../MarkA")
+to_anchor_path = NodePath("../HollowcrossTarget")
+
+[node name="RouteHollowB" parent="." instance=ExtResource("4_segment")]
+from_anchor_path = NodePath("../HollowcrossTarget")
+to_anchor_path = NodePath("../MarkB")
+
+[node name="RouteBC" parent="." instance=ExtResource("4_segment")]
+from_anchor_path = NodePath("../MarkB")
+to_anchor_path = NodePath("../MarkC")
+
+[node name="RouteCMorrow" parent="." instance=ExtResource("4_segment")]
+from_anchor_path = NodePath("../MarkC")
+to_anchor_path = NodePath("../MorrowfieldTarget")
+
+[node name="MarkA" parent="." instance=ExtResource("3_marker")]
+offset_left = 660.0
+offset_top = 239.0
+offset_right = 690.0
+offset_bottom = 271.0
+path_node_id = &"l1_a"
+
+[node name="MarkB" parent="." instance=ExtResource("3_marker")]
+offset_left = 915.0
+offset_top = 414.0
+offset_right = 945.0
+offset_bottom = 446.0
+texture = ExtResource("7_small_b")
+path_node_id = &"l1_b"
+
+[node name="MarkC" parent="." instance=ExtResource("3_marker")]
+offset_left = 975.0
+offset_top = 469.0
+offset_right = 1005.0
+offset_bottom = 501.0
+texture = ExtResource("8_small_c")
+path_node_id = &"l1_c"
+
+[node name="VesperwickTarget" parent="." instance=ExtResource("2_station")]
+layout_mode = 0
+offset_left = 470.0
+offset_top = 96.0
+offset_right = 650.0
+offset_bottom = 252.0
+station_name = "Vesperwick"
+
+[node name="HollowcrossTarget" parent="." instance=ExtResource("2_station")]
+layout_mode = 0
+offset_left = 730.0
+offset_top = 266.0
+offset_right = 910.0
+offset_bottom = 422.0
+station_name = "Hollowcross"
+
+[node name="Star" parent="HollowcrossTarget" index="2"]
+texture = ExtResource("5_hollow")
+
+[node name="MorrowfieldTarget" parent="." instance=ExtResource("2_station")]
+layout_mode = 0
+offset_left = 980.0
+offset_top = 456.0
+offset_right = 1160.0
+offset_bottom = 612.0
+station_name = "Morrowfield"
+
+[node name="Star" parent="MorrowfieldTarget" index="2"]
+texture = ExtResource("6_morrow")
+
+[editable path="VesperwickTarget"]
+[editable path="HollowcrossTarget"]
+[editable path="MorrowfieldTarget"]

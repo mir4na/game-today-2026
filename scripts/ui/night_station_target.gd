@@ -7,6 +7,7 @@ signal selected(station_name: String)
 
 @export var station_name: String
 @export var face_token_scene: PackedScene
+@export var path_anchor_offset: Vector2 = Vector2(90.0, 94.0)
 @export_category("Validation Animation")
 @export_range(0.01, 1.0, 0.01) var pointer_pop_seconds: float = 0.11
 @export_range(0.01, 1.0, 0.01) var pointer_shrink_seconds: float = 0.18
@@ -109,7 +110,7 @@ func reset_validation_visual() -> void:
 
 
 func get_path_node_center() -> Vector2:
-	return position + _star.position + _star.size * 0.5
+	return position + path_anchor_offset
 
 
 func _play_success_pulse() -> void:

@@ -7,7 +7,7 @@ signal continue_requested
 
 @export_category("Inspector Copy")
 @export var blessings_template: String = "Blessings  %d"
-@export var audit_stock_template: String = "%d owned  •  %d Blessings"
+@export var veil_note_stock_template: String = "%d / 1 owned  •  %d Blessings"
 @export var radar_stock_template: String = "%d owned  •  %d Blessings"
 @export var speed_level_template: String = "Level %d / %d  •  15 seconds  •  %d Blessings"
 @export var maximum_speed_text: String = "Maximum time-bending level"
@@ -71,13 +71,13 @@ const RIGHT_WALL_CLOSED_SIZE := Vector2(300.0, 720.0)
 @onready var _angel_entrance: Node2D = %AngelEntrance
 @onready var _market_actors: Node2D = $MarketActors
 @onready var _angel_float: Node2D = %AngelFloat
-@onready var _item_entrances: Array[Node2D] = [%AuditEntrance, %RadarEntrance, %SpeedEntrance]
-@onready var _item_floats: Array[Node2D] = [%AuditFloat, %RadarFloat, %SpeedFloat]
-@onready var _shelf_spins: Array[Node2D] = [%AuditShelfSpin, %RadarShelfSpin, %SpeedShelfSpin]
-@onready var _item_sprites: Array[Sprite2D] = [%AuditItem, %RadarItem, %SpeedItem]
-@onready var _item_highlights: Array[Sprite2D] = [%AuditHighlight, %RadarHighlight, %SpeedHighlight]
-@onready var _item_buttons: Array[Button] = [%AuditButton, %RadarButton, %SpeedButton]
-@onready var _item_info_labels: Array[Label] = [%AuditInfoLabel, %RadarInfoLabel, %SpeedInfoLabel]
+@onready var _item_entrances: Array[Node2D] = [%VeilNoteEntrance, %RadarEntrance, %SpeedEntrance]
+@onready var _item_floats: Array[Node2D] = [%VeilNoteFloat, %RadarFloat, %SpeedFloat]
+@onready var _shelf_spins: Array[Node2D] = [%VeilNoteShelfSpin, %RadarShelfSpin, %SpeedShelfSpin]
+@onready var _item_sprites: Array[Sprite2D] = [%VeilNoteItem, %RadarItem, %SpeedItem]
+@onready var _item_highlights: Array[Sprite2D] = [%VeilNoteHighlight, %RadarHighlight, %SpeedHighlight]
+@onready var _item_buttons: Array[Button] = [%VeilNoteButton, %RadarButton, %SpeedButton]
+@onready var _item_info_labels: Array[Label] = [%VeilNoteInfoLabel, %RadarInfoLabel, %SpeedInfoLabel]
 @onready var _header_root: Control = %HeaderRoot
 @onready var _blessings_label: Label = %BlessingsLabel
 @onready var _continue_button: Button = %ContinueButton
@@ -162,11 +162,11 @@ func _open_standalone_preview() -> void:
 	open_market(
 		{
 			"blessings": preview_blessings,
-			"audit_slips": 1,
+			"veil_notes": 0,
 			"radar_charges": 2,
 			"speed_level": 0,
 			"speed_max_level": 3,
-			"audit_slip_cost": 3,
+			"veil_note_cost": 3,
 			"radar_charge_cost": 4,
 			"speed_upgrade_cost": 6,
 		},
@@ -181,16 +181,17 @@ func _open_standalone_preview() -> void:
 func set_snapshot(snapshot: Dictionary) -> void:
 	_snapshot = snapshot.duplicate(true)
 	var blessings: int = int(_snapshot.get("blessings", 0))
-	var audit_cost: int = int(_snapshot.get("audit_slip_cost", 0))
+	var veil_note_cost: int = int(_snapshot.get("veil_note_cost", 0))
+	var veil_note_count: int = int(_snapshot.get("veil_notes", 0))
 	var radar_cost: int = int(_snapshot.get("radar_charge_cost", 0))
 	var speed_cost: int = int(_snapshot.get("speed_upgrade_cost", -1))
 	var speed_level: int = int(_snapshot.get("speed_level", 0))
 	var speed_maximum: int = int(_snapshot.get("speed_max_level", 0))
 	_blessings_label.text = blessings_template % blessings
-	_item_info_labels[0].text = audit_stock_template % [int(_snapshot.get("audit_slips", 0)), audit_cost]
+	_item_info_labels[0].text = veil_note_stock_template % [veil_note_count, veil_note_cost]
 	_item_info_labels[1].text = radar_stock_template % [int(_snapshot.get("radar_charges", 0)), radar_cost]
 	_item_info_labels[2].text = maximum_speed_text if speed_cost < 0 else speed_level_template % [speed_level, speed_maximum, speed_cost]
-	_item_buttons[0].disabled = _input_locked or blessings < audit_cost
+	_item_buttons[0].disabled = _input_locked or veil_note_count >= 1 or blessings < veil_note_cost
 	_item_buttons[1].disabled = _input_locked or blessings < radar_cost
 	_item_buttons[2].disabled = _input_locked or speed_cost < 0 or blessings < speed_cost
 	_continue_button.disabled = _input_locked
@@ -512,11 +513,11 @@ func _reset_gate() -> void:
 	_right_wall.size = RIGHT_WALL_CLOSED_SIZE
 
 
-func _on_audit_button_pressed() -> void:
+func _on_veil_note_button_pressed() -> void:
 	if _input_locked or _item_buttons[0].disabled:
 		return
 	_pulse_item(0)
-	purchase_requested.emit(&"audit_slip")
+	purchase_requested.emit(&"veil_note")
 
 
 func _on_radar_button_pressed() -> void:

@@ -52,8 +52,17 @@ func _run() -> void:
 		var reader := game._night_soul_record_ui as NightSoulRecordUI
 		var anchor := reader.get_node("%RecordAnchor") as Control
 		var biography_text := reader.get_node("%BiographyText") as RichTextLabel
+		var portrait := reader.get_node("%Portrait") as NightCharacterPortrait
 		_check(reader.visible, "Interacting with a night passenger must open the Soul Record.")
-		_check(anchor.anchor_left == 1.0 and anchor.size.y > anchor.size.x, "Soul Record paper must be vertical and anchored to the right side.")
+		_check(anchor.anchor_left == 1.0 and anchor.size.x > anchor.size.y, "Soul Record paper must be horizontal and anchored to the right side.")
+		_check(
+			portrait.get_source_artwork() == inspected.data.get_character_artwork(),
+			"The Soul Record portrait must depict the NPC being inspected, even when their ID portrait is borrowed."
+		)
+		_check(
+			portrait.texture is AtlasTexture,
+			"The Soul Record portrait must crop the character artwork to an upper-body frame."
+		)
 		_check(biography_text.text.contains(puzzle.get_statement_for_passenger(inspected_name)), "The clickable biography must include the hidden statement.")
 		_check(game._gameplay_camera.offset.x > 200.0, "Soul Record inspection must shift the gameplay camera toward the player/NPC framing.")
 		var correct_sentence_index: int = -1
@@ -77,5 +86,5 @@ func _run() -> void:
 
 	game.free()
 	if _failures == 0:
-		print("PASS: varied hidden statements, vertical Soul Record, and camera shift.")
+		print("PASS: varied hidden statements, horizontal Soul Record, and camera shift.")
 	quit(1 if _failures > 0 else 0)

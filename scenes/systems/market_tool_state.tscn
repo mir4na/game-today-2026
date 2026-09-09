@@ -3,13 +3,13 @@
 [ext_resource type="Script" path="res://scripts/systems/market_tool_state.gd" id="1"]
 
 [node name="MarketToolState" type="Node"]
-editor_description = "Scene-authored starting inventory and market economy. Swiftstep starts unlocked; Radar must be purchased. Effect duration and world speed are configured in SwiftstepEffectUI."
+editor_description = "Scene-authored starting inventory and market economy. Veil Note has a one-item capacity and reveals one extra Night Shift clue."
 script = ExtResource("1")
 starting_blessings = 0
-starting_audit_slips = 1
+starting_veil_notes = 1
 starting_radar_charges = 0
 starting_speed_level = 1
-audit_slip_cost = 3
+veil_note_cost = 3
 radar_charge_cost = 4
 speed_upgrade_costs = PackedInt32Array(6, 10, 15)
 blessings_per_correct_dropoff = 30
