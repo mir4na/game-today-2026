@@ -62,9 +62,8 @@ Main                             gameplay scene
     ├── StationStopCutsceneUI    letterbox + passenger staging over the gameplay camera
     ├── ShiftReportUI            receipt, net earnings, daily target, PASSED/FAILED, retry/menu actions
     ├── NightMarketUI            tools purchased with Blessings before night service
-    ├── NightSoulRecordUI        clickable biographies containing constellation clues
-    ├── NightPuzzleUI            draggable soul ledger and symbolic constellation
-    ├── DepartureSequenceUI      symbolic soul-release montage
+    ├── NightSoulRecordUI        clickable biographies containing station-path clues
+    ├── NightPuzzleUI            draggable soul ledger plus animated station-path validation
     └── PauseUI
 ```
 
@@ -80,7 +79,7 @@ Every static hierarchy and visual is scene-owned: menu panels and backdrop, HUD 
 - `scripts/player/player.gd` handles horizontal `CharacterBody2D` movement, camera follow, facing, and nearest-interactable selection.
 - `scripts/train/carriage.gd` and `scripts/train/train.gd` animate the scene-authored modular carriages, day/night overlay, underframe, and train sway; their geometry and palette live in train scenes and assigned SVG textures.
 - `scripts/passenger/passenger_data.gd` is the designer-facing passenger Resource. `passenger.gd` presents it, emits inspection requests, and runs the selected ambient AI profile inside safe passenger-coach boundaries.
-- `scripts/systems/departure_puzzle_data.gd` builds the four-node constellation case, Soul Record biographies, anomaly-based relational clues, and internal assignment solution. The night phase asks the player to recover clue sentences and place each soul on a symbolic node; it does not simulate physical station stops.
+- `scripts/systems/departure_puzzle_data.gd` builds the four-node station-path case, Soul Record biographies, anomaly-based relational clues, and internal assignment solution. The night phase asks the player to recover clue sentences and place each soul on a symbolic node; it does not simulate physical station stops.
 - Scripts in `scripts/ui` project state into responsive Control/Container layouts and signal decisions back to `Main`.
 
 ## Adding a passenger

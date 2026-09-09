@@ -5,20 +5,36 @@ extends Control
 
 signal closed
 signal departures_confirmed(assignments: Dictionary)
+signal validation_finished(succeeded: bool, attempt_count: int)
 
 @export_category("Inspector Copy")
-@export var instruction_text: String = "Each station is one node. A thread means the two stations are directly connected."
-@export_multiline var no_selection_text: String = "Drag a soul card, or select a card and a station.\nFinalizing seals the result."
-@export var selection_template: String = "%s selected — choose a station."
+@export var instruction_text: String = "Drag each soul to a station."
 @export var incomplete_assignment_error: String = "Assign every soul before finalizing."
 @export var assignment_count_template: String = "%d / %d SOULS ASSIGNED"
 @export var clue_count_template: String = "%d / %d STATEMENTS RECORDED"
+@export_category("Validation Presentation")
+@export var ledger_exit_offset: Vector2 = Vector2(-390.0, 0.0)
+@export var station_path_focus_offset: Vector2 = Vector2(-172.0, 0.0)
+@export var station_path_focus_scale: Vector2 = Vector2(1.12, 1.12)
+@export var station_path_focus_pivot: Vector2 = Vector2(812.0, 360.0)
+@export_range(0.05, 2.0, 0.05) var focus_transition_seconds: float = 0.5
+@export_range(0.05, 2.0, 0.05) var light_travel_seconds: float = 0.34
+@export_range(0.0, 1.0, 0.05) var station_hold_seconds: float = 0.16
+@export_range(0.1, 3.0, 0.05) var result_hold_seconds: float = 0.9
+@export_range(0.05, 1.0, 0.05) var failed_attempt_exit_seconds: float = 0.28
+@export var validation_reading_template: String = "READING %s"
+@export var validation_failed_template: String = "THE STATION PATH REJECTS ATTEMPT %d"
+@export var validation_success_text: String = "THE STATION PATH IS ALIGNED"
 
 var _puzzle: DeparturePuzzleData
 var _selected_passenger: String = ""
 var _assignments: Dictionary = {}
 var _passenger_data_by_name: Dictionary = {}
 var _collected_statements: Dictionary = {}
+var _validating: bool = false
+var _focus_tween: Tween
+var _ledger_rest_position: Vector2
+var _station_path_rest_position: Vector2
 
 @onready var _instruction_label: Label = %InstructionLabel
 @onready var _selection_label: Label = %SelectionLabel
@@ -27,6 +43,12 @@ var _collected_statements: Dictionary = {}
 @onready var _error_label: Label = %ErrorLabel
 @onready var _confirm_button: Button = %ConfirmButton
 @onready var _board_anchor: Control = %BoardAnchor
+@onready var _ledger_anchor: Control = %LedgerAnchor
+@onready var _station_path_anchor: Control = %StationPathAnchor
+@onready var _validation_light: TextureRect = %ValidationLightToken
+@onready var _validation_status: Label = %ValidationStatusLabel
+@onready var _legend_label: Label = $BoardAnchor/StationPathAnchor/LegendLabel
+@onready var _close_button: Control = $BoardAnchor/StationPathAnchor/CloseButton
 @onready var _passenger_cards: Array[NightPassengerCard] = [
 	%PassengerCard1,
 	%PassengerCard2,
@@ -42,12 +64,16 @@ var _collected_statements: Dictionary = {}
 
 
 func _ready() -> void:
+	_ledger_rest_position = _ledger_anchor.position
+	_station_path_rest_position = _station_path_anchor.position
+	_station_path_anchor.pivot_offset = station_path_focus_pivot
 	_instruction_label.text = instruction_text
 	for card: NightPassengerCard in _passenger_cards:
 		card.selected.connect(_on_passenger_selected)
 	for target: NightStationTarget in _station_targets:
 		target.passenger_dropped.connect(_assign_passenger_to_station)
 		target.selected.connect(_on_station_selected)
+	_reset_validation_presentation()
 	hide()
 
 
@@ -63,8 +89,10 @@ func open_puzzle(
 	_selected_passenger = ""
 	_passenger_data_by_name.clear()
 	_collected_statements = collected_statements.duplicate(true)
+	_validating = false
 	_error_label.text = ""
-	_selection_label.text = no_selection_text
+	_selection_label.text = instruction_text
+	_reset_validation_presentation()
 
 	for card: NightPassengerCard in _passenger_cards:
 		card.hide()
@@ -72,7 +100,7 @@ func open_puzzle(
 		target.hide()
 
 	if puzzle == null:
-		show_error("The night constellation is unavailable.")
+		show_error("The night station path is unavailable.")
 		show()
 		return
 	if passengers.size() > _passenger_cards.size() or puzzle.night_stations.size() > _station_targets.size():
@@ -94,7 +122,7 @@ func open_puzzle(
 	for index: int in range(puzzle.night_stations.size()):
 		var target: NightStationTarget = _station_targets[index]
 		if target.station_name != puzzle.night_stations[index]:
-			push_error("Night constellation scene order does not match the puzzle resource.")
+			push_error("Night station path scene order does not match the puzzle resource.")
 		target.show()
 
 	_remove_invalid_assignments()
@@ -121,30 +149,38 @@ func refresh_collected_statements(collected_statements: Dictionary) -> void:
 
 
 func request_close() -> void:
-	if not visible:
+	if not visible or _validating:
 		return
 	hide()
 	closed.emit()
 
 
 func show_error(message: String) -> void:
+	_validating = false
 	_error_label.text = message
+	_update_counts()
 
 
 func _on_passenger_selected(passenger_name: String) -> void:
+	if _validating:
+		return
 	_selected_passenger = passenger_name
-	_selection_label.text = selection_template % passenger_name
+	_selection_label.text = instruction_text
 	_error_label.text = ""
 
 
 func _on_station_selected(station_name: String) -> void:
+	if _validating:
+		return
 	if _selected_passenger.is_empty():
-		_selection_label.text = no_selection_text
+		_selection_label.text = instruction_text
 		return
 	_assign_passenger_to_station(station_name, _selected_passenger)
 
 
 func _assign_passenger_to_station(station_name: String, passenger_name: String) -> void:
+	if _validating:
+		return
 	if _puzzle == null or not _puzzle.night_stations.has(station_name):
 		return
 	if not _passenger_data_by_name.has(passenger_name):
@@ -163,7 +199,7 @@ func _assign_passenger_to_station(station_name: String, passenger_name: String) 
 		station_passengers.append(passenger_name)
 	_assignments[station_name] = station_passengers
 	_selected_passenger = passenger_name
-	_selection_label.text = "%s assigned to %s." % [passenger_name, station_name]
+	_selection_label.text = instruction_text
 	_error_label.text = ""
 	_update_assignment_visuals()
 
@@ -191,7 +227,7 @@ func _update_counts() -> void:
 		if not str(_collected_statements.get(passenger_name, "")).is_empty():
 			clue_count += 1
 	_clue_count_label.text = clue_count_template % [clue_count, total]
-	_confirm_button.disabled = total == 0 or assigned_count != total
+	_confirm_button.disabled = _validating or total == 0 or assigned_count != total
 
 
 func _station_for_passenger(passenger_name: String) -> String:
@@ -223,10 +259,189 @@ func _remove_invalid_assignments() -> void:
 
 
 func _confirm() -> void:
+	if _validating:
+		return
 	if _puzzle == null or _assigned_passenger_count() != _passenger_data_by_name.size():
 		_error_label.text = incomplete_assignment_error
 		return
+	_confirm_button.disabled = true
 	departures_confirmed.emit(_assignments.duplicate(true))
+
+
+func play_validation(station_results: Dictionary, attempt_count: int) -> void:
+	if not visible or _puzzle == null:
+		show_error("The station path could not read this assignment.")
+		return
+	_validating = true
+	_confirm_button.disabled = true
+	await _focus_station_path()
+
+	var ordered_targets: Array[NightStationTarget] = _get_validation_order()
+	var all_correct: bool = true
+	for index: int in range(ordered_targets.size()):
+		var target: NightStationTarget = ordered_targets[index]
+		var is_correct: bool = bool(station_results.get(target.station_name, false))
+		all_correct = all_correct and is_correct
+		_validation_status.text = validation_reading_template % target.station_name.to_upper()
+		await _move_validation_light(target, index == 0)
+		await target.play_validation(is_correct)
+		if station_hold_seconds > 0.0:
+			await get_tree().create_timer(station_hold_seconds).timeout
+
+	await _fade_validation_light()
+	if all_correct:
+		_validation_status.text = validation_success_text
+		_validation_status.modulate = Color("6b7d43")
+		if result_hold_seconds > 0.0:
+			await get_tree().create_timer(result_hold_seconds).timeout
+		validation_finished.emit(true, attempt_count)
+		return
+
+	_validation_status.text = validation_failed_template % attempt_count
+	_validation_status.modulate = Color("b34345")
+	if result_hold_seconds > 0.0:
+		await get_tree().create_timer(result_hold_seconds).timeout
+	_assignments.clear()
+	_selected_passenger = ""
+	_selection_label.text = instruction_text
+	_error_label.text = ""
+	_update_assignment_visuals()
+	for target: NightStationTarget in _station_targets:
+		target.reset_validation_visual()
+	await _dismiss_failed_attempt()
+	_validating = false
+	validation_finished.emit(false, attempt_count)
+
+
+func _focus_station_path() -> void:
+	if is_instance_valid(_focus_tween) and _focus_tween.is_valid():
+		_focus_tween.kill()
+	_validation_status.modulate = Color.WHITE
+	_validation_status.text = "READING THE STATION PATH"
+	_validation_status.show()
+	_validation_status.modulate.a = 0.0
+	_station_path_anchor.pivot_offset = station_path_focus_pivot
+	_focus_tween = create_tween().set_parallel(true)
+	_focus_tween.tween_property(
+		_ledger_anchor,
+		^"position",
+		_ledger_rest_position + ledger_exit_offset,
+		focus_transition_seconds
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	_focus_tween.tween_property(
+		_ledger_anchor, ^"modulate:a", 0.0, focus_transition_seconds * 0.76
+	)
+	_focus_tween.tween_property(
+		_station_path_anchor,
+		^"position",
+		_station_path_rest_position + station_path_focus_offset,
+		focus_transition_seconds
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_focus_tween.tween_property(
+		_station_path_anchor,
+		^"scale",
+		station_path_focus_scale,
+		focus_transition_seconds
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	for control: CanvasItem in _validation_chrome():
+		_focus_tween.tween_property(
+			control, ^"modulate:a", 0.0, focus_transition_seconds * 0.55
+		)
+	_focus_tween.tween_property(
+		_validation_status, ^"modulate:a", 1.0, focus_transition_seconds
+	).set_delay(focus_transition_seconds * 0.45)
+	await _focus_tween.finished
+
+
+func _dismiss_failed_attempt() -> void:
+	_board_anchor.pivot_offset = _board_anchor.size * 0.5
+	var tween: Tween = create_tween().set_parallel(true)
+	tween.tween_property(
+		_board_anchor, ^"scale", Vector2(0.97, 0.97), failed_attempt_exit_seconds
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_property(
+		_board_anchor, ^"modulate:a", 0.0, failed_attempt_exit_seconds
+	)
+	await tween.finished
+
+
+func _move_validation_light(target: NightStationTarget, first_target: bool) -> void:
+	var target_position: Vector2 = target.get_path_node_center() - _validation_light.size * 0.5
+	if first_target:
+		_validation_light.position = target_position
+		_validation_light.scale = Vector2.ZERO
+		_validation_light.modulate = Color(1.0, 0.77, 0.31, 0.92)
+		_validation_light.show()
+		var arrival_tween: Tween = create_tween()
+		arrival_tween.tween_property(
+			_validation_light, ^"scale", Vector2.ONE, light_travel_seconds
+		).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		await arrival_tween.finished
+		return
+	var travel_tween: Tween = create_tween().set_parallel(true)
+	travel_tween.tween_property(
+		_validation_light, ^"position", target_position, light_travel_seconds
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	travel_tween.tween_property(
+		_validation_light, ^"rotation", _validation_light.rotation + PI, light_travel_seconds
+	)
+	await travel_tween.finished
+
+
+func _fade_validation_light() -> void:
+	if not _validation_light.visible:
+		return
+	var tween: Tween = create_tween().set_parallel(true)
+	tween.tween_property(_validation_light, ^"scale", Vector2(1.6, 1.6), 0.24)
+	tween.tween_property(_validation_light, ^"modulate:a", 0.0, 0.24)
+	await tween.finished
+	_validation_light.hide()
+
+
+func _get_validation_order() -> Array[NightStationTarget]:
+	# This order follows authored graph threads continuously:
+	# Vesperwick -> Bellhaven -> Hollowcross -> Morrowfield.
+	var result: Array[NightStationTarget] = []
+	for target: NightStationTarget in [
+		%VesperwickTarget,
+		%BellhavenTarget,
+		%HollowcrossTarget,
+		%MorrowfieldTarget,
+	]:
+		if target.visible:
+			result.append(target)
+	return result
+
+
+func _validation_chrome() -> Array[CanvasItem]:
+	return [
+		_instruction_label,
+		_legend_label,
+		_selection_label,
+		_assignment_count_label,
+		_confirm_button,
+		_error_label,
+		_close_button,
+	]
+
+
+func _reset_validation_presentation() -> void:
+	if is_instance_valid(_focus_tween) and _focus_tween.is_valid():
+		_focus_tween.kill()
+	_ledger_anchor.position = _ledger_rest_position
+	_ledger_anchor.modulate.a = 1.0
+	_station_path_anchor.position = _station_path_rest_position
+	_station_path_anchor.scale = Vector2.ONE
+	_station_path_anchor.pivot_offset = station_path_focus_pivot
+	for control: CanvasItem in _validation_chrome():
+		control.modulate.a = 1.0
+	_validation_light.hide()
+	_validation_light.scale = Vector2.ONE
+	_validation_light.modulate.a = 0.0
+	_validation_status.hide()
+	_validation_status.modulate = Color.WHITE
+	for target: NightStationTarget in _station_targets:
+		target.reset_validation_visual()
 
 
 func _passengers_assigned_to(station_name: String) -> Array:

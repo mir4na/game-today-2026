@@ -41,7 +41,7 @@ func _run() -> void:
 	_check(game.state == AfterTheEndGame.GameState.NIGHT, "The shortcut must enter Night Shift immediately.")
 	_check(game._get_dead_passenger_data().size() == expected_night_roster, "The shortcut must include every scheduled anomaly in the night roster.")
 	_check(game._active_passenger_count() == expected_night_roster, "Living daylight passengers must not remain active at night.")
-	_check(game._runtime_puzzle != null, "The shortcut must initialize the runtime constellation puzzle.")
+	_check(game._runtime_puzzle != null, "The shortcut must initialize the runtime station-path puzzle.")
 	_check(not shortcut.visible, "The temporary shortcut must hide after Night Shift begins.")
 
 	game.free()

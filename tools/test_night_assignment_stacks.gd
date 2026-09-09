@@ -50,6 +50,7 @@ func _run() -> void:
 
 	var first_card := board._passenger_cards[0] as NightPassengerCard
 	_check(first_card.get_node("%StatementLabel").text == statements[first_name], "The ledger card must show the exact biography sentence.")
+	_check((first_card.get_node("%AssignedOverlay") as ColorRect).visible, "An assigned ledger portrait must show its gray overlay.")
 	# Scene linkage is the invariant that keeps the visual preview editable.
 	_check(first_card.drag_preview_scene != null, "The passenger drag preview must be supplied by a scene resource.")
 	_check(first_target.face_token_scene != null, "Station face tokens must be supplied by a scene resource.")

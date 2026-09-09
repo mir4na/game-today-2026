@@ -8,7 +8,6 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/document_overlay_ui.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/ui/guidebook_ui.tscn" id="6"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_puzzle_ui.tscn" id="8"]
-[ext_resource type="PackedScene" path="res://scenes/night/departure_sequence_ui.tscn" id="9"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_ui.tscn" id="10"]
 [ext_resource type="Resource" uid="uid://cx6ttdmtj4lgd" path="res://data/passengers/npc_1_profile.tres" id="11"]
 [ext_resource type="Resource" uid="uid://d1llapidnrg01" path="res://data/passengers/npc_2_profile.tres" id="12"]
@@ -91,7 +90,7 @@ radar_anomaly_light_seconds = 4.0
 debug_print_anomaly_roster = true
 night_shift_instruction = "Night shift
 Read each soul's record, then open the Night Ledger from the lower-left button"
-departure_statement_recorded_template = "Constellation statement recorded
+departure_statement_recorded_template = "Station path statement recorded
 %d / %d found"
 
 [node name="MarketToolState" parent="." unique_id=1541596097 instance=ExtResource("40_market_state")]
@@ -276,9 +275,6 @@ unique_name_in_owner = true
 [node name="NightPuzzleUI" parent="ModalLayer" unique_id=1779434419 instance=ExtResource("8")]
 unique_name_in_owner = true
 
-[node name="DepartureSequenceUI" parent="ModalLayer" unique_id=348132804 instance=ExtResource("9")]
-unique_name_in_owner = true
-
 [node name="PauseUI" parent="ModalLayer" unique_id=680489697 instance=ExtResource("10")]
 unique_name_in_owner = true
 
@@ -320,8 +316,7 @@ unique_name_in_owner = true
 [connection signal="statement_recorded" from="ModalLayer/NightSoulRecordUI" to="." method="_on_night_statement_recorded"]
 [connection signal="closed" from="ModalLayer/NightPuzzleUI" to="." method="_close_night_puzzle"]
 [connection signal="departures_confirmed" from="ModalLayer/NightPuzzleUI" to="." method="_on_departures_confirmed"]
-[connection signal="journey_continue_requested" from="ModalLayer/DepartureSequenceUI" to="." method="_on_journey_continue"]
-[connection signal="sequence_finished" from="ModalLayer/DepartureSequenceUI" to="." method="_on_night_sequence_finished"]
+[connection signal="validation_finished" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_validation_finished"]
 [connection signal="main_menu_requested" from="ModalLayer/PauseUI" to="." method="_return_to_main_menu"]
 [connection signal="restart_requested" from="ModalLayer/PauseUI" to="." method="_restart_game"]
 [connection signal="resume_requested" from="ModalLayer/PauseUI" to="." method="_resume_from_pause"]

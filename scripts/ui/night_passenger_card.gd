@@ -11,6 +11,7 @@ var assigned_station: String = ""
 var _passenger_data: PassengerData
 
 @onready var _portrait: TextureRect = %Portrait
+@onready var _assigned_overlay: ColorRect = %AssignedOverlay
 @onready var _name_label: Label = %PassengerName
 @onready var _anomaly_label: Label = %AnomalyLabel
 @onready var _statement_label: Label = %StatementLabel
@@ -34,6 +35,7 @@ func configure(data: PassengerData, statement: String, anomaly_label: String) ->
 func set_assignment(station: String) -> void:
 	assigned_station = station
 	_assignment_label.text = station.to_upper() if not station.is_empty() else "UNASSIGNED"
+	_assigned_overlay.visible = not station.is_empty()
 
 
 func _get_drag_data(_at_position: Vector2) -> Variant:

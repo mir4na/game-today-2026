@@ -136,6 +136,19 @@ failed_result_template = "FAILED  •  %d below target"
 failed_result_color = Color(0.701961, 0.25098, 0.25098, 1)
 failed_payment_text = "Restart this shift with your starting balance and supplies restored."
 failed_continue_text = "PRESS ANY KEY TO RESTART SHIFT"
+night_title_text = "NIGHT PAYCHECK"
+night_subtitle_template = "NIGHT SHIFT • DAY %d"
+night_souls_caption = "SOULS RELEASED"
+night_failed_attempts_caption = "FAILED ATTEMPTS"
+night_attempts_caption = "TOTAL ATTEMPTS"
+night_route_caption = "STATION PATH"
+night_detail_title = "ATTEMPT DEDUCTION"
+night_net_caption = "NIGHT TOTAL"
+night_balance_caption = "CURRENT BALANCE"
+night_result_text = "NIGHT SHIFT COMPLETE"
+night_payment_template = "%d Blessings added after attempt deductions."
+night_first_attempt_text = "No deduction — the station path aligned on the first attempt."
+night_attempt_breakdown_template = "• %d failed attempt(s) × %d Blessings\n• Reward reduced by %d Blessings."
 typewriter_target_paths = Array[NodePath]([NodePath("Center/Stack/Receipt/Title"), NodePath("Center/Stack/Receipt/Subtitle"), NodePath("Center/Stack/Receipt/CorrectCaption"), NodePath("Center/Stack/Receipt/CorrectValue"), NodePath("Center/Stack/Receipt/WrongCaption"), NodePath("Center/Stack/Receipt/WrongValue"), NodePath("Center/Stack/Receipt/AnomalyCaption"), NodePath("Center/Stack/Receipt/AnomalyValue"), NodePath("Center/Stack/Receipt/RetainedCaption"), NodePath("Center/Stack/Receipt/RetainedValue"), NodePath("Center/Stack/Receipt/DetailTitle"), NodePath("Center/Stack/Receipt/Breakdown"), NodePath("Center/Stack/Receipt/NetCaption"), NodePath("Center/Stack/Receipt/NetValue"), NodePath("Center/Stack/Receipt/TargetCaption"), NodePath("Center/Stack/Receipt/TargetValue"), NodePath("Center/Stack/Receipt/ResultLabel"), NodePath("Center/Stack/Receipt/PaymentLabel")])
 typewriter_characters_per_second = 180.0
 typewriter_line_pause_seconds = 0.04
@@ -235,6 +248,7 @@ texture = ExtResource("5_dashed")
 expand_mode = 1
 
 [node name="CorrectCaption" type="Label" parent="Center/Stack/Receipt" unique_id=31312748]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 32.0
 offset_top = 142.0
@@ -263,6 +277,7 @@ horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="WrongCaption" type="Label" parent="Center/Stack/Receipt" unique_id=34058644]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 32.0
 offset_top = 174.0
@@ -291,6 +306,7 @@ horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="AnomalyCaption" type="Label" parent="Center/Stack/Receipt" unique_id=591410445]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 32.0
 offset_top = 206.0
@@ -319,6 +335,7 @@ horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="RetainedCaption" type="Label" parent="Center/Stack/Receipt" unique_id=2025552026]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 32.0
 offset_top = 246.0
@@ -347,6 +364,7 @@ horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="DetailTitle" type="Label" parent="Center/Stack/Receipt" unique_id=1416548424]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 32.0
 offset_top = 287.0
@@ -384,6 +402,7 @@ texture = ExtResource("4_solid")
 expand_mode = 1
 
 [node name="NetCaption" type="Label" parent="Center/Stack/Receipt" unique_id=2038894041]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 32.0
 offset_top = 433.0
@@ -414,6 +433,7 @@ horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="TargetCaption" type="Label" parent="Center/Stack/Receipt" unique_id=2001262666]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 32.0
 offset_top = 465.0

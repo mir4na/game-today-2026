@@ -1,25 +1,24 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene format=3 uid="uid://shq6f5saupvr"]
 
-[ext_resource type="Script" path="res://scripts/ui/night_puzzle_ui.gd" id="1"]
-[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Group 139.png" id="3_map_paper"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Rectangle 240.png" id="4_ledger_back"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Rectangle 241.png" id="5_ledger_page"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Star 1.png" id="6_star_vesper"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Star 2.png" id="7_star_hollow"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Star 8.png" id="8_star_bell"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Star 10.png" id="9_star_morrow"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Star 3.png" id="10_star_small_a"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Star 5.png" id="11_star_small_b"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Star 6.png" id="12_star_small_c"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Star 11.png" id="13_star_small_d"]
+[ext_resource type="Script" uid="uid://c8x4ng5vu33kh" path="res://scripts/ui/night_puzzle_ui.gd" id="1"]
+[ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" uid="uid://quci1agnefcf" path="res://assets/NightShift/Group 139.png" id="3_map_paper"]
+[ext_resource type="Texture2D" uid="uid://dmh6qftjtjsjv" path="res://assets/NightShift/Rectangle 240.png" id="4_ledger_back"]
+[ext_resource type="Texture2D" uid="uid://com3a5pd33m6f" path="res://assets/NightShift/Rectangle 241.png" id="5_ledger_page"]
+[ext_resource type="Texture2D" uid="uid://yxs7co42lxj2" path="res://assets/NightShift/Star 2.png" id="7_star_hollow"]
+[ext_resource type="Texture2D" uid="uid://b6xohv012pwrg" path="res://assets/NightShift/Star 8.png" id="8_star_bell"]
+[ext_resource type="Texture2D" uid="uid://dx1lvypgyc8v" path="res://assets/NightShift/Star 10.png" id="9_star_morrow"]
+[ext_resource type="Texture2D" uid="uid://b8r125kpoy8y7" path="res://assets/NightShift/Star 3.png" id="10_star_small_a"]
+[ext_resource type="Texture2D" uid="uid://di3bloogycg43" path="res://assets/NightShift/Star 5.png" id="11_star_small_b"]
+[ext_resource type="Texture2D" uid="uid://bsxxjx7nbngm4" path="res://assets/NightShift/Star 6.png" id="12_star_small_c"]
+[ext_resource type="Texture2D" uid="uid://cpfj3a6xiesl2" path="res://assets/NightShift/Star 11.png" id="13_star_small_d"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_passenger_card.tscn" id="14_card"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_station_target.tscn" id="15_station"]
-[ext_resource type="FontFile" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="16_irish"]
-[ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Medium.ttf" id="17_medium"]
-[ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="18_bold"]
+[ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="16_irish"]
+[ext_resource type="FontFile" uid="uid://jysqo0nff08k" path="res://fonts/Josefin_Sans/static/JosefinSans-Medium.ttf" id="17_medium"]
+[ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="18_bold"]
 [ext_resource type="PackedScene" path="res://scenes/ui/components/round_close_button.tscn" id="19_close"]
-[ext_resource type="Script" path="res://scripts/ui/hover_scale_button.gd" id="20_hover"]
+[ext_resource type="Script" uid="uid://fgch1jgxeocf" path="res://scripts/ui/hover_scale_button.gd" id="20_hover"]
 
 [sub_resource type="StyleBoxFlat" id="ConfirmNormal"]
 content_margin_left = 22.0
@@ -27,6 +26,22 @@ content_margin_top = 10.0
 content_margin_right = 22.0
 content_margin_bottom = 10.0
 bg_color = Color(0.690196, 0.298039, 0.290196, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.286275, 0.223529, 0.203922, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="ConfirmPressed"]
+content_margin_left = 22.0
+content_margin_top = 10.0
+content_margin_right = 22.0
+content_margin_bottom = 10.0
+bg_color = Color(0.513725, 0.207843, 0.207843, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -53,24 +68,7 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxFlat" id="ConfirmPressed"]
-content_margin_left = 22.0
-content_margin_top = 10.0
-content_margin_right = 22.0
-content_margin_bottom = 10.0
-bg_color = Color(0.513725, 0.207843, 0.207843, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.286275, 0.223529, 0.203922, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[node name="NightPuzzleUI" type="Control"]
-visible = false
+[node name="NightPuzzleUI" type="Control" unique_id=391770319]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -78,11 +76,23 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 theme = ExtResource("2_theme")
 script = ExtResource("1")
+ledger_exit_offset = Vector2(-390, 0)
+station_path_focus_offset = Vector2(-172, 0)
+station_path_focus_scale = Vector2(1.12, 1.12)
+station_path_focus_pivot = Vector2(812, 360)
+focus_transition_seconds = 0.5
+light_travel_seconds = 0.34
+station_hold_seconds = 0.16
+result_hold_seconds = 0.9
+failed_attempt_exit_seconds = 0.28
+validation_reading_template = "READING %s"
+instruction_text = "Drag each soul to a station."
+validation_failed_template = "THE STATION PATH REJECTS ATTEMPT %d"
+validation_success_text = "THE STATION PATH IS ALIGNED"
 
-[node name="Shade" type="ColorRect" parent="."]
+[node name="Shade" type="ColorRect" parent="." unique_id=2037629714]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -92,7 +102,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.0745098, 0.0745098, 0.0823529, 0.94)
 
-[node name="BoardAnchor" type="Control" parent="."]
+[node name="BoardAnchor" type="Control" parent="." unique_id=266371434]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 8
@@ -108,7 +118,17 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
 
-[node name="LedgerBacking" type="TextureRect" parent="BoardAnchor"]
+[node name="LedgerAnchor" type="Control" parent="BoardAnchor" unique_id=1164450504]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="LedgerBacking" type="TextureRect" parent="BoardAnchor/LedgerAnchor" unique_id=2087279466]
 layout_mode = 0
 offset_left = 18.0
 offset_top = 18.0
@@ -118,7 +138,7 @@ mouse_filter = 2
 texture = ExtResource("4_ledger_back")
 expand_mode = 1
 
-[node name="LedgerPage" type="TextureRect" parent="BoardAnchor"]
+[node name="LedgerPage" type="TextureRect" parent="BoardAnchor/LedgerAnchor" unique_id=14146694]
 layout_mode = 0
 offset_left = 32.0
 offset_top = 40.0
@@ -128,7 +148,7 @@ mouse_filter = 2
 texture = ExtResource("5_ledger_page")
 expand_mode = 1
 
-[node name="LedgerHeader" type="Label" parent="BoardAnchor"]
+[node name="LedgerHeader" type="Label" parent="BoardAnchor/LedgerAnchor" unique_id=395466344]
 layout_mode = 0
 offset_left = 48.0
 offset_top = 48.0
@@ -140,7 +160,7 @@ theme_override_font_sizes/font_size = 17
 text = "SOUL RECORDS"
 horizontal_alignment = 1
 
-[node name="PassengerCard1" parent="BoardAnchor" instance=ExtResource("14_card")]
+[node name="PassengerCard1" parent="BoardAnchor/LedgerAnchor" unique_id=1140326123 instance=ExtResource("14_card")]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 29.0
@@ -148,7 +168,7 @@ offset_top = 82.0
 offset_right = 347.0
 offset_bottom = 198.0
 
-[node name="PassengerCard2" parent="BoardAnchor" instance=ExtResource("14_card")]
+[node name="PassengerCard2" parent="BoardAnchor/LedgerAnchor" unique_id=1572439812 instance=ExtResource("14_card")]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 29.0
@@ -156,7 +176,7 @@ offset_top = 202.0
 offset_right = 347.0
 offset_bottom = 318.0
 
-[node name="PassengerCard3" parent="BoardAnchor" instance=ExtResource("14_card")]
+[node name="PassengerCard3" parent="BoardAnchor/LedgerAnchor" unique_id=1937201624 instance=ExtResource("14_card")]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 29.0
@@ -164,7 +184,7 @@ offset_top = 322.0
 offset_right = 347.0
 offset_bottom = 438.0
 
-[node name="PassengerCard4" parent="BoardAnchor" instance=ExtResource("14_card")]
+[node name="PassengerCard4" parent="BoardAnchor/LedgerAnchor" unique_id=241677965 instance=ExtResource("14_card")]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 29.0
@@ -172,7 +192,7 @@ offset_top = 442.0
 offset_right = 347.0
 offset_bottom = 558.0
 
-[node name="ClueCountLabel" type="Label" parent="BoardAnchor"]
+[node name="ClueCountLabel" type="Label" parent="BoardAnchor/LedgerAnchor" unique_id=841210573]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 45.0
@@ -185,7 +205,7 @@ theme_override_font_sizes/font_size = 13
 text = "0 / 4 STATEMENTS RECORDED"
 horizontal_alignment = 1
 
-[node name="LedgerTitleSmall" type="Label" parent="BoardAnchor"]
+[node name="LedgerTitleSmall" type="Label" parent="BoardAnchor/LedgerAnchor" unique_id=2107068399]
 layout_mode = 0
 offset_left = 55.0
 offset_top = 615.0
@@ -197,7 +217,7 @@ theme_override_font_sizes/font_size = 13
 text = "NIGHT ASSIGNMENT"
 horizontal_alignment = 1
 
-[node name="LedgerTitle" type="Label" parent="BoardAnchor"]
+[node name="LedgerTitle" type="Label" parent="BoardAnchor/LedgerAnchor" unique_id=1069597564]
 layout_mode = 0
 offset_left = 55.0
 offset_top = 638.0
@@ -209,7 +229,18 @@ theme_override_font_sizes/font_size = 34
 text = "LEDGER"
 horizontal_alignment = 1
 
-[node name="MapPaper" type="TextureRect" parent="BoardAnchor"]
+[node name="StationPathAnchor" type="Control" parent="BoardAnchor" unique_id=975919289]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="MapPaper" type="TextureRect" parent="BoardAnchor/StationPathAnchor" unique_id=1829912111]
+z_index = -2
 layout_mode = 0
 offset_left = 366.0
 offset_top = 18.0
@@ -220,109 +251,7 @@ texture = ExtResource("3_map_paper")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="MapTitle" type="Label" parent="BoardAnchor"]
-layout_mode = 0
-offset_left = 432.0
-offset_top = 44.0
-offset_right = 1179.0
-offset_bottom = 83.0
-theme_override_colors/font_color = Color(0.247059, 0.211765, 0.2, 1)
-theme_override_fonts/font = ExtResource("16_irish")
-theme_override_font_sizes/font_size = 30
-text = "NIGHT CONSTELLATION"
-horizontal_alignment = 1
-
-[node name="InstructionLabel" type="Label" parent="BoardAnchor"]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 432.0
-offset_top = 82.0
-offset_right = 1179.0
-offset_bottom = 108.0
-theme_override_colors/font_color = Color(0.396078, 0.333333, 0.305882, 1)
-theme_override_fonts/font = ExtResource("17_medium")
-theme_override_font_sizes/font_size = 14
-text = "Each station is one node. A thread means the two stations are directly connected."
-horizontal_alignment = 1
-
-[node name="ThreadVesperHollow" type="Line2D" parent="BoardAnchor"]
-points = PackedVector2Array(815, 185, 615, 375)
-width = 3.0
-default_color = Color(0.27451, 0.231373, 0.211765, 0.8)
-
-[node name="ThreadVesperBell" type="Line2D" parent="BoardAnchor"]
-points = PackedVector2Array(815, 185, 1015, 375)
-width = 3.0
-default_color = Color(0.27451, 0.231373, 0.211765, 0.8)
-
-[node name="ThreadHollowBell" type="Line2D" parent="BoardAnchor"]
-points = PackedVector2Array(615, 375, 1015, 375)
-width = 3.0
-default_color = Color(0.27451, 0.231373, 0.211765, 0.8)
-
-[node name="ThreadHollowMorrow" type="Line2D" parent="BoardAnchor"]
-points = PackedVector2Array(615, 375, 615, 565)
-width = 3.0
-default_color = Color(0.27451, 0.231373, 0.211765, 0.8)
-
-[node name="DecorStarA" type="TextureRect" parent="BoardAnchor"]
-layout_mode = 0
-offset_left = 704.0
-offset_top = 271.0
-offset_right = 731.0
-offset_bottom = 302.0
-mouse_filter = 2
-texture = ExtResource("10_star_small_a")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="DecorStarB" type="TextureRect" parent="BoardAnchor"]
-layout_mode = 0
-offset_left = 897.0
-offset_top = 272.0
-offset_right = 922.0
-offset_bottom = 303.0
-mouse_filter = 2
-texture = ExtResource("11_star_small_b")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="DecorStarC" type="TextureRect" parent="BoardAnchor"]
-layout_mode = 0
-offset_left = 791.0
-offset_top = 356.0
-offset_right = 816.0
-offset_bottom = 388.0
-mouse_filter = 2
-texture = ExtResource("12_star_small_c")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="DecorStarD" type="TextureRect" parent="BoardAnchor"]
-layout_mode = 0
-offset_left = 602.0
-offset_top = 463.0
-offset_right = 628.0
-offset_bottom = 493.0
-mouse_filter = 2
-texture = ExtResource("13_star_small_d")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="ClockwiseLabel" type="Label" parent="BoardAnchor"]
-layout_mode = 0
-offset_left = 778.0
-offset_top = 283.0
-offset_right = 854.0
-offset_bottom = 321.0
-theme_override_colors/font_color = Color(0.690196, 0.298039, 0.290196, 0.86)
-theme_override_fonts/font = ExtResource("18_bold")
-theme_override_font_sizes/font_size = 18
-text = "↻"
-horizontal_alignment = 1
-tooltip_text = "Clockwise around the closed loop"
-
-[node name="VesperwickTarget" parent="BoardAnchor" instance=ExtResource("15_station")]
+[node name="VesperwickTarget" parent="BoardAnchor/StationPathAnchor" unique_id=1854758608 instance=ExtResource("15_station")]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 725.0
@@ -332,10 +261,11 @@ offset_bottom = 263.0
 tooltip_text = "Vesperwick — a soul releases its last held memory."
 station_name = "Vesperwick"
 
-[node name="Star" parent="BoardAnchor/VesperwickTarget" index="1"]
-texture = ExtResource("6_star_vesper")
+[node name="Pin" parent="BoardAnchor/StationPathAnchor/VesperwickTarget" index="4"]
+offset_top = -3.0
+offset_bottom = 59.0
 
-[node name="HollowcrossTarget" parent="BoardAnchor" instance=ExtResource("15_station")]
+[node name="HollowcrossTarget" parent="BoardAnchor/StationPathAnchor" unique_id=52946649 instance=ExtResource("15_station")]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 525.0
@@ -345,10 +275,10 @@ offset_bottom = 453.0
 tooltip_text = "Hollowcross — a soul meets the name beneath every title."
 station_name = "Hollowcross"
 
-[node name="Star" parent="BoardAnchor/HollowcrossTarget" index="1"]
+[node name="Star" parent="BoardAnchor/StationPathAnchor/HollowcrossTarget" index="2"]
 texture = ExtResource("7_star_hollow")
 
-[node name="BellhavenTarget" parent="BoardAnchor" instance=ExtResource("15_station")]
+[node name="BellhavenTarget" parent="BoardAnchor/StationPathAnchor" unique_id=1779628924 instance=ExtResource("15_station")]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 925.0
@@ -358,10 +288,10 @@ offset_bottom = 453.0
 tooltip_text = "Bellhaven — a soul hears one final call from the living."
 station_name = "Bellhaven"
 
-[node name="Star" parent="BoardAnchor/BellhavenTarget" index="1"]
+[node name="Star" parent="BoardAnchor/StationPathAnchor/BellhavenTarget" index="2"]
 texture = ExtResource("8_star_bell")
 
-[node name="MorrowfieldTarget" parent="BoardAnchor" instance=ExtResource("15_station")]
+[node name="MorrowfieldTarget" parent="BoardAnchor/StationPathAnchor" unique_id=572458143 instance=ExtResource("15_station")]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 525.0
@@ -371,10 +301,11 @@ offset_bottom = 643.0
 tooltip_text = "Morrowfield — a soul sees the tomorrow that continued without it."
 station_name = "Morrowfield"
 
-[node name="Star" parent="BoardAnchor/MorrowfieldTarget" index="1"]
+[node name="Star" parent="BoardAnchor/StationPathAnchor/MorrowfieldTarget" index="2"]
 texture = ExtResource("9_star_morrow")
 
-[node name="LegendLabel" type="Label" parent="BoardAnchor"]
+[node name="LegendLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=1909445939]
+visible = false
 layout_mode = 0
 offset_left = 746.0
 offset_top = 520.0
@@ -383,26 +314,27 @@ offset_bottom = 567.0
 theme_override_colors/font_color = Color(0.392157, 0.32549, 0.294118, 1)
 theme_override_fonts/font = ExtResource("17_medium")
 theme_override_font_sizes/font_size = 12
-text = "CLOCKWISE = FOLLOW THE RED ARROW AROUND THE LOOP\nENDPOINT = THE STATION WITH ONE THREAD"
+text = "CLOCKWISE = FOLLOW THE RED ARROW AROUND THE LOOP
+ENDPOINT = THE STATION WITH ONE THREAD"
 horizontal_alignment = 1
 
-[node name="SelectionLabel" type="Label" parent="BoardAnchor"]
+[node name="SelectionLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=1103657674]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 744.0
-offset_top = 563.0
+offset_top = 571.0
 offset_right = 1177.0
-offset_bottom = 602.0
+offset_bottom = 596.0
 theme_override_colors/font_color = Color(0.364706, 0.294118, 0.270588, 1)
 theme_override_fonts/font = ExtResource("17_medium")
 theme_override_font_sizes/font_size = 12
-text = "Drag a soul card, or select a card and a station.
-Finalizing seals the result."
+text = "Drag each soul to a station."
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="AssignmentCountLabel" type="Label" parent="BoardAnchor"]
+[node name="AssignmentCountLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=259874943]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_left = 746.0
 offset_top = 605.0
@@ -414,7 +346,7 @@ theme_override_font_sizes/font_size = 12
 text = "0 / 4 SOULS ASSIGNED"
 horizontal_alignment = 1
 
-[node name="ConfirmButton" type="Button" parent="BoardAnchor"]
+[node name="ConfirmButton" type="Button" parent="BoardAnchor/StationPathAnchor" unique_id=1914064462]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 970.0
@@ -427,12 +359,12 @@ theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("18_bold")
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("ConfirmNormal")
-theme_override_styles/hover = SubResource("ConfirmHover")
 theme_override_styles/pressed = SubResource("ConfirmPressed")
+theme_override_styles/hover = SubResource("ConfirmHover")
 text = "FINALIZE ASSIGNMENTS"
 script = ExtResource("20_hover")
 
-[node name="ErrorLabel" type="Label" parent="BoardAnchor"]
+[node name="ErrorLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=972805423]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 746.0
@@ -444,7 +376,39 @@ theme_override_fonts/font = ExtResource("18_bold")
 theme_override_font_sizes/font_size = 12
 horizontal_alignment = 1
 
-[node name="CloseButton" parent="BoardAnchor" instance=ExtResource("19_close")]
+[node name="ValidationLightToken" type="TextureRect" parent="BoardAnchor/StationPathAnchor" unique_id=403489340]
+unique_name_in_owner = true
+visible = false
+z_index = 30
+layout_mode = 0
+offset_right = 44.0
+offset_bottom = 44.0
+pivot_offset = Vector2(22, 22)
+mouse_filter = 2
+texture = ExtResource("13_star_small_d")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ValidationStatusLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=1737779961]
+unique_name_in_owner = true
+visible = false
+z_index = 31
+layout_mode = 0
+offset_left = 510.0
+offset_top = 627.0
+offset_right = 1120.0
+offset_bottom = 674.0
+theme_override_colors/font_color = Color(0.388235, 0.32549, 0.294118, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.913725, 0.67451, 0.45)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("18_bold")
+theme_override_font_sizes/font_size = 20
+text = "READING THE STATION PATH"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" parent="BoardAnchor/StationPathAnchor" unique_id=145186199 instance=ExtResource("19_close")]
 layout_mode = 0
 offset_left = 1184.0
 offset_top = 24.0
@@ -452,10 +416,119 @@ offset_right = 1238.0
 offset_bottom = 78.0
 tooltip_text = "Close Night Ledger [E]"
 
-[connection signal="pressed" from="BoardAnchor/ConfirmButton" to="." method="_confirm"]
-[connection signal="pressed" from="BoardAnchor/CloseButton" to="." method="request_close"]
+[node name="MapTitle" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=67688186]
+visible = false
+layout_mode = 0
+offset_left = 432.0
+offset_top = 44.0
+offset_right = 1179.0
+offset_bottom = 83.0
+theme_override_colors/font_color = Color(0.247059, 0.211765, 0.2, 1)
+theme_override_fonts/font = ExtResource("16_irish")
+theme_override_font_sizes/font_size = 30
+text = "NIGHT STATION PATH"
+horizontal_alignment = 1
 
-[editable path="BoardAnchor/VesperwickTarget"]
-[editable path="BoardAnchor/HollowcrossTarget"]
-[editable path="BoardAnchor/BellhavenTarget"]
-[editable path="BoardAnchor/MorrowfieldTarget"]
+[node name="InstructionLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=756115613]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 432.0
+offset_top = 82.0
+offset_right = 1179.0
+offset_bottom = 108.0
+theme_override_colors/font_color = Color(0.396078, 0.333333, 0.305882, 1)
+theme_override_fonts/font = ExtResource("17_medium")
+theme_override_font_sizes/font_size = 14
+text = "Each station is one node. A thread means the two stations are directly connected."
+horizontal_alignment = 1
+
+[node name="ThreadVesperHollow" type="Line2D" parent="BoardAnchor/StationPathAnchor" unique_id=479539069]
+z_index = -1
+points = PackedVector2Array(815, 185, 615, 375)
+width = 3.0
+default_color = Color(0.27451, 0.231373, 0.211765, 0.8)
+
+[node name="ThreadVesperBell" type="Line2D" parent="BoardAnchor/StationPathAnchor" unique_id=1302515708]
+z_index = -1
+points = PackedVector2Array(815, 185, 1015, 375)
+width = 3.0
+default_color = Color(0.27451, 0.231373, 0.211765, 0.8)
+
+[node name="ThreadHollowBell" type="Line2D" parent="BoardAnchor/StationPathAnchor" unique_id=1934394111]
+z_index = -1
+points = PackedVector2Array(615, 375, 1015, 375)
+width = 3.0
+default_color = Color(0.27451, 0.231373, 0.211765, 0.8)
+
+[node name="ThreadHollowMorrow" type="Line2D" parent="BoardAnchor/StationPathAnchor" unique_id=477155091]
+z_index = -1
+points = PackedVector2Array(615, 375, 615, 565)
+width = 3.0
+default_color = Color(0.27451, 0.231373, 0.211765, 0.8)
+
+[node name="DecorStarA" type="TextureRect" parent="BoardAnchor/StationPathAnchor" unique_id=681034204]
+layout_mode = 0
+offset_left = 704.0
+offset_top = 271.0
+offset_right = 731.0
+offset_bottom = 302.0
+mouse_filter = 2
+texture = ExtResource("10_star_small_a")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DecorStarB" type="TextureRect" parent="BoardAnchor/StationPathAnchor" unique_id=593210213]
+layout_mode = 0
+offset_left = 897.0
+offset_top = 272.0
+offset_right = 922.0
+offset_bottom = 303.0
+mouse_filter = 2
+texture = ExtResource("11_star_small_b")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DecorStarC" type="TextureRect" parent="BoardAnchor/StationPathAnchor" unique_id=1914091529]
+layout_mode = 0
+offset_left = 791.0
+offset_top = 356.0
+offset_right = 816.0
+offset_bottom = 388.0
+mouse_filter = 2
+texture = ExtResource("12_star_small_c")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DecorStarD" type="TextureRect" parent="BoardAnchor/StationPathAnchor" unique_id=1515561339]
+layout_mode = 0
+offset_left = 602.0
+offset_top = 463.0
+offset_right = 628.0
+offset_bottom = 493.0
+mouse_filter = 2
+texture = ExtResource("13_star_small_d")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ClockwiseLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=1104695280]
+visible = false
+layout_mode = 0
+offset_left = 778.0
+offset_top = 283.0
+offset_right = 854.0
+offset_bottom = 321.0
+tooltip_text = "Clockwise around the closed loop"
+theme_override_colors/font_color = Color(0.690196, 0.298039, 0.290196, 0.86)
+theme_override_fonts/font = ExtResource("18_bold")
+theme_override_font_sizes/font_size = 18
+text = "↻"
+horizontal_alignment = 1
+
+[connection signal="pressed" from="BoardAnchor/StationPathAnchor/ConfirmButton" to="." method="_confirm"]
+[connection signal="pressed" from="BoardAnchor/StationPathAnchor/CloseButton" to="." method="request_close"]
+
+[editable path="BoardAnchor/StationPathAnchor/VesperwickTarget"]
+[editable path="BoardAnchor/StationPathAnchor/HollowcrossTarget"]
+[editable path="BoardAnchor/StationPathAnchor/BellhavenTarget"]
+[editable path="BoardAnchor/StationPathAnchor/MorrowfieldTarget"]

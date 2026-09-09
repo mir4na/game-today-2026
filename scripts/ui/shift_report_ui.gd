@@ -22,6 +22,20 @@ signal continue_requested
 @export var failed_result_color: Color
 @export_multiline var failed_payment_text: String
 @export var failed_continue_text: String
+@export_category("Night Paycheck Copy")
+@export var night_title_text: String = "NIGHT PAYCHECK"
+@export var night_subtitle_template: String = "NIGHT SHIFT • DAY %d"
+@export var night_souls_caption: String = "SOULS RELEASED"
+@export var night_failed_attempts_caption: String = "FAILED ATTEMPTS"
+@export var night_attempts_caption: String = "TOTAL ATTEMPTS"
+@export var night_route_caption: String = "STATION PATH"
+@export var night_detail_title: String = "ATTEMPT DEDUCTION"
+@export var night_net_caption: String = "NIGHT TOTAL"
+@export var night_balance_caption: String = "CURRENT BALANCE"
+@export var night_result_text: String = "NIGHT SHIFT COMPLETE"
+@export var night_payment_template: String = "%d Blessings added after attempt deductions."
+@export_multiline var night_first_attempt_text: String = "No deduction — the station path aligned on the first attempt."
+@export_multiline var night_attempt_breakdown_template: String = "• %d failed attempt(s) × %d Blessings\n• Reward reduced by %d Blessings."
 @export_category("Typewriter")
 @export var typewriter_target_paths: Array[NodePath] = []
 @export_range(20.0, 600.0, 5.0) var typewriter_characters_per_second: float = 180.0
@@ -32,13 +46,21 @@ signal continue_requested
 @export_node_path("AnimationPlayer") var presentation_player_path: NodePath
 @export var presentation_animation: StringName = &"present"
 
+@onready var _title: Label = %Title
 @onready var _subtitle: Label = %Subtitle
+@onready var _correct_caption: Label = %CorrectCaption
 @onready var _correct: Label = %CorrectValue
+@onready var _wrong_caption: Label = %WrongCaption
 @onready var _wrong: Label = %WrongValue
+@onready var _anomaly_caption: Label = %AnomalyCaption
 @onready var _anomaly: Label = %AnomalyValue
+@onready var _retained_caption: Label = %RetainedCaption
 @onready var _retained: Label = %RetainedValue
+@onready var _detail_title: Label = %DetailTitle
 @onready var _net: Label = %NetValue
+@onready var _net_caption: Label = %NetCaption
 @onready var _target: Label = %TargetValue
+@onready var _target_caption: Label = %TargetCaption
 @onready var _result: Label = %ResultLabel
 @onready var _payment: Label = %PaymentLabel
 @onready var _breakdown: RichTextLabel = %Breakdown
@@ -53,9 +75,20 @@ var _typewriter_characters: float = 0.0
 var _typewriter_pause_remaining: float = 0.0
 var _typewriter_running: bool = false
 var _input_lock_remaining: float = 0.0
+var _day_receipt_copy: Dictionary = {}
 
 
 func _ready() -> void:
+	_day_receipt_copy = {
+		"title": _title.text,
+		"correct_caption": _correct_caption.text,
+		"wrong_caption": _wrong_caption.text,
+		"anomaly_caption": _anomaly_caption.text,
+		"retained_caption": _retained_caption.text,
+		"detail_title": _detail_title.text,
+		"net_caption": _net_caption.text,
+		"target_caption": _target_caption.text,
+	}
 	for target_path: NodePath in typewriter_target_paths:
 		var target: Control = get_node_or_null(target_path) as Control
 		if target != null and (target is Label or target is RichTextLabel):
@@ -64,6 +97,7 @@ func _ready() -> void:
 
 func open_report(day: int, retained: int, anomaly_total: int, penalties: PackedStringArray, award: Dictionary) -> void:
 	_continue_sent = false
+	_restore_day_receipt_copy()
 	_subtitle.text = subtitle_template % day
 	_correct.text = reward_template % [award.correct_dropoffs, award.correct_rate, award.dropoff_reward]
 	_wrong.text = deduction_template % [award.wrong_dropoffs, award.wrong_rate, award.wrong_deduction]
@@ -85,6 +119,61 @@ func open_report(day: int, retained: int, anomaly_total: int, penalties: PackedS
 	show()
 	_present()
 	_start_typewriter()
+
+
+func open_night_report(day: int, soul_total: int, award: Dictionary, balance: int) -> void:
+	_continue_sent = false
+	_title.text = night_title_text
+	_subtitle.text = night_subtitle_template % day
+	_correct_caption.text = night_souls_caption
+	_correct.text = reward_template % [
+		soul_total,
+		int(award.get("correct_rate", 0)),
+		int(award.get("base_reward", 0)),
+	]
+	_wrong_caption.text = night_failed_attempts_caption
+	_wrong.text = deduction_template % [
+		int(award.get("failed_attempts", 0)),
+		int(award.get("attempt_rate", 0)),
+		int(award.get("attempt_deduction", 0)),
+	]
+	_anomaly_caption.text = night_attempts_caption
+	_anomaly.text = str(int(award.get("attempt_count", 1)))
+	_anomaly.add_theme_color_override(&"font_color", Color("333340"))
+	_retained_caption.text = night_route_caption
+	_retained.text = "ALIGNED"
+	_detail_title.text = night_detail_title
+	var failed_attempts: int = int(award.get("failed_attempts", 0))
+	_breakdown.text = night_first_attempt_text if failed_attempts == 0 else \
+		night_attempt_breakdown_template % [
+			failed_attempts,
+			int(award.get("attempt_rate", 0)),
+			int(award.get("attempt_deduction", 0)),
+		]
+	_breakdown.scroll_to_line(0)
+	_net_caption.text = night_net_caption
+	_net.text = amount_template % int(award.get("earned", 0))
+	_target_caption.text = night_balance_caption
+	_target.text = amount_template % maxi(0, balance)
+	_result.text = night_result_text
+	_result.add_theme_color_override(&"font_color", passed_result_color)
+	_payment.text = night_payment_template % int(award.get("earned", 0))
+	_continue_hint.text = passed_continue_text
+	show()
+	_present()
+	_start_typewriter()
+
+
+func _restore_day_receipt_copy() -> void:
+	_title.text = str(_day_receipt_copy.get("title", "PAYCHECK"))
+	_correct_caption.text = str(_day_receipt_copy.get("correct_caption", "CORRECT DROP-OFFS"))
+	_wrong_caption.text = str(_day_receipt_copy.get("wrong_caption", "WRONG DROP-OFFS"))
+	_anomaly_caption.text = str(_day_receipt_copy.get("anomaly_caption", "ANOMALY STAMPS"))
+	_retained_caption.text = str(_day_receipt_copy.get("retained_caption", "ANOMALIES RETAINED"))
+	_detail_title.text = str(_day_receipt_copy.get("detail_title", "PENALTY DETAILS"))
+	_net_caption.text = str(_day_receipt_copy.get("net_caption", "NET TOTAL"))
+	_target_caption.text = str(_day_receipt_copy.get("target_caption", "REQUIRED TO PASS"))
+	_anomaly.add_theme_color_override(&"font_color", failed_result_color)
 
 
 func _present() -> void:

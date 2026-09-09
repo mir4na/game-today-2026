@@ -1,7 +1,7 @@
 class_name NightSoulRecordUI
 extends Control
 ## Vertical biography reader used during the night walk. Every sentence is
-## clickable, but only the naturally embedded constellation clue is recorded.
+## clickable, but only the naturally embedded station-path clue is recorded.
 
 signal closed
 signal closing

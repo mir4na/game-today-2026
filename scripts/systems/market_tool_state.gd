@@ -22,6 +22,7 @@ const TOOL_SPEED_UPGRADE: StringName = &"speed_upgrade"
 @export_range(0, 100, 1) var blessings_per_wrong_dropoff: int = 20
 @export_range(0, 100, 1) var blessings_per_incorrect_anomaly: int = 40
 @export_range(0, 20, 1) var blessings_per_correct_night_dropoff: int = 2
+@export_range(0, 100, 1) var blessings_per_failed_night_attempt: int = 10
 
 var blessings: int = 0
 var audit_slips: int = 0
@@ -97,15 +98,25 @@ func restore_shift_inventory(snapshot: Dictionary) -> void:
 	_emit_inventory_changed()
 
 
-func award_night_blessings(correct_night_dropoffs: int) -> Dictionary:
+func award_night_blessings(correct_night_dropoffs: int, attempt_count: int = 1) -> Dictionary:
 	if _night_blessings_awarded:
 		return _last_night_award.duplicate(true)
 	_night_blessings_awarded = true
 	var correct_count: int = maxi(0, correct_night_dropoffs)
-	var earned: int = correct_count * blessings_per_correct_night_dropoff
+	var safe_attempt_count: int = maxi(1, attempt_count)
+	var failed_attempts: int = maxi(0, safe_attempt_count - 1)
+	var base_reward: int = correct_count * blessings_per_correct_night_dropoff
+	var attempt_deduction: int = failed_attempts * blessings_per_failed_night_attempt
+	var earned: int = maxi(0, base_reward - attempt_deduction)
 	blessings += earned
 	_last_night_award = {
 		"earned": earned,
+		"base_reward": base_reward,
+		"attempt_deduction": attempt_deduction,
+		"attempt_count": safe_attempt_count,
+		"failed_attempts": failed_attempts,
+		"correct_rate": blessings_per_correct_night_dropoff,
+		"attempt_rate": blessings_per_failed_night_attempt,
 		"correct_night_dropoffs": correct_count,
 	}
 	_emit_inventory_changed()

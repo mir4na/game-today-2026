@@ -1,9 +1,9 @@
 class_name DeparturePuzzleData
 extends Resource
-## Content for the night constellation and its Soul Records. The UI scene owns
+## Content for the night station path and its Soul Records. The UI scene owns
 ## the graph layout; this resource builds a matching, solvable nightly case.
 
-@export_category("Constellation")
+@export_category("Station Path")
 @export var night_stations: PackedStringArray = PackedStringArray()
 @export_multiline var clockwise_statement_template: String
 @export_multiline var hub_statement_template: String

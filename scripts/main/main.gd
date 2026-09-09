@@ -108,6 +108,7 @@ var _dirty_seat_activated: bool = false
 var _service_seal_active: bool = false
 var _day_blessing_award: Dictionary = {}
 var _night_blessing_award: Dictionary = {}
+var _night_assignment_attempts: int = 0
 var _night_world_prepared: bool = false
 var _radar_scan_active: bool = false
 var _swiftstep_active: bool = false
@@ -126,7 +127,6 @@ var _world_time_scale: float = 1.0
 @onready var _night_transition_ui: NightTransitionCutsceneUI = %NightTransitionCutsceneUI
 @onready var _night_puzzle_ui: NightPuzzleUI = %NightPuzzleUI
 @onready var _night_soul_record_ui: Variant = %NightSoulRecordUI
-@onready var _sequence_ui: DepartureSequenceUI = %DepartureSequenceUI
 @onready var _pause_ui: PauseUI = %PauseUI
 @onready var _blocked_aisle_ui: Control = %BlockedAislePuzzleUI
 @onready var _clean_seat_ui: Control = %CleanSeatUI
@@ -1815,6 +1815,9 @@ func _get_day_pass_target() -> int:
 	return maxi(0, day_pass_targets[clampi(day_number - 1, 0, day_pass_targets.size() - 1)])
 
 func _on_shift_report_continue() -> void:
+	if state == GameState.COMPLETE:
+		_continue_after_night_paycheck()
+		return
 	if state != GameState.SHIFT_REPORT:
 		return
 	if not bool(_day_blessing_award.get("passed", false)):
@@ -2027,6 +2030,7 @@ func _prepare_night_world() -> void:
 		push_error("The configured departure puzzle resource is invalid.")
 		return
 	_night_world_prepared = true
+	_night_assignment_attempts = 0
 	_runtime_puzzle = puzzle_template.create_runtime(_get_dead_passenger_data(), _daily_rng)
 	_collected_departure_statements.clear()
 	_train.set_night_strength(1.0)
@@ -2084,23 +2088,56 @@ func _on_departures_confirmed(assignments: Dictionary) -> void:
 	if puzzle == null:
 		_night_puzzle_ui.show_error("The night assignment manifest is unavailable.")
 		return
-	var correct_count: int = 0
+	_night_assignment_attempts += 1
+	var station_results: Dictionary = {}
 	for station: String in puzzle.night_stations:
 		var expected_passenger: String = str(
 			puzzle.correct_passenger_by_station.get(station, "")
 		)
-		if _night_assignment_contains(assignments, station, expected_passenger):
-			correct_count += 1
-	_night_blessing_award = _market_tool_state.call(&"award_night_blessings", correct_count)
-	_night_puzzle_ui.hide()
-	_active_modal = _sequence_ui
-	state = GameState.COMPLETE
-	_sequence_ui.start_sequence(
-		assignments,
-		puzzle,
-		_night_blessing_award,
-		int(_market_tool_state.call(&"get_snapshot").get("blessings", 0))
+		var assigned_passengers: Array[String] = _night_passengers_assigned_to(
+			assignments, station
+		)
+		station_results[station] = (
+			assigned_passengers.size() == 1
+			and assigned_passengers[0] == expected_passenger
+		)
+	_night_puzzle_ui.play_validation(station_results, _night_assignment_attempts)
+
+
+func _on_night_validation_finished(succeeded: bool, attempt_count: int) -> void:
+	if state != GameState.NIGHT_PUZZLE:
+		return
+	if not succeeded:
+		# A rejected station path restarts the playable night investigation.
+		# The generated case stays the same, while its statements and placements
+		# must be recovered again. The attempt counter intentionally persists.
+		_collected_departure_statements.clear()
+		_night_puzzle_ui.hide()
+		_active_modal = null
+		state = GameState.NIGHT
+		_set_player_control_for_state()
+		return
+	var puzzle: DeparturePuzzleData = _get_departure_puzzle()
+	if puzzle == null:
+		_night_puzzle_ui.show_error("The night assignment manifest is unavailable.")
+		return
+	var correct_count: int = puzzle.correct_passenger_by_station.size()
+	_night_blessing_award = _market_tool_state.call(
+		&"award_night_blessings",
+		correct_count,
+		attempt_count
 	)
+	_night_puzzle_ui.hide()
+	_active_modal = _shift_report_ui
+	state = GameState.COMPLETE
+	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
+	_shift_report_ui.open_night_report(
+		day_number,
+		correct_count,
+		_night_blessing_award,
+		int(snapshot.get("blessings", 0))
+	)
+	_save_night_completion()
 
 
 func _night_assignment_contains(
@@ -2115,6 +2152,21 @@ func _night_assignment_contains(
 		return (assigned as Array).has(passenger_name)
 	# Compatibility with older tests and any currently open pre-stack board.
 	return str(assigned) == passenger_name
+
+
+func _night_passengers_assigned_to(assignments: Dictionary, station_name: String) -> Array[String]:
+	var result: Array[String] = []
+	var assigned: Variant = assignments.get(station_name, [])
+	if assigned is Array:
+		for passenger_value: Variant in assigned:
+			var passenger_name: String = str(passenger_value)
+			if not passenger_name.is_empty() and not result.has(passenger_name):
+				result.append(passenger_name)
+	else:
+		var legacy_name: String = str(assigned)
+		if not legacy_name.is_empty():
+			result.append(legacy_name)
+	return result
 
 func _get_departure_puzzle() -> DeparturePuzzleData:
 	return _runtime_puzzle if _runtime_puzzle != null else puzzle_resource as DeparturePuzzleData
@@ -2229,7 +2281,7 @@ func _get_dead_passenger_data() -> Array[PassengerData]:
 			result.append(passenger.data)
 	return result
 
-func _on_night_sequence_finished() -> void:
+func _save_night_completion() -> void:
 	if state != GameState.COMPLETE or _progress_advanced:
 		return
 	var next_checkpoint: Dictionary = ShiftProgress.make_checkpoint(
@@ -2238,12 +2290,11 @@ func _on_night_sequence_finished() -> void:
 	)
 	next_checkpoint.completed = day_number >= ShiftProgress.DAY_COUNT
 	_progress_advanced = ShiftProgress.save_checkpoint(next_checkpoint)
-	_sequence_ui.set_progress_result(day_number, ShiftProgress.DAY_COUNT, _progress_advanced)
 
 
-func _on_journey_continue() -> void:
+func _continue_after_night_paycheck() -> void:
 	if not _progress_advanced:
-		_on_night_sequence_finished()
+		_save_night_completion()
 		if not _progress_advanced:
 			return
 	if day_number >= ShiftProgress.DAY_COUNT:

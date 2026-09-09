@@ -130,10 +130,10 @@ func _run() -> void:
 	game._finalize_day_shift()
 	_check(game._day_blessing_award.wrong_deduction == 20 * living_count, "Station settlement applies a flat 20 Blessings per wrong drop-off.")
 	game._enter_night()
-	game._on_departures_confirmed(game._get_departure_puzzle().correct_passenger_by_station)
-	game._sequence_ui._show_complete()
+	game.state = AfterTheEndGame.GameState.NIGHT_PUZZLE
+	game._on_night_validation_finished(true, 1)
 	_check(Progress.load_checkpoint().day == 3, "Finishing the night checkpoints the next day.")
-	game._on_journey_continue()
+	game._continue_after_night_paycheck()
 	await process_frame
 	await process_frame
 	game = current_scene as AfterTheEndGame
@@ -141,8 +141,8 @@ func _run() -> void:
 	_check(game.day_number == 3, "Continue after the night enters the next day.")
 	game.day_number = 5
 	game._enter_night()
-	game._on_departures_confirmed(game._get_departure_puzzle().correct_passenger_by_station)
-	game._sequence_ui._show_complete()
+	game.state = AfterTheEndGame.GameState.NIGHT_PUZZLE
+	game._on_night_validation_finished(true, 1)
 	_check(Progress.load_checkpoint().completed and Progress.load_checkpoint().day == 5, "Day 5 ends the campaign; no Day 6.")
 	game.free()
 	current_scene = null
