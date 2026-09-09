@@ -5,10 +5,10 @@
 [resource]
 script = ExtResource("1")
 night_stations = PackedStringArray("Vesperwick", "Hollowcross", "Bellhaven", "Morrowfield")
-clockwise_statement_template = "%s is one node clockwise from %s."
-hub_statement_template = "%s waits at the only node connected directly to all three others."
-endpoint_statement_template = "%s waits at the endpoint, where the single thread stops."
-distance_statement_template = "Two threads separate %s from %s."
+clockwise_statement_template = "%s appears one mark clockwise from %s in the recovered pattern."
+hub_statement_template = "%s rests at the one mark touched by all three paths."
+endpoint_statement_template = "%s rests where the lone path reaches its end."
+distance_statement_template = "The recovered pattern leaves two paths between %s and %s."
 single_passenger_statement = "This is the only soul awaiting assignment tonight."
 anomaly_descriptor_by_type = {
 "newspaper_death": "the passenger named as dead in the newspaper",
@@ -74,3 +74,7 @@ generic_biography_opening = PackedStringArray("{name} spent years working as a {
 generic_anomaly_record = PackedStringArray("Something in {name}'s travel record cannot be explained by the daytime service.", "The evidence remains unchanged after the train crosses the veil.")
 generic_resonance_medium = "After the veil, a new sentence appears among {name}'s belongings."
 resonance_closing_sentence = "The writing was not present before the train crossed the veil and fades anywhere outside the carriage."
+biography_opening_support = PackedStringArray("Several surviving pages contain circles, crossed-out route marks, and small corrections whose purpose was never explained.")
+biography_evidence_support = PackedStringArray("A second diagram runs toward the edge of the page, where water damage has erased every useful label.")
+biography_veil_support = PackedStringArray("Other marks wander across the page without forming a complete route, then disappear when the carriage lights return.")
+hidden_statement_context_by_paragraph = PackedStringArray("One rough pattern among {name}'s surviving notes is drawn so that {statement}.", "A thin pencil mark beside the copied evidence is arranged so that {statement}.", "When the page is opened beyond the veil, its faded lines settle so that {statement}.")

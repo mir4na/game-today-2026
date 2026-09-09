@@ -26,6 +26,14 @@ extends Resource
 @export var generic_anomaly_record: PackedStringArray = PackedStringArray()
 @export var generic_resonance_medium: String
 @export var resonance_closing_sentence: String
+@export var biography_opening_support: PackedStringArray = PackedStringArray()
+@export var biography_evidence_support: PackedStringArray = PackedStringArray()
+@export var biography_veil_support: PackedStringArray = PackedStringArray()
+@export var hidden_statement_context_by_paragraph: PackedStringArray = PackedStringArray([
+	"One rough pattern among {name}'s surviving notes is drawn so that {statement}.",
+	"A thin pencil mark beside the copied evidence is arranged so that {statement}.",
+	"When the page is opened beyond the veil, its faded lines settle so that {statement}.",
+])
 
 ## Populated only on a duplicated runtime puzzle.
 var statement_by_passenger: Dictionary = {}
@@ -90,15 +98,30 @@ func create_runtime(passengers: Array[PassengerData], rng: RandomNumberGenerator
 	_shuffle_strings(clues, rng)
 	var statement_holders: Array[PassengerData] = passengers.duplicate()
 	_shuffle_passengers(statement_holders, rng)
+	var paragraph_placements := PackedInt32Array()
+	for index: int in range(station_count):
+		paragraph_placements.append(index % 3)
+	_shuffle_ints(paragraph_placements, rng)
 	for index: int in range(station_count):
 		var holder: PassengerData = statement_holders[index]
-		var statement: String = clues[index]
-		runtime.statement_by_passenger[holder.short_name] = statement
-		runtime.biography_by_passenger[holder.short_name] = runtime._compose_biography(holder, statement)
+		var biography: Array = runtime._compose_biography(
+			holder,
+			clues[index],
+			paragraph_placements[index],
+			rng
+		)
+		var hidden_statement: String = runtime._find_hidden_statement(biography, clues[index])
+		runtime.statement_by_passenger[holder.short_name] = hidden_statement
+		runtime.biography_by_passenger[holder.short_name] = biography
 	return runtime
 
 
-func _compose_biography(data: PassengerData, statement: String) -> Array:
+func _compose_biography(
+	data: PassengerData,
+	statement: String,
+	paragraph_index: int,
+	rng: RandomNumberGenerator
+) -> Array:
 	var occupation_key: String = data.occupation.strip_edges().to_lower()
 	var opening: Variant = biography_opening_by_occupation.get(occupation_key, generic_biography_opening)
 	var anomaly_record: Variant = anomaly_record_by_type.get(data.anomaly_type, generic_anomaly_record)
@@ -111,10 +134,59 @@ func _compose_biography(data: PassengerData, statement: String) -> Array:
 	paragraphs.append(_format_sentence_list(anomaly_record, data))
 	paragraphs.append(PackedStringArray([
 		_format_biography_sentence(medium_template, data),
-		statement,
 		_format_biography_sentence(resonance_closing_sentence, data),
 	]))
+	var opening_sentences := paragraphs[0] as PackedStringArray
+	var evidence_sentences := paragraphs[1] as PackedStringArray
+	var veil_sentences := paragraphs[2] as PackedStringArray
+	opening_sentences.append_array(_format_sentence_list(biography_opening_support, data))
+	evidence_sentences.append_array(_format_sentence_list(biography_evidence_support, data))
+	veil_sentences.append_array(_format_sentence_list(biography_veil_support, data))
+	paragraphs[0] = opening_sentences
+	paragraphs[1] = evidence_sentences
+	paragraphs[2] = veil_sentences
+	var target_paragraph: int = clampi(paragraph_index, 0, paragraphs.size() - 1)
+	var hidden_statement: String = _contextualize_hidden_statement(
+		data,
+		statement,
+		target_paragraph
+	)
+	var target_sentences := paragraphs[target_paragraph] as PackedStringArray
+	var insertion_index: int = rng.randi_range(0, target_sentences.size())
+	target_sentences.insert(insertion_index, hidden_statement)
+	paragraphs[target_paragraph] = target_sentences
 	return paragraphs
+
+
+func _contextualize_hidden_statement(
+	data: PassengerData,
+	statement: String,
+	paragraph_index: int
+) -> String:
+	var context_template: String = "{statement}"
+	if not hidden_statement_context_by_paragraph.is_empty():
+		context_template = hidden_statement_context_by_paragraph[
+			clampi(paragraph_index, 0, hidden_statement_context_by_paragraph.size() - 1)
+		]
+	var clause: String = statement.strip_edges()
+	clause = clause.trim_suffix(".").strip_edges()
+	if not clause.is_empty():
+		clause = clause.left(1).to_lower() + clause.substr(1)
+	return _format_biography_sentence(context_template, data) \
+		.replace("{statement}", clause) \
+		.strip_edges()
+
+
+func _find_hidden_statement(paragraphs: Array, source_statement: String) -> String:
+	var source_clause: String = source_statement.strip_edges().trim_suffix(".").to_lower()
+	for paragraph_value: Variant in paragraphs:
+		if not paragraph_value is PackedStringArray:
+			continue
+		var sentences := paragraph_value as PackedStringArray
+		for sentence: String in sentences:
+			if source_clause in sentence.to_lower():
+				return sentence
+	return source_statement
 
 
 func _format_sentence_list(value: Variant, data: PassengerData) -> PackedStringArray:
@@ -183,5 +255,13 @@ func _shuffle_strings(values: PackedStringArray, rng: RandomNumberGenerator) -> 
 	for index: int in range(values.size() - 1, 0, -1):
 		var swap_index: int = rng.randi_range(0, index)
 		var held: String = values[index]
+		values[index] = values[swap_index]
+		values[swap_index] = held
+
+
+func _shuffle_ints(values: PackedInt32Array, rng: RandomNumberGenerator) -> void:
+	for index: int in range(values.size() - 1, 0, -1):
+		var swap_index: int = rng.randi_range(0, index)
+		var held: int = values[index]
 		values[index] = values[swap_index]
 		values[swap_index] = held

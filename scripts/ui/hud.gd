@@ -4,6 +4,7 @@ extends CanvasLayer
 
 signal guidebook_requested
 signal market_tool_requested(tool_id: StringName)
+signal debug_night_requested
 
 @export_category("Inspector Copy")
 @export var clock_template: String = "%02d:%02d %s"
@@ -52,6 +53,7 @@ signal market_tool_requested(tool_id: StringName)
 @onready var _notification_panel: PanelContainer = %NotificationPanel
 @onready var _notification_label: Label = %NotificationLabel
 @onready var _tool_status_label: Label = %ToolStatusLabel
+@onready var _debug_night_button: Button = %DebugNightButton
 @onready var _guidebook_button: Button = %GuidebookButton
 @onready var _market_item_bar: VBoxContainer = %MarketItemBar
 @onready var _audit_slot: Control = %AuditSlot
@@ -403,6 +405,7 @@ func _update_dialogue_pointer(target_local_x: float, prompt_width: float) -> voi
 func set_day_hud_visible(value: bool) -> void:
 	_clock_panel.visible = value
 	_guidebook_button.tooltip_text = "Open guidebook"
+	_debug_night_button.visible = value
 	if not value:
 		_clock_briefing_animation.stop()
 		_clock_sign_assembly.hide()
@@ -455,10 +458,15 @@ func _on_guidebook_button_pressed() -> void:
 func _on_market_item_requested(tool_id: StringName) -> void:
 	market_tool_requested.emit(tool_id)
 
+
+func _on_debug_night_button_pressed() -> void:
+	debug_night_requested.emit()
+
 func set_night_walk_mode() -> void:
 	_clock_briefing_animation.stop()
 	_clock_sign_assembly.hide()
 	_clock_panel.show()
+	_debug_night_button.hide()
 	_guidebook_button.tooltip_text = "Open Night Ledger"
 	_tool_status_label.visible = true
 	_market_item_bar.visible = true

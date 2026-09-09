@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/night_station_target.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/NightShift/Star 1.png" id="2_star"]
 [ext_resource type="Texture2D" path="res://assets/NightShift/Group 149.png" id="3_pin"]
 [ext_resource type="Texture2D" path="res://assets/NightShift/Rectangle 243.png" id="4_label"]
 [ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="5_font"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_station_face_token.tscn" id="6_face_token"]
 
 [sub_resource type="StyleBoxFlat" id="DropGlowStyle"]
 bg_color = Color(0.698039, 0.298039, 0.290196, 0.12)
@@ -26,6 +27,7 @@ offset_right = 180.0
 offset_bottom = 156.0
 mouse_default_cursor_shape = 2
 script = ExtResource("1")
+face_token_scene = ExtResource("6_face_token")
 
 [node name="DropGlow" type="Panel" parent="."]
 unique_name_in_owner = true
@@ -51,6 +53,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="Pin" type="TextureRect" parent="."]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 68.0
 offset_top = 0.0
@@ -61,17 +64,17 @@ texture = ExtResource("3_pin")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="AssignmentPortrait" type="TextureRect" parent="."]
+[node name="AssignmentFaces" type="HBoxContainer" parent="."]
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_left = 77.0
-offset_top = 8.0
-offset_right = 103.0
-offset_bottom = 34.0
+offset_left = 18.0
+offset_top = 4.0
+offset_right = 162.0
+offset_bottom = 40.0
 mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
+theme_override_constants/separation = 0
+alignment = 1
 
 [node name="StationPlate" type="TextureRect" parent="."]
 layout_mode = 0

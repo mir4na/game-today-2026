@@ -36,7 +36,7 @@ func start_sequence(
 	night_award: Dictionary = {},
 	blessing_balance: int = 0
 ) -> void:
-	_assignments = assignments.duplicate()
+	_assignments = assignments.duplicate(true)
 	_puzzle = puzzle
 	_night_award = night_award.duplicate(true)
 	_blessing_balance = maxi(0, blessing_balance)
@@ -48,16 +48,37 @@ func start_sequence(
 
 func _show_current_station() -> void:
 	var station: String = _puzzle.night_stations[_index]
-	var passenger_name: String = _assignments[station]
+	var passenger_names: Array[String] = _passengers_for_station(station)
 	_background.color = station_colors[_index]
 	_station_label.text = station.to_upper()
-	_passenger_label.text = passenger_departure_template % passenger_name
+	if passenger_names.is_empty():
+		_passenger_label.text = "No soul is assigned to this destination."
+	elif passenger_names.size() == 1:
+		_passenger_label.text = passenger_departure_template % passenger_names[0]
+	else:
+		_passenger_label.text = "%s are assigned to this destination." % \
+			", ".join(passenger_names)
 	_atmosphere_label.text = atmosphere_lines[_index]
 	_blessing_reward_label.hide()
 	_continue_button.text = next_button_text if _index < _puzzle.night_stations.size() - 1 else complete_button_text
 	modulate.a = 0.0
 	var tween := create_tween()
 	tween.tween_property(self, "modulate:a", 1.0, 0.5)
+
+
+func _passengers_for_station(station_name: String) -> Array[String]:
+	var result: Array[String] = []
+	var assigned: Variant = _assignments.get(station_name, [])
+	if assigned is Array:
+		for passenger_value: Variant in assigned:
+			var passenger_name: String = str(passenger_value)
+			if not passenger_name.is_empty():
+				result.append(passenger_name)
+	else:
+		var legacy_name: String = str(assigned)
+		if not legacy_name.is_empty():
+			result.append(legacy_name)
+	return result
 
 func _advance() -> void:
 	_index += 1

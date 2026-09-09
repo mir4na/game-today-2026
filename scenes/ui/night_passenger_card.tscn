@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/night_passenger_card.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/NightShift/Frame 28.png" id="2_card"]
 [ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="3_bold"]
 [ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Medium.ttf" id="4_medium"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_passenger_drag_preview.tscn" id="5_drag_preview"]
 
 [node name="NightPassengerCard" type="Control"]
 custom_minimum_size = Vector2(318, 116)
@@ -13,6 +14,7 @@ offset_right = 318.0
 offset_bottom = 116.0
 mouse_default_cursor_shape = 6
 script = ExtResource("1")
+drag_preview_scene = ExtResource("5_drag_preview")
 
 [node name="CardPaper" type="TextureRect" parent="."]
 layout_mode = 1

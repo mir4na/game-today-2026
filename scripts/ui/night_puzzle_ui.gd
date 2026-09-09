@@ -149,10 +149,19 @@ func _assign_passenger_to_station(station_name: String, passenger_name: String) 
 		return
 	if not _passenger_data_by_name.has(passenger_name):
 		return
+	# Each soul has one destination, while a station may hold any number of
+	# souls. Re-dropping a soul moves it without displacing the existing stack.
 	for old_station: String in _assignments.keys():
-		if _assignments[old_station] == passenger_name:
+		var old_passengers: Array = _passengers_assigned_to(old_station)
+		old_passengers.erase(passenger_name)
+		if old_passengers.is_empty():
 			_assignments.erase(old_station)
-	_assignments[station_name] = passenger_name
+		else:
+			_assignments[old_station] = old_passengers
+	var station_passengers: Array = _passengers_assigned_to(station_name)
+	if not station_passengers.has(passenger_name):
+		station_passengers.append(passenger_name)
+	_assignments[station_name] = station_passengers
 	_selected_passenger = passenger_name
 	_selection_label.text = "%s assigned to %s." % [passenger_name, station_name]
 	_error_label.text = ""
@@ -163,11 +172,10 @@ func _update_assignment_visuals() -> void:
 	for target: NightStationTarget in _station_targets:
 		if not target.visible:
 			continue
-		var passenger_name: String = str(_assignments.get(target.station_name, ""))
-		var portrait: Texture2D
-		if _passenger_data_by_name.has(passenger_name):
-			portrait = (_passenger_data_by_name[passenger_name] as PassengerData).id_photo
-		target.set_assignment(passenger_name, portrait)
+		target.set_assignments(
+			_passengers_assigned_to(target.station_name),
+			_passenger_data_by_name
+		)
 	for card: NightPassengerCard in _passenger_cards:
 		if card.visible:
 			card.set_assignment(_station_for_passenger(card.passenger_name))
@@ -176,36 +184,67 @@ func _update_assignment_visuals() -> void:
 
 func _update_counts() -> void:
 	var total: int = _passenger_data_by_name.size()
-	_assignment_count_label.text = assignment_count_template % [_assignments.size(), total]
+	var assigned_count: int = _assigned_passenger_count()
+	_assignment_count_label.text = assignment_count_template % [assigned_count, total]
 	var clue_count: int = 0
 	for passenger_name: String in _passenger_data_by_name:
 		if not str(_collected_statements.get(passenger_name, "")).is_empty():
 			clue_count += 1
 	_clue_count_label.text = clue_count_template % [clue_count, total]
-	_confirm_button.disabled = total == 0 or _assignments.size() != total
+	_confirm_button.disabled = total == 0 or assigned_count != total
 
 
 func _station_for_passenger(passenger_name: String) -> String:
 	for station_name: String in _assignments:
-		if _assignments[station_name] == passenger_name:
+		if _passengers_assigned_to(station_name).has(passenger_name):
 			return station_name
 	return ""
 
 
 func _remove_invalid_assignments() -> void:
+	var seen_passengers: Dictionary = {}
 	for station_name: String in _assignments.keys():
-		if (
-			not _puzzle.night_stations.has(station_name)
-			or not _passenger_data_by_name.has(str(_assignments[station_name]))
-		):
+		if not _puzzle.night_stations.has(station_name):
 			_assignments.erase(station_name)
+			continue
+		var valid_passengers: Array[String] = []
+		for passenger_value: Variant in _passengers_assigned_to(station_name):
+			var passenger_name: String = str(passenger_value)
+			if (
+				_passenger_data_by_name.has(passenger_name)
+				and not seen_passengers.has(passenger_name)
+			):
+				valid_passengers.append(passenger_name)
+				seen_passengers[passenger_name] = true
+		if valid_passengers.is_empty():
+			_assignments.erase(station_name)
+		else:
+			_assignments[station_name] = valid_passengers
 
 
 func _confirm() -> void:
-	if _puzzle == null or _assignments.size() != _passenger_data_by_name.size():
+	if _puzzle == null or _assigned_passenger_count() != _passenger_data_by_name.size():
 		_error_label.text = incomplete_assignment_error
 		return
 	departures_confirmed.emit(_assignments.duplicate(true))
+
+
+func _passengers_assigned_to(station_name: String) -> Array:
+	var stored: Variant = _assignments.get(station_name, [])
+	if stored is Array:
+		return (stored as Array).duplicate()
+	# Accept old in-memory/test manifests during the transition to stacked
+	# assignments.
+	var legacy_name: String = str(stored)
+	return [] if legacy_name.is_empty() else [legacy_name]
+
+
+func _assigned_passenger_count() -> int:
+	var seen: Dictionary = {}
+	for station_name: String in _assignments:
+		for passenger_value: Variant in _passengers_assigned_to(station_name):
+			seen[str(passenger_value)] = true
+	return seen.size()
 
 
 func _present_board() -> void:

@@ -6,22 +6,48 @@ signal passenger_dropped(station_name: String, passenger_name: String)
 signal selected(station_name: String)
 
 @export var station_name: String
+@export var face_token_scene: PackedScene
 
 @onready var _station_label: Label = %StationLabel
 @onready var _assignment_label: Label = %AssignmentLabel
-@onready var _assignment_portrait: TextureRect = %AssignmentPortrait
+@onready var _assignment_faces: HBoxContainer = %AssignmentFaces
+@onready var _pin: TextureRect = %Pin
 @onready var _drop_glow: Panel = %DropGlow
 
 
 func _ready() -> void:
 	_station_label.text = station_name.to_upper()
-	set_assignment("", null)
+	set_assignments([], {})
 
 
-func set_assignment(passenger_name: String, portrait: Texture2D) -> void:
-	_assignment_label.text = passenger_name.to_upper()
-	_assignment_portrait.texture = portrait
-	_assignment_portrait.visible = portrait != null
+func set_assignments(passenger_names: Array, passenger_data_by_name: Dictionary) -> void:
+	for child: Node in _assignment_faces.get_children():
+		_assignment_faces.remove_child(child)
+		child.free()
+	var valid_names: Array[String] = []
+	for passenger_value: Variant in passenger_names:
+		var passenger_name: String = str(passenger_value)
+		if not passenger_data_by_name.has(passenger_name):
+			continue
+		var data := passenger_data_by_name[passenger_name] as PassengerData
+		if data == null or data.get_character_artwork() == null:
+			continue
+		valid_names.append(passenger_name)
+		if face_token_scene == null:
+			continue
+		var token := face_token_scene.instantiate() as NightStationFaceToken
+		if token == null:
+			continue
+		_assignment_faces.add_child(token)
+		token.configure(passenger_name, data.get_character_artwork())
+	_assignment_faces.visible = not valid_names.is_empty()
+	_pin.visible = valid_names.is_empty()
+	if valid_names.is_empty():
+		_assignment_label.text = ""
+	elif valid_names.size() == 1:
+		_assignment_label.text = valid_names[0].to_upper()
+	else:
+		_assignment_label.text = "%d SOULS" % valid_names.size()
 
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
