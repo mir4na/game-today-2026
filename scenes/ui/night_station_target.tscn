@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://bf367g8ynhfyn" path="res://assets/NightShift/Star 1.png" id="2_star"]
 [ext_resource type="Texture2D" uid="uid://8m7pjm6ftjo8" path="res://assets/NightShift/Rectangle 243.png" id="4_label"]
 [ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="5_font"]
-[ext_resource type="PackedScene" path="res://scenes/ui/night_station_assignment_pin.tscn" id="6_assignment_pin"]
+[ext_resource type="PackedScene" uid="uid://cpqmbivnfscqr" path="res://scenes/ui/night_station_assignment_pin.tscn" id="6_assignment_pin"]
 [ext_resource type="Shader" uid="uid://jesdf5ee2ma2" path="res://shaders/night_station_star.gdshader" id="7_star_shader"]
 
 [sub_resource type="StyleBoxFlat" id="DropGlowStyle"]
@@ -26,6 +26,8 @@ shader_parameter/shimmer_strength = 0.62
 shader_parameter/shimmer_speed = 0.34
 shader_parameter/shimmer_width = 0.11
 shader_parameter/shimmer_offset = 0.0
+shader_parameter/twinkle_strength = 0.24
+shader_parameter/twinkle_speed = 2.8
 shader_parameter/outline_strength = 0.0
 shader_parameter/outline_size = 8.0
 shader_parameter/outline_color = Color(1, 1, 1, 1)
@@ -127,9 +129,9 @@ mouse_filter = 2
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 17.0
-offset_top = 21.0
+offset_top = 142.0
 offset_right = 163.0
-offset_bottom = 45.0
+offset_bottom = 166.0
 mouse_filter = 2
 texture = ExtResource("4_label")
 expand_mode = 1
@@ -138,9 +140,9 @@ expand_mode = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 20.0
-offset_top = 22.0
+offset_top = 143.0
 offset_right = 160.0
-offset_bottom = 44.0
+offset_bottom = 165.0
 theme_override_colors/font_color = Color(0.952941, 0.917647, 0.843137, 1)
 theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 12

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cpqmbivnfscqr"]
 
 [ext_resource type="Script" uid="uid://soxfk516215t" path="res://scripts/ui/night_station_assignment_pin.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://b6il533a6bl5k" path="res://assets/ui/circle.png" id="3_cm4sc"]
+[ext_resource type="Texture2D" uid="uid://eb4on56qvm05" path="res://assets/ui/Ellipse 115.png" id="3_cm4sc"]
 [ext_resource type="Script" uid="uid://b1lbens1ur17i" path="res://scripts/ui/night_character_portrait.gd" id="3_portrait"]
 [ext_resource type="Texture2D" uid="uid://biw0f3wxnqss1" path="res://assets/characters/Where Do You Belong_/NPC1.png" id="4_placeholder_character"]
 [ext_resource type="Shader" uid="uid://ctysxm3p1qb82" path="res://shaders/night_station_pin_portrait.gdshader" id="5_portrait_shader"]
@@ -39,9 +39,9 @@ unique_name_in_owner = true
 editor_description = "Circular upper-body portrait inside the pin head. Adjust these offsets to tune its framing while keeping the red pin artwork behind it."
 material = SubResource("PortraitCircleMaterial")
 layout_mode = 0
-offset_top = 3.0
+offset_top = 2.0
 offset_right = 43.0
-offset_bottom = 44.0
+offset_bottom = 43.0
 mouse_filter = 2
 texture = ExtResource("3_cm4sc")
 expand_mode = 1
@@ -54,9 +54,9 @@ editor_description = "Circular upper-body portrait inside the pin head. Adjust t
 material = SubResource("PortraitCircleMaterial")
 layout_mode = 0
 offset_left = 7.0
-offset_top = 9.0
-offset_right = 38.0
-offset_bottom = 41.0
+offset_top = 10.0
+offset_right = 37.0
+offset_bottom = 42.0
 mouse_filter = 2
 texture = SubResource("PlaceholderUpperBody")
 expand_mode = 1

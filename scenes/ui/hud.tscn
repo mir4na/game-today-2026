@@ -16,14 +16,18 @@
 [ext_resource type="Shader" uid="uid://ce1bimgy548dk" path="res://shaders/clock_progress_fill.gdshader" id="16_clock_fill_shader"]
 [ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="17_clock_font"]
 [ext_resource type="Material" path="res://resources/materials/hud_black_outline.tres" id="18_hud_outline"]
-[ext_resource type="PackedScene" path="res://scenes/ui/night_market_item_slot.tscn" id="19_market_slot"]
+[ext_resource type="PackedScene" uid="uid://b4nkn6n7jlvt2" path="res://scenes/ui/night_market_item_slot.tscn" id="19_market_slot"]
 [ext_resource type="Shader" uid="uid://b7v5jwqdcye4y" path="res://shaders/ui_texture_outline.gdshader" id="20_4mi7y"]
 [ext_resource type="Texture2D" uid="uid://2mae3aagu2ei" path="res://assets/nightmarket/Item_Audit.png" id="20_veil_note_item"]
 [ext_resource type="Texture2D" uid="uid://t3ymikc81x7u" path="res://assets/nightmarket/Item_Radar.png" id="21_radar_item"]
 [ext_resource type="Texture2D" uid="uid://bi2b0di5uipvm" path="res://assets/nightmarket/Item_Switft.png" id="22_swift_item"]
 [ext_resource type="Texture2D" uid="uid://d11pgqc341s0t" path="res://assets/ui/guidebook/Group 136.png" id="23_guidebook_button"]
-[ext_resource type="Script" path="res://scripts/ui/hover_scale_button.gd" id="24_hover"]
+[ext_resource type="Script" uid="uid://fgch1jgxeocf" path="res://scripts/ui/hover_scale_button.gd" id="24_hover"]
+[ext_resource type="Texture2D" uid="uid://bgnv4augyfqgi" path="res://assets/ui/Group 189.png" id="25_d5po8"]
 [ext_resource type="Texture2D" uid="uid://c5h8v2fd1x4ld" path="res://assets/ui/Group 176.png" id="25_service_action"]
+[ext_resource type="Texture2D" uid="uid://bq4haoh2g5ewe" path="res://assets/ui/Group 188 (1).png" id="26_7yoph"]
+[ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="26_qmm8d"]
+[ext_resource type="Texture2D" uid="uid://dluipv7wt56w1" path="res://assets/ui/Group 43.png" id="28_t0png"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_clock_fill"]
 resource_local_to_scene = true
@@ -32,22 +36,8 @@ shader_parameter/progress = 0.0
 shader_parameter/edge_softness = 0.003
 shader_parameter/fill_origin = Vector2(0.477, 1)
 
-[sub_resource type="StyleBoxEmpty" id="GuidebookButtonTransparent"]
-
 [sub_resource type="StyleBoxFlat" id="DebugSkipNormal"]
 bg_color = Color(0.52549, 0.45098, 0.356863, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.239216, 0.2, 0.184314, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="DebugSkipHover"]
-bg_color = Color(0.615686, 0.52549, 0.411765, 1)
 border_width_left = 3
 border_width_top = 3
 border_width_right = 3
@@ -70,19 +60,33 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_pkwgd"]
+[sub_resource type="StyleBoxFlat" id="DebugSkipHover"]
+bg_color = Color(0.615686, 0.52549, 0.411765, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.239216, 0.2, 0.184314, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxEmpty" id="GuidebookButtonTransparent"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qmm8d"]
 resource_local_to_scene = true
 shader = ExtResource("20_4mi7y")
 shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
 shader_parameter/outline_size = 9.0
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_d5po8"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t0png"]
 resource_local_to_scene = true
 shader = ExtResource("20_4mi7y")
 shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
 shader_parameter/outline_size = 9.0
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_7yoph"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_b6swc"]
 resource_local_to_scene = true
 shader = ExtResource("20_4mi7y")
 shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
@@ -122,8 +126,9 @@ unique_name_in_owner = true
 editor_description = "2.25x scene-authored minimap, enlarged 1.5x from its previous scale. Its right-edge pivot keeps it aligned to the top-right screen margin."
 layout_mode = 0
 offset_left = 45.0
+offset_top = 18.0
 offset_right = 269.0
-offset_bottom = 27.0
+offset_bottom = 45.0
 scale = Vector2(2.25, 2.25)
 pivot_offset = Vector2(224, 0)
 
@@ -131,10 +136,10 @@ pivot_offset = Vector2(224, 0)
 unique_name_in_owner = true
 editor_description = "Passive run status, independent from the minimap and side action buttons."
 layout_mode = 1
-offset_left = 28.0
-offset_top = 24.0
-offset_right = 260.0
-offset_bottom = 76.0
+offset_left = 117.0
+offset_top = -173.0
+offset_right = 349.0
+offset_bottom = -121.0
 theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.55)
 theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.92)
@@ -145,23 +150,24 @@ theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 14
 text = "BLESSINGS 0"
 
-[node name="DebugNightButton" type="Button" parent="Root"]
+[node name="DebugNightButton" type="Button" parent="Root" unique_id=2040065380]
 unique_name_in_owner = true
 editor_description = "Temporary scene-authored shortcut for testing Night Shift. Hide or remove this node when the debug shortcut is no longer needed."
 layout_mode = 1
-offset_left = 28.0
-offset_top = 78.0
-offset_right = 224.0
-offset_bottom = 120.0
+offset_left = 10.0
+offset_top = 146.0
+offset_right = 206.0
+offset_bottom = 188.0
+tooltip_text = "Skip daylight and enter Night Shift"
 focus_mode = 0
 mouse_default_cursor_shape = 2
 theme_override_font_sizes/font_size = 14
 text = "TEMP: NIGHT SHIFT"
-tooltip_text = "Skip daylight and enter Night Shift"
 script = ExtResource("24_hover")
 
 [node name="MaintenanceTrackers" type="Control" parent="Root" unique_id=527339909]
 editor_description = "Off-screen minigame pointers. The high Z index keeps these above the Night Market item bar."
+visible = false
 z_index = 200
 layout_mode = 1
 anchors_preset = 15
@@ -241,13 +247,13 @@ mouse_filter = 2
 texture = ExtResource("5_dialogue_pointer")
 expand_mode = 1
 
-[node name="RouteBriefingBanner" type="Control" parent="Root"]
+[node name="RouteBriefingBanner" type="Control" parent="Root" unique_id=1073353751]
 unique_name_in_owner = true
 editor_description = "Centered departure notification made from the complete Clock_Sign asset. Its two hanging rods settle flush against the top screen edge."
-z_index = 60
 visible = false
+z_index = 60
 layout_mode = 1
-anchors_preset = 1
+anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -210.0
@@ -258,7 +264,7 @@ grow_horizontal = 2
 pivot_offset = Vector2(210, 0)
 mouse_filter = 2
 
-[node name="SignOutline" type="TextureRect" parent="Root/RouteBriefingBanner"]
+[node name="SignOutline" type="TextureRect" parent="Root/RouteBriefingBanner" unique_id=687058542]
 modulate = Color(0.0156863, 0.0196078, 0.027451, 0.94)
 layout_mode = 0
 offset_left = -4.0
@@ -270,7 +276,7 @@ texture = ExtResource("7_clock_sign")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Sign" type="TextureRect" parent="Root/RouteBriefingBanner"]
+[node name="Sign" type="TextureRect" parent="Root/RouteBriefingBanner" unique_id=291326733]
 layout_mode = 0
 offset_right = 420.0
 offset_bottom = 163.62
@@ -279,7 +285,7 @@ texture = ExtResource("7_clock_sign")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Title" type="Label" parent="Root/RouteBriefingBanner"]
+[node name="Title" type="Label" parent="Root/RouteBriefingBanner" unique_id=490030586]
 layout_mode = 0
 offset_left = 35.0
 offset_top = 66.0
@@ -292,7 +298,7 @@ text = "NEXT STOP"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="BriefingNextStopLabel" type="Label" parent="Root/RouteBriefingBanner"]
+[node name="BriefingNextStopLabel" type="Label" parent="Root/RouteBriefingBanner" unique_id=1433648546]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 18.0
@@ -496,15 +502,43 @@ mouse_filter = 2
 texture = ExtResource("15_clock_night")
 expand_mode = 1
 
-[node name="ClockHoverArea" type="Control" parent="Root/ClockPanel"]
+[node name="ClockHoverArea" type="Control" parent="Root/ClockPanel" unique_id=1282893736]
 unique_name_in_owner = true
 editor_description = "Hover hitbox for the dial, revealed destination sign, and attached debug skip sign."
-layout_mode = 0
+anchors_preset = 0
 offset_left = -18.0
 offset_top = -12.0
 offset_right = 512.0
 offset_bottom = 480.0
 mouse_default_cursor_shape = 2
+
+[node name="DebugNextStationButton" type="Button" parent="Root/ClockPanel" unique_id=2012593223]
+unique_name_in_owner = true
+editor_description = "Debug-only station skip attached to the right edge of the Next Stop sign. The flat box samples Clock_Sign's #86735B panel color."
+visible = false
+z_index = 40
+layout_mode = 0
+offset_left = 338.0
+offset_top = 196.0
+offset_right = 494.0
+offset_bottom = 251.0
+pivot_offset = Vector2(78, 30.5)
+tooltip_text = "Debug only: trigger the normal arrival flow"
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.94, 0.94, 0.94, 1)
+theme_override_colors/font_pressed_color = Color(0.901961, 0.847059, 0.741176, 1)
+theme_override_colors/font_hover_color = Color(1, 0.968627, 0.870588, 1)
+theme_override_colors/font_outline_color = Color(0.22, 0.18, 0.17, 0.28)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("17_clock_font")
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("DebugSkipNormal")
+theme_override_styles/pressed = SubResource("DebugSkipPressed")
+theme_override_styles/hover = SubResource("DebugSkipHover")
+text = "SKIP STOP"
+script = ExtResource("24_hover")
+hover_scale = 1.06
 
 [node name="GuidebookButton" type="Button" parent="Root" unique_id=1411831653]
 unique_name_in_owner = true
@@ -533,54 +567,9 @@ icon = ExtResource("23_guidebook_button")
 expand_icon = true
 script = ExtResource("24_hover")
 
-[node name="ServiceActionButton" type="Button" parent="Root" unique_id=1388490062]
-unique_name_in_owner = true
-editor_description = "Scene-authored service action above Guidebook. During the day it opens the sign-off trace; at night it opens the station-path ledger."
-visible = false
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = -263.0
-offset_right = 132.0
-offset_bottom = -155.0
-grow_vertical = 0
-tooltip_text = ""
-focus_mode = 0
-mouse_default_cursor_shape = 2
-theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
-theme_override_colors/icon_pressed_color = Color(0.82, 0.82, 0.86, 1)
-theme_override_colors/icon_hover_color = Color(1.08, 1.08, 1.08, 1)
-theme_override_colors/icon_disabled_color = Color(0.45, 0.45, 0.5, 0.72)
-theme_override_styles/normal = SubResource("GuidebookButtonTransparent")
-theme_override_styles/pressed = SubResource("GuidebookButtonTransparent")
-theme_override_styles/hover = SubResource("GuidebookButtonTransparent")
-theme_override_styles/disabled = SubResource("GuidebookButtonTransparent")
-icon = ExtResource("25_service_action")
-expand_icon = true
-script = ExtResource("24_hover")
-
-[node name="ServiceActionOutline" type="TextureRect" parent="Root/ServiceActionButton"]
-show_behind_parent = true
+[node name="GuidebookOutline" type="TextureRect" parent="Root/GuidebookButton" unique_id=1893492123]
 self_modulate = Color(0.015, 0.018, 0.024, 0.98)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -3.0
-offset_top = -3.0
-offset_right = 3.0
-offset_bottom = 3.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("25_service_action")
-expand_mode = 1
-
-[node name="GuidebookOutline" type="TextureRect" parent="Root/GuidebookButton"]
 show_behind_parent = true
-self_modulate = Color(0.015, 0.018, 0.024, 0.98)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -595,7 +584,51 @@ mouse_filter = 2
 texture = ExtResource("23_guidebook_button")
 expand_mode = 1
 
-[node name="MarketItemBar" type="VBoxContainer" parent="Root" unique_id=258053490]
+[node name="ServiceActionButton" type="Button" parent="Root" unique_id=1388490062]
+unique_name_in_owner = true
+editor_description = "Scene-authored service action above Guidebook. During the day it opens the sign-off trace; at night it opens the station-path ledger."
+visible = false
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -263.0
+offset_right = 132.0
+offset_bottom = -155.0
+grow_vertical = 0
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(0.82, 0.82, 0.86, 1)
+theme_override_colors/icon_hover_color = Color(1.08, 1.08, 1.08, 1)
+theme_override_colors/icon_disabled_color = Color(0.45, 0.45, 0.5, 0.72)
+theme_override_styles/normal = SubResource("GuidebookButtonTransparent")
+theme_override_styles/pressed = SubResource("GuidebookButtonTransparent")
+theme_override_styles/hover = SubResource("GuidebookButtonTransparent")
+theme_override_styles/disabled = SubResource("GuidebookButtonTransparent")
+icon = ExtResource("25_service_action")
+expand_icon = true
+script = ExtResource("24_hover")
+
+[node name="ServiceActionOutline" type="TextureRect" parent="Root/ServiceActionButton" unique_id=1782019830]
+self_modulate = Color(0.015, 0.018, 0.024, 0.98)
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -3.0
+offset_top = -3.0
+offset_right = 3.0
+offset_bottom = 3.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("25_service_action")
+expand_mode = 1
+
+[node name="MarketItemBar" type="HBoxContainer" parent="Root" unique_id=505008182]
 unique_name_in_owner = true
 editor_description = "Scene-authored Night Market inventory. Slots appear only while their item is owned; shortcut numbers stay hidden from the HUD."
 layout_mode = 1
@@ -604,10 +637,10 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -112.0
-offset_top = -142.0
-offset_right = -24.0
-offset_bottom = 142.0
+offset_left = -496.0
+offset_top = 250.0
+offset_right = -212.0
+offset_bottom = 345.0
 grow_horizontal = 0
 grow_vertical = 2
 theme_override_constants/separation = 10
@@ -618,9 +651,22 @@ layout_mode = 2
 tool_id = &"veil_note"
 item_name = "Veil Note — reveal one additional Night Shift statement"
 
-[node name="Icon" parent="Root/MarketItemBar/VeilNoteSlot" index="1"]
-material = SubResource("ShaderMaterial_pkwgd")
+[node name="Background" parent="Root/MarketItemBar/VeilNoteSlot" index="0" unique_id=1812476632]
+material = SubResource("ShaderMaterial_qmm8d")
+
+[node name="ItemButton" parent="Root/MarketItemBar/VeilNoteSlot" index="1" unique_id=1460274364]
+offset_left = -11.0
+offset_right = -11.0
+
+[node name="Icon" parent="Root/MarketItemBar/VeilNoteSlot" index="2" unique_id=771861680]
+material = SubResource("ShaderMaterial_qmm8d")
+offset_left = -7.0
+offset_right = 73.0
 texture = ExtResource("20_veil_note_item")
+
+[node name="AmountLabel" parent="Root/MarketItemBar/VeilNoteSlot" index="3" unique_id=1619402339]
+offset_left = 33.0
+offset_right = 81.0
 
 [node name="RadarSlot" parent="Root/MarketItemBar" unique_id=943347102 instance=ExtResource("19_market_slot")]
 unique_name_in_owner = true
@@ -628,8 +674,11 @@ layout_mode = 2
 tool_id = &"radar_charge"
 item_name = "Carriage Radar"
 
-[node name="Icon" parent="Root/MarketItemBar/RadarSlot" index="1"]
-material = SubResource("ShaderMaterial_d5po8")
+[node name="Background" parent="Root/MarketItemBar/RadarSlot" index="0" unique_id=1812476632]
+material = SubResource("ShaderMaterial_t0png")
+
+[node name="Icon" parent="Root/MarketItemBar/RadarSlot" index="2" unique_id=771861680]
+material = SubResource("ShaderMaterial_t0png")
 texture = ExtResource("21_radar_item")
 
 [node name="SwiftSlot" parent="Root/MarketItemBar" unique_id=2093275063 instance=ExtResource("19_market_slot")]
@@ -637,39 +686,13 @@ unique_name_in_owner = true
 layout_mode = 2
 tool_id = &"swiftstep"
 item_name = "Swiftstep Soles"
-amount_template = "×%d"
 
-[node name="Icon" parent="Root/MarketItemBar/SwiftSlot" index="1"]
-material = SubResource("ShaderMaterial_7yoph")
+[node name="Background" parent="Root/MarketItemBar/SwiftSlot" index="0" unique_id=1812476632]
+material = SubResource("ShaderMaterial_b6swc")
+
+[node name="Icon" parent="Root/MarketItemBar/SwiftSlot" index="2" unique_id=771861680]
+material = SubResource("ShaderMaterial_b6swc")
 texture = ExtResource("22_swift_item")
-
-[node name="DebugNextStationButton" type="Button" parent="Root/ClockPanel"]
-unique_name_in_owner = true
-editor_description = "Debug-only station skip attached to the right edge of the Next Stop sign. The flat box samples Clock_Sign's #86735B panel color."
-visible = false
-z_index = 40
-layout_mode = 0
-offset_left = 338.0
-offset_top = 196.0
-offset_right = 494.0
-offset_bottom = 251.0
-pivot_offset = Vector2(78, 30.5)
-tooltip_text = "Debug only: trigger the normal arrival flow"
-focus_mode = 0
-mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.94, 0.94, 0.94, 1)
-theme_override_colors/font_hover_color = Color(1, 0.968627, 0.870588, 1)
-theme_override_colors/font_pressed_color = Color(0.901961, 0.847059, 0.741176, 1)
-theme_override_colors/font_outline_color = Color(0.22, 0.18, 0.17, 0.28)
-theme_override_constants/outline_size = 2
-theme_override_fonts/font = ExtResource("17_clock_font")
-theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("DebugSkipNormal")
-theme_override_styles/pressed = SubResource("DebugSkipPressed")
-theme_override_styles/hover = SubResource("DebugSkipHover")
-text = "SKIP STOP"
-script = ExtResource("24_hover")
-hover_scale = 1.06
 
 [node name="NotificationPanel" type="PanelContainer" parent="Root" unique_id=1320290712]
 unique_name_in_owner = true
@@ -691,23 +714,69 @@ theme_override_styles/panel = SubResource("NotificationTextOnlyStyle")
 [node name="NotificationLabel" type="Label" parent="Root/NotificationPanel" unique_id=2128017887]
 unique_name_in_owner = true
 layout_mode = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.972549, 0.890196, 0.713726, 1)
-theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.96)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.72)
-theme_override_constants/outline_size = 6
+theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.96)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 3
+theme_override_constants/outline_size = 6
 theme_override_fonts/font = ExtResource("17_clock_font")
 theme_override_font_sizes/font_size = 23
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
 
-[connection signal="pressed" from="Root/GuidebookButton" to="." method="_on_guidebook_button_pressed"]
-[connection signal="pressed" from="Root/ServiceActionButton" to="." method="_on_service_action_button_pressed"]
+[node name="DayTexture" type="TextureRect" parent="." unique_id=213970348]
+offset_top = 32.999996
+offset_right = 418.5714
+offset_bottom = 159.0
+scale = Vector2(0.7, 0.7)
+texture = ExtResource("25_d5po8")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="DayTexture" unique_id=522932358]
+layout_mode = 0
+offset_left = 162.85725
+offset_top = 9.999977
+offset_right = 361.85724
+offset_bottom = 110.99998
+theme_override_colors/font_color = Color(0.92941177, 0.89411765, 0.85490197, 1)
+theme_override_fonts/font = ExtResource("26_qmm8d")
+theme_override_font_sizes/font_size = 84
+text = "Day 1"
+
+[node name="BlessingTexture" type="TextureRect" parent="." unique_id=2100582662]
+offset_left = 309.00003
+offset_top = 57.0
+offset_right = 544.71423
+offset_bottom = 149.0
+scale = Vector2(0.7, 0.7)
+texture = ExtResource("26_7yoph")
+
+[node name="Label" type="Label" parent="BlessingTexture" unique_id=188150663]
+layout_mode = 0
+offset_left = 87.14283
+offset_top = 27.142857
+offset_right = 412.14282
+offset_bottom = 128.14285
+scale = Vector2(0.4, 0.4)
+theme_override_colors/font_color = Color(0.9098039, 0.7764706, 0.35686275, 1)
+theme_override_fonts/font = ExtResource("26_qmm8d")
+theme_override_font_sizes/font_size = 84
+text = "200/300"
+
+[node name="TextureRect" type="TextureRect" parent="BlessingTexture" unique_id=1158321824]
+layout_mode = 0
+offset_left = 9.999977
+offset_top = 4.2857113
+offset_right = 93.99998
+offset_bottom = 88.28571
+texture = ExtResource("28_t0png")
+
 [connection signal="pressed" from="Root/DebugNightButton" to="." method="_on_debug_night_button_pressed"]
 [connection signal="pressed" from="Root/ClockPanel/DebugNextStationButton" to="." method="_on_debug_next_station_button_pressed"]
+[connection signal="pressed" from="Root/GuidebookButton" to="." method="_on_guidebook_button_pressed"]
+[connection signal="pressed" from="Root/ServiceActionButton" to="." method="_on_service_action_button_pressed"]
 [connection signal="tool_requested" from="Root/MarketItemBar/VeilNoteSlot" to="." method="_on_market_item_requested"]
 [connection signal="tool_requested" from="Root/MarketItemBar/RadarSlot" to="." method="_on_market_item_requested"]
 [connection signal="tool_requested" from="Root/MarketItemBar/SwiftSlot" to="." method="_on_market_item_requested"]
