@@ -13,7 +13,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export var manifest_config: DailyManifestConfig
 @export_category("Day Progression")
 @export_range(1, 5, 1) var day_number: int = 1
-@export var day_pass_targets: PackedInt32Array = PackedInt32Array([100, 120, 140, 160, 180])
+@export var day_pass_targets: PackedInt32Array = PackedInt32Array([300, 350, 400, 450, 500])
 @export_category("Day Route")
 @export var day_route: PackedStringArray
 @export_category("Station Service")
@@ -57,7 +57,7 @@ const SERVICE_FULL_NIGHT_PROGRESS: float = 0.98
 const BLOOM_SUNSET_BLEND_START_PROGRESS: float = 0.38
 const TOOL_VEIL_NOTE: StringName = &"veil_note"
 const TOOL_RADAR_CHARGE: StringName = &"radar_charge"
-const TOOL_SPEED_UPGRADE: StringName = &"speed_upgrade"
+const TOOL_SWIFTSTEP: StringName = &"swiftstep"
 
 var state: GameState = GameState.OPENING
 var _day_minutes: float = START_MINUTES
@@ -97,7 +97,6 @@ var _station_cutscene_timeline_complete: bool = false
 var _station_camera_return_complete: bool = false
 var _station_cutscene_motion_strength: float = 1.0
 var _station_gameplay_actors_hidden: bool = false
-var _station_player_world_position: Vector2
 var _station_foreground_hidden: bool = false
 var _station_railroad_was_visible: bool = true
 var _train_occupants_station_rest_position: Vector2
@@ -1694,7 +1693,6 @@ func _hide_gameplay_actors_for_station_cutscene() -> void:
 		return
 	# TrainOccupants follows the same station offset as Cars. Physics stays off so
 	# the hidden MC cannot react to moving floor collision during the cutscene.
-	_station_player_world_position = _player.global_position
 	_player.velocity = Vector2.ZERO
 	_player.set_physics_process(false)
 	_player.hide()
@@ -1724,7 +1722,10 @@ func _restore_gameplay_actors_after_station_cutscene() -> void:
 		_player.show()
 		_passenger_container.show()
 		return
-	_player.global_position = _station_player_world_position
+	# TrainOccupants follows the exterior train during the cinematic. The player
+	# stayed still in local space while physics was disabled, so restoring the
+	# old global coordinate here would counteract that parent motion and cause a
+	# visible final camera correction as gameplay takes over.
 	_player.velocity = Vector2.ZERO
 	_player.set_physics_process(true)
 	_player.show()
@@ -1787,6 +1788,8 @@ func _on_station_cutscene_skip_requested() -> void:
 func _on_station_cinematic_camera_handoff_finished() -> void:
 	_station_camera_return_complete = true
 	_station_stop_ui.confirm_camera_return_complete()
+	if state == GameState.NIGHT_TRANSITION:
+		_night_transition_ui.notify_camera_return_completed()
 	_try_complete_station_cutscene()
 
 
@@ -2071,7 +2074,7 @@ func _on_market_tool_requested(tool_id: StringName) -> void:
 		TOOL_RADAR_CHARGE:
 			if not _radar_scan_active:
 				_use_carriage_radar()
-		TOOL_SPEED_UPGRADE:
+		TOOL_SWIFTSTEP:
 			_use_swiftstep()
 
 func _on_modal_closed() -> void:
@@ -2192,10 +2195,24 @@ func _on_night_transition_camera_return_requested() -> void:
 	_night_transition_camera_return_requested = true
 	_station_camera_return_complete = false
 	_station_cinematic_view.return_to_gameplay()
+	# Debug previews and isolated test routes can enter the transition without a
+	# stopped station camera beneath them. In that case there is no exterior
+	# handoff to await, so let the staged transition continue immediately.
+	if not _station_cinematic_view.has_active_camera_handoff():
+		_station_camera_return_complete = true
+		_night_transition_ui.notify_camera_return_completed()
 
 
 func _on_night_transition_veil_crossed() -> void:
 	_prepare_night_world()
+
+
+func _on_night_transition_whiteout_reached() -> void:
+	if state != GameState.NIGHT_TRANSITION:
+		return
+	# The market belongs inside the whiteout. The player never sees the night
+	# world swap; it is prepared behind the veil while the market is open.
+	_open_night_market()
 
 
 func _on_night_transition_finished() -> void:
@@ -2203,7 +2220,10 @@ func _on_night_transition_finished() -> void:
 		return
 	_active_modal = null
 	_finish_terminal_night_transition_world()
-	_open_night_market()
+	_enter_night(false, false)
+	_hud.set_cutscene_hidden(false)
+	_hud.notify(night_shift_instruction, 5.0)
+	_set_player_control_for_state()
 
 
 func _finish_terminal_night_transition_world() -> void:
@@ -2221,9 +2241,8 @@ func _finish_terminal_night_transition_world() -> void:
 
 
 func _open_night_market() -> void:
-	# The market opens only after the train has crossed the veil and the camera has
-	# completed its return to the night-time gameplay composition.
-	_set_train_stopped_for_night_transition()
+	# The market appears while the transition is still a full white screen. This
+	# keeps the world conversion and camera handoff hidden behind the veil.
 	state = GameState.MARKET
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
@@ -2250,21 +2269,19 @@ func _on_market_purchase_requested(tool_id: StringName) -> void:
 func _on_night_market_continue() -> void:
 	if state != GameState.MARKET:
 		return
-	# The market closes over fog. Reveal the already prepared night carriage,
-	# then restore input only after the fog has cleared.
-	_enter_night(false, false)
+	# Market fog clears back to the frozen white transition. Hold there briefly,
+	# then let the cutscene reveal the prepared night carriage and camera.
+	state = GameState.NIGHT_TRANSITION
+	_active_modal = _night_transition_ui
 	_night_market_ui.call(&"release_transition_fog")
 	var fog_release_seconds: float = maxf(
 		float(_night_market_ui.get("transition_fog_release_duration")),
 		0.05
 	)
 	await get_tree().create_timer(fog_release_seconds, false).timeout
-	if state != GameState.NIGHT:
+	if state != GameState.NIGHT_TRANSITION:
 		return
-	_active_modal = null
-	_hud.set_cutscene_hidden(false)
-	_hud.notify(night_shift_instruction, 5.0)
-	_set_player_control_for_state()
+	_night_transition_ui.resume_after_market()
 
 
 func _on_market_inventory_changed(snapshot: Dictionary) -> void:
@@ -2312,17 +2329,19 @@ func _on_veil_note_reveal_finished() -> void:
 
 func _use_swiftstep() -> void:
 	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
-	var speed_level: int = int(snapshot.get("speed_level", 0))
-	if speed_level <= 0:
+	var swift_charges: int = int(snapshot.get("swift_charges", 0))
+	if swift_charges <= 0:
 		_hud.notify("NO SWIFTSTEP SOLES OWNED", 2.5)
 		return
 	if _swiftstep_active:
 		_hud.notify("SWIFTSTEP IS ALREADY BENDING TIME", 2.0)
 		return
+	if not bool(_market_tool_state.call(&"consume_swift_charge")):
+		return
 	_swiftstep_active = true
 	GameSFX.play(&"time_warp", -5.0, 1.0, 0.02, 0.3)
 	_hud.set_swiftstep_active(true)
-	var next_time_scale: float = float(_swiftstep_effect_ui.call(&"activate", _player, speed_level))
+	var next_time_scale: float = float(_swiftstep_effect_ui.call(&"activate", _player))
 	_set_world_time_scale(next_time_scale)
 	_hud.notify(
 		"SWIFTSTEP SOLES ACTIVE\nTHE WORLD YIELDS FOR 15 SECONDS",

@@ -589,9 +589,9 @@ texture = ExtResource("21_radar_item")
 [node name="SwiftSlot" parent="Root/MarketItemBar" unique_id=2093275063 instance=ExtResource("19_market_slot")]
 unique_name_in_owner = true
 layout_mode = 2
-tool_id = &"speed_upgrade"
+tool_id = &"swiftstep"
 item_name = "Swiftstep Soles"
-amount_template = "LV.%d"
+amount_template = "×%d"
 
 [node name="Icon" parent="Root/MarketItemBar/SwiftSlot" index="1"]
 material = SubResource("ShaderMaterial_7yoph")

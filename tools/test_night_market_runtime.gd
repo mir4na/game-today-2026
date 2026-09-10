@@ -15,11 +15,12 @@ func _run() -> void:
 		"blessings": 100,
 		"veil_notes": 0,
 		"radar_charges": 2,
-		"speed_level": 0,
-		"speed_max_level": 3,
-		"veil_note_cost": 3,
-		"radar_charge_cost": 4,
-		"speed_upgrade_cost": 6,
+		"radar_max_charges": 3,
+		"swift_charges": 1,
+		"swift_max_charges": 3,
+		"veil_note_cost": 90,
+		"radar_charge_cost": 45,
+		"swift_charge_cost": 75,
 	}
 	market.open_market(snapshot, {"earned": 120, "dropoff_reward": 180, "penalty_deduction": 60})
 	await create_timer(0.3).timeout

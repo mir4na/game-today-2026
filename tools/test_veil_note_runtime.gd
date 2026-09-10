@@ -23,18 +23,26 @@ func _run() -> void:
 	var market := MarketScene.instantiate() as MarketToolState
 	root.add_child(market)
 	market.restore_shift_inventory({
-		"blessings": 10,
+		"blessings": 1000,
 		"veil_notes": 1,
 		"radar_charges": 0,
-		"speed_level": 1,
+		"swift_charges": 1,
 	})
 	var result: Dictionary = market.purchase(&"veil_note")
-	_check(not bool(result.success) and market.blessings == 10, "An owned Veil Note must block purchase before spending Blessings.")
+	_check(not bool(result.success) and market.blessings == 1000, "An owned Veil Note must block purchase before spending Blessings.")
 	_check(market.consume_veil_note() and market.veil_notes == 0, "Opening the Veil Note must consume its single stock.")
 	result = market.purchase(&"veil_note")
-	_check(bool(result.success) and market.veil_notes == 1 and market.blessings == 7, "An empty slot may buy exactly one Veil Note.")
+	_check(bool(result.success) and market.veil_notes == 1 and market.blessings == 910, "An empty slot may buy exactly one Veil Note.")
 	result = market.purchase(&"veil_note")
-	_check(not bool(result.success) and market.blessings == 7, "Repeated purchases must remain blocked at capacity one.")
+	_check(not bool(result.success) and market.blessings == 910, "Repeated purchases must remain blocked at capacity one.")
+	market.restore_shift_inventory({"blessings": 1000, "veil_notes": 0, "radar_charges": 0, "swift_charges": 0})
+	for _charge: int in 3:
+		_check(bool(market.purchase(&"radar_charge").success), "Radar charges must be purchasable until the case reaches three.")
+	_check(market.radar_charges == 3 and not bool(market.purchase(&"radar_charge").success), "Radar stock must stop at three charges.")
+	for _charge: int in 3:
+		_check(bool(market.purchase(&"swiftstep").success), "Swiftstep charges must be purchasable until the case reaches three.")
+	_check(market.swift_charges == 3 and not bool(market.purchase(&"swiftstep").success), "Swiftstep stock must stop at three charges.")
+	_check(market.consume_swift_charge() and market.swift_charges == 2, "Using Swiftstep must consume exactly one charge.")
 	market.restore_shift_inventory({"blessings": 0, "audit_slips": 8})
 	_check(market.veil_notes == 1, "Legacy Audit Slip saves must migrate into one Veil Note.")
 	market.free()
@@ -69,7 +77,7 @@ func _run() -> void:
 		"blessings": 0,
 		"veil_notes": 1,
 		"radar_charges": 0,
-		"speed_level": 1,
+		"swift_charges": 1,
 	})
 	game._on_market_tool_requested(&"veil_note")
 	_check(game._market_tool_state.veil_notes == 1, "Veil Note activation must be rejected during Day Shift.")

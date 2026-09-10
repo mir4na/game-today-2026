@@ -638,11 +638,17 @@ func _update_exchange_actors() -> void:
 		)
 		var platform_position: Vector2 = _profile_platform_position(door_position, profile)
 		var actor_position: Vector2 = _station_walk_position(door_position, platform_position, progress, profile, false)
+		# A passenger who has left the carriage becomes part of the platform flow.
+		# Do not leave the walk animation playing at a fixed destination while the
+		# train is still in the station shot.
+		if progress >= 1.0:
+			var time_since_exit: float = maxf(_elapsed - start_time - walk_duration, 0.0)
+			actor_position = _departing_platform_flow_position(platform_position, time_since_exit, profile)
 		_set_actor_slot(
 			actor_index,
 			_departing_actors[actor_index],
 			actor_position,
-			_walk_rotation(progress, profile),
+			_walk_rotation(progress + maxf(_elapsed - start_time - walk_duration, 0.0), profile),
 			float(profile["side"]),
 			_smoothstep(0.08, doorway_step_ratio, progress) * _station_environment_alpha,
 			1.0,
@@ -852,7 +858,9 @@ func _station_walk_position(door_position: Vector2, platform_position: Vector2, 
 		-side * doorway_inside_horizontal_offset,
 		-doorway_inside_vertical_offset
 	)
-	var pause_duration: float = minf(doorway_pause_ratio, 1.0 - doorway_step_ratio)
+	# Boarding has a brief threshold beat before the handoff inside the coach.
+	# Departing souls keep moving so they never appear stuck in the doorway.
+	var pause_duration: float = minf(doorway_pause_ratio, 1.0 - doorway_step_ratio) if boarding else 0.0
 	if boarding:
 		var approach_end: float = maxf(1.0 - doorway_step_ratio - pause_duration, 0.01)
 		if clamped_progress < approach_end:
@@ -871,6 +879,15 @@ func _station_walk_position(door_position: Vector2, platform_position: Vector2, 
 		return landing_position
 	var platform_progress: float = inverse_lerp(doorway_step_ratio + pause_duration, 1.0, clamped_progress)
 	return _platform_walk_position(landing_position, platform_position, _ease_in_out_sine(platform_progress), profile)
+
+
+func _departing_platform_flow_position(platform_position: Vector2, elapsed: float, profile: Dictionary) -> Vector2:
+	var direction: float = float(profile["side"])
+	var walk_distance: float = elapsed * 135.0
+	var position := platform_position + Vector2(direction * walk_distance, 0.0)
+	var stride: float = abs(sin(elapsed * 7.0 + float(profile["walk_phase"])))
+	position.y -= stride * float(profile["step_lift"]) * 0.45
+	return position
 
 
 func _quadratic_path(start: Vector2, control: Vector2, finish: Vector2, progress: float) -> Vector2:

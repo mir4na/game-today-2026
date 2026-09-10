@@ -6,7 +6,17 @@ signal passenger_dropped(station_name: String, passenger_name: String)
 signal selected(station_name: String)
 
 @export var station_name: String
-@export var face_token_scene: PackedScene
+@export var assignment_pin_scene: PackedScene
+@export_category("Assignment Pin Layout")
+## Positions are local to this station target. Edit these on each target
+## instance to compose the pin stack around a particular station star.
+@export var assignment_pin_offsets: PackedVector2Array = PackedVector2Array([
+	Vector2(68.0, -42.0),
+	Vector2(101.0, -42.0),
+	Vector2(35.0, -42.0),
+	Vector2(52.0, -8.0),
+	Vector2(85.0, -8.0),
+])
 @export var path_anchor_offset: Vector2 = Vector2(90.0, 94.0)
 @export_category("Validation Animation")
 @export_range(0.01, 1.0, 0.01) var pointer_pop_seconds: float = 0.11
@@ -18,8 +28,7 @@ signal selected(station_name: String)
 
 @onready var _station_label: Label = %StationLabel
 @onready var _assignment_label: Label = %AssignmentLabel
-@onready var _assignment_faces: HBoxContainer = %AssignmentFaces
-@onready var _pin: TextureRect = %Pin
+@onready var _assignment_pins: Control = %AssignmentPins
 @onready var _drop_glow: Panel = %DropGlow
 @onready var _star: TextureRect = %Star
 @onready var _validation_glow: TextureRect = %ValidationGlow
@@ -41,11 +50,12 @@ func _ready() -> void:
 
 
 func set_assignments(passenger_names: Array, passenger_data_by_name: Dictionary) -> void:
-	for child: Node in _assignment_faces.get_children():
-		_assignment_faces.remove_child(child)
+	for child: Node in _assignment_pins.get_children():
+		_assignment_pins.remove_child(child)
 		child.free()
 	var valid_names: Array[String] = []
-	for passenger_value: Variant in passenger_names:
+	for index: int in passenger_names.size():
+		var passenger_value: Variant = passenger_names[index]
 		var passenger_name: String = str(passenger_value)
 		if not passenger_data_by_name.has(passenger_name):
 			continue
@@ -53,24 +63,28 @@ func set_assignments(passenger_names: Array, passenger_data_by_name: Dictionary)
 		if data == null or data.get_character_artwork() == null:
 			continue
 		valid_names.append(passenger_name)
-		if face_token_scene == null:
+		if assignment_pin_scene == null:
 			continue
-		var token := face_token_scene.instantiate() as NightStationFaceToken
-		if token == null:
+		var pin := assignment_pin_scene.instantiate() as Control
+		if pin == null:
 			continue
-		_assignment_faces.add_child(token)
-		token.configure(passenger_name, data.get_character_artwork())
-	_assignment_faces.visible = not valid_names.is_empty()
-	# The red pin represents an assigned soul, so an untouched station remains
-	# a bare star until its first drop.
-	_pin.visible = not valid_names.is_empty()
+		_assignment_pins.add_child(pin)
+		pin.position = _get_assignment_pin_offset(valid_names.size() - 1)
+		pin.call(&"configure", passenger_name, data.get_character_artwork())
+	_assignment_pins.visible = not valid_names.is_empty()
 	if valid_names.is_empty():
 		_assignment_label.text = ""
 	elif valid_names.size() == 1:
 		_assignment_label.text = valid_names[0].to_upper()
 	else:
 		_assignment_label.text = "%d SOULS" % valid_names.size()
-	_assignment_faces.pivot_offset = _assignment_faces.size * 0.5
+	_assignment_pins.pivot_offset = size * 0.5
+
+
+func _get_assignment_pin_offset(index: int) -> Vector2:
+	if not assignment_pin_offsets.is_empty():
+		return assignment_pin_offsets[index % assignment_pin_offsets.size()]
+	return Vector2(68.0 + float(index % 3) * 33.0, -42.0 + float(index / 3) * 34.0)
 
 
 func play_validation(is_correct: bool) -> void:
@@ -78,22 +92,22 @@ func play_validation(is_correct: bool) -> void:
 		_validation_tween.kill()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_drop_glow.hide()
-	_assignment_faces.pivot_offset = _assignment_faces.size * 0.5
+	_assignment_pins.pivot_offset = size * 0.5
 	_star.pivot_offset = _star.size * 0.5
 	_validation_glow.pivot_offset = _validation_glow.size * 0.5
 
 	_validation_tween = create_tween()
 	_validation_tween.tween_property(
-		_assignment_faces, ^"scale", Vector2(1.16, 1.16), pointer_pop_seconds
+		_assignment_pins, ^"scale", Vector2(1.16, 1.16), pointer_pop_seconds
 	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_validation_tween.parallel().tween_property(
 		_assignment_label, ^"modulate:a", 0.0, pointer_pop_seconds + pointer_shrink_seconds
 	)
 	_validation_tween.tween_property(
-		_assignment_faces, ^"scale", Vector2.ZERO, pointer_shrink_seconds
+		_assignment_pins, ^"scale", Vector2.ZERO, pointer_shrink_seconds
 	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	_validation_tween.parallel().tween_property(
-		_assignment_faces, ^"modulate:a", 0.0, pointer_shrink_seconds
+		_assignment_pins, ^"modulate:a", 0.0, pointer_shrink_seconds
 	)
 	await _validation_tween.finished
 	if is_correct:
@@ -106,8 +120,8 @@ func reset_validation_visual() -> void:
 	if is_instance_valid(_validation_tween) and _validation_tween.is_valid():
 		_validation_tween.kill()
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	_assignment_faces.scale = Vector2.ONE
-	_assignment_faces.modulate = Color.WHITE
+	_assignment_pins.scale = Vector2.ONE
+	_assignment_pins.modulate = Color.WHITE
 	_assignment_label.modulate = Color.WHITE
 	_star.scale = Vector2.ONE
 	_star.modulate = Color.WHITE

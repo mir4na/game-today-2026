@@ -6,8 +6,11 @@ signal dismissed
 
 @onready var _blocked_aisle: Control = %BlockedAisle
 @onready var _clean_the_seat: Control = %CleanTheSeat
+@onready var _shade: ColorRect = $Shade
+@onready var _content: Control = $Content
 
 var _closing: bool = false
+var _opening: bool = false
 
 
 func _ready() -> void:
@@ -21,14 +24,26 @@ func show_hint(hint_id: StringName) -> void:
 		push_warning("Unknown service hint '%s'." % hint_id)
 		return
 	_closing = false
-	modulate.a = 0.0
+	_opening = true
+	modulate.a = 1.0
+	_shade.modulate.a = 0.0
+	_content.modulate.a = 0.0
+	_content.pivot_offset = _content.size * 0.5
+	_content.scale = Vector2(0.94, 0.94)
 	show()
-	var fade_in := create_tween()
-	fade_in.tween_property(self, ^"modulate:a", 1.0, 0.2).set_trans(Tween.TRANS_SINE)
+	# The dimmed world arrives first, then the instruction card settles in. This
+	# makes the Day 2/3 onboarding read as one deliberate sequence.
+	var reveal := create_tween()
+	reveal.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	reveal.tween_property(_shade, ^"modulate:a", 1.0, 0.22)
+	reveal.tween_interval(0.06)
+	reveal.tween_property(_content, ^"modulate:a", 1.0, 0.18)
+	reveal.parallel().tween_property(_content, ^"scale", Vector2.ONE, 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	reveal.tween_callback(func() -> void: _opening = false)
 
 
 func _input(event: InputEvent) -> void:
-	if not visible or _closing:
+	if not visible or _closing or _opening:
 		return
 	var should_close: bool = event is InputEventKey and event.is_pressed() and not event.is_echo()
 	if event is InputEventMouseButton:
@@ -43,8 +58,12 @@ func _input(event: InputEvent) -> void:
 func _dismiss() -> void:
 	_closing = true
 	var fade_out := create_tween()
-	fade_out.tween_property(self, ^"modulate:a", 0.0, 0.16).set_trans(Tween.TRANS_SINE)
+	fade_out.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	fade_out.tween_property(_content, ^"modulate:a", 0.0, 0.1)
+	fade_out.parallel().tween_property(_content, ^"scale", Vector2(0.96, 0.96), 0.1)
+	fade_out.tween_property(_shade, ^"modulate:a", 0.0, 0.14)
 	fade_out.tween_callback(func() -> void:
 		hide()
+		_opening = false
 		dismissed.emit()
 	)

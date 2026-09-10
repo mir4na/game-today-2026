@@ -510,6 +510,7 @@ unique_name_in_owner = true
 [connection signal="sequence_finished" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_finished"]
 [connection signal="sequence_timeline_changed" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_timeline_changed"]
 [connection signal="veil_crossed" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_veil_crossed"]
+[connection signal="whiteout_reached" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_whiteout_reached"]
 [connection signal="continue_requested" from="ModalLayer/NightMarketUI" to="." method="_on_night_market_continue"]
 [connection signal="purchase_requested" from="ModalLayer/NightMarketUI" to="." method="_on_market_purchase_requested"]
 [connection signal="closed" from="ModalLayer/NightSoulRecordUI" to="." method="_on_night_soul_record_closed"]

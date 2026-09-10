@@ -70,6 +70,11 @@ func _run() -> void:
 	_check(transition.get_node_or_null("NightTitle") == null, "The veil transition must not show a Night Service title.")
 	_check(transition.get_node_or_null("VeilSymbol") == null, "The veil transition must not show the old diamond logo.")
 	_check(
+		is_equal_approx(transition.night_reveal_hold_seconds, 1.0)
+		and is_equal_approx(transition.exterior_hold_after_zoom_seconds, 1.0),
+		"Night reveal and post-zoom exterior holds must each default to one second."
+	)
+	_check(
 		transition.station_fade_end_time <= transition.departure_start_time + 3.0,
 		"The terminal station must clear before fog starts three seconds after departure."
 	)
@@ -95,13 +100,25 @@ func _run() -> void:
 		game._station_cinematic_view._station_camera.zoom.is_equal_approx(wide_zoom),
 		"Following the departing train must preserve the station shot's wide zoom."
 	)
-	transition._process(transition.camera_return_time - transition._elapsed + 0.01)
-	_check(game._station_cinematic_view._returning, "The camera must begin its player return only after the fog clears.")
+	transition._process(transition.veil_crossing_time - transition._elapsed + 0.01)
+	_check(game.state == AfterTheEndGame.GameState.MARKET, "The full whiteout must open the Night Market.")
+	_check(not game._station_cinematic_view._returning, "The camera must remain behind the whiteout while the market is open.")
+	game.state = AfterTheEndGame.GameState.NIGHT_TRANSITION
+	transition.white_screen_hold_seconds = 0.0
+	transition.post_market_fade_seconds = 0.01
+	transition.night_reveal_hold_seconds = 0.0
+	transition.exterior_hold_after_zoom_seconds = 0.0
+	# This fixture normally freezes Main. Let the new staged camera handoff run
+	# long enough to reach its return request.
+	game.process_mode = Node.PROCESS_MODE_PAUSABLE
+	transition.resume_after_market()
+	await create_timer(0.25).timeout
+	_check(game._station_cinematic_view._returning, "The camera must begin its player return as the whiteout reveals night.")
 	_check(
 		game._station_cinematic_view._return_start_center.distance_to(
-			game._station_cinematic_view._handoff_target_position()
+			game._station_cinematic_view._station_camera.global_position
 		) < 1.0,
-		"The final player zoom must begin from the already-following camera position without a spatial jump."
+		"The final player zoom must begin from the current follow camera position without a spatial jump."
 	)
 
 	game.free()

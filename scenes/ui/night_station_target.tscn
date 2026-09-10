@@ -1,16 +1,11 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene format=3 uid="uid://dtc0qws1b8k11"]
 
-[ext_resource type="Script" path="res://scripts/ui/night_station_target.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Star 1.png" id="2_star"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Group 149.png" id="3_pin"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Rectangle 243.png" id="4_label"]
-[ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="5_font"]
-[ext_resource type="PackedScene" path="res://scenes/ui/night_station_face_token.tscn" id="6_face_token"]
-[ext_resource type="Shader" path="res://shaders/night_station_star.gdshader" id="7_star_shader"]
-
-[sub_resource type="ShaderMaterial" id="StationStarMaterial"]
-resource_local_to_scene = true
-shader = ExtResource("7_star_shader")
+[ext_resource type="Script" uid="uid://duriciv7aeqtb" path="res://scripts/ui/night_station_target.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://bf367g8ynhfyn" path="res://assets/NightShift/Star 1.png" id="2_star"]
+[ext_resource type="Texture2D" uid="uid://8m7pjm6ftjo8" path="res://assets/NightShift/Rectangle 243.png" id="4_label"]
+[ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="5_font"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_station_assignment_pin.tscn" id="6_assignment_pin"]
+[ext_resource type="Shader" uid="uid://jesdf5ee2ma2" path="res://shaders/night_station_star.gdshader" id="7_star_shader"]
 
 [sub_resource type="StyleBoxFlat" id="DropGlowStyle"]
 bg_color = Color(0.698039, 0.298039, 0.290196, 0.12)
@@ -24,11 +19,22 @@ corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
+[sub_resource type="ShaderMaterial" id="StationStarMaterial"]
+resource_local_to_scene = true
+shader = ExtResource("7_star_shader")
+shader_parameter/shimmer_strength = 0.62
+shader_parameter/shimmer_speed = 0.34
+shader_parameter/shimmer_width = 0.11
+shader_parameter/shimmer_offset = 0.0
+shader_parameter/outline_strength = 0.0
+shader_parameter/outline_size = 8.0
+shader_parameter/outline_color = Color(1, 1, 1, 1)
+
 [sub_resource type="Gradient" id="FailureGradient"]
 offsets = PackedFloat32Array(0, 0.35, 1)
 colors = PackedColorArray(1, 0.92, 0.58, 1, 1, 0.25, 0.2, 1, 0.45, 0.04, 0.08, 0)
 
-[node name="NightStationTarget" type="Control"]
+[node name="NightStationTarget" type="Control" unique_id=402256131]
 custom_minimum_size = Vector2(180, 156)
 layout_mode = 3
 anchors_preset = 0
@@ -36,13 +42,13 @@ offset_right = 180.0
 offset_bottom = 156.0
 mouse_default_cursor_shape = 2
 script = ExtResource("1")
-face_token_scene = ExtResource("6_face_token")
+assignment_pin_scene = ExtResource("6_assignment_pin")
 
-[node name="PathAnchor" type="Marker2D" parent="."]
+[node name="PathAnchor" type="Marker2D" parent="." unique_id=1230057630]
 editor_description = "Scene-authored center used by NightPathSegment. Move this marker to change where route lines meet the station star."
 position = Vector2(90, 94)
 
-[node name="DropGlow" type="Panel" parent="."]
+[node name="DropGlow" type="Panel" parent="." unique_id=2089924321]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
@@ -54,7 +60,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("DropGlowStyle")
 
-[node name="ValidationGlow" type="TextureRect" parent="."]
+[node name="ValidationGlow" type="TextureRect" parent="." unique_id=82931317]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0)
 layout_mode = 0
@@ -68,7 +74,7 @@ texture = ExtResource("2_star")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Star" type="TextureRect" parent="."]
+[node name="Star" type="TextureRect" parent="." unique_id=267792886]
 unique_name_in_owner = true
 material = SubResource("StationStarMaterial")
 layout_mode = 0
@@ -81,18 +87,17 @@ texture = ExtResource("2_star")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="FailureParticles" type="CPUParticles2D" parent="."]
+[node name="FailureParticles" type="CPUParticles2D" parent="." unique_id=816427710]
 unique_name_in_owner = true
 z_index = 12
 position = Vector2(90, 94)
 emitting = false
 amount = 30
+texture = ExtResource("2_star")
 lifetime = 0.72
 one_shot = true
 explosiveness = 1.0
 randomness = 0.36
-texture = ExtResource("2_star")
-direction = Vector2(1, 0)
 spread = 180.0
 gravity = Vector2(0, 82)
 initial_velocity_min = 72.0
@@ -103,48 +108,34 @@ scale_amount_min = 0.035
 scale_amount_max = 0.095
 color_ramp = SubResource("FailureGradient")
 
-[node name="Pin" type="TextureRect" parent="."]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 68.0
-offset_top = 0.0
-offset_right = 112.0
-offset_bottom = 62.0
-mouse_filter = 2
-texture = ExtResource("3_pin")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="AssignmentFaces" type="HBoxContainer" parent="."]
+[node name="AssignmentPins" type="Control" parent="." unique_id=596955814]
 unique_name_in_owner = true
 visible = false
-layout_mode = 0
-offset_left = 18.0
-offset_top = 4.0
-offset_right = 162.0
-offset_bottom = 40.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
-theme_override_constants/separation = 0
-alignment = 1
 
-[node name="StationPlate" type="TextureRect" parent="."]
+[node name="StationPlate" type="TextureRect" parent="." unique_id=1169548858]
 layout_mode = 0
 offset_left = 17.0
-offset_top = 56.0
+offset_top = 21.0
 offset_right = 163.0
-offset_bottom = 80.0
+offset_bottom = 45.0
 mouse_filter = 2
 texture = ExtResource("4_label")
 expand_mode = 1
 
-[node name="StationLabel" type="Label" parent="."]
+[node name="StationLabel" type="Label" parent="." unique_id=25343150]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 20.0
-offset_top = 57.0
+offset_top = 22.0
 offset_right = 160.0
-offset_bottom = 79.0
-mouse_filter = 2
+offset_bottom = 44.0
 theme_override_colors/font_color = Color(0.952941, 0.917647, 0.843137, 1)
 theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 12
@@ -152,17 +143,15 @@ text = "STATION"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="AssignmentLabel" type="Label" parent="."]
+[node name="AssignmentLabel" type="Label" parent="." unique_id=1438097480]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 14.0
 offset_top = 134.0
 offset_right = 166.0
 offset_bottom = 154.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.333333, 0.27451, 0.25098, 1)
 theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 10
-text = ""
 horizontal_alignment = 1
 text_overrun_behavior = 3

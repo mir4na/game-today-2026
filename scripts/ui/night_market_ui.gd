@@ -8,9 +8,8 @@ signal continue_requested
 @export_category("Inspector Copy")
 @export var blessings_template: String = "Blessings  %d"
 @export var veil_note_stock_template: String = "%d / 1 owned  •  %d Blessings"
-@export var radar_stock_template: String = "%d owned  •  %d Blessings"
-@export var speed_level_template: String = "Level %d / %d  •  15 seconds  •  %d Blessings"
-@export var maximum_speed_text: String = "Maximum time-bending level"
+@export var radar_stock_template: String = "%d / %d owned  •  %d Blessings"
+@export var swift_stock_template: String = "%d / %d owned  •  15 seconds  •  %d Blessings"
 @export_category("Floating Motion")
 @export_range(0.0, 20.0, 0.5) var angel_float_height: float = 8.0
 @export_range(0.0, 5.0, 0.05) var angel_float_speed: float = 1.15
@@ -164,11 +163,12 @@ func _open_standalone_preview() -> void:
 			"blessings": preview_blessings,
 			"veil_notes": 0,
 			"radar_charges": 2,
-			"speed_level": 0,
-			"speed_max_level": 3,
-			"veil_note_cost": 3,
-			"radar_charge_cost": 4,
-			"speed_upgrade_cost": 6,
+			"radar_max_charges": 3,
+			"swift_charges": 1,
+			"swift_max_charges": 3,
+			"veil_note_cost": 90,
+			"radar_charge_cost": 45,
+			"swift_charge_cost": 75,
 		},
 		{
 			"earned": 120,
@@ -184,16 +184,18 @@ func set_snapshot(snapshot: Dictionary) -> void:
 	var veil_note_cost: int = int(_snapshot.get("veil_note_cost", 0))
 	var veil_note_count: int = int(_snapshot.get("veil_notes", 0))
 	var radar_cost: int = int(_snapshot.get("radar_charge_cost", 0))
-	var speed_cost: int = int(_snapshot.get("speed_upgrade_cost", -1))
-	var speed_level: int = int(_snapshot.get("speed_level", 0))
-	var speed_maximum: int = int(_snapshot.get("speed_max_level", 0))
+	var radar_count: int = int(_snapshot.get("radar_charges", 0))
+	var radar_maximum: int = int(_snapshot.get("radar_max_charges", 3))
+	var swift_count: int = int(_snapshot.get("swift_charges", 0))
+	var swift_maximum: int = int(_snapshot.get("swift_max_charges", 3))
+	var swift_cost: int = int(_snapshot.get("swift_charge_cost", 0))
 	_blessings_label.text = blessings_template % blessings
 	_item_info_labels[0].text = veil_note_stock_template % [veil_note_count, veil_note_cost]
-	_item_info_labels[1].text = radar_stock_template % [int(_snapshot.get("radar_charges", 0)), radar_cost]
-	_item_info_labels[2].text = maximum_speed_text if speed_cost < 0 else speed_level_template % [speed_level, speed_maximum, speed_cost]
+	_item_info_labels[1].text = radar_stock_template % [radar_count, radar_maximum, radar_cost]
+	_item_info_labels[2].text = swift_stock_template % [swift_count, swift_maximum, swift_cost]
 	_item_buttons[0].disabled = _input_locked or veil_note_count >= 1 or blessings < veil_note_cost
-	_item_buttons[1].disabled = _input_locked or blessings < radar_cost
-	_item_buttons[2].disabled = _input_locked or speed_cost < 0 or blessings < speed_cost
+	_item_buttons[1].disabled = _input_locked or radar_count >= radar_maximum or blessings < radar_cost
+	_item_buttons[2].disabled = _input_locked or swift_count >= swift_maximum or blessings < swift_cost
 	_continue_button.disabled = _input_locked
 	for index: int in range(_item_buttons.size()):
 		_item_entrances[index].self_modulate = Color(0.62, 0.62, 0.68, 1.0) if _item_buttons[index].disabled else Color.WHITE
@@ -538,7 +540,7 @@ func _on_speed_button_pressed() -> void:
 	if _input_locked or _item_buttons[2].disabled:
 		return
 	_pulse_item(2)
-	purchase_requested.emit(&"speed_upgrade")
+	purchase_requested.emit(&"swiftstep")
 
 
 func _on_continue_button_pressed() -> void:

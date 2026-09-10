@@ -133,10 +133,6 @@ station_name = "Vesperwick"
 [node name="Star" parent="VesperwickTarget" index="2"]
 material = SubResource("ShaderMaterial_xoy74")
 
-[node name="Pin" parent="VesperwickTarget" index="4"]
-offset_top = -29.0
-offset_bottom = 33.0
-
 [node name="StationPlate" parent="VesperwickTarget" index="6"]
 offset_top = 35.0
 offset_bottom = 59.0
@@ -156,10 +152,6 @@ station_name = "Hollowcross"
 [node name="Star" parent="HollowcrossTarget" index="2"]
 material = SubResource("ShaderMaterial_07otn")
 texture = ExtResource("5_hollow")
-
-[node name="Pin" parent="HollowcrossTarget" index="4"]
-offset_top = -30.0
-offset_bottom = 32.0
 
 [node name="StationPlate" parent="HollowcrossTarget" index="6"]
 offset_top = 34.0
@@ -181,10 +173,6 @@ station_name = "Bellhaven"
 material = SubResource("ShaderMaterial_0g0pr")
 texture = ExtResource("9_bell")
 
-[node name="Pin" parent="BellhavenTarget" index="4"]
-offset_top = -36.0
-offset_bottom = 26.0
-
 [node name="StationPlate" parent="BellhavenTarget" index="6"]
 offset_top = 27.0
 offset_bottom = 51.0
@@ -204,10 +192,6 @@ station_name = "Morrowfield"
 [node name="Star" parent="MorrowfieldTarget" index="2"]
 material = SubResource("ShaderMaterial_sov8u")
 texture = ExtResource("6_morrow")
-
-[node name="Pin" parent="MorrowfieldTarget" index="4"]
-offset_top = -39.0
-offset_bottom = 23.0
 
 [node name="StationPlate" parent="MorrowfieldTarget" index="6"]
 offset_top = 24.0

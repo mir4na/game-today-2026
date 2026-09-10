@@ -8,8 +8,8 @@ signal effect_finished
 @export_range(1.0, 60.0, 0.5) var effect_duration_seconds: float = 15.0
 @export_range(0.1, 2.0, 0.05) var absorb_duration_seconds: float = 0.7
 @export_range(0.1, 2.0, 0.05) var release_duration_seconds: float = 0.8
-@export_category("World Speed By Upgrade Level")
-@export var world_time_scales: PackedFloat32Array = PackedFloat32Array([0.30, 0.20, 0.12])
+@export_category("World Slowdown")
+@export_range(0.05, 1.0, 0.01) var world_time_scale: float = 0.30
 @export_category("Player Color Preservation")
 @export var world_lighting_path: NodePath
 
@@ -40,9 +40,9 @@ func _ready() -> void:
 	set_process(false)
 
 
-func activate(player: Node2D, upgrade_level: int) -> float:
+func activate(player: Node2D) -> float:
 	if _active:
-		return get_world_time_scale(upgrade_level)
+		return get_world_time_scale()
 	_active = true
 	_player = player
 	_elapsed_seconds = 0.0
@@ -59,13 +59,11 @@ func activate(player: Node2D, upgrade_level: int) -> float:
 	_effect_tween.tween_method(_set_effect_strength, 0.0, 1.0, absorb_duration_seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_effect_tween.tween_method(_set_burst_strength, 1.0, 0.0, absorb_duration_seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	_effect_timer.start(effect_duration_seconds)
-	return get_world_time_scale(upgrade_level)
+	return get_world_time_scale()
 
 
-func get_world_time_scale(upgrade_level: int) -> float:
-	if world_time_scales.is_empty():
-		return 0.2
-	return clampf(world_time_scales[clampi(upgrade_level - 1, 0, world_time_scales.size() - 1)], 0.05, 1.0)
+func get_world_time_scale() -> float:
+	return clampf(world_time_scale, 0.05, 1.0)
 
 
 func is_effect_active() -> bool:

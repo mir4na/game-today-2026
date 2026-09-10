@@ -66,7 +66,7 @@ func _run() -> void:
 	var first_name: String = passengers[0].short_name
 	var second_name: String = passengers[1].short_name
 	var first_target := board._station_targets[0] as NightStationTarget
-	var first_pin := first_target.get_node("%Pin") as TextureRect
+	var assignment_pins := first_target.get_node("%AssignmentPins") as Control
 	var star_material := (first_target.get_node("%Star") as TextureRect).material as ShaderMaterial
 	_check(
 		board._station_path_anchor.mouse_filter == Control.MOUSE_FILTER_IGNORE
@@ -74,7 +74,7 @@ func _run() -> void:
 		and board._station_path_layout.mouse_filter == Control.MOUSE_FILTER_IGNORE,
 		"Transparent station-path layers must not intercept drags that begin on ledger cards."
 	)
-	_check(not first_pin.visible, "An empty station must not show a red passenger pin.")
+	_check(not assignment_pins.visible, "An empty station must not show a red passenger pin.")
 	_check(star_material != null, "Every scene-authored station star must carry its shimmer material.")
 	var drag_payload: Dictionary = {
 		"kind": &"night_soul_card",
@@ -92,14 +92,29 @@ func _run() -> void:
 	var stacked: Array = board._passengers_assigned_to(first_station)
 	_check(stacked.size() == 2, "A station must retain more than one assigned soul.")
 	_check(stacked.has(first_name) and stacked.has(second_name), "Stacked station assignments must retain both passenger names.")
-	_check(first_target.get_node("%AssignmentFaces").get_child_count() == 2, "A stacked station must render one face token per assigned NPC.")
-	_check(first_pin.visible, "A station must reveal its red passenger pin after a soul is assigned.")
+	_check(assignment_pins.get_child_count() == 2, "A stacked station must render one pin per assigned NPC.")
+	_check(assignment_pins.visible, "A station must reveal its red passenger pins after souls are assigned.")
+	for pin: Node in assignment_pins.get_children():
+		var character_placeholder := pin.get_node_or_null("%CharacterPlaceholder") as NightCharacterPortrait
+		_check(
+			character_placeholder != null,
+			"Every assignment pin must expose an editable character placeholder."
+		)
+		if character_placeholder != null:
+			_check(
+				character_placeholder.material is ShaderMaterial,
+				"Pin portraits must be clipped to the pin's circular head."
+			)
+			_check(
+				is_equal_approx(character_placeholder.crop_height_ratio, 0.43),
+				"Pin portraits must use the same upper-body crop as ledger portraits."
+			)
 
 	_check(first_card.get_node("%StatementLabel").text == statements[first_name], "The ledger card must show the exact biography sentence.")
 	_check((first_card.get_node("%AssignedOverlay") as ColorRect).visible, "An assigned ledger portrait must show its gray overlay.")
 	# Scene linkage is the invariant that keeps the visual preview editable.
 	_check(first_card.drag_preview_scene != null, "The passenger drag preview must be supplied by a scene resource.")
-	_check(first_target.face_token_scene != null, "Station face tokens must be supplied by a scene resource.")
+	_check(first_target.assignment_pin_scene != null, "Station pins must be supplied by a scene resource.")
 	if first_card.drag_preview_scene != null:
 		for profile: PassengerIdentityProfile in game.passenger_identity_profiles:
 			var preview_data := PassengerData.create_from_identity(profile)

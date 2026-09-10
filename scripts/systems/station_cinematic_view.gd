@@ -199,6 +199,10 @@ func get_station_environment_alpha() -> float:
 	return _station_environment_alpha
 
 
+func has_active_camera_handoff() -> bool:
+	return _active
+
+
 func get_station_crowd_layout() -> Dictionary:
 	return {
 		"platform_baseline_y": _platform_baseline.global_position.y,

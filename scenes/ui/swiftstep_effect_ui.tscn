@@ -25,7 +25,7 @@ script = ExtResource("1_script")
 effect_duration_seconds = 15.0
 absorb_duration_seconds = 0.7
 release_duration_seconds = 0.8
-world_time_scales = PackedFloat32Array(0.3, 0.2, 0.12)
+world_time_scale = 0.3
 
 [node name="ScreenEffect" type="ColorRect" parent="."]
 unique_name_in_owner = true

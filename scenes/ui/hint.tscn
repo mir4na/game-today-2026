@@ -1,15 +1,17 @@
-[gd_scene load_steps=8 format=3 uid="uid://dl1hatq1cq2qy"]
+[gd_scene format=3 uid="uid://dl1hatq1cq2qy"]
 
-[ext_resource type="Script" path="res://scripts/ui/hint_ui.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://ulhnktt3cfts" path="res://scripts/ui/hint_ui.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://bmkis5r4t40k7" path="res://assets/ui/hint/blocked_aisle.png" id="2_blocked"]
 [ext_resource type="Texture2D" uid="uid://dw1qyyuedtqkj" path="res://assets/ui/hint/gameplay_aisle.png" id="3_aisle_gameplay"]
 [ext_resource type="Texture2D" uid="uid://dyyil2ueterxu" path="res://assets/ui/hint/clean_the_seat.png" id="4_clean"]
 [ext_resource type="Texture2D" uid="uid://06cuh8jwn3tb" path="res://assets/ui/hint/ui.png" id="5_clean_gameplay"]
+[ext_resource type="FontFile" uid="uid://f6svvsvs8ti1" path="res://fonts/Josefin_Sans/static/JosefinSans-Regular.ttf" id="5_wocbk"]
 [ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="6_title_font"]
-[ext_resource type="FontFile" uid="uid://b0kjil2q7jixo" path="res://fonts/Josefin_Sans/static/JosefinSans-Light.ttf" id="7_body_font"]
+[ext_resource type="FontFile" uid="uid://0m5n4ccpu3ps" path="res://fonts/Josefin_Sans/static/JosefinSans-BoldItalic.ttf" id="8_w3q0o"]
 
-[node name="Hint" type="Control"]
+[node name="Hint" type="Control" unique_id=1970596750]
 process_mode = 3
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -18,7 +20,7 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_script")
 
-[node name="Shade" type="ColorRect" parent="."]
+[node name="Shade" type="ColorRect" parent="." unique_id=467159793]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -26,9 +28,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.015, 0.025, 0.04, 0.78)
+color = Color(0.8717144, 0.8952076, 0.9309929, 0.78039217)
 
-[node name="Content" type="Control" parent="."]
+[node name="Content" type="Control" parent="." unique_id=729482226]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -36,69 +38,14 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -500.0
-offset_top = -310.0
+offset_top = -268.0
 offset_right = 500.0
-offset_bottom = 310.0
+offset_bottom = 352.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="BlockedAisle" type="Control" parent="Content"]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="Title" type="Label" parent="Content/BlockedAisle"]
-layout_mode = 0
-offset_top = 14.0
-offset_right = 1000.0
-offset_bottom = 78.0
-theme_override_colors/font_color = Color(1, 0.88, 0.62, 1)
-theme_override_fonts/font = ExtResource("6_title_font")
-theme_override_font_sizes/font_size = 48
-text = "Blocked Aisle"
-horizontal_alignment = 1
-
-[node name="HowTo" type="TextureRect" parent="Content/BlockedAisle"]
-layout_mode = 0
-offset_left = 65.0
-offset_top = 105.0
-offset_right = 460.0
-offset_bottom = 329.0
-texture = ExtResource("2_blocked")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="InWorld" type="TextureRect" parent="Content/BlockedAisle"]
-layout_mode = 0
-offset_left = 540.0
-offset_top = 105.0
-offset_right = 935.0
-offset_bottom = 319.0
-texture = ExtResource("3_aisle_gameplay")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Description" type="Label" parent="Content/BlockedAisle"]
-layout_mode = 0
-offset_left = 96.0
-offset_top = 378.0
-offset_right = 904.0
-offset_bottom = 478.0
-theme_override_colors/font_color = Color(0.96, 0.91, 0.8, 1)
-theme_override_fonts/font = ExtResource("7_body_font")
-theme_override_font_sizes/font_size = 28
-text = "A luggage rack is blocking the way between coaches. Find it, then repack the bags to clear the aisle."
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 2
-
-[node name="CleanTheSeat" type="Control" parent="Content"]
+[node name="BlockedAisle" type="Control" parent="Content" unique_id=1425731773]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
@@ -109,58 +56,113 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Title" type="Label" parent="Content/CleanTheSeat"]
+[node name="Title" type="Label" parent="Content/BlockedAisle" unique_id=1398700115]
 layout_mode = 0
 offset_top = 14.0
 offset_right = 1000.0
 offset_bottom = 78.0
-theme_override_colors/font_color = Color(1, 0.88, 0.62, 1)
+theme_override_colors/font_color = Color(0.32577616, 0.23928374, 9.62615e-08, 1)
 theme_override_fonts/font = ExtResource("6_title_font")
 theme_override_font_sizes/font_size = 48
-text = "Clean the Seat"
+text = "Blocked Aisle"
 horizontal_alignment = 1
 
-[node name="HowTo" type="TextureRect" parent="Content/CleanTheSeat"]
+[node name="HowTo" type="TextureRect" parent="Content/BlockedAisle" unique_id=1292416389]
 layout_mode = 0
 offset_left = 65.0
 offset_top = 105.0
 offset_right = 460.0
-offset_bottom = 314.0
-texture = ExtResource("4_clean")
+offset_bottom = 329.0
+texture = ExtResource("2_blocked")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="InWorld" type="TextureRect" parent="Content/CleanTheSeat"]
+[node name="InWorld" type="TextureRect" parent="Content/BlockedAisle" unique_id=909983889]
 layout_mode = 0
 offset_left = 540.0
 offset_top = 105.0
 offset_right = 935.0
-offset_bottom = 372.0
-texture = ExtResource("5_clean_gameplay")
+offset_bottom = 319.0
+texture = ExtResource("3_aisle_gameplay")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Description" type="Label" parent="Content/CleanTheSeat"]
+[node name="Description" type="Label" parent="Content/BlockedAisle" unique_id=1114215535]
 layout_mode = 0
 offset_left = 96.0
 offset_top = 378.0
 offset_right = 904.0
 offset_bottom = 478.0
-theme_override_colors/font_color = Color(0.96, 0.91, 0.8, 1)
-theme_override_fonts/font = ExtResource("7_body_font")
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("5_wocbk")
+theme_override_font_sizes/font_size = 28
+text = "A luggage rack is blocking the way between coaches. Find it, then repack the bags to clear the aisle."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="CleanTheSeat" type="Control" parent="Content" unique_id=1699702213]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="Content/CleanTheSeat" unique_id=1286095554]
+layout_mode = 0
+offset_top = 14.0
+offset_right = 1000.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(0.32577616, 0.23928374, 9.62615e-08, 1)
+theme_override_fonts/font = ExtResource("6_title_font")
+theme_override_font_sizes/font_size = 48
+text = "Clean the Seat"
+horizontal_alignment = 1
+
+[node name="HowTo" type="TextureRect" parent="Content/CleanTheSeat" unique_id=1027132261]
+layout_mode = 0
+offset_left = 108.0
+offset_top = 105.0
+offset_right = 503.0
+offset_bottom = 314.0
+texture = ExtResource("4_clean")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="InWorld" type="TextureRect" parent="Content/CleanTheSeat" unique_id=902737460]
+layout_mode = 0
+offset_left = 495.0
+offset_top = 105.0
+offset_right = 890.0
+offset_bottom = 316.0
+texture = ExtResource("5_clean_gameplay")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Description2" type="Label" parent="Content/CleanTheSeat" unique_id=1322178946]
+layout_mode = 0
+offset_left = 96.0
+offset_top = 378.0
+offset_right = 904.0
+offset_bottom = 478.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("5_wocbk")
 theme_override_font_sizes/font_size = 28
 text = "A seat has been left dirty. Find the marked seat, then wipe it clean before you inspect passengers."
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
 
-[node name="CloseLabel" type="Label" parent="Content"]
+[node name="CloseLabel" type="Label" parent="Content" unique_id=1565939336]
 layout_mode = 0
 offset_top = 545.0
 offset_right = 1000.0
 offset_bottom = 580.0
-theme_override_colors/font_color = Color(1, 0.88, 0.62, 1)
-theme_override_fonts/font = ExtResource("7_body_font")
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("8_w3q0o")
 theme_override_font_sizes/font_size = 24
 text = "PRESS ANY KEY TO CONTINUE"
 horizontal_alignment = 1

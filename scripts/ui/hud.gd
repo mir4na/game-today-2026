@@ -268,7 +268,7 @@ func set_market_tool_inventory(snapshot: Dictionary) -> void:
 	_tool_status_label.text = tool_status_template % int(snapshot.get("blessings", 0))
 	_veil_note_slot.call(&"set_owned_amount", int(snapshot.get("veil_notes", 0)))
 	_radar_slot.call(&"set_owned_amount", int(snapshot.get("radar_charges", 0)))
-	_swift_slot.call(&"set_owned_amount", int(snapshot.get("speed_level", 0)))
+	_swift_slot.call(&"set_owned_amount", int(snapshot.get("swift_charges", 0)))
 	_update_action_button_locks()
 
 

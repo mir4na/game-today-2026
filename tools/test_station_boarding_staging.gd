@@ -88,6 +88,23 @@ func _run() -> void:
 	assert(boarding_actor.visible, "A boarder must remain visible when the door approach begins.")
 	assert(boarding_actor.position.distance_to(position_before_boarding) < 4.0, "Entrance and boarding paths must meet without a visual pop.")
 
+	# A passenger who has stepped onto the platform must remain in the pedestrian
+	# flow instead of holding a walking frame at their final doorway position.
+	station_ui.play_stop("Test station", [actor], [], door_markers, waiting_positions, [])
+	station_ui.set_process(false)
+	var departing_profile: Dictionary = station_ui._departing_motion_profiles[0]
+	var departing_end: float = float(departing_profile["start_time"]) + float(departing_profile["walk_duration"])
+	station_ui._elapsed = departing_end + 0.15
+	station_ui.call(&"_update_visuals")
+	var departing_actor := station_ui.get_node("StationActorCanvas/ActorSlots/Actor0") as Node2D
+	var first_departing_flow_position: Vector2 = departing_actor.position
+	station_ui._elapsed = departing_end + 0.55
+	station_ui.call(&"_update_visuals")
+	assert(
+		departing_actor.position.distance_to(first_departing_flow_position) > 10.0,
+		"A departing passenger must continue through the platform crowd after leaving the train."
+	)
+
 	var skip_prompt := station_ui.get_node("CinematicBorderLayer/SkipHint/SkipPromptLabel") as Label
 	var skip_button := station_ui.get_node("CinematicBorderLayer/SkipHint/SkipButton") as Button
 	assert(skip_prompt != null and skip_prompt.mouse_filter == Control.MOUSE_FILTER_IGNORE, "The non-interactive skip copy must not capture clicks.")
