@@ -44,16 +44,47 @@ func _run() -> void:
 		"A ledger portrait must retain the same real character identity shown in the carriage."
 	)
 	_check(first_card_portrait.texture is AtlasTexture, "Ledger portrait boxes must show an upper-body crop.")
+	var portrait_crop := first_card_portrait.texture as AtlasTexture
+	_check(
+		absf(portrait_crop.region.size.x - portrait_crop.region.size.y) < 4.0,
+		"The ledger portrait crop must match its square frame without letterboxing."
+	)
+	_check(
+		(first_card.get_node("%PortraitName") as Label).text == passengers[0].short_name.to_upper(),
+		"The caption below a ledger portrait must show that NPC's name."
+	)
 	var first_station: String = puzzle.night_stations[0]
 	var first_name: String = passengers[0].short_name
 	var second_name: String = passengers[1].short_name
+	var first_target := board._station_targets[0] as NightStationTarget
+	var first_pin := first_target.get_node("%Pin") as TextureRect
+	var star_material := (first_target.get_node("%Star") as TextureRect).material as ShaderMaterial
+	_check(
+		board._station_path_anchor.mouse_filter == Control.MOUSE_FILTER_IGNORE
+		and board._station_path_layout_host.mouse_filter == Control.MOUSE_FILTER_IGNORE
+		and board._station_path_layout.mouse_filter == Control.MOUSE_FILTER_IGNORE,
+		"Transparent station-path layers must not intercept drags that begin on ledger cards."
+	)
+	_check(not first_pin.visible, "An empty station must not show a red passenger pin.")
+	_check(star_material != null, "Every scene-authored station star must carry its shimmer material.")
+	var drag_payload: Dictionary = {
+		"kind": &"night_soul_card",
+		"passenger_name": first_name,
+	}
+	_check(first_target._can_drop_data(Vector2.ZERO, drag_payload), "A station must accept a dragged soul card.")
+	if star_material != null:
+		_check(
+			is_equal_approx(float(star_material.get_shader_parameter(&"outline_strength")), 1.0),
+			"A valid drag hover must enable the station star's white outline."
+		)
+	first_target._set_drop_highlight(false)
 	board._assign_passenger_to_station(first_station, first_name)
 	board._assign_passenger_to_station(first_station, second_name)
 	var stacked: Array = board._passengers_assigned_to(first_station)
 	_check(stacked.size() == 2, "A station must retain more than one assigned soul.")
 	_check(stacked.has(first_name) and stacked.has(second_name), "Stacked station assignments must retain both passenger names.")
-	var first_target := board._station_targets[0] as NightStationTarget
 	_check(first_target.get_node("%AssignmentFaces").get_child_count() == 2, "A stacked station must render one face token per assigned NPC.")
+	_check(first_pin.visible, "A station must reveal its red passenger pin after a soul is assigned.")
 
 	_check(first_card.get_node("%StatementLabel").text == statements[first_name], "The ledger card must show the exact biography sentence.")
 	_check((first_card.get_node("%AssignedOverlay") as ColorRect).visible, "An assigned ledger portrait must show its gray overlay.")

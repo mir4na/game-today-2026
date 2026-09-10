@@ -17,17 +17,17 @@ var _passenger_data: PassengerData
 @onready var _portrait: NightCharacterPortrait = %Portrait
 @onready var _assigned_overlay: ColorRect = %AssignedOverlay
 @onready var _name_label: Label = %PassengerName
-@onready var _anomaly_label: Label = %AnomalyLabel
+@onready var _portrait_name_label: Label = %PortraitName
 @onready var _statement_label: Label = %StatementLabel
 @onready var _assignment_label: Label = %AssignmentLabel
 
 
-func configure(data: PassengerData, statement: String, anomaly_label: String) -> void:
+func configure(data: PassengerData, statement: String) -> void:
 	_passenger_data = data
 	passenger_name = data.short_name
 	_portrait.set_passenger(data)
 	_name_label.text = data.short_name.to_upper()
-	_anomaly_label.text = anomaly_label
+	_portrait_name_label.text = data.short_name.to_upper()
 	# Keep the ledger wording byte-for-byte identical to the sentence selected
 	# from the Soul Record. Wrapping is visual only; the copy is never shortened.
 	_statement_label.text = statement if not statement.is_empty() else "Statement not recorded"

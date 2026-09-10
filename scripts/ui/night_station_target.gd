@@ -26,11 +26,16 @@ signal selected(station_name: String)
 @onready var _failure_particles: CPUParticles2D = %FailureParticles
 
 var _validation_tween: Tween
+var _star_material: ShaderMaterial
 
 
 func _ready() -> void:
 	_station_label.text = station_name.to_upper()
 	_validation_glow.texture = _star.texture
+	_star_material = _star.material as ShaderMaterial
+	if _star_material != null:
+		var station_phase: float = float(abs(station_name.hash() % 997)) / 997.0
+		_star_material.set_shader_parameter(&"shimmer_offset", station_phase)
 	set_assignments([], {})
 	reset_validation_visual()
 
@@ -56,7 +61,9 @@ func set_assignments(passenger_names: Array, passenger_data_by_name: Dictionary)
 		_assignment_faces.add_child(token)
 		token.configure(passenger_name, data.get_character_artwork())
 	_assignment_faces.visible = not valid_names.is_empty()
-	_pin.visible = valid_names.is_empty()
+	# The red pin represents an assigned soul, so an untouched station remains
+	# a bare star until its first drop.
+	_pin.visible = not valid_names.is_empty()
 	if valid_names.is_empty():
 		_assignment_label.text = ""
 	elif valid_names.size() == 1:
@@ -107,6 +114,7 @@ func reset_validation_visual() -> void:
 	_validation_glow.scale = Vector2.ONE
 	_validation_glow.modulate = Color(1.0, 1.0, 1.0, 0.0)
 	_failure_particles.emitting = false
+	_set_drop_highlight(false)
 
 
 func get_path_node_center() -> Vector2:
@@ -166,19 +174,19 @@ func _play_failure_burst() -> void:
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 	if not data is Dictionary:
-		_drop_glow.hide()
+		_set_drop_highlight(false)
 		return false
 	var payload: Dictionary = data
 	var accepted: bool = (
 		payload.get("kind", &"") == &"night_soul_card"
 		and not str(payload.get("passenger_name", "")).is_empty()
 	)
-	_drop_glow.visible = accepted
+	_set_drop_highlight(accepted)
 	return accepted
 
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
-	_drop_glow.hide()
+	_set_drop_highlight(false)
 	if not data is Dictionary:
 		return
 	var payload: Dictionary = data
@@ -186,8 +194,15 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_DRAG_END and is_instance_valid(_drop_glow):
+	if what == NOTIFICATION_DRAG_END:
+		_set_drop_highlight(false)
+
+
+func _set_drop_highlight(active: bool) -> void:
+	if is_instance_valid(_drop_glow):
 		_drop_glow.hide()
+	if _star_material != null:
+		_star_material.set_shader_parameter(&"outline_strength", 1.0 if active else 0.0)
 
 
 func _gui_input(event: InputEvent) -> void:

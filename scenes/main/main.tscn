@@ -47,6 +47,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/swiftstep_effect_ui.tscn" id="46_swiftstep_effect"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_soul_record_ui.tscn" id="47_soul_record"]
 [ext_resource type="PackedScene" path="res://scenes/ui/veil_note_reveal_ui.tscn" id="48_veil_note_reveal"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/night_ledger_guardian.tscn" id="49_night_guardian"]
+[ext_resource type="PackedScene" path="res://scenes/ui/service_signature_ui.tscn" id="50_signature_ui"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_day_cycle_sky"]
 shader = ExtResource("39")
@@ -90,9 +92,7 @@ station_travel_durations_seconds = PackedFloat32Array(120, 120, 120, 120)
 radar_anomaly_light_seconds = 4.0
 debug_print_anomaly_roster = true
 night_shift_instruction = "Night shift
-Read each soul's record, then open the Night Ledger from the lower-left button"
-departure_statement_recorded_template = "Station path statement recorded
-%d / %d found"
+Read each soul's record, then consult the watcher"
 
 [node name="MarketToolState" parent="." unique_id=1541596097 instance=ExtResource("40_market_state")]
 unique_name_in_owner = true
@@ -168,6 +168,10 @@ editor_description = "Player and runtime passengers follow the exact station tra
 
 [node name="Passengers" type="Node2D" parent="GameplayWorld/TrainOccupants" unique_id=1237360660]
 unique_name_in_owner = true
+
+[node name="NightLedgerGuardian" parent="GameplayWorld/TrainOccupants" instance=ExtResource("49_night_guardian")]
+unique_name_in_owner = true
+position = Vector2(480, 430)
 
 [node name="PlayerSpawnPoint" type="Marker2D" parent="GameplayWorld/TrainOccupants" unique_id=1158105950]
 editor_description = "Move this Marker2D in the Inspector to set the player's initial position inside the front passenger coach."
@@ -276,6 +280,9 @@ unique_name_in_owner = true
 [node name="NightPuzzleUI" parent="ModalLayer" unique_id=1779434419 instance=ExtResource("8")]
 unique_name_in_owner = true
 
+[node name="ServiceSignatureUI" parent="ModalLayer" instance=ExtResource("50_signature_ui")]
+unique_name_in_owner = true
+
 [node name="VeilNoteRevealUI" parent="ModalLayer" instance=ExtResource("48_veil_note_reveal")]
 unique_name_in_owner = true
 
@@ -318,7 +325,11 @@ unique_name_in_owner = true
 [connection signal="purchase_requested" from="ModalLayer/NightMarketUI" to="." method="_on_market_purchase_requested"]
 [connection signal="closed" from="ModalLayer/NightSoulRecordUI" to="." method="_on_night_soul_record_closed"]
 [connection signal="closing" from="ModalLayer/NightSoulRecordUI" to="." method="_on_night_soul_record_closing"]
+[connection signal="statement_feedback_requested" from="ModalLayer/NightSoulRecordUI" to="." method="_on_night_statement_feedback_requested"]
 [connection signal="statement_recorded" from="ModalLayer/NightSoulRecordUI" to="." method="_on_night_statement_recorded"]
+[connection signal="consulted" from="GameplayWorld/TrainOccupants/NightLedgerGuardian" to="." method="_on_watcher_consulted"]
+[connection signal="closed" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signature_closed"]
+[connection signal="service_signed" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signed"]
 [connection signal="closed" from="ModalLayer/NightPuzzleUI" to="." method="_close_night_puzzle"]
 [connection signal="departures_confirmed" from="ModalLayer/NightPuzzleUI" to="." method="_on_departures_confirmed"]
 [connection signal="validation_finished" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_validation_finished"]

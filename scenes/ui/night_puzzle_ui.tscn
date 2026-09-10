@@ -137,12 +137,10 @@ mouse_filter = 1
 
 [node name="LedgerAnchor" type="Control" parent="BoardAnchor" unique_id=1164450504]
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+z_index = 5
+layout_mode = 0
+offset_right = 366.0
+offset_bottom = 720.0
 mouse_filter = 1
 
 [node name="LedgerBacking" type="TextureRect" parent="BoardAnchor/LedgerAnchor" unique_id=2087279466]
@@ -300,7 +298,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 1
+mouse_filter = 2
 
 [node name="MapPaper" type="TextureRect" parent="BoardAnchor/StationPathAnchor" unique_id=1829912111]
 z_index = -2
@@ -322,7 +320,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 1
+mouse_filter = 2
 
 [node name="LegendLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=1909445939]
 visible = false

@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/night_station_target.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/NightShift/Star 1.png" id="2_star"]
@@ -6,6 +6,11 @@
 [ext_resource type="Texture2D" path="res://assets/NightShift/Rectangle 243.png" id="4_label"]
 [ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="5_font"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_station_face_token.tscn" id="6_face_token"]
+[ext_resource type="Shader" path="res://shaders/night_station_star.gdshader" id="7_star_shader"]
+
+[sub_resource type="ShaderMaterial" id="StationStarMaterial"]
+resource_local_to_scene = true
+shader = ExtResource("7_star_shader")
 
 [sub_resource type="StyleBoxFlat" id="DropGlowStyle"]
 bg_color = Color(0.698039, 0.298039, 0.290196, 0.12)
@@ -61,6 +66,7 @@ stretch_mode = 5
 
 [node name="Star" type="TextureRect" parent="."]
 unique_name_in_owner = true
+material = SubResource("StationStarMaterial")
 layout_mode = 0
 offset_left = 39.0
 offset_top = 44.0

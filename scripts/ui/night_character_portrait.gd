@@ -5,10 +5,10 @@ extends TextureRect
 ## use the passenger's underlying character identity instead.
 
 @export_category("Upper-body Crop")
-@export_range(0.0, 1.0, 0.01) var crop_left_ratio: float = 0.13
-@export_range(0.0, 1.0, 0.01) var crop_top_ratio: float = 0.04
-@export_range(0.01, 1.0, 0.01) var crop_width_ratio: float = 0.74
-@export_range(0.01, 1.0, 0.01) var crop_height_ratio: float = 0.55
+@export_range(0.0, 1.0, 0.01) var crop_left_ratio: float = 0.21
+@export_range(0.0, 1.0, 0.01) var crop_top_ratio: float = 0.11
+@export_range(0.01, 1.0, 0.01) var crop_width_ratio: float = 0.58
+@export_range(0.01, 1.0, 0.01) var crop_height_ratio: float = 0.43
 
 
 func set_passenger(data: PassengerData) -> void:

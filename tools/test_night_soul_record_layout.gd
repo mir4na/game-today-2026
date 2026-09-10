@@ -30,6 +30,15 @@ func _run() -> void:
 	game._on_debug_night_requested()
 	var puzzle: DeparturePuzzleData = game._runtime_puzzle
 	_check(puzzle != null, "Night shortcut must create a Soul Record puzzle.")
+	var guardian: Variant = game.get_node("%NightLedgerGuardian")
+	_check(guardian != null and guardian.visible and guardian.enabled, "NPC 17 watcher must appear only when Night Service begins.")
+	if guardian != null:
+		guardian.interact()
+		await process_frame
+		_check(game.state == AfterTheEndGame.GameState.NIGHT_PUZZLE, "Interacting with the watcher must open the Night Ledger map.")
+		_check(game._night_puzzle_ui.visible, "The watcher interaction must present the assignment map UI.")
+		game._close_night_puzzle()
+		await process_frame
 
 	var occupied_paragraphs: Dictionary = {}
 	for passenger_name: String in puzzle.statement_by_passenger:
@@ -65,19 +74,81 @@ func _run() -> void:
 		)
 		_check(biography_text.text.contains(puzzle.get_statement_for_passenger(inspected_name)), "The clickable biography must include the hidden statement.")
 		_check(game._gameplay_camera.offset.x > 200.0, "Soul Record inspection must shift the gameplay camera toward the player/NPC framing.")
+		_check(reader.get_node_or_null("%StatusLabel") == null, "Soul Record must not keep a recorded/rejected status sentence.")
 		var correct_sentence_index: int = -1
+		var incorrect_sentence_index: int = -1
 		for sentence_index: int in reader._sentence_by_index:
 			if reader._sentence_by_index[sentence_index] == puzzle.get_statement_for_passenger(inspected_name):
 				correct_sentence_index = sentence_index
-				break
+			elif incorrect_sentence_index < 0:
+				incorrect_sentence_index = sentence_index
 		_check(correct_sentence_index >= 0, "The embedded clue must remain a selectable sentence.")
+		_check(incorrect_sentence_index >= 0, "The biography must retain selectable decoy sentences.")
+		if incorrect_sentence_index >= 0:
+			reader._on_sentence_clicked(incorrect_sentence_index)
+			await create_timer(0.07).timeout
+			_check(
+				float(reader._error_flash_material.get_shader_parameter(&"strength")) > 0.0,
+				"A rejected sentence must produce the red screen feedback effect."
+			)
+			_check(
+				game._gameplay_camera.offset.distance_to(game._night_record_camera_target_offset) > 0.1,
+				"A rejected sentence must shake the gameplay camera."
+			)
+			_check(not game._collected_departure_statements.has(inspected_name), "A rejected sentence must not enter the Night Ledger.")
+			await create_timer(0.55).timeout
 		if correct_sentence_index >= 0:
+			reader._on_sentence_hover_started(correct_sentence_index)
+			_check(
+				biography_text.text.contains("[url=%d][color=#%s]" % [
+					correct_sentence_index,
+					reader.hovered_sentence_color.to_html(false),
+				]),
+				"A hovered biography sentence must turn red."
+			)
+			reader._on_sentence_hover_ended(correct_sentence_index)
+			_check(
+				not biography_text.text.contains("[url=%d][color=#%s]" % [
+					correct_sentence_index,
+					reader.hovered_sentence_color.to_html(false),
+				]),
+				"A biography sentence must restore its normal color after hover."
+			)
+			var camera_offset_before_success: Vector2 = game._gameplay_camera.offset
 			reader._on_sentence_clicked(correct_sentence_index)
+			_check(reader._correct_reveal_characters >= 0, "A correct statement must begin its typewriter reveal.")
+			_check(
+				biography_text.text.contains("[bgcolor=#%s][color=#%s]" % [
+					reader.correct_highlight_background.to_html(false),
+					reader.correct_highlight_text_color.to_html(false),
+				]),
+				"A correct statement must switch to a black highlight with white text."
+			)
 			_check(game._collected_departure_statements.has(inspected_name), "Clicking the embedded clue must record it in the Night Ledger.")
 			_check(
 				str(game._collected_departure_statements.get(inspected_name, ""))
 				== puzzle.get_statement_for_passenger(inspected_name),
 				"The Night Ledger must preserve the exact sentence clicked in the biography."
+			)
+			await create_timer(0.07).timeout
+			_check(
+				(reader._error_flash_material.get_shader_parameter(&"flash_color") as Color).is_equal_approx(
+					reader.correct_flash_color
+				),
+				"An accepted sentence must use the green Soul Record feedback color."
+			)
+			_check(
+				float(reader._error_flash_material.get_shader_parameter(&"strength")) > 0.0,
+				"An accepted sentence must produce a visible green feedback flash."
+			)
+			_check(
+				game._gameplay_camera.offset.distance_to(camera_offset_before_success) < 0.1,
+				"An accepted sentence must not shake the gameplay camera."
+			)
+			await create_timer(reader.correct_typewriter_seconds + 0.1).timeout
+			_check(
+				biography_text.text.contains(puzzle.get_statement_for_passenger(inspected_name)),
+				"The full correct statement must remain readable after the typewriter reveal."
 			)
 		reader.request_close()
 		await create_timer(0.45).timeout
@@ -86,5 +157,5 @@ func _run() -> void:
 
 	game.free()
 	if _failures == 0:
-		print("PASS: varied hidden statements, horizontal Soul Record, and camera shift.")
+		print("PASS: watcher entry, varied hidden statements, and visual sentence feedback.")
 	quit(1 if _failures > 0 else 0)

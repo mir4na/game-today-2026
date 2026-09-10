@@ -5,7 +5,8 @@ const MainScene = preload("res://scenes/main/main.tscn")
 const NightPuzzleScene = preload("res://scenes/ui/night_puzzle_ui.tscn")
 
 const EXPECTED_ANOMALY_COUNTS := [3, 3, 4, 4, 5]
-const EXPECTED_PATH_SEGMENT_COUNTS := [5, 9, 9, 11, 20]
+const EXPECTED_ROUTE_EDGE_COUNTS := [3, 3, 4, 5, 6]
+const EXPECTED_PATH_SEGMENT_COUNTS := [6, 9, 9, 11, 20]
 
 var _failures: int = 0
 
@@ -75,12 +76,12 @@ func _run() -> void:
 			"Every deceased passenger must receive exactly one solution destination."
 		)
 		_check(
-			runtime.night_stations.size() == (3 if service_level == 1 else 4),
-			"Level 1 uses a three-mark route; later levels use all four marks."
+			runtime.night_stations.size() == 4,
+			"Every Night Service level must display all four stations."
 		)
 		_check(
-			runtime.get_route_edges().size() == service_level + 1,
-			"Each Night Service level must add exactly one connection to the station path."
+			runtime.get_route_edges().size() == EXPECTED_ROUTE_EDGE_COUNTS[service_level - 1],
+			"Each Night Service level must expose its intended station connections."
 		)
 		_check(
 			runtime.get_path_segment_count() == EXPECTED_PATH_SEGMENT_COUNTS[service_level - 1],
@@ -126,7 +127,7 @@ func _run() -> void:
 			largest_station_group = maxi(largest_station_group, station_group_size)
 		match service_level:
 			1:
-				_check(occupied_station_count == 3, "Level 1 must fill its readable three-stop chain.")
+				_check(occupied_station_count == 3, "Level 1 must leave one of four stations empty.")
 			2:
 				_check(occupied_station_count == 3, "Level 2 must leave one of four stations empty.")
 			3, 4:

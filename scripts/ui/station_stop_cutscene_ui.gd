@@ -125,7 +125,7 @@ var _motion_rng := RandomNumberGenerator.new()
 @onready var _heading_label: Label = %HeadingLabel
 @onready var _subtitle_label: Label = %SubtitleLabel
 @onready var _status_label: Label = %StatusLabel
-@onready var _skip_hint: Label = %SkipHint
+@onready var _skip_hint: Button = %SkipHint
 @onready var _cinematic_title: Control = %CinematicTitle
 @onready var _screen_fade: ColorRect = %ScreenFade
 @onready var _station_actor_canvas: CanvasLayer = %StationActorCanvas
@@ -253,7 +253,7 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 
 
 func skip_sequence() -> void:
-	if not visible or _camera_return_started:
+	if not visible or _camera_return_started or _elapsed < screen_fade_duration:
 		return
 	_skip_requested = true
 	_camera_return_started = true
@@ -355,6 +355,7 @@ func confirm_camera_return_complete() -> void:
 
 func _update_visuals() -> void:
 	_update_screen_fade()
+	_update_skip_button()
 	_update_camera_return()
 	_update_train_motion()
 	_update_exchange_actors()
@@ -364,6 +365,10 @@ func _update_visuals() -> void:
 func _update_screen_fade() -> void:
 	var fade_progress: float = clampf(_elapsed / maxf(screen_fade_duration, 0.01), 0.0, 1.0)
 	_screen_fade.modulate.a = 1.0 - _ease_in_out_sine(fade_progress)
+
+
+func _update_skip_button() -> void:
+	_skip_hint.disabled = _camera_return_started or _elapsed < screen_fade_duration
 
 
 func _update_train_motion() -> void:

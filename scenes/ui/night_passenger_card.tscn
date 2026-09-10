@@ -68,7 +68,7 @@ theme_override_fonts/font = ExtResource("3_bold")
 theme_override_font_sizes/font_size = 16
 text = "PASSENGER"
 
-[node name="AnomalyLabel" type="Label" parent="."]
+[node name="PortraitName" type="Label" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 12.0
@@ -79,7 +79,7 @@ mouse_filter = 2
 theme_override_colors/font_color = Color(0.486275, 0.270588, 0.254902, 1)
 theme_override_fonts/font = ExtResource("3_bold")
 theme_override_font_sizes/font_size = 9
-text = "ANOMALY"
+text = "PASSENGER"
 horizontal_alignment = 1
 text_overrun_behavior = 3
 

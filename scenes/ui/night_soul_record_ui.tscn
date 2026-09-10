@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://bn7q3awivg60d"]
+[gd_scene load_steps=11 format=3 uid="uid://bn7q3awivg60d"]
 
 [ext_resource type="Script" uid="uid://bdso461f0naxt" path="res://scripts/ui/night_soul_record_ui.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://quci1agnefcf" path="res://assets/NightShift/Group 139.png" id="2_paper"]
@@ -7,6 +7,13 @@
 [ext_resource type="FontFile" uid="uid://jysqo0nff08k" path="res://fonts/Josefin_Sans/static/JosefinSans-Medium.ttf" id="5_josefin"]
 [ext_resource type="PackedScene" path="res://scenes/ui/components/round_close_button.tscn" id="6_close"]
 [ext_resource type="Script" uid="uid://b1lbens1ur17i" path="res://scripts/ui/night_character_portrait.gd" id="8_portrait"]
+[ext_resource type="Shader" path="res://shaders/soul_record_feedback.gdshader" id="9_feedback"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_feedback"]
+resource_local_to_scene = true
+shader = ExtResource("9_feedback")
+shader_parameter/strength = 0.0
+shader_parameter/flash_color = Color(0.9, 0.035, 0.045, 1)
 
 [sub_resource type="StyleBoxFlat" id="PortraitFrameStyle"]
 bg_color = Color(0.192157, 0.188235, 0.219608, 1)
@@ -40,8 +47,22 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.027451, 0.0313726, 0.0431373, 0.3)
 
+[node name="ErrorFlash" type="ColorRect" parent="."]
+unique_name_in_owner = true
+z_index = 1
+material = SubResource("ShaderMaterial_feedback")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 1)
+
 [node name="RecordAnchor" type="Control" parent="." unique_id=410776374]
 unique_name_in_owner = true
+z_index = 2
 editor_description = "Scene-authored horizontal Soul Record. It remains offset to the right so the inspected NPC and player stay visible on the left."
 layout_mode = 1
 anchors_preset = 6
@@ -161,18 +182,6 @@ theme_override_font_sizes/normal_font_size = 15
 bbcode_enabled = true
 scroll_active = false
 meta_underlined = false
-
-[node name="StatusLabel" type="Label" parent="RecordAnchor" unique_id=1280973771]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 82.0
-offset_top = 488.0
-offset_right = 678.0
-offset_bottom = 514.0
-theme_override_fonts/font = ExtResource("5_josefin")
-theme_override_font_sizes/font_size = 14
-horizontal_alignment = 1
-text_overrun_behavior = 3
 
 [node name="CloseHint" type="Label" parent="RecordAnchor" unique_id=1274251806]
 layout_mode = 0

@@ -130,8 +130,7 @@ func open_puzzle(
 		var card: NightPassengerCard = _passenger_cards[index]
 		card.configure(
 			data,
-			str(_collected_statements.get(data.short_name, "")),
-			puzzle.get_anomaly_label(data.anomaly_type)
+			str(_collected_statements.get(data.short_name, ""))
 		)
 		card.show()
 
@@ -199,8 +198,7 @@ func refresh_collected_statements(collected_statements: Dictionary) -> void:
 		var data := _passenger_data_by_name[card.passenger_name] as PassengerData
 		card.configure(
 			data,
-			str(_collected_statements.get(card.passenger_name, "")),
-			_puzzle.get_anomaly_label(data.anomaly_type)
+			str(_collected_statements.get(card.passenger_name, ""))
 		)
 		card.set_assignment(_station_for_passenger(card.passenger_name))
 	_update_counts()

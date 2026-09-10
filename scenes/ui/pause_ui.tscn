@@ -162,16 +162,31 @@ uses_slider = true
 
 [node name="Actions" type="HBoxContainer" parent="Ticket"]
 layout_mode = 0
-offset_left = 598.0
+offset_left = 435.0
 offset_top = 344.0
 offset_right = 954.0
 offset_bottom = 383.0
 theme_override_constants/separation = 10
 alignment = 2
 
+[node name="ResumeButton" type="Button" parent="Ticket/Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(163, 39)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.937255, 0.788235, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("ActionButtonStyle")
+theme_override_styles/hover = SubResource("ActionButtonStyle")
+theme_override_styles/pressed = SubResource("ActionButtonStyle")
+theme_override_styles/focus = SubResource("ActionButtonStyle")
+text = "Resume"
+script = ExtResource("8_hover")
+
 [node name="RestartButton" type="Button" parent="Ticket/Actions"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(173, 39)
+custom_minimum_size = Vector2(163, 39)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.937255, 0.788235, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
@@ -186,7 +201,7 @@ script = ExtResource("8_hover")
 
 [node name="MainMenuButton" type="Button" parent="Ticket/Actions"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(173, 39)
+custom_minimum_size = Vector2(163, 39)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.937255, 0.788235, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
@@ -224,5 +239,6 @@ theme_override_font_sizes/font_size = 12
 text = "07 JUN 2026"
 horizontal_alignment = 2
 
+[connection signal="pressed" from="Ticket/Actions/ResumeButton" to="." method="_on_resume_button_pressed"]
 [connection signal="pressed" from="Ticket/Actions/RestartButton" to="." method="_on_restart_button_pressed"]
 [connection signal="pressed" from="Ticket/Actions/MainMenuButton" to="." method="_on_main_menu_button_pressed"]

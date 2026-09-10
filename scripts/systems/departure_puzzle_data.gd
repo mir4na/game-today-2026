@@ -92,9 +92,7 @@ func get_assignment_count() -> int:
 
 func get_assignment_instruction() -> String:
 	match service_level:
-		1:
-			return "Drag each soul to a station. Small marks show route distance."
-		2:
+		1, 2:
 			return "Drag each soul to a station. One station remains empty."
 		3, 4:
 			return "Drag each soul to a station. Each station holds one soul."
@@ -108,9 +106,9 @@ func get_service_label() -> String:
 
 func get_route_edges() -> Array[Vector2i]:
 	if service_level == 1:
-		# Level 1 uses its reduced local order: Vesperwick, Hollowcross,
-		# Morrowfield.
-		return [Vector2i(0, 1), Vector2i(1, 2)]
+		# The introductory path is a four-station chain with one empty
+		# destination: Vesperwick - Hollowcross - Bellhaven - Morrowfield.
+		return [Vector2i(0, 1), Vector2i(1, 2), Vector2i(2, 3)]
 	var edges: Array[Vector2i] = [
 		Vector2i(0, 1), # Vesperwick - Hollowcross
 		Vector2i(1, 3), # Hollowcross - Morrowfield
@@ -232,11 +230,10 @@ func _resolve_service_level(requested_level: int, passenger_count: int) -> int:
 	return 1
 
 
-func _stations_for_level(level: int) -> PackedStringArray:
-	if night_stations.size() < 4 or level > 1:
-		return night_stations.duplicate()
-	# Level 1 presents a readable three-stop chain: top -> hub -> endpoint.
-	return PackedStringArray([night_stations[0], night_stations[1], night_stations[3]])
+func _stations_for_level(_level: int) -> PackedStringArray:
+	# Station paths always expose all four authored destinations. Early levels
+	# reduce the soul count instead, leaving one station visibly unoccupied.
+	return night_stations.duplicate()
 
 
 func _assignment_stations_for_level(level: int, passenger_count: int) -> PackedStringArray:
