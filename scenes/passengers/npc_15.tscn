@@ -1,0 +1,118 @@
+[gd_scene format=3 uid="uid://dkaspdbmx7b3f"]
+
+[ext_resource type="PackedScene" path="res://scenes/passengers/passenger.tscn" id="1_base"]
+[ext_resource type="Shader" uid="uid://dq5qi6bem7nkh" path="res://shaders/interactable_outline.gdshader" id="2_6h8pi"]
+[ext_resource type="Texture2D" uid="uid://c0wxp7pf8kf2k" path="res://assets/characters/Where Do You Belong_/NPC15.png" id="2_art"]
+[ext_resource type="Texture2D" uid="uid://b1i568u18j5jf" path="res://assets/characters/Where Do You Belong_/Group 28.png" id="3_8ws60"]
+[ext_resource type="Material" path="res://resources/materials/character_reference_cutout.tres" id="3_cutout"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_6h8pi"]
+resource_local_to_scene = true
+shader = ExtResource("2_6h8pi")
+shader_parameter/outline_enabled = false
+shader_parameter/outline_color = Color(0.96, 0.78, 0.32, 1)
+shader_parameter/outline_width = 4.0
+shader_parameter/dead_effect_strength = 0.0
+shader_parameter/dead_desaturation = 0.72
+shader_parameter/dead_tint = Color(0.3, 0.52, 0.66, 0.24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hq42o"]
+atlas = ExtResource("3_8ws60")
+region = Rect2(0, 0, 714, 896)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gndn4"]
+atlas = ExtResource("3_8ws60")
+region = Rect2(714, 0, 714, 896)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i0bj7"]
+atlas = ExtResource("3_8ws60")
+region = Rect2(1428, 0, 714, 896)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ehtpk"]
+atlas = ExtResource("3_8ws60")
+region = Rect2(0, 896, 714, 896)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k1jsw"]
+atlas = ExtResource("3_8ws60")
+region = Rect2(714, 896, 714, 896)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s4m0u"]
+atlas = ExtResource("3_8ws60")
+region = Rect2(1428, 896, 714, 896)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s7aft"]
+atlas = ExtResource("3_8ws60")
+region = Rect2(0, 1792, 714, 896)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a0js5"]
+atlas = ExtResource("3_8ws60")
+region = Rect2(714, 1792, 714, 896)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iexau"]
+atlas = ExtResource("3_8ws60")
+region = Rect2(1428, 1792, 714, 896)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_8ws60"]
+resource_local_to_scene = true
+animations = [{
+"frames": [],
+"loop": 1,
+"name": &"idle",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hq42o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gndn4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i0bj7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ehtpk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k1jsw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s4m0u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s7aft")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a0js5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_iexau")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 10.0
+}]
+
+[node name="npc_15" unique_id=491729671 instance=ExtResource("1_base")]
+uses_authored_character_artwork = true
+
+[node name="CharacterScale" parent="." index="1"]
+material = SubResource("ShaderMaterial_6h8pi")
+
+[node name="InteractionPromptAnchor" parent="CharacterScale/PassengerVisual" index="0"]
+position = Vector2(21.78, -123.203)
+
+[node name="NPCVisual" parent="CharacterScale/PassengerVisual" index="1"]
+editor_description = "Walk artwork calibrated to match CharacterArtwork's visible height, horizontal center, and foot baseline."
+position = Vector2(-4.685, -51.832)
+scale = Vector2(0.228212, 0.228212)
+sprite_frames = SubResource("SpriteFrames_8ws60")
+animation = &"walk"
+frame = 8
+frame_progress = 1.0
+
+[node name="CharacterArtwork" type="Sprite2D" parent="CharacterScale/PassengerVisual" index="2" unique_id=1845554667]
+material = ExtResource("3_cutout")
+position = Vector2(-4.253, -37.459)
+scale = Vector2(0.265812, 0.265812)
+texture = ExtResource("2_art")

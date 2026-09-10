@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://cugd4ar6xupi2"]
+
+[ext_resource type="Script" uid="uid://w1kwenk3fmei" path="res://scripts/interactables/newspaper.gd" id="1"]
+[ext_resource type="Material" path="res://resources/materials/interactable_outline.tres" id="2_outline"]
+[ext_resource type="Texture2D" uid="uid://dbd4nf7tdm8i1" path="res://assets/ui/newspaper/Rak.png" id="3_rack"]
+
+[sub_resource type="RectangleShape2D" id="RackInteractionShape"]
+size = Vector2(180, 228)
+
+[node name="Newspaper" type="Area2D" unique_id=654820484 groups=["passenger_stop_obstacles"]]
+editor_description = "Scene-authored newspaper rack. Adjust its artwork, collision, and prompt directly through this scene's Inspector."
+z_index = 2
+script = ExtResource("1")
+prompt_text = "Read newspaper"
+interaction_distance = 150.0
+passenger_idle_collision_path = NodePath("CollisionShape2D")
+prompt_anchor_path = NodePath("InteractionPromptAnchor")
+focus_visual_path = NodePath("Visual")
+raise_on_focus = false
+
+[node name="InteractionPromptAnchor" type="Marker2D" parent="." unique_id=377578827]
+editor_description = "Inspector-authored screen prompt anchor above the newspaper."
+position = Vector2(0, -234)
+
+[node name="Visual" type="CanvasGroup" parent="." unique_id=1225356523]
+editor_description = "Outline target containing the scene-authored newspaper rack sprite."
+material = ExtResource("2_outline")
+fit_margin = 12.0
+clear_margin = 12.0
+
+[node name="RackSprite" type="Sprite2D" parent="Visual" unique_id=1164740874]
+editor_description = "Newspaper rack artwork. Texture, position, and scale are editable through the Inspector."
+position = Vector2(0, -114)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("3_rack")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=688299852]
+editor_description = "Interaction area aligned with the rack artwork; it does not physically block the player."
+position = Vector2(0, -114)
+shape = SubResource("RackInteractionShape")

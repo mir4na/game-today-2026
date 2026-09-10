@@ -1,0 +1,220 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/document_overlay_ui.gd" id="1"]
+[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/passenger_documents.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/ui/newspaper_reader.tscn" id="4_newspaper"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/round_close_button.tscn" id="5_close"]
+[ext_resource type="PackedScene" path="res://scenes/ui/stamp_tray_ui.tscn" id="6_stamp_tray"]
+
+[sub_resource type="StyleBoxFlat" id="ReaderPanelStyle"]
+content_margin_left = 24.0
+content_margin_top = 20.0
+content_margin_right = 24.0
+content_margin_bottom = 20.0
+bg_color = Color(0.0980392, 0.137255, 0.180392, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.819608, 0.678431, 0.439216, 1)
+corner_radius_top_left = 9
+corner_radius_top_right = 9
+corner_radius_bottom_right = 9
+corner_radius_bottom_left = 9
+
+[sub_resource type="StyleBoxFlat" id="CloseButtonNormal"]
+bg_color = Color(0.0352941, 0.0470588, 0.0666667, 0.82)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.819608, 0.678431, 0.439216, 0.82)
+corner_radius_top_left = 27
+corner_radius_top_right = 27
+corner_radius_bottom_right = 27
+corner_radius_bottom_left = 27
+
+[sub_resource type="StyleBoxFlat" id="CloseButtonHover"]
+bg_color = Color(0.141176, 0.101961, 0.0901961, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.933333, 0.827451, 0.607843, 1)
+corner_radius_top_left = 27
+corner_radius_top_right = 27
+corner_radius_bottom_right = 27
+corner_radius_bottom_left = 27
+
+[sub_resource type="StyleBoxFlat" id="CloseButtonPressed"]
+bg_color = Color(0.239216, 0.129412, 0.105882, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.933333, 0.827451, 0.607843, 1)
+corner_radius_top_left = 27
+corner_radius_top_right = 27
+corner_radius_bottom_right = 27
+corner_radius_bottom_left = 27
+
+[node name="DocumentOverlayUI" type="Control"]
+visible = false
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+theme = ExtResource("2")
+script = ExtResource("1")
+non_death_headline = "DRY SEASON SETTLES IN"
+non_death_primary_template = "Regional forecaster [b]%s[/b] confirmed that the dry season has arrived after rainfall fell sharply across the eastern district. Clear skies and rising afternoon temperatures are expected throughout the coming weeks. Farmers have begun adjusting irrigation schedules, while residents are being asked to conserve water and avoid burning waste near grassland. Weather officials will continue monitoring wells, reservoirs, and fire-prone areas each morning."
+non_death_secondary_headline = "PUBLIC ADVISORY"
+non_death_secondary_template = "Rail passengers should carry drinking water and prepare for hotter platforms during midday service. Municipal crews are inspecting pumps and distributing supplies to neighborhoods with limited reserves. Further updates will be issued if temperatures continue to rise.\n\nEdition printed before the afternoon service left %s."
+non_death_alt_headline = "YEAR-END HOLIDAYS BEGIN"
+non_death_alt_primary_template = "Year-end holidays have officially begun, bringing a sharp rise in visitors across the region. Tourism coordinator [b]%s[/b] said hotels, markets, and public attractions are preparing extended hours for families arriving throughout the week. Travelers are advised to reserve accommodation early, keep tickets ready, and expect crowded roads near major destinations. Extra information desks will operate daily as local businesses prepare seasonal events, food stalls, and evening performances for holiday guests."
+non_death_alt_secondary_headline = "VISITOR NOTICE"
+non_death_alt_secondary_template = "Additional rail services and shuttle buses will serve popular districts during peak hours. Visitors should watch station announcements, safeguard personal belongings, and allow extra time between connections. Local authorities have also opened temporary rest areas and first-aid posts.\n\nEdition printed before the afternoon service left %s."
+matching_death_headline = "PASSENGER DIES IN TRAIN FIRE"
+matching_death_primary_template = "A fire swept through a passenger carriage shortly before dawn, filling the compartment with heavy smoke before the train could stop. Authorities confirmed that [b]%s[/b], aged %d, was trapped inside when flames spread across the rear doorway and blocked the nearest exit. Railway staff uncoupled the damaged carriage as emergency crews contained the blaze. The train remains sealed while investigators examine the electrical system and interior fittings."
+matching_death_secondary_headline = "RAIL SAFETY INQUIRY"
+matching_death_secondary_template = "Records show the victim boarded at %s and worked as a %s. Investigators are reviewing witness statements, carriage maintenance logs, and the emergency response. The cause remains undetermined, and services using similar rolling stock face additional inspections.\n\nEdition printed before the afternoon service left %s."
+matching_death_alt_headline = "CLEANING ATTENDANT FOUND MURDERED"
+matching_death_alt_primary_template = "A cleaning attendant was found murdered during an overnight shift after failing to report at the end of duty. Authorities identified the victim as [b]%s[/b], aged %d. Investigators believe the attack occurred while the attendant was cleaning an isolated service area, where overturned equipment and a bloodstained cloth were recovered. Access remained sealed through the morning as officers questioned night staff and reviewed movement around the final scheduled trains."
+matching_death_alt_secondary_headline = "NIGHT-SHIFT KILLING"
+matching_death_alt_secondary_template = "Records show the victim traveled from %s and was employed as a %s before taking the overnight cleaning assignment. Detectives are examining cleaning equipment, staff logs, and witness accounts. No suspect has been named, and the motive remains unknown.\n\nEdition printed before the afternoon service left %s."
+departure_statement_title = "DEPARTURE STATEMENT"
+departure_statement_template = "[font_size=28][b]%s[/b][/font_size]\n\n[color=#c9ad79]STATEMENT[/color]\n\n\"%s\"\n\n[font_size=15][color=#9c9386]%s[/color][/font_size]"
+departure_statement_recorded_text = "Statement recorded in the night ledger."
+departure_statement_reread_text = "Statement already recorded."
+missing_departure_statement_text = "[color=#c98f87]This passenger has no configured departure statement.[/color]"
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.01, 0.015, 0.025, 0.58)
+
+[node name="PassengerDocumentCenter" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PassengerDocumentAnchor" type="Control" parent="PassengerDocumentCenter"]
+custom_minimum_size = Vector2(760, 520)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="PassengerDocuments" parent="PassengerDocumentCenter/PassengerDocumentAnchor" instance=ExtResource("3")]
+unique_name_in_owner = true
+layout_mode = 0
+
+[node name="PassengerCloseButton" parent="." instance=ExtResource("5_close")]
+unique_name_in_owner = true
+z_index = 50
+custom_minimum_size = Vector2(54, 54)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -78.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 78.0
+grow_horizontal = 0
+focus_neighbor_bottom = NodePath("../PassengerDocumentCenter/PassengerDocumentAnchor/PassengerDocuments")
+tooltip_text = "Close passenger documents [E / ESC]"
+
+[node name="StampTrayUI" parent="." instance=ExtResource("6_stamp_tray")]
+unique_name_in_owner = true
+z_index = 80
+
+[node name="NewspaperCenter" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="NewspaperReader" parent="NewspaperCenter" instance=ExtResource("4_newspaper")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="ReaderCenter" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ReaderAnchor" type="Control" parent="ReaderCenter"]
+custom_minimum_size = Vector2(1040, 600)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="ReaderPanel" type="PanelContainer" parent="ReaderCenter/ReaderAnchor"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(1040, 600)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("ReaderPanelStyle")
+
+[node name="ReaderLayout" type="VBoxContainer" parent="ReaderCenter/ReaderAnchor/ReaderPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="ReaderCenter/ReaderAnchor/ReaderPanel/ReaderLayout"]
+layout_mode = 2
+
+[node name="ReaderTitle" type="Label" parent="ReaderCenter/ReaderAnchor/ReaderPanel/ReaderLayout/Header"]
+theme_type_variation = &"HeaderLabel"
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
+theme_override_font_sizes/font_size = 27
+text = "DOCUMENT"
+
+[node name="CloseButton" parent="ReaderCenter/ReaderAnchor/ReaderPanel/ReaderLayout/Header" instance=ExtResource("5_close")]
+layout_mode = 2
+tooltip_text = "Close document [E / ESC]"
+
+[node name="ReaderContent" type="RichTextLabel" parent="ReaderCenter/ReaderAnchor/ReaderPanel/ReaderLayout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/default_color = Color(0.901961, 0.87451, 0.819608, 1)
+theme_override_font_sizes/normal_font_size = 19
+theme_override_font_sizes/bold_font_size = 22
+bbcode_enabled = true
+fit_content = false
+scroll_active = true
+
+[connection signal="pressed" from="ReaderCenter/ReaderAnchor/ReaderPanel/ReaderLayout/Header/CloseButton" to="." method="request_close"]
+[connection signal="pressed" from="PassengerCloseButton" to="." method="request_close"]
+[connection signal="close_requested" from="NewspaperCenter/NewspaperReader" to="." method="request_close"]
+[connection signal="stamp_toggle_requested" from="PassengerDocumentCenter/PassengerDocumentAnchor/PassengerDocuments" to="." method="_toggle_station_assignment"]
+[connection signal="ticket_visibility_changed" from="PassengerDocumentCenter/PassengerDocumentAnchor/PassengerDocuments" to="." method="_on_ticket_visibility_changed"]
+[connection signal="stamp_dropped" from="StampTrayUI" to="." method="_on_stamp_dropped"]

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3 uid="uid://diyhq8nh7l86r"]
+
+[ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://c0wxp7pf8kf2k" path="res://assets/characters/Where Do You Belong_/NPC15.png" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/passengers/npc_15.tscn" id="3_scene"]
+
+[resource]
+script = ExtResource("1")
+passenger_name = "Zoe"
+short_name = "Zoe"
+age = 44
+occupation = "Glassworker"
+body_color = Color(0.65, 0.47, 0.36, 1)
+passenger_scene = ExtResource("3_scene")
+id_photo = ExtResource("2")
+identity_number = "CID-0015"
+birth_place = "Goldcrest"
+date_of_birth = "17 SEP 1982"

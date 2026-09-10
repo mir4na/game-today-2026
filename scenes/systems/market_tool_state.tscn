@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/market_tool_state.gd" id="1"]
+
+[node name="MarketToolState" type="Node"]
+editor_description = "Scene-authored starting inventory and market economy. Veil Note has a one-item capacity and reveals one extra Night Shift clue."
+script = ExtResource("1")
+starting_blessings = 0
+starting_veil_notes = 1
+starting_radar_charges = 0
+starting_swift_charges = 1
+maximum_radar_charges = 3
+maximum_swift_charges = 5
+veil_note_cost = 200
+radar_charge_cost = 150
+swift_charge_cost = 75
+blessings_per_correct_dropoff = 30
+blessings_per_wrong_dropoff = 20
+blessings_per_incorrect_anomaly = 40
+blessings_per_correct_night_dropoff = 100
+blessings_per_night_attempt = 100

@@ -1,0 +1,18 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://bfgu0g2fltexs"]
+
+[ext_resource type="Shader" uid="uid://dq5qi6bem7nkh" path="res://shaders/interactable_outline.gdshader" id="1_outline"]
+
+[resource]
+resource_local_to_scene = true
+shader = ExtResource("1_outline")
+shader_parameter/outline_enabled = false
+shader_parameter/outline_color = Color(0.96, 0.78, 0.32, 1)
+shader_parameter/outline_width = 4.0
+shader_parameter/dead_effect_strength = 0.0
+shader_parameter/dead_desaturation = 0.72
+shader_parameter/dead_tint = Color(0.3, 0.52, 0.66, 0.24)
+shader_parameter/interaction_lock_strength = 0.0
+shader_parameter/radar_detection_strength = 0.0
+shader_parameter/radar_detection_color = Color(1, 0.08, 0.035, 0.95)
+shader_parameter/radar_outline_width = 8.0
+shader_parameter/radar_inner_tint = 0.12

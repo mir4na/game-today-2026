@@ -1,0 +1,115 @@
+[gd_scene format=3 uid="uid://c02e32y8p4krv"]
+
+[ext_resource type="PackedScene" path="res://scenes/passengers/passenger.tscn" id="1_base"]
+[ext_resource type="Shader" uid="uid://dq5qi6bem7nkh" path="res://shaders/interactable_outline.gdshader" id="2_4nwin"]
+[ext_resource type="Texture2D" uid="uid://cd48rc6fhar0b" path="res://assets/characters/Where Do You Belong_/NPC8.png" id="2_art"]
+[ext_resource type="Material" path="res://resources/materials/character_reference_cutout.tres" id="3_cutout"]
+[ext_resource type="Texture2D" uid="uid://t0pefikl3hd6" path="res://assets/characters/Where Do You Belong_/Group 25.png" id="3_t7jxs"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_b63dr"]
+resource_local_to_scene = true
+shader = ExtResource("2_4nwin")
+shader_parameter/outline_enabled = false
+shader_parameter/outline_color = Color(0.96, 0.78, 0.32, 1)
+shader_parameter/outline_width = 4.0
+shader_parameter/dead_effect_strength = 0.0
+shader_parameter/dead_desaturation = 0.72
+shader_parameter/dead_tint = Color(0.3, 0.52, 0.66, 0.24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2rb76"]
+atlas = ExtResource("3_t7jxs")
+region = Rect2(0, 0, 716, 897)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uy7oj"]
+atlas = ExtResource("3_t7jxs")
+region = Rect2(716, 0, 716, 897)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e51xe"]
+atlas = ExtResource("3_t7jxs")
+region = Rect2(1432, 0, 716, 897)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ord8e"]
+atlas = ExtResource("3_t7jxs")
+region = Rect2(0, 897, 716, 897)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ejg33"]
+atlas = ExtResource("3_t7jxs")
+region = Rect2(716, 897, 716, 897)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v6bdv"]
+atlas = ExtResource("3_t7jxs")
+region = Rect2(1432, 897, 716, 897)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v7d1c"]
+atlas = ExtResource("3_t7jxs")
+region = Rect2(0, 1794, 716, 897)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cf1py"]
+atlas = ExtResource("3_t7jxs")
+region = Rect2(716, 1794, 716, 897)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mfprb"]
+atlas = ExtResource("3_t7jxs")
+region = Rect2(1432, 1794, 716, 897)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_22dp0"]
+resource_local_to_scene = true
+animations = [{
+"frames": [],
+"loop": 1,
+"name": &"idle",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2rb76")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uy7oj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e51xe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ord8e")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ejg33")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v6bdv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v7d1c")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cf1py")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mfprb")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 10.0
+}]
+
+[node name="npc_8" unique_id=379094587 instance=ExtResource("1_base")]
+uses_authored_character_artwork = true
+
+[node name="CharacterScale" parent="." index="1"]
+material = SubResource("ShaderMaterial_b63dr")
+
+[node name="InteractionPromptAnchor" parent="CharacterScale/PassengerVisual" index="0"]
+position = Vector2(-7.063, -122.671)
+
+[node name="NPCVisual" parent="CharacterScale/PassengerVisual" index="1"]
+position = Vector2(-1.302481, -55.399158)
+scale = Vector2(0.239291, 0.239291)
+sprite_frames = SubResource("SpriteFrames_22dp0")
+animation = &"walk"
+
+[node name="CharacterArtwork" type="Sprite2D" parent="CharacterScale/PassengerVisual" index="2" unique_id=335220791]
+material = ExtResource("3_cutout")
+position = Vector2(-3.472, -40.002)
+scale = Vector2(0.277786, 0.277786)
+texture = ExtResource("2_art")

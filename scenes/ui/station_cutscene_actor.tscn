@@ -1,0 +1,35 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="ShaderMaterial" path="res://resources/materials/character_reference_cutout.tres" id="1_cutout"]
+
+[node name="StationCutsceneActor" type="Node2D"]
+editor_description = "Scene-authored platform actor. Boarding hands off to the real Passenger node when this visual crosses the open doorway."
+visible = false
+
+[node name="Shadow" type="Polygon2D" parent="."]
+editor_description = "Soft platform shadow aligned to the shared NPC foot line. Move this node to adjust every station crowd actor."
+z_index = -2
+position = Vector2(0, 21)
+polygon = PackedVector2Array(-36, 0, -33.26, -2.3, -25.46, -4.24, -13.78, -5.54, 0, -6, 13.78, -5.54, 25.46, -4.24, 33.26, -2.3, 36, 0, 33.26, 2.3, 25.46, 4.24, 13.78, 5.54, 0, 6, -13.78, 5.54, -25.46, 4.24, -33.26, 2.3)
+color = Color(0.025, 0.03, 0.04, 0.2)
+
+[node name="ContactShadow" type="Polygon2D" parent="."]
+editor_description = "Small contact shadow directly beneath the feet."
+z_index = -1
+position = Vector2(0, 21)
+polygon = PackedVector2Array(-22, 0, -20.33, -1.15, -15.56, -2.12, -8.42, -2.77, 0, -3, 8.42, -2.77, 15.56, -2.12, 20.33, -1.15, 22, 0, 20.33, 1.15, 15.56, 2.12, 8.42, 2.77, 0, 3, -8.42, 2.77, -15.56, 2.12, -20.33, 1.15)
+color = Color(0.02, 0.025, 0.035, 0.34)
+
+[node name="CharacterSprite" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(0, -91)
+scale = Vector2(0.32, 0.32)
+material = ExtResource("1_cutout")
+texture_filter = 4
+
+[node name="WalkingSprite" type="AnimatedSprite2D" parent="."]
+unique_name_in_owner = true
+visible = false
+position = Vector2(0, -91)
+scale = Vector2(0.32, 0.32)
+texture_filter = 4

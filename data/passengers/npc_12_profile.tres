@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3 uid="uid://04q085qiaa4u"]
+
+[ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://cecfjvuwq7ljk" path="res://assets/characters/Where Do You Belong_/NPC12 - Attar.png" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/passengers/npc_12.tscn" id="3_scene"]
+
+[resource]
+script = ExtResource("1")
+gender = 1
+passenger_name = "Nikolas"
+short_name = "Nikolas"
+age = 29
+occupation = "Cook"
+body_color = Color(0.72, 0.5, 0.28, 1)
+passenger_scene = ExtResource("3_scene")
+id_photo = ExtResource("2")
+identity_number = "CID-0012"
+birth_place = "Moonridge"
+date_of_birth = "11 DEC 1997"

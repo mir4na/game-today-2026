@@ -1,0 +1,137 @@
+[gd_scene format=3 uid="uid://cq24ye24eom3u"]
+
+[ext_resource type="Script" uid="uid://dg3q4jbt287eb" path="res://scripts/player/player.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://cnjfku034uar1" path="res://assets/characters/spritesheet_mc.png" id="3_gmlin"]
+
+[sub_resource type="CapsuleShape2D" id="Capsule"]
+radius = 27.5
+height = 136.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_je7p5"]
+atlas = ExtResource("3_gmlin")
+region = Rect2(560, 1400, 560, 700)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dovo2"]
+atlas = ExtResource("3_gmlin")
+region = Rect2(0, 0, 560, 700)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gmlin"]
+atlas = ExtResource("3_gmlin")
+region = Rect2(560, 0, 560, 700)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lvxji"]
+atlas = ExtResource("3_gmlin")
+region = Rect2(1120, 0, 560, 700)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p47bc"]
+atlas = ExtResource("3_gmlin")
+region = Rect2(0, 700, 560, 700)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_75vfm"]
+atlas = ExtResource("3_gmlin")
+region = Rect2(560, 700, 560, 700)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0owmy"]
+atlas = ExtResource("3_gmlin")
+region = Rect2(1120, 700, 560, 700)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qek5x"]
+atlas = ExtResource("3_gmlin")
+region = Rect2(0, 1400, 560, 700)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5gtgg"]
+atlas = ExtResource("3_gmlin")
+region = Rect2(560, 1400, 560, 700)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h17s1"]
+atlas = ExtResource("3_gmlin")
+region = Rect2(1120, 1400, 560, 700)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_yjxff"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_je7p5")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dovo2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gmlin")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lvxji")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p47bc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_75vfm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0owmy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qek5x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5gtgg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h17s1")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 10.0
+}]
+
+[node name="Player" type="CharacterBody2D" unique_id=2030105969]
+z_index = 3
+collision_mask = 2
+floor_snap_length = 12.0
+script = ExtResource("1")
+
+[node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=2014097555]
+shape = SubResource("Capsule")
+
+[node name="GroundShadow" type="Polygon2D" parent="." unique_id=1435860278]
+position = Vector2(0, 67)
+color = Color(0.03, 0.03, 0.04, 0.42)
+polygon = PackedVector2Array(-48, 0, -44.346, -3.061, -33.941, -5.657, -18.369, -7.391, 0, -8, 18.369, -7.391, 33.941, -5.657, 44.346, -3.061, 48, 0, 44.346, 3.061, 33.941, 5.657, 18.369, 7.391, 0, 8, -18.369, 7.391, -33.941, 5.657, -44.346, 3.061)
+
+[node name="MCVisual" type="AnimatedSprite2D" parent="." unique_id=1053191898]
+unique_name_in_owner = true
+position = Vector2(0.5, -9)
+scale = Vector2(0.25178573, 0.25142857)
+sprite_frames = SubResource("SpriteFrames_yjxff")
+animation = &"walk"
+autoplay = "idle"
+frame_progress = 0.23886856
+
+[node name="DialogueAnchor" type="Marker2D" parent="."]
+unique_name_in_owner = true
+editor_description = "Anchor for dialogue bubbles, positioned just above the player's head."
+position = Vector2(0, -112)
+
+[node name="RadarOrigin" type="Marker2D" parent="."]
+unique_name_in_owner = true
+editor_description = "Scene-authored center of the radial carriage scan. Move this marker to change where the radar wave begins on the MC."
+position = Vector2(0, -36)
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=406153284]
+editor_description = "Gameplay framing. Negative Position Y places the train lower on screen. World limits are supplied by CameraBounds/Min and Max in Main."
+position = Vector2(0, -40)
+zoom = Vector2(1.35, 1.35)
+
+[node name="CinematicCameraAnchor" type="Marker2D" parent="."]
+editor_description = "Scene-authored camera target used when a station cutscene moves back toward the MC. Keep it aligned with Camera2D by default; move it to tune the cinematic handoff framing."
+position = Vector2(0, -40)
+
+[node name="NightSoulRecordCameraOffset" type="Marker2D" parent="."]
+editor_description = "Scene-authored Camera2D offset while reading a Soul Record. Positive X moves the inspected player/NPC pair toward the left side of the viewport."
+position = Vector2(310, 0)

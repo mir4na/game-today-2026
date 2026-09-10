@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="DailyManifestConfig" format=3 uid="uid://b37vfh7cgqlw5"]
+
+[ext_resource type="Script" uid="uid://damtsuj4cdl67" path="res://scripts/systems/daily_manifest_config.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+total_passenger_count = 16
+initial_passenger_count = 8
+maximum_onboard_passenger_count = 12
+deceased_passenger_count = 3
+night_anomaly_count_by_level = PackedInt32Array(3, 3, 4, 4, 5)
+guaranteed_newspaper_anomaly_level = 5
+female_passenger_names = PackedStringArray("Eleni", "Daphne", "Irene", "Kalliope", "Melina", "Nefeli", "Thalia", "Xenia", "Zoe", "Anthea", "Ariadne", "Despina", "Lydia", "Penelope", "Helena", "Dimitra", "Georgia", "Myrto")
+male_passenger_names = PackedStringArray("Andreas", "Dimitris", "Elias", "Leonidas", "Nikolas", "Stavros", "Theo", "Petros", "Yannis", "Alexios", "Christos", "Konstantinos", "Kyriakos", "Manolis", "Michalis", "Panagiotis", "Spyros", "Vasileios")
+service_train_number = "505"
+alternate_train_numbers = PackedStringArray("318", "742", "901")
+service_date_text = "07 JUN 2026"
+ticket_day_code = "260607"
+invalid_service_dates_by_day_code = {
+"260606": "06 JUN 2026",
+"260608": "08 JUN 2026",
+"270607": "07 JUN 2027"
+}
+anomaly_types = PackedStringArray("shadowless", "unlisted_destination", "portrait_mismatch", "time_invalid_ticket", "newspaper_death")
+unlisted_destination_names = PackedStringArray("Greyhaven", "Hollowfen", "Larkspur")
+ai_behaviors = PackedStringArray("still", "wander", "carriage_roamer", "window_watcher", "restless")

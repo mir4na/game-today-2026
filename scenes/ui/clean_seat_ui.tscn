@@ -1,0 +1,219 @@
+[gd_scene format=3 uid="uid://dxh8uc0ytsvkm"]
+
+[ext_resource type="Script" uid="uid://d4m2frgbi65gj" path="res://scripts/minigames/clean_seat_ui.gd" id="1_ui"]
+[ext_resource type="Script" uid="uid://dqewd4t6k10kt" path="res://scripts/minigames/clean_seat_surface.gd" id="2_surface"]
+[ext_resource type="Texture2D" uid="uid://bb8rkrjaeuw6n" path="res://assets/kereta/seat.png" id="3_seat"]
+[ext_resource type="Texture2D" uid="uid://rtv7tfulbcyt" path="res://assets/item/lap.png" id="4_cloth"]
+[ext_resource type="Shader" uid="uid://dmqodekj7fc8t" path="res://shaders/seat_dirt_wipe.gdshader" id="5_shader"]
+[ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="6_theme"]
+[ext_resource type="Shader" uid="uid://bvor23y27r85g" path="res://shaders/seat_cleaning_foam.gdshader" id="7_foam_shader"]
+[ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="8_josefin_bold"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/round_close_button.tscn" id="9_close"]
+
+[sub_resource type="ShaderMaterial" id="DirtMaterial"]
+resource_local_to_scene = true
+shader = ExtResource("5_shader")
+shader_parameter/surface_size = Vector2(220, 342)
+shader_parameter/stain_a = Vector4(0.5, 0.28, 34, 1)
+shader_parameter/stain_b = Vector4(0.38, 0.49, 29, 2)
+shader_parameter/stain_c = Vector4(0.63, 0.61, 32, 3)
+shader_parameter/stain_d = Vector4(0.47, 0.78, 28, 4)
+shader_parameter/dirt_color = Color(0.2, 0.105, 0.045, 0.9)
+
+[sub_resource type="ShaderMaterial" id="FoamMaterial"]
+resource_local_to_scene = true
+shader = ExtResource("7_foam_shader")
+shader_parameter/surface_size = Vector2(220, 342)
+shader_parameter/foam_center = Vector2(0.5, 0.5)
+shader_parameter/brush_active = 0.0
+shader_parameter/foam_color = Color(0.84, 0.96, 1, 0.92)
+
+[node name="CleanSeatUI" type="Control" unique_id=622337779]
+process_mode = 1
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("6_theme")
+script = ExtResource("1_ui")
+
+[node name="Shade" type="ColorRect" parent="." unique_id=1604998946]
+editor_description = "Full-screen dim matching Blocked Aisle. Adjust alpha here to tune background darkness."
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.01, 0.015, 0.025, 0.72)
+
+[node name="CleaningWindow" type="Control" parent="." unique_id=1279917107]
+unique_name_in_owner = true
+editor_description = "Transparent 820 × 510 layout matching Blocked Aisle. Move and resize its scene-authored children here."
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -410.0
+offset_top = -255.0
+offset_right = 410.0
+offset_bottom = 255.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Instruction" type="Label" parent="CleaningWindow" unique_id=2137211910]
+editor_description = "Scene-authored drag instruction, aligned with the Blocked Aisle description."
+layout_mode = 0
+offset_left = 40.0
+offset_top = 12.0
+offset_right = 780.0
+offset_bottom = 63.0
+theme_override_colors/font_color = Color(0.803922, 0.792157, 0.752941, 1)
+theme_override_colors/font_outline_color = Color(0.0352941, 0.0431373, 0.054902, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("8_josefin_bold")
+theme_override_font_sizes/font_size = 24
+text = "Drag the cloth over the seat
+until every stain is gone."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Seat" type="TextureRect" parent="CleaningWindow" unique_id=1440294814]
+editor_description = "Scene-authored seat artwork. Keep this rect aligned with WipeSurface below."
+layout_mode = 0
+offset_left = 300.0
+offset_top = 82.0
+offset_right = 520.0
+offset_bottom = 424.0
+mouse_filter = 2
+texture = ExtResource("3_seat")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="WipeSurface" type="Control" parent="CleaningWindow" unique_id=495625072]
+unique_name_in_owner = true
+editor_description = "Interactive surface aligned exactly over Seat. Resizing requires matching the shader surface_size above."
+clip_contents = true
+anchors_preset = 0
+offset_left = 300.0
+offset_top = 82.0
+offset_right = 520.0
+offset_bottom = 424.0
+mouse_default_cursor_shape = 2
+script = ExtResource("2_surface")
+stain_markers_path = NodePath("StainMarkers")
+dirt_layer_path = NodePath("DirtLayer")
+cloth_path = NodePath("Cloth")
+cleaning_foam_path = NodePath("CleaningFoam")
+
+[node name="DirtLayer" type="ColorRect" parent="CleaningWindow/WipeSurface" unique_id=1877017664]
+material = SubResource("DirtMaterial")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="StainMarkers" type="Node2D" parent="CleaningWindow/WipeSurface" unique_id=1119704972]
+
+[node name="BackrestSpill" type="Marker2D" parent="CleaningWindow/WipeSurface/StainMarkers" unique_id=284577973]
+position = Vector2(110, 96)
+metadata/radius = 34.0
+
+[node name="LeftSmear" type="Marker2D" parent="CleaningWindow/WipeSurface/StainMarkers" unique_id=70812178]
+position = Vector2(83, 170)
+metadata/radius = 29.0
+
+[node name="RightSmear" type="Marker2D" parent="CleaningWindow/WipeSurface/StainMarkers" unique_id=215343294]
+position = Vector2(138, 215)
+metadata/radius = 32.0
+
+[node name="SeatSpill" type="Marker2D" parent="CleaningWindow/WipeSurface/StainMarkers" unique_id=1252803020]
+position = Vector2(104, 275)
+metadata/radius = 28.0
+
+[node name="CleaningFoam" type="ColorRect" parent="CleaningWindow/WipeSurface" unique_id=1894810092]
+unique_name_in_owner = true
+z_index = 4
+material = SubResource("FoamMaterial")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Cloth" type="TextureRect" parent="CleaningWindow/WipeSurface" unique_id=2086547850]
+unique_name_in_owner = true
+visible = false
+z_index = 5
+layout_mode = 0
+offset_right = 64.0
+offset_bottom = 50.0
+mouse_filter = 2
+texture = ExtResource("4_cloth")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ProgressLabel" type="Label" parent="CleaningWindow" unique_id=2051246173]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 250.0
+offset_top = 443.0
+offset_right = 570.0
+offset_bottom = 471.0
+theme_override_colors/font_color = Color(0.941176, 0.811765, 0.552941, 1)
+theme_override_colors/font_outline_color = Color(0.0352941, 0.0431373, 0.054902, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("8_josefin_bold")
+theme_override_font_sizes/font_size = 18
+text = "Cleaning  0%"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseHint" type="Label" parent="CleaningWindow" unique_id=897463567]
+unique_name_in_owner = true
+editor_description = "Scene-authored keyboard hint matching the Blocked Aisle footer."
+z_index = 30
+layout_mode = 0
+offset_left = 210.0
+offset_top = 509.0
+offset_right = 610.0
+offset_bottom = 543.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.0352941, 0.0431373, 0.054902, 0.95)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("8_josefin_bold")
+theme_override_font_sizes/font_size = 18
+text = "PRESS [E] TO CLOSE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" parent="." unique_id=187877911 instance=ExtResource("9_close")]
+unique_name_in_owner = true
+editor_description = "Scene-authored minigame exit. It mirrors the E interaction shortcut; Esc is reserved for Pause."
+z_index = 50
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -274.0
+offset_top = 116.0
+offset_right = -218.0
+offset_bottom = 172.0
+grow_horizontal = 0
+tooltip_text = "Leave the minigame without resetting progress"
+
+[connection signal="cleaned" from="CleaningWindow/WipeSurface" to="." method="_on_surface_cleaned"]
+[connection signal="cleaning_progress" from="CleaningWindow/WipeSurface" to="." method="_on_cleaning_progress"]
+[connection signal="pressed" from="CloseButton" to="." method="_on_close_button_pressed"]

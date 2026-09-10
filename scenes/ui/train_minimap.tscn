@@ -1,0 +1,184 @@
+[gd_scene load_steps=6 format=3 uid="uid://cxgfpcr3hg68b"]
+
+[ext_resource type="Script" uid="uid://0j8h84yllxdm" path="res://scripts/ui/train_minimap.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://ddbii5vyjx3mi" path="res://assets/ui/gerbong_active.png" id="2_active"]
+[ext_resource type="Texture2D" uid="uid://1nweqvgg1u7s" path="res://assets/ui/gerbong_nonactive.png" id="3_inactive"]
+[ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="4_theme"]
+[ext_resource type="Material" path="res://resources/materials/hud_black_outline.tres" id="5_outline"]
+
+[node name="TrainMinimap" type="Control" unique_id=1538774286]
+custom_minimum_size = Vector2(224, 27)
+layout_mode = 3
+anchors_preset = 0
+size_flags_horizontal = 4
+mouse_filter = 2
+theme = ExtResource("4_theme")
+script = ExtResource("1")
+carriage_numbers = PackedInt32Array(4, 3, 2, 1)
+slot_paths = Array[NodePath]([NodePath("Slot0"), NodePath("Slot1"), NodePath("Slot2"), NodePath("Slot3")])
+active_carriage_texture = ExtResource("2_active")
+inactive_carriage_texture = ExtResource("3_inactive")
+selected_marker_color = Color(0.0941176, 0.12549, 0.168627, 1)
+normal_marker_color = Color(0.941176, 0.811765, 0.552941, 1)
+
+[node name="Connectors" type="Control" parent="." unique_id=522977223]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Connector0" type="ColorRect" parent="Connectors" unique_id=2052335589]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 19.0
+offset_right = 61.0
+offset_bottom = 21.0
+color = Color(0.54902, 0.509804, 0.454902, 1)
+
+[node name="Connector1" type="ColorRect" parent="Connectors" unique_id=5565144]
+layout_mode = 0
+offset_left = 111.0
+offset_top = 19.0
+offset_right = 116.0
+offset_bottom = 21.0
+color = Color(0.54902, 0.509804, 0.454902, 1)
+
+[node name="Connector2" type="ColorRect" parent="Connectors" unique_id=1452030313]
+layout_mode = 0
+offset_left = 166.0
+offset_top = 19.0
+offset_right = 171.0
+offset_bottom = 21.0
+color = Color(0.54902, 0.509804, 0.454902, 1)
+
+[node name="Slot0" type="Control" parent="." unique_id=1878631634]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 56.0
+offset_bottom = 25.0
+
+[node name="Box" type="TextureRect" parent="Slot0" unique_id=756454706]
+material = ExtResource("5_outline")
+layout_mode = 0
+offset_right = 54.0
+offset_bottom = 23.0
+texture = ExtResource("2_active")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MarkerLabel" type="Label" parent="Slot0/Box" unique_id=161880028]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 5.0
+offset_bottom = 5.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/line_spacing = -7
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot1" type="Control" parent="." unique_id=1641753493]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_left = 57.0
+offset_top = 2.0
+offset_right = 111.0
+offset_bottom = 25.0
+
+[node name="Box" type="TextureRect" parent="Slot1" unique_id=683516816]
+material = ExtResource("5_outline")
+layout_mode = 0
+offset_right = 54.0
+offset_bottom = 23.0
+texture = ExtResource("3_inactive")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MarkerLabel" type="Label" parent="Slot1/Box" unique_id=1589799408]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 5.0
+offset_bottom = 5.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/line_spacing = -7
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot2" type="Control" parent="." unique_id=247919059]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_left = 112.0
+offset_top = 2.0
+offset_right = 166.0
+offset_bottom = 25.0
+
+[node name="Box" type="TextureRect" parent="Slot2" unique_id=303909592]
+material = ExtResource("5_outline")
+layout_mode = 0
+offset_right = 54.0
+offset_bottom = 23.0
+texture = ExtResource("3_inactive")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MarkerLabel" type="Label" parent="Slot2/Box" unique_id=855814035]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 5.0
+offset_bottom = 5.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/line_spacing = -7
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot3" type="Control" parent="." unique_id=592430716]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_left = 167.0
+offset_top = 2.0
+offset_right = 221.0
+offset_bottom = 25.0
+
+[node name="Box" type="TextureRect" parent="Slot3" unique_id=906714206]
+material = ExtResource("5_outline")
+layout_mode = 0
+offset_right = 54.0
+offset_bottom = 23.0
+texture = ExtResource("3_inactive")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MarkerLabel" type="Label" parent="Slot3/Box" unique_id=1330998012]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 5.0
+offset_bottom = 5.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/line_spacing = -7
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1

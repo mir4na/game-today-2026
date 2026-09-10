@@ -1,0 +1,12 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://shaders/screen_bloom.gdshader" id="1_bloom_shader"]
+
+[resource]
+resource_name = "Screen Bloom"
+shader = ExtResource("1_bloom_shader")
+shader_parameter/threshold = 0.72
+shader_parameter/soft_knee = 0.18
+shader_parameter/intensity = 0.34
+shader_parameter/radius = 4.2
+shader_parameter/bloom_tint = Color(1, 0.9, 0.78, 1)

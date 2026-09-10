@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#15263a"/>
+      <stop offset="1" stop-color="#263748"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#171e29"/>
+      <stop offset="1" stop-color="#090d14"/>
+    </linearGradient>
+    <radialGradient id="lamp">
+      <stop offset="0" stop-color="#e0bd72" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#e0bd72" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1280" height="720" fill="#0b111b"/>
+  <g fill="url(#sky)" stroke="#596473" stroke-width="4">
+    <rect x="45" y="94" width="205" height="235"/>
+    <rect x="297" y="94" width="205" height="235"/>
+    <rect x="549" y="94" width="205" height="235"/>
+    <rect x="801" y="94" width="205" height="235"/>
+    <rect x="1053" y="94" width="182" height="235"/>
+  </g>
+  <g fill="#263b4c" opacity=".85">
+    <path d="M47 329 L47 277 108 212 165 279 211 233 248 280 248 329Z"/>
+    <path d="M299 329 L299 266 360 221 417 276 463 241 500 287 500 329Z"/>
+    <path d="M551 329 L551 281 612 213 669 276 715 238 752 286 752 329Z"/>
+    <path d="M803 329 L803 270 864 226 921 273 967 239 1004 285 1004 329Z"/>
+    <path d="M1055 329 L1055 275 1116 218 1173 279 1218 242 1233 267 1233 329Z"/>
+  </g>
+  <g fill="#9aabb5" opacity=".08">
+    <ellipse cx="155" cy="179" rx="77" ry="31"/>
+    <ellipse cx="455" cy="224" rx="94" ry="35"/>
+    <ellipse cx="706" cy="174" rx="86" ry="29"/>
+    <ellipse cx="977" cy="221" rx="104" ry="36"/>
+  </g>
+  <g fill="#303a48">
+    <rect x="144" y="94" width="6" height="235"/><rect x="396" y="94" width="6" height="235"/>
+    <rect x="648" y="94" width="6" height="235"/><rect x="900" y="94" width="6" height="235"/>
+    <rect x="1141" y="94" width="6" height="235"/>
+  </g>
+  <rect y="350" width="1280" height="284" fill="url(#floor)"/>
+  <rect y="350" width="1280" height="3" fill="#9c7c50"/>
+  <g stroke="#413b38" stroke-width="3" fill="#e0bd72">
+    <path d="M130 350v50"/><circle cx="130" cy="408" r="9"/>
+    <path d="M460 350v50"/><circle cx="460" cy="408" r="9"/>
+    <path d="M790 350v50"/><circle cx="790" cy="408" r="9"/>
+    <path d="M1120 350v50"/><circle cx="1120" cy="408" r="9"/>
+  </g>
+  <g fill="url(#lamp)">
+    <circle cx="130" cy="408" r="44"/><circle cx="460" cy="408" r="44"/>
+    <circle cx="790" cy="408" r="44"/><circle cx="1120" cy="408" r="44"/>
+  </g>
+  <rect y="634" width="1280" height="86" fill="#080c13"/>
+  <rect y="634" width="1280" height="4" fill="#3a424e"/>
+  <path d="M0 677H1280M0 699H1280" stroke="#252b35" stroke-width="5"/>
+</svg>

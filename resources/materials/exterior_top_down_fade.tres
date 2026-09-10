@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://brf65k0jnducb"]
+
+[ext_resource type="Shader" uid="uid://dptrpenkwd8l2" path="res://shaders/exterior_top_down_fade.gdshader" id="1_shader"]
+
+[resource]
+shader = ExtResource("1_shader")
+shader_parameter/wipe_progress = 0.0
+shader_parameter/edge_softness = 0.08
+shader_parameter/wipe_top_screen_y = 0.0
+shader_parameter/wipe_bottom_screen_y = 1.0
