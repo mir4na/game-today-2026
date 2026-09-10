@@ -12,20 +12,20 @@ const TOOL_SWIFTSTEP: StringName = &"swiftstep"
 @export_range(0, 999, 1) var starting_blessings: int = 0
 @export_range(0, 1, 1) var starting_veil_notes: int = 1
 @export_range(0, 3, 1) var starting_radar_charges: int = 0
-@export_range(0, 3, 1) var starting_swift_charges: int = 1
+@export_range(0, 5, 1) var starting_swift_charges: int = 1
 @export_category("Carry Limits")
 @export_range(1, 3, 1) var maximum_radar_charges: int = 3
-@export_range(1, 3, 1) var maximum_swift_charges: int = 3
+@export_range(1, 5, 1) var maximum_swift_charges: int = 5
 @export_category("Market Costs")
-@export_range(1, 999, 1) var veil_note_cost: int = 90
-@export_range(1, 999, 1) var radar_charge_cost: int = 45
+@export_range(1, 999, 1) var veil_note_cost: int = 200
+@export_range(1, 999, 1) var radar_charge_cost: int = 150
 @export_range(1, 999, 1) var swift_charge_cost: int = 75
 @export_category("Blessing Rewards")
 @export_range(0, 100, 1) var blessings_per_correct_dropoff: int = 30
 @export_range(0, 100, 1) var blessings_per_wrong_dropoff: int = 20
 @export_range(0, 100, 1) var blessings_per_incorrect_anomaly: int = 40
-@export_range(0, 100, 1) var blessings_per_correct_night_dropoff: int = 50
-@export_range(0, 100, 1) var blessings_per_failed_night_attempt: int = 10
+@export_range(0, 500, 1) var blessings_per_correct_night_dropoff: int = 100
+@export_range(0, 500, 1) var blessings_per_night_attempt: int = 100
 
 var blessings: int = 0
 var veil_notes: int = 0
@@ -108,8 +108,7 @@ func restore_shift_inventory(snapshot: Dictionary) -> void:
 		maximum_radar_charges
 	)
 	# Version 3 stored a Swiftstep potency level. It now represents the number
-	# of 15-second uses carried, preserving existing saves without granting more
-	# than the new three-item capacity.
+	# of ten-second speed boosts carried, clamped to the current five-item case.
 	swift_charges = clampi(
 		int(snapshot.get("swift_charges", snapshot.get("speed_level", starting_swift_charges))),
 		0,
@@ -126,7 +125,7 @@ func award_night_blessings(correct_night_dropoffs: int, attempt_count: int = 1) 
 	var safe_attempt_count: int = maxi(1, attempt_count)
 	var failed_attempts: int = maxi(0, safe_attempt_count - 1)
 	var base_reward: int = correct_count * blessings_per_correct_night_dropoff
-	var attempt_deduction: int = failed_attempts * blessings_per_failed_night_attempt
+	var attempt_deduction: int = failed_attempts * blessings_per_night_attempt
 	var earned: int = maxi(0, base_reward - attempt_deduction)
 	blessings += earned
 	_last_night_award = {
@@ -136,7 +135,7 @@ func award_night_blessings(correct_night_dropoffs: int, attempt_count: int = 1) 
 		"attempt_count": safe_attempt_count,
 		"failed_attempts": failed_attempts,
 		"correct_rate": blessings_per_correct_night_dropoff,
-		"attempt_rate": blessings_per_failed_night_attempt,
+		"attempt_rate": blessings_per_night_attempt,
 		"correct_night_dropoffs": correct_count,
 	}
 	_emit_inventory_changed()

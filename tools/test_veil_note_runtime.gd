@@ -22,6 +22,16 @@ func _check(condition: bool, message: String) -> void:
 func _run() -> void:
 	var market := MarketScene.instantiate() as MarketToolState
 	root.add_child(market)
+	_check(
+		market.veil_note_cost == 200
+		and market.radar_charge_cost == 150
+		and market.swift_charge_cost == 75,
+		"Night Market prices must match the authored 200 / 150 / 75 balance."
+	)
+	_check(
+		market.maximum_radar_charges == 3 and market.maximum_swift_charges == 5,
+		"Radar must carry three charges and Swiftstep must carry five."
+	)
 	market.restore_shift_inventory({
 		"blessings": 1000,
 		"veil_notes": 1,
@@ -32,17 +42,17 @@ func _run() -> void:
 	_check(not bool(result.success) and market.blessings == 1000, "An owned Veil Note must block purchase before spending Blessings.")
 	_check(market.consume_veil_note() and market.veil_notes == 0, "Opening the Veil Note must consume its single stock.")
 	result = market.purchase(&"veil_note")
-	_check(bool(result.success) and market.veil_notes == 1 and market.blessings == 910, "An empty slot may buy exactly one Veil Note.")
+	_check(bool(result.success) and market.veil_notes == 1 and market.blessings == 800, "An empty slot may buy one 200-Blessing Veil Note.")
 	result = market.purchase(&"veil_note")
-	_check(not bool(result.success) and market.blessings == 910, "Repeated purchases must remain blocked at capacity one.")
+	_check(not bool(result.success) and market.blessings == 800, "Repeated purchases must remain blocked at capacity one.")
 	market.restore_shift_inventory({"blessings": 1000, "veil_notes": 0, "radar_charges": 0, "swift_charges": 0})
 	for _charge: int in 3:
 		_check(bool(market.purchase(&"radar_charge").success), "Radar charges must be purchasable until the case reaches three.")
 	_check(market.radar_charges == 3 and not bool(market.purchase(&"radar_charge").success), "Radar stock must stop at three charges.")
-	for _charge: int in 3:
-		_check(bool(market.purchase(&"swiftstep").success), "Swiftstep charges must be purchasable until the case reaches three.")
-	_check(market.swift_charges == 3 and not bool(market.purchase(&"swiftstep").success), "Swiftstep stock must stop at three charges.")
-	_check(market.consume_swift_charge() and market.swift_charges == 2, "Using Swiftstep must consume exactly one charge.")
+	for _charge: int in 5:
+		_check(bool(market.purchase(&"swiftstep").success), "Swiftstep charges must be purchasable until the case reaches five.")
+	_check(market.swift_charges == 5 and not bool(market.purchase(&"swiftstep").success), "Swiftstep stock must stop at five charges.")
+	_check(market.consume_swift_charge() and market.swift_charges == 4, "Using Swiftstep must consume exactly one charge.")
 	market.restore_shift_inventory({"blessings": 0, "audit_slips": 8})
 	_check(market.veil_notes == 1, "Legacy Audit Slip saves must migrate into one Veil Note.")
 	market.free()
@@ -99,6 +109,22 @@ func _run() -> void:
 	_check(reveal.visible and game._active_modal == reveal, "The scene-authored reveal must own input while it plays.")
 	await create_timer(0.9).timeout
 	_check(not reveal.visible and game._active_modal == null, "The reveal must return control after its particle flight.")
+
+	var swift_effect := game._swiftstep_effect_ui as SwiftstepEffectUI
+	swift_effect.effect_duration_seconds = 0.05
+	swift_effect.absorb_duration_seconds = 0.01
+	swift_effect.release_duration_seconds = 0.01
+	game._on_market_tool_requested(&"swiftstep")
+	_check(game._market_tool_state.swift_charges == 0, "Swiftstep activation must consume one carried pair.")
+	_check(
+		is_equal_approx(game._player.get_move_speed_multiplier(), 3.0),
+		"Swiftstep must triple only the player's movement speed."
+	)
+	await create_timer(0.15).timeout
+	_check(
+		is_equal_approx(game._player.get_move_speed_multiplier(), 1.0),
+		"Swiftstep must restore normal movement speed when its timer ends."
+	)
 
 	game._open_night_puzzle()
 	await process_frame

@@ -1,5 +1,5 @@
 extends SceneTree
-## Checks animated station-path validation, retry enforcement, and attempt deductions.
+## Checks animated station-path validation, retry enforcement, and retry deductions.
 
 const MainScene = preload("res://scenes/main/main.tscn")
 
@@ -39,6 +39,7 @@ func _run() -> void:
 	board.light_travel_seconds = 0.01
 	board.station_hold_seconds = 0.0
 	board.result_hold_seconds = 0.01
+	board.paycheck_handoff_seconds = 0.01
 	board.failed_attempt_exit_seconds = 0.01
 	for target: NightStationTarget in board._station_targets:
 		target.pointer_pop_seconds = 0.01
@@ -85,32 +86,40 @@ func _run() -> void:
 	await process_frame
 	_check(game.state == AfterTheEndGame.GameState.COMPLETE, "A correct retry must enter the night paycheck state.")
 	_check(game._shift_report_ui.visible, "The existing scene-authored paycheck must appear after a correct station path.")
+	_check(board.visible, "The completed station path must remain visible behind the night paycheck.")
 	_check(game.get_node_or_null("ModalLayer/DepartureSequenceUI") == null, "The obsolete assignment result screen must be removed.")
 	var award: Dictionary = game._night_blessing_award
 	_check(int(award.get("failed_attempts", -1)) == 1, "Only failed attempts may reduce the reward.")
 	_check(
-		int(award.get("base_reward", -1)) == puzzle.get_assignment_count() * 50,
-		"Every correctly released soul must contribute 50 Blessings."
+		int(award.get("base_reward", -1)) == puzzle.get_assignment_count() * 100,
+		"Every correctly released soul must contribute 100 Blessings."
 	)
-	_check(int(award.get("attempt_deduction", -1)) == 10, "One rejected attempt must deduct the configured 10 Blessings.")
+	_check(int(award.get("attempt_deduction", -1)) == 100, "Two submissions must cost one retry penalty.")
 	_check(
 		int(award.get("earned", -1))
 		== int(award.get("base_reward", 0)) - int(award.get("attempt_deduction", 0)),
-		"Night earnings must equal the base reward minus accumulated attempt deductions."
+		"Night earnings must equal the base reward minus accumulated retry deductions."
 	)
 	_check(
-		(game._shift_report_ui.get_node("%WrongCaption") as Label).text == "FAILED ATTEMPTS",
-		"The night paycheck must display the attempt deduction breakdown."
+		(game._shift_report_ui.get_node("%WrongCaption") as Label).text == "RETRY COST",
+		"The night paycheck must display the retry deduction breakdown."
 	)
 	_check(
 		(game._shift_report_ui.get_node("%Title") as Label).text == "PAYCHECK",
 		"The night paycheck title must not repeat the word 'Night'."
 	)
 	var floor_test := MarketToolState.new()
-	floor_test.blessings_per_correct_night_dropoff = 50
-	floor_test.blessings_per_failed_night_attempt = 10
+	floor_test.blessings_per_correct_night_dropoff = 100
+	floor_test.blessings_per_night_attempt = 100
+	var first_try_award: Dictionary = floor_test.award_night_blessings(3, 1)
+	_check(int(first_try_award.get("attempt_deduction", -1)) == 0, "The first night attempt must not deduct Blessings.")
+	_check(int(first_try_award.get("earned", -1)) == 300, "A first-try three-soul night should award the full 300 Blessings.")
+
+	floor_test = MarketToolState.new()
+	floor_test.blessings_per_correct_night_dropoff = 100
+	floor_test.blessings_per_night_attempt = 100
 	var floor_award: Dictionary = floor_test.award_night_blessings(3, 16)
-	_check(int(floor_award.get("base_reward", -1)) == 150, "Three released souls must be worth 150 Blessings.")
+	_check(int(floor_award.get("base_reward", -1)) == 300, "Three released souls must be worth 300 Blessings.")
 	_check(int(floor_award.get("earned", -1)) == 0, "Night reward must never fall below zero after many failed attempts.")
 
 	game.free()

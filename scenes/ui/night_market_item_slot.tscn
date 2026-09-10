@@ -1,8 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://b4nkn6n7jlvt2"]
+[gd_scene load_steps=6 format=3 uid="uid://b4nkn6n7jlvt2"]
 
 [ext_resource type="Script" uid="uid://cqjmgqrrfuvfn" path="res://scripts/ui/night_market_item_slot.gd" id="1_script"]
 [ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
-[ext_resource type="Material" path="res://resources/materials/hud_black_outline.tres" id="4_outline"]
 [ext_resource type="Texture2D" uid="uid://76xa8b6162yi" path="res://assets/ui/Ellipse 115 (1).png" id="4_p3rbs"]
 [ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="5_csyhk"]
 
@@ -27,7 +26,7 @@ script = ExtResource("1_script")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1812476632]
 unique_name_in_owner = true
-material = ExtResource("4_outline")
+visible = false
 layout_mode = 0
 offset_left = 6.0
 offset_top = 4.0
@@ -55,7 +54,6 @@ theme_override_styles/disabled = SubResource("StyleBox_transparent")
 
 [node name="Icon" type="TextureRect" parent="." unique_id=771861680]
 unique_name_in_owner = true
-material = ExtResource("4_outline")
 layout_mode = 0
 offset_left = 16.0
 offset_top = 12.0

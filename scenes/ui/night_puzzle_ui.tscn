@@ -148,7 +148,7 @@ mouse_filter = 2
 texture = ExtResource("5_ledger_page")
 expand_mode = 1
 
-[node name="LedgerScroll" type="ScrollContainer" parent="BoardAnchor/LedgerAnchor"]
+[node name="LedgerScroll" type="ScrollContainer" parent="BoardAnchor/LedgerAnchor" unique_id=1892342354]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 29.0
@@ -159,7 +159,7 @@ horizontal_scroll_mode = 0
 vertical_scroll_mode = 3
 scroll_deadzone = 8
 
-[node name="CardCanvas" type="Control" parent="BoardAnchor/LedgerAnchor/LedgerScroll"]
+[node name="CardCanvas" type="Control" parent="BoardAnchor/LedgerAnchor/LedgerScroll" unique_id=1160189820]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(318, 518)
 layout_mode = 2
@@ -169,15 +169,12 @@ mouse_filter = 2
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_right = 318.0
-offset_bottom = 116.0
 
 [node name="PassengerCard2" parent="BoardAnchor/LedgerAnchor/LedgerScroll/CardCanvas" unique_id=1572439812 instance=ExtResource("14_card")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
 offset_top = 120.0
-offset_right = 318.0
 offset_bottom = 236.0
 
 [node name="PassengerCard3" parent="BoardAnchor/LedgerAnchor/LedgerScroll/CardCanvas" unique_id=1937201624 instance=ExtResource("14_card")]
@@ -185,7 +182,6 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 0
 offset_top = 240.0
-offset_right = 318.0
 offset_bottom = 356.0
 
 [node name="PassengerCard4" parent="BoardAnchor/LedgerAnchor/LedgerScroll/CardCanvas" unique_id=241677965 instance=ExtResource("14_card")]
@@ -193,7 +189,6 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 0
 offset_top = 360.0
-offset_right = 318.0
 offset_bottom = 476.0
 
 [node name="PassengerCard5" parent="BoardAnchor/LedgerAnchor/LedgerScroll/CardCanvas" unique_id=381691292 instance=ExtResource("14_card")]
@@ -201,21 +196,20 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 0
 offset_top = 480.0
-offset_right = 318.0
 offset_bottom = 596.0
 
 [node name="VeilNotePanel" type="Panel" parent="BoardAnchor/LedgerAnchor" unique_id=1434416946]
 unique_name_in_owner = true
-visible = false
 layout_mode = 0
-offset_left = 420.0
-offset_top = 103.0
-offset_right = 708.0
-offset_bottom = 154.0
+offset_left = 46.66667
+offset_top = 689.6666
+offset_right = 334.6667
+offset_bottom = 740.6666
 mouse_filter = 2
 theme_override_styles/panel = SubResource("VeilNotePaper")
 
 [node name="Title" type="Label" parent="BoardAnchor/LedgerAnchor/VeilNotePanel" unique_id=32261348]
+visible = false
 layout_mode = 0
 offset_left = 9.0
 offset_top = 4.0
@@ -229,13 +223,13 @@ text = "VEIL NOTE"
 [node name="VeilNoteStatement" type="Label" parent="BoardAnchor/LedgerAnchor/VeilNotePanel" unique_id=1669800178]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 9.0
-offset_top = 17.0
-offset_right = 279.0
+offset_left = 5.5555573
+offset_top = 3.666748
+offset_right = 284.44446
 offset_bottom = 47.0
 theme_override_colors/font_color = Color(0.247059, 0.211765, 0.2, 1)
 theme_override_fonts/font = ExtResource("17_medium")
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 12
 text = "Two souls rest at stations joined by one line."
 vertical_alignment = 1
 autowrap_mode = 2
@@ -306,6 +300,7 @@ color = Color(0.027451, 0.0705882, 0.137255, 0.92)
 
 [node name="PathLayoutHost" type="Control" parent="BoardAnchor/StationPathAnchor" unique_id=239346585]
 unique_name_in_owner = true
+editor_description = "Shared constellation stage. Move, resize, or scale this Control to adjust every Night Service level. The Level 1 child is an editor preview and is replaced automatically at runtime."
 z_index = 3
 layout_mode = 1
 anchors_preset = 15
@@ -318,6 +313,10 @@ offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+
+[node name="ConstellationLevel1Preview" parent="BoardAnchor/StationPathAnchor/PathLayoutHost" unique_id=900956760 instance=ExtResource("21_path_1")]
+editor_description = "Editor-only layout reference. Edit PathLayoutHost to reposition or resize all levels; edit the Level 1 source scene for its individual station and marker arrangement."
+layout_mode = 1
 
 [node name="LegendLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=1909445939]
 visible = false
@@ -338,15 +337,15 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 z_index = 4
 layout_mode = 0
-offset_left = 420.0
-offset_top = 543.0
-offset_right = 738.0
-offset_bottom = 568.0
+offset_left = 406.6667
+offset_top = 513.3334
+offset_right = 724.6667
+offset_bottom = 584.44446
 theme_override_colors/font_color = Color(0.364706, 0.294118, 0.270588, 1)
 theme_override_fonts/font = ExtResource("17_medium")
 theme_override_font_sizes/font_size = 24
 text = "Drag each soul to a station."
-vertical_alignment = 1
+autowrap_mode = 2
 
 [node name="AssignmentCountLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=259874943]
 unique_name_in_owner = true
@@ -408,7 +407,7 @@ texture = ExtResource("13_star_small_d")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="ValidationFuseGlow" type="Line2D" parent="BoardAnchor/StationPathAnchor"]
+[node name="ValidationFuseGlow" type="Line2D" parent="BoardAnchor/StationPathAnchor" unique_id=1416134697]
 unique_name_in_owner = true
 z_index = 24
 width = 11.0
@@ -418,7 +417,7 @@ begin_cap_mode = 2
 end_cap_mode = 2
 antialiased = true
 
-[node name="ValidationFuseTrail" type="Line2D" parent="BoardAnchor/StationPathAnchor"]
+[node name="ValidationFuseTrail" type="Line2D" parent="BoardAnchor/StationPathAnchor" unique_id=820023964]
 unique_name_in_owner = true
 z_index = 25
 width = 3.5
@@ -428,7 +427,7 @@ begin_cap_mode = 2
 end_cap_mode = 2
 antialiased = true
 
-[node name="ValidationFuseSpark" type="CPUParticles2D" parent="BoardAnchor/StationPathAnchor"]
+[node name="ValidationFuseSpark" type="CPUParticles2D" parent="BoardAnchor/StationPathAnchor" unique_id=1066396284]
 unique_name_in_owner = true
 z_index = 29
 emitting = false
@@ -436,7 +435,6 @@ amount = 18
 texture = ExtResource("13_star_small_d")
 lifetime = 0.38
 randomness = 0.72
-local_coords = false
 emission_shape = 1
 emission_sphere_radius = 7.0
 direction = Vector2(0, 0)

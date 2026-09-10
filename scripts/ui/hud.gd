@@ -12,7 +12,11 @@ signal debug_night_requested
 @export var clock_template: String = "%02d:%02d %s"
 @export var tool_status_template: String = "BLESSINGS %d"
 @export var day_template: String = "Day %d"
-@export var blessing_progress_template: String = "%d/%d"
+@export_category("Day Blessing Progress")
+@export_range(0.1, 1.0, 0.05) var blessing_near_threshold_ratio: float = 0.7
+@export var blessing_far_color: Color = Color(0.96, 0.95, 0.92, 1.0)
+@export var blessing_near_color: Color = Color(1.0, 0.82, 0.28, 1.0)
+@export var blessing_reached_color: Color = Color(1.0, 0.34, 0.3, 1.0)
 @export_category("Journey Clock")
 @export_range(0.0, 1440.0, 1.0) var clock_default_start_minutes: float = 840.0
 @export_range(0.0, 1440.0, 1.0) var clock_default_end_minutes: float = 1320.0
@@ -76,7 +80,8 @@ signal debug_night_requested
 @onready var _day_summary: Control = %DaySummary
 @onready var _day_label: Label = %DayLabel
 @onready var _blessing_summary: Control = %BlessingSummary
-@onready var _blessing_label: Label = %BlessingLabel
+@onready var _blessing_earned_label: Label = %BlessingEarnedLabel
+@onready var _blessing_target_label: Label = %BlessingTargetLabel
 @onready var _debug_night_button: Button = %DebugNightButton
 @onready var _guidebook_button: Button = %GuidebookButton
 @onready var _service_action_button: Button = %ServiceActionButton
@@ -278,7 +283,6 @@ func set_passenger_counts_by_carriage(counts: Dictionary) -> void:
 func set_market_tool_inventory(snapshot: Dictionary) -> void:
 	var blessings: int = int(snapshot.get("blessings", 0))
 	_tool_status_label.text = tool_status_template % blessings
-	_refresh_service_summary(blessings)
 	_veil_note_slot.call(&"set_owned_amount", int(snapshot.get("veil_notes", 0)))
 	_radar_slot.call(&"set_owned_amount", int(snapshot.get("radar_charges", 0)))
 	_swift_slot.call(&"set_owned_amount", int(snapshot.get("swift_charges", 0)))
@@ -293,9 +297,18 @@ func set_service_progress(day: int, blessings: int, target: int) -> void:
 
 
 func _refresh_service_summary(blessings: int) -> void:
-	if not is_instance_valid(_blessing_label):
+	if not is_instance_valid(_blessing_earned_label) or not is_instance_valid(_blessing_target_label):
 		return
-	_blessing_label.text = blessing_progress_template % [maxi(0, blessings), _displayed_blessing_target]
+	var day_blessings: int = maxi(0, blessings)
+	_blessing_earned_label.text = str(day_blessings)
+	_blessing_target_label.text = str(_displayed_blessing_target)
+	var earned_color: Color = blessing_far_color
+	if _displayed_blessing_target > 0:
+		if day_blessings >= _displayed_blessing_target:
+			earned_color = blessing_reached_color
+		elif float(day_blessings) / float(_displayed_blessing_target) >= blessing_near_threshold_ratio:
+			earned_color = blessing_near_color
+	_blessing_earned_label.add_theme_color_override(&"font_color", earned_color)
 
 
 func request_market_item(shortcut_number: int) -> bool:
@@ -549,7 +562,7 @@ func set_swiftstep_active(value: bool) -> void:
 	_update_action_button_locks()
 	_swift_slot.call(
 		&"set_item_tooltip",
-		"Swiftstep is bending time" if value else "Swiftstep Soles — slow the world for 15 seconds"
+		"Swiftstep Soles active — movement speed ×3" if value else "Swiftstep Soles — movement speed ×3 for 10 seconds"
 	)
 
 

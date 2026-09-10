@@ -23,6 +23,7 @@ signal validation_impact_requested(succeeded: bool)
 @export_range(0.05, 2.0, 0.05) var light_travel_seconds: float = 0.34
 @export_range(0.0, 1.0, 0.05) var station_hold_seconds: float = 0.16
 @export_range(0.1, 3.0, 0.05) var result_hold_seconds: float = 0.9
+@export_range(0.0, 2.0, 0.05) var paycheck_handoff_seconds: float = 0.5
 @export_range(0.05, 1.0, 0.05) var failed_attempt_exit_seconds: float = 0.28
 @export_category("Five-Soul Ledger Layout")
 @export var regular_card_origin: Vector2 = Vector2.ZERO
@@ -46,6 +47,7 @@ var _focus_tween: Tween
 var _map_impact_tween: Tween
 var _ledger_rest_position: Vector2
 var _station_path_rest_position: Vector2
+var _station_path_rest_scale: Vector2
 var _current_instruction: String = ""
 var _station_path_layout: NightStationPathLayout
 var _station_targets: Array[NightStationTarget] = []
@@ -84,6 +86,7 @@ var _validation_fuse_points := PackedVector2Array()
 func _ready() -> void:
 	_ledger_rest_position = _ledger_anchor.position
 	_station_path_rest_position = _station_path_anchor.position
+	_station_path_rest_scale = _station_path_anchor.scale
 	_station_path_anchor.pivot_offset = station_path_focus_pivot
 	_current_instruction = instruction_text
 	_instruction_label.text = _current_instruction
@@ -189,6 +192,14 @@ func _is_statement_found(passenger_name: String) -> bool:
 func _configure_station_path(puzzle: DeparturePuzzleData) -> void:
 	if is_instance_valid(_station_path_layout):
 		_station_path_layout.free()
+	# NightPuzzleUI keeps a Level 1 instance in the scene as an editor preview.
+	# Remove that preview (or the previous runtime layout) before loading the
+	# case-specific scene. Transform edits on PathLayoutHost remain shared by
+	# every level.
+	for child: Node in _station_path_layout_host.get_children():
+		if child is NightStationPathLayout:
+			_station_path_layout_host.remove_child(child)
+			child.free()
 	_station_path_layout = null
 	_station_targets.clear()
 	var layout_scene: PackedScene = puzzle.get_station_path_layout_scene()
@@ -374,8 +385,8 @@ func play_validation(station_results: Dictionary, attempt_count: int) -> void:
 
 	await _fade_validation_light()
 	if all_correct:
-		if result_hold_seconds > 0.0:
-			await get_tree().create_timer(result_hold_seconds).timeout
+		if paycheck_handoff_seconds > 0.0:
+			await get_tree().create_timer(paycheck_handoff_seconds).timeout
 		validation_finished.emit(true, attempt_count)
 		return
 
@@ -418,7 +429,7 @@ func _focus_station_path() -> void:
 	_focus_tween.tween_property(
 		_station_path_anchor,
 		^"scale",
-		station_path_focus_scale,
+		_station_path_rest_scale * station_path_focus_scale,
 		focus_transition_seconds
 	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_focus_tween.tween_property(
@@ -601,7 +612,7 @@ func _reset_validation_presentation() -> void:
 	_ledger_anchor.position = _ledger_rest_position
 	_ledger_anchor.modulate.a = 1.0
 	_station_path_anchor.position = _station_path_rest_position
-	_station_path_anchor.scale = Vector2.ONE
+	_station_path_anchor.scale = _station_path_rest_scale
 	_station_path_anchor.pivot_offset = station_path_focus_pivot
 	for control: CanvasItem in _validation_chrome():
 		control.modulate.a = 1.0

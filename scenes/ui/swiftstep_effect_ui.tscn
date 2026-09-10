@@ -1,31 +1,26 @@
 [gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/swiftstep_effect_ui.gd" id="1_script"]
-[ext_resource type="Shader" path="res://shaders/swiftstep_world_slow.gdshader" id="2_shader"]
+[ext_resource type="Shader" path="res://shaders/swiftstep_speed_boost.gdshader" id="2_shader"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_swiftstep"]
 resource_local_to_scene = true
 shader = ExtResource("2_shader")
-shader_parameter/player_screen_uv = Vector2(0.5, 0.62)
-shader_parameter/slowed_tint = Color(0.87, 0.92, 1, 1)
-shader_parameter/light_tint = Color(0.72, 0.92, 1, 1)
+shader_parameter/streak_tint = Color(1, 0.86, 0.38, 1)
 shader_parameter/effect_strength = 0.0
 shader_parameter/burst_strength = 0.0
-shader_parameter/flow_direction = -1.0
 shader_parameter/elapsed_seconds = 0.0
-shader_parameter/world_brightness = 0.84
-shader_parameter/world_saturation = 0.68
-shader_parameter/ray_density = 24.0
-shader_parameter/ray_speed = 2.8
-shader_parameter/ray_intensity = 0.38
+shader_parameter/streak_density = 36.0
+shader_parameter/streak_speed = 5.2
+shader_parameter/streak_intensity = 0.2
 
 [node name="SwiftstepEffectUI" type="CanvasLayer"]
 layer = 9
 script = ExtResource("1_script")
-effect_duration_seconds = 15.0
+effect_duration_seconds = 10.0
 absorb_duration_seconds = 0.7
 release_duration_seconds = 0.8
-world_time_scale = 0.3
+player_speed_multiplier = 3.0
 
 [node name="ScreenEffect" type="ColorRect" parent="."]
 unique_name_in_owner = true
@@ -38,15 +33,9 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(1, 1, 1, 1)
 
-[node name="PlayerColorCopy" type="Sprite2D" parent="."]
-unique_name_in_owner = true
-editor_description = "Runtime copy of the MC artwork drawn above the world dim so the character keeps its normal color without a spotlight."
-visible = false
-z_index = 1
-
 [node name="EffectTimer" type="Timer" parent="."]
 unique_name_in_owner = true
-wait_time = 15.0
+wait_time = 10.0
 one_shot = true
 
 [connection signal="timeout" from="EffectTimer" to="." method="_on_effect_timer_timeout"]

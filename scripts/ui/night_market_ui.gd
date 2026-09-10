@@ -9,7 +9,7 @@ signal continue_requested
 @export var blessings_template: String = "Blessings  %d"
 @export var veil_note_stock_template: String = "%d / 1 owned  •  %d Blessings"
 @export var radar_stock_template: String = "%d / %d owned  •  %d Blessings"
-@export var swift_stock_template: String = "%d / %d owned  •  15 seconds  •  %d Blessings"
+@export var swift_stock_template: String = "%d / %d owned  •  Speed ×3 for 10 seconds  •  %d Blessings"
 @export_category("Floating Motion")
 @export_range(0.0, 20.0, 0.5) var angel_float_height: float = 8.0
 @export_range(0.0, 5.0, 0.05) var angel_float_speed: float = 1.15
@@ -36,7 +36,7 @@ signal continue_requested
 @export_range(1.0, 1.2, 0.01) var item_button_hover_scale: float = 1.06
 @export_range(0.05, 0.35, 0.01) var item_button_hover_duration: float = 0.14
 @export_category("Standalone Preview")
-@export_range(0, 999, 1) var preview_blessings: int = 100
+@export_range(0, 999, 1) var preview_blessings: int = 500
 
 var _snapshot: Dictionary = {}
 var _continue_sent: bool = false
@@ -165,9 +165,9 @@ func _open_standalone_preview() -> void:
 			"radar_charges": 2,
 			"radar_max_charges": 3,
 			"swift_charges": 1,
-			"swift_max_charges": 3,
-			"veil_note_cost": 90,
-			"radar_charge_cost": 45,
+			"swift_max_charges": 5,
+			"veil_note_cost": 200,
+			"radar_charge_cost": 150,
 			"swift_charge_cost": 75,
 		},
 		{
@@ -187,7 +187,7 @@ func set_snapshot(snapshot: Dictionary) -> void:
 	var radar_count: int = int(_snapshot.get("radar_charges", 0))
 	var radar_maximum: int = int(_snapshot.get("radar_max_charges", 3))
 	var swift_count: int = int(_snapshot.get("swift_charges", 0))
-	var swift_maximum: int = int(_snapshot.get("swift_max_charges", 3))
+	var swift_maximum: int = int(_snapshot.get("swift_max_charges", 5))
 	var swift_cost: int = int(_snapshot.get("swift_charge_cost", 0))
 	_blessings_label.text = blessings_template % blessings
 	_item_info_labels[0].text = veil_note_stock_template % [veil_note_count, veil_note_cost]

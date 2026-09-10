@@ -61,7 +61,9 @@ func _refresh_presentation() -> void:
 	visible = _owned_amount > 0
 	_amount_label.text = amount_template % _owned_amount
 	_button.disabled = _interaction_locked or _owned_amount <= 0
-	self_modulate = Color(0.64, 0.64, 0.68, 0.82) if _button.disabled else Color.WHITE
+	# Keep the authored item artwork untouched even while interaction is locked.
+	# Availability is already communicated by visibility and the amount label.
+	self_modulate = Color.WHITE
 
 
 func _set_hovered(value: bool) -> void:

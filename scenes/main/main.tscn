@@ -431,7 +431,6 @@ expand_mode = 1
 
 [node name="SwiftstepEffectUI" parent="." unique_id=1129699900 instance=ExtResource("46_swiftstep_effect")]
 unique_name_in_owner = true
-world_lighting_path = NodePath("../GameplayWorld/WorldLighting")
 
 [node name="BloomLayer" type="CanvasLayer" parent="." unique_id=2034352473]
 editor_description = "Subtle highlight bloom for the rendered world. It sits below the HUD and modal layers so interface text stays crisp."

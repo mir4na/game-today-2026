@@ -133,7 +133,6 @@ var _night_service_expired: bool = false
 var _night_service_timeout_presented: bool = false
 var _radar_scan_active: bool = false
 var _swiftstep_active: bool = false
-var _world_time_scale: float = 1.0
 
 @onready var _train: TrainWorld = %Train
 @onready var _player: ConductorPlayer = %Player
@@ -283,7 +282,7 @@ func _process(delta: float) -> void:
 		return
 
 	if not _station_arrival_announced:
-		_day_minutes = minf(_day_minutes + delta * _world_time_scale, _next_arrival_minutes())
+		_day_minutes = minf(_day_minutes + delta, _next_arrival_minutes())
 		_travel_background.update_route_leg_remaining(
 			maxf(_next_arrival_minutes() - _day_minutes, 0.0)
 		)
@@ -401,7 +400,7 @@ func _update_night_service(delta: float, world_simulation_active: bool) -> void:
 	if not world_simulation_active:
 		return
 	_night_service_elapsed_seconds = minf(
-		_night_service_elapsed_seconds + delta * _world_time_scale,
+		_night_service_elapsed_seconds + delta,
 		night_service_duration_seconds
 	)
 	_hud.set_clock_progress(_night_service_clock_progress())
@@ -707,7 +706,6 @@ func _spawn_passenger(data: PassengerData, seat_slot: Marker2D) -> Passenger:
 	passenger.position = _passenger_container.to_local(seat_slot.global_position)
 	passenger.documents_requested.connect(_on_passenger_documents_requested)
 	_passenger_container.add_child(passenger)
-	passenger.set_world_time_scale(_world_time_scale)
 	_passengers.append(passenger)
 	_seat_occupant_by_slot[seat_slot] = passenger
 	_seat_slot_by_passenger[passenger] = seat_slot
@@ -1605,6 +1603,7 @@ func _process_station_arrival() -> void:
 				int(_market_tool_state.get("blessings_per_wrong_dropoff")),
 		])
 		departing_passenger.depart_train()
+	_refresh_day_blessing_hud()
 
 	# The transition preview may be requested before later-station anomalies have
 	# boarded. Once the terminal exchange has freed the living passengers' seats,
@@ -2004,13 +2003,7 @@ func _open_guidebook() -> void:
 
 
 func _refresh_guidebook_progress() -> void:
-	var earnings: Dictionary = _market_tool_state.call(
-		&"preview_day_blessings",
-		_correct_drop_offs,
-		_wrong_drop_offs,
-		_incorrectly_stamped_anomalies.size(),
-		_get_day_pass_target()
-	)
+	var earnings: Dictionary = _get_day_blessing_preview()
 	var boarded_today: int = 0
 	var aboard: int = 0
 	var stamped_aboard: int = 0
@@ -2349,11 +2342,7 @@ func _on_night_market_continue() -> void:
 
 func _on_market_inventory_changed(snapshot: Dictionary) -> void:
 	_hud.set_market_tool_inventory(snapshot)
-	_hud.set_service_progress(
-		day_number,
-		int(snapshot.get("blessings", 0)),
-		_get_day_pass_target()
-	)
+	_refresh_day_blessing_hud()
 	if is_instance_valid(_night_market_ui) and _night_market_ui.visible:
 		_night_market_ui.call(&"set_snapshot", snapshot)
 
@@ -2402,46 +2391,25 @@ func _use_swiftstep() -> void:
 		_hud.notify("No Swiftstep soles owned", 2.5)
 		return
 	if _swiftstep_active:
-		_hud.notify("Swiftstep is already bending time", 2.0)
+		_hud.notify("Swiftstep Soles are already active", 2.0)
 		return
 	if not bool(_market_tool_state.call(&"consume_swift_charge")):
 		return
 	_swiftstep_active = true
-	GameSFX.play(&"time_warp", -5.0, 1.0, 0.02, 0.3)
+	GameSFX.play(&"speed_woosh", -5.0, 1.08, 0.02, 0.3)
 	_hud.set_swiftstep_active(true)
-	var next_time_scale: float = float(_swiftstep_effect_ui.call(&"activate", _player))
-	_set_world_time_scale(next_time_scale)
+	var speed_multiplier: float = float(_swiftstep_effect_ui.call(&"activate", _player))
+	_player.set_move_speed_multiplier(speed_multiplier)
 	_hud.notify(
-		"Swiftstep soles active\nThe world yields for 15 seconds",
+		"Swiftstep Soles active\nMovement speed tripled for 10 seconds",
 		2.75
 	)
 
 
 func _on_swiftstep_effect_finished() -> void:
-	_set_world_time_scale(1.0)
+	_player.set_move_speed_multiplier(1.0)
 	_swiftstep_active = false
 	_hud.set_swiftstep_active(false)
-
-
-func _set_world_time_scale(value: float) -> void:
-	var previous_scale: float = _world_time_scale
-	_world_time_scale = clampf(value, 0.05, 1.0)
-	_train.set_world_time_scale(_world_time_scale)
-	_travel_background.set_world_time_scale(_world_time_scale)
-	_travel_foreground.set_world_time_scale(_world_time_scale)
-	_ambience.set_world_time_scale(_world_time_scale)
-	for passenger: Passenger in _passengers:
-		if is_instance_valid(passenger):
-			passenger.set_world_time_scale(_world_time_scale)
-	_rescale_running_timer(_blocked_aisle_timer, previous_scale, _world_time_scale)
-	_rescale_running_timer(_dirty_seat_timer, previous_scale, _world_time_scale)
-
-
-func _rescale_running_timer(timer: Timer, previous_scale: float, next_scale: float) -> void:
-	if not is_instance_valid(timer) or timer.is_stopped():
-		return
-	var world_seconds_remaining: float = timer.time_left * maxf(previous_scale, 0.05)
-	timer.start(world_seconds_remaining / maxf(next_scale, 0.05))
 
 
 func _use_carriage_radar() -> void:
@@ -2678,7 +2646,9 @@ func _on_night_validation_finished(succeeded: bool, attempt_count: int) -> void:
 		attempt_count
 	)
 	_hud.set_service_action_mode(true, false)
-	_night_puzzle_ui.hide()
+	# Keep the completed station path visible beneath the paycheck entrance so
+	# the scan flows directly into the report without exposing gameplay between
+	# the two modal screens.
 	_active_modal = _shift_report_ui
 	state = GameState.COMPLETE
 	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
@@ -2729,6 +2699,28 @@ func _record_incorrect_anomaly(data: PassengerData, station: String) -> void:
 	_penalty_log.append("%s: anomaly assigned to %s; remains aboard  (−%d Blessings)" % [
 		data.passenger_name, station, int(_market_tool_state.get("blessings_per_incorrect_anomaly")),
 	])
+	_refresh_day_blessing_hud()
+
+
+func _get_day_blessing_preview() -> Dictionary:
+	return _market_tool_state.call(
+		&"preview_day_blessings",
+		_correct_drop_offs,
+		_wrong_drop_offs,
+		_incorrectly_stamped_anomalies.size(),
+		_get_day_pass_target()
+	)
+
+
+func _refresh_day_blessing_hud() -> void:
+	if not is_instance_valid(_hud) or not is_instance_valid(_market_tool_state):
+		return
+	var earnings: Dictionary = _get_day_blessing_preview()
+	_hud.set_service_progress(
+		day_number,
+		int(earnings.get("net_earnings", 0)),
+		_get_day_pass_target()
+	)
 
 
 func _set_player_control_for_state() -> void:

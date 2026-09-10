@@ -12,14 +12,14 @@ func _run() -> void:
 	root.add_child(market)
 	await process_frame
 	var snapshot: Dictionary = {
-		"blessings": 100,
+		"blessings": 500,
 		"veil_notes": 0,
 		"radar_charges": 2,
 		"radar_max_charges": 3,
 		"swift_charges": 1,
-		"swift_max_charges": 3,
-		"veil_note_cost": 90,
-		"radar_charge_cost": 45,
+		"swift_max_charges": 5,
+		"veil_note_cost": 200,
+		"radar_charge_cost": 150,
 		"swift_charge_cost": 75,
 	}
 	market.open_market(snapshot, {"earned": 120, "dropoff_reward": 180, "penalty_deduction": 60})

@@ -7,6 +7,8 @@ const LEGACY_STARTER_RADAR_VERSION: int = 1
 const AUDIT_SLIP_VERSION: int = 2
 const SWIFT_STOCK_VERSION: int = 3
 const DAY_COUNT: int = 5
+const RADAR_CARRY_LIMIT: int = 3
+const SWIFT_CARRY_LIMIT: int = 5
 
 
 ## Creates the only checkpoint that replaces an existing campaign from scratch.
@@ -77,8 +79,12 @@ static func _migrate_swift_stock(checkpoint: Dictionary) -> Dictionary:
 	var migrated: Dictionary = checkpoint.duplicate(true)
 	var inventory: Dictionary = migrated.inventory
 	# Old saves stored Swiftstep potency. The redesigned item uses the same
-	# one-to-three range as a carry count, preserving an equivalent stock.
-	inventory["swift_charges"] = clampi(int(inventory.get("speed_level", 1)), 0, 3)
+	# carry count, preserving the old value within the current five-slot case.
+	inventory["swift_charges"] = clampi(
+		int(inventory.get("speed_level", 1)),
+		0,
+		SWIFT_CARRY_LIMIT
+	)
 	inventory.erase("speed_level")
 	migrated.inventory = inventory
 	return migrated
@@ -87,12 +93,20 @@ static func make_checkpoint(day: int, inventory: Dictionary, seed_value: int) ->
 	var saved_inventory: Dictionary = {}
 	for key: String in ["blessings", "radar_charges", "swift_charges"]:
 		if inventory.has(key):
-			var maximum: int = 3 if key in ["radar_charges", "swift_charges"] else 999999
+			var maximum: int = 999999
+			if key == "radar_charges":
+				maximum = RADAR_CARRY_LIMIT
+			elif key == "swift_charges":
+				maximum = SWIFT_CARRY_LIMIT
 			saved_inventory[key] = clampi(int(inventory[key]), 0, maximum)
 	# Allow an old or hand-authored snapshot while writing only the new
 	# consumable Swiftstep inventory key.
 	if not saved_inventory.has("swift_charges") and inventory.has("speed_level"):
-		saved_inventory["swift_charges"] = clampi(int(inventory["speed_level"]), 0, 3)
+		saved_inventory["swift_charges"] = clampi(
+			int(inventory["speed_level"]),
+			0,
+			SWIFT_CARRY_LIMIT
+		)
 	if inventory.has("veil_notes") or inventory.has("audit_slips"):
 		saved_inventory["veil_notes"] = clampi(
 			int(inventory.get("veil_notes", inventory.get("audit_slips", 0))),

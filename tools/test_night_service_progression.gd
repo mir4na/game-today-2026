@@ -118,15 +118,19 @@ func _run() -> void:
 
 		var hidden_paragraphs: Dictionary = {}
 		var normalized_veil_statement: String = runtime.get_veil_note_statement().to_lower()
-		var veil_mentions_background: bool = false
+		var veil_identifies_soul: bool = false
 		for case_passenger: PassengerData in deceased:
+			var short_name: String = case_passenger.short_name.strip_edges().to_lower()
 			var occupation: String = case_passenger.occupation.strip_edges().to_lower()
-			if not occupation.is_empty() and occupation in normalized_veil_statement:
-				veil_mentions_background = true
+			if (
+				(not short_name.is_empty() and short_name in normalized_veil_statement)
+				or (not occupation.is_empty() and occupation in normalized_veil_statement)
+			):
+				veil_identifies_soul = true
 				break
 		_check(
-			veil_mentions_background,
-			"The prepared Veil Note must identify souls through their backgrounds."
+			veil_identifies_soul,
+			"The prepared Veil Note must identify souls through names, occupations, or backgrounds."
 		)
 		for data: PassengerData in deceased:
 			var statement: String = runtime.get_statement_for_passenger(data.short_name)

@@ -12,7 +12,7 @@ extends Resource
 @export_multiline var distance_statement_template: String
 @export_multiline var single_passenger_statement: String
 @export_multiline var veil_note_statement_template: String = "%s and %s belong at stations joined by one line."
-@export_multiline var veil_note_distance_statement_template: String = "%s and %s are separated by %d small marks."
+@export_multiline var veil_note_distance_statement_template: String = "%s and %s are separated by %s."
 @export_multiline var veil_note_direct_statement_template: String = "%s belongs at %s."
 @export_multiline var veil_note_shared_station_template: String = "%s and %s share %s."
 
@@ -71,12 +71,41 @@ extends Resource
 		"For a moment, the traces left with {name} align around the idea that {statement}.",
 	]),
 ]
+@export var hidden_statement_unique_contexts: PackedStringArray = PackedStringArray([
+	"A loose timetable tucked into {name}'s belongings folds open on the words that {statement}.",
+	"The underside of {name}'s oldest receipt carries a faint route note: {statement}.",
+	"A torn corner from {name}'s case file darkens until it says that {statement}.",
+	"A dry pencil line along {name}'s final page stops beside one sentence: {statement}.",
+	"The last map scrap kept with {name} creases into a warning that {statement}.",
+	"A lesson diagram in {name}'s recovered papers quietly resolves into the fact that {statement}.",
+	"The ink around {name}'s ticket stamp gathers into a plain answer: {statement}.",
+	"A narrow label sewn into {name}'s sleeve turns over by itself and shows that {statement}.",
+	"The back of {name}'s platform token warms, then leaves the sentence: {statement}.",
+	"A smudged station mark beside {name}'s name clears just long enough to show that {statement}.",
+	"The pressed edge of {name}'s record book reveals one remaining instruction: {statement}.",
+	"A cracked fold in {name}'s evidence sheet catches the carriage glow and states that {statement}.",
+	"The final blank margin near {name}'s name fills with the conclusion that {statement}.",
+	"A sealed note found under {name}'s seat opens to a single route fact: {statement}.",
+	"The dust on {name}'s recovered parcel settles into a line saying that {statement}.",
+	"A brass corner on {name}'s file turns cold and exposes the message that {statement}.",
+	"The route pinholes around {name}'s papers connect into the sentence that {statement}.",
+	"A water-stained annotation near {name}'s record becomes readable: {statement}.",
+	"The final crease in {name}'s page points to the answer that {statement}.",
+	"A hidden carbon copy beneath {name}'s form repeats one fact: {statement}.",
+	"The station wax on {name}'s document splits and leaves behind the words that {statement}.",
+	"A pale line inside {name}'s record frame writes itself as: {statement}.",
+	"The last unchecked box in {name}'s ledger opens into the clue that {statement}.",
+	"A torn route seal attached to {name}'s page settles around the phrase that {statement}.",
+	"The recovered tag tied to {name}'s belongings twists until it reads that {statement}.",
+])
 
 ## Populated only on a duplicated runtime puzzle.
 var statement_by_passenger: Dictionary = {}
 var correct_passenger_by_station: Dictionary = {}
 var correct_station_by_passenger: Dictionary = {}
 var biography_by_passenger: Dictionary = {}
+var context_slot_by_passenger: Dictionary = {}
+var clue_blocked_passengers_by_holder: Dictionary = {}
 var veil_note_statement: String = ""
 var service_level: int = 1
 
@@ -195,6 +224,8 @@ func create_runtime(
 	runtime.correct_passenger_by_station = {}
 	runtime.correct_station_by_passenger = {}
 	runtime.biography_by_passenger = {}
+	runtime.context_slot_by_passenger = {}
+	runtime.clue_blocked_passengers_by_holder = {}
 	runtime.veil_note_statement = ""
 	runtime.service_level = runtime._resolve_service_level(requested_level, passengers.size())
 	runtime.night_stations = runtime._stations_for_level(runtime.service_level)
@@ -217,26 +248,38 @@ func create_runtime(
 			runtime.correct_passenger_by_station[station_name] = passenger_name
 	var descriptors: PackedStringArray = runtime._build_unique_descriptors(ordered)
 	runtime.veil_note_statement = runtime._build_veil_note_statement(ordered, descriptors, rng)
-	var clues: PackedStringArray = runtime._build_progression_clues(descriptors, assignment_stations)
+	var clue_records: Array = runtime._build_progression_clue_records(descriptors, assignment_stations)
 
-	_shuffle_strings(clues, rng)
-	var statement_holders: Array[PassengerData] = passengers.duplicate()
-	_shuffle_passengers(statement_holders, rng)
+	runtime._shuffle_clue_records(clue_records, rng)
+	var holder_assignments: PackedInt32Array = runtime._assign_statement_holders(clue_records, ordered.size())
 	var paragraph_placements := PackedInt32Array()
-	for index: int in range(passengers.size()):
+	for index: int in range(ordered.size()):
 		paragraph_placements.append(index % 3)
 	_shuffle_ints(paragraph_placements, rng)
-	for index: int in range(passengers.size()):
-		var holder: PassengerData = statement_holders[index]
+	for index: int in range(clue_records.size()):
+		var clue_record: Dictionary = clue_records[index]
+		var holder_index: int = holder_assignments[index] if index < holder_assignments.size() else index
+		var holder: PassengerData = ordered[clampi(holder_index, 0, ordered.size() - 1)]
+		var clue_statement: String = str(clue_record.get("statement", ""))
+		var context_slot: int = int(clue_record.get("context_slot", index))
+		var blocked_passengers := PackedStringArray()
+		var blocked_indices: Variant = clue_record.get("blocked_holders", PackedInt32Array())
+		if blocked_indices is PackedInt32Array:
+			for blocked_index: int in blocked_indices:
+				if blocked_index >= 0 and blocked_index < ordered.size():
+					blocked_passengers.append(ordered[blocked_index].short_name)
 		var biography: Array = runtime._compose_biography(
 			holder,
-			clues[index],
+			clue_statement,
 			paragraph_placements[index],
-			rng
+			rng,
+			context_slot
 		)
-		var hidden_statement: String = runtime._find_hidden_statement(biography, clues[index])
+		var hidden_statement: String = runtime._find_hidden_statement(biography, clue_statement)
 		runtime.statement_by_passenger[holder.short_name] = hidden_statement
 		runtime.biography_by_passenger[holder.short_name] = biography
+		runtime.context_slot_by_passenger[holder.short_name] = context_slot
+		runtime.clue_blocked_passengers_by_holder[holder.short_name] = blocked_passengers
 	return runtime
 
 
@@ -278,70 +321,142 @@ func _build_progression_clues(
 	descriptors: PackedStringArray,
 	assignment_stations: PackedStringArray
 ) -> PackedStringArray:
+	var records: Array = _build_progression_clue_records(descriptors, assignment_stations)
 	var clues := PackedStringArray()
+	for record: Dictionary in records:
+		clues.append(str(record.get("statement", "")))
+	return clues
+
+
+func _build_progression_clue_records(
+	descriptors: PackedStringArray,
+	assignment_stations: PackedStringArray
+) -> Array:
+	var records: Array = []
 	if descriptors.size() == 1:
-		clues.append(single_passenger_statement)
-		return clues
+		records.append(_clue_record(single_passenger_statement, PackedInt32Array([0]), 0))
+		return records
+	var slot_base: int = maxi(0, service_level - 1) * 5
 	if service_level == 1 and descriptors.size() >= 3:
-		clues.append(direct_station_statement_template % [
-			_sentence_case(descriptors[0]), assignment_stations[0]
-		])
-		clues.append(between_statement_template % [
-			_sentence_case(descriptors[1]), descriptors[0], descriptors[2]
-		])
-		clues.append(_build_distance_statement(
-			descriptors[2], descriptors[0], assignment_stations[2], assignment_stations[0]
+		records.append(_clue_record(
+			direct_station_statement_template % [_sentence_case(descriptors[0]), assignment_stations[0]],
+			PackedInt32Array([0]),
+			slot_base
+		))
+		records.append(_clue_record(
+			between_statement_template % [_sentence_case(descriptors[1]), descriptors[0], descriptors[2]],
+			PackedInt32Array([1]),
+			slot_base + 1
+		))
+		records.append(_clue_record(
+			_build_distance_statement(descriptors[2], descriptors[0], assignment_stations[2], assignment_stations[0]),
+			PackedInt32Array([2, 0]),
+			slot_base + 2
 		))
 	elif service_level == 2 and descriptors.size() >= 3:
-		clues.append(highest_mark_statement_template % _sentence_case(descriptors[0]))
-		clues.append(_build_distance_statement(
-			descriptors[1], descriptors[0], assignment_stations[1], assignment_stations[0]
+		records.append(_clue_record(
+			highest_mark_statement_template % _sentence_case(descriptors[0]),
+			PackedInt32Array([0]),
+			slot_base
 		))
-		clues.append(lowest_mark_statement_template % _sentence_case(descriptors[2]))
+		records.append(_clue_record(
+			_build_distance_statement(descriptors[1], descriptors[0], assignment_stations[1], assignment_stations[0]),
+			PackedInt32Array([1, 0]),
+			slot_base + 1
+		))
+		records.append(_clue_record(
+			lowest_mark_statement_template % _sentence_case(descriptors[2]),
+			PackedInt32Array([2]),
+			slot_base + 2
+		))
 	elif service_level == 3 and descriptors.size() >= 4:
-		clues.append(clockwise_statement_template % [
-			_sentence_case(descriptors[2]), descriptors[0]
-		])
-		clues.append(hub_statement_template % _sentence_case(descriptors[1]))
-		clues.append(endpoint_statement_template % _sentence_case(descriptors[3]))
-		clues.append(_build_distance_statement(
-			descriptors[3], descriptors[2], assignment_stations[3], assignment_stations[2]
+		records.append(_clue_record(
+			clockwise_statement_template % [_sentence_case(descriptors[2]), descriptors[0]],
+			PackedInt32Array([2]),
+			slot_base
+		))
+		records.append(_clue_record(
+			hub_statement_template % _sentence_case(descriptors[1]),
+			PackedInt32Array([1]),
+			slot_base + 1
+		))
+		records.append(_clue_record(
+			endpoint_statement_template % _sentence_case(descriptors[3]),
+			PackedInt32Array([3]),
+			slot_base + 2
+		))
+		records.append(_clue_record(
+			_build_distance_statement(descriptors[3], descriptors[2], assignment_stations[3], assignment_stations[2]),
+			PackedInt32Array([3, 2]),
+			slot_base + 3
 		))
 	elif service_level == 4 and descriptors.size() >= 4:
-		clues.append(highest_mark_statement_template % _sentence_case(descriptors[0]))
-		clues.append(clockwise_statement_template % [
-			_sentence_case(descriptors[2]), descriptors[0]
-		])
-		clues.append(linked_pair_statement_template % [
-			_sentence_case(descriptors[1]), descriptors[0], descriptors[3]
-		])
-		clues.append(opposite_mark_statement_template % [
-			_sentence_case(descriptors[3]), descriptors[0]
-		])
+		records.append(_clue_record(
+			highest_mark_statement_template % _sentence_case(descriptors[0]),
+			PackedInt32Array([0]),
+			slot_base
+		))
+		records.append(_clue_record(
+			clockwise_statement_template % [_sentence_case(descriptors[2]), descriptors[0]],
+			PackedInt32Array([2]),
+			slot_base + 1
+		))
+		records.append(_clue_record(
+			linked_pair_statement_template % [_sentence_case(descriptors[1]), descriptors[0], descriptors[3]],
+			PackedInt32Array([1]),
+			slot_base + 2
+		))
+		records.append(_clue_record(
+			opposite_mark_statement_template % [_sentence_case(descriptors[3]), descriptors[0]],
+			PackedInt32Array([3]),
+			slot_base + 3
+		))
 	elif service_level >= 5 and descriptors.size() >= 5:
-		clues.append(highest_mark_statement_template % _sentence_case(descriptors[0]))
-		clues.append(clockwise_statement_template % [
-			_sentence_case(descriptors[2]), descriptors[0]
-		])
-		clues.append(opposite_mark_statement_template % [
-			_sentence_case(descriptors[3]), descriptors[0]
-		])
-		clues.append(same_station_statement_template % [
-			_sentence_case(descriptors[1]), descriptors[4]
-		])
-		clues.append(shared_station_counterclockwise_statement_template % [
-			descriptors[1], descriptors[4], descriptors[0]
-		])
+		records.append(_clue_record(
+			highest_mark_statement_template % _sentence_case(descriptors[0]),
+			PackedInt32Array([0]),
+			slot_base
+		))
+		records.append(_clue_record(
+			clockwise_statement_template % [_sentence_case(descriptors[2]), descriptors[0]],
+			PackedInt32Array([2]),
+			slot_base + 1
+		))
+		records.append(_clue_record(
+			opposite_mark_statement_template % [_sentence_case(descriptors[3]), descriptors[0]],
+			PackedInt32Array([3]),
+			slot_base + 2
+		))
+		records.append(_clue_record(
+			same_station_statement_template % [_sentence_case(descriptors[1]), descriptors[4]],
+			PackedInt32Array([1, 4]),
+			slot_base + 3
+		))
+		records.append(_clue_record(
+			shared_station_counterclockwise_statement_template % [descriptors[1], descriptors[4], descriptors[0]],
+			PackedInt32Array([1, 4]),
+			slot_base + 4
+		))
 	# Direct station lines keep editor/debug rosters playable if their size does
 	# not match the campaign's authored 3/3/4/4/5 progression.
-	while clues.size() < descriptors.size():
-		var index: int = clues.size()
-		clues.append(direct_station_statement_template % [
-			_sentence_case(descriptors[index]), assignment_stations[index]
-		])
-	if clues.size() > descriptors.size():
-		clues.resize(descriptors.size())
-	return clues
+	while records.size() < descriptors.size():
+		var index: int = records.size()
+		records.append(_clue_record(
+			direct_station_statement_template % [_sentence_case(descriptors[index]), assignment_stations[index]],
+			PackedInt32Array([index]),
+			slot_base + index
+		))
+	if records.size() > descriptors.size():
+		records.resize(descriptors.size())
+	return records
+
+
+func _clue_record(statement: String, blocked_holder_indices: PackedInt32Array, context_slot: int) -> Dictionary:
+	return {
+		"statement": statement.strip_edges(),
+		"blocked_holders": blocked_holder_indices.duplicate(),
+		"context_slot": context_slot,
+	}
 
 
 func _build_distance_statement(
@@ -351,7 +466,15 @@ func _build_distance_statement(
 	second_station: String
 ) -> String:
 	var distance: int = maxi(0, get_small_mark_distance(first_station, second_station))
-	return distance_statement_template % [first_descriptor, second_descriptor, distance]
+	return distance_statement_template % [
+		first_descriptor,
+		second_descriptor,
+		_small_mark_phrase(distance),
+	]
+
+
+func _small_mark_phrase(count: int) -> String:
+	return "%d small %s" % [count, "mark" if count == 1 else "marks"]
 
 
 func _build_veil_note_statement(
@@ -365,6 +488,10 @@ func _build_veil_note_statement(
 		return single_passenger_statement.strip_edges()
 	if service_level == 1:
 		return _build_direct_veil_statement(ordered_passengers, descriptors, rng)
+	if service_level == 2:
+		var upper_note: String = _build_upper_station_veil_statement(ordered_passengers)
+		if not upper_note.is_empty():
+			return upper_note
 	if service_level >= 5:
 		var shared_statement: String = _build_shared_station_veil_statement(
 			ordered_passengers,
@@ -402,7 +529,7 @@ func _build_veil_note_statement(
 	return (veil_note_distance_statement_template % [
 		first_descriptor,
 		second_descriptor,
-		int(selected_pair["distance"]),
+		_small_mark_phrase(int(selected_pair["distance"])),
 	]).strip_edges()
 
 
@@ -421,6 +548,25 @@ func _build_direct_veil_statement(
 		_sentence_case(descriptors[selected_index]),
 		station_name,
 	]).strip_edges()
+
+
+func _build_upper_station_veil_statement(ordered_passengers: Array[PassengerData]) -> String:
+	if night_stations.is_empty():
+		return ""
+	var upper_station: String = night_stations[0]
+	for data: PassengerData in ordered_passengers:
+		if data == null:
+			continue
+		if str(correct_station_by_passenger.get(data.short_name, "")) != upper_station:
+			continue
+		if data.occupation.strip_edges().to_lower() == "retired teacher":
+			return "The last lesson map leaves %s closest to the upper station." % data.short_name
+	for data: PassengerData in ordered_passengers:
+		if data == null:
+			continue
+		if str(correct_station_by_passenger.get(data.short_name, "")) == upper_station:
+			return "The oldest route map leaves %s closest to the upper station." % data.short_name
+	return ""
 
 
 func _build_shared_station_veil_statement(
@@ -455,7 +601,8 @@ func _compose_biography(
 	data: PassengerData,
 	statement: String,
 	paragraph_index: int,
-	rng: RandomNumberGenerator
+	rng: RandomNumberGenerator,
+	context_slot: int = -1
 ) -> Array:
 	var occupation_key: String = data.occupation.strip_edges().to_lower()
 	var opening: Variant = biography_opening_by_occupation.get(occupation_key, generic_biography_opening)
@@ -485,7 +632,8 @@ func _compose_biography(
 		data,
 		statement,
 		target_paragraph,
-		rng
+		rng,
+		context_slot
 	)
 	var target_sentences := paragraphs[target_paragraph] as PackedStringArray
 	var insertion_index: int = rng.randi_range(0, target_sentences.size())
@@ -498,10 +646,15 @@ func _contextualize_hidden_statement(
 	data: PassengerData,
 	statement: String,
 	paragraph_index: int,
-	rng: RandomNumberGenerator
+	rng: RandomNumberGenerator,
+	context_slot: int = -1
 ) -> String:
 	var context_template: String = "{statement}"
-	if paragraph_index < hidden_statement_context_variants_by_paragraph.size():
+	if context_slot >= 0 and not hidden_statement_unique_contexts.is_empty():
+		context_template = hidden_statement_unique_contexts[
+			clampi(context_slot, 0, hidden_statement_unique_contexts.size() - 1)
+		]
+	elif paragraph_index < hidden_statement_context_variants_by_paragraph.size():
 		var variants: PackedStringArray = hidden_statement_context_variants_by_paragraph[paragraph_index]
 		if not variants.is_empty():
 			context_template = variants[rng.randi_range(0, variants.size() - 1)]
@@ -528,6 +681,68 @@ func _find_hidden_statement(paragraphs: Array, source_statement: String) -> Stri
 			if source_clause in sentence.to_lower():
 				return sentence
 	return source_statement
+
+
+func _assign_statement_holders(clue_records: Array, passenger_count: int) -> PackedInt32Array:
+	var assignments := PackedInt32Array()
+	for _index: int in range(clue_records.size()):
+		assignments.append(-1)
+	var used := PackedInt32Array()
+	for _index: int in range(passenger_count):
+		used.append(0)
+	if _assign_statement_holders_recursive(clue_records, assignments, used, 0, false):
+		return assignments
+	for index: int in range(assignments.size()):
+		assignments[index] = -1
+	for index: int in range(used.size()):
+		used[index] = 0
+	if _assign_statement_holders_recursive(clue_records, assignments, used, 0, true):
+		return assignments
+	for index: int in range(clue_records.size()):
+		assignments[index] = index % maxi(1, passenger_count)
+	return assignments
+
+
+func _assign_statement_holders_recursive(
+	clue_records: Array,
+	assignments: PackedInt32Array,
+	used: PackedInt32Array,
+	clue_index: int,
+	allow_blocked_holders: bool
+) -> bool:
+	if clue_index >= clue_records.size():
+		return true
+	var preferred_indices := PackedInt32Array()
+	for holder_index: int in range(used.size()):
+		if used[holder_index] != 0:
+			continue
+		if _clue_blocks_holder(clue_records[clue_index] as Dictionary, holder_index):
+			if not allow_blocked_holders:
+				continue
+		preferred_indices.append(holder_index)
+	for holder_index: int in preferred_indices:
+		assignments[clue_index] = holder_index
+		used[holder_index] = 1
+		if _assign_statement_holders_recursive(
+			clue_records,
+			assignments,
+			used,
+			clue_index + 1,
+			allow_blocked_holders
+		):
+			return true
+		assignments[clue_index] = -1
+		used[holder_index] = 0
+	return false
+
+
+func _clue_blocks_holder(clue_record: Dictionary, holder_index: int) -> bool:
+	var blocked: Variant = clue_record.get("blocked_holders", PackedInt32Array())
+	if blocked is PackedInt32Array:
+		return (blocked as PackedInt32Array).has(holder_index)
+	if blocked is Array:
+		return (blocked as Array).has(holder_index)
+	return false
 
 
 func _format_sentence_list(value: Variant, data: PassengerData) -> PackedStringArray:
@@ -602,6 +817,14 @@ func _shuffle_strings(values: PackedStringArray, rng: RandomNumberGenerator) -> 
 	for index: int in range(values.size() - 1, 0, -1):
 		var swap_index: int = rng.randi_range(0, index)
 		var held: String = values[index]
+		values[index] = values[swap_index]
+		values[swap_index] = held
+
+
+func _shuffle_clue_records(values: Array, rng: RandomNumberGenerator) -> void:
+	for index: int in range(values.size() - 1, 0, -1):
+		var swap_index: int = rng.randi_range(0, index)
+		var held: Variant = values[index]
 		values[index] = values[swap_index]
 		values[swap_index] = held
 

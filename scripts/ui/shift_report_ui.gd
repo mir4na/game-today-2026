@@ -27,16 +27,15 @@ signal continue_requested
 @export var night_title_text: String = "PAYCHECK"
 @export var night_subtitle_template: String = "NIGHT SHIFT • DAY %d"
 @export var night_souls_caption: String = "SOULS RELEASED"
-@export var night_failed_attempts_caption: String = "FAILED ATTEMPTS"
+@export var night_failed_attempts_caption: String = "RETRY COST"
 @export var night_attempts_caption: String = "TOTAL ATTEMPTS"
 @export var night_route_caption: String = "STATION PATH"
-@export var night_detail_title: String = "ATTEMPT DEDUCTION"
+@export var night_detail_title: String = "RETRY DEDUCTION"
 @export var night_net_caption: String = "NIGHT TOTAL"
 @export var night_balance_caption: String = "CURRENT BALANCE"
 @export var night_result_text: String = "NIGHT SHIFT COMPLETE"
-@export var night_payment_template: String = "%d Blessings added after attempt deductions."
-@export_multiline var night_first_attempt_text: String = "No deduction — the station path aligned on the first attempt."
-@export_multiline var night_attempt_breakdown_template: String = "• %d failed attempt(s) × %d Blessings\n• Reward reduced by %d Blessings."
+@export var night_payment_template: String = "%d Blessings added after retry deductions."
+@export_multiline var night_attempt_breakdown_template: String = "• %d retry attempt(s) × %d Blessings\n• Reward reduced by %d Blessings."
 @export_category("Typewriter")
 @export var typewriter_target_paths: Array[NodePath] = []
 @export_range(20.0, 600.0, 5.0) var typewriter_characters_per_second: float = 180.0
@@ -140,13 +139,11 @@ func open_night_report(day: int, soul_total: int, award: Dictionary, balance: in
 	_retained_caption.text = night_route_caption
 	_retained.text = "ALIGNED"
 	_detail_title.text = night_detail_title
-	var failed_attempts: int = int(award.get("failed_attempts", 0))
-	_breakdown.text = night_first_attempt_text if failed_attempts == 0 else \
-		night_attempt_breakdown_template % [
-			failed_attempts,
-			int(award.get("attempt_rate", 0)),
-			int(award.get("attempt_deduction", 0)),
-		]
+	_breakdown.text = night_attempt_breakdown_template % [
+		int(award.get("failed_attempts", 0)),
+		int(award.get("attempt_rate", 0)),
+		int(award.get("attempt_deduction", 0)),
+	]
 	_breakdown.scroll_to_line(0)
 	_net_caption.text = night_net_caption
 	_net.text = amount_template % int(award.get("earned", 0))
