@@ -1,16 +1,61 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene format=3 uid="uid://c83gsm8nuq8ip"]
 
-[ext_resource type="Script" path="res://scripts/ui/night_station_path_layout.gd" id="1_layout"]
+[ext_resource type="Script" uid="uid://csq0rtkiog676" path="res://scripts/ui/night_station_path_layout.gd" id="1_layout"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_station_target.tscn" id="2_station"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_path_marker.tscn" id="3_marker"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_path_segment.tscn" id="4_segment"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Star 2.png" id="5_hollow"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Star 10.png" id="6_morrow"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Star 5.png" id="7_small_b"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Star 11.png" id="8_small_c"]
-[ext_resource type="Texture2D" path="res://assets/NightShift/Star 8.png" id="9_bell"]
+[ext_resource type="Texture2D" uid="uid://yxs7co42lxj2" path="res://assets/NightShift/Star 2.png" id="5_hollow"]
+[ext_resource type="Texture2D" uid="uid://dx1lvypgyc8v" path="res://assets/NightShift/Star 10.png" id="6_morrow"]
+[ext_resource type="Shader" uid="uid://jesdf5ee2ma2" path="res://shaders/night_station_star.gdshader" id="7_n378h"]
+[ext_resource type="Texture2D" uid="uid://di3bloogycg43" path="res://assets/NightShift/Star 5.png" id="7_small_b"]
+[ext_resource type="Texture2D" uid="uid://cpfj3a6xiesl2" path="res://assets/NightShift/Star 11.png" id="8_small_c"]
+[ext_resource type="Texture2D" uid="uid://b6xohv012pwrg" path="res://assets/NightShift/Star 8.png" id="9_bell"]
 
-[node name="NightStationPathLevel1" type="Control"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xoy74"]
+resource_local_to_scene = true
+shader = ExtResource("7_n378h")
+shader_parameter/shimmer_strength = 0.62
+shader_parameter/shimmer_speed = 0.34
+shader_parameter/shimmer_width = 0.11
+shader_parameter/shimmer_offset = 0.0
+shader_parameter/outline_strength = 0.0
+shader_parameter/outline_size = 8.0
+shader_parameter/outline_color = Color(1, 1, 1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_07otn"]
+resource_local_to_scene = true
+shader = ExtResource("7_n378h")
+shader_parameter/shimmer_strength = 0.62
+shader_parameter/shimmer_speed = 0.34
+shader_parameter/shimmer_width = 0.11
+shader_parameter/shimmer_offset = 0.0
+shader_parameter/outline_strength = 0.0
+shader_parameter/outline_size = 8.0
+shader_parameter/outline_color = Color(1, 1, 1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0g0pr"]
+resource_local_to_scene = true
+shader = ExtResource("7_n378h")
+shader_parameter/shimmer_strength = 0.62
+shader_parameter/shimmer_speed = 0.34
+shader_parameter/shimmer_width = 0.11
+shader_parameter/shimmer_offset = 0.0
+shader_parameter/outline_strength = 0.0
+shader_parameter/outline_size = 8.0
+shader_parameter/outline_color = Color(1, 1, 1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sov8u"]
+resource_local_to_scene = true
+shader = ExtResource("7_n378h")
+shader_parameter/shimmer_strength = 0.62
+shader_parameter/shimmer_speed = 0.34
+shader_parameter/shimmer_width = 0.11
+shader_parameter/shimmer_offset = 0.0
+shader_parameter/outline_strength = 0.0
+shader_parameter/outline_size = 8.0
+shader_parameter/outline_color = Color(1, 1, 1, 1)
+
+[node name="NightStationPathLevel1" type="Control" unique_id=1597052705]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -19,41 +64,48 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_layout")
-service_level = 1
 validation_order = PackedStringArray("Vesperwick", "Hollowcross", "Bellhaven", "Morrowfield")
 
-[node name="RouteVesperA" parent="." instance=ExtResource("4_segment")]
+[node name="RouteVesperA" parent="." unique_id=1846540734 instance=ExtResource("4_segment")]
+points = PackedVector2Array(560, 190, 675, 255)
 from_anchor_path = NodePath("../VesperwickTarget")
 to_anchor_path = NodePath("../MarkA")
 
-[node name="RouteAHollow" parent="." instance=ExtResource("4_segment")]
+[node name="RouteAHollow" parent="." unique_id=1871067988 instance=ExtResource("4_segment")]
+points = PackedVector2Array(675, 255, 800, 360)
 from_anchor_path = NodePath("../MarkA")
 to_anchor_path = NodePath("../HollowcrossTarget")
 
-[node name="RouteHollowB" parent="." instance=ExtResource("4_segment")]
+[node name="RouteHollowB" parent="." unique_id=146410341 instance=ExtResource("4_segment")]
+points = PackedVector2Array(800, 360, 925, 344)
 from_anchor_path = NodePath("../HollowcrossTarget")
 to_anchor_path = NodePath("../MarkB")
 
-[node name="RouteBBell" parent="." instance=ExtResource("4_segment")]
+[node name="RouteBBell" parent="." unique_id=410979011 instance=ExtResource("4_segment")]
+points = PackedVector2Array(925, 344, 1060, 360)
 from_anchor_path = NodePath("../MarkB")
 to_anchor_path = NodePath("../BellhavenTarget")
 
-[node name="RouteBellC" parent="." instance=ExtResource("4_segment")]
+[node name="RouteBellC" parent="." unique_id=1159080664 instance=ExtResource("4_segment")]
+points = PackedVector2Array(1060, 360, 1063, 458)
 from_anchor_path = NodePath("../BellhavenTarget")
 to_anchor_path = NodePath("../MarkC")
 
-[node name="RouteCMorrow" parent="." instance=ExtResource("4_segment")]
+[node name="RouteCMorrow" parent="." unique_id=2107560219 instance=ExtResource("4_segment")]
+points = PackedVector2Array(1063, 458, 1060, 576)
 from_anchor_path = NodePath("../MarkC")
 to_anchor_path = NodePath("../MorrowfieldTarget")
 
-[node name="MarkA" parent="." instance=ExtResource("3_marker")]
+[node name="MarkA" parent="." unique_id=310314289 instance=ExtResource("3_marker")]
+layout_mode = 0
 offset_left = 660.0
 offset_top = 239.0
 offset_right = 690.0
 offset_bottom = 271.0
 path_node_id = &"l1_a"
 
-[node name="MarkB" parent="." instance=ExtResource("3_marker")]
+[node name="MarkB" parent="." unique_id=1238190637 instance=ExtResource("3_marker")]
+layout_mode = 0
 offset_left = 910.0
 offset_top = 328.0
 offset_right = 940.0
@@ -61,7 +113,8 @@ offset_bottom = 360.0
 texture = ExtResource("7_small_b")
 path_node_id = &"l1_b"
 
-[node name="MarkC" parent="." instance=ExtResource("3_marker")]
+[node name="MarkC" parent="." unique_id=1390449395 instance=ExtResource("3_marker")]
+layout_mode = 0
 offset_left = 1048.0
 offset_top = 442.0
 offset_right = 1078.0
@@ -69,7 +122,7 @@ offset_bottom = 474.0
 texture = ExtResource("8_small_c")
 path_node_id = &"l1_c"
 
-[node name="VesperwickTarget" parent="." instance=ExtResource("2_station")]
+[node name="VesperwickTarget" parent="." unique_id=1218827852 instance=ExtResource("2_station")]
 layout_mode = 0
 offset_left = 470.0
 offset_top = 96.0
@@ -77,7 +130,22 @@ offset_right = 650.0
 offset_bottom = 252.0
 station_name = "Vesperwick"
 
-[node name="HollowcrossTarget" parent="." instance=ExtResource("2_station")]
+[node name="Star" parent="VesperwickTarget" index="2"]
+material = SubResource("ShaderMaterial_xoy74")
+
+[node name="Pin" parent="VesperwickTarget" index="4"]
+offset_top = -29.0
+offset_bottom = 33.0
+
+[node name="StationPlate" parent="VesperwickTarget" index="6"]
+offset_top = 35.0
+offset_bottom = 59.0
+
+[node name="StationLabel" parent="VesperwickTarget" index="7"]
+offset_top = 36.0
+offset_bottom = 58.0
+
+[node name="HollowcrossTarget" parent="." unique_id=1873164584 instance=ExtResource("2_station")]
 layout_mode = 0
 offset_left = 710.0
 offset_top = 266.0
@@ -86,9 +154,22 @@ offset_bottom = 422.0
 station_name = "Hollowcross"
 
 [node name="Star" parent="HollowcrossTarget" index="2"]
+material = SubResource("ShaderMaterial_07otn")
 texture = ExtResource("5_hollow")
 
-[node name="BellhavenTarget" parent="." instance=ExtResource("2_station")]
+[node name="Pin" parent="HollowcrossTarget" index="4"]
+offset_top = -30.0
+offset_bottom = 32.0
+
+[node name="StationPlate" parent="HollowcrossTarget" index="6"]
+offset_top = 34.0
+offset_bottom = 58.0
+
+[node name="StationLabel" parent="HollowcrossTarget" index="7"]
+offset_top = 35.0
+offset_bottom = 57.0
+
+[node name="BellhavenTarget" parent="." unique_id=335049405 instance=ExtResource("2_station")]
 layout_mode = 0
 offset_left = 970.0
 offset_top = 266.0
@@ -97,9 +178,22 @@ offset_bottom = 422.0
 station_name = "Bellhaven"
 
 [node name="Star" parent="BellhavenTarget" index="2"]
+material = SubResource("ShaderMaterial_0g0pr")
 texture = ExtResource("9_bell")
 
-[node name="MorrowfieldTarget" parent="." instance=ExtResource("2_station")]
+[node name="Pin" parent="BellhavenTarget" index="4"]
+offset_top = -36.0
+offset_bottom = 26.0
+
+[node name="StationPlate" parent="BellhavenTarget" index="6"]
+offset_top = 27.0
+offset_bottom = 51.0
+
+[node name="StationLabel" parent="BellhavenTarget" index="7"]
+offset_top = 28.0
+offset_bottom = 50.0
+
+[node name="MorrowfieldTarget" parent="." unique_id=1583221073 instance=ExtResource("2_station")]
 layout_mode = 0
 offset_left = 970.0
 offset_top = 482.0
@@ -108,7 +202,20 @@ offset_bottom = 638.0
 station_name = "Morrowfield"
 
 [node name="Star" parent="MorrowfieldTarget" index="2"]
+material = SubResource("ShaderMaterial_sov8u")
 texture = ExtResource("6_morrow")
+
+[node name="Pin" parent="MorrowfieldTarget" index="4"]
+offset_top = -39.0
+offset_bottom = 23.0
+
+[node name="StationPlate" parent="MorrowfieldTarget" index="6"]
+offset_top = 24.0
+offset_bottom = 48.0
+
+[node name="StationLabel" parent="MorrowfieldTarget" index="7"]
+offset_top = 25.0
+offset_bottom = 47.0
 
 [editable path="VesperwickTarget"]
 [editable path="HollowcrossTarget"]

@@ -11,7 +11,7 @@ signal validation_finished(succeeded: bool, attempt_count: int)
 @export var instruction_text: String = "Drag each soul to a station."
 @export var incomplete_assignment_error: String = "Assign every soul before finalizing."
 @export var assignment_count_template: String = "%d / %d SOULS ASSIGNED"
-@export var clue_count_template: String = "%d / %d STATEMENTS RECORDED"
+@export var clue_count_template: String = "%d/%d FOUND"
 @export_category("Validation Presentation")
 @export var ledger_exit_offset: Vector2 = Vector2(-390.0, 0.0)
 @export var station_path_focus_offset: Vector2 = Vector2(-172.0, 0.0)
@@ -26,9 +26,9 @@ signal validation_finished(succeeded: bool, attempt_count: int)
 @export var validation_failed_template: String = "THE STATION PATH REJECTS ATTEMPT %d"
 @export var validation_success_text: String = "THE STATION PATH IS ALIGNED"
 @export_category("Five-Soul Ledger Layout")
-@export var regular_card_origin: Vector2 = Vector2(29.0, 82.0)
+@export var regular_card_origin: Vector2 = Vector2(29.0, 52.0)
 @export_range(80.0, 140.0, 1.0) var regular_card_spacing: float = 120.0
-@export var compact_card_origin: Vector2 = Vector2(61.0, 82.0)
+@export var compact_card_origin: Vector2 = Vector2(61.0, 52.0)
 @export_range(0.5, 1.0, 0.01) var compact_card_scale: float = 0.8
 @export_range(70.0, 120.0, 1.0) var compact_card_spacing: float = 92.0
 @export_category("Scene-Based Station Paths")
@@ -38,6 +38,7 @@ var _puzzle: DeparturePuzzleData
 var _selected_passenger: String = ""
 var _assignments: Dictionary = {}
 var _passenger_data_by_name: Dictionary = {}
+var _ledger_passenger_order: Array[String] = []
 var _collected_statements: Dictionary = {}
 var _veil_note_statement: String = ""
 var _validating: bool = false
@@ -52,7 +53,6 @@ var _station_targets: Array[NightStationTarget] = []
 @onready var _selection_label: Label = %SelectionLabel
 @onready var _assignment_count_label: Label = %AssignmentCountLabel
 @onready var _clue_count_label: Label = %ClueCountLabel
-@onready var _service_level_label: Label = %LedgerTitleSmall
 @onready var _veil_note_panel: Control = %VeilNotePanel
 @onready var _veil_note_label: Label = %VeilNoteStatement
 @onready var _error_label: Label = %ErrorLabel
@@ -98,6 +98,7 @@ func open_puzzle(
 		_assignments.clear()
 	_selected_passenger = ""
 	_passenger_data_by_name.clear()
+	_ledger_passenger_order.clear()
 	_collected_statements = collected_statements.duplicate(true)
 	set_veil_note_statement(veil_note_statement)
 	_validating = false
@@ -105,7 +106,6 @@ func open_puzzle(
 	_current_instruction = puzzle.get_assignment_instruction() if puzzle != null else instruction_text
 	_instruction_label.text = _current_instruction
 	_selection_label.text = _current_instruction
-	_service_level_label.text = puzzle.get_service_label() if puzzle != null else "NIGHT ASSIGNMENT"
 	_reset_validation_presentation()
 
 	for card: NightPassengerCard in _passenger_cards:
@@ -122,19 +122,12 @@ func open_puzzle(
 		show_error("This ledger supports five souls and four stations.")
 		show()
 		return
-	_layout_passenger_cards(passengers.size())
-
-	for index: int in range(passengers.size()):
-		var data: PassengerData = passengers[index]
+	for data: PassengerData in passengers:
 		_passenger_data_by_name[data.short_name] = data
-		var card: NightPassengerCard = _passenger_cards[index]
-		card.configure(
-			data,
-			str(_collected_statements.get(data.short_name, ""))
-		)
-		card.show()
+		_ledger_passenger_order.append(data.short_name)
 
 	_remove_invalid_assignments()
+	_refresh_ledger_cards()
 	_update_assignment_visuals()
 	show()
 	_present_board()
@@ -150,6 +143,29 @@ func _layout_passenger_cards(passenger_count: int) -> void:
 		card.position = origin + Vector2(0.0, spacing * index)
 		card.scale = Vector2.ONE * card_scale
 		card.set_compact_mode(use_compact_layout)
+
+
+func _refresh_ledger_cards() -> void:
+	var found_names: Array[String] = []
+	for passenger_name: String in _ledger_passenger_order:
+		if _is_statement_found(passenger_name):
+			found_names.append(passenger_name)
+	_layout_passenger_cards(found_names.size())
+	for card: NightPassengerCard in _passenger_cards:
+		card.hide()
+	for index: int in range(found_names.size()):
+		var passenger_name: String = found_names[index]
+		var data := _passenger_data_by_name.get(passenger_name) as PassengerData
+		if data == null:
+			continue
+		var card: NightPassengerCard = _passenger_cards[index]
+		card.configure(data, str(_collected_statements.get(passenger_name, "")))
+		card.set_assignment(_station_for_passenger(passenger_name))
+		card.show()
+
+
+func _is_statement_found(passenger_name: String) -> bool:
+	return not str(_collected_statements.get(passenger_name, "")).strip_edges().is_empty()
 
 
 func _configure_station_path(puzzle: DeparturePuzzleData) -> void:
@@ -192,16 +208,9 @@ func refresh_collected_statements(collected_statements: Dictionary) -> void:
 	_collected_statements = collected_statements.duplicate(true)
 	if not visible or _puzzle == null:
 		return
-	for card: NightPassengerCard in _passenger_cards:
-		if not card.visible or not _passenger_data_by_name.has(card.passenger_name):
-			continue
-		var data := _passenger_data_by_name[card.passenger_name] as PassengerData
-		card.configure(
-			data,
-			str(_collected_statements.get(card.passenger_name, ""))
-		)
-		card.set_assignment(_station_for_passenger(card.passenger_name))
-	_update_counts()
+	_remove_invalid_assignments()
+	_refresh_ledger_cards()
+	_update_assignment_visuals()
 
 
 func request_close() -> void:
@@ -218,7 +227,7 @@ func show_error(message: String) -> void:
 
 
 func _on_passenger_selected(passenger_name: String) -> void:
-	if _validating:
+	if _validating or not _is_statement_found(passenger_name):
 		return
 	_selected_passenger = passenger_name
 	_selection_label.text = _current_instruction
@@ -239,7 +248,7 @@ func _assign_passenger_to_station(station_name: String, passenger_name: String) 
 		return
 	if _puzzle == null or not _puzzle.night_stations.has(station_name):
 		return
-	if not _passenger_data_by_name.has(passenger_name):
+	if not _passenger_data_by_name.has(passenger_name) or not _is_statement_found(passenger_name):
 		return
 	# Each soul has one destination, while a station may hold any number of
 	# souls. Re-dropping a soul moves it without displacing the existing stack.
@@ -304,6 +313,7 @@ func _remove_invalid_assignments() -> void:
 			var passenger_name: String = str(passenger_value)
 			if (
 				_passenger_data_by_name.has(passenger_name)
+				and _is_statement_found(passenger_name)
 				and not seen_passengers.has(passenger_name)
 			):
 				valid_passengers.append(passenger_name)

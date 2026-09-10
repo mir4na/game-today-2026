@@ -25,6 +25,7 @@ var _transition_tween: Tween
 var _panel_rest_position: Vector2
 
 @onready var _panel: Control = %Panel
+@onready var _close_button: Button = %CloseButton
 @onready var _question_stage: Control = %QuestionStage
 @onready var _signature_stage: Control = %SignatureStage
 @onready var _route_label: Label = %RouteLabel
@@ -39,6 +40,11 @@ var _panel_rest_position: Vector2
 
 func _ready() -> void:
 	_panel_rest_position = _panel.position
+	var close_callable := Callable(self, "request_close")
+	if not _close_button.pressed.is_connected(close_callable):
+		_close_button.pressed.connect(close_callable)
+	_close_button.disabled = false
+	_close_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	_drawing_area.gui_input.connect(_on_drawing_area_gui_input)
 	hide()
 
@@ -77,6 +83,18 @@ func open_signature(from_station: String, to_station: String, route_leg: int) ->
 func request_close() -> void:
 	if not visible or _accepted:
 		return
+	_drawing = false
+	_user_stroke.clear_points()
+	if is_instance_valid(_feedback_tween):
+		_feedback_tween.kill()
+	if is_instance_valid(_transition_tween):
+		_transition_tween.kill()
+	_feedback_flash.modulate.a = 0.0
+	_transition_fade.modulate.a = 0.0
+	_transition_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_panel.position = _panel_rest_position
+	_panel.scale = Vector2.ONE
+	_panel.modulate.a = 1.0
 	hide()
 	closed.emit()
 

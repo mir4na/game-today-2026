@@ -118,6 +118,9 @@ func reset_validation_visual() -> void:
 
 
 func get_path_node_center() -> Vector2:
+	var authored_anchor := get_node_or_null("PathAnchor") as Node2D
+	if is_instance_valid(authored_anchor):
+		return position + authored_anchor.position
 	return position + path_anchor_offset
 
 

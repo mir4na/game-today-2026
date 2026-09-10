@@ -35,6 +35,11 @@ var _section_tween: Tween
 
 @onready var _page_title: Label = %PageTitle
 @onready var _content: RichTextLabel = %Content
+@onready var _today_layout: Control = %TodayLayout
+@onready var _rules_layout: Control = %RulesLayout
+@onready var _today_route_label: Label = %TodayRouteLabel
+@onready var _today_progress_label: Label = %TodayProgressLabel
+@onready var _pass_shift_body: Label = %PassShiftBody
 @onready var _today_button: Button = %TodayButton
 @onready var _procedure_button: Button = %ProcedureButton
 @onready var _anomaly_list: Control = %AnomalyList
@@ -106,6 +111,8 @@ func _show_today() -> void:
 	var next_station: String = completed_service_text
 	if _route_index + 1 < _route_stations.size():
 		next_station = _route_stations[_route_index + 1]
+	var still_needed: int = maxi(0, _pass_target - _net_earnings)
+	_refresh_today_layout(current_station, next_station, still_needed)
 	_set_section(
 		_today_button,
 		"Today's Service",
@@ -115,7 +122,7 @@ func _show_today() -> void:
 			_service_train_number,
 			_pass_target,
 			_net_earnings,
-			maxi(0, _pass_target - _net_earnings),
+			still_needed,
 			_boarded_today,
 			_passenger_count,
 			_stamped_aboard,
@@ -134,9 +141,7 @@ func _show_procedure() -> void:
 
 
 func _show_anomalies() -> void:
-	_set_section(_anomalies_button, "Anomaly List", "")
-	_content.hide()
-	_anomaly_list.show()
+	_set_section(_anomalies_button, "Anomaly Signs", "")
 
 
 func _set_section(active_button: Button, title: String, document: String) -> void:
@@ -148,12 +153,43 @@ func _set_section(active_button: Button, title: String, document: String) -> voi
 	var section_changed: bool = next_section != _active_section
 	_active_section = next_section
 	_update_tab_presentation()
-	_content.show()
-	_anomaly_list.hide()
 	_page_title.text = title
 	_content.text = document
+	_update_section_visibility(next_section)
 	if section_changed:
 		_play_section_rustle()
+
+
+func _refresh_today_layout(current_station: String, next_station: String, still_needed: int) -> void:
+	if not is_node_ready():
+		return
+	var route_line: String = "%s → %s" % [current_station, next_station]
+	if next_station == completed_service_text:
+		route_line = "%s → service complete" % current_station
+	_today_route_label.text = "Day %d • Train %s • %s\n%s" % [
+		_day_number,
+		_service_train_number,
+		_service_day_code,
+		route_line,
+	]
+	_today_progress_label.text = "Aboard %d • Stamped %d" % [
+		_passenger_count,
+		_stamped_aboard,
+	]
+	_pass_shift_body.text = "Need %d Blessings.\nCurrent %d • Left %d" % [
+		_pass_target,
+		_net_earnings,
+		still_needed,
+	]
+
+
+func _update_section_visibility(section: int) -> void:
+	if not is_node_ready():
+		return
+	_content.hide()
+	_today_layout.visible = section == SECTION_TODAY
+	_rules_layout.visible = section == SECTION_RULES
+	_anomaly_list.visible = section == SECTION_ANOMALIES
 
 
 func _section_buttons() -> Array[Button]:

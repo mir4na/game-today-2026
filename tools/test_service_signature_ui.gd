@@ -40,8 +40,28 @@ func _run() -> void:
 	await process_frame
 	_check(signature.visible, "Consulting the watcher during daylight must open service sign-off.")
 	_check(game._active_modal == signature, "Service sign-off must own gameplay input while open.")
+	var close_button := signature.get_node("%CloseButton") as Button
+	close_button.pressed.emit()
+	await process_frame
+	_check(not signature.visible, "The service sign-off close button must close the UI.")
+	_check(game._active_modal == null, "Closing service sign-off must restore modal ownership.")
+	watcher.interact()
+	await process_frame
+	_check(signature.visible, "The daytime watcher can reopen service sign-off after closing it.")
 	signature._on_confirm_pressed()
 	_check(signature._signature_stage.visible, "Confirming completion must reveal the trace stage.")
+	var drawing_center: Vector2 = signature._drawing_area.size * 0.5
+	for pattern: Line2D in [signature._pulse_pattern, signature._loop_pattern]:
+		var min_point: Vector2 = pattern.points[0]
+		var max_point: Vector2 = pattern.points[0]
+		for point: Vector2 in pattern.points:
+			min_point = min_point.min(point)
+			max_point = max_point.max(point)
+		var pattern_center: Vector2 = (min_point + max_point) * 0.5
+		_check(
+			pattern_center.distance_to(drawing_center) <= 2.0,
+			"The scene-authored service sign-off mark must be centered in the drawing area."
+		)
 	_check(
 		signature._trace_matches_pattern(signature._active_pattern.points, signature._active_pattern.points),
 		"Tracing a scene-authored mark exactly must be accepted."

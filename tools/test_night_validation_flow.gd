@@ -28,6 +28,9 @@ func _run() -> void:
 	game._active_modal = null
 	game.state = AfterTheEndGame.GameState.DAY
 	game._on_debug_night_requested()
+	var puzzle: DeparturePuzzleData = game._get_departure_puzzle()
+	for data: PassengerData in game._get_dead_passenger_data():
+		game._collected_departure_statements[data.short_name] = puzzle.get_statement_for_passenger(data.short_name)
 	game._open_night_puzzle()
 	await process_frame
 
@@ -43,7 +46,6 @@ func _run() -> void:
 		target.star_pulse_seconds = 0.01
 		target.failure_burst_seconds = 0.01
 
-	var puzzle: DeparturePuzzleData = game._get_departure_puzzle()
 	var correct_names: Array = puzzle.correct_station_by_passenger.keys()
 	for passenger_value: Variant in correct_names:
 		var passenger_name: String = str(passenger_value)

@@ -35,11 +35,13 @@ func _sync_to_anchors() -> void:
 
 
 func _anchor_center(anchor: Control) -> Vector2:
-	if anchor is NightStationTarget:
-		return (anchor as NightStationTarget).get_path_node_center()
-	if anchor is NightPathMarker:
-		return (anchor as NightPathMarker).get_path_node_center()
-	return anchor.position + anchor.size * 0.5
+	# Read the scene-authored marker directly. Calling methods on instanced
+	# @tool scripts can fail while Godot is refreshing placeholder instances,
+	# which previously left one end of a route at (0, 0) in the editor.
+	var path_anchor := anchor.get_node_or_null("PathAnchor") as Node2D
+	if is_instance_valid(path_anchor):
+		return to_local(path_anchor.global_position)
+	return to_local(anchor.global_position + anchor.size * 0.5)
 
 
 func _resolve_anchor_id(anchor: Node) -> String:

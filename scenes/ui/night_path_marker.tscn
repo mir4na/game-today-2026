@@ -11,3 +11,7 @@ texture = ExtResource("2_star")
 expand_mode = 1
 stretch_mode = 5
 script = ExtResource("1_marker")
+
+[node name="PathAnchor" type="Marker2D" parent="."]
+editor_description = "Scene-authored center used by NightPathSegment."
+position = Vector2(15, 16)

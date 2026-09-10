@@ -124,6 +124,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="CloseButton" parent="Panel" instance=ExtResource("6_close")]
+unique_name_in_owner = true
 z_index = 5
 layout_mode = 0
 offset_left = 704.0
@@ -244,7 +245,7 @@ theme_override_styles/panel = SubResource("DrawingStyle")
 
 [node name="PulsePattern" type="Line2D" parent="Panel/SignatureStage/DrawingArea/GuideLines"]
 unique_name_in_owner = true
-points = PackedVector2Array(72, 232, 112, 210, 144, 140, 180, 262, 222, 90, 302, 312, 346, 142, 392, 194, 430, 238)
+points = PackedVector2Array(101, 211, 141, 189, 173, 119, 209, 241, 251, 69, 331, 291, 375, 121, 421, 173, 459, 217)
 width = 9.0
 default_color = Color(0.78, 0.62, 0.35, 0.72)
 joint_mode = 2
@@ -253,7 +254,7 @@ end_cap_mode = 2
 
 [node name="LoopPattern" type="Line2D" parent="Panel/SignatureStage/DrawingArea/GuideLines"]
 unique_name_in_owner = true
-points = PackedVector2Array(132, 286, 172, 220, 128, 166, 84, 184, 126, 214, 224, 124, 296, 190, 252, 250, 194, 214, 168, 154, 170, 82)
+points = PackedVector2Array(222, 282, 262, 216, 218, 162, 174, 180, 216, 210, 314, 120, 386, 186, 342, 246, 284, 210, 258, 150, 260, 78)
 width = 9.0
 default_color = Color(0.78, 0.62, 0.35, 0.72)
 joint_mode = 2

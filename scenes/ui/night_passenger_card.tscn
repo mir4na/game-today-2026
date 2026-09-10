@@ -21,6 +21,7 @@ compact_statement_bottom = 108.0
 hide_assignment_in_compact = true
 
 [node name="CardPaper" type="TextureRect" parent="."]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -30,15 +31,15 @@ grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("2_card")
 expand_mode = 1
-stretch_mode = 6
+stretch_mode = 0
 
 [node name="Portrait" type="TextureRect" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 12.0
+offset_left = 10.0
 offset_top = 12.0
-offset_right = 82.0
-offset_bottom = 82.0
+offset_right = 81.0
+offset_bottom = 78.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -48,10 +49,10 @@ script = ExtResource("6_portrait")
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_left = 12.0
+offset_left = 10.0
 offset_top = 12.0
-offset_right = 82.0
-offset_bottom = 82.0
+offset_right = 81.0
+offset_bottom = 78.0
 mouse_filter = 2
 color = Color(0.2, 0.211765, 0.227451, 0.58)
 
@@ -71,10 +72,10 @@ text = "PASSENGER"
 [node name="PortraitName" type="Label" parent="."]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 12.0
-offset_top = 87.0
-offset_right = 87.0
-offset_bottom = 108.0
+offset_left = 8.0
+offset_top = 80.0
+offset_right = 84.0
+offset_bottom = 101.0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.486275, 0.270588, 0.254902, 1)
 theme_override_fonts/font = ExtResource("3_bold")

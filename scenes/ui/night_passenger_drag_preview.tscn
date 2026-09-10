@@ -1,66 +1,20 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/night_passenger_drag_preview.gd" id="1"]
-[ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="2_font"]
-
-[sub_resource type="StyleBoxFlat" id="NamePlateStyle"]
-bg_color = Color(0.101961, 0.0862745, 0.0823529, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.760784, 0.556863, 0.309804, 1)
-corner_radius_top_left = 9
-corner_radius_top_right = 9
-corner_radius_bottom_right = 9
-corner_radius_bottom_left = 9
 
 [node name="NightPassengerDragPreview" type="Control"]
-custom_minimum_size = Vector2(126, 176)
+custom_minimum_size = Vector2(126, 168)
 layout_mode = 3
 anchors_preset = 0
-offset_right = 126.0
-offset_bottom = 176.0
+offset_left = -63.0
+offset_top = -82.0
+offset_right = 63.0
+offset_bottom = 86.0
 mouse_filter = 2
 script = ExtResource("1")
+preview_center = Vector2(63, 82)
+maximum_visual_size = Vector2(118, 164)
 
-[node name="Shadow" type="Polygon2D" parent="."]
-position = Vector2(63, 145)
-polygon = PackedVector2Array(-37, 0, -31, -6, -16, -9, 0, -10, 16, -9, 31, -6, 37, 0, 31, 6, 16, 9, 0, 10, -16, 9, -31, 6)
-color = Color(0.0470588, 0.0392157, 0.0431373, 0.55)
-
-[node name="CharacterSprite" type="TextureRect" parent="."]
+[node name="CharacterSprite" type="AnimatedSprite2D" parent="."]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 13.0
-offset_top = 0.0
-offset_right = 113.0
-offset_bottom = 151.0
-mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="NamePlate" type="Panel" parent="."]
-layout_mode = 0
-offset_left = 13.0
-offset_top = 143.0
-offset_right = 113.0
-offset_bottom = 174.0
-mouse_filter = 2
-theme_override_styles/panel = SubResource("NamePlateStyle")
-
-[node name="PassengerName" type="Label" parent="NamePlate"]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_colors/font_color = Color(0.968627, 0.933333, 0.866667, 1)
-theme_override_fonts/font = ExtResource("2_font")
-theme_override_font_sizes/font_size = 12
-text = "SOUL"
-horizontal_alignment = 1
-vertical_alignment = 1
+position = Vector2(63, 82)

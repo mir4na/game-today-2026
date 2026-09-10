@@ -37,8 +37,17 @@ func _run() -> void:
 	await process_frame
 
 	var board := game._night_puzzle_ui as NightPuzzleUI
+	for card: NightPassengerCard in board._passenger_cards:
+		var record_strip := card.get_node("%CardPaper") as TextureRect
+		_check(
+			record_strip.texture != null
+			and record_strip.texture.resource_path == "res://assets/NightShift/Frame 28.png",
+			"Every ledger NPC card must use the scene-authored Frame 28 record strip."
+		)
 	var first_card := board._passenger_cards[0] as NightPassengerCard
+	var card_paper := first_card.get_node("%CardPaper") as TextureRect
 	var first_card_portrait := first_card.get_node("%Portrait") as NightCharacterPortrait
+	_check(card_paper.stretch_mode == TextureRect.STRETCH_SCALE, "The record strip must align its portrait well to the card bounds.")
 	_check(
 		first_card_portrait.get_source_artwork() == passengers[0].get_character_artwork(),
 		"A ledger portrait must retain the same real character identity shown in the carriage."
@@ -92,11 +101,28 @@ func _run() -> void:
 	_check(first_card.drag_preview_scene != null, "The passenger drag preview must be supplied by a scene resource.")
 	_check(first_target.face_token_scene != null, "Station face tokens must be supplied by a scene resource.")
 	if first_card.drag_preview_scene != null:
-		var preview := first_card.drag_preview_scene.instantiate() as NightPassengerDragPreview
-		preview.configure(passengers[0])
-		var preview_sprite := preview.get_node("%CharacterSprite") as TextureRect
-		_check(preview_sprite.texture == passengers[0].get_character_artwork(), "Dragging must use the NPC character artwork.")
-		preview.free()
+		for profile: PassengerIdentityProfile in game.passenger_identity_profiles:
+			var preview_data := PassengerData.create_from_identity(profile)
+			var preview := first_card.drag_preview_scene.instantiate() as NightPassengerDragPreview
+			preview.configure(preview_data)
+			var preview_sprite := preview.get_node("%CharacterSprite") as AnimatedSprite2D
+			_check(
+				preview.position == -preview.preview_center
+				and preview_sprite.position == preview.preview_center,
+				"The drag preview cursor hotspot must be centered on the walk-cycle sprite."
+			)
+			_check(
+				preview_sprite.sprite_frames != null
+				and preview_sprite.animation == &"walk"
+				and preview_sprite.sprite_frames.get_frame_count(&"walk") > 1
+				and preview_sprite.is_playing(),
+				"Dragging %s must play the walk SpriteFrames from that NPC's scene." % profile.short_name
+			)
+			_check(
+				preview.get_node_or_null("%PassengerName") == null,
+				"The walk-cycle drag preview must not render a separate name plate."
+			)
+			preview.free()
 	var expected_passengers: Array[String] = puzzle.get_expected_passengers_for_station(
 		puzzle.night_stations[0]
 	)

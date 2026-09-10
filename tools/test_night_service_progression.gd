@@ -91,6 +91,18 @@ func _run() -> void:
 			runtime.get_small_mark_count() > 0,
 			"Every station path must contain functional small distance marks."
 		)
+		var layout := runtime.get_station_path_layout_scene().instantiate() as NightStationPathLayout
+		root.add_child(layout)
+		for segment: NightPathSegment in layout.get_path_segments():
+			segment._sync_to_anchors()
+			_check(segment.points.size() == 2, "Every route line must resolve both scene anchors.")
+			if segment.points.size() == 2:
+				_check(
+					segment.points[0].distance_to(Vector2.ZERO) > 1.0
+					and segment.points[1].distance_to(Vector2.ZERO) > 1.0,
+					"Level %d route lines must never fall back to the ledger corner." % service_level
+				)
+		layout.free()
 		for first_station: String in runtime.night_stations:
 			for second_station: String in runtime.night_stations:
 				if first_station == second_station:
@@ -149,19 +161,37 @@ func _run() -> void:
 		root.add_child(board)
 		await process_frame
 		var collected: Dictionary = {}
-		for data: PassengerData in level_five_passengers:
-			collected[data.short_name] = level_five_puzzle.get_statement_for_passenger(data.short_name)
 		board.open_puzzle(level_five_passengers, level_five_puzzle, collected)
 		await process_frame
+		var initially_visible_cards: int = 0
+		for card: NightPassengerCard in board._passenger_cards:
+			if card.visible:
+				initially_visible_cards += 1
+		_check(initially_visible_cards == 0, "The Night Ledger must begin without any NPC records.")
+		_check(board._clue_count_label.text == "0/5 FOUND", "The empty ledger must use the concise FOUND counter.")
+		_check(
+			board.get_node_or_null("BoardAnchor/LedgerAnchor/LedgerHeader") == null
+			and board.get_node_or_null("BoardAnchor/LedgerAnchor/LedgerTitleSmall") == null,
+			"The ledger header and small service title must be removed."
+		)
+		var first_found: PassengerData = level_five_passengers[0]
+		collected[first_found.short_name] = level_five_puzzle.get_statement_for_passenger(first_found.short_name)
+		board.refresh_collected_statements(collected)
+		_check(
+			board._passenger_cards[0].visible
+			and not board._passenger_cards[1].visible
+			and board._passenger_cards[0].passenger_name == first_found.short_name,
+			"A valid biography statement must reveal exactly its matching NPC record."
+		)
+		for data: PassengerData in level_five_passengers:
+			collected[data.short_name] = level_five_puzzle.get_statement_for_passenger(data.short_name)
+		board.refresh_collected_statements(collected)
 		_check(board._passenger_cards[4].visible, "The final night must display a fifth scene-authored ledger card.")
 		_check(
 			board._passenger_cards[4].scale.is_equal_approx(Vector2.ONE * board.compact_card_scale),
 			"Five ledger cards must switch to the compact layout without scrolling."
 		)
-		_check(
-			board._service_level_label.text == "NIGHT SERVICE  •  LEVEL 5",
-			"The ledger must identify the active Night Service level."
-		)
+		_check(board._clue_count_label.text == "5/5 FOUND", "The ledger counter must update as records are discovered.")
 		var visible_final_threads: int = 0
 		for child: Node in board._station_path_layout.get_children():
 			if child is NightPathSegment and child.visible:

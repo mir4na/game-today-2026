@@ -27,6 +27,10 @@ func _run() -> void:
 	game._finish_staged_boarding()
 	game._open_guidebook()
 	var guide: GuidebookUI = game._guidebook_ui
+	_check((guide.get_node("%TodayLayout") as Control).visible, "Today's Service uses its scene-authored layout.")
+	_check(not (guide.get_node("%Content") as RichTextLabel).visible, "The visible guidebook page is not the raw RichText document.")
+	_check((guide.get_node("%TodayRouteLabel") as Label).text.contains(game.manifest_config.service_train_number), "The scene-authored service page shows the generated service number.")
+	_check((guide.get_node("%PassShiftBody") as Label).text.contains("Blessings"), "The scene-authored service page shows the paycheck target.")
 	var original_day: int = game.day_number
 	for day: int in range(1, 6):
 		game.day_number = day
@@ -84,6 +88,8 @@ func _run() -> void:
 	game._correct_drop_offs = 0
 	game._process(0.01)
 	_check(guide._page_title.text == "Rules", "Live updates preserve the selected section.")
+	_check((guide.get_node("%RulesLayout") as Control).visible, "Rules uses its scene-authored layout.")
+	_check(not ((guide.get_node("Center/BookStage/Page/RulesLayout/RulesRightText") as Label).text.contains("TAB")), "Rules page avoids raw keyboard-control lists.")
 	guide._show_today()
 	_check(guide._content.text.contains("[b]Earned today[/b]  -60 Blessings"), "Negative earnings are shown without hiding penalties.")
 	game._correct_drop_offs = 20
@@ -103,28 +109,55 @@ func _run() -> void:
 	guide._show_procedure()
 	_check(guide._content.text.contains("30 Blessings") and guide._content.text.contains("40 Blessings"), "Rules include the current paycheck scoring.")
 	guide._show_anomalies()
+	_check(guide._anomaly_list.visible, "Anomaly section uses its scene-authored page.")
+	_check((guide.get_node("%AnomalyIntroLabel") as Label).text.contains("Keep suspicious"), "Anomaly page has a short player-facing instruction.")
 	var entries: Node = guide._anomaly_list.get_node("Entries")
-	_check(entries.get_child_count() == 6, "Every documented anomaly and obstruction has a guidebook entry.")
-	for expected_entry: String in ["Shadowless", "UnlistedDestination", "PortraitMismatch", "TimeInvalidTicket", "NewspaperDeath", "BlockedConnector"]:
-		_check(entries.has_node(expected_entry), "The guidebook includes %s." % expected_entry)
+	var left_entries: Node = entries.get_node("LeftPageEntries")
+	var right_entries: Node = entries.get_node("RightPageEntries")
+	_check(not (left_entries is Container) and not (right_entries is Container), "Anomaly page columns allow free-positioned sections.")
+	var anomaly_entries: Array[Node] = []
+	for child: Node in left_entries.get_children():
+		anomaly_entries.append(child)
+	for child: Node in right_entries.get_children():
+		anomaly_entries.append(child)
+	var entries_by_name: Dictionary = {}
+	for child: Node in anomaly_entries:
+		entries_by_name[child.name] = child
+	_check(anomaly_entries.size() == 5, "Only passenger anomalies appear in the anomaly guidebook page.")
+	_check(not entries_by_name.has("BlockedConnector"), "Blocked connectors are not listed as passenger anomalies.")
+	for expected_entry: String in ["Shadowless", "UnlistedDestination", "PortraitMismatch", "TimeInvalidTicket", "NewspaperDeath"]:
+		_check(entries_by_name.has(expected_entry), "The guidebook includes %s." % expected_entry)
 	var expected_photos: Dictionary = {
 		"Shadowless": "res://assets/ui/guidebook/shadowless.png",
 		"UnlistedDestination": "res://assets/ui/guidebook/unlisted_destination.png",
+		"PortraitMismatch": "res://assets/ui/id_card.png",
+		"TimeInvalidTicket": "res://assets/ui/passenger_ticket.png",
 		"NewspaperDeath": "res://assets/ui/guidebook/newspaper.png",
-		"BlockedConnector": "res://assets/ui/guidebook/blocked.png",
 	}
-	for entry: Node in entries.get_children():
-		var photo: TextureRect = entry.get_node("PhotoFrame/Photo") as TextureRect
-		var placeholder: Label = entry.get_node("PhotoFrame/Placeholder") as Label
-		if expected_photos.has(entry.name):
-			_check(photo.texture != null and photo.texture.resource_path == expected_photos[entry.name], "%s uses its scene-authored reference photo." % entry.name)
-			_check(not placeholder.visible, "%s hides its placeholder when a photo is available." % entry.name)
-			continue
-		_check(placeholder.visible, "An entry without artwork displays its photo placeholder.")
+	var expected_photo_sides: Dictionary = {
+		"Shadowless": 0,
+		"UnlistedDestination": 0,
+		"PortraitMismatch": 1,
+		"TimeInvalidTicket": 1,
+		"NewspaperDeath": 0,
+	}
+	for entry: Node in anomaly_entries:
+		_check(entry.get("photo_side") != null, "%s exposes its scene-authored photo-side control." % entry.name)
+		_check(entry.get("photo_offset") != null, "%s exposes scene-authored crop positioning." % entry.name)
+		_check(entry.get("photo_scale") != null, "%s exposes scene-authored crop scaling." % entry.name)
+		_check(entry.get("allow_manual_photo_content") != null, "%s supports manually authored photo content like the newspaper picture." % entry.name)
+		var photo: Sprite2D = entry.get_node("PhotoFrame/PhotoClip/PhotoContent/Photo") as Sprite2D
+		var placeholder: Label = entry.get_node("PhotoFrame/PhotoClip/Placeholder") as Label
+		_check(photo.texture != null and photo.texture.resource_path == expected_photos[entry.name], "%s uses its scene-authored reference photo." % entry.name)
+		_check(not placeholder.visible, "%s hides its placeholder when a photo is available." % entry.name)
+		var photo_side: int = int(entry.get("photo_side"))
+		_check(photo_side == expected_photo_sides[entry.name], "%s keeps its authored photo side." % entry.name)
+		var expected_first_child: String = "Text" if photo_side == 1 else "PhotoFrame"
+		_check(entry.get_child(0).name == expected_first_child, "%s applies the authored left/right photo position." % entry.name)
 		var sample := GradientTexture2D.new()
-		entry.photo = sample
+		entry.set("photo", sample)
 		_check(photo.texture == sample and not placeholder.visible, "Assigning a photo replaces its placeholder.")
-		entry.photo = null
+		entry.set("photo", null)
 	await create_timer(0.1).timeout
 	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw

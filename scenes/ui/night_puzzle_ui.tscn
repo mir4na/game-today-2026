@@ -12,11 +12,23 @@
 [ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="18_bold"]
 [ext_resource type="PackedScene" path="res://scenes/ui/components/round_close_button.tscn" id="19_close"]
 [ext_resource type="Script" uid="uid://fgch1jgxeocf" path="res://scripts/ui/hover_scale_button.gd" id="20_hover"]
-[ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_1.tscn" id="21_path_1"]
+[ext_resource type="PackedScene" uid="uid://c83gsm8nuq8ip" path="res://scenes/ui/night_station_paths/night_station_path_level_1.tscn" id="21_path_1"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_2.tscn" id="22_path_2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_3.tscn" id="23_path_3"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_4.tscn" id="24_path_4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_5.tscn" id="25_path_5"]
+
+[sub_resource type="StyleBoxFlat" id="VeilNotePaper"]
+bg_color = Color(0.913725, 0.85098, 0.713726, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.478431, 0.337255, 0.286275, 0.9)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [sub_resource type="StyleBoxFlat" id="ConfirmNormal"]
 content_margin_left = 22.0
@@ -66,18 +78,6 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxFlat" id="VeilNotePaper"]
-bg_color = Color(0.913725, 0.85098, 0.713726, 0.98)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.478431, 0.337255, 0.286275, 0.9)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
 [node name="NightPuzzleUI" type="Control" unique_id=391770319]
 process_mode = 3
 layout_mode = 3
@@ -88,24 +88,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2_theme")
 script = ExtResource("1")
-ledger_exit_offset = Vector2(-390, 0)
-station_path_focus_offset = Vector2(-172, 0)
-station_path_focus_scale = Vector2(1.12, 1.12)
-station_path_focus_pivot = Vector2(812, 360)
-focus_transition_seconds = 0.5
-light_travel_seconds = 0.34
-station_hold_seconds = 0.16
-result_hold_seconds = 0.9
-failed_attempt_exit_seconds = 0.28
-validation_reading_template = "READING %s"
-instruction_text = "Drag each soul to a station."
-validation_failed_template = "THE STATION PATH REJECTS ATTEMPT %d"
-validation_success_text = "THE STATION PATH IS ALIGNED"
-regular_card_origin = Vector2(29, 82)
-regular_card_spacing = 120.0
-compact_card_origin = Vector2(61, 82)
-compact_card_scale = 0.8
-compact_card_spacing = 92.0
 station_path_layout_scenes = Array[PackedScene]([ExtResource("21_path_1"), ExtResource("22_path_2"), ExtResource("23_path_3"), ExtResource("24_path_4"), ExtResource("25_path_5")])
 
 [node name="Shade" type="ColorRect" parent="." unique_id=2037629714]
@@ -138,7 +120,7 @@ mouse_filter = 1
 [node name="LedgerAnchor" type="Control" parent="BoardAnchor" unique_id=1164450504]
 unique_name_in_owner = true
 z_index = 5
-layout_mode = 0
+anchors_preset = 0
 offset_right = 366.0
 offset_bottom = 720.0
 mouse_filter = 1
@@ -163,20 +145,9 @@ mouse_filter = 2
 texture = ExtResource("5_ledger_page")
 expand_mode = 1
 
-[node name="LedgerHeader" type="Label" parent="BoardAnchor/LedgerAnchor" unique_id=395466344]
-layout_mode = 0
-offset_left = 48.0
-offset_top = 48.0
-offset_right = 326.0
-offset_bottom = 79.0
-theme_override_colors/font_color = Color(0.247059, 0.211765, 0.2, 1)
-theme_override_fonts/font = ExtResource("18_bold")
-theme_override_font_sizes/font_size = 17
-text = "SOUL RECORDS"
-horizontal_alignment = 1
-
 [node name="PassengerCard1" parent="BoardAnchor/LedgerAnchor" unique_id=1140326123 instance=ExtResource("14_card")]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_left = 29.0
 offset_top = 82.0
@@ -185,6 +156,7 @@ offset_bottom = 198.0
 
 [node name="PassengerCard2" parent="BoardAnchor/LedgerAnchor" unique_id=1572439812 instance=ExtResource("14_card")]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_left = 29.0
 offset_top = 202.0
@@ -193,6 +165,7 @@ offset_bottom = 318.0
 
 [node name="PassengerCard3" parent="BoardAnchor/LedgerAnchor" unique_id=1937201624 instance=ExtResource("14_card")]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_left = 29.0
 offset_top = 322.0
@@ -201,13 +174,14 @@ offset_bottom = 438.0
 
 [node name="PassengerCard4" parent="BoardAnchor/LedgerAnchor" unique_id=241677965 instance=ExtResource("14_card")]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_left = 29.0
 offset_top = 442.0
 offset_right = 347.0
 offset_bottom = 558.0
 
-[node name="PassengerCard5" parent="BoardAnchor/LedgerAnchor" instance=ExtResource("14_card")]
+[node name="PassengerCard5" parent="BoardAnchor/LedgerAnchor" unique_id=381691292 instance=ExtResource("14_card")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
@@ -216,7 +190,7 @@ offset_top = 562.0
 offset_right = 347.0
 offset_bottom = 678.0
 
-[node name="VeilNotePanel" type="Panel" parent="BoardAnchor/LedgerAnchor"]
+[node name="VeilNotePanel" type="Panel" parent="BoardAnchor/LedgerAnchor" unique_id=1434416946]
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
@@ -227,7 +201,7 @@ offset_bottom = 610.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("VeilNotePaper")
 
-[node name="Title" type="Label" parent="BoardAnchor/LedgerAnchor/VeilNotePanel"]
+[node name="Title" type="Label" parent="BoardAnchor/LedgerAnchor/VeilNotePanel" unique_id=32261348]
 layout_mode = 0
 offset_left = 9.0
 offset_top = 4.0
@@ -238,7 +212,7 @@ theme_override_fonts/font = ExtResource("18_bold")
 theme_override_font_sizes/font_size = 10
 text = "VEIL NOTE"
 
-[node name="VeilNoteStatement" type="Label" parent="BoardAnchor/LedgerAnchor/VeilNotePanel"]
+[node name="VeilNoteStatement" type="Label" parent="BoardAnchor/LedgerAnchor/VeilNotePanel" unique_id=1669800178]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 9.0
@@ -262,31 +236,18 @@ offset_bottom = 630.0
 theme_override_colors/font_color = Color(0.439216, 0.345098, 0.309804, 1)
 theme_override_fonts/font = ExtResource("17_medium")
 theme_override_font_sizes/font_size = 13
-text = "0 / 4 STATEMENTS RECORDED"
-horizontal_alignment = 1
-
-[node name="LedgerTitleSmall" type="Label" parent="BoardAnchor/LedgerAnchor" unique_id=2107068399]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 55.0
-offset_top = 628.0
-offset_right = 319.0
-offset_bottom = 649.0
-theme_override_colors/font_color = Color(0.262745, 0.231373, 0.223529, 1)
-theme_override_fonts/font = ExtResource("18_bold")
-theme_override_font_sizes/font_size = 13
-text = "NIGHT ASSIGNMENT"
+text = "0/4 FOUND"
 horizontal_alignment = 1
 
 [node name="LedgerTitle" type="Label" parent="BoardAnchor/LedgerAnchor" unique_id=1069597564]
 layout_mode = 0
 offset_left = 55.0
-offset_top = 646.0
+offset_top = 630.0
 offset_right = 319.0
-offset_bottom = 687.0
+offset_bottom = 681.0
 theme_override_colors/font_color = Color(0.262745, 0.231373, 0.223529, 1)
 theme_override_fonts/font = ExtResource("16_irish")
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 42
 text = "LEDGER"
 horizontal_alignment = 1
 
@@ -312,12 +273,16 @@ texture = ExtResource("3_map_paper")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="PathLayoutHost" type="Control" parent="BoardAnchor/StationPathAnchor"]
+[node name="PathLayoutHost" type="Control" parent="BoardAnchor/StationPathAnchor" unique_id=239346585]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 15.0
+offset_top = -4.0
+offset_right = 15.0
+offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -339,13 +304,13 @@ horizontal_alignment = 1
 [node name="SelectionLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=1103657674]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 744.0
-offset_top = 571.0
-offset_right = 1177.0
-offset_bottom = 596.0
+offset_left = 464.0
+offset_top = 601.0
+offset_right = 897.0
+offset_bottom = 626.0
 theme_override_colors/font_color = Color(0.364706, 0.294118, 0.270588, 1)
 theme_override_fonts/font = ExtResource("17_medium")
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 24
 text = "Drag each soul to a station."
 horizontal_alignment = 1
 vertical_alignment = 1

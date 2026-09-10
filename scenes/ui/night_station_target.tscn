@@ -38,6 +38,10 @@ mouse_default_cursor_shape = 2
 script = ExtResource("1")
 face_token_scene = ExtResource("6_face_token")
 
+[node name="PathAnchor" type="Marker2D" parent="."]
+editor_description = "Scene-authored center used by NightPathSegment. Move this marker to change where route lines meet the station star."
+position = Vector2(90, 94)
+
 [node name="DropGlow" type="Panel" parent="."]
 unique_name_in_owner = true
 visible = false
