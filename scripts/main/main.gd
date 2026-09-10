@@ -2344,6 +2344,11 @@ func _on_night_market_continue() -> void:
 
 func _on_market_inventory_changed(snapshot: Dictionary) -> void:
 	_hud.set_market_tool_inventory(snapshot)
+	_hud.set_service_progress(
+		day_number,
+		int(snapshot.get("blessings", 0)),
+		_get_day_pass_target()
+	)
 	if is_instance_valid(_night_market_ui) and _night_market_ui.visible:
 		_night_market_ui.call(&"set_snapshot", snapshot)
 

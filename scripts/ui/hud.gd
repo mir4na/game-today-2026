@@ -11,6 +11,8 @@ signal debug_night_requested
 @export_category("Inspector Copy")
 @export var clock_template: String = "%02d:%02d %s"
 @export var tool_status_template: String = "BLESSINGS %d"
+@export var day_template: String = "Day %d"
+@export var blessing_progress_template: String = "%d/%d"
 @export_category("Journey Clock")
 @export_range(0.0, 1440.0, 1.0) var clock_default_start_minutes: float = 840.0
 @export_range(0.0, 1440.0, 1.0) var clock_default_end_minutes: float = 1320.0
@@ -71,11 +73,15 @@ signal debug_night_requested
 @onready var _notification_panel: PanelContainer = %NotificationPanel
 @onready var _notification_label: Label = %NotificationLabel
 @onready var _tool_status_label: Label = %ToolStatusLabel
+@onready var _day_summary: Control = %DaySummary
+@onready var _day_label: Label = %DayLabel
+@onready var _blessing_summary: Control = %BlessingSummary
+@onready var _blessing_label: Label = %BlessingLabel
 @onready var _debug_night_button: Button = %DebugNightButton
 @onready var _guidebook_button: Button = %GuidebookButton
 @onready var _service_action_button: Button = %ServiceActionButton
 @onready var _debug_next_station_button: Button = %DebugNextStationButton
-@onready var _market_item_bar: VBoxContainer = %MarketItemBar
+@onready var _market_item_bar: HBoxContainer = %MarketItemBar
 @onready var _veil_note_slot: Control = %VeilNoteSlot
 @onready var _radar_slot: Control = %RadarSlot
 @onready var _swift_slot: Control = %SwiftSlot
@@ -105,6 +111,8 @@ var _route_banner_rest_scale: Vector2
 var _service_sealed: bool = false
 var _radar_active: bool = false
 var _swiftstep_active: bool = false
+var _displayed_day: int = 1
+var _displayed_blessing_target: int = 0
 
 const CLOCK_FILL_ARC_DEGREES: float = 180.0
 
@@ -268,11 +276,26 @@ func set_passenger_counts_by_carriage(counts: Dictionary) -> void:
 
 
 func set_market_tool_inventory(snapshot: Dictionary) -> void:
-	_tool_status_label.text = tool_status_template % int(snapshot.get("blessings", 0))
+	var blessings: int = int(snapshot.get("blessings", 0))
+	_tool_status_label.text = tool_status_template % blessings
+	_refresh_service_summary(blessings)
 	_veil_note_slot.call(&"set_owned_amount", int(snapshot.get("veil_notes", 0)))
 	_radar_slot.call(&"set_owned_amount", int(snapshot.get("radar_charges", 0)))
 	_swift_slot.call(&"set_owned_amount", int(snapshot.get("swift_charges", 0)))
 	_update_action_button_locks()
+
+
+func set_service_progress(day: int, blessings: int, target: int) -> void:
+	_displayed_day = maxi(1, day)
+	_displayed_blessing_target = maxi(0, target)
+	_day_label.text = day_template % _displayed_day
+	_refresh_service_summary(blessings)
+
+
+func _refresh_service_summary(blessings: int) -> void:
+	if not is_instance_valid(_blessing_label):
+		return
+	_blessing_label.text = blessing_progress_template % [maxi(0, blessings), _displayed_blessing_target]
 
 
 func request_market_item(shortcut_number: int) -> bool:
@@ -484,13 +507,17 @@ func _update_dialogue_pointer(target_local_x: float, prompt_width: float) -> voi
 
 func set_day_hud_visible(value: bool) -> void:
 	_clock_panel.visible = value
+	_day_summary.visible = value
+	_blessing_summary.visible = value
 	_guidebook_button.tooltip_text = "Open guidebook"
 	set_service_action_mode(false, value)
 	_debug_night_button.visible = OS.is_debug_build() and value
 	if not value:
 		_reset_clock_hover(true)
 		_hide_route_briefing(true)
-	_tool_status_label.visible = value
+	# Blessings now live in the illustrated service summary. Keep the legacy
+	# status label available for old scene references without drawing it twice.
+	_tool_status_label.visible = false
 	_market_item_bar.visible = value
 	_floating_prompt.visible = value and not _prompt_label.text.is_empty()
 	# The train minimap remains visible through the night walk.
@@ -572,10 +599,12 @@ func _on_debug_next_station_button_pressed() -> void:
 
 func set_night_walk_mode() -> void:
 	_clock_panel.show()
+	_day_summary.show()
+	_blessing_summary.show()
 	_debug_night_button.hide()
 	_guidebook_button.tooltip_text = "Open guidebook"
 	set_service_action_mode(true)
-	_tool_status_label.visible = true
+	_tool_status_label.visible = false
 	_market_item_bar.visible = true
 	_floating_prompt.visible = not _prompt_label.text.is_empty()
 
