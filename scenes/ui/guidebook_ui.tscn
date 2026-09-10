@@ -502,7 +502,6 @@ scroll_active = false
 
 [node name="TodayLayout" type="Control" parent="Center/BookStage/Page" unique_id=921652152]
 unique_name_in_owner = true
-visible = false
 anchors_preset = 0
 offset_left = 56.0
 offset_top = 122.0
@@ -528,9 +527,10 @@ autowrap_mode = 2
 
 [node name="InspectHeading" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=1188180706]
 layout_mode = 0
-offset_top = 4.0
-offset_right = 260.0
-offset_bottom = 34.0
+offset_left = 12.986317
+offset_top = 41.945236
+offset_right = 272.98633
+offset_bottom = 71.94524
 theme_override_colors/font_color = Color(0.285, 0.235, 0.205, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 23
@@ -538,9 +538,10 @@ text = "INSPECT & DECIDE"
 
 [node name="InspectBody" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=1376093460]
 layout_mode = 0
-offset_top = 40.0
-offset_right = 268.0
-offset_bottom = 116.0
+offset_left = 14.356178
+offset_top = 72.082184
+offset_right = 282.35617
+offset_bottom = 148.08218
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
 theme_override_font_sizes/font_size = 19
 text = "Match IDs, tickets, portraits, and destinations before stamping."
@@ -559,10 +560,10 @@ stretch_mode = 5
 
 [node name="DayArt" type="TextureRect" parent="Center/BookStage/Page/TodayLayout" unique_id=1556179104]
 layout_mode = 0
-offset_left = 14.0
-offset_top = 184.0
-offset_right = 166.0
-offset_bottom = 336.0
+offset_left = 8.520538
+offset_top = 166.19185
+offset_right = 160.52054
+offset_bottom = 318.19183
 mouse_filter = 2
 texture = ExtResource("28_day_art")
 expand_mode = 1
@@ -570,21 +571,21 @@ stretch_mode = 5
 
 [node name="DayDropHeading" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=2073629800]
 layout_mode = 0
-offset_left = 210.0
-offset_top = 194.0
-offset_right = 456.0
-offset_bottom = 224.0
+offset_left = 181.23291
+offset_top = 174.82191
+offset_right = 427.2329
+offset_bottom = 204.82191
 theme_override_colors/font_color = Color(0.285, 0.235, 0.205, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 23
-text = "DAYTIME DROP-OFFS"
+text = "DROP-OFFS"
 
 [node name="DayDropBody" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=1109729052]
 layout_mode = 0
-offset_left = 210.0
-offset_top = 232.0
-offset_right = 456.0
-offset_bottom = 316.0
+offset_left = 181.23291
+offset_top = 207.34244
+offset_right = 427.2329
+offset_bottom = 291.34244
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
 theme_override_font_sizes/font_size = 19
 text = "Stamp ordinary passengers only when their required stop is next."
@@ -592,9 +593,10 @@ autowrap_mode = 2
 
 [node name="KeepHeading" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=2043073957]
 layout_mode = 0
-offset_top = 374.0
-offset_right = 456.0
-offset_bottom = 404.0
+offset_left = 20.547943
+offset_top = 315.09592
+offset_right = 476.54794
+offset_bottom = 345.09592
 theme_override_colors/font_color = Color(0.285, 0.235, 0.205, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 23
@@ -602,9 +604,10 @@ text = "KEEP ANOMALIES ABOARD"
 
 [node name="KeepBody" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=28963461]
 layout_mode = 0
-offset_top = 412.0
-offset_right = 456.0
-offset_bottom = 466.0
+offset_left = 24.657532
+offset_top = 353.09607
+offset_right = 400.65753
+offset_bottom = 407.09607
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
 theme_override_font_sizes/font_size = 19
 text = "They become night service cases; a wrong anomaly stamp costs pay."
@@ -612,10 +615,10 @@ autowrap_mode = 2
 
 [node name="BlessingsArt" type="TextureRect" parent="Center/BookStage/Page/TodayLayout" unique_id=66015562]
 layout_mode = 0
-offset_left = 742.0
-offset_top = -28.0
-offset_right = 884.0
-offset_bottom = 114.0
+offset_left = 757.0685
+offset_top = -10.191772
+offset_right = 899.0685
+offset_bottom = 131.80823
 mouse_filter = 2
 texture = ExtResource("29_blessings_art")
 expand_mode = 1
@@ -623,34 +626,35 @@ stretch_mode = 5
 
 [node name="BlessingsHeading" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=2085918094]
 layout_mode = 0
-offset_left = 520.0
-offset_top = 104.0
-offset_right = 884.0
-offset_bottom = 134.0
+offset_left = 504.93146
+offset_top = 10.849426
+offset_right = 868.93146
+offset_bottom = 61.849426
 theme_override_colors/font_color = Color(0.285, 0.235, 0.205, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 23
-text = "BLESSINGS & PENALTIES"
+text = "BLESSINGS & 
+PENALTIES"
 
 [node name="BlessingsBody" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=1972844099]
 layout_mode = 0
-offset_left = 520.0
-offset_top = 142.0
-offset_right = 884.0
-offset_bottom = 226.0
+offset_left = 506.3014
+offset_top = 70.76712
+offset_right = 870.3014
+offset_bottom = 154.76712
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
 theme_override_font_sizes/font_size = 17
-text = "+30 Blessings for a correct drop-off.
--20 Blessings for a wrong drop-off.
--40 Blessings for a wrongly stamped anomaly."
+text = "correct drop-off = +30 Blessings
+wrong drop-off = 20 Blessings
+wrongly stamped anomaly = 40 Blessings"
 autowrap_mode = 2
 
 [node name="PaycheckArt" type="TextureRect" parent="Center/BookStage/Page/TodayLayout" unique_id=1817302016]
 layout_mode = 0
-offset_left = 526.0
-offset_top = 272.0
-offset_right = 650.0
-offset_bottom = 396.0
+offset_left = 501.3426
+offset_top = 152.82196
+offset_right = 625.3426
+offset_bottom = 276.82196
 mouse_filter = 2
 texture = ExtResource("30_paycheck_art")
 expand_mode = 1
@@ -658,10 +662,10 @@ stretch_mode = 5
 
 [node name="PassShiftHeading" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=1931928130]
 layout_mode = 0
-offset_left = 684.0
-offset_top = 276.0
-offset_right = 884.0
-offset_bottom = 306.0
+offset_left = 642.90424
+offset_top = 159.56163
+offset_right = 842.90424
+offset_bottom = 189.56163
 theme_override_colors/font_color = Color(0.285, 0.235, 0.205, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 23
@@ -670,10 +674,10 @@ text = "PASS THE SHIFT"
 [node name="PassShiftBody" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=2104775941]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 684.0
-offset_top = 314.0
-offset_right = 884.0
-offset_bottom = 366.0
+offset_left = 647.0138
+offset_top = 190.71231
+offset_right = 847.0138
+offset_bottom = 242.71231
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
 theme_override_font_sizes/font_size = 17
 text = "Need 0 Blessings.
@@ -683,10 +687,10 @@ autowrap_mode = 2
 [node name="TodayProgressLabel" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=760986733]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 684.0
-offset_top = 370.0
-offset_right = 884.0
-offset_bottom = 398.0
+offset_left = 652.4933
+offset_top = 239.86298
+offset_right = 852.4933
+offset_bottom = 267.86298
 theme_override_colors/font_color = Color(0.42, 0.345, 0.29, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 14
@@ -695,10 +699,10 @@ autowrap_mode = 2
 
 [node name="NightHeading" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=618711841]
 layout_mode = 0
-offset_left = 520.0
-offset_top = 394.0
-offset_right = 702.0
-offset_bottom = 424.0
+offset_left = 522.7397
+offset_top = 296.7399
+offset_right = 706.7397
+offset_bottom = 326.7399
 theme_override_colors/font_color = Color(0.285, 0.235, 0.205, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 23
@@ -706,10 +710,10 @@ text = "NIGHT SERVICE"
 
 [node name="NightBody" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=1218784574]
 layout_mode = 0
-offset_left = 520.0
-offset_top = 430.0
-offset_right = 708.0
-offset_bottom = 488.0
+offset_left = 526.8491
+offset_top = 330.00006
+offset_right = 714.8491
+offset_bottom = 388.00006
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
 theme_override_font_sizes/font_size = 16
 text = "Find statements, then assign every soul."
@@ -717,10 +721,10 @@ autowrap_mode = 2
 
 [node name="NightArt" type="TextureRect" parent="Center/BookStage/Page/TodayLayout" unique_id=538374152]
 layout_mode = 0
-offset_left = 736.0
-offset_top = 386.0
-offset_right = 862.0
-offset_bottom = 512.0
+offset_left = 745.58905
+offset_top = 275.04117
+offset_right = 871.58905
+offset_bottom = 401.04117
 mouse_filter = 2
 texture = ExtResource("31_night_art")
 expand_mode = 1
@@ -793,6 +797,7 @@ autowrap_mode = 2
 [node name="AnomalyList" type="Control" parent="Center/BookStage/Page" unique_id=637261252]
 unique_name_in_owner = true
 editor_description = "Scene-based Anomaly Signs spread. Adjust each GuidebookAnomalyEntry instance and its Photo settings here."
+visible = false
 anchors_preset = 0
 offset_left = 56.0
 offset_top = 122.0
