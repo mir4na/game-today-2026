@@ -6,6 +6,49 @@
 [ext_resource type="FontFile" uid="uid://jysqo0nff08k" path="res://fonts/Josefin_Sans/static/JosefinSans-Medium.ttf" id="4_medium"]
 [ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="5_bold"]
 
+[sub_resource type="StyleBoxFlat" id="StampShadowStyle"]
+bg_color = Color(0.0117647, 0.0117647, 0.0156863, 0.48)
+corner_radius_top_left = 86
+corner_radius_top_right = 86
+corner_radius_bottom_right = 86
+corner_radius_bottom_left = 86
+
+[sub_resource type="StyleBoxFlat" id="StampRubberStyle"]
+bg_color = Color(0.0352941, 0.0352941, 0.0431373, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.0117647, 0.0117647, 0.0156863, 1)
+corner_radius_top_left = 72
+corner_radius_top_right = 72
+corner_radius_bottom_right = 72
+corner_radius_bottom_left = 72
+
+[sub_resource type="StyleBoxFlat" id="StampCollarStyle"]
+bg_color = Color(0.105882, 0.109804, 0.121569, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.0235294, 0.027451, 0.0352941, 1)
+corner_radius_top_left = 86
+corner_radius_top_right = 86
+corner_radius_bottom_right = 86
+corner_radius_bottom_left = 86
+
+[sub_resource type="StyleBoxFlat" id="StampStemStyle"]
+bg_color = Color(0.105882, 0.101961, 0.109804, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.027451, 0.027451, 0.0313726, 1)
+corner_radius_top_left = 54
+corner_radius_top_right = 54
+corner_radius_bottom_right = 54
+corner_radius_bottom_left = 54
+
 [sub_resource type="StyleBoxFlat" id="StampHandleStyle"]
 bg_color = Color(0.792157, 0.160784, 0.176471, 1)
 border_width_left = 4
@@ -30,55 +73,12 @@ corner_radius_top_right = 32
 corner_radius_bottom_right = 32
 corner_radius_bottom_left = 32
 
-[sub_resource type="StyleBoxFlat" id="StampStemStyle"]
-bg_color = Color(0.105882, 0.101961, 0.109804, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.027451, 0.027451, 0.0313726, 1)
-corner_radius_top_left = 54
-corner_radius_top_right = 54
-corner_radius_bottom_right = 54
-corner_radius_bottom_left = 54
-
-[sub_resource type="StyleBoxFlat" id="StampCollarStyle"]
-bg_color = Color(0.105882, 0.109804, 0.121569, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.0235294, 0.027451, 0.0352941, 1)
-corner_radius_top_left = 86
-corner_radius_top_right = 86
-corner_radius_bottom_right = 86
-corner_radius_bottom_left = 86
-
-[sub_resource type="StyleBoxFlat" id="StampRubberStyle"]
-bg_color = Color(0.0352941, 0.0352941, 0.0431373, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.0117647, 0.0117647, 0.0156863, 1)
-corner_radius_top_left = 72
-corner_radius_top_right = 72
-corner_radius_bottom_right = 72
-corner_radius_bottom_left = 72
-
 [sub_resource type="StyleBoxFlat" id="StampHighlightStyle"]
 bg_color = Color(1, 0.788235, 0.768627, 0.72)
 corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
-
-[sub_resource type="StyleBoxFlat" id="StampShadowStyle"]
-bg_color = Color(0.0117647, 0.0117647, 0.0156863, 0.48)
-corner_radius_top_left = 86
-corner_radius_top_right = 86
-corner_radius_bottom_right = 86
-corner_radius_bottom_left = 86
 
 [sub_resource type="Animation" id="Animation_stamp_reset"]
 resource_name = "RESET"
@@ -180,149 +180,16 @@ tracks/7/keys = {
 "values": [-0.015]
 }
 tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
 tracks/8/path = NodePath("StampTool:visible")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
 tracks/8/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
 "values": [false]
-}
-
-[sub_resource type="Animation" id="Animation_apply_stamp"]
-resource_name = "apply_disembark_stamp"
-length = 0.82
-tracks/0/type = "value"
-tracks/0/path = NodePath("TicketSurface:position")
-tracks/0/interp = 2
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.22, 0.38, 0.52, 0.82),
-"transitions": PackedFloat32Array(1.6, 0.55, 1.8, 0.7, 1),
-"update": 0,
-"values": [Vector2(0, 0), Vector2(0, -6), Vector2(0, 7), Vector2(0, -2), Vector2(0, 0)]
-}
-tracks/1/type = "value"
-tracks/1/path = NodePath("TicketSurface:scale")
-tracks/1/interp = 2
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.22, 0.38, 0.52, 0.82),
-"transitions": PackedFloat32Array(1.6, 0.55, 1.8, 0.7, 1),
-"update": 0,
-"values": [Vector2(1, 1), Vector2(1.012, 1.012), Vector2(1.018, 0.965), Vector2(0.997, 1.006), Vector2(1, 1)]
-}
-tracks/2/type = "value"
-tracks/2/path = NodePath("TicketSurface:rotation")
-tracks/2/interp = 2
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.22, 0.38, 0.52, 0.82),
-"transitions": PackedFloat32Array(1.6, 0.55, 1.8, 0.7, 1),
-"update": 0,
-"values": [0.0, -0.008, 0.006, -0.0025, 0.0]
-}
-tracks/3/type = "value"
-tracks/3/path = NodePath("TicketSurface:self_modulate")
-tracks/3/interp = 1
-tracks/3/keys = {
-"times": PackedFloat32Array(0, 0.32, 0.38, 0.5, 0.82),
-"transitions": PackedFloat32Array(1, 1, 2, 0.8, 1),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(0.94, 0.9, 0.84, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 1)]
-}
-tracks/4/type = "value"
-tracks/4/path = NodePath("TicketSurface/ValidationStamp:visible")
-tracks/4/keys = {
-"times": PackedFloat32Array(0, 0.379, 0.38),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 1,
-"values": [false, false, true]
-}
-tracks/5/type = "value"
-tracks/5/path = NodePath("TicketSurface/ValidationStamp:self_modulate")
-tracks/5/interp = 1
-tracks/5/keys = {
-"times": PackedFloat32Array(0, 0.379, 0.38, 0.45, 0.62, 0.82),
-"transitions": PackedFloat32Array(1, 1, 1, 1.8, 0.8, 1),
-"update": 0,
-"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 0.56), Color(1, 1, 1, 0.96), Color(1, 1, 1, 0.9), Color(1, 1, 1, 0.92)]
-}
-tracks/6/type = "value"
-tracks/6/path = NodePath("TicketSurface/ValidationStamp:scale")
-tracks/6/interp = 2
-tracks/6/keys = {
-"times": PackedFloat32Array(0.38, 0.45, 0.62, 0.82),
-"transitions": PackedFloat32Array(0.55, 1.8, 0.8, 1),
-"update": 0,
-"values": [Vector2(0.94, 0.94), Vector2(1.025, 1.025), Vector2(0.995, 0.995), Vector2(1, 1)]
-}
-tracks/7/type = "value"
-tracks/7/path = NodePath("TicketSurface/ValidationStamp:rotation")
-tracks/7/interp = 2
-tracks/7/keys = {
-"times": PackedFloat32Array(0.38, 0.48, 0.7, 0.82),
-"transitions": PackedFloat32Array(0.7, 1.7, 0.8, 1),
-"update": 0,
-"values": [-0.015, 0.006, -0.002, 0.0]
-}
-tracks/8/type = "value"
-tracks/8/path = NodePath("StampTool:visible")
-tracks/8/keys = {
-"times": PackedFloat32Array(0, 0.819, 0.82),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 1,
-"values": [true, true, false]
-}
-tracks/9/type = "value"
-tracks/9/path = NodePath("StampTool:position")
-tracks/9/interp = 2
-tracks/9/keys = {
-"times": PackedFloat32Array(0, 0.14, 0.38, 0.5, 0.82),
-"transitions": PackedFloat32Array(0.7, 1.45, 1.8, 0.7, 1),
-"update": 0,
-"values": [Vector2(220, 146), Vector2(220, 146), Vector2(220, 146), Vector2(220, 146), Vector2(220, 146)]
-}
-tracks/10/type = "value"
-tracks/10/path = NodePath("StampTool:rotation")
-tracks/10/interp = 2
-tracks/10/keys = {
-"times": PackedFloat32Array(0, 0.14, 0.38, 0.5, 0.82),
-"transitions": PackedFloat32Array(0.7, 1.4, 1.7, 0.7, 1),
-"update": 0,
-"values": [-0.035, -0.018, 0.0, 0.008, -0.025]
-}
-tracks/11/type = "value"
-tracks/11/path = NodePath("StampTool:scale")
-tracks/11/interp = 2
-tracks/11/keys = {
-"times": PackedFloat32Array(0, 0.14, 0.38, 0.5, 0.82),
-"transitions": PackedFloat32Array(0.7, 1.4, 1.8, 0.7, 1),
-"update": 0,
-"values": [Vector2(1.14, 1.14), Vector2(1.05, 1.05), Vector2(0.94, 0.94), Vector2(1, 1), Vector2(1.12, 1.12)]
-}
-tracks/12/type = "value"
-tracks/12/path = NodePath("StampTool:self_modulate")
-tracks/12/interp = 1
-tracks/12/keys = {
-"times": PackedFloat32Array(0, 0.08, 0.58, 0.82),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
-}
-tracks/13/type = "value"
-tracks/13/path = NodePath("StampTool/ToolShadow:position")
-tracks/13/interp = 2
-tracks/13/keys = {
-"times": PackedFloat32Array(0, 0.14, 0.38, 0.5, 0.82),
-"transitions": PackedFloat32Array(0.7, 1.4, 1.8, 0.7, 1),
-"update": 0,
-"values": [Vector2(16, 16), Vector2(13, 13), Vector2(8, 8), Vector2(12, 12), Vector2(16, 16)]
-}
-tracks/14/type = "value"
-tracks/14/path = NodePath("StampTool/ToolShadow:self_modulate")
-tracks/14/interp = 1
-tracks/14/keys = {
-"times": PackedFloat32Array(0, 0.14, 0.38, 0.5, 0.82),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
-"update": 0,
-"values": [Color(1, 1, 1, 0.22), Color(1, 1, 1, 0.5), Color(1, 1, 1, 1), Color(1, 1, 1, 0.68), Color(1, 1, 1, 0.2)]
 }
 
 [sub_resource type="Animation" id="Animation_stamp_applied"]
@@ -425,12 +292,200 @@ tracks/7/keys = {
 "values": [0.0]
 }
 tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
 tracks/8/path = NodePath("StampTool:visible")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
 tracks/8/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
 "values": [false]
+}
+
+[sub_resource type="Animation" id="Animation_apply_stamp"]
+resource_name = "apply_disembark_stamp"
+length = 0.82
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TicketSurface:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.22, 0.38, 0.52, 0.82),
+"transitions": PackedFloat32Array(1.6, 0.55, 1.8, 0.7, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, -6), Vector2(0, 7), Vector2(0, -2), Vector2(0, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("TicketSurface:scale")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.22, 0.38, 0.52, 0.82),
+"transitions": PackedFloat32Array(1.6, 0.55, 1.8, 0.7, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1.012, 1.012), Vector2(1.018, 0.965), Vector2(0.997, 1.006), Vector2(1, 1)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("TicketSurface:rotation")
+tracks/2/interp = 2
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.22, 0.38, 0.52, 0.82),
+"transitions": PackedFloat32Array(1.6, 0.55, 1.8, 0.7, 1),
+"update": 0,
+"values": [0.0, -0.008, 0.006, -0.0025, 0.0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("TicketSurface:self_modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.32, 0.38, 0.5, 0.82),
+"transitions": PackedFloat32Array(1, 1, 2, 0.8, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(0.94, 0.9, 0.84, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 1)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("TicketSurface/ValidationStamp:visible")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.379, 0.38),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [false, false, true]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("TicketSurface/ValidationStamp:self_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 0.379, 0.38, 0.45, 0.62, 0.82),
+"transitions": PackedFloat32Array(1, 1, 1, 1.8, 0.8, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 0.56), Color(1, 1, 1, 0.96), Color(1, 1, 1, 0.9), Color(1, 1, 1, 0.92)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("TicketSurface/ValidationStamp:scale")
+tracks/6/interp = 2
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0.38, 0.45, 0.62, 0.82),
+"transitions": PackedFloat32Array(0.55, 1.8, 0.8, 1),
+"update": 0,
+"values": [Vector2(0.94, 0.94), Vector2(1.025, 1.025), Vector2(0.995, 0.995), Vector2(1, 1)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("TicketSurface/ValidationStamp:rotation")
+tracks/7/interp = 2
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0.38, 0.48, 0.7, 0.82),
+"transitions": PackedFloat32Array(0.7, 1.7, 0.8, 1),
+"update": 0,
+"values": [-0.015, 0.006, -0.002, 0.0]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("StampTool:visible")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0, 0.819, 0.82),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [true, true, false]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("StampTool:position")
+tracks/9/interp = 2
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0, 0.14, 0.38, 0.5, 0.82),
+"transitions": PackedFloat32Array(0.7, 1.45, 1.8, 0.7, 1),
+"update": 0,
+"values": [Vector2(220, 146), Vector2(220, 146), Vector2(220, 146), Vector2(220, 146), Vector2(220, 146)]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("StampTool:rotation")
+tracks/10/interp = 2
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0, 0.14, 0.38, 0.5, 0.82),
+"transitions": PackedFloat32Array(0.7, 1.4, 1.7, 0.7, 1),
+"update": 0,
+"values": [-0.035, -0.018, 0.0, 0.008, -0.025]
+}
+tracks/11/type = "value"
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/path = NodePath("StampTool:scale")
+tracks/11/interp = 2
+tracks/11/loop_wrap = true
+tracks/11/keys = {
+"times": PackedFloat32Array(0, 0.14, 0.38, 0.5, 0.82),
+"transitions": PackedFloat32Array(0.7, 1.4, 1.8, 0.7, 1),
+"update": 0,
+"values": [Vector2(1.14, 1.14), Vector2(1.05, 1.05), Vector2(0.94, 0.94), Vector2(1, 1), Vector2(1.12, 1.12)]
+}
+tracks/12/type = "value"
+tracks/12/imported = false
+tracks/12/enabled = true
+tracks/12/path = NodePath("StampTool:self_modulate")
+tracks/12/interp = 1
+tracks/12/loop_wrap = true
+tracks/12/keys = {
+"times": PackedFloat32Array(0, 0.08, 0.58, 0.82),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/13/type = "value"
+tracks/13/imported = false
+tracks/13/enabled = true
+tracks/13/path = NodePath("StampTool/ToolShadow:position")
+tracks/13/interp = 2
+tracks/13/loop_wrap = true
+tracks/13/keys = {
+"times": PackedFloat32Array(0, 0.14, 0.38, 0.5, 0.82),
+"transitions": PackedFloat32Array(0.7, 1.4, 1.8, 0.7, 1),
+"update": 0,
+"values": [Vector2(16, 16), Vector2(13, 13), Vector2(8, 8), Vector2(12, 12), Vector2(16, 16)]
+}
+tracks/14/type = "value"
+tracks/14/imported = false
+tracks/14/enabled = true
+tracks/14/path = NodePath("StampTool/ToolShadow:self_modulate")
+tracks/14/interp = 1
+tracks/14/loop_wrap = true
+tracks/14/keys = {
+"times": PackedFloat32Array(0, 0.14, 0.38, 0.5, 0.82),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0.22), Color(1, 1, 1, 0.5), Color(1, 1, 1, 1), Color(1, 1, 1, 0.68), Color(1, 1, 1, 0.2)]
 }
 
 [sub_resource type="Animation" id="Animation_remove_stamp"]
@@ -517,15 +572,8 @@ script = ExtResource("1_script")
 service_date_text = "07 JUN 2026"
 train_number_text = "505"
 missing_value_text = "NOT RECORDED"
-reset_stamp_animation = &"RESET"
-stamped_state_animation = &"STAMPED"
-apply_stamp_animation = &"apply_disembark_stamp"
-remove_stamp_animation = &"remove_disembark_stamp"
-unstamped_tooltip = "Drag a station stamp onto this ticket"
-stamped_tooltip = "This ticket has already been stamped"
-locked_tooltip = "Clean the dirty seat before stamping tickets"
 
-[node name="TicketSurface" type="Control" parent="."]
+[node name="TicketSurface" type="Control" parent="." unique_id=1912433214]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -560,9 +608,9 @@ mouse_filter = 2
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 45.0
-offset_top = 151.0
+offset_top = 155.0
 offset_right = 250.0
-offset_bottom = 178.0
+offset_bottom = 182.0
 theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
 theme_override_fonts/font = ExtResource("4_medium")
 theme_override_font_sizes/font_size = 18
@@ -572,10 +620,10 @@ text_overrun_behavior = 3
 [node name="Origin" type="Label" parent="TicketSurface/PrintedFields" unique_id=2105467530]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 45.0
-offset_top = 210.0
-offset_right = 250.0
-offset_bottom = 237.0
+offset_left = 43.0
+offset_top = 213.0
+offset_right = 248.0
+offset_bottom = 240.0
 theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
 theme_override_fonts/font = ExtResource("4_medium")
 theme_override_font_sizes/font_size = 18
@@ -586,9 +634,9 @@ text_overrun_behavior = 3
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 45.0
-offset_top = 266.0
+offset_top = 271.0
 offset_right = 250.0
-offset_bottom = 293.0
+offset_bottom = 298.0
 theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
 theme_override_fonts/font = ExtResource("4_medium")
 theme_override_font_sizes/font_size = 18
@@ -599,14 +647,13 @@ text_overrun_behavior = 3
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 256.0
-offset_top = 86.0
+offset_top = 88.0
 offset_right = 398.0
-offset_bottom = 113.0
+offset_bottom = 115.0
 theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
 theme_override_fonts/font = ExtResource("4_medium")
 theme_override_font_sizes/font_size = 18
 text = "07 JUN 2026"
-horizontal_alignment = 1
 text_overrun_behavior = 3
 
 [node name="TrainNumber" type="Label" parent="TicketSurface/PrintedFields" unique_id=543350826]
@@ -634,40 +681,40 @@ theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
 theme_override_fonts/font = ExtResource("5_bold")
 theme_override_font_sizes/font_size = 14
 text = "260607-505-0001"
-horizontal_alignment = 1
 text_overrun_behavior = 3
 
 [node name="ValidationStamp" type="TextureRect" parent="TicketSurface" unique_id=625880236]
 unique_name_in_owner = true
 visible = false
-z_index = 0
+self_modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+rotation = -0.015
+scale = Vector2(0.94, 0.94)
 pivot_offset = Vector2(310, 160.5)
 mouse_filter = 2
 texture = ExtResource("3_stamp")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="StampTool" type="Control" parent="."]
+[node name="StampTool" type="Control" parent="." unique_id=1101195302]
 unique_name_in_owner = true
 visible = false
-z_index = 0
-layout_mode = 0
+anchors_preset = 0
 offset_left = 220.0
 offset_top = 146.0
 offset_right = 400.0
 offset_bottom = 326.0
-pivot_offset = Vector2(90, 90)
 rotation = -0.035
 scale = Vector2(1.14, 1.14)
+pivot_offset = Vector2(90, 90)
 mouse_filter = 2
 
-[node name="ToolShadow" type="Panel" parent="StampTool"]
+[node name="ToolShadow" type="Panel" parent="StampTool" unique_id=2145664013]
 z_index = -1
 layout_mode = 0
 offset_left = 16.0
@@ -677,7 +724,7 @@ offset_bottom = 176.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StampShadowStyle")
 
-[node name="RubberPad" type="Panel" parent="StampTool"]
+[node name="RubberPad" type="Panel" parent="StampTool" unique_id=705576275]
 layout_mode = 0
 offset_left = 18.0
 offset_top = 18.0
@@ -686,7 +733,7 @@ offset_bottom = 162.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StampRubberStyle")
 
-[node name="BaseLower" type="Panel" parent="StampTool"]
+[node name="BaseLower" type="Panel" parent="StampTool" unique_id=112159034]
 layout_mode = 0
 offset_left = 7.0
 offset_top = 7.0
@@ -695,7 +742,7 @@ offset_bottom = 173.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StampCollarStyle")
 
-[node name="BaseFace" type="Panel" parent="StampTool"]
+[node name="BaseFace" type="Panel" parent="StampTool" unique_id=511538268]
 layout_mode = 0
 offset_left = 14.0
 offset_top = 14.0
@@ -704,7 +751,7 @@ offset_bottom = 166.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StampCollarStyle")
 
-[node name="Neck" type="Panel" parent="StampTool"]
+[node name="Neck" type="Panel" parent="StampTool" unique_id=1478323803]
 layout_mode = 0
 offset_left = 36.0
 offset_top = 36.0
@@ -713,7 +760,7 @@ offset_bottom = 144.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StampStemStyle")
 
-[node name="Knob" type="Panel" parent="StampTool"]
+[node name="Knob" type="Panel" parent="StampTool" unique_id=1994355741]
 layout_mode = 0
 offset_left = 49.0
 offset_top = 49.0
@@ -722,7 +769,7 @@ offset_bottom = 131.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StampHandleStyle")
 
-[node name="KnobInset" type="Panel" parent="StampTool"]
+[node name="KnobInset" type="Panel" parent="StampTool" unique_id=1030393785]
 layout_mode = 0
 offset_left = 58.0
 offset_top = 58.0
@@ -731,7 +778,7 @@ offset_bottom = 122.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StampHandleInsetStyle")
 
-[node name="KnobHighlight" type="Panel" parent="StampTool"]
+[node name="KnobHighlight" type="Panel" parent="StampTool" unique_id=989848470]
 layout_mode = 0
 offset_left = 68.0
 offset_top = 64.0
@@ -740,7 +787,7 @@ offset_bottom = 87.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StampHighlightStyle")
 
-[node name="StampAnimation" type="AnimationPlayer" parent="."]
+[node name="StampAnimation" type="AnimationPlayer" parent="." unique_id=1536988555]
 unique_name_in_owner = true
 libraries/ = SubResource("AnimationLibrary_stamp")
 

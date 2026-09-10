@@ -121,8 +121,11 @@ mouse_filter = 1
 unique_name_in_owner = true
 z_index = 5
 anchors_preset = 0
-offset_right = 366.0
-offset_bottom = 720.0
+offset_left = 48.0
+offset_top = 29.000002
+offset_right = 414.0
+offset_bottom = 749.0
+scale = Vector2(0.9, 0.9)
 mouse_filter = 1
 
 [node name="LedgerBacking" type="TextureRect" parent="BoardAnchor/LedgerAnchor" unique_id=2087279466]
@@ -145,59 +148,70 @@ mouse_filter = 2
 texture = ExtResource("5_ledger_page")
 expand_mode = 1
 
-[node name="PassengerCard1" parent="BoardAnchor/LedgerAnchor" unique_id=1140326123 instance=ExtResource("14_card")]
+[node name="LedgerScroll" type="ScrollContainer" parent="BoardAnchor/LedgerAnchor"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 0
 offset_left = 29.0
-offset_top = 82.0
+offset_top = 72.0
 offset_right = 347.0
-offset_bottom = 198.0
+offset_bottom = 590.0
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 3
+scroll_deadzone = 8
 
-[node name="PassengerCard2" parent="BoardAnchor/LedgerAnchor" unique_id=1572439812 instance=ExtResource("14_card")]
+[node name="CardCanvas" type="Control" parent="BoardAnchor/LedgerAnchor/LedgerScroll"]
 unique_name_in_owner = true
-visible = false
-layout_mode = 0
-offset_left = 29.0
-offset_top = 202.0
-offset_right = 347.0
-offset_bottom = 318.0
+custom_minimum_size = Vector2(318, 518)
+layout_mode = 2
+mouse_filter = 2
 
-[node name="PassengerCard3" parent="BoardAnchor/LedgerAnchor" unique_id=1937201624 instance=ExtResource("14_card")]
+[node name="PassengerCard1" parent="BoardAnchor/LedgerAnchor/LedgerScroll/CardCanvas" unique_id=1140326123 instance=ExtResource("14_card")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_left = 29.0
-offset_top = 322.0
-offset_right = 347.0
-offset_bottom = 438.0
+offset_right = 318.0
+offset_bottom = 116.0
 
-[node name="PassengerCard4" parent="BoardAnchor/LedgerAnchor" unique_id=241677965 instance=ExtResource("14_card")]
+[node name="PassengerCard2" parent="BoardAnchor/LedgerAnchor/LedgerScroll/CardCanvas" unique_id=1572439812 instance=ExtResource("14_card")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_left = 29.0
-offset_top = 442.0
-offset_right = 347.0
-offset_bottom = 558.0
+offset_top = 120.0
+offset_right = 318.0
+offset_bottom = 236.0
 
-[node name="PassengerCard5" parent="BoardAnchor/LedgerAnchor" unique_id=381691292 instance=ExtResource("14_card")]
+[node name="PassengerCard3" parent="BoardAnchor/LedgerAnchor/LedgerScroll/CardCanvas" unique_id=1937201624 instance=ExtResource("14_card")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_left = 29.0
-offset_top = 562.0
-offset_right = 347.0
-offset_bottom = 678.0
+offset_top = 240.0
+offset_right = 318.0
+offset_bottom = 356.0
+
+[node name="PassengerCard4" parent="BoardAnchor/LedgerAnchor/LedgerScroll/CardCanvas" unique_id=241677965 instance=ExtResource("14_card")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_top = 360.0
+offset_right = 318.0
+offset_bottom = 476.0
+
+[node name="PassengerCard5" parent="BoardAnchor/LedgerAnchor/LedgerScroll/CardCanvas" unique_id=381691292 instance=ExtResource("14_card")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_top = 480.0
+offset_right = 318.0
+offset_bottom = 596.0
 
 [node name="VeilNotePanel" type="Panel" parent="BoardAnchor/LedgerAnchor" unique_id=1434416946]
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
-offset_left = 44.0
-offset_top = 559.0
-offset_right = 332.0
-offset_bottom = 610.0
+offset_left = 420.0
+offset_top = 103.0
+offset_right = 708.0
+offset_bottom = 154.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("VeilNotePaper")
 
@@ -257,12 +271,17 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 88.00001
+offset_top = 24.0
+offset_right = 88.0
+offset_bottom = 24.0
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(0.9, 0.9)
 mouse_filter = 2
 
 [node name="MapPaper" type="TextureRect" parent="BoardAnchor/StationPathAnchor" unique_id=1829912111]
-z_index = -2
+z_index = 1
 layout_mode = 0
 offset_left = 366.0
 offset_top = 18.0
@@ -276,7 +295,7 @@ stretch_mode = 6
 [node name="ValidationMapShade" type="ColorRect" parent="BoardAnchor/StationPathAnchor" unique_id=1699062031]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0)
-z_index = -1
+z_index = 2
 layout_mode = 0
 offset_left = 366.0
 offset_top = 18.0
@@ -287,6 +306,7 @@ color = Color(0.027451, 0.0705882, 0.137255, 0.92)
 
 [node name="PathLayoutHost" type="Control" parent="BoardAnchor/StationPathAnchor" unique_id=239346585]
 unique_name_in_owner = true
+z_index = 3
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -301,6 +321,7 @@ mouse_filter = 2
 
 [node name="LegendLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=1909445939]
 visible = false
+z_index = 4
 layout_mode = 0
 offset_left = 746.0
 offset_top = 520.0
@@ -315,6 +336,7 @@ horizontal_alignment = 1
 
 [node name="SelectionLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=1103657674]
 unique_name_in_owner = true
+z_index = 4
 layout_mode = 0
 offset_left = 420.0
 offset_top = 543.0
@@ -329,6 +351,7 @@ vertical_alignment = 1
 [node name="AssignmentCountLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=259874943]
 unique_name_in_owner = true
 visible = false
+z_index = 4
 layout_mode = 0
 offset_left = 746.0
 offset_top = 605.0
@@ -342,6 +365,7 @@ horizontal_alignment = 1
 
 [node name="ConfirmButton" type="Button" parent="BoardAnchor/StationPathAnchor" unique_id=1914064462]
 unique_name_in_owner = true
+z_index = 4
 layout_mode = 0
 offset_left = 451.0
 offset_top = 584.0
@@ -360,6 +384,7 @@ script = ExtResource("20_hover")
 
 [node name="ErrorLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=972805423]
 unique_name_in_owner = true
+z_index = 4
 layout_mode = 0
 offset_left = 746.0
 offset_top = 654.0
@@ -383,26 +408,48 @@ texture = ExtResource("13_star_small_d")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="ValidationStatusLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=1737779961]
+[node name="ValidationFuseGlow" type="Line2D" parent="BoardAnchor/StationPathAnchor"]
 unique_name_in_owner = true
-visible = false
-z_index = 31
-layout_mode = 0
-offset_left = 510.0
-offset_top = 627.0
-offset_right = 1120.0
-offset_bottom = 674.0
-theme_override_colors/font_color = Color(0.388235, 0.32549, 0.294118, 1)
-theme_override_colors/font_shadow_color = Color(1, 0.913725, 0.67451, 0.45)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 2
-theme_override_fonts/font = ExtResource("18_bold")
-theme_override_font_sizes/font_size = 20
-text = "READING THE STATION PATH"
-horizontal_alignment = 1
-vertical_alignment = 1
+z_index = 24
+width = 11.0
+default_color = Color(1, 0.690196, 0.247059, 0.2)
+joint_mode = 1
+begin_cap_mode = 2
+end_cap_mode = 2
+antialiased = true
+
+[node name="ValidationFuseTrail" type="Line2D" parent="BoardAnchor/StationPathAnchor"]
+unique_name_in_owner = true
+z_index = 25
+width = 3.5
+default_color = Color(1, 0.92549, 0.713726, 1)
+joint_mode = 1
+begin_cap_mode = 2
+end_cap_mode = 2
+antialiased = true
+
+[node name="ValidationFuseSpark" type="CPUParticles2D" parent="BoardAnchor/StationPathAnchor"]
+unique_name_in_owner = true
+z_index = 29
+emitting = false
+amount = 18
+texture = ExtResource("13_star_small_d")
+lifetime = 0.38
+randomness = 0.72
+local_coords = false
+emission_shape = 1
+emission_sphere_radius = 7.0
+direction = Vector2(0, 0)
+spread = 180.0
+gravity = Vector2(0, 18)
+initial_velocity_min = 18.0
+initial_velocity_max = 46.0
+scale_amount_min = 0.035
+scale_amount_max = 0.09
+color = Color(1, 0.901961, 0.619608, 0.95)
 
 [node name="CloseButton" parent="BoardAnchor/StationPathAnchor" unique_id=145186199 instance=ExtResource("19_close")]
+z_index = 31
 layout_mode = 0
 offset_left = 1161.0
 offset_top = 48.0
@@ -413,6 +460,7 @@ tooltip_text = "Close Night Ledger [E]"
 
 [node name="MapTitle" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=67688186]
 visible = false
+z_index = 4
 layout_mode = 0
 offset_left = 432.0
 offset_top = 44.0
@@ -427,6 +475,7 @@ horizontal_alignment = 1
 [node name="InstructionLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=756115613]
 unique_name_in_owner = true
 visible = false
+z_index = 4
 layout_mode = 0
 offset_left = 432.0
 offset_top = 82.0

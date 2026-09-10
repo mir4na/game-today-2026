@@ -311,7 +311,6 @@ func _update_day_route_presentation() -> void:
 
 	if state == GameState.DAY and cycle_progress >= SUNSET_STATE_PROGRESS:
 		state = GameState.SUNSET
-		_hud.notify("THE LAST LIGHT FADES BEYOND THE RAILS", 3.0)
 
 
 func _on_debug_next_station_requested() -> void:
@@ -409,7 +408,6 @@ func _update_night_service(delta: float, world_simulation_active: bool) -> void:
 	if _night_service_elapsed_seconds < night_service_duration_seconds:
 		return
 	_night_service_expired = true
-	_hud.notify("Night service complete\nFinalize the departure assignments", 3.5)
 	_present_night_service_timeout()
 
 
@@ -1134,7 +1132,7 @@ func _on_blocked_aisle_timer_timeout() -> void:
 	_blocked_aisle_spawn_count += 1
 	if day_number == 2:
 		_blocked_aisle_timer.start(level_two_blocked_repeat_delay_seconds)
-	_hud.notify("LUGGAGE IS BLOCKING A COACH CONNECTOR", 3.5)
+	_hud.notify("Luggage is blocking a coach connector", 3.5)
 	_refresh_player_interactables()
 	_refresh_maintenance_trackers()
 
@@ -1175,7 +1173,7 @@ func _on_dirty_seat_timer_timeout() -> void:
 	_dirty_seat_spawns_this_route += 1
 	if day_number == 3 and _route_index == 0 and _dirty_seat_spawns_this_route == 1:
 		_dirty_seat_timer.start(level_three_clean_second_delay_seconds)
-	_hud.notify("A PASSENGER SEAT NEEDS CLEANING", 3.5)
+	_hud.notify("A passenger seat needs cleaning", 3.5)
 	_clear_dropoff_assignments_for_dirty_seat()
 	_set_service_sealed(true)
 	_refresh_maintenance_trackers()
@@ -1402,6 +1400,9 @@ func _on_night_statement_recorded(passenger_name: String, statement: String) -> 
 	if _collected_departure_statements.has(passenger_name):
 		return
 	_collected_departure_statements[passenger_name] = statement
+	var revealed_passenger: Passenger = _find_active_passenger_by_name(passenger_name)
+	if revealed_passenger != null:
+		revealed_passenger.set_night_identity_revealed(true)
 	_night_puzzle_ui.refresh_collected_statements(_collected_departure_statements)
 
 
@@ -1410,6 +1411,10 @@ func _on_night_statement_feedback_requested(succeeded: bool) -> void:
 	# shake is reserved for rejected sentences so success remains comfortable.
 	if not succeeded:
 		_shake_night_record_camera(16.0)
+
+
+func _on_night_validation_impact_requested(succeeded: bool) -> void:
+	_shake_night_record_camera(13.0 if succeeded else 8.0)
 
 
 func _on_night_soul_record_closed() -> void:
@@ -1482,11 +1487,11 @@ func _on_station_assignment_toggled(passenger_name: String, should_assign: bool)
 	# Legacy/testing compatibility. The player-facing UI now applies a specific,
 	# permanent station stamp through _on_station_stamp_applied().
 	if state not in [GameState.DAY, GameState.SUNSET] or not _has_next_day_station() or _station_exchange_processed:
-		_hud.notify("THE CURRENT STATION SERVICE RECORD IS ALREADY SEALED", 2.0)
+		_hud.notify("The current station service record is already sealed", 2.0)
 		return
 	var passenger: Passenger = _find_active_passenger_by_name(passenger_name)
 	if passenger == null:
-		_hud.notify("THIS PASSENGER IS NO LONGER ABOARD", 2.0)
+		_hud.notify("This passenger is no longer aboard", 2.0)
 		return
 	var canonical_name: String = passenger.data.passenger_name
 	var assignment_index: int = _station_assignment.find(canonical_name)
@@ -1512,11 +1517,11 @@ func _on_station_assignment_toggled(passenger_name: String, should_assign: bool)
 
 func _on_station_stamp_applied(passenger_name: String, station_name: String, ticket_position: Vector2) -> void:
 	if state not in [GameState.DAY, GameState.SUNSET] or _station_exchange_processed:
-		_hud.notify("THE CURRENT STATION SERVICE RECORD IS ALREADY SEALED", 2.0)
+		_hud.notify("The current station service record is already sealed", 2.0)
 		return
 	var passenger: Passenger = _find_active_passenger_by_name(passenger_name)
 	if passenger == null:
-		_hud.notify("THIS PASSENGER IS NO LONGER ABOARD", 2.0)
+		_hud.notify("This passenger is no longer aboard", 2.0)
 		return
 	if _is_dropoff_locked() or not day_route.has(station_name):
 		_document_overlay.configure_stamp_lock(_is_dropoff_locked())
@@ -2126,7 +2131,7 @@ func _on_market_tool_requested(tool_id: StringName) -> void:
 	match tool_id:
 		TOOL_VEIL_NOTE:
 			if state != GameState.NIGHT:
-				_hud.notify("VEIL NOTE CAN ONLY BE OPENED DURING NIGHT SHIFT", 2.5)
+				_hud.notify("Veil note can only be opened during night shift", 2.5)
 			else:
 				_use_veil_note()
 		TOOL_RADAR_CHARGE:
@@ -2356,18 +2361,18 @@ func _on_market_inventory_changed(snapshot: Dictionary) -> void:
 func _use_veil_note() -> void:
 	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
 	if int(snapshot.get("veil_notes", 0)) <= 0:
-		_hud.notify("NO VEIL NOTE REMAINS", 2.5)
+		_hud.notify("No veil note remains", 2.5)
 		return
 	if not _collected_veil_note_statement.is_empty():
-		_hud.notify("THIS NIGHT'S VEIL NOTE HAS ALREADY BEEN RECORDED", 2.5)
+		_hud.notify("This night's veil note has already been recorded", 2.5)
 		return
 	var puzzle: DeparturePuzzleData = _get_departure_puzzle()
 	if puzzle == null:
-		_hud.notify("THE VEIL NOTE CANNOT FIND THIS NIGHT'S PATH", 2.5)
+		_hud.notify("The veil note cannot find this night's path", 2.5)
 		return
 	var extra_statement: String = puzzle.get_veil_note_statement()
 	if extra_statement.is_empty():
-		_hud.notify("THE VEIL NOTE IS BLANK", 2.5)
+		_hud.notify("The veil note is blank", 2.5)
 		return
 	if not bool(_market_tool_state.call(&"consume_veil_note")):
 		return
@@ -2394,10 +2399,10 @@ func _use_swiftstep() -> void:
 	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
 	var swift_charges: int = int(snapshot.get("swift_charges", 0))
 	if swift_charges <= 0:
-		_hud.notify("NO SWIFTSTEP SOLES OWNED", 2.5)
+		_hud.notify("No Swiftstep soles owned", 2.5)
 		return
 	if _swiftstep_active:
-		_hud.notify("SWIFTSTEP IS ALREADY BENDING TIME", 2.0)
+		_hud.notify("Swiftstep is already bending time", 2.0)
 		return
 	if not bool(_market_tool_state.call(&"consume_swift_charge")):
 		return
@@ -2407,7 +2412,7 @@ func _use_swiftstep() -> void:
 	var next_time_scale: float = float(_swiftstep_effect_ui.call(&"activate", _player))
 	_set_world_time_scale(next_time_scale)
 	_hud.notify(
-		"SWIFTSTEP SOLES ACTIVE\nTHE WORLD YIELDS FOR 15 SECONDS",
+		"Swiftstep soles active\nThe world yields for 15 seconds",
 		2.75
 	)
 
@@ -2444,14 +2449,13 @@ func _use_carriage_radar() -> void:
 		return
 	var carriage_number: int = _train.get_passenger_carriage_number_at_world_x(_player.global_position.x)
 	if carriage_number <= 0:
-		_hud.notify("RADAR REQUIRES A PASSENGER COACH", 2.5)
 		return
 	if not _train.can_play_radar_scan(carriage_number):
-		_hud.notify("RADAR ARRAY IS UNAVAILABLE IN THIS COACH", 2.5)
+		_hud.notify("Radar array is unavailable in this coach", 2.5)
 		return
 	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
 	if int(snapshot.get("radar_charges", 0)) <= 0:
-		_hud.notify("NO RADAR CHARGES REMAINING", 3.0)
+		_hud.notify("No radar charges remaining", 3.0)
 		return
 	if not bool(_market_tool_state.call(&"consume_radar_charge")):
 		return
@@ -2648,6 +2652,9 @@ func _on_night_validation_finished(succeeded: bool, attempt_count: int) -> void:
 		# The generated case stays the same, while its statements and placements
 		# must be recovered again. The attempt counter intentionally persists.
 		_collected_departure_statements.clear()
+		for passenger: Passenger in _passengers:
+			if _is_active_passenger(passenger) and passenger.data.is_dead:
+				passenger.set_night_identity_revealed(false)
 		_night_puzzle_ui.hide()
 		_active_modal = null
 		state = GameState.NIGHT

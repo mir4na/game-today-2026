@@ -8,7 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/document_overlay_ui.tscn" id="5"]
 [ext_resource type="PackedScene" uid="uid://4vcwjjpkoty4" path="res://scenes/ui/guidebook_ui.tscn" id="6"]
 [ext_resource type="PackedScene" uid="uid://shq6f5saupvr" path="res://scenes/ui/night_puzzle_ui.tscn" id="8"]
-[ext_resource type="PackedScene" path="res://scenes/ui/pause_ui.tscn" id="10"]
+[ext_resource type="PackedScene" uid="uid://cqy4vojmyhgdi" path="res://scenes/ui/pause_ui.tscn" id="10"]
 [ext_resource type="Resource" uid="uid://cx6ttdmtj4lgd" path="res://data/passengers/npc_1_profile.tres" id="11"]
 [ext_resource type="Resource" uid="uid://d1llapidnrg01" path="res://data/passengers/npc_2_profile.tres" id="12"]
 [ext_resource type="Resource" uid="uid://j3f80mwvqkci" path="res://data/passengers/npc_3_profile.tres" id="13"]
@@ -37,21 +37,23 @@
 [ext_resource type="Resource" uid="uid://b37vfh7cgqlw5" path="res://data/daily_manifest_config.tres" id="37"]
 [ext_resource type="Shader" uid="uid://dq13hfpieecwx" path="res://shaders/night_atmosphere.gdshader" id="38"]
 [ext_resource type="PackedScene" uid="uid://bd7f1bhggbm10" path="res://scenes/ui/blocked_aisle_puzzle_ui.tscn" id="38_blocked_ui"]
+[ext_resource type="Shader" uid="uid://ce1bimgy548dk" path="res://shaders/clock_progress_fill.gdshader" id="38_pd34m"]
 [ext_resource type="Shader" uid="uid://dws5qbo4ng6g" path="res://shaders/day_cycle_sky.gdshader" id="39"]
 [ext_resource type="PackedScene" uid="uid://dxh8uc0ytsvkm" path="res://scenes/ui/clean_seat_ui.tscn" id="39_clean_ui"]
+[ext_resource type="Shader" uid="uid://b7v5jwqdcye4y" path="res://shaders/ui_texture_outline.gdshader" id="39_qjyke"]
 [ext_resource type="PackedScene" path="res://scenes/systems/market_tool_state.tscn" id="40_market_state"]
-[ext_resource type="PackedScene" path="res://scenes/ui/night_market_ui.tscn" id="41_market_ui"]
+[ext_resource type="PackedScene" uid="uid://5s6mup82ct4p" path="res://scenes/ui/night_market_ui.tscn" id="41_market_ui"]
 [ext_resource type="Script" uid="uid://cr77segdw7blg" path="res://scripts/systems/camera_bounds_2d.gd" id="42_camera_bounds"]
 [ext_resource type="PackedScene" uid="uid://c8qmx71qn8rq6" path="res://scenes/systems/travel_background.tscn" id="43_travel_background"]
 [ext_resource type="Texture2D" uid="uid://bnl61bhej8bp4" path="res://assets/environment/railroad.png" id="44_railroad"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_transition_cutscene_ui.tscn" id="45_night_transition"]
 [ext_resource type="PackedScene" path="res://scenes/systems/station_cinematic_view.tscn" id="45_station_view"]
 [ext_resource type="PackedScene" path="res://scenes/ui/swiftstep_effect_ui.tscn" id="46_swiftstep_effect"]
+[ext_resource type="Material" path="res://resources/materials/screen_bloom.tres" id="47_screen_bloom"]
 [ext_resource type="PackedScene" uid="uid://bn7q3awivg60d" path="res://scenes/ui/night_soul_record_ui.tscn" id="47_soul_record"]
 [ext_resource type="PackedScene" path="res://scenes/ui/veil_note_reveal_ui.tscn" id="48_veil_note_reveal"]
 [ext_resource type="PackedScene" path="res://scenes/ui/service_signature_ui.tscn" id="50_signature_ui"]
-[ext_resource type="Material" path="res://resources/materials/screen_bloom.tres" id="47_screen_bloom"]
-[ext_resource type="PackedScene" path="res://scenes/ui/hint.tscn" id="51_hint_ui"]
+[ext_resource type="PackedScene" uid="uid://dl1hatq1cq2qy" path="res://scenes/ui/hint.tscn" id="51_hint_ui"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_day_cycle_sky"]
 shader = ExtResource("39")
@@ -82,36 +84,6 @@ shader_parameter/noise_texture = SubResource("NoiseTexture2D_night_fog")
 shader_parameter/density = 0.52
 shader_parameter/speed = Vector2(0.02, 0.01)
 shader_parameter/fog_scale = Vector2(0.48, 0.48)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_ftp6y"]
-resource_local_to_scene = true
-shader = ExtResource("31_6miv3")
-shader_parameter/grayscale_strength = 0.0
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_pd34m"]
-resource_local_to_scene = true
-shader = ExtResource("32_yisfj")
-shader_parameter/scan_progress = 0.0
-shader_parameter/scan_aspect = 2.85
-shader_parameter/scan_origin = Vector2(0.5, 0.88)
-shader_parameter/band_width = 0.24
-shader_parameter/grid_density = 11.0
-shader_parameter/grid_line_width = 0.035
-shader_parameter/grid_feather = 0.018
-shader_parameter/edge_width = 0.004
-shader_parameter/edge_glow_width = 0.022
-shader_parameter/fill_strength = 0.04
-shader_parameter/scanned_grid_strength = 0.46
-shader_parameter/scanned_fill_strength = 0.025
-shader_parameter/trail_falloff = 2.25
-shader_parameter/warp_strength = 0.004
-shader_parameter/grid_color = Color(0.24, 1, 0.56, 0.68)
-shader_parameter/edge_color = Color(0.52, 1, 0.7, 0.92)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_qjyke"]
-resource_local_to_scene = true
-shader = ExtResource("31_6miv3")
-shader_parameter/grayscale_strength = 0.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_o8kno"]
 resource_local_to_scene = true
@@ -203,6 +175,67 @@ resource_local_to_scene = true
 shader = ExtResource("31_6miv3")
 shader_parameter/grayscale_strength = 0.0
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_scupx"]
+resource_local_to_scene = true
+shader = ExtResource("31_6miv3")
+shader_parameter/grayscale_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_62gx1"]
+resource_local_to_scene = true
+shader = ExtResource("32_yisfj")
+shader_parameter/scan_progress = 0.0
+shader_parameter/scan_aspect = 2.85
+shader_parameter/scan_origin = Vector2(0.5, 0.88)
+shader_parameter/band_width = 0.24
+shader_parameter/grid_density = 11.0
+shader_parameter/grid_line_width = 0.035
+shader_parameter/grid_feather = 0.018
+shader_parameter/edge_width = 0.004
+shader_parameter/edge_glow_width = 0.022
+shader_parameter/fill_strength = 0.04
+shader_parameter/scanned_grid_strength = 0.46
+shader_parameter/scanned_fill_strength = 0.025
+shader_parameter/trail_falloff = 2.25
+shader_parameter/warp_strength = 0.004
+shader_parameter/grid_color = Color(0.24, 1, 0.56, 0.68)
+shader_parameter/edge_color = Color(0.52, 1, 0.7, 0.92)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ae8n2"]
+resource_local_to_scene = true
+shader = ExtResource("31_6miv3")
+shader_parameter/grayscale_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_obdhw"]
+resource_local_to_scene = true
+shader = ExtResource("38_pd34m")
+shader_parameter/progress = 0.0
+shader_parameter/edge_softness = 0.003
+shader_parameter/fill_origin = Vector2(0.477, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_budmp"]
+resource_local_to_scene = true
+shader = ExtResource("39_qjyke")
+shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
+shader_parameter/outline_size = 9.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_32ji7"]
+resource_local_to_scene = true
+shader = ExtResource("39_qjyke")
+shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
+shader_parameter/outline_size = 9.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sveqe"]
+resource_local_to_scene = true
+shader = ExtResource("39_qjyke")
+shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
+shader_parameter/outline_size = 9.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lakrh"]
+resource_local_to_scene = true
+shader = ExtResource("39_qjyke")
+shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
+shader_parameter/outline_size = 9.0
+
 [node name="Main" type="Node2D" unique_id=604105226]
 script = ExtResource("1")
 passenger_identity_profiles = Array[ExtResource("2_08tbl")]([ExtResource("11"), ExtResource("12"), ExtResource("13"), ExtResource("14"), ExtResource("15"), ExtResource("16"), ExtResource("19"), ExtResource("20"), ExtResource("21"), ExtResource("22"), ExtResource("23"), ExtResource("24"), ExtResource("28"), ExtResource("29"), ExtResource("30"), ExtResource("31")])
@@ -211,12 +244,6 @@ passenger_scene = ExtResource("34")
 manifest_config = ExtResource("37")
 day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere")
 station_travel_durations_seconds = PackedFloat32Array(120, 120, 120, 120)
-level_two_blocked_first_delay_seconds = 10.0
-level_two_blocked_repeat_delay_seconds = 50.0
-level_three_clean_first_delay_seconds = 10.0
-level_three_clean_second_delay_seconds = 60.0
-clean_seat_route_edge_clearance_seconds = 20.0
-maintenance_event_clearance = 14.0
 debug_print_anomaly_roster = true
 night_shift_instruction = "Night shift · 03:00
 Read each soul's record, then open the station ledger"
@@ -310,43 +337,43 @@ unique_name_in_owner = true
 position = Vector2(-16, 0)
 
 [node name="ArtRoot" parent="GameplayWorld/Train/Cars/PassengerCoach4" parent_id_path=PackedInt32Array(1577522868, 398983735) index="1" unique_id=1724717493]
-material = SubResource("ShaderMaterial_ftp6y")
+material = SubResource("ShaderMaterial_o8kno")
 
 [node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach4/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 398983735, 545678927) index="0" unique_id=398318395]
-material = SubResource("ShaderMaterial_pd34m")
+material = SubResource("ShaderMaterial_7ahn0")
 
 [node name="InteriorLighting" parent="GameplayWorld/Train/Cars/PassengerCoach4" parent_id_path=PackedInt32Array(1577522868, 398983735) index="2" unique_id=1422164408]
-material = SubResource("ShaderMaterial_qjyke")
+material = SubResource("ShaderMaterial_vyrcm")
 
 [node name="Newspaper" parent="GameplayWorld/Train/Cars/PassengerCoach4" parent_id_path=PackedInt32Array(1577522868, 398983735) index="4" unique_id=891876982]
 position = Vector2(533, 495)
 
 [node name="ArtRoot" parent="GameplayWorld/Train/Cars/PassengerCoach3" parent_id_path=PackedInt32Array(1577522868, 534537403) index="1" unique_id=1724717493]
-material = SubResource("ShaderMaterial_o8kno")
-
-[node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach3/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 534537403, 545678927) index="0" unique_id=398318395]
-material = SubResource("ShaderMaterial_7ahn0")
-
-[node name="InteriorLighting" parent="GameplayWorld/Train/Cars/PassengerCoach3" parent_id_path=PackedInt32Array(1577522868, 534537403) index="2" unique_id=1422164408]
-material = SubResource("ShaderMaterial_vyrcm")
-
-[node name="ArtRoot" parent="GameplayWorld/Train/Cars/PassengerCoach2" parent_id_path=PackedInt32Array(1577522868, 213345118) index="1" unique_id=1724717493]
 material = SubResource("ShaderMaterial_3ql0k")
 
-[node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach2/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 213345118, 545678927) index="0" unique_id=398318395]
+[node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach3/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 534537403, 545678927) index="0" unique_id=398318395]
 material = SubResource("ShaderMaterial_8biwb")
 
-[node name="InteriorLighting" parent="GameplayWorld/Train/Cars/PassengerCoach2" parent_id_path=PackedInt32Array(1577522868, 213345118) index="2" unique_id=1422164408]
+[node name="InteriorLighting" parent="GameplayWorld/Train/Cars/PassengerCoach3" parent_id_path=PackedInt32Array(1577522868, 534537403) index="2" unique_id=1422164408]
 material = SubResource("ShaderMaterial_m0t6v")
 
-[node name="ArtRoot" parent="GameplayWorld/Train/Cars/PassengerCoach1" parent_id_path=PackedInt32Array(1577522868, 297172719) index="1" unique_id=1724717493]
+[node name="ArtRoot" parent="GameplayWorld/Train/Cars/PassengerCoach2" parent_id_path=PackedInt32Array(1577522868, 213345118) index="1" unique_id=1724717493]
 material = SubResource("ShaderMaterial_axmsw")
 
-[node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach1/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 297172719, 545678927) index="0" unique_id=398318395]
+[node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach2/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 213345118, 545678927) index="0" unique_id=398318395]
 material = SubResource("ShaderMaterial_0fdjx")
 
-[node name="InteriorLighting" parent="GameplayWorld/Train/Cars/PassengerCoach1" parent_id_path=PackedInt32Array(1577522868, 297172719) index="2" unique_id=1422164408]
+[node name="InteriorLighting" parent="GameplayWorld/Train/Cars/PassengerCoach2" parent_id_path=PackedInt32Array(1577522868, 213345118) index="2" unique_id=1422164408]
 material = SubResource("ShaderMaterial_ky173")
+
+[node name="ArtRoot" parent="GameplayWorld/Train/Cars/PassengerCoach1" parent_id_path=PackedInt32Array(1577522868, 297172719) index="1" unique_id=1724717493]
+material = SubResource("ShaderMaterial_scupx")
+
+[node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach1/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 297172719, 545678927) index="0" unique_id=398318395]
+material = SubResource("ShaderMaterial_62gx1")
+
+[node name="InteriorLighting" parent="GameplayWorld/Train/Cars/PassengerCoach1" parent_id_path=PackedInt32Array(1577522868, 297172719) index="2" unique_id=1422164408]
+material = SubResource("ShaderMaterial_ae8n2")
 
 [node name="BlockedAisle43" parent="GameplayWorld/Train/Cars/CarConnections/MaintenanceEvents" parent_id_path=PackedInt32Array(1577522868, 1440122565) index="0" unique_id=1176730495]
 editor_description = ""
@@ -406,14 +433,14 @@ expand_mode = 1
 unique_name_in_owner = true
 world_lighting_path = NodePath("../GameplayWorld/WorldLighting")
 
-[node name="BloomLayer" type="CanvasLayer" parent="."]
+[node name="BloomLayer" type="CanvasLayer" parent="." unique_id=2034352473]
 editor_description = "Subtle highlight bloom for the rendered world. It sits below the HUD and modal layers so interface text stays crisp."
 layer = 9
 
-[node name="RefreshScreenTexture" type="BackBufferCopy" parent="BloomLayer"]
+[node name="RefreshScreenTexture" type="BackBufferCopy" parent="BloomLayer" unique_id=1819045204]
 copy_mode = 2
 
-[node name="Bloom" type="ColorRect" parent="BloomLayer"]
+[node name="Bloom" type="ColorRect" parent="BloomLayer" unique_id=1026832635]
 material = ExtResource("47_screen_bloom")
 anchors_preset = 15
 anchor_right = 1.0
@@ -424,6 +451,44 @@ mouse_filter = 2
 
 [node name="HUD" parent="." unique_id=1053587110 instance=ExtResource("4")]
 unique_name_in_owner = true
+
+[node name="FloatingPrompt" parent="HUD/Root" parent_id_path=PackedInt32Array(1053587110, 664657133) index="4" unique_id=266769048]
+visible = true
+
+[node name="ClockFilled" parent="HUD/Root/ClockPanel/ClockFace" parent_id_path=PackedInt32Array(1053587110, 2018867802) index="2" unique_id=652018143]
+material = SubResource("ShaderMaterial_obdhw")
+
+[node name="ClockPointer" parent="HUD/Root/ClockPanel/ClockFace/ClockNeedlePivot" parent_id_path=PackedInt32Array(1053587110, 1197693786) index="0" unique_id=1810178768]
+material = SubResource("ShaderMaterial_budmp")
+
+[node name="DaySymbol" parent="HUD/Root/ClockPanel/ClockFace/ClockSymbolPivot" parent_id_path=PackedInt32Array(1053587110, 1736318714) index="0" unique_id=1300180946]
+material = SubResource("ShaderMaterial_budmp")
+
+[node name="NightSymbol" parent="HUD/Root/ClockPanel/ClockFace/ClockSymbolPivot" parent_id_path=PackedInt32Array(1053587110, 1736318714) index="1" unique_id=1397011548]
+material = SubResource("ShaderMaterial_budmp")
+
+[node name="Background" parent="HUD/Root/MarketItemBar/RadarSlot" parent_id_path=PackedInt32Array(1053587110, 943347102) index="0" unique_id=1812476632]
+material = SubResource("ShaderMaterial_32ji7")
+
+[node name="Icon" parent="HUD/Root/MarketItemBar/RadarSlot" parent_id_path=PackedInt32Array(1053587110, 943347102) index="2" unique_id=771861680]
+material = SubResource("ShaderMaterial_32ji7")
+
+[node name="Background" parent="HUD/Root/MarketItemBar/SwiftSlot" parent_id_path=PackedInt32Array(1053587110, 2093275063) index="0" unique_id=1812476632]
+material = SubResource("ShaderMaterial_sveqe")
+
+[node name="Icon" parent="HUD/Root/MarketItemBar/SwiftSlot" parent_id_path=PackedInt32Array(1053587110, 2093275063) index="2" unique_id=771861680]
+material = SubResource("ShaderMaterial_sveqe")
+
+[node name="Background" parent="HUD/Root/MarketItemBar/VeilNoteSlot" parent_id_path=PackedInt32Array(1053587110, 907689913) index="0" unique_id=1812476632]
+material = SubResource("ShaderMaterial_lakrh")
+
+[node name="Icon" parent="HUD/Root/MarketItemBar/VeilNoteSlot" parent_id_path=PackedInt32Array(1053587110, 907689913) index="2" unique_id=771861680]
+material = SubResource("ShaderMaterial_lakrh")
+
+[node name="NotificationPanel" parent="HUD/Root" parent_id_path=PackedInt32Array(1053587110, 664657133) index="10" unique_id=1320290712]
+visible = true
+offset_top = 224.0
+offset_bottom = 284.0
 
 [node name="ModalLayer" type="CanvasLayer" parent="." unique_id=1356756245]
 layer = 20
@@ -468,10 +533,10 @@ unique_name_in_owner = true
 [node name="CleanSeatUI" parent="ModalLayer" unique_id=1148165085 instance=ExtResource("39_clean_ui")]
 unique_name_in_owner = true
 
-[node name="HintUI" parent="ModalLayer" instance=ExtResource("51_hint_ui")]
+[node name="HintUI" parent="ModalLayer" unique_id=198971249 instance=ExtResource("51_hint_ui")]
 unique_name_in_owner = true
 
-[node name="PauseLayer" type="CanvasLayer" parent="."]
+[node name="PauseLayer" type="CanvasLayer" parent="." unique_id=1162735996]
 layer = 100
 
 [node name="PauseUI" parent="PauseLayer" unique_id=680489697 instance=ExtResource("10")]
@@ -518,22 +583,31 @@ unique_name_in_owner = true
 [connection signal="closed" from="ModalLayer/NightPuzzleUI" to="." method="_close_night_puzzle"]
 [connection signal="departures_confirmed" from="ModalLayer/NightPuzzleUI" to="." method="_on_departures_confirmed"]
 [connection signal="validation_finished" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_validation_finished"]
+[connection signal="validation_impact_requested" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_validation_impact_requested"]
 [connection signal="closed" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signature_closed"]
 [connection signal="service_signed" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signed"]
 [connection signal="signature_rejected" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signature_rejected"]
 [connection signal="reveal_finished" from="ModalLayer/VeilNoteRevealUI" to="." method="_on_veil_note_reveal_finished"]
-[connection signal="main_menu_requested" from="PauseLayer/PauseUI" to="." method="_return_to_main_menu"]
-[connection signal="restart_requested" from="PauseLayer/PauseUI" to="." method="_restart_game"]
-[connection signal="resume_requested" from="PauseLayer/PauseUI" to="." method="_resume_from_pause"]
 [connection signal="closed" from="ModalLayer/BlockedAislePuzzleUI" to="." method="_on_maintenance_minigame_closed"]
 [connection signal="completed" from="ModalLayer/BlockedAislePuzzleUI" to="." method="_on_maintenance_minigame_completed"]
 [connection signal="closed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_closed"]
 [connection signal="completed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_completed"]
 [connection signal="dismissed" from="ModalLayer/HintUI" to="." method="_on_level_start_hint_dismissed"]
+[connection signal="main_menu_requested" from="PauseLayer/PauseUI" to="." method="_return_to_main_menu"]
+[connection signal="restart_requested" from="PauseLayer/PauseUI" to="." method="_restart_game"]
+[connection signal="resume_requested" from="PauseLayer/PauseUI" to="." method="_resume_from_pause"]
 
 [editable path="GameplayWorld/Train"]
 [editable path="GameplayWorld/Train/Cars/PassengerCoach4"]
+[editable path="GameplayWorld/Train/Cars/PassengerCoach4/InteriorLighting"]
 [editable path="GameplayWorld/Train/Cars/PassengerCoach3"]
+[editable path="GameplayWorld/Train/Cars/PassengerCoach3/InteriorLighting"]
 [editable path="GameplayWorld/Train/Cars/PassengerCoach2"]
+[editable path="GameplayWorld/Train/Cars/PassengerCoach2/InteriorLighting"]
 [editable path="GameplayWorld/Train/Cars/PassengerCoach1"]
+[editable path="GameplayWorld/Train/Cars/PassengerCoach1/InteriorLighting"]
 [editable path="TravelForeground"]
+[editable path="HUD"]
+[editable path="HUD/Root/MarketItemBar/RadarSlot"]
+[editable path="HUD/Root/MarketItemBar/SwiftSlot"]
+[editable path="HUD/Root/MarketItemBar/VeilNoteSlot"]

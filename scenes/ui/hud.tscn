@@ -78,19 +78,19 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxEmpty" id="GuidebookButtonTransparent"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_b6swc"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_emer0"]
 resource_local_to_scene = true
 shader = ExtResource("20_4mi7y")
 shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
 shader_parameter/outline_size = 9.0
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_27rlx"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kfdjh"]
 resource_local_to_scene = true
 shader = ExtResource("20_4mi7y")
 shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
 shader_parameter/outline_size = 9.0
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_t0png"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xdlig"]
 resource_local_to_scene = true
 shader = ExtResource("20_4mi7y")
 shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
@@ -658,7 +658,7 @@ item_name = "Carriage Radar"
 short_name = "RADAR"
 
 [node name="Background" parent="Root/MarketItemBar/RadarSlot" index="0" unique_id=1812476632]
-material = SubResource("ShaderMaterial_b6swc")
+material = SubResource("ShaderMaterial_emer0")
 offset_left = 4.0
 offset_right = 84.0
 offset_bottom = 84.0
@@ -671,7 +671,7 @@ offset_right = 8.0
 offset_bottom = -34.0
 
 [node name="Icon" parent="Root/MarketItemBar/RadarSlot" index="2" unique_id=771861680]
-material = SubResource("ShaderMaterial_b6swc")
+material = SubResource("ShaderMaterial_emer0")
 offset_left = 12.0
 offset_top = 10.0
 offset_right = 92.0
@@ -721,7 +721,7 @@ item_name = "Swiftstep Soles"
 short_name = "SWIFT"
 
 [node name="Background" parent="Root/MarketItemBar/SwiftSlot" index="0" unique_id=1812476632]
-material = SubResource("ShaderMaterial_27rlx")
+material = SubResource("ShaderMaterial_kfdjh")
 offset_left = 4.0
 offset_right = 84.0
 offset_bottom = 84.0
@@ -735,7 +735,7 @@ offset_right = 5.0
 offset_bottom = -37.0
 
 [node name="Icon" parent="Root/MarketItemBar/SwiftSlot" index="2" unique_id=771861680]
-material = SubResource("ShaderMaterial_27rlx")
+material = SubResource("ShaderMaterial_kfdjh")
 offset_left = 29.0
 offset_top = 24.0
 offset_right = 109.0
@@ -783,7 +783,7 @@ item_name = "Veil Note — reveal one additional Night Shift statement"
 short_name = "VEIL"
 
 [node name="Background" parent="Root/MarketItemBar/VeilNoteSlot" index="0" unique_id=1812476632]
-material = SubResource("ShaderMaterial_t0png")
+material = SubResource("ShaderMaterial_xdlig")
 offset_left = 4.0
 offset_right = 84.0
 offset_bottom = 84.0
@@ -797,7 +797,7 @@ offset_right = 11.0
 offset_bottom = -39.0
 
 [node name="Icon" parent="Root/MarketItemBar/VeilNoteSlot" index="2" unique_id=771861680]
-material = SubResource("ShaderMaterial_t0png")
+material = SubResource("ShaderMaterial_xdlig")
 offset_left = 21.0
 offset_top = 24.0
 offset_right = 101.0
@@ -846,9 +846,9 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -400.0
-offset_top = 48.0
+offset_top = 176.0
 offset_right = 400.0
-offset_bottom = 108.0
+offset_bottom = 236.0
 grow_horizontal = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("NotificationTextOnlyStyle")
@@ -856,14 +856,10 @@ theme_override_styles/panel = SubResource("NotificationTextOnlyStyle")
 [node name="NotificationLabel" type="Label" parent="Root/NotificationPanel" unique_id=2128017887]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.972549, 0.890196, 0.713726, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.72)
-theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.96)
-theme_override_constants/shadow_offset_x = 2
-theme_override_constants/shadow_offset_y = 3
-theme_override_constants/outline_size = 6
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("17_clock_font")
 theme_override_font_sizes/font_size = 23
+text = "Test"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2

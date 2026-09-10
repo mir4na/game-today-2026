@@ -31,6 +31,8 @@ shader_parameter/twinkle_speed = 2.8
 shader_parameter/outline_strength = 0.0
 shader_parameter/outline_size = 8.0
 shader_parameter/outline_color = Color(1, 1, 1, 1)
+shader_parameter/result_whiten = 0.0
+shader_parameter/result_energy = 0.0
 
 [sub_resource type="Gradient" id="FailureGradient"]
 offsets = PackedFloat32Array(0, 0.35, 1)
@@ -38,7 +40,7 @@ colors = PackedColorArray(1, 0.92, 0.58, 1, 1, 0.25, 0.2, 1, 0.45, 0.04, 0.08, 0
 
 [sub_resource type="Gradient" id="SuccessGradient"]
 offsets = PackedFloat32Array(0, 0.42, 1)
-colors = PackedColorArray(1, 1, 1, 1, 1, 0.95, 0.72, 0.95, 1, 1, 1, 0)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.95, 1, 1, 1, 0)
 
 [node name="NightStationTarget" type="Control" unique_id=402256131]
 custom_minimum_size = Vector2(180, 156)
@@ -69,6 +71,7 @@ theme_override_styles/panel = SubResource("DropGlowStyle")
 [node name="ValidationGlow" type="TextureRect" parent="." unique_id=82931317]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0)
+material = SubResource("StationStarMaterial")
 layout_mode = 0
 offset_left = 24.0
 offset_top = 29.0
@@ -166,6 +169,7 @@ text_overrun_behavior = 3
 [node name="SuccessParticles" type="CPUParticles2D" parent="." unique_id=2063118871]
 unique_name_in_owner = true
 z_index = 13
+material = SubResource("StationStarMaterial")
 position = Vector2(90, 94)
 emitting = false
 amount = 38

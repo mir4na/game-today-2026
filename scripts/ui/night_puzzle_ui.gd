@@ -6,6 +6,7 @@ extends Control
 signal closed
 signal departures_confirmed(assignments: Dictionary)
 signal validation_finished(succeeded: bool, attempt_count: int)
+signal validation_impact_requested(succeeded: bool)
 
 @export_category("Inspector Copy")
 @export var instruction_text: String = "Drag each soul to a station."
@@ -18,20 +19,18 @@ signal validation_finished(succeeded: bool, attempt_count: int)
 @export var station_path_focus_scale: Vector2 = Vector2(1.12, 1.12)
 @export var station_path_focus_pivot: Vector2 = Vector2(812.0, 360.0)
 @export_range(0.05, 2.0, 0.05) var focus_transition_seconds: float = 0.5
-@export_range(0.0, 1.0, 0.05) var validation_map_shade_alpha: float = 0.72
+@export_range(0.0, 1.0, 0.05) var validation_map_shade_alpha: float = 0.5
 @export_range(0.05, 2.0, 0.05) var light_travel_seconds: float = 0.34
 @export_range(0.0, 1.0, 0.05) var station_hold_seconds: float = 0.16
 @export_range(0.1, 3.0, 0.05) var result_hold_seconds: float = 0.9
 @export_range(0.05, 1.0, 0.05) var failed_attempt_exit_seconds: float = 0.28
-@export var validation_reading_template: String = "READING %s"
-@export var validation_failed_template: String = "THE STATION PATH REJECTS ATTEMPT %d"
-@export var validation_success_text: String = "THE STATION PATH IS ALIGNED"
 @export_category("Five-Soul Ledger Layout")
-@export var regular_card_origin: Vector2 = Vector2(29.0, 52.0)
+@export var regular_card_origin: Vector2 = Vector2.ZERO
 @export_range(80.0, 140.0, 1.0) var regular_card_spacing: float = 120.0
-@export var compact_card_origin: Vector2 = Vector2(61.0, 52.0)
-@export_range(0.5, 1.0, 0.01) var compact_card_scale: float = 0.8
-@export_range(70.0, 120.0, 1.0) var compact_card_spacing: float = 92.0
+@export var compact_card_origin: Vector2 = Vector2.ZERO
+@export_range(0.5, 1.0, 0.01) var compact_card_scale: float = 1.0
+@export_range(70.0, 140.0, 1.0) var compact_card_spacing: float = 120.0
+@export_range(300.0, 700.0, 1.0) var ledger_scroll_viewport_height: float = 518.0
 @export_category("Scene-Based Station Paths")
 @export var station_path_layout_scenes: Array[PackedScene] = []
 
@@ -44,11 +43,13 @@ var _collected_statements: Dictionary = {}
 var _veil_note_statement: String = ""
 var _validating: bool = false
 var _focus_tween: Tween
+var _map_impact_tween: Tween
 var _ledger_rest_position: Vector2
 var _station_path_rest_position: Vector2
 var _current_instruction: String = ""
 var _station_path_layout: NightStationPathLayout
 var _station_targets: Array[NightStationTarget] = []
+var _validation_fuse_points := PackedVector2Array()
 
 @onready var _instruction_label: Label = %InstructionLabel
 @onready var _selection_label: Label = %SelectionLabel
@@ -60,10 +61,14 @@ var _station_targets: Array[NightStationTarget] = []
 @onready var _confirm_button: Button = %ConfirmButton
 @onready var _board_anchor: Control = %BoardAnchor
 @onready var _ledger_anchor: Control = %LedgerAnchor
+@onready var _ledger_scroll: ScrollContainer = %LedgerScroll
+@onready var _ledger_card_canvas: Control = %CardCanvas
 @onready var _station_path_anchor: Control = %StationPathAnchor
 @onready var _station_path_layout_host: Control = %PathLayoutHost
 @onready var _validation_light: TextureRect = %ValidationLightToken
-@onready var _validation_status: Label = %ValidationStatusLabel
+@onready var _validation_fuse_glow: Line2D = %ValidationFuseGlow
+@onready var _validation_fuse_trail: Line2D = %ValidationFuseTrail
+@onready var _validation_fuse_spark: CPUParticles2D = %ValidationFuseSpark
 @onready var _validation_map_shade: ColorRect = %ValidationMapShade
 @onready var _legend_label: Label = $BoardAnchor/StationPathAnchor/LegendLabel
 @onready var _close_button: Control = $BoardAnchor/StationPathAnchor/CloseButton
@@ -136,15 +141,26 @@ func open_puzzle(
 
 
 func _layout_passenger_cards(passenger_count: int) -> void:
-	var use_compact_layout: bool = passenger_count > 4
-	var origin: Vector2 = compact_card_origin if use_compact_layout else regular_card_origin
-	var spacing: float = compact_card_spacing if use_compact_layout else regular_card_spacing
-	var card_scale: float = compact_card_scale if use_compact_layout else 1.0
+	var use_scroll_layout: bool = _ledger_passenger_order.size() >= 5
+	var origin: Vector2 = compact_card_origin if use_scroll_layout else regular_card_origin
+	var spacing: float = compact_card_spacing if use_scroll_layout else regular_card_spacing
+	var card_scale: float = 1.0
+	_ledger_scroll.vertical_scroll_mode = (
+		ScrollContainer.SCROLL_MODE_AUTO
+		if use_scroll_layout
+		else ScrollContainer.SCROLL_MODE_DISABLED
+	)
+	var authored_count: int = maxi(passenger_count, _ledger_passenger_order.size() if use_scroll_layout else passenger_count)
+	var content_height: float = origin.y + spacing * maxf(0.0, float(authored_count - 1)) + 116.0
+	_ledger_card_canvas.custom_minimum_size = Vector2(
+		318.0,
+		maxf(ledger_scroll_viewport_height, content_height)
+	)
 	for index: int in range(_passenger_cards.size()):
 		var card: NightPassengerCard = _passenger_cards[index]
 		card.position = origin + Vector2(0.0, spacing * index)
 		card.scale = Vector2.ONE * card_scale
-		card.set_compact_mode(use_compact_layout)
+		card.set_compact_mode(false)
 
 
 func _refresh_ledger_cards() -> void:
@@ -196,6 +212,7 @@ func _configure_station_path(puzzle: DeparturePuzzleData) -> void:
 		target.visible = puzzle.night_stations.has(target.station_name)
 		target.passenger_dropped.connect(_assign_passenger_to_station)
 		target.selected.connect(_on_station_selected)
+		target.validation_impact.connect(_on_station_validation_impact)
 
 
 func set_veil_note_statement(statement: String) -> void:
@@ -350,7 +367,6 @@ func play_validation(station_results: Dictionary, attempt_count: int) -> void:
 		var target: NightStationTarget = ordered_targets[index]
 		var is_correct: bool = bool(station_results.get(target.station_name, false))
 		all_correct = all_correct and is_correct
-		_validation_status.text = validation_reading_template % target.station_name.to_upper()
 		await _move_validation_light(target, index == 0)
 		await target.play_validation(is_correct)
 		if station_hold_seconds > 0.0:
@@ -358,25 +374,23 @@ func play_validation(station_results: Dictionary, attempt_count: int) -> void:
 
 	await _fade_validation_light()
 	if all_correct:
-		_validation_status.text = validation_success_text
-		_validation_status.modulate = Color("6b7d43")
 		if result_hold_seconds > 0.0:
 			await get_tree().create_timer(result_hold_seconds).timeout
 		validation_finished.emit(true, attempt_count)
 		return
 
-	_validation_status.text = validation_failed_template % attempt_count
-	_validation_status.modulate = Color("b34345")
 	if result_hold_seconds > 0.0:
 		await get_tree().create_timer(result_hold_seconds).timeout
-		_assignments.clear()
+	_assignments.clear()
 	_selected_passenger = ""
 	_selection_label.text = _current_instruction
 	_error_label.text = ""
 	_update_assignment_visuals()
+	await _dismiss_failed_attempt()
+	# Restore failed stars only after the board is fully gone, so a rejected
+	# station stays absent for the entire visible result beat.
 	for target: NightStationTarget in _station_targets:
 		target.reset_validation_visual()
-	await _dismiss_failed_attempt()
 	_validating = false
 	validation_finished.emit(false, attempt_count)
 
@@ -384,10 +398,6 @@ func play_validation(station_results: Dictionary, attempt_count: int) -> void:
 func _focus_station_path() -> void:
 	if is_instance_valid(_focus_tween) and _focus_tween.is_valid():
 		_focus_tween.kill()
-	_validation_status.modulate = Color.WHITE
-	_validation_status.text = "READING THE STATION PATH"
-	_validation_status.show()
-	_validation_status.modulate.a = 0.0
 	_station_path_anchor.pivot_offset = station_path_focus_pivot
 	_focus_tween = create_tween().set_parallel(true)
 	_focus_tween.tween_property(
@@ -421,9 +431,6 @@ func _focus_station_path() -> void:
 		_focus_tween.tween_property(
 			control, ^"modulate:a", 0.0, focus_transition_seconds * 0.55
 		)
-	_focus_tween.tween_property(
-		_validation_status, ^"modulate:a", 1.0, focus_transition_seconds
-	).set_delay(focus_transition_seconds * 0.45)
 	await _focus_tween.finished
 
 
@@ -440,26 +447,60 @@ func _dismiss_failed_attempt() -> void:
 
 
 func _move_validation_light(target: NightStationTarget, first_target: bool) -> void:
-	var target_position: Vector2 = target.get_path_node_center() - _validation_light.size * 0.5
+	var target_center: Vector2 = _path_node_center(target)
+	var target_position: Vector2 = target_center - _validation_light.size * 0.5
 	if first_target:
+		_validation_fuse_points = PackedVector2Array([target_center])
+		_apply_validation_fuse_points()
 		_validation_light.position = target_position
 		_validation_light.scale = Vector2.ZERO
 		_validation_light.modulate = Color(1.0, 0.77, 0.31, 0.92)
 		_validation_light.show()
+		_validation_fuse_spark.position = target_center
+		_validation_fuse_spark.restart()
+		_validation_fuse_spark.emitting = true
 		var arrival_tween: Tween = create_tween()
 		arrival_tween.tween_property(
 			_validation_light, ^"scale", Vector2.ONE, light_travel_seconds
 		).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		await arrival_tween.finished
 		return
-	var travel_tween: Tween = create_tween().set_parallel(true)
-	travel_tween.tween_property(
-		_validation_light, ^"position", target_position, light_travel_seconds
-	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
-	travel_tween.tween_property(
-		_validation_light, ^"rotation", _validation_light.rotation + PI, light_travel_seconds
-	)
-	await travel_tween.finished
+	var current_center: Vector2 = _validation_light.position + _validation_light.size * 0.5
+	var route_nodes: Array[Control] = []
+	if is_instance_valid(_station_path_layout):
+		var ordered_targets: Array[NightStationTarget] = _get_validation_order()
+		var target_index: int = ordered_targets.find(target)
+		if target_index > 0:
+			route_nodes = _station_path_layout.get_route_nodes(
+				ordered_targets[target_index - 1].station_name,
+				target.station_name
+			)
+	var route_points := PackedVector2Array([current_center])
+	for node: Control in route_nodes:
+		var node_center: Vector2 = _path_node_center(node)
+		if route_points[-1].distance_to(node_center) > 0.5:
+			route_points.append(node_center)
+	if route_points[-1].distance_to(target_center) > 0.5:
+		route_points.append(target_center)
+	var segment_count: int = maxi(1, route_points.size() - 1)
+	var segment_seconds: float = maxf(0.04, light_travel_seconds / float(segment_count))
+	for point_index: int in range(1, route_points.size()):
+		var start: Vector2 = route_points[point_index - 1]
+		var finish: Vector2 = route_points[point_index]
+		_begin_validation_fuse_segment(start)
+		var travel_tween: Tween = create_tween().set_parallel(true)
+		travel_tween.tween_method(
+			_set_validation_fuse_progress.bind(start, finish),
+			0.0,
+			1.0,
+			segment_seconds
+		).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		travel_tween.tween_property(
+			_validation_light, ^"rotation", _validation_light.rotation + PI, segment_seconds
+		)
+		await travel_tween.finished
+	_validation_light.position = target_position
+	_validation_fuse_spark.position = target_center
 
 
 func _fade_validation_light() -> void:
@@ -470,6 +511,70 @@ func _fade_validation_light() -> void:
 	tween.tween_property(_validation_light, ^"modulate:a", 0.0, 0.24)
 	await tween.finished
 	_validation_light.hide()
+	_validation_fuse_spark.emitting = false
+	var fuse_fade: Tween = create_tween().set_parallel(true)
+	fuse_fade.tween_property(_validation_fuse_trail, ^"modulate:a", 0.0, 0.22)
+	fuse_fade.tween_property(_validation_fuse_glow, ^"modulate:a", 0.0, 0.22)
+	await fuse_fade.finished
+
+
+func _path_node_center(node: Control) -> Vector2:
+	var authored_anchor := node.get_node_or_null("PathAnchor") as Node2D
+	var global_center: Vector2 = (
+		authored_anchor.get_global_transform_with_canvas().origin
+		if authored_anchor != null
+		else node.get_global_rect().get_center()
+	)
+	return _station_path_anchor.get_global_transform_with_canvas().affine_inverse() * global_center
+
+
+func _begin_validation_fuse_segment(start: Vector2) -> void:
+	if _validation_fuse_points.is_empty():
+		_validation_fuse_points.append(start)
+	elif _validation_fuse_points[-1].distance_to(start) > 0.5:
+		_validation_fuse_points.append(start)
+	_validation_fuse_points.append(start)
+	_apply_validation_fuse_points()
+
+
+func _set_validation_fuse_progress(value: float, start: Vector2, finish: Vector2) -> void:
+	var center: Vector2 = start.lerp(finish, clampf(value, 0.0, 1.0))
+	_validation_fuse_points[-1] = center
+	_apply_validation_fuse_points()
+	_validation_light.position = center - _validation_light.size * 0.5
+	_validation_fuse_spark.position = center
+
+
+func _apply_validation_fuse_points() -> void:
+	_validation_fuse_trail.points = _validation_fuse_points
+	_validation_fuse_glow.points = _validation_fuse_points
+	_validation_fuse_trail.modulate.a = 1.0
+	_validation_fuse_glow.modulate.a = 1.0
+
+
+func _on_station_validation_impact(succeeded: bool) -> void:
+	validation_impact_requested.emit(succeeded)
+	if is_instance_valid(_map_impact_tween) and _map_impact_tween.is_valid():
+		_map_impact_tween.kill()
+	var base_position: Vector2 = _station_path_rest_position + station_path_focus_offset
+	var strength: float = 7.0 if succeeded else 4.0
+	_station_path_anchor.pivot_offset = station_path_focus_pivot
+	_map_impact_tween = create_tween()
+	for direction: Vector2 in [Vector2(-1.0, 0.25), Vector2(0.72, -0.38), Vector2(-0.35, 0.2)]:
+		_map_impact_tween.tween_property(
+			_station_path_anchor,
+			^"position",
+			base_position + direction * strength,
+			0.04
+		)
+		_map_impact_tween.parallel().tween_property(
+			_station_path_anchor,
+			^"rotation",
+			deg_to_rad(direction.x * strength * 0.08),
+			0.04
+		)
+	_map_impact_tween.tween_property(_station_path_anchor, ^"position", base_position, 0.06)
+	_map_impact_tween.parallel().tween_property(_station_path_anchor, ^"rotation", 0.0, 0.06)
 
 
 func _get_validation_order() -> Array[NightStationTarget]:
@@ -503,8 +608,12 @@ func _reset_validation_presentation() -> void:
 	_validation_light.hide()
 	_validation_light.scale = Vector2.ONE
 	_validation_light.modulate.a = 0.0
-	_validation_status.hide()
-	_validation_status.modulate = Color.WHITE
+	_validation_fuse_points.clear()
+	_validation_fuse_trail.clear_points()
+	_validation_fuse_glow.clear_points()
+	_validation_fuse_trail.modulate.a = 1.0
+	_validation_fuse_glow.modulate.a = 1.0
+	_validation_fuse_spark.emitting = false
 	_validation_map_shade.modulate.a = 0.0
 	for target: NightStationTarget in _station_targets:
 		target.reset_validation_visual()

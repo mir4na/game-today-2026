@@ -11,6 +11,8 @@ uniform float twinkle_speed : hint_range(0.0, 8.0) = 2.8;
 uniform float outline_strength : hint_range(0.0, 1.0) = 0.0;
 uniform float outline_size : hint_range(0.0, 16.0) = 8.0;
 uniform vec4 outline_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
+uniform float result_whiten : hint_range(0.0, 1.0) = 0.0;
+uniform float result_energy : hint_range(0.0, 1.0) = 0.0;
 
 void fragment() {
 	vec4 source = texture(TEXTURE, UV);
@@ -39,6 +41,8 @@ void fragment() {
 		vec3(1.0, 0.94, 0.72),
 		light_amount * source.a
 	);
+	shimmering_color = mix(shimmering_color, vec3(1.0), result_whiten * source.a);
+	shimmering_color += vec3(result_energy * 0.42) * source.a;
 
 	float outline_alpha = max(nearby_alpha - source.a, 0.0) * outline_strength;
 	float use_outline = step(source.a + 0.001, outline_alpha);

@@ -224,8 +224,12 @@ func _run() -> void:
 		board.refresh_collected_statements(collected)
 		_check(board._passenger_cards[4].visible, "The final night must display a fifth scene-authored ledger card.")
 		_check(
-			board._passenger_cards[4].scale.is_equal_approx(Vector2.ONE * board.compact_card_scale),
-			"Five ledger cards must switch to the compact layout without scrolling."
+			board._ledger_scroll.vertical_scroll_mode == ScrollContainer.SCROLL_MODE_AUTO,
+			"A five-soul ledger must enable vertical scrolling."
+		)
+		_check(
+			board._ledger_card_canvas.custom_minimum_size.y > board.ledger_scroll_viewport_height,
+			"The five full-size Soul Record cards must extend beyond the ledger viewport."
 		)
 		_check(board._clue_count_label.text == "5/5 FOUND", "The ledger counter must update as records are discovered.")
 		var visible_final_threads: int = 0

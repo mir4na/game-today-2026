@@ -115,3 +115,47 @@ func get_validation_targets() -> Array[NightStationTarget]:
 		if target != null:
 			result.append(target)
 	return result
+
+
+func get_route_nodes(first_id: String, second_id: String) -> Array[Control]:
+	var nodes_by_id: Dictionary = _get_path_nodes_by_id()
+	if not nodes_by_id.has(first_id) or not nodes_by_id.has(second_id):
+		return []
+	if first_id == second_id:
+		return [nodes_by_id[first_id] as Control]
+	var adjacency: Dictionary = _build_adjacency()
+	var previous: Dictionary = {first_id: ""}
+	var frontier: Array[String] = [first_id]
+	while not frontier.is_empty():
+		var current: String = frontier.pop_front()
+		if current == second_id:
+			break
+		for neighbor_value: Variant in adjacency.get(current, []):
+			var neighbor: String = str(neighbor_value)
+			if previous.has(neighbor):
+				continue
+			previous[neighbor] = current
+			frontier.append(neighbor)
+	if not previous.has(second_id):
+		return []
+	var reverse_ids: Array[String] = []
+	var cursor: String = second_id
+	while not cursor.is_empty():
+		reverse_ids.append(cursor)
+		cursor = str(previous.get(cursor, ""))
+	reverse_ids.reverse()
+	var route: Array[Control] = []
+	for node_id: String in reverse_ids:
+		var node := nodes_by_id.get(node_id) as Control
+		if node != null:
+			route.append(node)
+	return route
+
+
+func _get_path_nodes_by_id() -> Dictionary:
+	var result: Dictionary = {}
+	for target: NightStationTarget in get_station_targets():
+		result[target.station_name] = target
+	for marker: NightPathMarker in get_path_markers():
+		result[str(marker.path_node_id)] = marker
+	return result

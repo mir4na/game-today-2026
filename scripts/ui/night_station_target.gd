@@ -4,6 +4,7 @@ extends Control
 
 signal passenger_dropped(station_name: String, passenger_name: String)
 signal selected(station_name: String)
+signal validation_impact(succeeded: bool)
 
 @export var station_name: String
 @export var assignment_pin_scene: PackedScene
@@ -23,7 +24,7 @@ signal selected(station_name: String)
 @export_range(0.01, 1.0, 0.01) var pointer_shrink_seconds: float = 0.18
 @export_range(0.01, 1.0, 0.01) var star_pulse_seconds: float = 0.22
 @export_range(0.01, 1.0, 0.01) var failure_burst_seconds: float = 0.55
-@export var success_glow_color: Color = Color(1.0, 0.97, 0.84, 1.0)
+@export var success_glow_color: Color = Color.WHITE
 @export var failure_glow_color: Color = Color(1.0, 0.20, 0.24, 0.92)
 @export_category("Star Idle Motion")
 @export_range(0.0, 0.2, 0.005) var idle_scale_amount: float = 0.055
@@ -147,6 +148,7 @@ func play_validation(is_correct: bool) -> void:
 		_assignment_pins, ^"modulate:a", 0.0, pointer_shrink_seconds
 	)
 	await _validation_tween.finished
+	validation_impact.emit(is_correct)
 	if is_correct:
 		await _play_success_pulse()
 	else:
@@ -173,6 +175,7 @@ func reset_validation_visual() -> void:
 	_success_particles.emitting = false
 	_failure_particles.emitting = false
 	_idle_motion_enabled = true
+	_set_result_light(0.0, 0.0)
 	_set_drop_highlight(false)
 
 
@@ -187,6 +190,7 @@ func _play_success_pulse() -> void:
 	_validation_glow.modulate = Color(success_glow_color, 0.0)
 	_success_particles.restart()
 	_success_particles.emitting = true
+	_set_result_light(0.0, 0.0)
 	_validation_tween = create_tween()
 	_validation_tween.tween_property(
 		_star, ^"scale", Vector2(0.68, 0.68), star_pulse_seconds * 0.55
@@ -204,7 +208,10 @@ func _play_success_pulse() -> void:
 		_validation_glow, ^"modulate", success_glow_color, star_pulse_seconds
 	)
 	_validation_tween.parallel().tween_property(
-		_star, ^"modulate", Color(1.35, 1.28, 1.08, 1.0), star_pulse_seconds
+		_star, ^"modulate", Color(1.34, 1.34, 1.34, 1.0), star_pulse_seconds
+	)
+	_validation_tween.parallel().tween_method(
+		_set_success_result_light, 0.0, 1.0, star_pulse_seconds
 	)
 	_validation_tween.tween_property(
 		_star, ^"scale", Vector2.ONE, star_pulse_seconds * 0.55
@@ -213,6 +220,8 @@ func _play_success_pulse() -> void:
 		_validation_glow, ^"scale", Vector2(1.12, 1.12), star_pulse_seconds * 0.55
 	)
 	await _validation_tween.finished
+	_star.modulate = Color(1.55, 1.55, 1.55, 1.0)
+	_set_result_light(1.0, 0.72)
 
 
 func _play_failure_burst() -> void:
@@ -221,22 +230,29 @@ func _play_failure_burst() -> void:
 	_failure_particles.emitting = true
 	_validation_tween = create_tween()
 	_validation_tween.tween_property(
-		_star, ^"scale", Vector2(0.76, 0.76), star_pulse_seconds * 0.6
+		_star, ^"scale", Vector2(1.12, 1.12), star_pulse_seconds * 0.45
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_validation_tween.parallel().tween_property(
+		_star, ^"modulate", Color(1.0, 0.34, 0.38, 1.0), star_pulse_seconds * 0.45
+	)
+	_validation_tween.tween_property(
+		_star, ^"scale", Vector2.ZERO, star_pulse_seconds * 1.2
 	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	_validation_tween.parallel().tween_property(
-		_star, ^"modulate", Color(1.0, 0.34, 0.38, 1.0), star_pulse_seconds * 0.6
+		_star, ^"modulate:a", 0.0, star_pulse_seconds
 	)
-	_validation_tween.tween_property(
-		_star, ^"scale", Vector2(1.08, 1.08), star_pulse_seconds
-	).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 	_validation_tween.parallel().tween_property(
-		_validation_glow, ^"scale", Vector2(1.55, 1.55), star_pulse_seconds
+		_validation_glow, ^"scale", Vector2(1.7, 1.7), star_pulse_seconds
+	)
+	_validation_tween.parallel().tween_property(
+		_validation_glow, ^"modulate:a", 0.0, star_pulse_seconds * 1.2
 	)
 	_validation_tween.tween_interval(failure_burst_seconds)
-	_validation_tween.tween_property(
-		_validation_glow, ^"modulate:a", 0.2, star_pulse_seconds
-	)
 	await _validation_tween.finished
+
+
+func _set_success_result_light(value: float) -> void:
+	_set_result_light(value, value * 0.72)
 
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
@@ -270,6 +286,13 @@ func _set_drop_highlight(active: bool) -> void:
 		_drop_glow.hide()
 	if _star_material != null:
 		_star_material.set_shader_parameter(&"outline_strength", 1.0 if active else 0.0)
+
+
+func _set_result_light(whiten: float, energy: float) -> void:
+	if _star_material == null:
+		return
+	_star_material.set_shader_parameter(&"result_whiten", clampf(whiten, 0.0, 1.0))
+	_star_material.set_shader_parameter(&"result_energy", clampf(energy, 0.0, 1.0))
 
 
 func _gui_input(event: InputEvent) -> void:

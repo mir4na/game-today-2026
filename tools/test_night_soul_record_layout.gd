@@ -134,6 +134,19 @@ func _run() -> void:
 			)
 			_check(game._collected_departure_statements.has(inspected_name), "Clicking the embedded clue must record it in the Night Ledger.")
 			_check(
+				inspected.night_identity_revealed,
+				"Finding a soul's statement must restore that NPC's color while keeping its ghost presentation."
+			)
+			_check(
+				is_zero_approx(float(inspected._focus_material.get_shader_parameter(&"dead_effect_strength"))),
+				"A discovered night NPC must no longer use the desaturated death grade."
+			)
+			_check(
+				is_equal_approx(inspected._passenger_visual.modulate.a, inspected.dead_visual_alpha)
+				or inspected._passenger_visual.modulate.a < 1.0,
+				"Restoring a discovered NPC's color must preserve its translucent soul alpha."
+			)
+			_check(
 				str(game._collected_departure_statements.get(inspected_name, ""))
 				== puzzle.get_statement_for_passenger(inspected_name),
 				"The Night Ledger must preserve the exact sentence clicked in the biography."

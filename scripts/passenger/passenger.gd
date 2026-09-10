@@ -34,6 +34,7 @@ signal documents_requested(passenger: Passenger)
 @export var dead_twitch_interval_seconds: Vector2 = Vector2(4.0, 8.0)
 var documents_checked: bool = false
 var night_mode: bool = false
+var night_identity_revealed: bool = false
 var departed: bool = false
 var ai_enabled: bool = true
 var runtime_carriage: int = 1
@@ -164,6 +165,8 @@ func get_station_cutscene_visual() -> Dictionary:
 	return visual
 
 func set_night_mode(value: bool) -> void:
+	if value and not night_mode:
+		night_identity_revealed = false
 	night_mode = value
 	ai_enabled = not value
 	prompt_text = night_prompt_text if value and data != null and data.is_dead else _day_prompt_text
@@ -175,6 +178,11 @@ func set_night_mode(value: bool) -> void:
 	_settling_for_night = value and visible and _ai_walking
 	if not _is_dead_night_visual_active():
 		_reset_dead_idle()
+	_update_visual()
+
+
+func set_night_identity_revealed(value: bool) -> void:
+	night_identity_revealed = value
 	_update_visual()
 
 func depart_train() -> void:
@@ -680,7 +688,10 @@ func _update_visual() -> void:
 	_shadow.scale = _shadow_rest_scale * (dead_shadow_scale if dead_visual_active else 1.0)
 	_shadow.modulate.a = dead_shadow_alpha if dead_visual_active else 0.52
 	if is_instance_valid(_focus_material):
-		_focus_material.set_shader_parameter(&"dead_effect_strength", 1.0 if dead_visual_active else 0.0)
+		_focus_material.set_shader_parameter(
+			&"dead_effect_strength",
+			1.0 if dead_visual_active and not night_identity_revealed else 0.0
+		)
 		_focus_material.set_shader_parameter(&"dead_desaturation", dead_desaturation)
 		_focus_material.set_shader_parameter(&"dead_tint", dead_tint)
 
