@@ -121,6 +121,11 @@ func _ready() -> void:
 	_route_banner_rest_scale = _route_briefing_banner.scale
 	_clock_hover_area.mouse_entered.connect(_on_clock_hover_entered)
 	_clock_hover_area.mouse_exited.connect(_on_clock_hover_exited)
+	# Keep the clock lifted while the pointer crosses onto the attached button.
+	# As a later ClockPanel sibling, the button also receives clicks ahead of the
+	# broad hover catcher instead of being occluded by it.
+	_debug_next_station_button.mouse_entered.connect(_on_clock_hover_entered)
+	_debug_next_station_button.mouse_exited.connect(_on_clock_hover_exited)
 	_route_briefing_banner.hide()
 	_debug_next_station_button.visible = false
 	set_swiftstep_active(false)
