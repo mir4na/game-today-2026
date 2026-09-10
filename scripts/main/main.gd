@@ -112,6 +112,7 @@ var _night_assignment_attempts: int = 0
 var _night_world_prepared: bool = false
 var _terminal_station_waiting_for_night_transition: bool = false
 var _night_transition_camera_return_requested: bool = false
+var _debug_day_pass_override: bool = false
 var _radar_scan_active: bool = false
 var _swiftstep_active: bool = false
 var _world_time_scale: float = 1.0
@@ -1375,6 +1376,12 @@ func _process_station_arrival() -> void:
 		])
 		departing_passenger.depart_train()
 
+	# The transition preview may be requested before later-station anomalies have
+	# boarded. Once the terminal exchange has freed the living passengers' seats,
+	# restore those authored anomalies so the night roster remains complete.
+	if is_terminal_arrival and _debug_day_pass_override:
+		_ensure_complete_debug_night_roster()
+
 	# Station boarding is capacity-based and independent from drop-offs. A player
 	# who keeps all eight opening passengers can still receive later boarders,
 	# but the active roster can never exceed the configured onboard maximum.
@@ -1802,8 +1809,22 @@ func _on_guidebook_requested() -> void:
 
 
 func _on_debug_night_requested() -> void:
-	if state not in [GameState.DAY, GameState.SUNSET] or _active_modal != null:
+	if not OS.is_debug_build() or state not in [GameState.DAY, GameState.SUNSET] or _active_modal != null:
 		return
+	_clear_day_distractions_for_debug()
+	_debug_day_pass_override = true
+	_route_index = maxi(day_route.size() - 2, 0)
+	_day_minutes = _final_arrival_minutes()
+	_station_assignment.clear()
+	_station_arrival_announced = true
+	_station_exchange_processed = false
+	_shift_report_finalized = false
+	_process_station_arrival()
+	_refresh_player_interactables(true)
+	_update_passenger_minimap()
+
+
+func _jump_directly_to_debug_night() -> void:
 	_prepare_debug_night_roster()
 	_route_index = maxi(day_route.size() - 1, 0)
 	_day_minutes = _final_arrival_minutes()
@@ -1816,6 +1837,18 @@ func _on_debug_night_requested() -> void:
 
 
 func _prepare_debug_night_roster() -> void:
+	_clear_day_distractions_for_debug()
+
+	# A direct jump has no terminal exchange to remove ordinary passengers.
+	for passenger: Passenger in _passengers:
+		if _is_active_passenger(passenger) and not passenger.data.is_dead:
+			_release_passenger_seat(passenger)
+			passenger.depart_train()
+	_ensure_complete_debug_night_roster()
+	_set_passenger_ai_enabled(false)
+
+
+func _clear_day_distractions_for_debug() -> void:
 	_blocked_aisle_timer.stop()
 	_dirty_seat_timer.stop()
 	_radar_scan_active = false
@@ -1834,13 +1867,9 @@ func _prepare_debug_night_roster() -> void:
 	_set_service_sealed(false, true)
 	_finish_staged_boarding()
 
-	# Normal terminal service removes every living passenger before the veil.
-	# Reproduce that roster without awarding or penalizing the skipped day.
-	for passenger: Passenger in _passengers:
-		if _is_active_passenger(passenger) and not passenger.data.is_dead:
-			_release_passenger_seat(passenger)
-			passenger.depart_train()
 
+
+func _ensure_complete_debug_night_roster() -> void:
 	# Some anomalies are scheduled to board at later stations. Add them now so
 	# this shortcut always opens the complete authored night case.
 	for data: PassengerData in _daily_manifest:
@@ -1856,7 +1885,6 @@ func _prepare_debug_night_roster() -> void:
 			continue
 		passenger.randomize_initial_activity()
 		_interactables.append(passenger)
-	_set_passenger_ai_enabled(false)
 
 
 func _on_market_tool_requested(tool_id: StringName) -> void:
@@ -1933,6 +1961,11 @@ func _finalize_day_shift() -> void:
 		_incorrectly_stamped_anomalies.size(),
 		_get_day_pass_target()
 	)
+	if _debug_day_pass_override:
+		# This temporary route exists to preview the terminal-to-night cutscene.
+		# Preserve the real paycheck figures while bypassing its pass gate.
+		_day_blessing_award["passed"] = true
+		_day_blessing_award["debug_pass_override"] = true
 	_active_modal = _shift_report_ui
 	_shift_report_ui.open_report(day_number, _retained_anomalies, _get_dead_passenger_data().size(), _penalty_log, _day_blessing_award)
 
@@ -1951,6 +1984,7 @@ func _on_shift_report_continue() -> void:
 		_restart_game()
 		return
 	_shift_report_ui.hide()
+	_debug_day_pass_override = false
 	_start_night_transition()
 
 

@@ -1,0 +1,103 @@
+[gd_scene format=3 uid="uid://dl1hatq1cq2qy"]
+
+[ext_resource type="Texture2D" uid="uid://bmkis5r4t40k7" path="res://assets/ui/hint/blocked_aisle.png" id="1_5kxpe"]
+[ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="1_pj02t"]
+[ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="1_wbsq7"]
+[ext_resource type="Texture2D" uid="uid://dw1qyyuedtqkj" path="res://assets/ui/hint/gameplay_aisle.png" id="2_2xvme"]
+[ext_resource type="FontFile" uid="uid://b0kjil2q7jixo" path="res://fonts/Josefin_Sans/static/JosefinSans-Light.ttf" id="4_eka5h"]
+
+[node name="Hint" type="Control" unique_id=1600579217]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BlockedAisle" type="Control" parent="." unique_id=1231402727]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Title" type="Label" parent="BlockedAisle" unique_id=60492039]
+layout_mode = 0
+offset_left = 483.0
+offset_top = 87.0
+offset_right = 767.0
+offset_bottom = 145.0
+theme_override_fonts/font = ExtResource("1_wbsq7")
+theme_override_font_sizes/font_size = 48
+text = "Blocked Aisle"
+
+[node name="BlockedAisle" type="Sprite2D" parent="BlockedAisle" unique_id=787253472]
+position = Vector2(379, 309.00003)
+scale = Vector2(0.221, 0.221)
+texture = ExtResource("1_5kxpe")
+
+[node name="GameplayAisle" type="Sprite2D" parent="BlockedAisle" unique_id=609610915]
+position = Vector2(863.99994, 309.50003)
+scale = Vector2(0.22408025, 0.23535454)
+texture = ExtResource("2_2xvme")
+
+[node name="Description" type="Label" parent="BlockedAisle" unique_id=1279828573]
+layout_mode = 0
+offset_left = 285.0
+offset_top = 463.0
+offset_right = 973.0
+offset_bottom = 568.0
+theme_override_fonts/font = ExtResource("4_eka5h")
+theme_override_font_sizes/font_size = 24
+text = "Lorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep Ipsum"
+horizontal_alignment = 3
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="CleanTheSeat" type="Control" parent="." unique_id=742424903]
+visible = false
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Title" type="Label" parent="CleanTheSeat" unique_id=565893511]
+layout_mode = 0
+offset_left = 483.0
+offset_top = 87.0
+offset_right = 767.0
+offset_bottom = 145.0
+theme_override_fonts/font = ExtResource("1_wbsq7")
+theme_override_font_sizes/font_size = 48
+text = "Lorep Ipsum"
+
+[node name="BlockedAisle" type="Sprite2D" parent="CleanTheSeat" unique_id=159473529]
+position = Vector2(379, 309.00003)
+scale = Vector2(0.221, 0.221)
+texture = ExtResource("1_5kxpe")
+
+[node name="GameplayAisle" type="Sprite2D" parent="CleanTheSeat" unique_id=831912459]
+position = Vector2(863.99994, 309.50003)
+scale = Vector2(0.22408025, 0.23535454)
+texture = ExtResource("2_2xvme")
+
+[node name="Description" type="Label" parent="CleanTheSeat" unique_id=2027935122]
+layout_mode = 0
+offset_left = 285.0
+offset_top = 463.0
+offset_right = 973.0
+offset_bottom = 568.0
+theme_override_fonts/font = ExtResource("4_eka5h")
+theme_override_font_sizes/font_size = 24
+text = "Lorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep IpsumLorep Ipsum"
+horizontal_alignment = 3
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="CloseLabel" type="Label" parent="." unique_id=1935951487]
+layout_mode = 0
+offset_left = 523.0
+offset_top = 624.0
+offset_right = 733.0
+offset_bottom = 648.0
+theme_override_fonts/font = ExtResource("1_pj02t")
+theme_override_font_sizes/font_size = 24
+text = "Press any key to ...."
+horizontal_alignment = 1

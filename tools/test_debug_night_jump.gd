@@ -1,5 +1,5 @@
 extends SceneTree
-## Verifies the temporary HUD shortcut builds the complete Night Shift roster.
+## Verifies the temporary HUD shortcut previews the complete terminal-to-night flow.
 
 const MainScene = preload("res://scenes/main/main.tscn")
 
@@ -38,13 +38,35 @@ func _run() -> void:
 	_check(shortcut.visible, "The temporary Night Shift button must be visible during daylight gameplay.")
 	shortcut.pressed.emit()
 
-	_check(game.state == AfterTheEndGame.GameState.NIGHT, "The shortcut must enter Night Shift immediately.")
+	_check(game.state == AfterTheEndGame.GameState.DAY, "The shortcut must remain in daylight while the terminal cutscene plays.")
+	_check(game._station_cutscene_context == &"terminal_exchange", "The shortcut must begin the real final-station cutscene.")
+	_check(game._station_stop_ui.visible, "The final-station cutscene UI must be visible after using the shortcut.")
 	_check(game._get_dead_passenger_data().size() == expected_night_roster, "The shortcut must include every scheduled anomaly in the night roster.")
-	_check(game._active_passenger_count() == expected_night_roster, "Living daylight passengers must not remain active at night.")
-	_check(game._runtime_puzzle != null, "The shortcut must initialize the runtime station-path puzzle.")
-	_check(not shortcut.visible, "The temporary shortcut must hide after Night Shift begins.")
+	_check(game._active_passenger_count() == expected_night_roster, "Living passengers must leave during the terminal exchange.")
+	_check(not shortcut.visible, "The temporary shortcut must hide while the terminal cutscene plays.")
+
+	# Resolve the terminal sequence without waiting for authored animation timings.
+	game._station_stop_ui.hide()
+	game._on_station_stop_finished()
+	_check(game.state == AfterTheEndGame.GameState.SHIFT_REPORT, "The terminal cutscene must lead to the day paycheck.")
+	_check(bool(game._day_blessing_award.get("passed", false)), "The transition preview paycheck must pass below the normal threshold.")
+	_check(bool(game._day_blessing_award.get("debug_pass_override", false)), "The forced pass must remain scoped to the debug preview.")
+
+	var wheel_event := InputEventMouseButton.new()
+	wheel_event.button_index = MOUSE_BUTTON_WHEEL_DOWN
+	wheel_event.pressed = true
+	_check(not game._shift_report_ui._is_continue_input(wheel_event), "Mouse-wheel scrolling must not continue the paycheck.")
+	var click_event := InputEventMouseButton.new()
+	click_event.button_index = MOUSE_BUTTON_LEFT
+	click_event.pressed = true
+	_check(game._shift_report_ui._is_continue_input(click_event), "A normal mouse click must still continue the paycheck.")
+
+	game._on_shift_report_continue()
+	_check(game.state == AfterTheEndGame.GameState.NIGHT_TRANSITION, "Continuing the paycheck must begin the veil transition.")
+	_check(game._night_transition_ui.visible, "The terminal-to-night transition UI must play after the paycheck.")
+	_check(not game._debug_day_pass_override, "The debug pass override must clear once the transition begins.")
 
 	game.free()
 	if _failures == 0:
-		print("PASS: temporary Night Shift shortcut and complete anomaly roster.")
+		print("PASS: terminal Night Shift preview, forced paycheck pass, and scroll exclusion.")
 	quit(1 if _failures > 0 else 0)

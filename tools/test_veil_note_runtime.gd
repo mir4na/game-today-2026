@@ -74,7 +74,7 @@ func _run() -> void:
 	game._on_market_tool_requested(&"veil_note")
 	_check(game._market_tool_state.veil_notes == 1, "Veil Note activation must be rejected during Day Shift.")
 
-	game._on_debug_night_requested()
+	game._jump_directly_to_debug_night()
 	var puzzle: DeparturePuzzleData = game._get_departure_puzzle()
 	_check(puzzle != null and not puzzle.get_veil_note_statement().is_empty(), "Every generated night case must prepare an additional statement.")
 	var reveal := game._veil_note_reveal_ui as VeilNoteRevealUI

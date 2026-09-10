@@ -14,6 +14,7 @@ signal continue_requested
 @export_multiline var no_penalties_text: String
 @export_category("Passed Result")
 @export var passed_result_template: String
+@export var debug_passed_result_text: String = "PASSED  •  TRANSITION PREVIEW"
 @export var passed_result_color: Color
 @export_multiline var passed_payment_template: String
 @export var passed_continue_text: String
@@ -107,7 +108,10 @@ func open_report(day: int, retained: int, anomaly_total: int, penalties: PackedS
 	_target.text = amount_template % int(award.pass_target)
 	var passed: bool = bool(award.passed)
 	var difference: int = int(award.net_earnings) - int(award.pass_target)
-	_result.text = passed_result_template % difference if passed else failed_result_template % -difference
+	if bool(award.get("debug_pass_override", false)):
+		_result.text = debug_passed_result_text
+	else:
+		_result.text = passed_result_template % difference if passed else failed_result_template % -difference
 	_result.add_theme_color_override(&"font_color", passed_result_color if passed else failed_result_color)
 	_payment.text = passed_payment_template % int(award.earned) if passed else failed_payment_text
 	_continue_hint.text = passed_continue_text if passed else failed_continue_text
@@ -290,5 +294,13 @@ func _is_continue_input(event: InputEvent) -> bool:
 	if event is InputEventJoypadButton:
 		return event.pressed
 	if event is InputEventMouseButton:
-		return event.pressed
+		var mouse_event := event as InputEventMouseButton
+		if mouse_event.button_index in [
+			MOUSE_BUTTON_WHEEL_UP,
+			MOUSE_BUTTON_WHEEL_DOWN,
+			MOUSE_BUTTON_WHEEL_LEFT,
+			MOUSE_BUTTON_WHEEL_RIGHT,
+		]:
+			return false
+		return mouse_event.pressed
 	return false

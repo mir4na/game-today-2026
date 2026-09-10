@@ -27,7 +27,7 @@ func _run() -> void:
 	await process_frame
 	game._active_modal = null
 	game.state = AfterTheEndGame.GameState.DAY
-	game._on_debug_night_requested()
+	game._jump_directly_to_debug_night()
 	var puzzle: DeparturePuzzleData = game._get_departure_puzzle()
 	for data: PassengerData in game._get_dead_passenger_data():
 		game._collected_departure_statements[data.short_name] = puzzle.get_statement_for_passenger(data.short_name)

@@ -27,7 +27,7 @@ func _run() -> void:
 	await process_frame
 	game._active_modal = null
 	game.state = AfterTheEndGame.GameState.DAY
-	game._on_debug_night_requested()
+	game._jump_directly_to_debug_night()
 	var puzzle: DeparturePuzzleData = game._runtime_puzzle
 	_check(puzzle != null, "Night shortcut must create a Soul Record puzzle.")
 	var guardian: Variant = game.get_node("%NightLedgerGuardian")
