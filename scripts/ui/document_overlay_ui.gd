@@ -4,6 +4,7 @@ extends Control
 
 signal closed
 signal station_assignment_toggled(passenger_name: String, should_assign: bool)
+signal station_stamp_applied(passenger_name: String, station_name: String, ticket_position: Vector2)
 
 enum ViewMode {
 	NONE,
@@ -71,9 +72,11 @@ var _presentation_rest_modulate: Color
 @onready var _reader_title: Label = %ReaderTitle
 @onready var _reader_content: RichTextLabel = %ReaderContent
 @onready var _newspaper_reader: Variant = %NewspaperReader
+@onready var _stamp_tray: StampTrayUI = %StampTrayUI
 
 
 func show_passenger(data: PassengerData) -> void:
+	GameSFX.play(&"paper_rustle", -7.0, 0.98, 0.025, 0.1)
 	_view_revision += 1
 	_closing = false
 	_data = data
@@ -86,6 +89,12 @@ func show_passenger(data: PassengerData) -> void:
 	_documents.set_passenger(data)
 	_documents.set_stamp_locked(false)
 	_documents.reset_to_id_card()
+	_stamp_tray.configure(
+		_documents.get_ticket_surface(),
+		not data.stamped_station.is_empty(),
+		false
+	)
+	_stamp_tray.set_ticket_visible(false)
 	show()
 	_present_document_control(_documents as Control)
 
@@ -143,12 +152,14 @@ func compose_matching_death_newspaper(
 
 
 func show_newspaper(document: String) -> void:
+	GameSFX.play(&"paper_rustle", -6.0, 0.94, 0.02, 0.1)
 	_view_revision += 1
 	_closing = false
 	_restore_presented_control()
 	_data = null
 	_view_mode = ViewMode.NEWSPAPER
 	_documents.hide()
+	_stamp_tray.set_ticket_visible(false)
 	_passenger_close_button.hide()
 	_reader_panel.hide()
 	_newspaper_reader.set_content(
@@ -200,18 +211,24 @@ func configure_station_assignment(is_assigned: bool, animate_stamp: bool = false
 		return
 	_is_assigned_to_next_station = is_assigned
 	_documents.set_disembark_stamped(is_assigned, animate_stamp)
+	if is_assigned:
+		_stamp_tray.mark_committed()
 
 
 func configure_stamp_lock(is_locked: bool) -> void:
 	if _view_mode != ViewMode.PASSENGER_DOCUMENTS:
 		return
 	_documents.set_stamp_locked(is_locked)
+	_stamp_tray.set_stamp_locked(is_locked)
 
 
 func request_close() -> void:
 	if not visible or _closing:
 		return
 	_closing = true
+	_stamp_tray.cancel_drag()
+	_stamp_tray.set_ticket_visible(false)
+	GameSFX.play(&"paper_rustle", -10.0, 0.88, 0.02, 0.1)
 	var closing_revision: int = _view_revision
 	if _view_mode == ViewMode.NEWSPAPER:
 		await _newspaper_reader.dismiss()
@@ -253,8 +270,31 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed(&"switch_document") and _documents.toggle_document():
 		get_viewport().set_input_as_handled()
-	elif event.is_action_pressed(&"stamp_ticket") and _documents.request_stamp_action():
-		get_viewport().set_input_as_handled()
+
+
+func _on_ticket_visibility_changed(is_ticket_visible: bool) -> void:
+	# PassengerDocuments enters its reset state before this parent's @onready
+	# references are assigned during scene construction.
+	if not is_instance_valid(_stamp_tray):
+		return
+	if _view_mode != ViewMode.PASSENGER_DOCUMENTS or _data == null:
+		_stamp_tray.set_ticket_visible(false)
+		return
+	_stamp_tray.set_ticket_visible(is_ticket_visible)
+
+
+func _on_stamp_dropped(station_name: String, ticket_position: Vector2) -> void:
+	if (
+		_data == null
+		or not _documents.is_ticket_active()
+		or not _data.stamped_station.is_empty()
+	):
+		return
+	station_stamp_applied.emit(_data.passenger_name, station_name, ticket_position)
+	# The main game handles authoritative validation synchronously. Only reveal
+	# ink after it has accepted and persisted this exact station choice.
+	if _data.stamped_station == station_name:
+		_documents.set_station_stamp(station_name, ticket_position, true)
 
 
 func _toggle_station_assignment() -> void:
@@ -264,10 +304,12 @@ func _toggle_station_assignment() -> void:
 
 
 func _show_reader(title: String, document: String) -> void:
+	GameSFX.play(&"paper_rustle", -8.0, 1.02, 0.02, 0.1)
 	_view_revision += 1
 	_closing = false
 	_view_mode = ViewMode.READER
 	_documents.hide()
+	_stamp_tray.set_ticket_visible(false)
 	_passenger_close_button.hide()
 	_newspaper_reader.hide()
 	_reader_title.text = title

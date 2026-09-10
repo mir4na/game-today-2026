@@ -1,10 +1,11 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/document_overlay_ui.gd" id="1"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/passenger_documents.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/ui/newspaper_reader.tscn" id="4_newspaper"]
 [ext_resource type="PackedScene" path="res://scenes/ui/components/round_close_button.tscn" id="5_close"]
+[ext_resource type="PackedScene" path="res://scenes/ui/stamp_tray_ui.tscn" id="6_stamp_tray"]
 
 [sub_resource type="StyleBoxFlat" id="ReaderPanelStyle"]
 content_margin_left = 24.0
@@ -136,6 +137,10 @@ grow_horizontal = 0
 focus_neighbor_bottom = NodePath("../PassengerDocumentCenter/PassengerDocumentAnchor/PassengerDocuments")
 tooltip_text = "Close passenger documents [E / ESC]"
 
+[node name="StampTrayUI" parent="." instance=ExtResource("6_stamp_tray")]
+unique_name_in_owner = true
+z_index = 80
+
 [node name="NewspaperCenter" type="CenterContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -211,3 +216,5 @@ scroll_active = true
 [connection signal="pressed" from="PassengerCloseButton" to="." method="request_close"]
 [connection signal="close_requested" from="NewspaperCenter/NewspaperReader" to="." method="request_close"]
 [connection signal="stamp_toggle_requested" from="PassengerDocumentCenter/PassengerDocumentAnchor/PassengerDocuments" to="." method="_toggle_station_assignment"]
+[connection signal="ticket_visibility_changed" from="PassengerDocumentCenter/PassengerDocumentAnchor/PassengerDocuments" to="." method="_on_ticket_visibility_changed"]
+[connection signal="stamp_dropped" from="StampTrayUI" to="." method="_on_stamp_dropped"]

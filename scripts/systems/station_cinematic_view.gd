@@ -10,6 +10,7 @@ signal camera_handoff_finished
 @export var target_zoom: Vector2 = Vector2(0.428571, 0.428571)
 @export_range(0.1, 2.0, 0.05) var return_duration: float = 0.75
 @export_category("Return Transition")
+@export_range(0.1, 3.0, 0.05) var departure_follow_duration: float = 1.35
 @export_range(0.0, 1.0, 0.01) var station_fade_start_progress: float = 0.08
 @export_range(0.0, 1.0, 0.01) var station_fade_end_progress: float = 0.82
 @export_category("Time Of Day Tint")
@@ -28,10 +29,14 @@ var _arrival_start_center: Vector2
 var _arrival_start_zoom: Vector2
 var _active: bool = false
 var _returning: bool = false
+var _departure_following: bool = false
+var _departure_follow_blend: float = 0.0
+var _departure_follow_start_center: Vector2
 var _camera_handed_off: bool = false
 var _return_tween: Tween
 var _return_start_center: Vector2
 var _return_start_zoom: Vector2
+var _return_start_environment_alpha: float = 1.0
 var _handoff_composition_offset: Vector2 = Vector2.ZERO
 var _handoff_composition_captured: bool = false
 var _station_environment_alpha: float = 1.0
@@ -88,6 +93,8 @@ func begin(source_camera: Camera2D, station_name: String, handoff_anchor: Node2D
 	_station_sign.modulate.a = 1.0
 	_station_sign_layer.show()
 	_returning = false
+	_departure_following = false
+	_departure_follow_blend = 0.0
 	_camera_handed_off = false
 	_active = true
 	_station_camera.enabled = true
@@ -114,15 +121,41 @@ func return_to_gameplay() -> void:
 	if not _active or _returning:
 		return
 	_returning = true
+	_departure_following = false
 	_capture_handoff_composition()
 	if _return_tween and _return_tween.is_valid():
 		_return_tween.kill()
 	_return_start_center = _station_camera.global_position
 	_return_start_zoom = _station_camera.zoom
+	_return_start_environment_alpha = _station_environment_alpha
 	_return_tween = create_tween()
 	_return_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	_return_tween.tween_method(_update_camera_return, 0.0, 1.0, return_duration)
 	_return_tween.tween_callback(_begin_following_gameplay_camera)
+
+
+func begin_departure_follow() -> void:
+	if not _active or _returning or _camera_handed_off or _departure_following:
+		return
+	_capture_handoff_composition()
+	if _return_tween and _return_tween.is_valid():
+		_return_tween.kill()
+	_departure_following = true
+	_departure_follow_blend = 0.0
+	_departure_follow_start_center = _station_camera.global_position
+	_return_tween = create_tween()
+	_return_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_return_tween.tween_method(
+		_update_departure_follow,
+		0.0,
+		1.0,
+		departure_follow_duration
+	)
+
+
+func set_transition_environment_alpha(value: float) -> void:
+	if _active:
+		_set_station_environment_alpha(value)
 
 
 func skip_to_gameplay() -> void:
@@ -135,12 +168,15 @@ func skip_to_gameplay() -> void:
 	_station_sign_layer.hide()
 	_set_station_environment_alpha(0.0)
 	_returning = false
+	_departure_following = false
 	_camera_handed_off = true
 	camera_handoff_finished.emit()
 
 
 func _process(_delta: float) -> void:
-	if _active and _camera_handed_off:
+	if _active and _departure_following:
+		_update_departure_follow(_departure_follow_blend)
+	elif _active and _camera_handed_off:
 		_follow_gameplay_camera_transform()
 
 
@@ -148,7 +184,9 @@ func sync_follow_target() -> void:
 	# Train travel offsets are signal-driven. Sync immediately on that signal so
 	# a large skipped timeline step cannot leave the cinematic camera one frame
 	# behind the player and passengers.
-	if _active and _camera_handed_off:
+	if _active and _departure_following:
+		_update_departure_follow(_departure_follow_blend)
+	elif _active and _camera_handed_off:
 		_follow_gameplay_camera_transform()
 
 
@@ -179,6 +217,8 @@ func finish() -> void:
 	_set_station_environment_alpha(1.0)
 	_active = false
 	_returning = false
+	_departure_following = false
+	_departure_follow_blend = 0.0
 	_camera_handed_off = false
 	_handoff_anchor = null
 	_handoff_composition_captured = false
@@ -196,7 +236,19 @@ func _update_camera_return(progress: float) -> void:
 	var fade_start: float = minf(station_fade_start_progress, station_fade_end_progress)
 	var fade_end: float = maxf(station_fade_start_progress, station_fade_end_progress)
 	var fade_progress: float = clampf(inverse_lerp(fade_start, maxf(fade_end, fade_start + 0.001), progress), 0.0, 1.0)
-	_set_station_environment_alpha(1.0 - _smoothstep(fade_progress))
+	_set_station_environment_alpha(
+		lerpf(_return_start_environment_alpha, 0.0, _smoothstep(fade_progress))
+	)
+
+
+func _update_departure_follow(progress: float) -> void:
+	if not _departure_following:
+		return
+	_departure_follow_blend = clampf(progress, 0.0, 1.0)
+	_station_camera.global_position = _departure_follow_start_center.lerp(
+		_handoff_target_position(),
+		_smoothstep(_departure_follow_blend)
+	)
 
 
 func _begin_following_gameplay_camera() -> void:
@@ -204,6 +256,7 @@ func _begin_following_gameplay_camera() -> void:
 		return
 	_camera_handed_off = true
 	_returning = false
+	_departure_following = false
 	_set_station_environment_alpha(0.0)
 	_follow_gameplay_camera_transform()
 	camera_handoff_finished.emit()
@@ -283,6 +336,7 @@ func _activate_gameplay_camera() -> void:
 		_source_camera.reset_smoothing()
 	_station_camera.enabled = false
 	_returning = false
+	_departure_following = false
 
 
 func _smoothstep(value: float) -> float:

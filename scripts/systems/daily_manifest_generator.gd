@@ -145,6 +145,8 @@ static func _reset_runtime_fields(passengers: Array[PassengerData], route: Packe
 		data.ticket_day_code = config.ticket_day_code.strip_edges()
 		data.ticket_issue_type = PassengerData.TICKET_ISSUE_NONE
 		data.required_dropoff_station = ""
+		data.stamped_station = ""
+		data.stamp_ticket_position = Vector2.ZERO
 		data.is_dead = false
 		data.anomaly_type = "none"
 		data.current_carriage = rng.randi_range(1, config.passenger_carriage_count)

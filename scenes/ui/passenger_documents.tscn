@@ -259,8 +259,8 @@ reset_animation = &"RESET"
 show_id_animation = &"show_id_card"
 show_ticket_animation = &"show_ticket"
 id_instruction = "[Q] View ticket    •    [E] Close"
-unstamped_ticket_instruction = "[Q] View ID    •    [Space] Apply disembark stamp    •    [E] Close"
-stamped_ticket_instruction = "[Q] View ID    •    [Space] Remove disembark stamp    •    [E] Close"
+unstamped_ticket_instruction = "Drag a station stamp onto the ticket    •    [Q] View ID    •    [E] Close"
+stamped_ticket_instruction = "Ticket stamped    •    [Q] View ID    •    [E] Close"
 locked_ticket_instruction = "Clean the dirty seat before stamping tickets    •    [Q] View ID    •    [E] Close"
 
 [node name="PassengerTicket" parent="." instance=ExtResource("3_ticket")]

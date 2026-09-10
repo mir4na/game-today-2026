@@ -5,8 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://cxgfpcr3hg68b" path="res://scenes/ui/train_minimap.tscn" id="3"]
 [ext_resource type="Texture2D" uid="uid://cm00awa5lejd5" path="res://assets/ui/dialogue_bubble.png" id="4_dialogue_bubble"]
 [ext_resource type="Texture2D" uid="uid://cnxjqwj7xqhw8" path="res://assets/ui/dialogue_pointer.png" id="5_dialogue_pointer"]
-[ext_resource type="Texture2D" uid="uid://cy51u8nivsmgu" path="res://assets/ui/Clock/Group 78.png" id="7_cwdlq"]
-[ext_resource type="Texture2D" uid="uid://cvbygk5ecjcpy" path="res://assets/ui/Clock/Rectangle 168.png" id="8_o6xly"]
+[ext_resource type="Texture2D" uid="uid://cibw51gavd0w" path="res://assets/ui/Clock/Clock_Sign.png" id="7_clock_sign"]
 [ext_resource type="PackedScene" path="res://scenes/ui/maintenance_tracker.tscn" id="8_tracker"]
 [ext_resource type="Texture2D" uid="uid://c8y3exdjys06m" path="res://assets/ui/Clock/Background_Unfilled.png" id="9_clock_unfilled"]
 [ext_resource type="Texture2D" uid="uid://6c4pwd7p83gj" path="res://assets/ui/Clock/Background_Filled.png" id="10_clock_filled"]
@@ -25,16 +24,6 @@
 [ext_resource type="Texture2D" uid="uid://d11pgqc341s0t" path="res://assets/ui/guidebook/Group 136.png" id="23_guidebook_button"]
 [ext_resource type="Script" path="res://scripts/ui/hover_scale_button.gd" id="24_hover"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_clock_pole_left"]
-atlas = ExtResource("7_cwdlq")
-region = Rect2(0, 0, 22, 129)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_clock_pole_right"]
-atlas = ExtResource("7_cwdlq")
-region = Rect2(558, 0, 22, 129)
-filter_clip = true
-
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_clock_fill"]
 resource_local_to_scene = true
 shader = ExtResource("16_clock_fill_shader")
@@ -42,64 +31,43 @@ shader_parameter/progress = 0.0
 shader_parameter/edge_softness = 0.003
 shader_parameter/fill_origin = Vector2(0.477, 1)
 
-[sub_resource type="Animation" id="Animation_clock_briefing"]
-resource_name = "route_briefing"
-length = 3.2
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("ClockPanel/ClockSignAssembly:visible")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 3.2),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [true, false]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("ClockPanel/ClockSignAssembly:modulate:a")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.28, 2.55, 3.2),
-"transitions": PackedFloat32Array(0.35, 1, 1, 1),
-"update": 0,
-"values": [0.0, 1.0, 1.0, 0.0]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("ClockPanel/ClockSignAssembly:offset_top")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.34, 2.55, 3.2),
-"transitions": PackedFloat32Array(0.25, 1, 1, 1),
-"update": 0,
-"values": [40.0, 0.0, 0.0, 70.0]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("ClockPanel/ClockSignAssembly:offset_bottom")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0, 0.34, 2.55, 3.2),
-"transitions": PackedFloat32Array(0.25, 1, 1, 1),
-"update": 0,
-"values": [210.0, 170.0, 170.0, 240.0]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_clock_briefing"]
-_data = {
-&"route_briefing": SubResource("Animation_clock_briefing")
-}
-
 [sub_resource type="StyleBoxEmpty" id="GuidebookButtonTransparent"]
+
+[sub_resource type="StyleBoxFlat" id="DebugSkipNormal"]
+bg_color = Color(0.52549, 0.45098, 0.356863, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.239216, 0.2, 0.184314, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="DebugSkipHover"]
+bg_color = Color(0.615686, 0.52549, 0.411765, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.239216, 0.2, 0.184314, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="DebugSkipPressed"]
+bg_color = Color(0.431373, 0.360784, 0.278431, 1)
+border_width_left = 3
+border_width_top = 4
+border_width_right = 3
+border_width_bottom = 2
+border_color = Color(0.176471, 0.145098, 0.137255, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_pkwgd"]
 resource_local_to_scene = true
@@ -150,12 +118,13 @@ grow_horizontal = 0
 
 [node name="TrainMinimap" parent="Root/MinimapAnchor" unique_id=2026753613 instance=ExtResource("3")]
 unique_name_in_owner = true
-editor_description = "Scene-authored minimap size. Adjust Scale here to resize the complete minimap while preserving its internal layout."
+editor_description = "2.25x scene-authored minimap, enlarged 1.5x from its previous scale. Its right-edge pivot keeps it aligned to the top-right screen margin."
 layout_mode = 0
-offset_left = -57.0
-offset_right = 167.0
+offset_left = 45.0
+offset_right = 269.0
 offset_bottom = 27.0
-scale = Vector2(1.5, 1.5)
+scale = Vector2(2.25, 2.25)
+pivot_offset = Vector2(224, 0)
 
 [node name="ToolStatusLabel" type="Label" parent="Root" unique_id=1425442653]
 unique_name_in_owner = true
@@ -271,9 +240,77 @@ mouse_filter = 2
 texture = ExtResource("5_dialogue_pointer")
 expand_mode = 1
 
+[node name="RouteBriefingBanner" type="Control" parent="Root"]
+unique_name_in_owner = true
+editor_description = "Centered departure notification made from the complete Clock_Sign asset. Its two hanging rods settle flush against the top screen edge."
+z_index = 60
+visible = false
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -210.0
+offset_top = -166.0
+offset_right = 210.0
+offset_bottom = -2.0
+grow_horizontal = 2
+pivot_offset = Vector2(210, 0)
+mouse_filter = 2
+
+[node name="SignOutline" type="TextureRect" parent="Root/RouteBriefingBanner"]
+modulate = Color(0.0156863, 0.0196078, 0.027451, 0.94)
+layout_mode = 0
+offset_left = -4.0
+offset_top = -2.0
+offset_right = 424.0
+offset_bottom = 166.0
+mouse_filter = 2
+texture = ExtResource("7_clock_sign")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Sign" type="TextureRect" parent="Root/RouteBriefingBanner"]
+layout_mode = 0
+offset_right = 420.0
+offset_bottom = 163.62
+mouse_filter = 2
+texture = ExtResource("7_clock_sign")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="Root/RouteBriefingBanner"]
+layout_mode = 0
+offset_left = 35.0
+offset_top = 66.0
+offset_right = 385.0
+offset_bottom = 93.0
+theme_override_colors/font_color = Color(0.305882, 0.258824, 0.25098, 1)
+theme_override_fonts/font = ExtResource("17_clock_font")
+theme_override_font_sizes/font_size = 21
+text = "NEXT STOP"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BriefingNextStopLabel" type="Label" parent="Root/RouteBriefingBanner"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 18.0
+offset_top = 91.0
+offset_right = 402.0
+offset_bottom = 145.0
+theme_override_colors/font_color = Color(0.94, 0.94, 0.94, 1)
+theme_override_colors/font_outline_color = Color(0.22, 0.18, 0.17, 0.28)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("17_clock_font")
+theme_override_font_sizes/font_size = 31
+text = "BRAMBLEFORD"
+horizontal_alignment = 1
+vertical_alignment = 1
+text_overrun_behavior = 3
+
 [node name="ClockPanel" type="Control" parent="Root" unique_id=735151017]
 unique_name_in_owner = true
-editor_description = "Scene-authored bottom-center journey clock. ClockSignAssembly briefly announces the next stop while ClockFace remains visible throughout gameplay."
+editor_description = "Bottom-center journey clock. HoverArea lifts the complete assembly so the Clock_Sign destination board is revealed below the dial."
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -281,8 +318,9 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -175.0
-offset_top = -300.0
+offset_top = -215.0
 offset_right = 175.0
+offset_bottom = 85.0
 grow_horizontal = 2
 grow_vertical = 0
 scale = Vector2(0.666667, 0.666667)
@@ -290,86 +328,32 @@ pivot_offset = Vector2(175, 300)
 mouse_filter = 2
 
 [node name="ClockSignAssembly" type="Control" parent="Root/ClockPanel" unique_id=184474026]
-editor_description = "Station sign header. Its 350 px width matches ClockFace, keeping both elements centered."
+editor_description = "Clock_Sign is parented to the clock and overlaps behind ClockFace, keeping its rods visibly attached throughout the hover animation."
 anchors_preset = 0
+offset_top = 148.0
 offset_right = 350.0
-offset_bottom = 170.0
+offset_bottom = 288.0
+pivot_offset = Vector2(175, 0)
 mouse_filter = 2
 
 [node name="ClockSignOutline" type="TextureRect" parent="Root/ClockPanel/ClockSignAssembly" unique_id=2124821817]
-editor_description = "Black silhouette behind the station sign. Adjust Scale here to change the visible outline thickness."
 modulate = Color(0.0156863, 0.0196078, 0.027451, 0.96)
 layout_mode = 0
-offset_left = 3.5
-offset_right = 346.5
-offset_bottom = 76.50012
-scale = Vector2(1.028, 1.12)
-pivot_offset = Vector2(171.5, 38.25)
+offset_left = -3.0
+offset_top = -2.0
+offset_right = 353.0
+offset_bottom = 140.0
 mouse_filter = 2
-texture = ExtResource("8_o6xly")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="ClockSignPoles" type="Control" parent="Root/ClockPanel/ClockSignAssembly" unique_id=402474082]
-editor_description = "Two pole slices extend behind ClockFace so the station sign remains visibly attached."
-anchors_preset = 0
-offset_right = 350.0
-offset_bottom = 170.0
-mouse_filter = 2
-
-[node name="LeftPoleOutline" type="TextureRect" parent="Root/ClockPanel/ClockSignAssembly/ClockSignPoles" unique_id=1415805050]
-modulate = Color(0.0156863, 0.0196078, 0.027451, 0.96)
-layout_mode = 0
-offset_left = 65.0
-offset_top = 65.0
-offset_right = 86.0
-offset_bottom = 169.0
-mouse_filter = 2
-texture = SubResource("AtlasTexture_clock_pole_left")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="RightPoleOutline" type="TextureRect" parent="Root/ClockPanel/ClockSignAssembly/ClockSignPoles" unique_id=1011589764]
-modulate = Color(0.0156863, 0.0196078, 0.027451, 0.96)
-layout_mode = 0
-offset_left = 264.0
-offset_top = 65.0
-offset_right = 285.0
-offset_bottom = 169.0
-mouse_filter = 2
-texture = SubResource("AtlasTexture_clock_pole_right")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="LeftPole" type="TextureRect" parent="Root/ClockPanel/ClockSignAssembly/ClockSignPoles" unique_id=140072059]
-layout_mode = 0
-offset_left = 68.0
-offset_top = 68.0
-offset_right = 83.0
-offset_bottom = 166.0
-mouse_filter = 2
-texture = SubResource("AtlasTexture_clock_pole_left")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="RightPole" type="TextureRect" parent="Root/ClockPanel/ClockSignAssembly/ClockSignPoles" unique_id=1308288395]
-layout_mode = 0
-offset_left = 267.0
-offset_top = 68.0
-offset_right = 282.0
-offset_bottom = 166.0
-mouse_filter = 2
-texture = SubResource("AtlasTexture_clock_pole_right")
+texture = ExtResource("7_clock_sign")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="ClockSign" type="TextureRect" parent="Root/ClockPanel/ClockSignAssembly" unique_id=391894367]
 layout_mode = 0
-offset_left = 3.5
-offset_right = 346.5
-offset_bottom = 76.50012
+offset_right = 350.0
+offset_bottom = 136.34
 mouse_filter = 2
-texture = ExtResource("8_o6xly")
+texture = ExtResource("7_clock_sign")
 expand_mode = 1
 stretch_mode = 5
 
@@ -377,9 +361,9 @@ stretch_mode = 5
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 25.0
-offset_top = 9.0
+offset_top = 54.0
 offset_right = 325.0
-offset_bottom = 33.0
+offset_bottom = 78.0
 theme_override_colors/font_color = Color(0.305882, 0.258824, 0.25098, 1)
 theme_override_fonts/font = ExtResource("17_clock_font")
 theme_override_font_sizes/font_size = 19
@@ -391,9 +375,9 @@ vertical_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 14.0
-offset_top = 32.0
+offset_top = 76.0
 offset_right = 336.0
-offset_bottom = 73.0
+offset_bottom = 126.0
 theme_override_colors/font_color = Color(0.94, 0.94, 0.94, 1)
 theme_override_colors/font_outline_color = Color(0.22, 0.18, 0.17, 0.28)
 theme_override_constants/outline_size = 2
@@ -407,9 +391,8 @@ text_overrun_behavior = 3
 [node name="ClockFace" type="Control" parent="Root/ClockPanel" unique_id=2018867802]
 editor_description = "Centered clock face. Move this node to adjust the clock without disturbing the station sign."
 anchors_preset = 0
-offset_top = 108.5
 offset_right = 350.0
-offset_bottom = 287.5
+offset_bottom = 179.0
 mouse_filter = 2
 
 [node name="ClockFaceOutline" type="TextureRect" parent="Root/ClockPanel/ClockFace" unique_id=1368557547]
@@ -512,10 +495,15 @@ mouse_filter = 2
 texture = ExtResource("15_clock_night")
 expand_mode = 1
 
-[node name="ClockBriefingAnimation" type="AnimationPlayer" parent="Root" unique_id=478647926]
+[node name="ClockHoverArea" type="Control" parent="Root/ClockPanel"]
 unique_name_in_owner = true
-editor_description = "Scene-authored next-stop sign timing. The sign enters for 0.34 seconds, remains readable until 2.55 seconds, then drops and fades out by 3.2 seconds; ClockFace is not animated."
-libraries/ = SubResource("AnimationLibrary_clock_briefing")
+editor_description = "Hover hitbox for the dial, revealed destination sign, and attached debug skip sign."
+layout_mode = 0
+offset_left = -18.0
+offset_top = -12.0
+offset_right = 512.0
+offset_bottom = 480.0
+mouse_default_cursor_shape = 2
 
 [node name="GuidebookButton" type="Button" parent="Root" unique_id=1411831653]
 unique_name_in_owner = true
@@ -609,29 +597,33 @@ amount_template = "LV.%d"
 material = SubResource("ShaderMaterial_7yoph")
 texture = ExtResource("22_swift_item")
 
-[node name="DebugNextStationButton" type="Button" parent="Root"]
+[node name="DebugNextStationButton" type="Button" parent="Root/ClockPanel"]
 unique_name_in_owner = true
+editor_description = "Debug-only station skip attached to the right edge of the Next Stop sign. The flat box samples Clock_Sign's #86735B panel color."
 visible = false
-layout_mode = 1
-anchors_preset = 3
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 28.0
-offset_top = -78.0
-offset_right = 248.0
-offset_bottom = -28.0
-grow_vertical = 0
+z_index = 40
+layout_mode = 0
+offset_left = 338.0
+offset_top = 196.0
+offset_right = 494.0
+offset_bottom = 251.0
+pivot_offset = Vector2(78, 30.5)
 tooltip_text = "Debug only: trigger the normal arrival flow"
 focus_mode = 0
 mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.933333, 0.827451, 0.607843, 1)
-theme_override_colors/font_pressed_color = Color(0.843137, 0.690196, 0.419608, 1)
-theme_override_colors/font_hover_color = Color(1, 0.956863, 0.827451, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("GuidebookButtonTransparent")
-theme_override_styles/pressed = SubResource("GuidebookButtonTransparent")
-theme_override_styles/hover = SubResource("GuidebookButtonTransparent")
-text = "Debug: next station"
+theme_override_colors/font_color = Color(0.94, 0.94, 0.94, 1)
+theme_override_colors/font_hover_color = Color(1, 0.968627, 0.870588, 1)
+theme_override_colors/font_pressed_color = Color(0.901961, 0.847059, 0.741176, 1)
+theme_override_colors/font_outline_color = Color(0.22, 0.18, 0.17, 0.28)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("17_clock_font")
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("DebugSkipNormal")
+theme_override_styles/pressed = SubResource("DebugSkipPressed")
+theme_override_styles/hover = SubResource("DebugSkipHover")
+text = "SKIP STOP"
+script = ExtResource("24_hover")
+hover_scale = 1.06
 
 [node name="NotificationPanel" type="PanelContainer" parent="Root" unique_id=1320290712]
 unique_name_in_owner = true
@@ -668,7 +660,7 @@ autowrap_mode = 2
 
 [connection signal="pressed" from="Root/GuidebookButton" to="." method="_on_guidebook_button_pressed"]
 [connection signal="pressed" from="Root/DebugNightButton" to="." method="_on_debug_night_button_pressed"]
-[connection signal="pressed" from="Root/DebugNextStationButton" to="." method="_on_debug_next_station_button_pressed"]
+[connection signal="pressed" from="Root/ClockPanel/DebugNextStationButton" to="." method="_on_debug_next_station_button_pressed"]
 [connection signal="tool_requested" from="Root/MarketItemBar/VeilNoteSlot" to="." method="_on_market_item_requested"]
 [connection signal="tool_requested" from="Root/MarketItemBar/RadarSlot" to="." method="_on_market_item_requested"]
 [connection signal="tool_requested" from="Root/MarketItemBar/SwiftSlot" to="." method="_on_market_item_requested"]

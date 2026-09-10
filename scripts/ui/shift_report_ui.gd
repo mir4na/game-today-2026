@@ -10,8 +10,8 @@ signal continue_requested
 @export var deduction_template: String
 @export var retained_template: String
 @export var amount_template: String
-@export var penalty_line_template: String
-@export_multiline var no_penalties_text: String
+@export var penalty_line_template: String = "• %s"
+@export_multiline var no_penalties_text: String = "No penalties issued."
 @export_category("Passed Result")
 @export var passed_result_template: String
 @export var debug_passed_result_text: String = "PASSED  •  TRANSITION PREVIEW"
@@ -24,7 +24,7 @@ signal continue_requested
 @export_multiline var failed_payment_text: String
 @export var failed_continue_text: String
 @export_category("Night Paycheck Copy")
-@export var night_title_text: String = "NIGHT PAYCHECK"
+@export var night_title_text: String = "PAYCHECK"
 @export var night_subtitle_template: String = "NIGHT SHIFT • DAY %d"
 @export var night_souls_caption: String = "SOULS RELEASED"
 @export var night_failed_attempts_caption: String = "FAILED ATTEMPTS"
@@ -97,12 +97,13 @@ func _ready() -> void:
 	set_process(false)
 
 func open_report(day: int, retained: int, anomaly_total: int, penalties: PackedStringArray, award: Dictionary) -> void:
+	GameSFX.play(&"paper_rustle", -7.0, 0.98, 0.02, 0.1)
 	_continue_sent = false
 	_restore_day_receipt_copy()
 	_subtitle.text = subtitle_template % day
-	_correct.text = reward_template % [award.correct_dropoffs, award.correct_rate, award.dropoff_reward]
-	_wrong.text = deduction_template % [award.wrong_dropoffs, award.wrong_rate, award.wrong_deduction]
-	_anomaly.text = deduction_template % [award.incorrect_anomalies, award.anomaly_rate, award.anomaly_deduction]
+	_correct.text = reward_template % int(award.dropoff_reward)
+	_wrong.text = deduction_template % int(award.wrong_deduction)
+	_anomaly.text = deduction_template % int(award.anomaly_deduction)
 	_retained.text = retained_template % [retained, anomaly_total]
 	_net.text = amount_template % int(award.net_earnings)
 	_target.text = amount_template % int(award.pass_target)
@@ -129,18 +130,10 @@ func open_night_report(day: int, soul_total: int, award: Dictionary, balance: in
 	_continue_sent = false
 	_title.text = night_title_text
 	_subtitle.text = night_subtitle_template % day
-	_correct_caption.text = night_souls_caption
-	_correct.text = reward_template % [
-		soul_total,
-		int(award.get("correct_rate", 0)),
-		int(award.get("base_reward", 0)),
-	]
+	_correct_caption.text = "%s  (%d)" % [night_souls_caption, soul_total]
+	_correct.text = reward_template % int(award.get("base_reward", 0))
 	_wrong_caption.text = night_failed_attempts_caption
-	_wrong.text = deduction_template % [
-		int(award.get("failed_attempts", 0)),
-		int(award.get("attempt_rate", 0)),
-		int(award.get("attempt_deduction", 0)),
-	]
+	_wrong.text = deduction_template % int(award.get("attempt_deduction", 0))
 	_anomaly_caption.text = night_attempts_caption
 	_anomaly.text = str(int(award.get("attempt_count", 1)))
 	_anomaly.add_theme_color_override(&"font_color", Color("333340"))
@@ -233,6 +226,7 @@ func _request_continue() -> void:
 	if _continue_sent or _typewriter_running:
 		return
 	_continue_sent = true
+	GameSFX.stop_loop(&"shift_report_typewriter")
 	continue_requested.emit()
 
 
@@ -249,6 +243,7 @@ func _start_typewriter() -> void:
 	if not _typewriter_running:
 		_finish_typewriter()
 	else:
+		GameSFX.start_loop(&"shift_report_typewriter", &"typewriter", -16.0, 1.0)
 		set_process(true)
 
 
@@ -263,6 +258,7 @@ func _advance_typewriter_target() -> void:
 
 
 func _finish_typewriter() -> void:
+	GameSFX.stop_loop(&"shift_report_typewriter")
 	for target: Control in _typewriter_targets:
 		_set_visible_characters(target, -1)
 	_typewriter_index = _typewriter_targets.size()
@@ -271,6 +267,10 @@ func _finish_typewriter() -> void:
 	_continue_hint.show()
 	_hint_animation.play(&"blink")
 	set_process(_input_lock_remaining > 0.0)
+
+
+func _exit_tree() -> void:
+	GameSFX.stop_loop(&"shift_report_typewriter")
 
 
 func _get_total_characters(target: Control) -> int:

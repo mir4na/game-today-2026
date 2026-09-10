@@ -3,6 +3,7 @@ extends Control
 ## Scene-authored passage through the veil before the nightly assignment shift.
 
 signal veil_crossed
+signal departure_follow_requested
 signal camera_return_requested
 signal sequence_timeline_changed(elapsed: float)
 signal sequence_finished
@@ -12,6 +13,9 @@ signal sequence_finished
 @export_range(0.0, 10.0, 0.05) var skip_unlock_seconds: float = 1.5
 @export_category("Station Train Motion")
 @export_range(0.0, 10.0, 0.05) var departure_start_time: float = 0.45
+@export_range(0.0, 10.0, 0.05) var departure_follow_time: float = 0.65
+@export_range(0.0, 10.0, 0.05) var station_fade_start_time: float = 1.2
+@export_range(0.0, 10.0, 0.05) var station_fade_end_time: float = 3.2
 @export_range(0.0, 1.0, 0.01) var veil_departure_progress: float = 0.58
 @export_range(0.0, 10.0, 0.05) var departure_end_time: float = 8.35
 @export_range(0.0, 10.0, 0.05) var camera_return_time: float = 8.55
@@ -20,6 +24,7 @@ signal sequence_finished
 
 var _elapsed: float = 0.0
 var _veil_crossed: bool = false
+var _departure_follow_requested: bool = false
 var _camera_return_requested: bool = false
 var _finished: bool = false
 
@@ -31,6 +36,7 @@ func _ready() -> void:
 func play_transition() -> void:
 	_elapsed = 0.0
 	_veil_crossed = false
+	_departure_follow_requested = false
 	_camera_return_requested = false
 	_finished = false
 	show()
@@ -44,6 +50,8 @@ func play_transition() -> void:
 func _process(delta: float) -> void:
 	_elapsed += delta
 	sequence_timeline_changed.emit(_elapsed)
+	if not _departure_follow_requested and _elapsed >= departure_follow_time:
+		_emit_departure_follow_requested()
 	if not _veil_crossed and _elapsed >= veil_crossing_time:
 		_emit_veil_crossed()
 	if not _camera_return_requested and _elapsed >= camera_return_time:
@@ -64,6 +72,7 @@ func skip_sequence() -> void:
 	_animation_player.stop()
 	_elapsed = maxf(_elapsed, departure_end_time)
 	sequence_timeline_changed.emit(_elapsed)
+	_emit_departure_follow_requested()
 	_emit_veil_crossed()
 	_emit_camera_return_requested()
 	_finish_sequence()
@@ -79,6 +88,13 @@ func _emit_veil_crossed() -> void:
 		return
 	_veil_crossed = true
 	veil_crossed.emit()
+
+
+func _emit_departure_follow_requested() -> void:
+	if _departure_follow_requested:
+		return
+	_departure_follow_requested = true
+	departure_follow_requested.emit()
 
 
 func _emit_camera_return_requested() -> void:
@@ -112,12 +128,24 @@ func get_station_departure_progress() -> float:
 	)
 
 
+func get_station_environment_alpha() -> float:
+	var fade_start: float = minf(station_fade_start_time, station_fade_end_time)
+	var fade_end: float = maxf(station_fade_start_time, station_fade_end_time)
+	if _elapsed <= fade_start:
+		return 1.0
+	if _elapsed >= fade_end:
+		return 0.0
+	var progress: float = inverse_lerp(fade_start, maxf(fade_end, fade_start + 0.001), _elapsed)
+	return 1.0 - _ease_in_out_sine(progress)
+
+
 func _finish_sequence() -> void:
 	if _finished:
 		return
 	_finished = true
 	_elapsed = maxf(_elapsed, departure_end_time)
 	sequence_timeline_changed.emit(_elapsed)
+	_emit_departure_follow_requested()
 	_emit_veil_crossed()
 	_emit_camera_return_requested()
 	set_process(false)

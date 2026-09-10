@@ -1,22 +1,33 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene format=3 uid="uid://cqy4vojmyhgdi"]
 
-[ext_resource type="Script" path="res://scripts/ui/pause_ui.gd" id="1_script"]
-[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
-[ext_resource type="Texture2D" path="res://assets/ui/PauseMenu/Background.png" id="3_background"]
-[ext_resource type="Texture2D" path="res://assets/ui/PauseMenu/OptionsText.png" id="4_options"]
-[ext_resource type="Texture2D" path="res://assets/ui/PauseMenu/Button.png" id="5_button"]
+[ext_resource type="Script" uid="uid://c52e84we488ys" path="res://scripts/ui/pause_ui.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" uid="uid://ct88goyyc3aw7" path="res://assets/ui/PauseMenu/Background.png" id="3_background"]
+[ext_resource type="Texture2D" uid="uid://b7gvplohuy1sb" path="res://assets/ui/PauseMenu/OptionsText.png" id="4_options"]
+[ext_resource type="Texture2D" uid="uid://c11bujcyfxqet" path="res://assets/ui/PauseMenu/Button.png" id="5_button"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_option_selector.tscn" id="6_selector"]
-[ext_resource type="Shader" path="res://shaders/pause_menu_palette.gdshader" id="7_palette"]
-[ext_resource type="Script" path="res://scripts/ui/hover_scale_button.gd" id="8_hover"]
+[ext_resource type="Shader" uid="uid://bykwrt6kj3rdj" path="res://shaders/pause_menu_palette.gdshader" id="7_palette"]
+[ext_resource type="Script" uid="uid://fgch1jgxeocf" path="res://scripts/ui/hover_scale_button.gd" id="8_hover"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ticket_palette"]
 resource_local_to_scene = true
 shader = ExtResource("7_palette")
+shader_parameter/night_strength = 0.0
+shader_parameter/monochrome_tint = false
+shader_parameter/day_ink = Color(0.207843, 0.207843, 0.25098, 1)
+shader_parameter/night_ink = Color(0.957, 0.894, 0.62, 1)
+shader_parameter/night_paper_top = Color(0.22, 0.224, 0.345, 1)
+shader_parameter/night_paper_bottom = Color(0.173, 0.11, 0.235, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_title_palette"]
 resource_local_to_scene = true
 shader = ExtResource("7_palette")
+shader_parameter/night_strength = 0.0
 shader_parameter/monochrome_tint = true
+shader_parameter/day_ink = Color(0.207843, 0.207843, 0.25098, 1)
+shader_parameter/night_ink = Color(0.957, 0.894, 0.62, 1)
+shader_parameter/night_paper_top = Color(0.22, 0.224, 0.345, 1)
+shader_parameter/night_paper_bottom = Color(0.173, 0.11, 0.235, 1)
 
 [sub_resource type="StyleBoxTexture" id="ActionButtonStyle"]
 texture = ExtResource("5_button")
@@ -27,20 +38,19 @@ texture_margin_bottom = 18.0
 axis_stretch_horizontal = 1
 axis_stretch_vertical = 1
 
-[node name="PauseUI" type="Control"]
-visible = false
+[node name="PauseUI" type="Control" unique_id=931919145]
 process_mode = 3
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 theme = ExtResource("2_theme")
 script = ExtResource("1_script")
 
-[node name="Shade" type="ColorRect" parent="."]
+[node name="Shade" type="ColorRect" parent="." unique_id=1693415066]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -51,7 +61,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.0156863, 0.0196078, 0.0313725, 0.76)
 
-[node name="Ticket" type="Control" parent="."]
+[node name="Ticket" type="Control" parent="." unique_id=647626998]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 8
@@ -65,11 +75,12 @@ offset_right = 560.0
 offset_bottom = 215.0
 grow_horizontal = 2
 grow_vertical = 2
-pivot_offset = Vector2(560, 215)
 scale = Vector2(0.86, 0.86)
+pivot_offset = Vector2(560, 215)
 mouse_filter = 1
 
-[node name="TicketShadow" type="TextureRect" parent="Ticket"]
+[node name="TicketShadow" type="TextureRect" parent="Ticket" unique_id=1550255319]
+modulate = Color(0.0470588, 0.0509804, 0.0705882, 0.24)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -81,12 +92,11 @@ offset_bottom = 11.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-modulate = Color(0.0470588, 0.0509804, 0.0705882, 0.24)
 texture = ExtResource("3_background")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="TicketArtwork" type="TextureRect" parent="Ticket"]
+[node name="TicketArtwork" type="TextureRect" parent="Ticket" unique_id=2101954934]
 unique_name_in_owner = true
 material = SubResource("ShaderMaterial_ticket_palette")
 layout_mode = 1
@@ -100,7 +110,7 @@ texture = ExtResource("3_background")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="OptionsTitle" type="TextureRect" parent="Ticket"]
+[node name="OptionsTitle" type="TextureRect" parent="Ticket" unique_id=1112034766]
 unique_name_in_owner = true
 material = SubResource("ShaderMaterial_title_palette")
 layout_mode = 0
@@ -113,7 +123,7 @@ texture = ExtResource("4_options")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="OptionGrid" type="GridContainer" parent="Ticket"]
+[node name="OptionGrid" type="GridContainer" parent="Ticket" unique_id=1851122647]
 layout_mode = 0
 offset_left = 451.0
 offset_top = 88.0
@@ -123,44 +133,52 @@ theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 7
 columns = 2
 
-[node name="DisplayModeOption" parent="Ticket/OptionGrid" instance=ExtResource("6_selector")]
+[node name="DisplayModeOption" parent="Ticket/OptionGrid" unique_id=354321011 instance=ExtResource("6_selector")]
 unique_name_in_owner = true
+layout_mode = 2
 option_label = "Display"
 
-[node name="ResolutionOption" parent="Ticket/OptionGrid" instance=ExtResource("6_selector")]
+[node name="ResolutionOption" parent="Ticket/OptionGrid" unique_id=1273984289 instance=ExtResource("6_selector")]
 unique_name_in_owner = true
+layout_mode = 2
 option_label = "Resolution"
 
-[node name="VsyncOption" parent="Ticket/OptionGrid" instance=ExtResource("6_selector")]
+[node name="VsyncOption" parent="Ticket/OptionGrid" unique_id=1307087419 instance=ExtResource("6_selector")]
 unique_name_in_owner = true
+layout_mode = 2
 option_label = "VSync"
 
-[node name="MasterVolumeOption" parent="Ticket/OptionGrid" instance=ExtResource("6_selector")]
+[node name="MasterVolumeOption" parent="Ticket/OptionGrid" unique_id=203468228 instance=ExtResource("6_selector")]
 unique_name_in_owner = true
+layout_mode = 2
 option_label = "Master"
 uses_slider = true
 
-[node name="SfxVolumeOption" parent="Ticket/OptionGrid" instance=ExtResource("6_selector")]
+[node name="SfxVolumeOption" parent="Ticket/OptionGrid" unique_id=548203374 instance=ExtResource("6_selector")]
 unique_name_in_owner = true
+layout_mode = 2
 option_label = "SFX"
 uses_slider = true
 
-[node name="MusicVolumeOption" parent="Ticket/OptionGrid" instance=ExtResource("6_selector")]
+[node name="MusicVolumeOption" parent="Ticket/OptionGrid" unique_id=1313044217 instance=ExtResource("6_selector")]
 unique_name_in_owner = true
+layout_mode = 2
 option_label = "Music"
 uses_slider = true
 
-[node name="AnnouncementVolumeOption" parent="Ticket/OptionGrid" instance=ExtResource("6_selector")]
+[node name="AnnouncementVolumeOption" parent="Ticket/OptionGrid" unique_id=1516746708 instance=ExtResource("6_selector")]
 unique_name_in_owner = true
+layout_mode = 2
 option_label = "Announcement"
 uses_slider = true
 
-[node name="AmbienceVolumeOption" parent="Ticket/OptionGrid" instance=ExtResource("6_selector")]
+[node name="AmbienceVolumeOption" parent="Ticket/OptionGrid" unique_id=294858102 instance=ExtResource("6_selector")]
 unique_name_in_owner = true
+layout_mode = 2
 option_label = "Ambience"
 uses_slider = true
 
-[node name="Actions" type="HBoxContainer" parent="Ticket"]
+[node name="Actions" type="HBoxContainer" parent="Ticket" unique_id=356072082]
 layout_mode = 0
 offset_left = 435.0
 offset_top = 344.0
@@ -184,37 +202,37 @@ theme_override_styles/focus = SubResource("ActionButtonStyle")
 text = "Resume"
 script = ExtResource("8_hover")
 
-[node name="RestartButton" type="Button" parent="Ticket/Actions"]
+[node name="RestartButton" type="Button" parent="Ticket/Actions" unique_id=2123995975]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(163, 39)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.937255, 0.788235, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("ActionButtonStyle")
-theme_override_styles/hover = SubResource("ActionButtonStyle")
 theme_override_styles/pressed = SubResource("ActionButtonStyle")
+theme_override_styles/hover = SubResource("ActionButtonStyle")
 theme_override_styles/focus = SubResource("ActionButtonStyle")
 text = "Restart shift"
 script = ExtResource("8_hover")
 
-[node name="MainMenuButton" type="Button" parent="Ticket/Actions"]
+[node name="MainMenuButton" type="Button" parent="Ticket/Actions" unique_id=762932059]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(163, 39)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.937255, 0.788235, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("ActionButtonStyle")
-theme_override_styles/hover = SubResource("ActionButtonStyle")
 theme_override_styles/pressed = SubResource("ActionButtonStyle")
+theme_override_styles/hover = SubResource("ActionButtonStyle")
 theme_override_styles/focus = SubResource("ActionButtonStyle")
 text = "Main menu"
 script = ExtResource("8_hover")
 
-[node name="ServiceInfo" type="VBoxContainer" parent="Ticket"]
+[node name="ServiceInfo" type="VBoxContainer" parent="Ticket" unique_id=1685433136]
 layout_mode = 0
 offset_left = 967.0
 offset_top = 339.0
@@ -223,7 +241,7 @@ offset_bottom = 390.0
 theme_override_constants/separation = -2
 alignment = 1
 
-[node name="TrainNumber" type="Label" parent="Ticket/ServiceInfo"]
+[node name="TrainNumber" type="Label" parent="Ticket/ServiceInfo" unique_id=1943752714]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
@@ -231,7 +249,7 @@ theme_override_font_sizes/font_size = 14
 text = "Train 505"
 horizontal_alignment = 2
 
-[node name="ServiceDate" type="Label" parent="Ticket/ServiceInfo"]
+[node name="ServiceDate" type="Label" parent="Ticket/ServiceInfo" unique_id=111696672]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)

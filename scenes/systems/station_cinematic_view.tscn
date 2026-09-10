@@ -9,6 +9,7 @@ unique_name_in_owner = true
 editor_description = "Station arrival shot. The camera zoom matches the centered 1920x1080 station art at its reduced 70% world scale."
 script = ExtResource("1_view")
 return_duration = 1.1
+departure_follow_duration = 1.35
 station_fade_start_progress = 0.08
 station_fade_end_progress = 0.82
 

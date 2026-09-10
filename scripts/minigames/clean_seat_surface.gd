@@ -59,6 +59,7 @@ func _ready() -> void:
 
 
 func reset_cleaning() -> void:
+	GameSFX.stop_loop(&"clean_seat_wipe")
 	_completed = false
 	_wiping = false
 	if _mask_image != null:
@@ -77,6 +78,7 @@ func reset_cleaning() -> void:
 
 func cancel_wipe() -> void:
 	_wiping = false
+	GameSFX.stop_loop(&"clean_seat_wipe")
 	if is_instance_valid(_cloth):
 		_cloth.hide()
 	_set_foam(Vector2.ZERO, false)
@@ -98,6 +100,10 @@ func _gui_input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		_wiping = event.pressed
+		if _wiping:
+			GameSFX.start_loop(&"clean_seat_wipe", &"wipe", -13.0, 1.0)
+		else:
+			GameSFX.stop_loop(&"clean_seat_wipe")
 		_last_wipe_position = event.position
 		_update_cloth(event.position, event.pressed)
 		if event.pressed:
@@ -163,6 +169,8 @@ func _paint_segment(from: Vector2, to: Vector2) -> void:
 func _complete_cleaning() -> void:
 	_completed = true
 	_wiping = false
+	GameSFX.stop_loop(&"clean_seat_wipe")
+	GameSFX.play(&"success", -5.0, 1.05, 0.02, 0.2)
 	# Completion is visually authoritative: no shader fringe may remain while the
 	# UI reports 100%. The stricter threshold still requires nearly every stain
 	# sample to be wiped before this final mask fill occurs.
@@ -173,6 +181,10 @@ func _complete_cleaning() -> void:
 		_cloth.hide()
 	_set_foam(Vector2.ZERO, false)
 	cleaned.emit()
+
+
+func _exit_tree() -> void:
+	GameSFX.stop_loop(&"clean_seat_wipe")
 
 
 func _paint_circle(local_center: Vector2) -> void:

@@ -29,6 +29,10 @@ var ticket_service_date: String = ""
 var ticket_day_code: String = ""
 var ticket_issue_type: StringName = TICKET_ISSUE_NONE
 var required_dropoff_station: String = ""
+## A station stamp is permanent for the lifetime of this generated passenger.
+## The local ticket position lets the ink mark reappear exactly where it was dropped.
+var stamped_station: String = ""
+var stamp_ticket_position: Vector2 = Vector2.ZERO
 var is_dead: bool = false
 var anomaly_type: String = "none"
 var current_carriage: int = 1

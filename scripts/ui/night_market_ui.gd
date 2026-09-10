@@ -201,7 +201,11 @@ func set_snapshot(snapshot: Dictionary) -> void:
 			_set_item_highlight(index, false)
 
 
-func show_purchase_result(_result: Dictionary, snapshot: Dictionary) -> void:
+func show_purchase_result(result: Dictionary, snapshot: Dictionary) -> void:
+	if bool(result.get("success", false)):
+		GameSFX.play(&"success", -5.0, 1.08, 0.02, 0.16)
+	else:
+		GameSFX.play(&"ui_error", -7.0, 0.92, 0.02, 0.16)
 	set_snapshot(snapshot)
 	_focus_first_available_action()
 
@@ -323,6 +327,7 @@ func _play_entrance_animation() -> void:
 
 	# The merchant and merchandise are deliberately absent until the gate has
 	# cleared the opening. The angel leads, then the shelves arrive in a stagger.
+	GameSFX.play(&"magic_shimmer", -7.0, 1.0, 0.025, 0.3)
 	_market_tween = create_tween().set_parallel(true)
 	_market_tween.tween_property(_header_root, ^"position:y", 0.0, entrance_duration * 0.78).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).set_delay(0.12)
 	_market_tween.tween_property(_header_root, ^"modulate:a", 1.0, entrance_duration * 0.55).set_delay(0.12)
@@ -368,6 +373,7 @@ func _raise_entrance_fog() -> void:
 
 
 func _open_gate_and_release_entrance_fog() -> void:
+	GameSFX.play(&"mechanical_door", -7.0, 1.04, 0.02, 0.3)
 	_market_tween = create_tween().set_parallel(true)
 	_market_tween.tween_property(_left_door, ^"position", _left_door_open_position, gate_open_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	_market_tween.tween_property(_right_door, ^"position", _right_door_open_position, gate_open_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
@@ -418,6 +424,7 @@ func _play_exit_animation() -> void:
 
 
 func _close_gate() -> void:
+	GameSFX.play(&"mechanical_door", -6.0, 0.9, 0.02, 0.3)
 	_market_tween = create_tween().set_parallel(true)
 	_market_tween.tween_property(_left_door, ^"position:x", LEFT_DOOR_CLOSED_X, gate_close_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN_OUT)
 	_market_tween.tween_property(_right_door, ^"position:x", RIGHT_DOOR_CLOSED_X, gate_close_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN_OUT)

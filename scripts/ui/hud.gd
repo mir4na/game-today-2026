@@ -21,6 +21,18 @@ signal debug_night_requested
 @export_range(0.01, 0.2, 0.01) var clock_symbol_edge_scale: float = 0.04
 @export_range(1.0, 1.2, 0.01) var clock_symbol_edge_bulge: float = 1.07
 @export_range(0.0, 8.0, 0.1) var clock_symbol_spin_tilt_degrees: float = 2.2
+@export_category("Journey Clock Hover")
+@export_range(40.0, 180.0, 1.0) var clock_hover_lift_pixels: float = 115.0
+@export_range(0.1, 0.8, 0.01) var clock_hover_in_duration: float = 0.3
+@export_range(0.1, 0.8, 0.01) var clock_hover_out_duration: float = 0.24
+@export_range(0.8, 1.0, 0.01) var clock_sign_hidden_y_scale: float = 0.92
+@export_category("Route Briefing")
+@export_range(1.0, 8.0, 0.25) var route_briefing_hold_seconds: float = 3.0
+@export_range(-16.0, 0.0, 1.0) var route_briefing_attached_y: float = -8.0
+@export_range(0.0, 16.0, 1.0) var route_briefing_overshoot_pixels: float = 8.0
+@export_range(0.1, 1.0, 0.01) var route_briefing_in_duration: float = 0.48
+@export_range(0.05, 0.4, 0.01) var route_briefing_settle_duration: float = 0.14
+@export_range(0.1, 1.0, 0.01) var route_briefing_out_duration: float = 0.32
 @export_category("Interaction Prompt")
 @export var prompt_screen_offset: Vector2 = Vector2.ZERO
 @export var prompt_edge_margin: Vector2 = Vector2(24.0, 20.0)
@@ -43,11 +55,12 @@ signal debug_night_requested
 @onready var _minimap: TrainMinimap = %TrainMinimap
 @onready var _clock_panel: Control = %ClockPanel
 @onready var _clock_sign_assembly: Control = $Root/ClockPanel/ClockSignAssembly
-@onready var _clock_briefing_animation: AnimationPlayer = %ClockBriefingAnimation
+@onready var _clock_hover_area: Control = %ClockHoverArea
 @onready var _clock_fill: TextureRect = %ClockFilled
 @onready var _clock_pointer_pivot: Control = %ClockNeedlePivot
-@onready var _next_stop_title: Label = %NextStopTitle
 @onready var _next_stop_label: Label = %NextStopLabel
+@onready var _route_briefing_banner: Control = %RouteBriefingBanner
+@onready var _briefing_next_stop_label: Label = %BriefingNextStopLabel
 @onready var _clock_symbol_pivot: Control = %ClockSymbolPivot
 @onready var _day_symbol: TextureRect = %DaySymbol
 @onready var _night_symbol: TextureRect = %NightSymbol
@@ -77,8 +90,16 @@ var _prompt_reveal_scale: float = 1.0
 var _clock_is_night: bool = false
 var _clock_symbol_tween: Tween
 var _clock_progress_tween: Tween
+var _clock_hover_tween: Tween
+var _route_briefing_tween: Tween
 var _clock_progress: float = 0.0
 var _clock_target_progress: float = -1.0
+var _clock_rest_offset_top: float
+var _clock_rest_offset_bottom: float
+var _clock_sign_rest_scale: Vector2
+var _route_banner_hidden_position: Vector2
+var _route_banner_attached_position: Vector2
+var _route_banner_rest_scale: Vector2
 var _service_sealed: bool = false
 var _radar_active: bool = false
 var _swiftstep_active: bool = false
@@ -86,7 +107,28 @@ var _swiftstep_active: bool = false
 const CLOCK_FILL_ARC_DEGREES: float = 180.0
 
 func _ready() -> void:
-	_clock_sign_assembly.hide()
+	_clock_sign_assembly.show()
+	_clock_rest_offset_top = _clock_panel.offset_top
+	_clock_rest_offset_bottom = _clock_panel.offset_bottom
+	_clock_sign_rest_scale = _clock_sign_assembly.scale
+	_clock_sign_assembly.scale = Vector2(
+		_clock_sign_rest_scale.x,
+		_clock_sign_rest_scale.y * clock_sign_hidden_y_scale
+	)
+	_route_banner_hidden_position = _route_briefing_banner.position
+	_route_banner_attached_position = Vector2(
+		_route_banner_hidden_position.x,
+		route_briefing_attached_y
+	)
+	_route_banner_rest_scale = _route_briefing_banner.scale
+	_clock_hover_area.mouse_entered.connect(_on_clock_hover_entered)
+	_clock_hover_area.mouse_exited.connect(_on_clock_hover_exited)
+	# Keep the clock lifted while the pointer crosses onto the attached button.
+	# As a later ClockPanel sibling, the button also receives clicks ahead of the
+	# broad hover catcher instead of being occluded by it.
+	_debug_next_station_button.mouse_entered.connect(_on_clock_hover_entered)
+	_debug_next_station_button.mouse_exited.connect(_on_clock_hover_exited)
+	_route_briefing_banner.hide()
 	_debug_next_station_button.visible = false
 	set_swiftstep_active(false)
 
@@ -119,6 +161,7 @@ func set_clock_progress(value: float, animate: bool = false) -> void:
 	if is_instance_valid(_clock_progress_tween) and _clock_progress_tween.is_valid():
 		_clock_progress_tween.kill()
 	if animate and is_inside_tree():
+		GameSFX.play(&"clock_ticking", -13.0, 1.0, 0.02, 0.15)
 		_clock_progress_tween = create_tween()
 		_clock_progress_tween.tween_method(
 			_apply_clock_progress,
@@ -149,7 +192,9 @@ func _apply_clock_progress(progress: float) -> void:
 
 func set_next_stop(station_name: String) -> void:
 	var destination: String = station_name.strip_edges().to_upper()
-	_next_stop_label.text = destination if not destination.is_empty() else "—"
+	var display_name: String = destination if not destination.is_empty() else "—"
+	_next_stop_label.text = display_name
+	_briefing_next_stop_label.text = display_name
 
 
 func set_clock_night_mode(is_night: bool, animate: bool = true) -> void:
@@ -166,6 +211,7 @@ func set_clock_night_mode(is_night: bool, animate: bool = true) -> void:
 	if not animate or not is_inside_tree():
 		_show_clock_symbol(is_night)
 		return
+	GameSFX.play(&"coin_flip", -6.0, 1.0, 0.015, 0.2)
 	# Seven horizontal coin turns create an explicit slow -> fast -> slow rhythm.
 	# The face changes only at the thinnest point of the fastest center turn, so
 	# the day/night swap is concealed by the edge of the spinning medallion.
@@ -210,8 +256,6 @@ func set_clock_night_mode(is_night: bool, animate: bool = true) -> void:
 func _show_clock_symbol(is_night: bool) -> void:
 	_day_symbol.visible = not is_night
 	_night_symbol.visible = is_night
-	_next_stop_title.visible = not is_night
-	_next_stop_label.visible = not is_night
 
 func set_current_carriage_number(carriage_number: int) -> void:
 	_minimap.set_current_carriage_number(carriage_number)
@@ -440,8 +484,8 @@ func set_day_hud_visible(value: bool) -> void:
 	_guidebook_button.tooltip_text = "Open guidebook"
 	_debug_night_button.visible = OS.is_debug_build() and value
 	if not value:
-		_clock_briefing_animation.stop()
-		_clock_sign_assembly.hide()
+		_reset_clock_hover(true)
+		_hide_route_briefing(true)
 	_tool_status_label.visible = value
 	_market_item_bar.visible = value
 	_floating_prompt.visible = value and not _prompt_label.text.is_empty()
@@ -454,11 +498,13 @@ func set_debug_next_station_available(value: bool) -> void:
 
 func show_route_briefing() -> void:
 	_clock_panel.show()
-	_clock_briefing_animation.stop()
-	_clock_briefing_animation.play(&"route_briefing")
+	_play_route_briefing()
 
 func set_cutscene_hidden(value: bool) -> void:
 	_root.visible = not value
+	if value:
+		_reset_clock_hover(true)
+		_hide_route_briefing(true)
 
 
 func set_radar_active(value: bool) -> void:
@@ -510,14 +556,148 @@ func _on_debug_next_station_button_pressed() -> void:
 		debug_next_station_requested.emit()
 
 func set_night_walk_mode() -> void:
-	_clock_briefing_animation.stop()
-	_clock_sign_assembly.hide()
 	_clock_panel.show()
 	_debug_night_button.hide()
 	_guidebook_button.tooltip_text = "Open Night Ledger"
 	_tool_status_label.visible = true
 	_market_item_bar.visible = true
 	_floating_prompt.visible = not _prompt_label.text.is_empty()
+
+
+func _on_clock_hover_entered() -> void:
+	_tween_clock_to(true)
+
+
+func _on_clock_hover_exited() -> void:
+	_tween_clock_to(false)
+
+
+func _tween_clock_to(revealing: bool) -> void:
+	if is_instance_valid(_clock_hover_tween) and _clock_hover_tween.is_valid():
+		_clock_hover_tween.kill()
+	_clock_hover_tween = create_tween()
+	var duration: float = clock_hover_in_duration if revealing else clock_hover_out_duration
+	var lift: float = clock_hover_lift_pixels if revealing else 0.0
+	var sign_scale: Vector2 = _clock_sign_rest_scale if revealing else Vector2(
+		_clock_sign_rest_scale.x,
+		_clock_sign_rest_scale.y * clock_sign_hidden_y_scale
+	)
+	_clock_hover_tween.tween_property(
+		_clock_panel,
+		^"offset_top",
+		_clock_rest_offset_top - lift,
+		duration
+	).set_trans(
+		Tween.TRANS_BACK if revealing else Tween.TRANS_QUAD
+	).set_ease(Tween.EASE_OUT)
+	_clock_hover_tween.parallel().tween_property(
+		_clock_sign_assembly,
+		^"scale",
+		sign_scale,
+		duration
+	).set_trans(
+		Tween.TRANS_BACK if revealing else Tween.TRANS_QUAD
+	).set_ease(Tween.EASE_OUT)
+	_clock_hover_tween.parallel().tween_property(
+		_clock_panel,
+		^"offset_bottom",
+		_clock_rest_offset_bottom - lift,
+		duration
+	).set_trans(
+		Tween.TRANS_BACK if revealing else Tween.TRANS_QUAD
+	).set_ease(Tween.EASE_OUT)
+
+
+func _reset_clock_hover(immediate: bool) -> void:
+	if is_instance_valid(_clock_hover_tween) and _clock_hover_tween.is_valid():
+		_clock_hover_tween.kill()
+	_clock_hover_tween = null
+	if immediate:
+		_clock_panel.offset_top = _clock_rest_offset_top
+		_clock_panel.offset_bottom = _clock_rest_offset_bottom
+		_clock_sign_assembly.scale = Vector2(
+			_clock_sign_rest_scale.x,
+			_clock_sign_rest_scale.y * clock_sign_hidden_y_scale
+		)
+	else:
+		_tween_clock_to(false)
+
+
+func _play_route_briefing() -> void:
+	if is_instance_valid(_route_briefing_tween) and _route_briefing_tween.is_valid():
+		_route_briefing_tween.kill()
+	_route_briefing_banner.position = _route_banner_hidden_position
+	_route_briefing_banner.scale = Vector2(
+		_route_banner_rest_scale.x * 0.98,
+		_route_banner_rest_scale.y * 0.94
+	)
+	_route_briefing_banner.modulate.a = 0.25
+	_route_briefing_banner.show()
+	var overshoot_position: Vector2 = _route_banner_attached_position + Vector2(
+		0.0,
+		route_briefing_overshoot_pixels
+	)
+	_route_briefing_tween = create_tween()
+	_route_briefing_tween.tween_property(
+		_route_briefing_banner,
+		^"position",
+		overshoot_position,
+		route_briefing_in_duration
+	).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+	_route_briefing_tween.parallel().tween_property(
+		_route_briefing_banner,
+		^"scale",
+		Vector2(_route_banner_rest_scale.x, _route_banner_rest_scale.y * 1.025),
+		route_briefing_in_duration
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_route_briefing_tween.parallel().tween_property(
+		_route_briefing_banner,
+		^"modulate:a",
+		1.0,
+		minf(route_briefing_in_duration, 0.18)
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_route_briefing_tween.tween_property(
+		_route_briefing_banner,
+		^"position",
+		_route_banner_attached_position,
+		route_briefing_settle_duration
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_route_briefing_tween.parallel().tween_property(
+		_route_briefing_banner,
+		^"scale",
+		_route_banner_rest_scale,
+		route_briefing_settle_duration
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_route_briefing_tween.tween_interval(route_briefing_hold_seconds)
+	_route_briefing_tween.tween_property(
+		_route_briefing_banner,
+		^"position",
+		_route_banner_hidden_position,
+		route_briefing_out_duration
+	).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_IN)
+	_route_briefing_tween.parallel().tween_property(
+		_route_briefing_banner,
+		^"modulate:a",
+		0.0,
+		route_briefing_out_duration
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	_route_briefing_tween.tween_callback(_finish_route_briefing)
+
+
+func _finish_route_briefing() -> void:
+	_route_briefing_banner.hide()
+	_route_briefing_banner.position = _route_banner_hidden_position
+	_route_briefing_banner.scale = _route_banner_rest_scale
+	_route_briefing_banner.modulate.a = 1.0
+	_route_briefing_tween = null
+
+
+func _hide_route_briefing(immediate: bool) -> void:
+	if is_instance_valid(_route_briefing_tween) and _route_briefing_tween.is_valid():
+		_route_briefing_tween.kill()
+	_route_briefing_tween = null
+	if immediate:
+		_finish_route_briefing()
 
 func notify(message: String, seconds: float = 3.0) -> void:
 	if is_instance_valid(_notification_tween):

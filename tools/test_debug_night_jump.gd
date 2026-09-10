@@ -66,7 +66,45 @@ func _run() -> void:
 	_check(game._night_transition_ui.visible, "The terminal-to-night transition UI must play after the paycheck.")
 	_check(not game._debug_day_pass_override, "The debug pass override must clear once the transition begins.")
 
+	var transition := game._night_transition_ui as NightTransitionCutsceneUI
+	_check(transition.get_node_or_null("NightTitle") == null, "The veil transition must not show a Night Service title.")
+	_check(transition.get_node_or_null("VeilSymbol") == null, "The veil transition must not show the old diamond logo.")
+	_check(
+		transition.station_fade_end_time <= transition.departure_start_time + 3.0,
+		"The terminal station must clear before fog starts three seconds after departure."
+	)
+	var transition_animation := transition.get_node("%TransitionAnimation") as AnimationPlayer
+	transition_animation.seek(transition.departure_start_time + 3.0 - 0.01, true)
+	_check(
+		(transition.get_node("FogBack") as ColorRect).self_modulate.a < 0.01
+		and (transition.get_node("FogFront") as ColorRect).self_modulate.a < 0.01,
+		"Fog must remain absent during the first three seconds of train departure."
+	)
+	transition_animation.seek(transition.departure_start_time + 3.5, true)
+	_check(
+		(transition.get_node("FogBack") as ColorRect).self_modulate.a > 0.05
+		and (transition.get_node("FogFront") as ColorRect).self_modulate.a > 0.05,
+		"Both fog layers must arrive after the train has left the station."
+	)
+
+	transition._process(transition.departure_follow_time + 0.01)
+	_check(game._station_cinematic_view._departure_following, "The wide camera must begin following the departing train before the veil appears.")
+	var wide_zoom: Vector2 = game._station_cinematic_view._station_camera.zoom
+	game._station_cinematic_view._update_departure_follow(1.0)
+	_check(
+		game._station_cinematic_view._station_camera.zoom.is_equal_approx(wide_zoom),
+		"Following the departing train must preserve the station shot's wide zoom."
+	)
+	transition._process(transition.camera_return_time - transition._elapsed + 0.01)
+	_check(game._station_cinematic_view._returning, "The camera must begin its player return only after the fog clears.")
+	_check(
+		game._station_cinematic_view._return_start_center.distance_to(
+			game._station_cinematic_view._handoff_target_position()
+		) < 1.0,
+		"The final player zoom must begin from the already-following camera position without a spatial jump."
+	)
+
 	game.free()
 	if _failures == 0:
-		print("PASS: terminal Night Shift preview, forced paycheck pass, and scroll exclusion.")
+		print("PASS: terminal Night Shift preview, delayed veil, seamless camera handoff, forced paycheck pass, and scroll exclusion.")
 	quit(1 if _failures > 0 else 0)

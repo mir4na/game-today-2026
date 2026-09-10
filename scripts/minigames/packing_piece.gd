@@ -84,6 +84,7 @@ func set_grabbed_feedback(value: bool) -> void:
 func play_valid_drop() -> void:
 	if not is_instance_valid(_artwork):
 		return
+	GameSFX.play(&"grab", -12.0, 0.76, 0.035, 0.04)
 	_kill_feedback_tween()
 	_feedback_tween = create_tween()
 	_feedback_tween.tween_property(_artwork, ^"scale", Vector2(1.1, 0.9), 0.07).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
@@ -96,6 +97,7 @@ func play_valid_drop() -> void:
 func play_invalid_drop() -> void:
 	if not is_instance_valid(_artwork):
 		return
+	GameSFX.play(&"ui_error", -8.0, 0.92, 0.025, 0.08)
 	_kill_feedback_tween()
 	_feedback_tween = create_tween()
 	_feedback_tween.tween_property(_artwork, ^"scale", Vector2(0.94, 1.06), 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
@@ -164,6 +166,7 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			_dragging = true
+			GameSFX.play(&"grab", -9.0, 1.03, 0.04, 0.05)
 			_grab_offset = event.position
 			set_grabbed_feedback(true)
 			grabbed.emit(self, _grab_offset)

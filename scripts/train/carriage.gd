@@ -16,7 +16,6 @@ const NIGHT_WINDOW_LIGHT := Color("3aa2e9")
 @export_node_path("Node2D") var passenger_door_slots_path: NodePath
 @export_category("Scene Visuals")
 @export_node_path("Node2D") var sway_root_path: NodePath
-@export_node_path("CanvasItem") var night_overlay_path: NodePath
 @export_node_path("CanvasItem") var window_light_root_path: NodePath
 @export_node_path("Node2D") var exterior_visual_path: NodePath
 @export_node_path("Node2D") var exterior_door_visual_path: NodePath
@@ -57,7 +56,6 @@ const NIGHT_WINDOW_LIGHT := Color("3aa2e9")
 @export var wheel_spin_animation: StringName = &"wheel_spin"
 
 @onready var _sway_root: Node2D = _get_optional_node(sway_root_path) as Node2D
-@onready var _night_overlay: CanvasItem = _get_optional_node(night_overlay_path) as CanvasItem
 @onready var _window_light_root: CanvasItem = _get_optional_node(window_light_root_path) as CanvasItem
 @onready var _exterior_visual: Node2D = _get_optional_node(exterior_visual_path) as Node2D
 @onready var _exterior_door_visual: Node2D = _get_optional_node(exterior_door_visual_path) as Node2D
@@ -143,9 +141,7 @@ func _set_blocked_grayscale_strength(value: float) -> void:
 		if is_instance_valid(grayscale_material):
 			grayscale_material.set_shader_parameter(&"grayscale_strength", _blocked_grayscale_strength)
 
-func set_environment(_scroll: float, night_strength: float, day_cycle_progress: float, sway_time: float) -> void:
-	if is_instance_valid(_night_overlay):
-		_night_overlay.modulate.a = clampf(night_strength, 0.0, 1.0)
+func set_environment(_scroll: float, _night_strength: float, day_cycle_progress: float, sway_time: float) -> void:
 	if is_instance_valid(_window_light_root):
 		var sunset_blend: float = smoothstep(0.08, 0.62, day_cycle_progress)
 		var night_blend: float = smoothstep(0.70, 0.98, day_cycle_progress)
@@ -495,6 +491,7 @@ func _play_door_animation(animation_name: StringName) -> void:
 	if not _door_animation.has_animation(animation_name):
 		push_warning("Missing carriage door animation: %s" % animation_name)
 		return
+	GameSFX.play(&"mechanical_door", -11.0, 1.0, 0.035, 0.2)
 	_door_animation.play(animation_name)
 
 func _fade_cinematic_interior_shade(target_alpha: float) -> void:

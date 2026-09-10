@@ -64,6 +64,7 @@ var _dead_twitch_rotation: float = 0.0
 var _escaping_navigation_blocker: bool = false
 var _settling_for_night: bool = false
 var _world_time_scale: float = 1.0
+var _footstep_timer: float = 0.0
 
 const PASSENGER_WALK_SPEED: float = 92.0
 
@@ -113,7 +114,17 @@ func _process(delta: float) -> void:
 		_ensure_safe_idle_position()
 		_update_day_ai(world_delta)
 	_animation_move_speed = position.distance_to(previous_position) / delta if delta > 0.0 else 0.0
+	_update_footsteps(world_delta)
 	_update_visual()
+
+
+func _update_footsteps(delta: float) -> void:
+	_footstep_timer = maxf(0.0, _footstep_timer - delta)
+	if _animation_move_speed < walk_animation_threshold or departed or not visible:
+		return
+	if _footstep_timer <= 0.0:
+		GameSFX.play(&"footstep", -23.0, 0.88, 0.08, 0.07)
+		_footstep_timer = _rng.randf_range(0.55, 0.72)
 
 func interact() -> void:
 	if data == null or departed:

@@ -43,6 +43,10 @@ func _run() -> void:
 	var menu := load("res://scenes/menu/main_menu.tscn").instantiate() as MainMenu
 	root.add_child(menu)
 	await process_frame
+	assert(
+		menu.get_node("BloomOverlay").get_index() < menu.get_node("UI").get_index(),
+		"Menu bloom must render before every menu and settings UI element."
+	)
 	var menu_train_sfx := menu.get_node("%TrainSfx") as AudioStreamPlayer
 	assert(menu_train_sfx.stream is AudioStreamOggVorbis and (menu_train_sfx.stream as AudioStreamOggVorbis).loop, "Main menu must loop the authored in-game train SFX.")
 	assert(menu_train_sfx.bus == &"SFX" and menu_train_sfx.volume_db <= -20.0, "Main-menu train SFX must stay quietly routed through the SFX bus.")
@@ -56,5 +60,14 @@ func _run() -> void:
 	assert((menu_settings.get_node("%MainMenuButton") as Button).text == "Back", "The shared action must become Back in main-menu settings mode.")
 	menu_settings.resume_requested.emit()
 	assert(not menu_settings.visible, "Closing shared settings must return to the main menu.")
+	var gameplay := load("res://scenes/main/main.tscn").instantiate() as AfterTheEndGame
+	var bloom_layer := gameplay.get_node("BloomLayer") as CanvasLayer
+	var hud_layer := gameplay.get_node("HUD") as CanvasLayer
+	var modal_layer := gameplay.get_node("ModalLayer") as CanvasLayer
+	var pause_layer := gameplay.get_node("PauseLayer") as CanvasLayer
+	assert(bloom_layer.layer < hud_layer.layer, "Gameplay bloom must render below the HUD.")
+	assert(bloom_layer.layer < modal_layer.layer, "Gameplay bloom must render below all modal UI.")
+	assert(bloom_layer.layer < pause_layer.layer, "Gameplay bloom must render below PauseUI.")
+	gameplay.free()
 	print("Pause menu runtime test passed.")
 	quit()

@@ -89,8 +89,8 @@ func _run() -> void:
 	var award: Dictionary = game._night_blessing_award
 	_check(int(award.get("failed_attempts", -1)) == 1, "Only failed attempts may reduce the reward.")
 	_check(
-		int(award.get("base_reward", -1)) == puzzle.get_assignment_count() * 20,
-		"Every correctly released soul must contribute the configured night reward."
+		int(award.get("base_reward", -1)) == puzzle.get_assignment_count() * 50,
+		"Every correctly released soul must contribute 50 Blessings."
 	)
 	_check(int(award.get("attempt_deduction", -1)) == 10, "One rejected attempt must deduct the configured 10 Blessings.")
 	_check(
@@ -102,6 +102,16 @@ func _run() -> void:
 		(game._shift_report_ui.get_node("%WrongCaption") as Label).text == "FAILED ATTEMPTS",
 		"The night paycheck must display the attempt deduction breakdown."
 	)
+	_check(
+		(game._shift_report_ui.get_node("%Title") as Label).text == "PAYCHECK",
+		"The night paycheck title must not repeat the word 'Night'."
+	)
+	var floor_test := MarketToolState.new()
+	floor_test.blessings_per_correct_night_dropoff = 50
+	floor_test.blessings_per_failed_night_attempt = 10
+	var floor_award: Dictionary = floor_test.award_night_blessings(3, 16)
+	_check(int(floor_award.get("base_reward", -1)) == 150, "Three released souls must be worth 150 Blessings.")
+	_check(int(floor_award.get("earned", -1)) == 0, "Night reward must never fall below zero after many failed attempts.")
 
 	game.free()
 	if _failures == 0:

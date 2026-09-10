@@ -51,6 +51,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/veil_note_reveal_ui.tscn" id="48_veil_note_reveal"]
 [ext_resource type="PackedScene" path="res://scenes/interactables/night_ledger_guardian.tscn" id="49_night_guardian"]
 [ext_resource type="PackedScene" path="res://scenes/ui/service_signature_ui.tscn" id="50_signature_ui"]
+[ext_resource type="Material" path="res://resources/materials/screen_bloom.tres" id="47_screen_bloom"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hint.tscn" id="51_hint_ui"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_day_cycle_sky"]
 shader = ExtResource("39")
@@ -208,12 +210,11 @@ passenger_identity_profiles = Array[ExtResource("2_08tbl")]([ExtResource("11"), 
 puzzle_resource = ExtResource("17")
 passenger_scene = ExtResource("34")
 manifest_config = ExtResource("37")
-maintenance_minigame_unlock_day = 1
 day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere")
 station_travel_durations_seconds = PackedFloat32Array(120, 120, 120, 120)
 maintenance_event_clearance = 14.0
 debug_print_anomaly_roster = true
-night_shift_instruction = "Night shift
+night_shift_instruction = "Night shift · 03:00
 Read each soul's record, then consult the watcher"
 
 [node name="MarketToolState" parent="." unique_id=1541596097 instance=ExtResource("40_market_state")]
@@ -407,6 +408,22 @@ expand_mode = 1
 unique_name_in_owner = true
 world_lighting_path = NodePath("../GameplayWorld/WorldLighting")
 
+[node name="BloomLayer" type="CanvasLayer" parent="."]
+editor_description = "Subtle highlight bloom for the rendered world. It sits below the HUD and modal layers so interface text stays crisp."
+layer = 9
+
+[node name="RefreshScreenTexture" type="BackBufferCopy" parent="BloomLayer"]
+copy_mode = 2
+
+[node name="Bloom" type="ColorRect" parent="BloomLayer"]
+material = ExtResource("47_screen_bloom")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
 [node name="HUD" parent="." unique_id=1053587110 instance=ExtResource("4")]
 unique_name_in_owner = true
 
@@ -447,13 +464,19 @@ unique_name_in_owner = true
 [node name="VeilNoteRevealUI" parent="ModalLayer" unique_id=2131935263 instance=ExtResource("48_veil_note_reveal")]
 unique_name_in_owner = true
 
-[node name="PauseUI" parent="ModalLayer" unique_id=680489697 instance=ExtResource("10")]
-unique_name_in_owner = true
-
 [node name="BlockedAislePuzzleUI" parent="ModalLayer" unique_id=559761803 instance=ExtResource("38_blocked_ui")]
 unique_name_in_owner = true
 
 [node name="CleanSeatUI" parent="ModalLayer" unique_id=1148165085 instance=ExtResource("39_clean_ui")]
+unique_name_in_owner = true
+
+[node name="HintUI" parent="ModalLayer" instance=ExtResource("51_hint_ui")]
+unique_name_in_owner = true
+
+[node name="PauseLayer" type="CanvasLayer" parent="."]
+layer = 100
+
+[node name="PauseUI" parent="PauseLayer" unique_id=680489697 instance=ExtResource("10")]
 unique_name_in_owner = true
 
 [connection signal="inventory_changed" from="MarketToolState" to="." method="_on_market_inventory_changed"]
@@ -471,6 +494,7 @@ unique_name_in_owner = true
 [connection signal="guidebook_requested" from="HUD" to="." method="_on_guidebook_requested"]
 [connection signal="closed" from="ModalLayer/DocumentOverlayUI" to="." method="_on_modal_closed"]
 [connection signal="station_assignment_toggled" from="ModalLayer/DocumentOverlayUI" to="." method="_on_station_assignment_toggled"]
+[connection signal="station_stamp_applied" from="ModalLayer/DocumentOverlayUI" to="." method="_on_station_stamp_applied"]
 [connection signal="closed" from="ModalLayer/GuidebookUI" to="." method="_on_modal_closed"]
 [connection signal="intro_finished" from="ModalLayer/DayIntroUI" to="." method="_on_day_intro_finished"]
 [connection signal="boarding_actor_entered" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_boarding_actor_entered"]
@@ -482,6 +506,7 @@ unique_name_in_owner = true
 [connection signal="train_motion_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_train_motion_changed"]
 [connection signal="continue_requested" from="ModalLayer/ShiftReportUI" to="." method="_on_shift_report_continue"]
 [connection signal="camera_return_requested" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_camera_return_requested"]
+[connection signal="departure_follow_requested" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_departure_follow_requested"]
 [connection signal="sequence_finished" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_finished"]
 [connection signal="sequence_timeline_changed" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_timeline_changed"]
 [connection signal="veil_crossed" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_veil_crossed"]
@@ -498,13 +523,14 @@ unique_name_in_owner = true
 [connection signal="service_signed" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signed"]
 [connection signal="signature_rejected" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signature_rejected"]
 [connection signal="reveal_finished" from="ModalLayer/VeilNoteRevealUI" to="." method="_on_veil_note_reveal_finished"]
-[connection signal="main_menu_requested" from="ModalLayer/PauseUI" to="." method="_return_to_main_menu"]
-[connection signal="restart_requested" from="ModalLayer/PauseUI" to="." method="_restart_game"]
-[connection signal="resume_requested" from="ModalLayer/PauseUI" to="." method="_resume_from_pause"]
+[connection signal="main_menu_requested" from="PauseLayer/PauseUI" to="." method="_return_to_main_menu"]
+[connection signal="restart_requested" from="PauseLayer/PauseUI" to="." method="_restart_game"]
+[connection signal="resume_requested" from="PauseLayer/PauseUI" to="." method="_resume_from_pause"]
 [connection signal="closed" from="ModalLayer/BlockedAislePuzzleUI" to="." method="_on_maintenance_minigame_closed"]
 [connection signal="completed" from="ModalLayer/BlockedAislePuzzleUI" to="." method="_on_maintenance_minigame_completed"]
 [connection signal="closed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_closed"]
 [connection signal="completed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_completed"]
+[connection signal="dismissed" from="ModalLayer/HintUI" to="." method="_on_level_start_hint_dismissed"]
 
 [editable path="GameplayWorld/Train"]
 [editable path="GameplayWorld/Train/Cars/PassengerCoach4"]
