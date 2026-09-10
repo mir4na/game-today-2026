@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://bn7q3awivg60d"]
+[gd_scene format=3 uid="uid://bn7q3awivg60d"]
 
 [ext_resource type="Script" uid="uid://bdso461f0naxt" path="res://scripts/ui/night_soul_record_ui.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://quci1agnefcf" path="res://assets/NightShift/Group 139.png" id="2_paper"]
@@ -7,7 +7,8 @@
 [ext_resource type="FontFile" uid="uid://jysqo0nff08k" path="res://fonts/Josefin_Sans/static/JosefinSans-Medium.ttf" id="5_josefin"]
 [ext_resource type="PackedScene" path="res://scenes/ui/components/round_close_button.tscn" id="6_close"]
 [ext_resource type="Script" uid="uid://b1lbens1ur17i" path="res://scripts/ui/night_character_portrait.gd" id="8_portrait"]
-[ext_resource type="Shader" path="res://shaders/soul_record_feedback.gdshader" id="9_feedback"]
+[ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="8_powux"]
+[ext_resource type="Shader" uid="uid://dhr36m1btxopk" path="res://shaders/soul_record_feedback.gdshader" id="9_feedback"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_feedback"]
 resource_local_to_scene = true
@@ -25,7 +26,6 @@ border_color = Color(0.690196, 0.619608, 0.52549, 1)
 
 [node name="NightSoulRecordUI" type="Control" unique_id=1186159104]
 process_mode = 3
-visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -47,7 +47,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.027451, 0.0313726, 0.0431373, 0.3)
 
-[node name="ErrorFlash" type="ColorRect" parent="."]
+[node name="ErrorFlash" type="ColorRect" parent="." unique_id=962608765]
 unique_name_in_owner = true
 z_index = 1
 material = SubResource("ShaderMaterial_feedback")
@@ -58,21 +58,20 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(1, 1, 1, 1)
 
 [node name="RecordAnchor" type="Control" parent="." unique_id=410776374]
 unique_name_in_owner = true
-z_index = 2
 editor_description = "Scene-authored horizontal Soul Record. It remains offset to the right so the inspected NPC and player stay visible on the left."
+z_index = 2
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -790.0
+offset_left = -896.0
 offset_top = -280.0
-offset_right = -30.0
+offset_right = -136.0
 offset_bottom = 280.0
 grow_horizontal = 0
 grow_vertical = 2
@@ -154,6 +153,7 @@ offset_bottom = 182.0
 
 [node name="InstructionLabel" type="Label" parent="RecordAnchor" unique_id=270865808]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_left = 82.0
 offset_top = 187.0
@@ -171,9 +171,9 @@ autowrap_mode = 2
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 82.0
-offset_top = 230.0
+offset_top = 202.0
 offset_right = 678.0
-offset_bottom = 480.0
+offset_bottom = 483.0
 mouse_default_cursor_shape = 2
 theme_override_colors/default_color = Color(0.247059, 0.215686, 0.203922, 1)
 theme_override_constants/line_separation = 2
@@ -186,21 +186,21 @@ meta_underlined = false
 [node name="CloseHint" type="Label" parent="RecordAnchor" unique_id=1274251806]
 layout_mode = 0
 offset_left = 265.0
-offset_top = 520.0
+offset_top = 499.0
 offset_right = 495.0
-offset_bottom = 544.0
+offset_bottom = 523.0
 theme_override_colors/font_color = Color(0.356863, 0.294118, 0.270588, 1)
-theme_override_fonts/font = ExtResource("5_josefin")
+theme_override_fonts/font = ExtResource("8_powux")
 theme_override_font_sizes/font_size = 14
 text = "PRESS E TO CLOSE"
 horizontal_alignment = 1
 
 [node name="CloseButton" parent="RecordAnchor" unique_id=686631276 instance=ExtResource("6_close")]
 layout_mode = 0
-offset_left = 664.0
-offset_top = 36.0
-offset_right = 718.0
-offset_bottom = 90.0
+offset_left = 639.0
+offset_top = 56.0
+offset_right = 695.0
+offset_bottom = 112.0
 tooltip_text = "Close Soul Record [E]"
 
 [connection signal="pressed" from="RecordAnchor/CloseButton" to="." method="request_close"]

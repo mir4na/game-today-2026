@@ -106,6 +106,10 @@ func _run() -> void:
 				"Pin portraits must be clipped to the pin's circular head."
 			)
 			_check(
+				is_equal_approx(character_placeholder.size.x, character_placeholder.size.y),
+				"The station pin portrait frame must remain circular rather than rectangular."
+			)
+			_check(
 				is_equal_approx(character_placeholder.crop_height_ratio, 0.43),
 				"Pin portraits must use the same upper-body crop as ledger portraits."
 			)
@@ -116,6 +120,21 @@ func _run() -> void:
 	_check(first_card.drag_preview_scene != null, "The passenger drag preview must be supplied by a scene resource.")
 	_check(first_target.assignment_pin_scene != null, "Station pins must be supplied by a scene resource.")
 	if first_card.drag_preview_scene != null:
+		var placeholder_preview := first_card.drag_preview_scene.instantiate() as NightPassengerDragPreview
+		root.add_child(placeholder_preview)
+		await process_frame
+		var placeholder_sprite := placeholder_preview.get_node("%CharacterSprite") as AnimatedSprite2D
+		_check(
+			placeholder_sprite.sprite_frames != null
+			and placeholder_sprite.sprite_frames.get_frame_count(&"walk") == 9
+			and placeholder_sprite.is_playing(),
+			"The drag-preview scene must expose an animated walk placeholder in the editor."
+		)
+		_check(
+			placeholder_preview.position == -placeholder_sprite.position,
+			"Moving the placeholder sprite in its scene must also define the cursor hotspot."
+		)
+		placeholder_preview.free()
 		for profile: PassengerIdentityProfile in game.passenger_identity_profiles:
 			var preview_data := PassengerData.create_from_identity(profile)
 			var preview := first_card.drag_preview_scene.instantiate() as NightPassengerDragPreview

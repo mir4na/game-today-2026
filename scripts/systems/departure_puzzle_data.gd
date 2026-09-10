@@ -13,6 +13,8 @@ extends Resource
 @export_multiline var single_passenger_statement: String
 @export_multiline var veil_note_statement_template: String = "%s and %s belong at stations joined by one line."
 @export_multiline var veil_note_distance_statement_template: String = "%s and %s are separated by %d small marks."
+@export_multiline var veil_note_direct_statement_template: String = "%s belongs at %s."
+@export_multiline var veil_note_shared_station_template: String = "%s and %s share %s."
 
 @export_category("Five-Level Progression")
 @export_multiline var direct_station_statement_template: String = "%s belongs at %s."
@@ -33,6 +35,8 @@ extends Resource
 @export var fallback_descriptor_template: String = "the %s"
 @export var fallback_anomaly_label: String = "UNRESOLVED ANOMALY"
 @export var duplicate_descriptor_template: String = "%s who worked as the %s"
+@export var occupation_descriptor_template: String = "the %s"
+@export var duplicate_occupation_descriptor_template: String = "%s, the %s"
 
 @export_category("Soul Record Biography")
 @export var biography_opening_by_occupation: Dictionary = {}
@@ -50,6 +54,23 @@ extends Resource
 	"Beside the copied evidence, {name} wrote: {statement}.",
 	"Beyond the veil, {name}'s faded page reveals: {statement}.",
 ])
+@export var hidden_statement_context_variants_by_paragraph: Array[PackedStringArray] = [
+	PackedStringArray([
+		"Among {name}'s surviving work notes is a line claiming that {statement}.",
+		"A margin beside {name}'s unfinished work preserves the conclusion that {statement}.",
+		"One detail recurs throughout {name}'s private records: {statement}.",
+	]),
+	PackedStringArray([
+		"A pencilled conclusion beside {name}'s evidence insists that {statement}.",
+		"The final annotation attached to {name}'s record suggests that {statement}.",
+		"Pressed faintly beneath the official report is the claim that {statement}.",
+	]),
+	PackedStringArray([
+		"As the carriage crosses the veil, the marks around {name}'s belongings settle around one certainty: {statement}.",
+		"Under the night carriage lights, {name}'s unfinished pattern resolves and shows that {statement}.",
+		"For a moment, the traces left with {name} align around the idea that {statement}.",
+	]),
+]
 
 ## Populated only on a duplicated runtime puzzle.
 var statement_by_passenger: Dictionary = {}
@@ -194,9 +215,8 @@ func create_runtime(
 		# validation uses correct_station_by_passenger so Level 5 can stack souls.
 		if not runtime.correct_passenger_by_station.has(station_name):
 			runtime.correct_passenger_by_station[station_name] = passenger_name
-	runtime.veil_note_statement = runtime._build_veil_note_statement(ordered, rng)
-
 	var descriptors: PackedStringArray = runtime._build_unique_descriptors(ordered)
+	runtime.veil_note_statement = runtime._build_veil_note_statement(ordered, descriptors, rng)
 	var clues: PackedStringArray = runtime._build_progression_clues(descriptors, assignment_stations)
 
 	_shuffle_strings(clues, rng)
@@ -336,12 +356,22 @@ func _build_distance_statement(
 
 func _build_veil_note_statement(
 	ordered_passengers: Array[PassengerData],
+	descriptors: PackedStringArray,
 	rng: RandomNumberGenerator
 ) -> String:
 	if ordered_passengers.is_empty():
 		return ""
 	if ordered_passengers.size() == 1:
 		return single_passenger_statement.strip_edges()
+	if service_level == 1:
+		return _build_direct_veil_statement(ordered_passengers, descriptors, rng)
+	if service_level >= 5:
+		var shared_statement: String = _build_shared_station_veil_statement(
+			ordered_passengers,
+			descriptors
+		)
+		if not shared_statement.is_empty():
+			return shared_statement
 	var available_pairs: Array[Dictionary] = []
 	for first_index: int in range(ordered_passengers.size()):
 		var first_name: String = ordered_passengers[first_index].short_name
@@ -352,20 +382,64 @@ func _build_veil_note_statement(
 			if first_station == second_station:
 				continue
 			var distance: int = get_small_mark_distance(first_station, second_station)
-			if distance >= 0:
+			var shares_route: bool = _stations_share_line(first_station, second_station)
+			if distance >= 0 and (service_level != 3 or shares_route):
 				available_pairs.append({
 					"first": first_index,
 					"second": second_index,
 					"distance": distance,
 				})
 	if available_pairs.is_empty():
-		return ""
+		return _build_direct_veil_statement(ordered_passengers, descriptors, rng)
 	var selected_pair: Dictionary = available_pairs[rng.randi_range(0, available_pairs.size() - 1)]
+	var first_descriptor: String = _sentence_case(descriptors[int(selected_pair["first"])])
+	var second_descriptor: String = descriptors[int(selected_pair["second"])]
+	if service_level == 3:
+		return (veil_note_statement_template % [
+			first_descriptor,
+			second_descriptor,
+		]).strip_edges()
 	return (veil_note_distance_statement_template % [
-		ordered_passengers[int(selected_pair["first"])].short_name,
-		ordered_passengers[int(selected_pair["second"])].short_name,
+		first_descriptor,
+		second_descriptor,
 		int(selected_pair["distance"]),
 	]).strip_edges()
+
+
+func _build_direct_veil_statement(
+	ordered_passengers: Array[PassengerData],
+	descriptors: PackedStringArray,
+	rng: RandomNumberGenerator
+) -> String:
+	var selectable_count: int = mini(ordered_passengers.size(), descriptors.size())
+	if selectable_count <= 0:
+		return single_passenger_statement.strip_edges()
+	var selected_index: int = rng.randi_range(0, selectable_count - 1)
+	var passenger_name: String = ordered_passengers[selected_index].short_name
+	var station_name: String = str(correct_station_by_passenger.get(passenger_name, ""))
+	return (veil_note_direct_statement_template % [
+		_sentence_case(descriptors[selected_index]),
+		station_name,
+	]).strip_edges()
+
+
+func _build_shared_station_veil_statement(
+	ordered_passengers: Array[PassengerData],
+	descriptors: PackedStringArray
+) -> String:
+	for first_index: int in range(ordered_passengers.size()):
+		var first_name: String = ordered_passengers[first_index].short_name
+		var station_name: String = str(correct_station_by_passenger.get(first_name, ""))
+		for second_index: int in range(first_index + 1, ordered_passengers.size()):
+			var second_name: String = ordered_passengers[second_index].short_name
+			if str(correct_station_by_passenger.get(second_name, "")) != station_name:
+				continue
+			return (veil_note_shared_station_template % [
+				_sentence_case(descriptors[first_index]),
+				descriptors[second_index],
+				station_name,
+			]).strip_edges()
+	return ""
 
 
 func _stations_share_line(first_station: String, second_station: String) -> bool:
@@ -410,7 +484,8 @@ func _compose_biography(
 	var hidden_statement: String = _contextualize_hidden_statement(
 		data,
 		statement,
-		target_paragraph
+		target_paragraph,
+		rng
 	)
 	var target_sentences := paragraphs[target_paragraph] as PackedStringArray
 	var insertion_index: int = rng.randi_range(0, target_sentences.size())
@@ -422,10 +497,15 @@ func _compose_biography(
 func _contextualize_hidden_statement(
 	data: PassengerData,
 	statement: String,
-	paragraph_index: int
+	paragraph_index: int,
+	rng: RandomNumberGenerator
 ) -> String:
 	var context_template: String = "{statement}"
-	if not hidden_statement_context_by_paragraph.is_empty():
+	if paragraph_index < hidden_statement_context_variants_by_paragraph.size():
+		var variants: PackedStringArray = hidden_statement_context_variants_by_paragraph[paragraph_index]
+		if not variants.is_empty():
+			context_template = variants[rng.randi_range(0, variants.size() - 1)]
+	elif not hidden_statement_context_by_paragraph.is_empty():
 		context_template = hidden_statement_context_by_paragraph[
 			clampi(paragraph_index, 0, hidden_statement_context_by_paragraph.size() - 1)
 		]
@@ -473,19 +553,25 @@ func _format_biography_sentence(template: String, data: PassengerData) -> String
 
 func _build_unique_descriptors(passengers: Array[PassengerData]) -> PackedStringArray:
 	var raw_descriptors := PackedStringArray()
-	var descriptor_counts: Dictionary = {}
+	var occupation_counts: Dictionary = {}
 	for data: PassengerData in passengers:
-		var descriptor: String = str(anomaly_descriptor_by_type.get(
-			data.anomaly_type,
-			fallback_descriptor_template % data.occupation.to_lower()
-		)).strip_edges()
+		var occupation: String = data.occupation.strip_edges().to_lower()
+		if occupation.is_empty():
+			occupation = "traveler"
+		var descriptor: String = occupation_descriptor_template % occupation
 		raw_descriptors.append(descriptor)
-		descriptor_counts[descriptor] = int(descriptor_counts.get(descriptor, 0)) + 1
+		occupation_counts[occupation] = int(occupation_counts.get(occupation, 0)) + 1
 	var result := PackedStringArray()
 	for index: int in range(passengers.size()):
 		var descriptor: String = raw_descriptors[index]
-		if int(descriptor_counts.get(descriptor, 0)) > 1:
-			descriptor = duplicate_descriptor_template % [descriptor, passengers[index].occupation.to_lower()]
+		var occupation: String = passengers[index].occupation.strip_edges().to_lower()
+		if occupation.is_empty():
+			occupation = "traveler"
+		if int(occupation_counts.get(occupation, 0)) > 1:
+			descriptor = duplicate_occupation_descriptor_template % [
+				passengers[index].short_name,
+				occupation,
+			]
 		result.append(descriptor)
 	return result
 

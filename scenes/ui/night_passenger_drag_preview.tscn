@@ -1,8 +1,85 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://bh4yymrogh21y"]
 
-[ext_resource type="Script" path="res://scripts/ui/night_passenger_drag_preview.gd" id="1"]
+[ext_resource type="Script" uid="uid://do6ik5qa64ejj" path="res://scripts/ui/night_passenger_drag_preview.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://cmrrljjvabvqo" path="res://assets/characters/Where Do You Belong_/Group 21.png" id="2_placeholder_sheet"]
 
-[node name="NightPassengerDragPreview" type="Control"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_placeholder_1"]
+atlas = ExtResource("2_placeholder_sheet")
+region = Rect2(0, 0, 714, 896)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_placeholder_2"]
+atlas = ExtResource("2_placeholder_sheet")
+region = Rect2(714, 0, 714, 896)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_placeholder_3"]
+atlas = ExtResource("2_placeholder_sheet")
+region = Rect2(1428, 0, 714, 896)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_placeholder_4"]
+atlas = ExtResource("2_placeholder_sheet")
+region = Rect2(0, 896, 714, 896)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_placeholder_5"]
+atlas = ExtResource("2_placeholder_sheet")
+region = Rect2(714, 896, 714, 896)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_placeholder_6"]
+atlas = ExtResource("2_placeholder_sheet")
+region = Rect2(1428, 896, 714, 896)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_placeholder_7"]
+atlas = ExtResource("2_placeholder_sheet")
+region = Rect2(0, 1792, 714, 896)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_placeholder_8"]
+atlas = ExtResource("2_placeholder_sheet")
+region = Rect2(714, 1792, 714, 896)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_placeholder_9"]
+atlas = ExtResource("2_placeholder_sheet")
+region = Rect2(1428, 1792, 714, 896)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_placeholder_walk"]
+animations = [{
+"frames": [],
+"loop": 1,
+"name": &"idle",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_placeholder_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_placeholder_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_placeholder_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_placeholder_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_placeholder_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_placeholder_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_placeholder_7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_placeholder_8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_placeholder_9")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 10.0
+}]
+
+[node name="NightPassengerDragPreview" type="Control" unique_id=1594750149]
 custom_minimum_size = Vector2(126, 168)
 layout_mode = 3
 anchors_preset = 0
@@ -12,9 +89,12 @@ offset_right = 63.0
 offset_bottom = 86.0
 mouse_filter = 2
 script = ExtResource("1")
-preview_center = Vector2(63, 82)
-maximum_visual_size = Vector2(118, 164)
 
-[node name="CharacterSprite" type="AnimatedSprite2D" parent="."]
+[node name="CharacterSprite" type="AnimatedSprite2D" parent="." unique_id=141358007]
 unique_name_in_owner = true
-position = Vector2(63, 82)
+editor_description = "Editable walk-animation placeholder. Move this node to change both its visual position and the cursor hotspot; use Visual Scale Multiplier on the scene root to tune runtime size."
+position = Vector2(8, -15)
+scale = Vector2(0.165, 0.165)
+sprite_frames = SubResource("SpriteFrames_placeholder_walk")
+animation = &"walk"
+autoplay = "walk"

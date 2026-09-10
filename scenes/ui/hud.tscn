@@ -23,6 +23,7 @@
 [ext_resource type="Texture2D" uid="uid://bi2b0di5uipvm" path="res://assets/nightmarket/Item_Switft.png" id="22_swift_item"]
 [ext_resource type="Texture2D" uid="uid://d11pgqc341s0t" path="res://assets/ui/guidebook/Group 136.png" id="23_guidebook_button"]
 [ext_resource type="Script" path="res://scripts/ui/hover_scale_button.gd" id="24_hover"]
+[ext_resource type="Texture2D" uid="uid://c5h8v2fd1x4ld" path="res://assets/ui/Group 176.png" id="25_service_action"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_clock_fill"]
 resource_local_to_scene = true
@@ -532,6 +533,51 @@ icon = ExtResource("23_guidebook_button")
 expand_icon = true
 script = ExtResource("24_hover")
 
+[node name="ServiceActionButton" type="Button" parent="Root" unique_id=1388490062]
+unique_name_in_owner = true
+editor_description = "Scene-authored service action above Guidebook. During the day it opens the sign-off trace; at night it opens the station-path ledger."
+visible = false
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -263.0
+offset_right = 132.0
+offset_bottom = -155.0
+grow_vertical = 0
+tooltip_text = ""
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(0.82, 0.82, 0.86, 1)
+theme_override_colors/icon_hover_color = Color(1.08, 1.08, 1.08, 1)
+theme_override_colors/icon_disabled_color = Color(0.45, 0.45, 0.5, 0.72)
+theme_override_styles/normal = SubResource("GuidebookButtonTransparent")
+theme_override_styles/pressed = SubResource("GuidebookButtonTransparent")
+theme_override_styles/hover = SubResource("GuidebookButtonTransparent")
+theme_override_styles/disabled = SubResource("GuidebookButtonTransparent")
+icon = ExtResource("25_service_action")
+expand_icon = true
+script = ExtResource("24_hover")
+
+[node name="ServiceActionOutline" type="TextureRect" parent="Root/ServiceActionButton"]
+show_behind_parent = true
+self_modulate = Color(0.015, 0.018, 0.024, 0.98)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -3.0
+offset_top = -3.0
+offset_right = 3.0
+offset_bottom = 3.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("25_service_action")
+expand_mode = 1
+
 [node name="GuidebookOutline" type="TextureRect" parent="Root/GuidebookButton"]
 show_behind_parent = true
 self_modulate = Color(0.015, 0.018, 0.024, 0.98)
@@ -659,6 +705,7 @@ vertical_alignment = 1
 autowrap_mode = 2
 
 [connection signal="pressed" from="Root/GuidebookButton" to="." method="_on_guidebook_button_pressed"]
+[connection signal="pressed" from="Root/ServiceActionButton" to="." method="_on_service_action_button_pressed"]
 [connection signal="pressed" from="Root/DebugNightButton" to="." method="_on_debug_night_button_pressed"]
 [connection signal="pressed" from="Root/ClockPanel/DebugNextStationButton" to="." method="_on_debug_next_station_button_pressed"]
 [connection signal="tool_requested" from="Root/MarketItemBar/VeilNoteSlot" to="." method="_on_market_item_requested"]

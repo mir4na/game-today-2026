@@ -72,6 +72,10 @@ func _run() -> void:
 		)
 		_check(runtime.service_level == service_level, "The runtime puzzle must retain its campaign level.")
 		_check(
+			not runtime.get_veil_note_statement().is_empty(),
+			"Every Night Service level must prepare one Veil Note statement."
+		)
+		_check(
 			runtime.get_assignment_count() == deceased.size(),
 			"Every deceased passenger must receive exactly one solution destination."
 		)
@@ -113,12 +117,44 @@ func _run() -> void:
 				)
 
 		var hidden_paragraphs: Dictionary = {}
+		var normalized_veil_statement: String = runtime.get_veil_note_statement().to_lower()
+		var veil_mentions_background: bool = false
+		for case_passenger: PassengerData in deceased:
+			var occupation: String = case_passenger.occupation.strip_edges().to_lower()
+			if not occupation.is_empty() and occupation in normalized_veil_statement:
+				veil_mentions_background = true
+				break
+		_check(
+			veil_mentions_background,
+			"The prepared Veil Note must identify souls through their backgrounds."
+		)
 		for data: PassengerData in deceased:
 			var statement: String = runtime.get_statement_for_passenger(data.short_name)
 			var biography: Array = runtime.get_biography_for_passenger(data.short_name)
 			var found_paragraph: int = _find_statement_paragraph(biography, statement)
 			_check(not statement.is_empty(), "Every soul must have a hidden ledger statement.")
 			_check(found_paragraph >= 0, "The saved statement must exactly match one biography sentence.")
+			var normalized_statement: String = statement.to_lower()
+			var mentions_background: bool = false
+			for case_passenger: PassengerData in deceased:
+				var occupation: String = case_passenger.occupation.strip_edges().to_lower()
+				if not occupation.is_empty() and occupation in normalized_statement:
+					mentions_background = true
+					break
+			_check(
+				mentions_background,
+				"Night statements must identify souls through their occupations or backgrounds."
+			)
+			for anomaly_descriptor: Variant in runtime.anomaly_descriptor_by_type.values():
+				_check(
+					not str(anomaly_descriptor).to_lower() in normalized_statement,
+					"Night statements must not identify souls by anomaly category."
+				)
+			for canned_phrase: String in ["files reads:", " wrote:", "page reveals:"]:
+				_check(
+					not canned_phrase in normalized_statement,
+					"Hidden clues must use seamless biography phrasing instead of repeated labels."
+				)
 			if found_paragraph >= 0:
 				hidden_paragraphs[found_paragraph] = true
 			_check(

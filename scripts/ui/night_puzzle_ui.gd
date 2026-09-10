@@ -18,6 +18,7 @@ signal validation_finished(succeeded: bool, attempt_count: int)
 @export var station_path_focus_scale: Vector2 = Vector2(1.12, 1.12)
 @export var station_path_focus_pivot: Vector2 = Vector2(812.0, 360.0)
 @export_range(0.05, 2.0, 0.05) var focus_transition_seconds: float = 0.5
+@export_range(0.0, 1.0, 0.05) var validation_map_shade_alpha: float = 0.72
 @export_range(0.05, 2.0, 0.05) var light_travel_seconds: float = 0.34
 @export_range(0.0, 1.0, 0.05) var station_hold_seconds: float = 0.16
 @export_range(0.1, 3.0, 0.05) var result_hold_seconds: float = 0.9
@@ -63,6 +64,7 @@ var _station_targets: Array[NightStationTarget] = []
 @onready var _station_path_layout_host: Control = %PathLayoutHost
 @onready var _validation_light: TextureRect = %ValidationLightToken
 @onready var _validation_status: Label = %ValidationStatusLabel
+@onready var _validation_map_shade: ColorRect = %ValidationMapShade
 @onready var _legend_label: Label = $BoardAnchor/StationPathAnchor/LegendLabel
 @onready var _close_button: Control = $BoardAnchor/StationPathAnchor/CloseButton
 @onready var _passenger_cards: Array[NightPassengerCard] = [
@@ -409,6 +411,12 @@ func _focus_station_path() -> void:
 		station_path_focus_scale,
 		focus_transition_seconds
 	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_focus_tween.tween_property(
+		_validation_map_shade,
+		^"modulate:a",
+		validation_map_shade_alpha,
+		focus_transition_seconds
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	for control: CanvasItem in _validation_chrome():
 		_focus_tween.tween_property(
 			control, ^"modulate:a", 0.0, focus_transition_seconds * 0.55
@@ -497,6 +505,7 @@ func _reset_validation_presentation() -> void:
 	_validation_light.modulate.a = 0.0
 	_validation_status.hide()
 	_validation_status.modulate = Color.WHITE
+	_validation_map_shade.modulate.a = 0.0
 	for target: NightStationTarget in _station_targets:
 		target.reset_validation_visual()
 

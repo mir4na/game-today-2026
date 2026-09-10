@@ -5,6 +5,7 @@ extends Control
 @export var animation_name: StringName = &"walk"
 @export var preview_center: Vector2 = Vector2(63.0, 82.0)
 @export var maximum_visual_size: Vector2 = Vector2(118.0, 164.0)
+@export_range(0.1, 3.0, 0.05) var visual_scale_multiplier: float = 1.0
 
 
 func _ready() -> void:
@@ -46,7 +47,6 @@ func configure(data: PassengerData) -> void:
 
 	character_sprite.sprite_frames = source_sprite.sprite_frames
 	character_sprite.animation = animation_name
-	character_sprite.position = preview_center
 	_fit_animation(character_sprite)
 	character_sprite.show()
 	character_sprite.play(animation_name)
@@ -56,8 +56,11 @@ func configure(data: PassengerData) -> void:
 
 func _apply_cursor_hotspot() -> void:
 	# Godot places a drag preview at the pointer using the preview root's
-	# origin. Keeping the root offset negative makes preview_center sit exactly
-	# under the cursor while the visual remains scene-authored.
+	# origin. Use the visible placeholder's authored position as the hotspot so
+	# moving CharacterSprite in this scene keeps the NPC centered on the cursor.
+	var character_sprite := get_node_or_null("%CharacterSprite") as AnimatedSprite2D
+	if character_sprite != null:
+		preview_center = character_sprite.position
 	position = -preview_center
 
 
@@ -73,4 +76,4 @@ func _fit_animation(sprite: AnimatedSprite2D) -> void:
 		maximum_visual_size.x / texture_size.x,
 		maximum_visual_size.y / texture_size.y
 	)
-	sprite.scale = Vector2.ONE * fit_scale
+	sprite.scale = Vector2.ONE * fit_scale * visual_scale_multiplier

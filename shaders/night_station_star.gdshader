@@ -6,6 +6,8 @@ uniform float shimmer_strength : hint_range(0.0, 1.0) = 0.62;
 uniform float shimmer_speed : hint_range(0.0, 2.0) = 0.34;
 uniform float shimmer_width : hint_range(0.01, 0.4) = 0.11;
 uniform float shimmer_offset : hint_range(0.0, 1.0) = 0.0;
+uniform float twinkle_strength : hint_range(0.0, 1.0) = 0.24;
+uniform float twinkle_speed : hint_range(0.0, 8.0) = 2.8;
 uniform float outline_strength : hint_range(0.0, 1.0) = 0.0;
 uniform float outline_size : hint_range(0.0, 16.0) = 8.0;
 uniform vec4 outline_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
@@ -26,9 +28,9 @@ void fragment() {
 	float sweep_position = fract(TIME * shimmer_speed + shimmer_offset) * 2.0 - 0.5;
 	float diagonal = (UV.x + UV.y) * 0.5;
 	float glint = 1.0 - smoothstep(0.0, shimmer_width, abs(diagonal - sweep_position));
-	float twinkle = 0.5 + 0.5 * sin(TIME * 2.4 + shimmer_offset * 6.283185);
+	float twinkle = 0.5 + 0.5 * sin(TIME * twinkle_speed + shimmer_offset * 6.283185);
 	float light_amount = clamp(
-		glint * shimmer_strength + twinkle * 0.12 + outline_strength * 0.20,
+		glint * shimmer_strength + twinkle * twinkle_strength + outline_strength * 0.20,
 		0.0,
 		0.9
 	);

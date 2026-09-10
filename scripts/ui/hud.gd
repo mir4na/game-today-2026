@@ -3,6 +3,7 @@ extends CanvasLayer
 ## Persistent, low-profile HUD. Modal screens live in sibling UI scenes.
 
 signal guidebook_requested
+signal service_action_requested
 signal debug_next_station_requested
 signal market_tool_requested(tool_id: StringName)
 signal debug_night_requested
@@ -72,6 +73,7 @@ signal debug_night_requested
 @onready var _tool_status_label: Label = %ToolStatusLabel
 @onready var _debug_night_button: Button = %DebugNightButton
 @onready var _guidebook_button: Button = %GuidebookButton
+@onready var _service_action_button: Button = %ServiceActionButton
 @onready var _debug_next_station_button: Button = %DebugNextStationButton
 @onready var _market_item_bar: VBoxContainer = %MarketItemBar
 @onready var _veil_note_slot: Control = %VeilNoteSlot
@@ -130,6 +132,7 @@ func _ready() -> void:
 	_debug_next_station_button.mouse_exited.connect(_on_clock_hover_exited)
 	_route_briefing_banner.hide()
 	_debug_next_station_button.visible = false
+	_service_action_button.visible = false
 	set_swiftstep_active(false)
 
 func _process(delta: float) -> void:
@@ -482,6 +485,7 @@ func _update_dialogue_pointer(target_local_x: float, prompt_width: float) -> voi
 func set_day_hud_visible(value: bool) -> void:
 	_clock_panel.visible = value
 	_guidebook_button.tooltip_text = "Open guidebook"
+	set_service_action_mode(false, value)
 	_debug_night_button.visible = OS.is_debug_build() and value
 	if not value:
 		_reset_clock_hover(true)
@@ -529,6 +533,7 @@ func set_service_sealed(value: bool) -> void:
 
 func _update_action_button_locks() -> void:
 	_guidebook_button.disabled = _service_sealed
+	_service_action_button.disabled = _service_sealed
 	_veil_note_slot.call(&"set_interaction_locked", _service_sealed)
 	_radar_slot.call(&"set_interaction_locked", _service_sealed or _radar_active)
 	_swift_slot.call(&"set_interaction_locked", _service_sealed or _swiftstep_active)
@@ -539,7 +544,17 @@ func _on_guidebook_button_pressed() -> void:
 
 
 func get_night_ledger_button_center() -> Vector2:
-	return _guidebook_button.get_global_rect().get_center()
+	return _service_action_button.get_global_rect().get_center()
+
+
+func set_service_action_mode(is_night: bool, available: bool = true) -> void:
+	_service_action_button.visible = available
+	_service_action_button.tooltip_text = ""
+	_service_action_button.set_meta(&"service_action_mode", &"night" if is_night else &"day")
+
+
+func _on_service_action_button_pressed() -> void:
+	service_action_requested.emit()
 
 
 func _on_market_item_requested(tool_id: StringName) -> void:
@@ -558,7 +573,8 @@ func _on_debug_next_station_button_pressed() -> void:
 func set_night_walk_mode() -> void:
 	_clock_panel.show()
 	_debug_night_button.hide()
-	_guidebook_button.tooltip_text = "Open Night Ledger"
+	_guidebook_button.tooltip_text = "Open guidebook"
+	set_service_action_mode(true)
 	_tool_status_label.visible = true
 	_market_item_bar.visible = true
 	_floating_prompt.visible = not _prompt_label.text.is_empty()

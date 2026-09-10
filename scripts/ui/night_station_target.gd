@@ -23,8 +23,12 @@ signal selected(station_name: String)
 @export_range(0.01, 1.0, 0.01) var pointer_shrink_seconds: float = 0.18
 @export_range(0.01, 1.0, 0.01) var star_pulse_seconds: float = 0.22
 @export_range(0.01, 1.0, 0.01) var failure_burst_seconds: float = 0.55
-@export var success_glow_color: Color = Color(1.0, 0.76, 0.30, 0.82)
+@export var success_glow_color: Color = Color(1.0, 0.97, 0.84, 1.0)
 @export var failure_glow_color: Color = Color(1.0, 0.20, 0.24, 0.92)
+@export_category("Star Idle Motion")
+@export_range(0.0, 0.2, 0.005) var idle_scale_amount: float = 0.055
+@export_range(0.0, 8.0, 0.25) var idle_rotation_degrees: float = 1.8
+@export_range(0.2, 4.0, 0.05) var idle_motion_speed: float = 1.25
 
 @onready var _station_label: Label = %StationLabel
 @onready var _assignment_label: Label = %AssignmentLabel
@@ -32,21 +36,42 @@ signal selected(station_name: String)
 @onready var _drop_glow: Panel = %DropGlow
 @onready var _star: TextureRect = %Star
 @onready var _validation_glow: TextureRect = %ValidationGlow
+@onready var _success_particles: CPUParticles2D = %SuccessParticles
 @onready var _failure_particles: CPUParticles2D = %FailureParticles
+@onready var _station_plate: TextureRect = %StationPlate
 
 var _validation_tween: Tween
 var _star_material: ShaderMaterial
+var _idle_phase: float = 0.0
+var _idle_motion_enabled: bool = true
 
 
 func _ready() -> void:
 	_station_label.text = station_name.to_upper()
+	_station_plate.pivot_offset = _station_plate.size * 0.5
+	_station_label.pivot_offset = _station_label.size * 0.5
+	_assignment_label.pivot_offset = _assignment_label.size * 0.5
+	_star.pivot_offset = _star.size * 0.5
 	_validation_glow.texture = _star.texture
 	_star_material = _star.material as ShaderMaterial
 	if _star_material != null:
 		var station_phase: float = float(abs(station_name.hash() % 997)) / 997.0
 		_star_material.set_shader_parameter(&"shimmer_offset", station_phase)
+		_idle_phase = station_phase * TAU
 	set_assignments([], {})
 	reset_validation_visual()
+
+
+func _process(_delta: float) -> void:
+	if not _idle_motion_enabled or not is_instance_valid(_star):
+		return
+	var time_seconds: float = Time.get_ticks_msec() * 0.001
+	var wave: float = sin(time_seconds * idle_motion_speed + _idle_phase)
+	var scale_factor: float = 1.0 + wave * idle_scale_amount
+	_star.scale = Vector2.ONE * scale_factor
+	_star.rotation = deg_to_rad(idle_rotation_degrees) * sin(
+		time_seconds * idle_motion_speed * 0.7 + _idle_phase
+	)
 
 
 func set_assignments(passenger_names: Array, passenger_data_by_name: Dictionary) -> void:
@@ -91,8 +116,11 @@ func play_validation(is_correct: bool) -> void:
 	if is_instance_valid(_validation_tween) and _validation_tween.is_valid():
 		_validation_tween.kill()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_idle_motion_enabled = false
 	_drop_glow.hide()
 	_assignment_pins.pivot_offset = size * 0.5
+	_station_plate.pivot_offset = _station_plate.size * 0.5
+	_station_label.pivot_offset = _station_label.size * 0.5
 	_star.pivot_offset = _star.size * 0.5
 	_validation_glow.pivot_offset = _validation_glow.size * 0.5
 
@@ -101,8 +129,17 @@ func play_validation(is_correct: bool) -> void:
 		_assignment_pins, ^"scale", Vector2(1.16, 1.16), pointer_pop_seconds
 	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_validation_tween.parallel().tween_property(
+		_assignment_label, ^"scale", Vector2.ZERO, pointer_pop_seconds + pointer_shrink_seconds
+	)
+	_validation_tween.parallel().tween_property(
 		_assignment_label, ^"modulate:a", 0.0, pointer_pop_seconds + pointer_shrink_seconds
 	)
+	_validation_tween.parallel().tween_property(
+		_station_plate, ^"scale", Vector2.ZERO, pointer_pop_seconds + pointer_shrink_seconds
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	_validation_tween.parallel().tween_property(
+		_station_label, ^"scale", Vector2.ZERO, pointer_pop_seconds + pointer_shrink_seconds
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	_validation_tween.tween_property(
 		_assignment_pins, ^"scale", Vector2.ZERO, pointer_shrink_seconds
 	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
@@ -122,12 +159,20 @@ func reset_validation_visual() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_assignment_pins.scale = Vector2.ONE
 	_assignment_pins.modulate = Color.WHITE
+	_assignment_label.scale = Vector2.ONE
 	_assignment_label.modulate = Color.WHITE
+	_station_plate.scale = Vector2.ONE
+	_station_plate.modulate = Color.WHITE
+	_station_label.scale = Vector2.ONE
+	_station_label.modulate = Color.WHITE
 	_star.scale = Vector2.ONE
+	_star.rotation = 0.0
 	_star.modulate = Color.WHITE
 	_validation_glow.scale = Vector2.ONE
 	_validation_glow.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	_success_particles.emitting = false
 	_failure_particles.emitting = false
+	_idle_motion_enabled = true
 	_set_drop_highlight(false)
 
 
@@ -140,6 +185,8 @@ func get_path_node_center() -> Vector2:
 
 func _play_success_pulse() -> void:
 	_validation_glow.modulate = Color(success_glow_color, 0.0)
+	_success_particles.restart()
+	_success_particles.emitting = true
 	_validation_tween = create_tween()
 	_validation_tween.tween_property(
 		_star, ^"scale", Vector2(0.68, 0.68), star_pulse_seconds * 0.55
@@ -155,6 +202,9 @@ func _play_success_pulse() -> void:
 	)
 	_validation_tween.parallel().tween_property(
 		_validation_glow, ^"modulate", success_glow_color, star_pulse_seconds
+	)
+	_validation_tween.parallel().tween_property(
+		_star, ^"modulate", Color(1.35, 1.28, 1.08, 1.0), star_pulse_seconds
 	)
 	_validation_tween.tween_property(
 		_star, ^"scale", Vector2.ONE, star_pulse_seconds * 0.55

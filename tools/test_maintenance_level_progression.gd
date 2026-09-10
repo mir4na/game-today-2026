@@ -58,6 +58,56 @@ func _run() -> void:
 		)
 
 	game.day_number = 2
+	game._blocked_aisle_spawn_count = 0
+	_check(
+		is_equal_approx(game._next_blocked_aisle_delay(), 10.0),
+		"Level 2's first blocked aisle must appear after 10 seconds."
+	)
+	game._blocked_aisle_spawn_count = 1
+	_check(
+		is_equal_approx(game._next_blocked_aisle_delay(), 50.0),
+		"Level 2 blocked aisles must repeat every 50 seconds."
+	)
+
+	game.day_number = 3
+	game._route_index = 0
+	game._dirty_seat_spawns_this_route = 0
+	_check(
+		is_equal_approx(game._next_dirty_seat_delay(), 10.0),
+		"Level 3's first clean seat must appear after 10 seconds."
+	)
+	game._dirty_seat_spawns_this_route = 1
+	_check(
+		is_equal_approx(game._next_dirty_seat_delay(), 60.0),
+		"Level 3's second clean seat must appear at 70 seconds."
+	)
+	game._dirty_seat_spawns_this_route = 2
+	_check(
+		game._next_dirty_seat_delay() < 0.0,
+		"Level 3's first route must stop after the clean seats at 10 and 70 seconds."
+	)
+
+	game._route_index = 1
+	game._dirty_seat_spawns_this_route = 0
+	for sample_index: int in range(12):
+		var randomized_delay: float = game._next_dirty_seat_delay()
+		_check(
+			randomized_delay >= 20.0 and randomized_delay <= 100.0,
+			"The next-route clean seat must avoid the first and final 20 seconds (sample %d)." % sample_index
+		)
+	game._dirty_seat_spawns_this_route = 1
+	_check(
+		game._next_dirty_seat_delay() < 0.0,
+		"The next Level 3 route may spawn only one clean seat."
+	)
+	game._route_index = 2
+	game._dirty_seat_spawns_this_route = 0
+	_check(
+		game._next_dirty_seat_delay() < 0.0,
+		"Level 3 must not schedule another clean seat after the next route."
+	)
+
+	game.day_number = 2
 	game._active_modal = null
 	_check(game._show_level_start_hint_if_needed(), "Level 2 must present the blocked-aisle hint.")
 	_check(game._hint_ui.visible, "The level 2 hint should be visible.")

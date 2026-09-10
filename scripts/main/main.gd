@@ -29,6 +29,11 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export_category("Maintenance Distractions")
 @export var blocked_aisle_delay_range_seconds: Vector2 = Vector2(9.0, 16.0)
 @export var dirty_seat_delay_range_seconds: Vector2 = Vector2(24.0, 38.0)
+@export_range(0.1, 120.0, 0.5) var level_two_blocked_first_delay_seconds: float = 10.0
+@export_range(0.1, 180.0, 0.5) var level_two_blocked_repeat_delay_seconds: float = 50.0
+@export_range(0.1, 120.0, 0.5) var level_three_clean_first_delay_seconds: float = 10.0
+@export_range(0.1, 180.0, 0.5) var level_three_clean_second_delay_seconds: float = 60.0
+@export_range(0.0, 60.0, 0.5) var clean_seat_route_edge_clearance_seconds: float = 20.0
 @export_range(0.0, 80.0, 1.0) var maintenance_event_clearance: float = 14.0
 @export_multiline var dirty_seat_passenger_blocked_text: String = "Please clean the dirty seat before checking my ticket."
 @export_category("Market Tools")
@@ -112,6 +117,9 @@ var _active_blocked_aisle_event: Node
 var _active_dirty_seat_event: Node
 var _blocked_aisle_activated: bool = false
 var _dirty_seat_activated: bool = false
+var _blocked_aisle_spawn_count: int = 0
+var _dirty_seat_spawns_this_route: int = 0
+var _maintenance_schedule_route_index: int = -1
 var _service_seal_active: bool = false
 var _day_blessing_award: Dictionary = {}
 var _night_blessing_award: Dictionary = {}
@@ -140,7 +148,6 @@ var _world_time_scale: float = 1.0
 @onready var _night_transition_ui: NightTransitionCutsceneUI = %NightTransitionCutsceneUI
 @onready var _night_puzzle_ui: NightPuzzleUI = %NightPuzzleUI
 @onready var _night_soul_record_ui: Variant = %NightSoulRecordUI
-@onready var _night_ledger_guardian: Variant = %NightLedgerGuardian
 @onready var _service_signature_ui: Variant = %ServiceSignatureUI
 @onready var _pause_ui: PauseUI = %PauseUI
 @onready var _blocked_aisle_ui: Control = %BlockedAislePuzzleUI
@@ -474,7 +481,7 @@ func _input(event: InputEvent) -> void:
 	if _night_statement_active or _service_seal_active:
 		return
 	if state == GameState.NIGHT_PUZZLE and _night_puzzle_ui.visible:
-		_toggle_guidebook()
+		_night_puzzle_ui.request_close()
 		get_viewport().set_input_as_handled()
 		return
 	if not _guidebook_ui.visible and (
@@ -1036,14 +1043,50 @@ func _configure_maintenance_events() -> void:
 
 
 func _schedule_maintenance_events() -> void:
+	_sync_maintenance_schedule_route()
 	if not _blocked_aisle_enabled_for_level():
 		_blocked_aisle_timer.stop()
-	elif not _blocked_aisle_activated and not _blocked_aisle_events.is_empty():
-		_blocked_aisle_timer.start(_random_delay(blocked_aisle_delay_range_seconds))
+	elif not _blocked_aisle_activated and not _blocked_aisle_events.is_empty() and _blocked_aisle_timer.is_stopped():
+		_blocked_aisle_timer.start(_next_blocked_aisle_delay())
 	if not _clean_seat_enabled_for_level():
 		_dirty_seat_timer.stop()
-	elif not _dirty_seat_activated and not _dirty_seat_events.is_empty():
-		_dirty_seat_timer.start(_random_delay(dirty_seat_delay_range_seconds))
+	elif not _dirty_seat_activated and not _dirty_seat_events.is_empty() and _dirty_seat_timer.is_stopped():
+		var clean_delay: float = _next_dirty_seat_delay()
+		if clean_delay > 0.0:
+			_dirty_seat_timer.start(clean_delay)
+
+
+func _sync_maintenance_schedule_route() -> void:
+	if _maintenance_schedule_route_index == _route_index:
+		return
+	_maintenance_schedule_route_index = _route_index
+	_dirty_seat_spawns_this_route = 0
+	_dirty_seat_timer.stop()
+
+
+func _next_blocked_aisle_delay() -> float:
+	if day_number == 2:
+		if _blocked_aisle_spawn_count == 0:
+			return level_two_blocked_first_delay_seconds
+		return level_two_blocked_repeat_delay_seconds
+	return _random_delay(blocked_aisle_delay_range_seconds)
+
+
+func _next_dirty_seat_delay() -> float:
+	if day_number != 3:
+		return _random_delay(dirty_seat_delay_range_seconds)
+	if _route_index == 0:
+		if _dirty_seat_spawns_this_route == 0:
+			return level_three_clean_first_delay_seconds
+		if _dirty_seat_spawns_this_route == 1:
+			return level_three_clean_second_delay_seconds
+		return -1.0
+	if _route_index != 1 or _dirty_seat_spawns_this_route > 0:
+		return -1.0
+	var route_duration: float = _get_station_travel_seconds(_route_index)
+	var maximum_clearance: float = maxf(route_duration * 0.5 - 0.1, 0.1)
+	var clearance: float = minf(clean_seat_route_edge_clearance_seconds, maximum_clearance)
+	return _daily_rng.randf_range(clearance, maxf(clearance, route_duration - clearance))
 
 
 func _random_delay(delay_range: Vector2) -> float:
@@ -1056,7 +1099,11 @@ func _on_blocked_aisle_timer_timeout() -> void:
 	if not _blocked_aisle_enabled_for_level():
 		_blocked_aisle_timer.stop()
 		return
-	if _blocked_aisle_activated or state not in [GameState.DAY, GameState.SUNSET]:
+	if state not in [GameState.DAY, GameState.SUNSET]:
+		return
+	if _blocked_aisle_activated:
+		if day_number == 2:
+			_blocked_aisle_timer.start(1.0)
 		return
 	if _station_stop_ui.visible:
 		_blocked_aisle_timer.start(1.0)
@@ -1084,6 +1131,9 @@ func _on_blocked_aisle_timer_timeout() -> void:
 	if is_instance_valid(blocked_connector):
 		_train.set_blocked_connector_effect(_player.global_position.x, blocked_connector.global_position.x)
 	_blocked_aisle_activated = true
+	_blocked_aisle_spawn_count += 1
+	if day_number == 2:
+		_blocked_aisle_timer.start(level_two_blocked_repeat_delay_seconds)
 	_hud.notify("LUGGAGE IS BLOCKING A COACH CONNECTOR", 3.5)
 	_refresh_player_interactables()
 	_refresh_maintenance_trackers()
@@ -1093,7 +1143,11 @@ func _on_dirty_seat_timer_timeout() -> void:
 	if not _clean_seat_enabled_for_level():
 		_dirty_seat_timer.stop()
 		return
-	if _dirty_seat_activated or state not in [GameState.DAY, GameState.SUNSET]:
+	if state not in [GameState.DAY, GameState.SUNSET]:
+		return
+	if _dirty_seat_activated:
+		if day_number == 3:
+			_dirty_seat_timer.start(1.0)
 		return
 	if _active_modal != null:
 		_dirty_seat_timer.start(1.0)
@@ -1118,6 +1172,9 @@ func _on_dirty_seat_timer_timeout() -> void:
 	_active_dirty_seat_event = vacant_candidates[_daily_rng.randi_range(0, vacant_candidates.size() - 1)]
 	_active_dirty_seat_event.call(&"set_event_active", true)
 	_dirty_seat_activated = true
+	_dirty_seat_spawns_this_route += 1
+	if day_number == 3 and _route_index == 0 and _dirty_seat_spawns_this_route == 1:
+		_dirty_seat_timer.start(level_three_clean_second_delay_seconds)
 	_hud.notify("A PASSENGER SEAT NEEDS CLEANING", 3.5)
 	_clear_dropoff_assignments_for_dirty_seat()
 	_set_service_sealed(true)
@@ -1163,17 +1220,22 @@ func _on_maintenance_minigame_completed(event: Node) -> void:
 		event.call(&"mark_solved")
 	if event == _active_dirty_seat_event:
 		_active_dirty_seat_event = null
+		if day_number == 3:
+			_dirty_seat_activated = false
 		if is_instance_valid(_document_overlay):
 			_document_overlay.configure_stamp_lock(false)
 		_set_service_sealed(false)
 	else:
 		if event == _active_blocked_aisle_event:
 			_active_blocked_aisle_event = null
+			if day_number == 2:
+				_blocked_aisle_activated = false
 			_train.clear_blocked_connector_effect()
 	_refresh_player_interactables()
 	_refresh_maintenance_trackers()
 	_active_modal = null
 	_set_player_control_for_state()
+	_schedule_maintenance_events()
 
 
 func _refresh_maintenance_trackers() -> void:
@@ -1578,7 +1640,6 @@ func _process_station_arrival() -> void:
 	_start_station_stop_cutscene(arrival_station, departing_actors, boarding_actors, is_terminal_arrival)
 
 func _start_station_stop_cutscene(station_name: String, departing_actors: Array[Dictionary], boarding_actors: Array[Dictionary], terminal_arrival: bool = false) -> void:
-	_night_ledger_guardian.call(&"set_shift_active", false)
 	_station_cutscene_context = &"terminal_exchange" if terminal_arrival else &"station_exchange"
 	_station_cutscene_timeline_complete = false
 	_station_camera_return_complete = false
@@ -1868,7 +1929,6 @@ func _on_station_stop_finished() -> void:
 		_active_modal = null
 	if finished_context == &"opening":
 		state = GameState.DAY
-		_night_ledger_guardian.call(&"set_shift_active", true, false)
 		_hud.set_day_hud_visible(true)
 		_hud.show_route_briefing()
 		_update_passenger_minimap()
@@ -1885,7 +1945,6 @@ func _on_station_stop_finished() -> void:
 		_update_passenger_minimap()
 		_finalize_day_shift()
 		return
-	_night_ledger_guardian.call(&"set_shift_active", true, false)
 	_travel_background.begin_route_leg(_route_index)
 	_hud.set_next_stop(_next_day_station())
 	_station_arrival_announced = false
@@ -1895,6 +1954,7 @@ func _on_station_stop_finished() -> void:
 		_hud.show_route_briefing()
 	_update_passenger_minimap()
 	_set_player_control_for_state()
+	_schedule_maintenance_events()
 
 
 func _on_train_station_travel_offset_changed(offset: Vector2) -> void:
@@ -1963,15 +2023,13 @@ func _refresh_guidebook_progress() -> void:
 
 
 func _toggle_guidebook() -> void:
-	if state in [GameState.NIGHT, GameState.NIGHT_PUZZLE]:
-		if _night_puzzle_ui.visible:
-			_night_puzzle_ui.request_close()
-		elif not _service_seal_active and _active_modal == null:
-			_open_night_puzzle()
-		return
 	if _guidebook_ui.visible:
 		_guidebook_ui.request_close()
-	elif not _service_seal_active and _active_modal == null and state in [GameState.DAY, GameState.SUNSET]:
+	elif (
+		not _service_seal_active
+		and _active_modal == null
+		and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
+	):
 		_open_guidebook()
 
 
@@ -2430,7 +2488,6 @@ func _carriage_has_anomaly(carriage_number: int) -> bool:
 func _enter_night(enable_controls: bool = true, show_instruction: bool = true) -> void:
 	_prepare_night_world()
 	state = GameState.NIGHT
-	_night_ledger_guardian.call(&"set_night_active", true)
 	_night_service_elapsed_seconds = 0.0
 	_night_service_expired = false
 	_night_service_timeout_presented = false
@@ -2503,7 +2560,7 @@ func _open_night_puzzle() -> void:
 	)
 
 
-func _on_watcher_consulted() -> void:
+func _on_service_action_requested() -> void:
 	if _active_modal != null or _service_seal_active:
 		return
 	if state == GameState.NIGHT:
@@ -2608,7 +2665,7 @@ func _on_night_validation_finished(succeeded: bool, attempt_count: int) -> void:
 		correct_count,
 		attempt_count
 	)
-	_night_ledger_guardian.call(&"set_night_active", false)
+	_hud.set_service_action_mode(true, false)
 	_night_puzzle_ui.hide()
 	_active_modal = _shift_report_ui
 	state = GameState.COMPLETE

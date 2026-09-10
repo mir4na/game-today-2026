@@ -30,14 +30,22 @@ func _run() -> void:
 	game._jump_directly_to_debug_night()
 	var puzzle: DeparturePuzzleData = game._runtime_puzzle
 	_check(puzzle != null, "Night shortcut must create a Soul Record puzzle.")
-	var guardian: Variant = game.get_node("%NightLedgerGuardian")
-	_check(guardian != null and guardian.visible and guardian.enabled, "NPC 17 watcher must appear only when Night Service begins.")
-	if guardian != null:
-		guardian.interact()
+	var service_button := game._hud.get_node("%ServiceActionButton") as Button
+	_check(game.get_node_or_null("%NightLedgerGuardian") == null, "Night Service must not keep the in-world watcher.")
+	_check(service_button.visible and not service_button.disabled, "The ledger button must appear when Night Service begins.")
+	_check(service_button.tooltip_text.is_empty(), "The night ledger button must not cover gameplay with hover copy.")
+	if service_button != null:
+		service_button.pressed.emit()
 		await process_frame
-		_check(game.state == AfterTheEndGame.GameState.NIGHT_PUZZLE, "Interacting with the watcher must open the Night Ledger map.")
-		_check(game._night_puzzle_ui.visible, "The watcher interaction must present the assignment map UI.")
+		_check(game.state == AfterTheEndGame.GameState.NIGHT_PUZZLE, "Pressing the service button at night must open the Night Ledger map.")
+		_check(game._night_puzzle_ui.visible, "The service button must present the assignment map UI.")
 		game._close_night_puzzle()
+		await process_frame
+		var guidebook_button := game._hud.get_node("%GuidebookButton") as Button
+		guidebook_button.pressed.emit()
+		await process_frame
+		_check(game._guidebook_ui.visible, "The separate Guidebook button must still open the Guidebook at night.")
+		game._guidebook_ui.request_close()
 		await process_frame
 
 	var occupied_paragraphs: Dictionary = {}
@@ -157,5 +165,5 @@ func _run() -> void:
 
 	game.free()
 	if _failures == 0:
-		print("PASS: watcher entry, varied hidden statements, and visual sentence feedback.")
+		print("PASS: ledger button entry, varied hidden statements, and visual sentence feedback.")
 	quit(1 if _failures > 0 else 0)

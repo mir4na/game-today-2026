@@ -1,8 +1,8 @@
 [gd_resource type="Resource" script_class="DeparturePuzzleData" format=3 uid="uid://dwxivcklwykx0"]
 
 [ext_resource type="Script" uid="uid://dylbvy4ioe7bs" path="res://scripts/systems/departure_puzzle_data.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_1.tscn" id="2_path_1"]
-[ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_2.tscn" id="3_path_2"]
+[ext_resource type="PackedScene" uid="uid://c83gsm8nuq8ip" path="res://scenes/ui/night_station_paths/night_station_path_level_1.tscn" id="2_path_1"]
+[ext_resource type="PackedScene" uid="uid://dvcw3ybsybkow" path="res://scenes/ui/night_station_paths/night_station_path_level_2.tscn" id="3_path_2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_3.tscn" id="4_path_3"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_4.tscn" id="5_path_4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_5.tscn" id="6_path_5"]
@@ -18,16 +18,11 @@ distance_statement_template = "The shortest route between %s and %s crosses %d s
 single_passenger_statement = "This is the only soul awaiting assignment tonight."
 veil_note_statement_template = "%s and %s belong at stations joined by one line."
 veil_note_distance_statement_template = "%s and %s are separated by %d small marks."
-direct_station_statement_template = "%s belongs at %s."
+veil_note_direct_statement_template = "%s belongs at %s."
+veil_note_shared_station_template = "%s and %s share %s."
 between_statement_template = "%s rests on the only route between %s and %s."
-outside_loop_statement_template = "%s rests beyond the only closed loop."
 linked_pair_statement_template = "%s has a direct route to both %s and %s."
-path_through_statement_template = "The shortest path from %s to %s passes through %s."
-highest_mark_statement_template = "%s rests at the highest station mark."
-lowest_mark_statement_template = "%s rests at the lowest station mark."
 opposite_mark_statement_template = "%s rests at the station opposite %s."
-same_station_statement_template = "%s and %s rest at the same station."
-shared_station_link_statement_template = "The station shared by %s and %s is joined directly to %s."
 shared_station_counterclockwise_statement_template = "The station shared by %s and %s is one station counterclockwise from %s."
 anomaly_descriptor_by_type = {
 "newspaper_death": "the newspaper victim",
@@ -43,9 +38,6 @@ anomaly_label_by_type = {
 "time_invalid_ticket": "WRONG TICKET DATE",
 "unlisted_destination": "UNLISTED DESTINATION"
 }
-fallback_descriptor_template = "the %s"
-fallback_anomaly_label = "UNRESOLVED ANOMALY"
-duplicate_descriptor_template = "%s who worked as the %s"
 biography_opening_by_occupation = {
 "archivist": PackedStringArray("{name} worked as an archivist, restoring damaged registers and returning misplaced pages to their proper files.", "Colleagues trusted {name} with records that were too fragile to be copied."),
 "bookbinder": PackedStringArray("{name} bound journals and public records in a narrow workshop beside the railway.", "Every finished book carried a small thread mark hidden beneath its back cover."),
@@ -65,11 +57,11 @@ biography_opening_by_occupation = {
 "tailor": PackedStringArray("{name} worked as a tailor near the eastern railway and saved a strip of cloth from every completed order.", "Old fabric was often sewn into the hidden lining of a new coat.")
 }
 anomaly_record_by_type = {
-"newspaper_death": PackedStringArray("A newspaper recovered inside the carriage names {name} as dead before this service reached its final stop.", "The printed occupation and age match {name}'s identity record."),
-"portrait_mismatch": PackedStringArray("The name and number on {name}'s identity card are valid, but the portrait belongs to {portrait_owner}.", "The photograph changes back only when the card is removed from the train."),
+"newspaper_death": PackedStringArray("A newspaper recovered inside the carriage names {name} as dead before this service reached its final stop.", "The printed occupation and age match {name}\'s identity record."),
+"portrait_mismatch": PackedStringArray("The name and number on {name}\'s identity card are valid, but the portrait belongs to {portrait_owner}.", "The photograph changes back only when the card is removed from the train."),
 "shadowless": PackedStringArray("Platform footage shows light falling clearly behind {name}, yet no shadow forms beneath the body.", "The empty patch follows {name} through every carriage."),
-"time_invalid_ticket": PackedStringArray("{name}'s ticket is printed for {ticket_date}, a date outside today's service.", "The ticket stock and serial number are otherwise genuine."),
-"unlisted_destination": PackedStringArray("{name}'s ticket names {destination}, which is absent from every destination on the daytime route.", "The letters remain legible even when the ticket is held against the route map.")
+"time_invalid_ticket": PackedStringArray("{name}\'s ticket is printed for {ticket_date}, a date outside today\'s service.", "The ticket stock and serial number are otherwise genuine."),
+"unlisted_destination": PackedStringArray("{name}\'s ticket names {destination}, which is absent from every destination on the daytime route.", "The letters remain legible even when the ticket is held against the route map.")
 }
 resonance_medium_by_occupation = {
 "archivist": "After the veil, a sentence appears between two entries in {name}'s restored register.",
@@ -89,11 +81,12 @@ resonance_medium_by_occupation = {
 "surveyor": "After the veil, a sentence follows the edge of {name}'s unfinished boundary map.",
 "tailor": "After the veil, unfamiliar words appear as stitches inside {name}'s unfinished lining."
 }
-generic_biography_opening = PackedStringArray("{name} spent years working as a {occupation} near the railway.", "A small collection of work notes was found among {name}'s belongings.")
-generic_anomaly_record = PackedStringArray("Something in {name}'s travel record cannot be explained by the daytime service.", "The evidence remains unchanged after the train crosses the veil.")
+generic_biography_opening = PackedStringArray("{name} spent years working as a {occupation} near the railway.", "A small collection of work notes was found among {name}\'s belongings.")
+generic_anomaly_record = PackedStringArray("Something in {name}\'s travel record cannot be explained by the daytime service.", "The evidence remains unchanged after the train crosses the veil.")
 generic_resonance_medium = "After the veil, a new sentence appears among {name}'s belongings."
 resonance_closing_sentence = "The writing was not present before the train crossed the veil and fades anywhere outside the carriage."
 biography_opening_support = PackedStringArray("Several surviving pages contain circles, crossed-out route marks, and small corrections whose purpose was never explained.")
 biography_evidence_support = PackedStringArray("A second diagram runs toward the edge of the page, where water damage has erased every useful label.")
 biography_veil_support = PackedStringArray("Other marks wander across the page without forming a complete route, then disappear when the carriage lights return.")
-hidden_statement_context_by_paragraph = PackedStringArray("An old note in {name}'s files reads: {statement}.", "Beside the copied evidence, {name} wrote: {statement}.", "Beyond the veil, {name}'s faded page reveals: {statement}.")
+hidden_statement_context_by_paragraph = null
+hidden_statement_context_variants_by_paragraph = Array[PackedStringArray]([PackedStringArray("Among {name}\'s surviving work notes is a line claiming that {statement}.", "A margin beside {name}\'s unfinished work preserves the conclusion that {statement}.", "One detail recurs throughout {name}\'s private records: {statement}."), PackedStringArray("A pencilled conclusion beside {name}\'s evidence insists that {statement}.", "The final annotation attached to {name}\'s record suggests that {statement}.", "Pressed faintly beneath the official report is the claim that {statement}."), PackedStringArray("As the carriage crosses the veil, the marks around {name}\'s belongings settle around one certainty: {statement}.", "Under the night carriage lights, {name}\'s unfinished pattern resolves and shows that {statement}.", "For a moment, the traces left with {name} align around the idea that {statement}.")])

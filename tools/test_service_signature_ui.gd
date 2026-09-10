@@ -1,5 +1,5 @@
 extends SceneTree
-## Covers the daytime watcher, scene-authored trace patterns, and station skip.
+## Covers the daytime service button, scene-authored trace patterns, and station skip.
 
 const MainScene = preload("res://scenes/main/main.tscn")
 
@@ -27,27 +27,35 @@ func _run() -> void:
 	await process_frame
 	game._active_modal = null
 	game.state = AfterTheEndGame.GameState.DAY
-	var watcher: Variant = game.get_node("%NightLedgerGuardian")
+	var service_button := game._hud.get_node("%ServiceActionButton") as Button
+	var guidebook_button := game._hud.get_node("%GuidebookButton") as Button
 	var signature: Variant = game.get_node("%ServiceSignatureUI")
 	var pause_ui := game.get_node("%PauseUI") as PauseUI
-	watcher.set_shift_active(true, false)
-	_check(watcher.visible and watcher.enabled, "The watcher must be available during daytime gameplay.")
-	_check(watcher.get_prompt().contains("Report completed service"), "The daytime watcher must explain its sign-off interaction.")
-	_check((watcher.get_node("%WatcherVisual") as CanvasGroup).modulate.a < 0.8, "The daytime watcher must remain visibly translucent.")
+	game._hud.set_day_hud_visible(true)
+	_check(game.get_node_or_null("%NightLedgerGuardian") == null, "The in-world watcher must be removed from gameplay.")
+	_check(service_button.visible and not service_button.disabled, "The service button must be available during daytime gameplay.")
+	_check(service_button.tooltip_text.is_empty(), "The service button must not show a long hover caption over gameplay.")
+	_check(service_button.icon != null and service_button.icon.resource_path.ends_with("Group 176.png"), "The service button must use the Group 176 ledger asset.")
+	_check(service_button.position.y < guidebook_button.position.y, "The service button must sit above the Guidebook button.")
 	_check((pause_ui.get_node("%ResumeButton") as Button).text == "Resume", "The pause menu must expose a Resume text button.")
+	_check(
+		not game._station_stop_ui.show_terminal_title
+		and game._station_stop_ui.terminal_heading_text.is_empty(),
+		"The terminal cutscene must not place EASTMERE copy in the middle of the screen."
+	)
 
-	watcher.interact()
+	service_button.pressed.emit()
 	await process_frame
-	_check(signature.visible, "Consulting the watcher during daylight must open service sign-off.")
+	_check(signature.visible, "Pressing the daytime service button must open service sign-off.")
 	_check(game._active_modal == signature, "Service sign-off must own gameplay input while open.")
 	var close_button := signature.get_node("%CloseButton") as Button
 	close_button.pressed.emit()
 	await process_frame
 	_check(not signature.visible, "The service sign-off close button must close the UI.")
 	_check(game._active_modal == null, "Closing service sign-off must restore modal ownership.")
-	watcher.interact()
+	service_button.pressed.emit()
 	await process_frame
-	_check(signature.visible, "The daytime watcher can reopen service sign-off after closing it.")
+	_check(signature.visible, "The daytime service button can reopen service sign-off after closing it.")
 	signature._on_confirm_pressed()
 	_check(signature._signature_stage.visible, "Confirming completion must reveal the trace stage.")
 	var drawing_center: Vector2 = signature._drawing_area.size * 0.5
@@ -89,9 +97,9 @@ func _run() -> void:
 	_check(game._day_minutes == arrival_minutes, "An accepted signature must fast-forward route time to the next arrival.")
 	_check(game._station_arrival_announced, "An accepted signature must begin the normal next-station sequence.")
 	_check(game._active_modal == game._station_stop_ui, "Fast-forward must enter the existing station cutscene flow.")
-	_check(not watcher.visible and not watcher.enabled, "The watcher must hide during a station cutscene.")
+	_check(not (game._hud.get_node("%Root") as Control).visible, "The service button must hide with the HUD during a station cutscene.")
 
 	game.free()
 	if _failures == 0:
-		print("PASS: daytime watcher, Resume button, service trace, and station fast-forward.")
+		print("PASS: daytime service button, Resume button, trace, and station fast-forward.")
 	quit(1 if _failures > 0 else 0)

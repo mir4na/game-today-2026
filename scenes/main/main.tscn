@@ -49,7 +49,6 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/swiftstep_effect_ui.tscn" id="46_swiftstep_effect"]
 [ext_resource type="PackedScene" uid="uid://bn7q3awivg60d" path="res://scenes/ui/night_soul_record_ui.tscn" id="47_soul_record"]
 [ext_resource type="PackedScene" path="res://scenes/ui/veil_note_reveal_ui.tscn" id="48_veil_note_reveal"]
-[ext_resource type="PackedScene" path="res://scenes/interactables/night_ledger_guardian.tscn" id="49_night_guardian"]
 [ext_resource type="PackedScene" path="res://scenes/ui/service_signature_ui.tscn" id="50_signature_ui"]
 [ext_resource type="Material" path="res://resources/materials/screen_bloom.tres" id="47_screen_bloom"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hint.tscn" id="51_hint_ui"]
@@ -212,10 +211,15 @@ passenger_scene = ExtResource("34")
 manifest_config = ExtResource("37")
 day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere")
 station_travel_durations_seconds = PackedFloat32Array(120, 120, 120, 120)
+level_two_blocked_first_delay_seconds = 10.0
+level_two_blocked_repeat_delay_seconds = 50.0
+level_three_clean_first_delay_seconds = 10.0
+level_three_clean_second_delay_seconds = 60.0
+clean_seat_route_edge_clearance_seconds = 20.0
 maintenance_event_clearance = 14.0
 debug_print_anomaly_roster = true
 night_shift_instruction = "Night shift · 03:00
-Read each soul's record, then consult the watcher"
+Read each soul's record, then open the station ledger"
 
 [node name="MarketToolState" parent="." unique_id=1541596097 instance=ExtResource("40_market_state")]
 unique_name_in_owner = true
@@ -291,12 +295,6 @@ editor_description = "Player and runtime passengers follow the exact station tra
 
 [node name="Passengers" type="Node2D" parent="GameplayWorld/TrainOccupants" unique_id=1237360660]
 unique_name_in_owner = true
-
-[node name="NightLedgerGuardian" parent="GameplayWorld/TrainOccupants" unique_id=1945125465 instance=ExtResource("49_night_guardian")]
-unique_name_in_owner = true
-editor_description = "Day/night watcher position. Move this instantiated node in the 2D editor or edit Transform > Position in the Inspector. Keep Y near 430 so its feet remain on the carriage floor."
-position = Vector2(383, 438)
-scale = Vector2(-1, 1)
 
 [node name="PlayerSpawnPoint" type="Marker2D" parent="GameplayWorld/TrainOccupants" unique_id=1158105950]
 editor_description = "Move this Marker2D in the Inspector to set the player's initial position inside the front passenger coach."
@@ -481,7 +479,6 @@ unique_name_in_owner = true
 
 [connection signal="inventory_changed" from="MarketToolState" to="." method="_on_market_inventory_changed"]
 [connection signal="camera_handoff_finished" from="GameplayWorld/StationCinematicView" to="." method="_on_station_cinematic_camera_handoff_finished"]
-[connection signal="consulted" from="GameplayWorld/TrainOccupants/NightLedgerGuardian" to="." method="_on_watcher_consulted"]
 [connection signal="interaction_pressed" from="GameplayWorld/TrainOccupants/PlayerSpawnPoint/Player" to="." method="_on_interaction_pressed"]
 [connection signal="nearby_interactable_changed" from="GameplayWorld/TrainOccupants/PlayerSpawnPoint/Player" to="." method="_on_nearby_interactable_changed"]
 [connection signal="exterior_fade_out_finished" from="GameplayWorld/Train" to="." method="_on_train_exterior_fade_out_finished"]
@@ -492,6 +489,7 @@ unique_name_in_owner = true
 [connection signal="debug_next_station_requested" from="HUD" to="." method="_on_debug_next_station_requested"]
 [connection signal="debug_night_requested" from="HUD" to="." method="_on_debug_night_requested"]
 [connection signal="guidebook_requested" from="HUD" to="." method="_on_guidebook_requested"]
+[connection signal="service_action_requested" from="HUD" to="." method="_on_service_action_requested"]
 [connection signal="closed" from="ModalLayer/DocumentOverlayUI" to="." method="_on_modal_closed"]
 [connection signal="station_assignment_toggled" from="ModalLayer/DocumentOverlayUI" to="." method="_on_station_assignment_toggled"]
 [connection signal="station_stamp_applied" from="ModalLayer/DocumentOverlayUI" to="." method="_on_station_stamp_applied"]

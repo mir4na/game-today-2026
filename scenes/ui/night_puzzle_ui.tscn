@@ -13,7 +13,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/components/round_close_button.tscn" id="19_close"]
 [ext_resource type="Script" uid="uid://fgch1jgxeocf" path="res://scripts/ui/hover_scale_button.gd" id="20_hover"]
 [ext_resource type="PackedScene" uid="uid://c83gsm8nuq8ip" path="res://scenes/ui/night_station_paths/night_station_path_level_1.tscn" id="21_path_1"]
-[ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_2.tscn" id="22_path_2"]
+[ext_resource type="PackedScene" uid="uid://dvcw3ybsybkow" path="res://scenes/ui/night_station_paths/night_station_path_level_2.tscn" id="22_path_2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_3.tscn" id="23_path_3"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_4.tscn" id="24_path_4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/night_station_paths/night_station_path_level_5.tscn" id="25_path_5"]
@@ -273,6 +273,18 @@ texture = ExtResource("3_map_paper")
 expand_mode = 1
 stretch_mode = 6
 
+[node name="ValidationMapShade" type="ColorRect" parent="BoardAnchor/StationPathAnchor" unique_id=1699062031]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0)
+z_index = -1
+layout_mode = 0
+offset_left = 366.0
+offset_top = 18.0
+offset_right = 1258.0
+offset_bottom = 702.0
+mouse_filter = 2
+color = Color(0.027451, 0.0705882, 0.137255, 0.92)
+
 [node name="PathLayoutHost" type="Control" parent="BoardAnchor/StationPathAnchor" unique_id=239346585]
 unique_name_in_owner = true
 layout_mode = 1
@@ -304,15 +316,14 @@ horizontal_alignment = 1
 [node name="SelectionLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=1103657674]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 464.0
+offset_left = 514.0
 offset_top = 601.0
-offset_right = 897.0
+offset_right = 832.0
 offset_bottom = 626.0
 theme_override_colors/font_color = Color(0.364706, 0.294118, 0.270588, 1)
 theme_override_fonts/font = ExtResource("17_medium")
 theme_override_font_sizes/font_size = 24
 text = "Drag each soul to a station."
-horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="AssignmentCountLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=259874943]
@@ -393,10 +404,11 @@ vertical_alignment = 1
 
 [node name="CloseButton" parent="BoardAnchor/StationPathAnchor" unique_id=145186199 instance=ExtResource("19_close")]
 layout_mode = 0
-offset_left = 1184.0
-offset_top = 24.0
-offset_right = 1238.0
-offset_bottom = 78.0
+offset_left = 1161.0
+offset_top = 48.0
+offset_right = 1217.0
+offset_bottom = 104.0
+scale = Vector2(1.2, 1.2)
 tooltip_text = "Close Night Ledger [E]"
 
 [node name="MapTitle" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=67688186]
