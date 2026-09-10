@@ -124,13 +124,14 @@ func _run() -> void:
 			)
 			var camera_offset_before_success: Vector2 = game._gameplay_camera.offset
 			reader._on_sentence_clicked(correct_sentence_index)
-			_check(reader._correct_reveal_characters >= 0, "A correct statement must begin its typewriter reveal.")
+			_check(reader._correct_reveal_characters >= 0, "A correct statement must begin its extraction animation.")
 			_check(
-				biography_text.text.contains("[bgcolor=#%s][color=#%s]" % [
-					reader.correct_highlight_background.to_html(false),
-					reader.correct_highlight_text_color.to_html(false),
-				]),
-				"A correct statement must switch to a black highlight with white text."
+				not biography_text.text.contains(puzzle.get_statement_for_passenger(inspected_name)),
+				"A correct statement must leave a blank space in the biography after extraction begins."
+			)
+			_check(
+				reader._flying_letters.size() > 0,
+				"A correct statement must send letter sprites toward the ledger button."
 			)
 			_check(game._collected_departure_statements.has(inspected_name), "Clicking the embedded clue must record it in the Night Ledger.")
 			_check(
@@ -163,13 +164,13 @@ func _run() -> void:
 				"An accepted sentence must produce a visible green feedback flash."
 			)
 			_check(
-				game._gameplay_camera.offset.distance_to(camera_offset_before_success) < 0.1,
-				"An accepted sentence must not shake the gameplay camera."
+				game._gameplay_camera.offset.distance_to(camera_offset_before_success) > 0.1,
+				"An accepted sentence must add a camera impact."
 			)
-			await create_timer(reader.correct_typewriter_seconds + 0.1).timeout
+			await create_timer(reader.statement_extract_seconds + reader.letter_stagger_seconds * float(reader._correct_statement.length()) + 0.1).timeout
 			_check(
-				biography_text.text.contains(puzzle.get_statement_for_passenger(inspected_name)),
-				"The full correct statement must remain readable after the typewriter reveal."
+				not biography_text.text.contains(puzzle.get_statement_for_passenger(inspected_name)),
+				"The extracted statement must stay blank inside the biography."
 			)
 		reader.request_close()
 		await create_timer(0.45).timeout

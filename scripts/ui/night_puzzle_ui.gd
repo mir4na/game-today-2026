@@ -46,8 +46,9 @@ var _validating: bool = false
 var _focus_tween: Tween
 var _map_impact_tween: Tween
 var _ledger_rest_position: Vector2
-var _station_path_rest_position: Vector2
-var _station_path_rest_scale: Vector2
+var _station_path_authored_position: Vector2
+var _station_path_authored_scale: Vector2
+var _station_path_authored_pivot: Vector2
 var _current_instruction: String = ""
 var _station_path_layout: NightStationPathLayout
 var _station_targets: Array[NightStationTarget] = []
@@ -85,9 +86,9 @@ var _validation_fuse_points := PackedVector2Array()
 
 func _ready() -> void:
 	_ledger_rest_position = _ledger_anchor.position
-	_station_path_rest_position = _station_path_anchor.position
-	_station_path_rest_scale = _station_path_anchor.scale
-	_station_path_anchor.pivot_offset = station_path_focus_pivot
+	_station_path_authored_position = _station_path_anchor.position
+	_station_path_authored_scale = _station_path_anchor.scale
+	_station_path_authored_pivot = _station_path_anchor.pivot_offset
 	_current_instruction = instruction_text
 	_instruction_label.text = _current_instruction
 	for card: NightPassengerCard in _passenger_cards:
@@ -409,7 +410,7 @@ func play_validation(station_results: Dictionary, attempt_count: int) -> void:
 func _focus_station_path() -> void:
 	if is_instance_valid(_focus_tween) and _focus_tween.is_valid():
 		_focus_tween.kill()
-	_station_path_anchor.pivot_offset = station_path_focus_pivot
+	_set_station_path_pivot_preserving_visual(station_path_focus_pivot)
 	_focus_tween = create_tween().set_parallel(true)
 	_focus_tween.tween_property(
 		_ledger_anchor,
@@ -423,13 +424,13 @@ func _focus_station_path() -> void:
 	_focus_tween.tween_property(
 		_station_path_anchor,
 		^"position",
-		_station_path_rest_position + station_path_focus_offset,
+		_station_path_authored_position + station_path_focus_offset,
 		focus_transition_seconds
 	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	_focus_tween.tween_property(
 		_station_path_anchor,
 		^"scale",
-		_station_path_rest_scale * station_path_focus_scale,
+		_station_path_authored_scale * station_path_focus_scale,
 		focus_transition_seconds
 	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_focus_tween.tween_property(
@@ -567,9 +568,9 @@ func _on_station_validation_impact(succeeded: bool) -> void:
 	validation_impact_requested.emit(succeeded)
 	if is_instance_valid(_map_impact_tween) and _map_impact_tween.is_valid():
 		_map_impact_tween.kill()
-	var base_position: Vector2 = _station_path_rest_position + station_path_focus_offset
+	var base_position: Vector2 = _station_path_authored_position + station_path_focus_offset
 	var strength: float = 7.0 if succeeded else 4.0
-	_station_path_anchor.pivot_offset = station_path_focus_pivot
+	_set_station_path_pivot_preserving_visual(station_path_focus_pivot)
 	_map_impact_tween = create_tween()
 	for direction: Vector2 in [Vector2(-1.0, 0.25), Vector2(0.72, -0.38), Vector2(-0.35, 0.2)]:
 		_map_impact_tween.tween_property(
@@ -611,9 +612,9 @@ func _reset_validation_presentation() -> void:
 		_focus_tween.kill()
 	_ledger_anchor.position = _ledger_rest_position
 	_ledger_anchor.modulate.a = 1.0
-	_station_path_anchor.position = _station_path_rest_position
-	_station_path_anchor.scale = _station_path_rest_scale
-	_station_path_anchor.pivot_offset = station_path_focus_pivot
+	_station_path_anchor.position = _station_path_authored_position
+	_station_path_anchor.scale = _station_path_authored_scale
+	_station_path_anchor.pivot_offset = _station_path_authored_pivot
 	for control: CanvasItem in _validation_chrome():
 		control.modulate.a = 1.0
 	_validation_light.hide()
@@ -648,14 +649,29 @@ func _assigned_passenger_count() -> int:
 	return seen.size()
 
 
+func _set_station_path_pivot_preserving_visual(new_pivot: Vector2) -> void:
+	if not is_instance_valid(_station_path_anchor):
+		return
+	var old_pivot: Vector2 = _station_path_anchor.pivot_offset
+	if old_pivot.is_equal_approx(new_pivot):
+		return
+	var current_scale: Vector2 = _station_path_anchor.scale
+	var old_visual_origin: Vector2 = _station_path_anchor.position + Vector2(
+		(1.0 - current_scale.x) * old_pivot.x,
+		(1.0 - current_scale.y) * old_pivot.y
+	)
+	_station_path_anchor.pivot_offset = new_pivot
+	_station_path_anchor.position = old_visual_origin - Vector2(
+		(1.0 - current_scale.x) * new_pivot.x,
+		(1.0 - current_scale.y) * new_pivot.y
+	)
+
+
 func _present_board() -> void:
-	_board_anchor.pivot_offset = _board_anchor.size * 0.5
+	_board_anchor.scale = Vector2.ONE
 	_board_anchor.modulate.a = 0.0
-	_board_anchor.scale = Vector2(0.97, 0.97)
 	var tween: Tween = create_tween()
 	tween.tween_property(_board_anchor, ^"modulate:a", 1.0, 0.2)
-	tween.parallel().tween_property(_board_anchor, ^"scale", Vector2.ONE, 0.3) \
-		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _unhandled_input(event: InputEvent) -> void:

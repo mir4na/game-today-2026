@@ -6,7 +6,7 @@ signal purchase_requested(tool_id: StringName)
 signal continue_requested
 
 @export_category("Inspector Copy")
-@export var blessings_template: String = "Blessings  %d"
+@export var blessings_template: String = "%d"
 @export var veil_note_stock_template: String = "%d / 1 owned  •  %d Blessings"
 @export var radar_stock_template: String = "%d / %d owned  •  %d Blessings"
 @export var swift_stock_template: String = "%d / %d owned  •  Speed ×3 for 10 seconds  •  %d Blessings"

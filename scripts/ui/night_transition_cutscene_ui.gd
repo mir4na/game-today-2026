@@ -13,6 +13,7 @@ signal sequence_finished
 @export var transition_animation: StringName = &"transition"
 @export_range(0.0, 30.0, 0.05) var veil_crossing_time: float = 5.25
 @export_category("Market Whiteout")
+@export_range(0.0, 5.0, 0.05) var pre_market_white_hold_seconds: float = 1.0
 @export_range(0.0, 5.0, 0.05) var white_screen_hold_seconds: float = 1.0
 @export_range(0.1, 3.0, 0.05) var post_market_fade_seconds: float = 1.15
 @export_range(0.0, 5.0, 0.05) var night_reveal_hold_seconds: float = 1.0
@@ -41,6 +42,7 @@ var _departure_follow_requested: bool = false
 var _camera_return_requested: bool = false
 var _finished: bool = false
 var _market_whiteout_active: bool = false
+var _whiteout_reached_emitted: bool = false
 var _resuming_after_market: bool = false
 var _camera_return_completed: bool = false
 
@@ -56,6 +58,7 @@ func play_transition() -> void:
 	_camera_return_requested = false
 	_finished = false
 	_market_whiteout_active = false
+	_whiteout_reached_emitted = false
 	_resuming_after_market = false
 	_camera_return_completed = false
 	show()
@@ -159,6 +162,17 @@ func _hold_at_market_whiteout() -> void:
 	_bottom_bar.self_modulate.a = 0.0
 	set_process(false)
 	_emit_veil_crossed()
+	_emit_whiteout_reached_after_hold()
+
+
+func _emit_whiteout_reached_after_hold() -> void:
+	if _whiteout_reached_emitted:
+		return
+	_whiteout_reached_emitted = true
+	if pre_market_white_hold_seconds > 0.0:
+		await get_tree().create_timer(pre_market_white_hold_seconds).timeout
+	if _finished or not _market_whiteout_active or not is_inside_tree():
+		return
 	whiteout_reached.emit()
 
 

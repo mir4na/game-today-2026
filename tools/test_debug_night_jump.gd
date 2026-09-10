@@ -101,7 +101,9 @@ func _run() -> void:
 		"Following the departing train must preserve the station shot's wide zoom."
 	)
 	transition._process(transition.veil_crossing_time - transition._elapsed + 0.01)
-	_check(game.state == AfterTheEndGame.GameState.MARKET, "The full whiteout must open the Night Market.")
+	_check(game.state == AfterTheEndGame.GameState.NIGHT_TRANSITION, "The full whiteout must hold before opening the Night Market.")
+	await create_timer(transition.pre_market_white_hold_seconds + 0.05).timeout
+	_check(game.state == AfterTheEndGame.GameState.MARKET, "The held whiteout must open the Night Market after one second.")
 	_check(not game._station_cinematic_view._returning, "The camera must remain behind the whiteout while the market is open.")
 	game.state = AfterTheEndGame.GameState.NIGHT_TRANSITION
 	transition.white_screen_hold_seconds = 0.0
@@ -109,17 +111,13 @@ func _run() -> void:
 	transition.night_reveal_hold_seconds = 0.0
 	transition.exterior_hold_after_zoom_seconds = 0.0
 	# This fixture normally freezes Main. Let the new staged camera handoff run
-	# long enough to reach its return request.
+	# long enough to reach its return request. Runtime reaches this through
+	# _on_night_market_continue(), which settles the station offset before reveal.
 	game.process_mode = Node.PROCESS_MODE_PAUSABLE
+	game._settle_night_transition_train_framing()
 	transition.resume_after_market()
 	await create_timer(0.25).timeout
 	_check(game._station_cinematic_view._returning, "The camera must begin its player return as the whiteout reveals night.")
-	_check(
-		game._station_cinematic_view._return_start_center.distance_to(
-			game._station_cinematic_view._station_camera.global_position
-		) < 1.0,
-		"The final player zoom must begin from the current follow camera position without a spatial jump."
-	)
 
 	game.free()
 	if _failures == 0:

@@ -101,6 +101,7 @@ var _station_cutscene_context: StringName = &""
 var _station_cutscene_timeline_complete: bool = false
 var _station_camera_return_complete: bool = false
 var _station_cutscene_motion_strength: float = 1.0
+var _station_vertical_settle_tween: Tween
 var _station_gameplay_actors_hidden: bool = false
 var _station_foreground_hidden: bool = false
 var _station_railroad_was_visible: bool = true
@@ -1373,7 +1374,8 @@ func _on_night_passenger_interacted(passenger: Passenger) -> void:
 		&"open_record",
 		passenger.data,
 		puzzle,
-		_collected_departure_statements.has(passenger_name)
+		_collected_departure_statements.has(passenger_name),
+		_hud.get_night_ledger_button_center()
 	)
 
 func _close_night_statement_dialogue() -> void:
@@ -1405,10 +1407,7 @@ func _on_night_statement_recorded(passenger_name: String, statement: String) -> 
 
 
 func _on_night_statement_feedback_requested(succeeded: bool) -> void:
-	# Correct statements use the Soul Record's green confirmation flash. Camera
-	# shake is reserved for rejected sentences so success remains comfortable.
-	if not succeeded:
-		_shake_night_record_camera(16.0)
+	_shake_night_record_camera(13.0 if succeeded else 16.0)
 
 
 func _on_night_validation_impact_requested(succeeded: bool) -> void:
@@ -1836,7 +1835,48 @@ func _on_station_cutscene_timeline_changed(elapsed: float) -> void:
 
 
 func _on_station_cutscene_camera_return_started() -> void:
+	_settle_station_cutscene_train_framing()
 	_station_cinematic_view.return_to_gameplay()
+
+
+func _settle_station_cutscene_train_framing() -> void:
+	if _station_cutscene_context not in [&"opening", &"station_exchange"]:
+		return
+	if is_instance_valid(_station_vertical_settle_tween) and _station_vertical_settle_tween.is_valid():
+		_station_vertical_settle_tween.kill()
+	# The cutscene parks Cars 24px above gameplay rest. Snapping that offset
+	# at return start pops the visible train while the wide camera is still
+	# active. Capture the post-snap handoff first (synchronous, nothing is
+	# rendered in between), then glide the train down in sync with the camera.
+	_train.set_station_vertical_offset_enabled(false)
+	_station_cinematic_view.align_handoff_vertical_to_gameplay()
+	_train.set_station_vertical_offset_enabled(true)
+	_train.set_station_vertical_blend(1.0)
+	var duration: float = maxf(_station_cinematic_view.return_duration, 0.05)
+	_station_vertical_settle_tween = create_tween()
+	_station_vertical_settle_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_station_vertical_settle_tween.tween_method(_update_station_vertical_settle, 0.0, 1.0, duration)
+	_station_vertical_settle_tween.tween_callback(_finish_station_vertical_settle)
+
+
+func _update_station_vertical_settle(progress: float) -> void:
+	# Mirror StationCinematicView's smoothstep so the train settles on the
+	# same beat as the camera push-in.
+	var clamped: float = clampf(progress, 0.0, 1.0)
+	var eased: float = clamped * clamped * (3.0 - 2.0 * clamped)
+	_train.set_station_vertical_blend(1.0 - eased)
+
+
+func _finish_station_vertical_settle() -> void:
+	_train.set_station_vertical_blend(0.0)
+	_train.set_station_vertical_offset_enabled(false)
+
+
+func _snap_station_vertical_settle() -> void:
+	if is_instance_valid(_station_vertical_settle_tween) and _station_vertical_settle_tween.is_valid():
+		_station_vertical_settle_tween.kill()
+	_train.set_station_vertical_blend(0.0)
+	_train.set_station_vertical_offset_enabled(false)
 
 
 func _on_station_cutscene_skip_requested() -> void:
@@ -1847,6 +1887,7 @@ func _on_station_cutscene_skip_requested() -> void:
 		_try_complete_station_cutscene()
 		return
 	# Other station skips land on the exact gameplay composition on this frame.
+	_snap_station_vertical_settle()
 	_station_cinematic_view.skip_to_gameplay()
 
 
@@ -1923,6 +1964,7 @@ func _on_station_stop_finished() -> void:
 		_update_passenger_minimap()
 		_finalize_day_shift()
 		return
+	_snap_station_vertical_settle()
 	_train.hide_exterior_body()
 	_station_cinematic_view.finish()
 	_set_station_foreground_hidden(false)
@@ -2278,7 +2320,8 @@ func _on_night_transition_finished() -> void:
 	_finish_terminal_night_transition_world()
 	_enter_night(false, false)
 	_hud.set_cutscene_hidden(false)
-	_hud.notify(night_shift_instruction, 5.0)
+	if not night_shift_instruction.strip_edges().is_empty():
+		_hud.notify(night_shift_instruction, 5.0)
 	_set_player_control_for_state()
 
 
@@ -2337,7 +2380,15 @@ func _on_night_market_continue() -> void:
 	await get_tree().create_timer(fog_release_seconds, false).timeout
 	if state != GameState.NIGHT_TRANSITION:
 		return
+	_settle_night_transition_train_framing()
 	_night_transition_ui.resume_after_market()
+
+
+func _settle_night_transition_train_framing() -> void:
+	if not _terminal_station_waiting_for_night_transition:
+		return
+	_train.set_station_vertical_offset_enabled(false)
+	_station_cinematic_view.align_handoff_vertical_to_gameplay()
 
 
 func _on_market_inventory_changed(snapshot: Dictionary) -> void:
@@ -2474,7 +2525,7 @@ func _enter_night(enable_controls: bool = true, show_instruction: bool = true) -
 	# the three-minute service window instead of jumping straight to 180 degrees.
 	_hud.set_clock_progress(_night_service_clock_progress())
 	_pause_ui.set_night_mode(true)
-	if show_instruction:
+	if show_instruction and not night_shift_instruction.strip_edges().is_empty():
 		_hud.notify(night_shift_instruction, 5.0)
 	if enable_controls:
 		_set_player_control_for_state()

@@ -180,6 +180,18 @@ func _process(_delta: float) -> void:
 		_follow_gameplay_camera_transform()
 
 
+func align_handoff_vertical_to_gameplay() -> void:
+	if not _active or not is_instance_valid(_source_camera):
+		return
+	var anchor: Node2D = _handoff_anchor if is_instance_valid(_handoff_anchor) else _source_camera
+	if not is_instance_valid(anchor):
+		return
+	var gameplay_center: Vector2 = _bounded_camera_center(anchor.global_position)
+	_handoff_composition_offset.y = gameplay_center.y - anchor.global_position.y
+	_handoff_composition_captured = true
+	sync_follow_target()
+
+
 func sync_follow_target() -> void:
 	# Train travel offsets are signal-driven. Sync immediately on that signal so
 	# a large skipped timeline step cannot leave the cinematic camera one frame

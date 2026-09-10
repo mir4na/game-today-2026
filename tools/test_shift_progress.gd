@@ -113,6 +113,7 @@ func _run() -> void:
 	game._on_shift_report_continue()
 	_check(game.state == AfterTheEndGame.GameState.NIGHT_TRANSITION, "Passing starts the terminal-to-night transition after the paycheck.")
 	_check(game._night_transition_ui.visible, "The veil transition appears before the Night Market.")
+	game._night_transition_ui.pre_market_white_hold_seconds = 0.0
 	game._night_transition_ui.skip_sequence()
 	_check(game.state == AfterTheEndGame.GameState.MARKET, "Completing the transition opens the Night Market.")
 	_check(game._night_market_ui.visible, "The Night Market opens after the train crosses the veil.")

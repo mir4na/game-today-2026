@@ -17,8 +17,10 @@
 [ext_resource type="Texture2D" uid="uid://niwkp5sxhluv" path="res://assets/nightmarket/Light_6.png" id="15_light6"]
 [ext_resource type="Texture2D" uid="uid://hcwe8cbeqjnc" path="res://assets/nightmarket/Light_7.png" id="16_light7"]
 [ext_resource type="Texture2D" uid="uid://btq1y6yvcs04p" path="res://assets/nightmarket/Pintu.png" id="17_door"]
+[ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="18_cgthx"]
 [ext_resource type="Shader" uid="uid://dq13hfpieecwx" path="res://shaders/night_atmosphere.gdshader" id="18_fog_shader"]
 [ext_resource type="Script" uid="uid://fgch1jgxeocf" path="res://scripts/ui/hover_scale_button.gd" id="19_hover"]
+[ext_resource type="Texture2D" uid="uid://dluipv7wt56w1" path="res://assets/ui/Group 43.png" id="20_n4jxj"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_background"]
 shader = ExtResource("3_background_shader")
@@ -514,40 +516,49 @@ offset_right = 360.0
 offset_bottom = 68.0
 theme_type_variation = &"HeaderLabel"
 theme_override_colors/font_color = Color(0.952941, 0.847059, 0.427451, 1)
-theme_override_font_sizes/font_size = 32
-text = "Night market"
+theme_override_fonts/font = ExtResource("18_cgthx")
+theme_override_font_sizes/font_size = 48
+text = "Secret Market"
 
 [node name="RewardLabel" type="Label" parent="HeaderRoot" unique_id=413820279]
 layout_mode = 0
 offset_left = 36.0
-offset_top = 69.0
-offset_right = 620.0
-offset_bottom = 96.0
+offset_top = 89.0
+offset_right = 523.0
+offset_bottom = 116.0
 theme_override_colors/font_color = Color(0.776471, 0.827451, 0.807843, 1)
-theme_override_font_sizes/font_size = 14
-text = "Choose what you need before night service"
+theme_override_font_sizes/font_size = 20
+text = "Choose what you need before finished your shift."
 
 [node name="BlessingsLabel" type="Label" parent="HeaderRoot" unique_id=1819881744]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 880.0
-offset_top = 29.0
-offset_right = 1160.0
-offset_bottom = 66.0
+offset_left = 1103.0
+offset_top = 41.0
+offset_right = 1244.0
+offset_bottom = 78.0
 theme_override_colors/font_color = Color(0.952941, 0.847059, 0.427451, 1)
-theme_override_font_sizes/font_size = 22
-horizontal_alignment = 2
+theme_override_font_sizes/font_size = 36
+text = "100"
 
 [node name="ContinueButton" type="Button" parent="HeaderRoot" unique_id=2133130603]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 1012.0
-offset_top = 82.0
+offset_top = 107.0
 offset_right = 1244.0
-offset_bottom = 135.0
+offset_bottom = 160.0
 mouse_default_cursor_shape = 2
 text = "Begin night shift"
 script = ExtResource("19_hover")
+
+[node name="BlessingTexture" type="TextureRect" parent="HeaderRoot" unique_id=1443285637]
+layout_mode = 0
+offset_left = 1020.0
+offset_top = 12.0
+offset_right = 1104.0
+offset_bottom = 96.0
+texture = ExtResource("20_n4jxj")
 
 [node name="TransitionFog" type="Control" parent="." unique_id=324671765]
 unique_name_in_owner = true
@@ -606,6 +617,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 1.0
+offset_right = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
