@@ -270,7 +270,6 @@ size = Vector2(934, 23)
 script = ExtResource("1")
 carriage_type = "conductor"
 sway_root_path = NodePath("ArtRoot")
-night_overlay_path = NodePath("ArtRoot/NightOverlay")
 window_light_root_path = NodePath("ArtRoot/Interior/WindowLightRoot")
 exterior_visual_path = NodePath("ArtRoot/Exterior")
 exterior_door_visual_path = NodePath("ArtRoot/Exterior/ClosedDoors")
@@ -438,15 +437,6 @@ texture = ExtResource("11_underframe")
 position = Vector2(749.95374, 567)
 scale = Vector2(0.3737353, 0.371)
 texture = ExtResource("11_underframe")
-
-[node name="NightOverlay" type="Polygon2D" parent="ArtRoot" unique_id=1585746021]
-unique_name_in_owner = true
-visible = false
-modulate = Color(1, 1, 1, 0)
-z_index = 7
-position = Vector2(83, -5)
-color = Color(0.0431373, 0.0705882, 0.12549, 0.68)
-polygon = PackedVector2Array(0, 100, 960, 100, 960, 640, 0, 640)
 
 [node name="StaticBody" type="StaticBody2D" parent="." unique_id=777471049]
 collision_layer = 2

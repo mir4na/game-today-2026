@@ -21,15 +21,23 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 ## Travel time per route leg, excluding station cutscenes and pauses.
 @export var station_travel_durations_seconds: PackedFloat32Array = PackedFloat32Array([120.0, 120.0, 120.0, 120.0])
 @export_range(0, 8, 1) var station_sign_blocked_carriage: int = 1
+@export_category("Bloom")
+@export_range(0.0, 1.5, 0.01) var morning_bloom_intensity: float = 0.11
+@export_range(0.0, 1.5, 0.01) var sunset_bloom_intensity: float = 0.27
+@export_range(0.0, 1.5, 0.01) var night_bloom_intensity: float = 0.34
 @export_category("Passenger Placement")
 @export_range(120.0, 240.0, 5.0) var minimum_passenger_seat_spacing: float = 120.0
 @export_category("Maintenance Distractions")
 @export var blocked_aisle_delay_range_seconds: Vector2 = Vector2(9.0, 16.0)
 @export var dirty_seat_delay_range_seconds: Vector2 = Vector2(24.0, 38.0)
+@export_multiline var dirty_seat_passenger_blocked_text: String = "Please clean the dirty seat before checking my ticket."
 @export_category("Market Tools")
 @export_range(0.25, 5.0, 0.05) var radar_scan_seconds: float = 1.6
 @export_range(0.1, 5.0, 0.05) var radar_result_reveal_seconds: float = 1.25
 @export_range(1.0, 30.0, 0.5) var radar_anomaly_light_seconds: float = 4.0
+@export_category("Night Service")
+## Maximum active service time before the departure-assignment ledger opens.
+@export_range(30.0, 600.0, 5.0) var night_service_duration_seconds: float = 180.0
 @export_category("Newspaper")
 @export_enum("Random", "Force Non-Death", "Force Death") var newspaper_edition_mode: int = NewspaperEditionMode.RANDOM
 @export_category("Debug")
@@ -47,6 +55,7 @@ const DAY_SERVICE_FINAL_CYCLE_PROGRESS: float = 1.0
 const SUNSET_STATE_PROGRESS: float = 0.62
 const SERVICE_NIGHT_START_PROGRESS: float = 0.70
 const SERVICE_FULL_NIGHT_PROGRESS: float = 0.98
+const BLOOM_SUNSET_BLEND_START_PROGRESS: float = 0.38
 const TOOL_AUDIT_SLIP: StringName = &"audit_slip"
 const TOOL_RADAR_CHARGE: StringName = &"radar_charge"
 const TOOL_SPEED_UPGRADE: StringName = &"speed_upgrade"
@@ -106,6 +115,9 @@ var _service_seal_active: bool = false
 var _day_blessing_award: Dictionary = {}
 var _night_blessing_award: Dictionary = {}
 var _night_world_prepared: bool = false
+var _night_service_elapsed_seconds: float = 0.0
+var _night_service_expired: bool = false
+var _night_service_timeout_presented: bool = false
 var _radar_scan_active: bool = false
 var _swiftstep_active: bool = false
 var _world_time_scale: float = 1.0
@@ -141,8 +153,12 @@ var _world_time_scale: float = 1.0
 @onready var _railroad_ui_layer: CanvasLayer = $RailroadUILayer
 @onready var _sky_gradient: ColorRect = %NightSkyOverlay
 @onready var _night_atmosphere: ColorRect = %NightAtmosphere
+@onready var _bloom_rect: ColorRect = $BloomLayer/Bloom
+
+var _bloom_material: ShaderMaterial
 
 func _ready() -> void:
+	_configure_bloom_material()
 	_train_occupants_station_rest_position = _train_occupants.position
 	_connect_hud_runtime_signals()
 	if day_route.size() < 2:
@@ -208,6 +224,17 @@ func _connect_hud_runtime_signals() -> void:
 		push_error("Swiftstep Effect UI is missing the effect_finished signal.")
 	elif not _swiftstep_effect_ui.is_connected(&"effect_finished", swiftstep_finished_callback):
 		_swiftstep_effect_ui.connect(&"effect_finished", swiftstep_finished_callback)
+	var background_period_callback := Callable(self, &"_on_travel_background_period_changed")
+	if not _travel_background.is_connected(&"period_changed", background_period_callback):
+		_travel_background.connect(&"period_changed", background_period_callback)
+
+
+func _on_travel_background_period_changed(display_cycle_progress: float) -> void:
+	# The medallion represents the visible world period, not the gameplay state.
+	# This lets it flip during the final daylight route as soon as NightSky is
+	# revealed by the tunnel, before Night Service formally begins.
+	var background_is_night: bool = is_equal_approx(display_cycle_progress, 1.0)
+	_hud.set_clock_night_mode(background_is_night, true)
 
 
 func _process(delta: float) -> void:
@@ -226,6 +253,9 @@ func _process(delta: float) -> void:
 		and _active_modal == null
 		and not _radar_scan_active
 	)
+	if state == GameState.NIGHT:
+		_update_night_service(delta, world_simulation_active)
+		return
 	if state != GameState.DAY and state != GameState.SUNSET:
 		return
 	# A radar scan suspends only route time. Every other gameplay system keeps
@@ -339,13 +369,86 @@ func _day_travel_clock_progress(route_progress: float) -> float:
 	var daylight_steps: int = maxi(day_route.size() - 1, 0)
 	return clampf(route_progress, 0.0, 1.0) * float(daylight_steps) / float(total_clock_steps)
 
+
+func _night_service_clock_progress() -> float:
+	var duration: float = maxf(night_service_duration_seconds, 0.001)
+	var night_ratio: float = clampf(_night_service_elapsed_seconds / duration, 0.0, 1.0)
+	return lerpf(_day_travel_clock_progress(1.0), 1.0, night_ratio)
+
+
+func _update_night_service(delta: float, world_simulation_active: bool) -> void:
+	if _night_service_expired:
+		_present_night_service_timeout()
+		return
+	if not world_simulation_active:
+		return
+	_night_service_elapsed_seconds = minf(
+		_night_service_elapsed_seconds + delta * _world_time_scale,
+		night_service_duration_seconds
+	)
+	_hud.set_clock_progress(_night_service_clock_progress())
+	if _night_service_elapsed_seconds < night_service_duration_seconds:
+		return
+	_night_service_expired = true
+	_hud.notify("Night service complete\nFinalize the departure assignments", 3.5)
+	_present_night_service_timeout()
+
+
+func _present_night_service_timeout() -> void:
+	if (
+		_night_service_timeout_presented
+		or _active_modal != null
+		or _night_statement_active
+		or state != GameState.NIGHT
+	):
+		return
+	_night_service_timeout_presented = true
+	_open_night_puzzle()
+
 func _set_sky_cycle_progress(value: float) -> void:
 	var clamped_progress: float = clampf(value, 0.0, 1.0)
 	_train.set_day_cycle_progress(clamped_progress)
 	_station_cinematic_view.set_cycle_progress(clamped_progress)
+	_set_bloom_cycle_progress(clamped_progress)
 	var sky_material := _sky_gradient.material as ShaderMaterial
 	if sky_material != null:
 		sky_material.set_shader_parameter(&"cycle_progress", clamped_progress)
+
+
+func _configure_bloom_material() -> void:
+	var shared_material := _bloom_rect.material as ShaderMaterial
+	if shared_material == null:
+		return
+	# Gameplay changes bloom throughout the route, so keep its material isolated
+	# from the main-menu bloom that uses the same authored base resource.
+	_bloom_material = shared_material.duplicate() as ShaderMaterial
+	_bloom_rect.material = _bloom_material
+
+
+func _set_bloom_cycle_progress(cycle_progress: float) -> void:
+	if _bloom_material == null:
+		return
+	var sunset_blend: float = smoothstep(
+		BLOOM_SUNSET_BLEND_START_PROGRESS,
+		SUNSET_STATE_PROGRESS,
+		cycle_progress
+	)
+	var daylight_intensity: float = lerpf(
+		morning_bloom_intensity,
+		sunset_bloom_intensity,
+		sunset_blend
+	)
+	var night_blend: float = smoothstep(
+		SERVICE_NIGHT_START_PROGRESS,
+		SERVICE_FULL_NIGHT_PROGRESS,
+		cycle_progress
+	)
+	var bloom_intensity: float = lerpf(
+		daylight_intensity,
+		night_bloom_intensity,
+		night_blend
+	)
+	_bloom_material.set_shader_parameter(&"intensity", bloom_intensity)
 
 
 func _input(event: InputEvent) -> void:
@@ -986,9 +1089,7 @@ func _on_dirty_seat_timer_timeout() -> void:
 
 
 func _clear_dropoff_assignments_for_dirty_seat() -> void:
-	_station_assignment.clear()
 	if is_instance_valid(_inspected_passenger):
-		_document_overlay.configure_station_assignment(false)
 		_document_overlay.configure_stamp_lock(true)
 
 
@@ -1068,6 +1169,7 @@ func _set_service_sealed(value: bool, immediate: bool = false) -> void:
 	_service_seal_active = value
 	_hud.set_service_sealed(value)
 	_refresh_player_interactables(immediate)
+	_refresh_nearby_interactable_prompt()
 
 
 func _refresh_player_interactables(immediate: bool = false) -> void:
@@ -1079,7 +1181,10 @@ func _refresh_player_interactables(immediate: bool = false) -> void:
 			continue
 		var is_allowed: bool = not _service_seal_active or _is_seal_allowed_interactable(interactable)
 		interactable.set_interaction_locked(not is_allowed, immediate)
-		if is_allowed:
+		# Locked passengers remain proximity targets so they can explain the
+		# maintenance block from their own dialogue anchor. The input handler below
+		# still prevents their documents from opening until the seat is clean.
+		if is_allowed or interactable is Passenger:
 			available_interactables.append(interactable)
 	_player.set_interactables(available_interactables)
 
@@ -1099,11 +1204,30 @@ func _on_interaction_pressed(interactable: Interactable) -> void:
 
 func _on_nearby_interactable_changed(interactable: Interactable) -> void:
 	_nearby_interactable = interactable
+	_refresh_nearby_interactable_prompt()
+	_refresh_maintenance_trackers()
+
+
+func _refresh_nearby_interactable_prompt() -> void:
+	if not is_instance_valid(_hud):
+		return
+	var interactable: Interactable = _nearby_interactable
 	_hud.set_prompt(
-		interactable.get_prompt() if interactable != null else "",
+		_get_nearby_interactable_prompt(interactable),
 		_get_interactable_prompt_anchor(interactable)
 	)
-	_refresh_maintenance_trackers()
+
+
+func _get_nearby_interactable_prompt(interactable: Interactable) -> String:
+	if interactable == null:
+		return ""
+	if (
+		_service_seal_active
+		and is_instance_valid(_active_dirty_seat_event)
+		and interactable is Passenger
+	):
+		return dirty_seat_passenger_blocked_text
+	return interactable.get_prompt()
 
 func _get_interactable_prompt_anchor(interactable: Interactable) -> Node2D:
 	if interactable == null:
@@ -1130,7 +1254,7 @@ func _open_passenger_documents(passenger: Passenger) -> void:
 	_hud.set_prompt("")
 	_document_overlay.show_passenger(passenger.data)
 	if state in [GameState.DAY, GameState.SUNSET] and _has_next_day_station() and not _station_exchange_processed:
-		_document_overlay.configure_station_assignment(_station_assignment.has(passenger.data.passenger_name))
+		_document_overlay.configure_station_assignment(not passenger.data.stamped_station.is_empty())
 		_document_overlay.configure_stamp_lock(_is_dropoff_locked())
 
 func _on_night_passenger_interacted(passenger: Passenger) -> void:
@@ -1145,6 +1269,7 @@ func _on_night_passenger_interacted(passenger: Passenger) -> void:
 	var newly_recorded: bool = not statement.is_empty() and not _collected_departure_statements.has(passenger_name)
 	if newly_recorded:
 		_collected_departure_statements[passenger_name] = statement
+	GameSFX.play(&"ghost_whisper", -10.0, 1.0, 0.07, 0.35)
 	_night_statement_active = true
 	_night_statement_newly_recorded = newly_recorded
 	_player.movement_enabled = false
@@ -1163,6 +1288,8 @@ func _close_night_statement_dialogue() -> void:
 	_night_statement_newly_recorded = false
 
 func _on_station_assignment_toggled(passenger_name: String, should_assign: bool) -> void:
+	# Legacy/testing compatibility. The player-facing UI now applies a specific,
+	# permanent station stamp through _on_station_stamp_applied().
 	if state not in [GameState.DAY, GameState.SUNSET] or not _has_next_day_station() or _station_exchange_processed:
 		_hud.notify("THE CURRENT STATION SERVICE RECORD IS ALREADY SEALED", 2.0)
 		return
@@ -1179,12 +1306,41 @@ func _on_station_assignment_toggled(passenger_name: String, should_assign: bool)
 	if should_assign:
 		if assignment_index < 0:
 			_station_assignment.append(canonical_name)
+		passenger.data.stamped_station = _next_day_station()
+		if passenger.data.stamp_ticket_position.is_zero_approx():
+			passenger.data.stamp_ticket_position = Vector2(502.0, 152.0)
 		if passenger.data.is_dead:
 			_record_incorrect_anomaly(passenger.data, _next_day_station())
 	else:
 		if assignment_index >= 0:
 			_station_assignment.remove_at(assignment_index)
+		passenger.data.stamped_station = ""
+		passenger.data.stamp_ticket_position = Vector2.ZERO
 	_document_overlay.configure_station_assignment(_station_assignment.has(canonical_name), true)
+
+
+func _on_station_stamp_applied(passenger_name: String, station_name: String, ticket_position: Vector2) -> void:
+	if state not in [GameState.DAY, GameState.SUNSET] or _station_exchange_processed:
+		_hud.notify("THE CURRENT STATION SERVICE RECORD IS ALREADY SEALED", 2.0)
+		return
+	var passenger: Passenger = _find_active_passenger_by_name(passenger_name)
+	if passenger == null:
+		_hud.notify("THIS PASSENGER IS NO LONGER ABOARD", 2.0)
+		return
+	if _is_dropoff_locked() or not day_route.has(station_name):
+		_document_overlay.configure_stamp_lock(_is_dropoff_locked())
+		return
+	var canonical_name: String = passenger.data.passenger_name
+	# Ink is permanent. Ignore duplicate drops even if input arrives twice in the
+	# same frame at the end of the drag animation.
+	if _station_assignment.has(canonical_name) or not passenger.data.stamped_station.is_empty():
+		return
+	passenger.data.stamped_station = station_name
+	passenger.data.stamp_ticket_position = ticket_position
+	_station_assignment.append(canonical_name)
+	if passenger.data.is_dead:
+		_record_incorrect_anomaly(passenger.data, station_name)
+	_refresh_guidebook_progress()
 
 func _on_newspaper_read() -> void:
 	_newspaper_read = true
@@ -1204,7 +1360,11 @@ func _process_station_arrival() -> void:
 	var departing: Array[Passenger] = []
 	for assigned_name: String in _station_assignment:
 		var assigned_passenger: Passenger = _find_active_passenger_by_name(assigned_name)
-		if assigned_passenger != null and assigned_passenger.data.is_dead:
+		if (
+			assigned_passenger != null
+			and assigned_passenger.data.is_dead
+			and assigned_passenger.data.stamped_station == arrival_station
+		):
 			_record_incorrect_anomaly(assigned_passenger.data, arrival_station)
 	if is_terminal_arrival:
 		# The final configured stop ends daylight service: every living passenger leaves automatically.
@@ -1218,6 +1378,10 @@ func _process_station_arrival() -> void:
 			if (
 				assigned_passenger != null
 				and not assigned_passenger.data.is_dead
+				and (
+					assigned_passenger.data.stamped_station == arrival_station
+					or assigned_passenger.data.stamped_station.is_empty()
+				)
 				and not _is_dropoff_locked()
 				and not departing.has(assigned_passenger)
 			):
@@ -1282,6 +1446,9 @@ func _start_station_stop_cutscene(station_name: String, departing_actors: Array[
 	_station_cutscene_context = &"terminal_exchange" if terminal_arrival else &"station_exchange"
 	_station_cutscene_timeline_complete = false
 	_station_camera_return_complete = false
+	# The station owns the entire background during its cinematic. This immediate
+	# cleanup also covers debug skips that jump past the normal tunnel exit lead.
+	_travel_background.set_tunnel_active(false, true)
 	_ambience.begin_station_sequence()
 	_active_modal = _station_stop_ui
 	_player.movement_enabled = false
@@ -1547,7 +1714,6 @@ func _on_station_stop_finished() -> void:
 		return
 	_travel_background.begin_route_leg(_route_index)
 	_hud.set_next_stop(_next_day_station())
-	_station_assignment.clear()
 	_station_arrival_announced = false
 	_station_exchange_processed = false
 	if state in [GameState.DAY, GameState.SUNSET]:
@@ -1801,6 +1967,7 @@ func _use_audit_slip() -> void:
 		return
 	if not bool(_market_tool_state.call(&"consume_audit_slip")):
 		return
+	GameSFX.play(&"paper_rustle", -5.0, 1.0, 0.025, 0.15)
 	var normalized_name: String = _normalize_name(passenger.data.passenger_name)
 	var found_in_manifest: bool = false
 	for manifest_data: PassengerData in _daily_manifest:
@@ -1829,6 +1996,7 @@ func _use_swiftstep() -> void:
 		_hud.notify("SWIFTSTEP IS ALREADY BENDING TIME", 2.0)
 		return
 	_swiftstep_active = true
+	GameSFX.play(&"time_warp", -5.0, 1.0, 0.02, 0.3)
 	_hud.set_swiftstep_active(true)
 	var next_time_scale: float = float(_swiftstep_effect_ui.call(&"activate", _player, speed_level))
 	_set_world_time_scale(next_time_scale)
@@ -1886,6 +2054,7 @@ func _use_carriage_radar() -> void:
 	var anomaly_detected: bool = _carriage_has_anomaly(carriage_number)
 	var radar_origin: Vector2 = _player.get_radar_origin_world_position()
 	_radar_scan_active = true
+	GameSFX.play(&"radar_ping", -4.0, 1.0, 0.015, 0.3)
 	_hud.set_radar_active(true)
 
 	_train.clear_radar_anomaly_signals()
@@ -1918,12 +2087,14 @@ func _carriage_has_anomaly(carriage_number: int) -> bool:
 func _enter_night() -> void:
 	_prepare_night_world()
 	state = GameState.NIGHT
+	_night_service_elapsed_seconds = 0.0
+	_night_service_expired = false
+	_night_service_timeout_presented = false
 	_resume_train_for_night()
 	_hud.set_night_walk_mode()
-	# The fifth and final 36-degree step belongs exclusively to Night Service.
-	# Both the filled arc and pointer animate from 144 to 180 degrees together.
-	_hud.set_clock_progress(1.0, true)
-	_hud.set_clock_night_mode(true, true)
+	# Night Service owns the final 36-degree division. It fills continuously over
+	# the three-minute service window instead of jumping straight to 180 degrees.
+	_hud.set_clock_progress(_night_service_clock_progress())
 	_pause_ui.set_night_mode(true)
 	_hud.notify(night_shift_instruction, 5.0)
 	_set_player_control_for_state()
@@ -1997,6 +2168,9 @@ func _on_departures_confirmed(assignments: Dictionary) -> void:
 		if assignments.get(station, "") != puzzle.correct_passenger_by_station.get(station, ""):
 			_night_puzzle_ui.show_error("Something is wrong with the symbolic assignments.")
 			return
+	_night_service_elapsed_seconds = night_service_duration_seconds
+	_night_service_expired = true
+	_hud.set_clock_progress(1.0, true)
 	_night_blessing_award = _market_tool_state.call(&"award_night_blessings", puzzle.night_stations.size())
 	_night_puzzle_ui.hide()
 	_active_modal = _sequence_ui
@@ -2029,7 +2203,7 @@ func _set_player_control_for_state() -> void:
 	_player.movement_enabled = can_walk
 	_player.interaction_enabled = can_walk
 	_hud.set_prompt(
-		_nearby_interactable.get_prompt() if can_walk and is_instance_valid(_nearby_interactable) else "",
+		_get_nearby_interactable_prompt(_nearby_interactable) if can_walk else "",
 		_get_interactable_prompt_anchor(_nearby_interactable) if can_walk else null
 	)
 

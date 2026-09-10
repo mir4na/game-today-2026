@@ -30,6 +30,7 @@ var _announcement_played: bool = false
 var _departure_restarted: bool = false
 var _audio_enabled: bool = false
 var _world_time_scale: float = 1.0
+var _creak_timer: float = 3.5
 
 @onready var _train_sfx: AudioStreamPlayer = $TrainSfx
 @onready var _brake_sfx: AudioStreamPlayer = $BrakeSfx
@@ -89,6 +90,7 @@ func restart_train_sfx() -> void:
 		return
 	_train_sfx.stop()
 	_train_sfx.play(0.0)
+	_creak_timer = randf_range(2.5, 5.0)
 
 func pause_train_travel() -> void:
 	motion_strength = 0.0
@@ -153,7 +155,8 @@ func _handle_station_motion(previous_strength: float, current_strength: float) -
 		_departure_restarted = true
 		restart_train_sfx()
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_update_carriage_creaks(delta)
 	if _playback == null:
 		return
 	var frames: int = _playback.get_frames_available()
@@ -166,6 +169,16 @@ func _process(_delta: float) -> void:
 		var sample: float = rumble + rail_click + wind + randf_range(-0.004, 0.004) * movement
 		_playback.push_frame(Vector2(sample, sample))
 		_phase += 1.0 / _mix_rate
+
+
+func _update_carriage_creaks(delta: float) -> void:
+	if motion_strength * _world_time_scale < 0.2:
+		return
+	_creak_timer -= delta * _world_time_scale
+	if _creak_timer > 0.0:
+		return
+	GameSFX.play(&"carriage_creak", -24.0, 1.0, 0.08, 1.0)
+	_creak_timer = randf_range(4.0, 8.0)
 
 func _exit_tree() -> void:
 	_train_sfx.stop()

@@ -20,6 +20,7 @@ signal interaction_pressed(interactable: Interactable)
 var _interactables: Array[Interactable] = []
 var _nearest: Interactable
 var _facing: float = 1.0
+var _footstep_timer: float = 0.0
 
 @onready var _animated_sprite: AnimatedSprite2D = %MCVisual
 @onready var _dialogue_anchor: Marker2D = %DialogueAnchor
@@ -40,10 +41,20 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.y = 0.0
 	move_and_slide()
+	_update_footsteps(delta)
 	if absf(direction) > 0.01:
 		_facing = signf(direction)
 	_update_visual()
 	_update_nearest()
+
+
+func _update_footsteps(delta: float) -> void:
+	_footstep_timer = maxf(0.0, _footstep_timer - delta)
+	if not movement_enabled or not is_on_floor() or absf(velocity.x) < walk_animation_threshold:
+		return
+	if _footstep_timer <= 0.0:
+		GameSFX.play(&"footstep", -16.0, 0.94, 0.055, 0.08)
+		_footstep_timer = 0.42
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"interact") and interaction_enabled and is_instance_valid(_nearest):

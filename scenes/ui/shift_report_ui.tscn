@@ -121,22 +121,20 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2")
 script = ExtResource("1")
-subtitle_template = "DAY %d  /  ALL AMOUNTS IN BLESSINGS"
-reward_template = "%d × %d     +%d"
-deduction_template = "%d × %d     −%d"
+subtitle_template = "Day %d  •  Blessings"
+reward_template = "+%d"
+deduction_template = "−%d"
 retained_template = "%d / %d"
-amount_template = "%d BLESSINGS"
-penalty_line_template = "• %s"
-no_penalties_text = "No penalties issued."
-passed_result_template = "PASSED  •  %d above target"
+amount_template = "%d"
+passed_result_template = "Passed  •  +%d over target"
 passed_result_color = Color(0.219608, 0.407843, 0.286275, 1)
-passed_payment_template = "%d Blessings added to your balance."
+passed_payment_template = "%d added to balance."
 passed_continue_text = "PRESS ANY KEY TO CONTINUE"
-failed_result_template = "FAILED  •  %d below target"
+failed_result_template = "Failed  •  %d below target"
 failed_result_color = Color(0.701961, 0.25098, 0.25098, 1)
-failed_payment_text = "Restart this shift with your starting balance and supplies restored."
+failed_payment_text = "Shift must be repeated."
 failed_continue_text = "PRESS ANY KEY TO RESTART SHIFT"
-typewriter_target_paths = Array[NodePath]([NodePath("Center/Stack/Receipt/Title"), NodePath("Center/Stack/Receipt/Subtitle"), NodePath("Center/Stack/Receipt/CorrectCaption"), NodePath("Center/Stack/Receipt/CorrectValue"), NodePath("Center/Stack/Receipt/WrongCaption"), NodePath("Center/Stack/Receipt/WrongValue"), NodePath("Center/Stack/Receipt/AnomalyCaption"), NodePath("Center/Stack/Receipt/AnomalyValue"), NodePath("Center/Stack/Receipt/RetainedCaption"), NodePath("Center/Stack/Receipt/RetainedValue"), NodePath("Center/Stack/Receipt/DetailTitle"), NodePath("Center/Stack/Receipt/Breakdown"), NodePath("Center/Stack/Receipt/NetCaption"), NodePath("Center/Stack/Receipt/NetValue"), NodePath("Center/Stack/Receipt/TargetCaption"), NodePath("Center/Stack/Receipt/TargetValue"), NodePath("Center/Stack/Receipt/ResultLabel"), NodePath("Center/Stack/Receipt/PaymentLabel")])
+typewriter_target_paths = Array[NodePath]([NodePath("Center/Stack/Receipt/Title"), NodePath("Center/Stack/Receipt/Subtitle"), NodePath("Center/Stack/Receipt/CorrectCaption"), NodePath("Center/Stack/Receipt/CorrectValue"), NodePath("Center/Stack/Receipt/WrongCaption"), NodePath("Center/Stack/Receipt/WrongValue"), NodePath("Center/Stack/Receipt/AnomalyCaption"), NodePath("Center/Stack/Receipt/AnomalyValue"), NodePath("Center/Stack/Receipt/RetainedCaption"), NodePath("Center/Stack/Receipt/RetainedValue"), NodePath("Center/Stack/Receipt/NetCaption"), NodePath("Center/Stack/Receipt/NetValue"), NodePath("Center/Stack/Receipt/TargetCaption"), NodePath("Center/Stack/Receipt/TargetValue"), NodePath("Center/Stack/Receipt/ResultLabel"), NodePath("Center/Stack/Receipt/PaymentLabel")])
 typewriter_characters_per_second = 180.0
 typewriter_line_pause_seconds = 0.04
 maximum_target_duration_seconds = 1.25
@@ -220,7 +218,7 @@ theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 12
-text = "DAY 1  /  ALL AMOUNTS IN BLESSINGS"
+text = "Day 1  •  Blessings"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -244,7 +242,7 @@ theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 16
-text = "CORRECT DROP-OFFS"
+text = "Correct drop-offs"
 vertical_alignment = 1
 
 [node name="CorrectValue" type="Label" parent="Center/Stack/Receipt" unique_id=823350649]
@@ -258,7 +256,7 @@ theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 16
-text = "0 × 30     +0"
+text = "+0"
 horizontal_alignment = 2
 vertical_alignment = 1
 
@@ -272,7 +270,7 @@ theme_override_colors/font_color = Color(0.7, 0.25, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 16
-text = "WRONG DROP-OFFS"
+text = "Wrong drop-offs"
 vertical_alignment = 1
 
 [node name="WrongValue" type="Label" parent="Center/Stack/Receipt" unique_id=1969419892]
@@ -286,7 +284,7 @@ theme_override_colors/font_color = Color(0.7, 0.25, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 16
-text = "0 × 20     −0"
+text = "−0"
 horizontal_alignment = 2
 vertical_alignment = 1
 
@@ -300,7 +298,7 @@ theme_override_colors/font_color = Color(0.7, 0.25, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 16
-text = "ANOMALY STAMPS"
+text = "Anomaly errors"
 vertical_alignment = 1
 
 [node name="AnomalyValue" type="Label" parent="Center/Stack/Receipt" unique_id=333283711]
@@ -314,7 +312,7 @@ theme_override_colors/font_color = Color(0.7, 0.25, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 16
-text = "0 × 40     −0"
+text = "−0"
 horizontal_alignment = 2
 vertical_alignment = 1
 
@@ -328,7 +326,7 @@ theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 13
-text = "ANOMALIES RETAINED"
+text = "Anomalies retained"
 vertical_alignment = 1
 
 [node name="RetainedValue" type="Label" parent="Center/Stack/Receipt" unique_id=1350857997]
@@ -346,39 +344,12 @@ text = "0 / 4"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="DetailTitle" type="Label" parent="Center/Stack/Receipt" unique_id=1416548424]
-layout_mode = 0
-offset_left = 32.0
-offset_top = 287.0
-offset_right = 428.0
-offset_bottom = 307.0
-theme_type_variation = &"HeaderLabel"
-theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
-theme_override_constants/outline_size = 0
-theme_override_font_sizes/font_size = 12
-text = "PENALTY DETAILS"
-vertical_alignment = 1
-
-[node name="Breakdown" type="RichTextLabel" parent="Center/Stack/Receipt" unique_id=1002253214]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 32.0
-offset_top = 312.0
-offset_right = 428.0
-offset_bottom = 408.0
-theme_override_colors/default_color = Color(0.43, 0.37, 0.36, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
-theme_override_constants/outline_size = 0
-theme_override_font_sizes/normal_font_size = 13
-text = "No penalties issued."
-
 [node name="TotalRule" type="TextureRect" parent="Center/Stack/Receipt" unique_id=158001455]
 layout_mode = 0
 offset_left = 32.0
-offset_top = 422.0
+offset_top = 296.0
 offset_right = 428.0
-offset_bottom = 425.0
+offset_bottom = 299.0
 mouse_filter = 2
 texture = ExtResource("4_solid")
 expand_mode = 1
@@ -386,58 +357,58 @@ expand_mode = 1
 [node name="NetCaption" type="Label" parent="Center/Stack/Receipt" unique_id=2038894041]
 layout_mode = 0
 offset_left = 32.0
-offset_top = 433.0
+offset_top = 310.0
 offset_right = 222.0
-offset_bottom = 460.0
+offset_bottom = 337.0
 theme_type_variation = &"HeaderLabel"
 theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 18
-text = "NET TOTAL"
+text = "Net total"
 vertical_alignment = 1
 
 [node name="NetValue" type="Label" parent="Center/Stack/Receipt" unique_id=1453477585]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 219.0
-offset_top = 433.0
+offset_top = 310.0
 offset_right = 428.0
-offset_bottom = 460.0
+offset_bottom = 337.0
 theme_type_variation = &"HeaderLabel"
 theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 18
-text = "0 BLESSINGS"
+text = "0"
 horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="TargetCaption" type="Label" parent="Center/Stack/Receipt" unique_id=2001262666]
 layout_mode = 0
 offset_left = 32.0
-offset_top = 465.0
+offset_top = 347.0
 offset_right = 262.0
-offset_bottom = 487.0
+offset_bottom = 369.0
 theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 13
-text = "REQUIRED TO PASS"
+text = "Required to pass"
 vertical_alignment = 1
 
 [node name="TargetValue" type="Label" parent="Center/Stack/Receipt" unique_id=1291313750]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 254.0
-offset_top = 465.0
+offset_top = 347.0
 offset_right = 428.0
-offset_bottom = 487.0
+offset_bottom = 369.0
 theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 13
-text = "100 BLESSINGS"
+text = "100"
 horizontal_alignment = 2
 vertical_alignment = 1
 
@@ -445,15 +416,15 @@ vertical_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 32.0
-offset_top = 494.0
+offset_top = 391.0
 offset_right = 428.0
-offset_bottom = 519.0
+offset_bottom = 416.0
 theme_type_variation = &"HeaderLabel"
 theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 19
-text = "PASSED"
+text = "Passed"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -461,14 +432,14 @@ vertical_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 32.0
-offset_top = 519.0
+offset_top = 425.0
 offset_right = 428.0
-offset_bottom = 550.0
+offset_bottom = 456.0
 theme_override_colors/font_color = Color(0.2, 0.2, 0.25, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 13
-text = "0 Blessings added to your balance."
+text = "0 added to balance."
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
@@ -476,9 +447,9 @@ autowrap_mode = 2
 [node name="BottomRule" type="TextureRect" parent="Center/Stack/Receipt" unique_id=485071202]
 layout_mode = 0
 offset_left = 32.0
-offset_top = 556.0
+offset_top = 474.0
 offset_right = 428.0
-offset_bottom = 559.0
+offset_bottom = 477.0
 mouse_filter = 2
 texture = ExtResource("4_solid")
 expand_mode = 1
@@ -486,9 +457,9 @@ expand_mode = 1
 [node name="Barcode" type="TextureRect" parent="Center/Stack/Receipt" unique_id=2087556874]
 layout_mode = 0
 offset_left = 154.0
-offset_top = 568.0
+offset_top = 493.0
 offset_right = 306.0
-offset_bottom = 608.0
+offset_bottom = 533.0
 mouse_filter = 2
 texture = ExtResource("6_barcode")
 expand_mode = 1

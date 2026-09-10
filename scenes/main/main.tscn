@@ -46,6 +46,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/night_transition_cutscene_ui.tscn" id="45_night_transition"]
 [ext_resource type="PackedScene" path="res://scenes/systems/station_cinematic_view.tscn" id="45_station_view"]
 [ext_resource type="PackedScene" path="res://scenes/ui/swiftstep_effect_ui.tscn" id="46_swiftstep_effect"]
+[ext_resource type="Material" path="res://resources/materials/screen_bloom.tres" id="47_screen_bloom"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_day_cycle_sky"]
 shader = ExtResource("39")
@@ -88,8 +89,8 @@ day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmer
 station_travel_durations_seconds = PackedFloat32Array(120, 120, 120, 120)
 radar_anomaly_light_seconds = 4.0
 debug_print_anomaly_roster = true
-night_shift_instruction = "Night shift
-Interview the deceased, then return to the ledger in the front passenger coach"
+night_shift_instruction = "Night shift · 03:00
+Interview the deceased before time runs out, then finalize the ledger"
 departure_statement_recorded_template = "Departure statement recorded
 %d / %d collected"
 
@@ -242,6 +243,22 @@ expand_mode = 1
 unique_name_in_owner = true
 world_lighting_path = NodePath("../GameplayWorld/WorldLighting")
 
+[node name="BloomLayer" type="CanvasLayer" parent="."]
+editor_description = "Subtle highlight bloom for the rendered world. It sits below the HUD and modal layers so interface text stays crisp."
+layer = 9
+
+[node name="RefreshScreenTexture" type="BackBufferCopy" parent="BloomLayer"]
+copy_mode = 2
+
+[node name="Bloom" type="ColorRect" parent="BloomLayer"]
+material = ExtResource("47_screen_bloom")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
 [node name="HUD" parent="." unique_id=1053587110 instance=ExtResource("4")]
 unique_name_in_owner = true
 
@@ -275,13 +292,16 @@ unique_name_in_owner = true
 [node name="DepartureSequenceUI" parent="ModalLayer" unique_id=348132804 instance=ExtResource("9")]
 unique_name_in_owner = true
 
-[node name="PauseUI" parent="ModalLayer" unique_id=680489697 instance=ExtResource("10")]
-unique_name_in_owner = true
-
 [node name="BlockedAislePuzzleUI" parent="ModalLayer" unique_id=559761803 instance=ExtResource("38_blocked_ui")]
 unique_name_in_owner = true
 
 [node name="CleanSeatUI" parent="ModalLayer" unique_id=1148165085 instance=ExtResource("39_clean_ui")]
+unique_name_in_owner = true
+
+[node name="PauseLayer" type="CanvasLayer" parent="."]
+layer = 100
+
+[node name="PauseUI" parent="PauseLayer" unique_id=680489697 instance=ExtResource("10")]
 unique_name_in_owner = true
 
 [connection signal="inventory_changed" from="MarketToolState" to="." method="_on_market_inventory_changed"]
@@ -296,6 +316,7 @@ unique_name_in_owner = true
 [connection signal="debug_next_station_requested" from="HUD" to="." method="_on_debug_next_station_requested"]
 [connection signal="closed" from="ModalLayer/DocumentOverlayUI" to="." method="_on_modal_closed"]
 [connection signal="station_assignment_toggled" from="ModalLayer/DocumentOverlayUI" to="." method="_on_station_assignment_toggled"]
+[connection signal="station_stamp_applied" from="ModalLayer/DocumentOverlayUI" to="." method="_on_station_stamp_applied"]
 [connection signal="closed" from="ModalLayer/GuidebookUI" to="." method="_on_modal_closed"]
 [connection signal="intro_finished" from="ModalLayer/DayIntroUI" to="." method="_on_day_intro_finished"]
 [connection signal="boarding_actor_entered" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_boarding_actor_entered"]
@@ -314,9 +335,9 @@ unique_name_in_owner = true
 [connection signal="departures_confirmed" from="ModalLayer/NightPuzzleUI" to="." method="_on_departures_confirmed"]
 [connection signal="journey_continue_requested" from="ModalLayer/DepartureSequenceUI" to="." method="_on_journey_continue"]
 [connection signal="sequence_finished" from="ModalLayer/DepartureSequenceUI" to="." method="_on_night_sequence_finished"]
-[connection signal="main_menu_requested" from="ModalLayer/PauseUI" to="." method="_return_to_main_menu"]
-[connection signal="restart_requested" from="ModalLayer/PauseUI" to="." method="_restart_game"]
-[connection signal="resume_requested" from="ModalLayer/PauseUI" to="." method="_resume_from_pause"]
+[connection signal="main_menu_requested" from="PauseLayer/PauseUI" to="." method="_return_to_main_menu"]
+[connection signal="restart_requested" from="PauseLayer/PauseUI" to="." method="_restart_game"]
+[connection signal="resume_requested" from="PauseLayer/PauseUI" to="." method="_resume_from_pause"]
 [connection signal="closed" from="ModalLayer/BlockedAislePuzzleUI" to="." method="_on_maintenance_minigame_closed"]
 [connection signal="completed" from="ModalLayer/BlockedAislePuzzleUI" to="." method="_on_maintenance_minigame_completed"]
 [connection signal="closed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_closed"]

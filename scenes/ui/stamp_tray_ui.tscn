@@ -1,0 +1,186 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/stamp_tray_ui.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/Stamp/Stamp_Background.png" id="2_background"]
+[ext_resource type="Texture2D" path="res://assets/ui/Stamp/Alderwick_Stamp.png" id="3_alderwick"]
+[ext_resource type="Texture2D" path="res://assets/ui/Stamp/Brambleford_Stamp.png" id="4_brambleford"]
+[ext_resource type="Texture2D" path="res://assets/ui/Stamp/Cinderfield_Stamp.png" id="5_cinderfield"]
+[ext_resource type="Texture2D" path="res://assets/ui/Stamp/Dunmere_Stamp.png" id="6_dunmere"]
+[ext_resource type="Texture2D" path="res://assets/ui/Stamp/Eastmere_Stamp.png" id="7_eastmere"]
+[ext_resource type="Texture2D" path="res://assets/ui/Stamp/Stamp_TopView.png" id="8_top_view"]
+
+[node name="StampTrayUI" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="Tray" type="Control" parent="."]
+unique_name_in_owner = true
+z_index = 80
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -626.0
+offset_top = -204.0
+offset_right = 94.0
+offset_bottom = -16.0
+grow_vertical = 0
+mouse_filter = 0
+
+[node name="Background" type="TextureRect" parent="Tray"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_background")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StampChoices" type="Control" parent="Tray"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Alderwick" type="Control" parent="Tray/StampChoices"]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 18.0
+offset_right = 124.0
+offset_bottom = 164.0
+pivot_offset = Vector2(54, 73)
+mouse_filter = 0
+
+[node name="Art" type="TextureRect" parent="Tray/StampChoices/Alderwick"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_alderwick")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Brambleford" type="Control" parent="Tray/StampChoices"]
+layout_mode = 0
+offset_left = 136.0
+offset_top = 18.0
+offset_right = 244.0
+offset_bottom = 164.0
+pivot_offset = Vector2(54, 73)
+mouse_filter = 0
+
+[node name="Art" type="TextureRect" parent="Tray/StampChoices/Brambleford"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4_brambleford")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Cinderfield" type="Control" parent="Tray/StampChoices"]
+layout_mode = 0
+offset_left = 256.0
+offset_top = 18.0
+offset_right = 364.0
+offset_bottom = 164.0
+pivot_offset = Vector2(54, 73)
+mouse_filter = 0
+
+[node name="Art" type="TextureRect" parent="Tray/StampChoices/Cinderfield"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("5_cinderfield")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Dunmere" type="Control" parent="Tray/StampChoices"]
+layout_mode = 0
+offset_left = 376.0
+offset_top = 18.0
+offset_right = 484.0
+offset_bottom = 164.0
+pivot_offset = Vector2(54, 73)
+mouse_filter = 0
+
+[node name="Art" type="TextureRect" parent="Tray/StampChoices/Dunmere"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("6_dunmere")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Eastmere" type="Control" parent="Tray/StampChoices"]
+layout_mode = 0
+offset_left = 496.0
+offset_top = 18.0
+offset_right = 604.0
+offset_bottom = 164.0
+pivot_offset = Vector2(54, 73)
+mouse_filter = 0
+
+[node name="Art" type="TextureRect" parent="Tray/StampChoices/Eastmere"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("7_eastmere")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DragPreview" type="TextureRect" parent="."]
+unique_name_in_owner = true
+visible = false
+z_index = 200
+layout_mode = 0
+offset_right = 126.0
+offset_bottom = 126.0
+pivot_offset = Vector2(63, 63)
+mouse_filter = 2
+texture = ExtResource("8_top_view")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DragSealHint" type="TextureRect" parent="DragPreview"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 25.0
+offset_top = 25.0
+offset_right = 101.0
+offset_bottom = 101.0
+mouse_filter = 2
+self_modulate = Color(1, 1, 1, 0.2)
+expand_mode = 1
+stretch_mode = 5

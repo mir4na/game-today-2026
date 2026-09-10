@@ -111,6 +111,7 @@ var _ambient_elapsed: float = 0.0
 var _ambient_platform_y_cache: float = NAN
 var _world_camera_scale: float = 1.0
 var _station_environment_alpha: float = 1.0
+var _crowd_footstep_timer: float = 0.0
 var _motion_rng := RandomNumberGenerator.new()
 
 @onready var _actor_slots: Array[Node2D] = [
@@ -224,6 +225,7 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 	_door_rest_positions = door_rest_positions.duplicate(true)
 	_elapsed = 0.0
 	_ambient_elapsed = 0.0
+	_crowd_footstep_timer = 0.15
 	_ambient_platform_y_cache = NAN
 	_finished = false
 	_timeline_completed = false
@@ -269,6 +271,7 @@ func _process(delta: float) -> void:
 	# Platform pedestrians belong to the station, not to the train timeline. They
 	# must keep walking while departure waits for the announcement to finish.
 	_ambient_elapsed += delta
+	_update_crowd_footsteps(delta)
 	var next_elapsed: float = minf(_elapsed + delta, _duration)
 	if _departure_blocked:
 		var departure_motion_start: float = _get_departure_motion_start()
@@ -280,6 +283,22 @@ func _process(delta: float) -> void:
 	if _elapsed >= _duration and not _timeline_completed:
 		_timeline_completed = true
 		timeline_completed.emit()
+
+
+func _update_crowd_footsteps(delta: float) -> void:
+	if _ambient_actors.is_empty() and _departing_actors.is_empty() and _boarding_actors.is_empty():
+		return
+	_crowd_footstep_timer -= delta
+	if _crowd_footstep_timer > 0.0:
+		return
+	var exchange_start: float = minf(
+		departing_start_time,
+		opening_boarding_start_time if _opening_mode else exchange_boarding_start_time
+	)
+	var exchange_walking: bool = _elapsed >= exchange_start and _elapsed <= _departure_start
+	if not _ambient_actors.is_empty() or exchange_walking:
+		GameSFX.play(&"footstep", -24.0, 0.85, 0.08, 0.07)
+	_crowd_footstep_timer = _motion_rng.randf_range(0.55, 0.72)
 
 
 func _unhandled_input(event: InputEvent) -> void:

@@ -2,6 +2,7 @@ class_name PassengerDocuments
 extends Control
 
 signal stamp_toggle_requested
+signal ticket_visibility_changed(is_ticket_visible: bool)
 
 enum ActiveDocument {
 	ID_CARD,
@@ -36,8 +37,7 @@ func _ready() -> void:
 func set_passenger(data: PassengerData) -> void:
 	_id_card.set_passenger(data)
 	_passenger_ticket.set_passenger(data)
-	_is_stamped = false
-	_passenger_ticket.set_disembark_stamped(false)
+	_is_stamped = data != null and not data.stamped_station.is_empty()
 	_update_instruction()
 
 
@@ -55,6 +55,7 @@ func reset_to_id_card() -> void:
 	_animation_player.stop()
 	_active_document = ActiveDocument.ID_CARD
 	_passenger_ticket.set_stamp_interaction_enabled(false)
+	ticket_visibility_changed.emit(false)
 	_update_instruction()
 
 
@@ -65,7 +66,9 @@ func show_id_card() -> bool:
 		return false
 	_active_document = ActiveDocument.ID_CARD
 	_passenger_ticket.set_stamp_interaction_enabled(false)
+	ticket_visibility_changed.emit(false)
 	_animation_player.play(show_id_animation)
+	GameSFX.play(&"paper_rustle", -9.0, 0.97, 0.025, 0.08)
 	_update_instruction()
 	return true
 
@@ -78,6 +81,7 @@ func show_ticket() -> bool:
 	_active_document = ActiveDocument.TICKET
 	_passenger_ticket.set_stamp_interaction_enabled(false)
 	_animation_player.play(show_ticket_animation)
+	GameSFX.play(&"paper_rustle", -9.0, 1.03, 0.025, 0.08)
 	_update_instruction()
 	return true
 
@@ -88,15 +92,28 @@ func set_disembark_stamped(value: bool, animate: bool = false) -> void:
 	_update_instruction()
 
 
+func set_station_stamp(station_name: String, ticket_position: Vector2, animate: bool = false) -> void:
+	_is_stamped = true
+	_passenger_ticket.set_station_stamp(station_name, ticket_position, animate)
+	_update_instruction()
+
+
+func get_ticket_surface() -> Control:
+	return _passenger_ticket.get_ticket_surface() as Control
+
+
+func has_stamp() -> bool:
+	return _is_stamped
+
+
 func is_ticket_active() -> bool:
 	return _active_document == ActiveDocument.TICKET and not _animation_player.is_playing()
 
 
 func request_stamp_toggle() -> bool:
-	if _stamp_locked or not is_ticket_active() or _passenger_ticket.is_stamp_animating():
-		return false
-	stamp_toggle_requested.emit()
-	return true
+	# Station stamps are now selected and dragged from the drawer. Keyboard/click
+	# toggling is deliberately disabled because placed ink cannot be removed.
+	return false
 
 
 func toggle_document() -> bool:
@@ -115,6 +132,7 @@ func _on_ticket_stamp_toggle_requested() -> void:
 
 func _on_document_animation_finished(_animation_name: StringName) -> void:
 	_passenger_ticket.set_stamp_interaction_enabled(_active_document == ActiveDocument.TICKET and not _stamp_locked)
+	ticket_visibility_changed.emit(_active_document == ActiveDocument.TICKET)
 	_update_instruction()
 
 

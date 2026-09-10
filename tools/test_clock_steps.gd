@@ -16,6 +16,11 @@ func _run() -> void:
 	hud.set_debug_next_station_available(true)
 	var debug_button := hud.get_node("%DebugNextStationButton") as Button
 	assert(debug_button.visible == OS.is_debug_build(), "Next-station button must only appear in debug builds.")
+	assert(debug_button.get_parent() == hud._clock_sign_assembly, "The debug skip button must stay attached to the Next Stop sign.")
+	var debug_sign := debug_button.get_node("Sign") as TextureRect
+	var main_sign := hud._clock_sign_assembly.get_node("ClockSign") as TextureRect
+	assert(debug_sign.texture == main_sign.texture, "The debug skip button must reuse the Clock Sign artwork.")
+	assert(debug_button.size.x < main_sign.size.x, "The attached debug sign must remain smaller than the destination sign.")
 	debug_button.pressed.emit()
 	assert(bool(debug_state.requested) == OS.is_debug_build(), "Debug next-station button must emit only in debug builds.")
 	hud.set_clock_route_stop_count(5)
@@ -55,6 +60,13 @@ func _run() -> void:
 		is_equal_approx(game._day_travel_clock_progress(1.0), 0.8),
 		"Day travel must stop at 144 degrees and reserve 36 degrees for Night Service."
 	)
+	assert(is_equal_approx(game.night_service_duration_seconds, 180.0), "Night Service must last three minutes.")
+	game._night_service_elapsed_seconds = 0.0
+	assert(is_equal_approx(game._night_service_clock_progress(), 0.8), "Night Service must begin at 144 degrees.")
+	game._night_service_elapsed_seconds = 90.0
+	assert(is_equal_approx(game._night_service_clock_progress(), 0.9), "Half of Night Service must place the clock at 162 degrees.")
+	game._night_service_elapsed_seconds = 180.0
+	assert(is_equal_approx(game._night_service_clock_progress(), 1.0), "Night Service must finish at 180 degrees.")
 	game.free()
 	hud.free()
 	print("PASS: clock advances 36 degrees per station, reserves Night Service, and completes the day-to-night coin spin.")

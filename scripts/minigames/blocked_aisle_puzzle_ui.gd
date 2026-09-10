@@ -387,6 +387,7 @@ func _check_completion() -> void:
 	if _completed or _occupied_cells.size() < grid_columns * grid_rows:
 		return
 	_completed = true
+	GameSFX.play(&"success", -4.0, 1.0, 0.02, 0.25)
 	_reset_board_preview()
 	_instruction_copy.hide()
 	for piece_index: int in range(_pieces.size()):

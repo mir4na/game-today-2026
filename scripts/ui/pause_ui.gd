@@ -60,6 +60,9 @@ var _menu_settings_mode: bool = false
 
 
 func _ready() -> void:
+	# This action receives a louder explicit cue before it closes the ticket and
+	# changes scenes, so the global button-confirm handler must not duplicate it.
+	_main_menu_button.set_meta(&"suppress_global_confirm_sfx", true)
 	_ticket_rest_position = _ticket.position
 	_ticket_rest_scale = _ticket.scale
 	_ticket.pivot_offset = _ticket.size * 0.5
@@ -326,4 +329,5 @@ func _on_restart_button_pressed() -> void:
 
 
 func _on_main_menu_button_pressed() -> void:
+	GameSFX.play(&"ui_confirm", -6.0, 0.96, 0.015, 0.12)
 	_close_with_action(&"main_menu")
