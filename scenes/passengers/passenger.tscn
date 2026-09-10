@@ -30,6 +30,7 @@ collision_layer = 0
 collision_mask = 0
 prompt_text = "Inspect passenger"
 interaction_distance = 105.0
+passenger_idle_collision_path = NodePath("InteractionShape")
 prompt_anchor_path = NodePath("CharacterScale/PassengerVisual/InteractionPromptAnchor")
 focus_visual_path = NodePath("CharacterScale")
 focus_z_index = 2

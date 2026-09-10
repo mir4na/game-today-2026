@@ -22,7 +22,8 @@ signal sequence_skip_requested
 @export var opening_status_template: String = "%d BOARDING"
 @export var exchange_status_template: String = "%d OFF  •  %d ON"
 @export var terminal_status_template: String = "%d DISEMBARKING"
-@export var skip_hint_text: String = "PRESS [SPACE] TO SKIP"
+@export var skip_hint_text: String = "PRESS [SPACE] TO"
+@export var skip_button_text: String = "SKIP"
 @export_category("Scene Animation")
 @export var letterbox_in_animation: StringName = &"letterbox_in"
 @export var letterbox_out_animation: StringName = &"letterbox_out"
@@ -125,7 +126,8 @@ var _motion_rng := RandomNumberGenerator.new()
 @onready var _heading_label: Label = %HeadingLabel
 @onready var _subtitle_label: Label = %SubtitleLabel
 @onready var _status_label: Label = %StatusLabel
-@onready var _skip_hint: Button = %SkipHint
+@onready var _skip_prompt_label: Label = %SkipPromptLabel
+@onready var _skip_button: Button = %SkipButton
 @onready var _cinematic_title: Control = %CinematicTitle
 @onready var _screen_fade: ColorRect = %ScreenFade
 @onready var _station_actor_canvas: CanvasLayer = %StationActorCanvas
@@ -237,7 +239,8 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 	_build_actor_motion_profiles()
 	_build_ambient_motion_profiles()
 	_update_scene_copy()
-	_skip_hint.text = skip_hint_text
+	_skip_prompt_label.text = skip_hint_text
+	_skip_button.text = skip_button_text
 	show()
 	_station_actor_canvas.show()
 	_cinematic_border_layer.show()
@@ -368,7 +371,7 @@ func _update_screen_fade() -> void:
 
 
 func _update_skip_button() -> void:
-	_skip_hint.disabled = _camera_return_started or _elapsed < screen_fade_duration
+	_skip_button.disabled = _camera_return_started or _elapsed < screen_fade_duration
 
 
 func _update_train_motion() -> void:

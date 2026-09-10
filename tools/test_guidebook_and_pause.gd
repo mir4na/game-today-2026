@@ -104,14 +104,26 @@ func _run() -> void:
 	_check(guide._content.text.contains("30 Blessings") and guide._content.text.contains("40 Blessings"), "Rules include the current paycheck scoring.")
 	guide._show_anomalies()
 	var entries: Node = guide._anomaly_list.get_node("Entries")
-	_check(entries.get_child_count() == 5, "Every configured anomaly has a photo entry.")
-	for expected_entry: String in ["Shadowless", "UnlistedDestination", "PortraitMismatch", "TimeInvalidTicket", "NewspaperDeath"]:
+	_check(entries.get_child_count() == 6, "Every documented anomaly and obstruction has a guidebook entry.")
+	for expected_entry: String in ["Shadowless", "UnlistedDestination", "PortraitMismatch", "TimeInvalidTicket", "NewspaperDeath", "BlockedConnector"]:
 		_check(entries.has_node(expected_entry), "The guidebook includes %s." % expected_entry)
+	var expected_photos: Dictionary = {
+		"Shadowless": "res://assets/ui/guidebook/shadowless.png",
+		"UnlistedDestination": "res://assets/ui/guidebook/unlisted_destination.png",
+		"NewspaperDeath": "res://assets/ui/guidebook/newspaper.png",
+		"BlockedConnector": "res://assets/ui/guidebook/blocked.png",
+	}
 	for entry: Node in entries.get_children():
-		_check(entry.get_node("PhotoFrame/Placeholder").visible, "An empty entry displays its photo placeholder.")
+		var photo: TextureRect = entry.get_node("PhotoFrame/Photo") as TextureRect
+		var placeholder: Label = entry.get_node("PhotoFrame/Placeholder") as Label
+		if expected_photos.has(entry.name):
+			_check(photo.texture != null and photo.texture.resource_path == expected_photos[entry.name], "%s uses its scene-authored reference photo." % entry.name)
+			_check(not placeholder.visible, "%s hides its placeholder when a photo is available." % entry.name)
+			continue
+		_check(placeholder.visible, "An entry without artwork displays its photo placeholder.")
 		var sample := GradientTexture2D.new()
 		entry.photo = sample
-		_check(entry.get_node("PhotoFrame/Photo").texture == sample and not entry.get_node("PhotoFrame/Placeholder").visible, "Assigning a photo replaces its placeholder.")
+		_check(photo.texture == sample and not placeholder.visible, "Assigning a photo replaces its placeholder.")
 		entry.photo = null
 	await create_timer(0.1).timeout
 	if DisplayServer.get_name() != "headless":

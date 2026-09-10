@@ -22,6 +22,10 @@
 [ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="20_title_font"]
 [ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="21_body_bold"]
 [ext_resource type="PackedScene" path="res://scenes/ui/components/round_close_button.tscn" id="22_close"]
+[ext_resource type="Texture2D" path="res://assets/ui/guidebook/shadowless.png" id="23_shadowless"]
+[ext_resource type="Texture2D" path="res://assets/ui/guidebook/unlisted_destination.png" id="24_unlisted"]
+[ext_resource type="Texture2D" path="res://assets/ui/guidebook/newspaper.png" id="25_newspaper"]
+[ext_resource type="Texture2D" path="res://assets/ui/guidebook/blocked.png" id="26_blocked"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_button"]
 
@@ -528,11 +532,13 @@ columns = 2
 layout_mode = 2
 heading = "SHADOWLESS"
 description = "The passenger casts no shadow."
+photo = ExtResource("23_shadowless")
 
 [node name="UnlistedDestination" parent="Center/BookStage/Page/AnomalyList/Entries" unique_id=765249923 instance=ExtResource("3_entry")]
 layout_mode = 2
 heading = "UNLISTED DESTINATION"
 description = "The destination is absent from today's route."
+photo = ExtResource("24_unlisted")
 
 [node name="PortraitMismatch" parent="Center/BookStage/Page/AnomalyList/Entries" unique_id=1524288881 instance=ExtResource("3_entry")]
 layout_mode = 2
@@ -548,6 +554,13 @@ description = "The date or day code does not match today's service."
 layout_mode = 2
 heading = "NEWSPAPER DEATH"
 description = "Match the passenger named in a death report with their documents."
+photo = ExtResource("25_newspaper")
+
+[node name="BlockedConnector" parent="Center/BookStage/Page/AnomalyList/Entries" instance=ExtResource("3_entry")]
+layout_mode = 2
+heading = "BLOCKED CONNECTOR"
+description = "Repack luggage obstructing the passage between coaches."
+photo = ExtResource("26_blocked")
 
 [node name="Clip" type="TextureRect" parent="Center/BookStage" unique_id=1818967348]
 unique_name_in_owner = true

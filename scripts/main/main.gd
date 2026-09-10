@@ -26,6 +26,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export_category("Maintenance Distractions")
 @export var blocked_aisle_delay_range_seconds: Vector2 = Vector2(9.0, 16.0)
 @export var dirty_seat_delay_range_seconds: Vector2 = Vector2(24.0, 38.0)
+@export_range(0.0, 80.0, 1.0) var maintenance_event_clearance: float = 14.0
 @export_category("Market Tools")
 @export_range(0.25, 5.0, 0.05) var radar_scan_seconds: float = 1.6
 @export_range(0.1, 5.0, 0.05) var radar_result_reveal_seconds: float = 1.25
@@ -955,13 +956,22 @@ func _on_blocked_aisle_timer_timeout() -> void:
 	if _station_stop_ui.visible:
 		_blocked_aisle_timer.start(1.0)
 		return
-	var distant_candidates: Array[Node] = []
+	var safe_candidates: Array[Node] = []
 	for event: Node in _blocked_aisle_events:
 		var world_event := event as Node2D
-		if is_instance_valid(world_event) and world_event.global_position.distance_to(_player.global_position) > 190.0:
+		if not is_instance_valid(world_event):
+			continue
+		if _maintenance_events_overlap(event, _active_dirty_seat_event, _player.global_position.x):
+			continue
+		safe_candidates.append(event)
+	var distant_candidates: Array[Node] = []
+	for event: Node in safe_candidates:
+		var world_event := event as Node2D
+		if world_event.global_position.distance_to(_player.global_position) > 190.0:
 			distant_candidates.append(event)
-	var candidates: Array[Node] = distant_candidates if not distant_candidates.is_empty() else _blocked_aisle_events
+	var candidates: Array[Node] = distant_candidates if not distant_candidates.is_empty() else safe_candidates
 	if candidates.is_empty():
+		_blocked_aisle_timer.start(2.0)
 		return
 	_active_blocked_aisle_event = candidates[_daily_rng.randi_range(0, candidates.size() - 1)]
 	_active_blocked_aisle_event.call(&"set_event_active", true, _player.global_position.x)
@@ -991,7 +1001,11 @@ func _on_dirty_seat_timer_timeout() -> void:
 			continue
 		var seat_marker := event.call(&"get_seat_marker") as Marker2D
 		var occupant := _seat_occupant_by_slot.get(seat_marker) as Passenger
-		if is_instance_valid(seat_marker) and not _is_active_passenger(occupant):
+		if (
+			is_instance_valid(seat_marker)
+			and not _is_active_passenger(occupant)
+			and not _maintenance_events_overlap(event, _active_blocked_aisle_event)
+		):
 			vacant_candidates.append(event)
 	if vacant_candidates.is_empty():
 		_dirty_seat_timer.start(2.0)
@@ -2207,6 +2221,12 @@ func _on_service_signature_closed() -> void:
 	_set_player_control_for_state()
 
 
+func _on_service_signature_rejected() -> void:
+	if _active_modal != _service_signature_ui:
+		return
+	_shake_night_record_camera(11.0)
+
+
 func _on_service_signed() -> void:
 	if _active_modal != _service_signature_ui or state not in [GameState.DAY, GameState.SUNSET]:
 		return
@@ -2391,6 +2411,18 @@ func _is_seat_blocked_by_maintenance(seat_marker: Marker2D) -> bool:
 	if not is_instance_valid(_active_dirty_seat_event):
 		return false
 	return _active_dirty_seat_event.call(&"get_seat_marker") == seat_marker
+
+
+func _maintenance_events_overlap(candidate: Node, active_event: Node, observer_global_x: float = NAN) -> bool:
+	if not is_instance_valid(candidate) or not is_instance_valid(active_event):
+		return false
+	if not candidate.has_method(&"get_maintenance_bounds") or not active_event.has_method(&"get_maintenance_bounds"):
+		return false
+	var candidate_bounds: Rect2 = candidate.call(&"get_maintenance_bounds", observer_global_x) as Rect2
+	var active_bounds: Rect2 = active_event.call(&"get_maintenance_bounds") as Rect2
+	if candidate_bounds.size == Vector2.ZERO or active_bounds.size == Vector2.ZERO:
+		return false
+	return candidate_bounds.grow(maintenance_event_clearance).intersects(active_bounds, true)
 
 func _is_active_passenger(passenger: Passenger) -> bool:
 	return is_instance_valid(passenger) and not passenger.departed

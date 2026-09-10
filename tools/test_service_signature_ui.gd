@@ -50,13 +50,22 @@ func _run() -> void:
 		not signature._trace_matches_pattern(PackedVector2Array([Vector2.ZERO, Vector2.ONE]), signature._active_pattern.points),
 		"An incomplete scribble must be rejected."
 	)
+	signature._play_rejection()
+	_check(
+		is_instance_valid(game._night_record_camera_shake_tween) and game._night_record_camera_shake_tween.is_valid(),
+		"A rejected signature must start a gameplay-camera shake tween."
+	)
 
 	var arrival_minutes: float = game._next_arrival_minutes()
+	var fade_alpha_when_signed: Array[float] = [-1.0]
+	signature.service_signed.connect(func() -> void: fade_alpha_when_signed[0] = signature._transition_fade.modulate.a)
 	signature._user_stroke.points = signature._active_pattern.points
 	signature._drawing = true
 	signature._finish_stroke()
-	await create_timer(0.75).timeout
+	await create_timer(1.65).timeout
 	_check(not signature.visible, "An accepted service signature must close its UI.")
+	_check(fade_alpha_when_signed[0] >= 0.99, "The station cutscene must begin only after the transition cover reaches black.")
+	_check(signature._transition_fade.modulate.a <= 0.01, "The transition cover must fade back out to reveal the cutscene.")
 	_check(game._day_minutes == arrival_minutes, "An accepted signature must fast-forward route time to the next arrival.")
 	_check(game._station_arrival_announced, "An accepted signature must begin the normal next-station sequence.")
 	_check(game._active_modal == game._station_stop_ui, "Fast-forward must enter the existing station cutscene flow.")

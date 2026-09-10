@@ -16,6 +16,7 @@ z_index = 1
 collision_layer = 0
 collision_mask = 0
 script = ExtResource("1_event")
+passenger_idle_collision_path = NodePath("InteractionCollision")
 interaction_collision_path = NodePath("InteractionCollision")
 npc_exclusion_collision_path = NodePath("NpcExclusionArea/NpcExclusionCollision")
 tracker_anchor_path = NodePath("TrackerAnchor")

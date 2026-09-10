@@ -409,9 +409,30 @@ static func is_stop_reserved_for_interaction(tree: SceneTree, world_position: Ve
 func _is_stop_position_available(point: Vector2) -> bool:
 	return (
 		not is_stop_reserved_for_interaction(get_tree(), get_parent().to_global(point), _interaction_shape.shape, _stop_shape_transform(point))
+		and not _is_interactable_idle_position_blocked(point)
 		and not _is_navigation_target_claimed(point)
 		and not _is_npc_navigation_blocked(point)
 	)
+
+
+func _is_interactable_idle_position_blocked(point: Vector2) -> bool:
+	if _interaction_shape.shape == null:
+		return false
+	var proposed_transform: Transform2D = _stop_shape_transform(point)
+	for node: Node in get_tree().get_nodes_in_group(&"passenger_idle_obstacles"):
+		if node == self or not node is Interactable:
+			continue
+		var obstacle := node as Interactable
+		if not obstacle.can_block_passenger_idle():
+			continue
+		var obstacle_collision: CollisionShape2D = obstacle.get_passenger_idle_collision()
+		if _interaction_shape.shape.collide(
+			proposed_transform,
+			obstacle_collision.shape,
+			obstacle_collision.global_transform
+		):
+			return true
+	return false
 
 
 func _ensure_safe_idle_position() -> void:
@@ -439,14 +460,19 @@ func _retarget_to_safe_stop(continue_forward: bool = false) -> void:
 	# position so an NPC can keep walking out of an inspected passenger/rack.
 	var carriage_range: Vector2 = _carriage_ranges.get(runtime_carriage, Vector2(position.x - 480.0, position.x + 480.0))
 	if candidates.is_empty() or continue_forward:
-		for step: int in range(1, 49):
-			var point := Vector2(position.x + _facing_direction * step * 20.0, _assigned_seat_position.y)
-			if point.x < carriage_range.x + 60.0 or point.x > carriage_range.y - 60.0:
-				break
-			if _is_stop_position_available(point):
-				candidates.push_back(point)
-				if continue_forward:
-					candidates = PackedVector2Array([point])
+		# Prefer the current facing direction, then try the other side. This keeps
+		# an obstructed idle NPC moving even when it stands near a carriage edge.
+		for direction: float in [_facing_direction, -_facing_direction]:
+			for step: int in range(1, 49):
+				var point := Vector2(position.x + direction * step * 20.0, _assigned_seat_position.y)
+				if point.x < carriage_range.x + 60.0 or point.x > carriage_range.y - 60.0:
+					break
+				if _is_stop_position_available(point):
+					candidates.push_back(point)
+					if continue_forward:
+						candidates = PackedVector2Array([point])
+					break
+			if not candidates.is_empty():
 				break
 	if candidates.is_empty():
 		return

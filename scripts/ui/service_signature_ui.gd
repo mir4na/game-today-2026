@@ -4,17 +4,24 @@ extends Control
 
 signal closed
 signal service_signed
+signal signature_rejected
 
 @export_category("Trace Validation")
 @export_range(8.0, 64.0, 1.0) var average_tolerance: float = 27.0
 @export_range(20.0, 120.0, 1.0) var maximum_tolerance: float = 62.0
 @export_range(0.4, 0.95, 0.05) var minimum_length_ratio: float = 0.7
 @export_range(1.05, 2.0, 0.05) var maximum_length_ratio: float = 1.45
+@export_category("Success Transition")
+@export_range(200.0, 900.0, 10.0) var success_drop_distance: float = 560.0
+@export_range(0.15, 0.8, 0.05) var success_drop_duration: float = 0.42
+@export_range(0.15, 0.8, 0.05) var fade_to_black_duration: float = 0.34
+@export_range(0.2, 1.0, 0.05) var fade_from_black_duration: float = 0.52
 
 var _drawing: bool = false
 var _accepted: bool = false
 var _active_pattern: Line2D
 var _feedback_tween: Tween
+var _transition_tween: Tween
 var _panel_rest_position: Vector2
 
 @onready var _panel: Control = %Panel
@@ -27,6 +34,7 @@ var _panel_rest_position: Vector2
 @onready var _user_stroke: Line2D = %UserStroke
 @onready var _feedback_label: Label = %FeedbackLabel
 @onready var _feedback_flash: ColorRect = %FeedbackFlash
+@onready var _transition_fade: ColorRect = %TransitionFade
 
 
 func _ready() -> void:
@@ -41,6 +49,12 @@ func open_signature(from_station: String, to_station: String, route_leg: int) ->
 	_user_stroke.clear_points()
 	_feedback_label.text = ""
 	_feedback_flash.modulate.a = 0.0
+	_transition_fade.modulate.a = 0.0
+	_transition_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if is_instance_valid(_feedback_tween):
+		_feedback_tween.kill()
+	if is_instance_valid(_transition_tween):
+		_transition_tween.kill()
 	_route_label.text = "%s  →  %s" % [
 		from_station.to_upper(),
 		to_station.to_upper(),
@@ -197,6 +211,7 @@ func _clamp_to_drawing_area(point: Vector2) -> Vector2:
 
 
 func _play_rejection() -> void:
+	signature_rejected.emit()
 	_feedback_label.text = "The mark is incomplete. Trace it again."
 	_user_stroke.default_color = Color("dc4747")
 	if is_instance_valid(_feedback_tween):
@@ -223,14 +238,53 @@ func _play_acceptance() -> void:
 	_feedback_tween.tween_property(_feedback_flash, ^"modulate:a", 0.3, 0.1)
 	_feedback_tween.parallel().tween_property(_panel, ^"scale", Vector2(1.025, 1.025), 0.12) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	_feedback_tween.tween_property(_feedback_flash, ^"modulate:a", 0.0, 0.24)
-	_feedback_tween.parallel().tween_property(_panel, ^"scale", Vector2.ONE, 0.2)
-	_feedback_tween.tween_callback(_finish_acceptance)
+	_feedback_tween.tween_property(_feedback_flash, ^"modulate:a", 0.0, 0.18)
+	_feedback_tween.parallel().tween_property(_panel, ^"scale", Vector2.ONE, 0.16)
+	_feedback_tween.tween_property(
+		_panel,
+		^"position:y",
+		_panel_rest_position.y + success_drop_distance,
+		success_drop_duration
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	_feedback_tween.parallel().tween_property(
+		_panel,
+		^"modulate:a",
+		0.0,
+		success_drop_duration * 0.72
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	_feedback_tween.tween_callback(_begin_station_transition)
 
 
-func _finish_acceptance() -> void:
-	hide()
+func _begin_station_transition() -> void:
+	_transition_fade.mouse_filter = Control.MOUSE_FILTER_STOP
+	_transition_tween = create_tween()
+	_transition_tween.tween_property(
+		_transition_fade,
+		^"modulate:a",
+		1.0,
+		fade_to_black_duration
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	await _transition_tween.finished
+	if not is_inside_tree():
+		return
+	# Main starts the existing station cutscene while this scene-authored cover
+	# is fully opaque. Revealing it afterward makes the new cutscene fade in.
 	service_signed.emit()
+	await get_tree().process_frame
+	if not is_inside_tree():
+		return
+	_transition_tween = create_tween()
+	_transition_tween.tween_property(
+		_transition_fade,
+		^"modulate:a",
+		0.0,
+		fade_from_black_duration
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	await _transition_tween.finished
+	if not is_inside_tree():
+		return
+	_transition_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hide()
 
 
 func _unhandled_input(event: InputEvent) -> void:

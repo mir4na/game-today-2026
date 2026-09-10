@@ -88,8 +88,11 @@ func _run() -> void:
 	assert(boarding_actor.visible, "A boarder must remain visible when the door approach begins.")
 	assert(boarding_actor.position.distance_to(position_before_boarding) < 4.0, "Entrance and boarding paths must meet without a visual pop.")
 
-	var skip_button := station_ui.get_node("CinematicBorderLayer/SkipHint") as Button
+	var skip_prompt := station_ui.get_node("CinematicBorderLayer/SkipHint/SkipPromptLabel") as Label
+	var skip_button := station_ui.get_node("CinematicBorderLayer/SkipHint/SkipButton") as Button
+	assert(skip_prompt != null and skip_prompt.mouse_filter == Control.MOUSE_FILTER_IGNORE, "The non-interactive skip copy must not capture clicks.")
 	assert(skip_button != null and skip_button.flat, "The station skip prompt must be a text-only clickable button.")
+	assert(skip_button.text == "SKIP", "Only the colored SKIP word may act as the cutscene button.")
 	assert(not skip_button.disabled, "The skip button must unlock after the opening screen fade.")
 	var skip_requests: Array[int] = [0]
 	station_ui.sequence_skip_requested.connect(func() -> void: skip_requests[0] += 1)
