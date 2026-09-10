@@ -1,63 +1,80 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://cn2kl7tdaloya"]
 
-[ext_resource type="Script" path="res://scripts/ui/guidebook_anomaly_entry.gd" id="1"]
-[ext_resource type="FontFile" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="2_title_font"]
+[ext_resource type="Script" uid="uid://cxpymh8itfeft" path="res://scripts/ui/guidebook_anomaly_entry.gd" id="1"]
+[ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="2_title_font"]
 
 [sub_resource type="StyleBoxFlat" id="PhotoStyle"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
 bg_color = Color(0.78, 0.72, 0.61, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.51, 0.41, 0.3, 1)
-content_margin_left = 6.0
-content_margin_top = 6.0
-content_margin_right = 6.0
-content_margin_bottom = 6.0
 
-[node name="AnomalyEntry" type="HBoxContainer"]
-editor_description = "Set Photo in this entry's Inspector to replace its placeholder. Heading and Description are editable here too."
-custom_minimum_size = Vector2(420, 118)
+[node name="AnomalyEntry" type="HBoxContainer" unique_id=1177967712]
+editor_description = "Reusable guidebook anomaly section. In guidebook_ui.tscn, set Photo Side/Frame/Offset/Scale or add manual Sprite2D children under PhotoFrame/PhotoClip/PhotoContent."
+custom_minimum_size = Vector2(0, 82)
 size_flags_horizontal = 3
 theme_override_constants/separation = 18
 script = ExtResource("1")
 
-[node name="PhotoFrame" type="PanelContainer" parent="."]
-custom_minimum_size = Vector2(150, 108)
+[node name="PhotoFrame" type="PanelContainer" parent="." unique_id=2049561371]
+editor_description = "Clipped photo frame. Frame Size is controlled by the parent GuidebookAnomalyEntry instance."
+custom_minimum_size = Vector2(150, 78)
+clip_contents = true
 layout_mode = 2
 theme_override_styles/panel = SubResource("PhotoStyle")
 
-[node name="Photo" type="TextureRect" parent="PhotoFrame"]
+[node name="PhotoClip" type="Control" parent="PhotoFrame" unique_id=1527806403]
+editor_description = "Visible crop window for the anomaly reference photo."
+custom_minimum_size = Vector2(138, 66)
+clip_contents = true
 layout_mode = 2
 mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
 
-[node name="Placeholder" type="Label" parent="PhotoFrame"]
-layout_mode = 2
-mouse_filter = 2
+[node name="PhotoContent" type="CanvasGroup" parent="PhotoFrame/PhotoClip" unique_id=943558789]
+editor_description = "Move/scale this group with Photo Offset, Photo Scale, and Rotation. You can add Sprite2D children here for newspaper-style composed reference photos."
+position = Vector2(69, 33)
+
+[node name="Photo" type="Sprite2D" parent="PhotoFrame/PhotoClip/PhotoContent" unique_id=328331925]
+editor_description = "Default single texture photo. The parent entry assigns its texture and crop."
+visible = false
+texture_filter = 1
+
+[node name="Placeholder" type="Label" parent="PhotoFrame/PhotoClip" unique_id=1733963593]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_colors/font_color = Color(0.44, 0.35, 0.26, 1)
 theme_override_font_sizes/font_size = 13
 text = "REFERENCE PHOTO"
 horizontal_alignment = 1
 vertical_alignment = 1
+autowrap_mode = 3
 
-[node name="Text" type="VBoxContainer" parent="."]
+[node name="Text" type="VBoxContainer" parent="." unique_id=242403726]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 4
-theme_override_constants/separation = 8
+size_flags_vertical = 3
+theme_override_constants/separation = 4
 
-[node name="Heading" type="Label" parent="Text"]
+[node name="Heading" type="Label" parent="Text" unique_id=1091116954]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.145, 0.094, 1)
 theme_override_fonts/font = ExtResource("2_title_font")
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 15
 text = "ANOMALY"
 autowrap_mode = 2
 
-[node name="Description" type="Label" parent="Text"]
+[node name="Description" type="Label" parent="Text" unique_id=1199178315]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.188, 0.145, 0.114, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 14
 autowrap_mode = 2

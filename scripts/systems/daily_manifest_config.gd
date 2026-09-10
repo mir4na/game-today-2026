@@ -6,10 +6,14 @@ extends Resource
 @export_range(1, 40, 1) var total_passenger_count: int = 17
 @export_range(1, 20, 1) var initial_passenger_count: int = 8
 @export_range(1, 40, 1) var maximum_onboard_passenger_count: int = 12
-@export_range(1, 4, 1) var deceased_passenger_count: int = 4
-@export_range(0, 4, 1) var minimum_initial_deceased: int = 1
+@export_range(1, 5, 1) var deceased_passenger_count: int = 3
+@export_range(0, 5, 1) var minimum_initial_deceased: int = 1
 @export_range(1, 8, 1) var passenger_carriage_count: int = 4
 @export var balance_boarding_groups_across_carriages: bool = true
+
+@export_category("Night Service Progression")
+@export var night_anomaly_count_by_level: PackedInt32Array = PackedInt32Array([3, 3, 4, 4, 5])
+@export_range(0, 5, 1) var guaranteed_newspaper_anomaly_level: int = 5
 
 @export_category("Passenger Name Pools")
 @export_range(1, 100, 1) var minimum_unique_name_count: int = 30
@@ -46,6 +50,7 @@ extends Resource
 
 func create_daily_service(day: int, shift_seed: int) -> DailyManifestConfig:
 	var daily := duplicate(true) as DailyManifestConfig
+	daily.deceased_passenger_count = get_night_anomaly_count(day)
 	var service_rng := RandomNumberGenerator.new()
 	service_rng.seed = ("train:%d:day:%d" % [shift_seed, day]).hash()
 	var numbers := PackedStringArray()
@@ -55,6 +60,20 @@ func create_daily_service(day: int, shift_seed: int) -> DailyManifestConfig:
 			numbers.append(candidate)
 	daily.service_train_number = numbers[service_rng.randi_range(0, numbers.size() - 1)]
 	return daily
+
+
+func get_night_anomaly_count(level: int) -> int:
+	if night_anomaly_count_by_level.is_empty():
+		return clampi(deceased_passenger_count, 1, 5)
+	return clampi(
+		night_anomaly_count_by_level[clampi(level - 1, 0, night_anomaly_count_by_level.size() - 1)],
+		1,
+		5
+	)
+
+
+func should_guarantee_newspaper_anomaly(level: int) -> bool:
+	return guaranteed_newspaper_anomaly_level > 0 and level >= guaranteed_newspaper_anomaly_level
 
 
 func get_all_passenger_names() -> PackedStringArray:

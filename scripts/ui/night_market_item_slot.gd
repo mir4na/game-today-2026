@@ -6,12 +6,14 @@ signal tool_requested(tool_id: StringName)
 
 @export var tool_id: StringName
 @export var item_name: String = "Night Market item"
+@export var short_name: String = "ITEM"
 @export var amount_template: String = "×%d"
 @export_range(1.0, 1.2, 0.01) var hover_scale: float = 1.08
 @export_range(0.05, 0.3, 0.01) var hover_duration: float = 0.12
 
 @onready var _button: Button = %ItemButton
 @onready var _amount_label: Label = %AmountLabel
+@onready var _name_label: Label = %NameLabel
 
 var _owned_amount: int = 0
 var _interaction_locked: bool = false
@@ -21,6 +23,7 @@ var _hover_tween: Tween
 func _ready() -> void:
 	pivot_offset = size * 0.5
 	_button.tooltip_text = item_name
+	_name_label.text = short_name
 	_button.mouse_entered.connect(_set_hovered.bind(true))
 	_button.mouse_exited.connect(_set_hovered.bind(false))
 	_refresh_presentation()
@@ -58,7 +61,9 @@ func _refresh_presentation() -> void:
 	visible = _owned_amount > 0
 	_amount_label.text = amount_template % _owned_amount
 	_button.disabled = _interaction_locked or _owned_amount <= 0
-	self_modulate = Color(0.64, 0.64, 0.68, 0.82) if _button.disabled else Color.WHITE
+	# Keep the authored item artwork untouched even while interaction is locked.
+	# Availability is already communicated by visibility and the amount label.
+	self_modulate = Color.WHITE
 
 
 func _set_hovered(value: bool) -> void:

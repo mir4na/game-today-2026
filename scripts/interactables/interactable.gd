@@ -7,6 +7,9 @@ signal interaction_requested(interactable: Interactable)
 @export var prompt_text: String = "Interact"
 @export var interaction_distance: float = 112.0
 @export var enabled: bool = true
+@export_category("Passenger Idle Clearance")
+@export var blocks_passenger_idle: bool = true
+@export_node_path("CollisionShape2D") var passenger_idle_collision_path: NodePath
 @export_category("Interaction Placement")
 @export_node_path("Node2D") var interaction_origin_path: NodePath
 @export_category("Prompt Placement")
@@ -33,6 +36,7 @@ var _focus_outline_width: float = 4.0
 
 
 func _ready() -> void:
+	add_to_group(&"passenger_idle_obstacles")
 	_default_z_index = z_index
 	_default_z_as_relative = z_as_relative
 	if focus_visual_path.is_empty():
@@ -53,6 +57,30 @@ func _ready() -> void:
 	_focus_material.set_shader_parameter(&"interaction_lock_strength", 0.0)
 	_focus_material.set_shader_parameter(&"radar_detection_strength", 0.0)
 	_refresh_interaction_outline()
+
+
+func can_block_passenger_idle() -> bool:
+	var collision := get_passenger_idle_collision()
+	return (
+		blocks_passenger_idle
+		and enabled
+		and is_visible_in_tree()
+		and is_instance_valid(collision)
+		and not collision.disabled
+		and collision.shape != null
+	)
+
+
+func get_passenger_idle_collision() -> CollisionShape2D:
+	if not passenger_idle_collision_path.is_empty():
+		return get_node_or_null(passenger_idle_collision_path) as CollisionShape2D
+	# Keep older interactable scenes compatible. Only inspect direct children so
+	# navigation probes and other helper collisions are never treated as the
+	# object's visible standing footprint.
+	for child: Node in get_children():
+		if child is CollisionShape2D:
+			return child as CollisionShape2D
+	return null
 
 func get_prompt() -> String:
 	return "[E] %s" % prompt_text

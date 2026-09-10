@@ -22,7 +22,8 @@ signal sequence_skip_requested
 @export var opening_status_template: String = "%d BOARDING"
 @export var exchange_status_template: String = "%d OFF  •  %d ON"
 @export var terminal_status_template: String = "%d DISEMBARKING"
-@export var skip_hint_text: String = "PRESS [SPACE] TO SKIP"
+@export var skip_hint_text: String = "PRESS [SPACE] TO"
+@export var skip_button_text: String = "SKIP"
 @export_category("Scene Animation")
 @export var letterbox_in_animation: StringName = &"letterbox_in"
 @export var letterbox_out_animation: StringName = &"letterbox_out"
@@ -33,6 +34,7 @@ signal sequence_skip_requested
 @export_range(0.0, 5.0, 0.05) var stop_deceleration_start: float = 2.0
 @export_range(0.5, 10.0, 0.05) var stop_arrival_end: float = 6.690431
 @export_range(3.0, 18.0, 0.05) var stop_departure_start: float = 11.340431
+@export_range(8.0, 20.0, 0.05) var terminal_hold_duration: float = 15.340431
 @export_range(5.0, 20.0, 0.05) var opening_duration: float = 15.340431
 @export_range(0.0, 5.0, 0.05) var opening_deceleration_start: float = 2.0
 @export_range(0.5, 10.0, 0.05) var opening_arrival_end: float = 6.690431
@@ -126,7 +128,8 @@ var _motion_rng := RandomNumberGenerator.new()
 @onready var _heading_label: Label = %HeadingLabel
 @onready var _subtitle_label: Label = %SubtitleLabel
 @onready var _status_label: Label = %StatusLabel
-@onready var _skip_hint: Label = %SkipHint
+@onready var _skip_prompt_label: Label = %SkipPromptLabel
+@onready var _skip_button: Button = %SkipButton
 @onready var _cinematic_title: Control = %CinematicTitle
 @onready var _screen_fade: ColorRect = %ScreenFade
 @onready var _station_actor_canvas: CanvasLayer = %StationActorCanvas
@@ -158,15 +161,22 @@ func play_opening(station_name: String, boarding_actors: Array[Dictionary], door
 func play_terminal(departing_actors: Array[Dictionary], door_markers: Dictionary = {}, ambient_actors: Array[Dictionary] = []) -> void:
 	_opening_mode = false
 	_terminal_mode = true
-	_duration = stop_duration
+	_duration = maxf(terminal_hold_duration, stop_arrival_end + 0.5)
 	_deceleration_start = stop_deceleration_start
 	_arrival_end = stop_arrival_end
-	_departure_start = stop_departure_start
+	# The terminal sequence ends on a held wide shot. Departure is driven later
+	# by NightTransitionCutsceneUI after the paycheck has been acknowledged.
+	_departure_start = _duration
 	_begin_sequence("", departing_actors, [], door_markers, {}, ambient_actors)
 
 
 func get_stop_timeline() -> Vector3:
 	return Vector3(stop_duration, stop_arrival_end, stop_departure_start)
+
+
+func get_terminal_timeline() -> Vector3:
+	var duration: float = maxf(terminal_hold_duration, stop_arrival_end + 0.5)
+	return Vector3(duration, stop_arrival_end, duration)
 
 
 func get_opening_timeline() -> Vector3:
@@ -189,6 +199,8 @@ func get_arrival_progress() -> float:
 
 
 func get_departure_progress() -> float:
+	if _terminal_mode:
+		return 0.0
 	var movement_start: float = _get_departure_motion_start()
 	var linear_progress: float = clampf(
 		inverse_lerp(movement_start, _duration, _elapsed),
@@ -239,7 +251,8 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 	_build_actor_motion_profiles()
 	_build_ambient_motion_profiles()
 	_update_scene_copy()
-	_skip_hint.text = skip_hint_text
+	_skip_prompt_label.text = skip_hint_text
+	_skip_button.text = skip_button_text
 	show()
 	_station_actor_canvas.show()
 	_cinematic_border_layer.show()
@@ -255,7 +268,7 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 
 
 func skip_sequence() -> void:
-	if not visible or _camera_return_started:
+	if not visible or _camera_return_started or _elapsed < screen_fade_duration:
 		return
 	_skip_requested = true
 	_camera_return_started = true
@@ -312,7 +325,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-func complete_sequence() -> void:
+func complete_sequence(return_camera: bool = true) -> void:
 	if _finished:
 		return
 	_finished = true
@@ -324,8 +337,9 @@ func complete_sequence() -> void:
 			actor_index + _departing_actors.size()
 		)
 		_emit_boarding_actor_entered(actor_index, door_position)
-	_start_camera_return_if_needed()
-	_set_train_motion_strength(1.0)
+	if return_camera:
+		_start_camera_return_if_needed()
+	_set_train_motion_strength(1.0 if return_camera else 0.0)
 	_screen_fade.modulate.a = 0.0
 	if _skip_requested:
 		_letterbox_animation.stop()
@@ -374,6 +388,7 @@ func confirm_camera_return_complete() -> void:
 
 func _update_visuals() -> void:
 	_update_screen_fade()
+	_update_skip_button()
 	_update_camera_return()
 	_update_train_motion()
 	_update_exchange_actors()
@@ -385,7 +400,14 @@ func _update_screen_fade() -> void:
 	_screen_fade.modulate.a = 1.0 - _ease_in_out_sine(fade_progress)
 
 
+func _update_skip_button() -> void:
+	_skip_button.disabled = _camera_return_started or _elapsed < screen_fade_duration
+
+
 func _update_train_motion() -> void:
+	if _terminal_mode and _elapsed >= _arrival_end:
+		_set_train_motion_strength(0.0)
+		return
 	var departure_motion_start: float = _get_departure_motion_start()
 	var strength: float = 1.0
 	if _elapsed < _deceleration_start:
@@ -402,6 +424,8 @@ func _update_train_motion() -> void:
 
 
 func _update_camera_return() -> void:
+	if _terminal_mode:
+		return
 	if get_departure_progress() >= camera_return_departure_progress:
 		_start_camera_return_if_needed()
 
@@ -614,11 +638,17 @@ func _update_exchange_actors() -> void:
 		)
 		var platform_position: Vector2 = _profile_platform_position(door_position, profile)
 		var actor_position: Vector2 = _station_walk_position(door_position, platform_position, progress, profile, false)
+		# A passenger who has left the carriage becomes part of the platform flow.
+		# Do not leave the walk animation playing at a fixed destination while the
+		# train is still in the station shot.
+		if progress >= 1.0:
+			var time_since_exit: float = maxf(_elapsed - start_time - walk_duration, 0.0)
+			actor_position = _departing_platform_flow_position(platform_position, time_since_exit, profile)
 		_set_actor_slot(
 			actor_index,
 			_departing_actors[actor_index],
 			actor_position,
-			_walk_rotation(progress, profile),
+			_walk_rotation(progress + maxf(_elapsed - start_time - walk_duration, 0.0), profile),
 			float(profile["side"]),
 			_smoothstep(0.08, doorway_step_ratio, progress) * _station_environment_alpha,
 			1.0,
@@ -828,7 +858,9 @@ func _station_walk_position(door_position: Vector2, platform_position: Vector2, 
 		-side * doorway_inside_horizontal_offset,
 		-doorway_inside_vertical_offset
 	)
-	var pause_duration: float = minf(doorway_pause_ratio, 1.0 - doorway_step_ratio)
+	# Boarding has a brief threshold beat before the handoff inside the coach.
+	# Departing souls keep moving so they never appear stuck in the doorway.
+	var pause_duration: float = minf(doorway_pause_ratio, 1.0 - doorway_step_ratio) if boarding else 0.0
 	if boarding:
 		var approach_end: float = maxf(1.0 - doorway_step_ratio - pause_duration, 0.01)
 		if clamped_progress < approach_end:
@@ -847,6 +879,15 @@ func _station_walk_position(door_position: Vector2, platform_position: Vector2, 
 		return landing_position
 	var platform_progress: float = inverse_lerp(doorway_step_ratio + pause_duration, 1.0, clamped_progress)
 	return _platform_walk_position(landing_position, platform_position, _ease_in_out_sine(platform_progress), profile)
+
+
+func _departing_platform_flow_position(platform_position: Vector2, elapsed: float, profile: Dictionary) -> Vector2:
+	var direction: float = float(profile["side"])
+	var walk_distance: float = elapsed * 135.0
+	var position := platform_position + Vector2(direction * walk_distance, 0.0)
+	var stride: float = abs(sin(elapsed * 7.0 + float(profile["walk_phase"])))
+	position.y -= stride * float(profile["step_lift"]) * 0.45
+	return position
 
 
 func _quadratic_path(start: Vector2, control: Vector2, finish: Vector2, progress: float) -> Vector2:

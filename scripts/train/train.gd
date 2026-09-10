@@ -20,6 +20,8 @@ var _cars_station_rest_position: Vector2
 var _station_arrival_progress: float = 1.0
 var _station_departure_progress: float = 0.0
 var _station_sequence_active: bool = false
+var _station_vertical_offset_enabled: bool = true
+var _station_vertical_blend: float = 1.0
 
 @onready var _cars: Node2D = %Cars
 @onready var _exterior_sequence: TrainExteriorBody = %ExteriorSequence
@@ -82,6 +84,8 @@ func clear_blocked_connector_effect(immediate: bool = false) -> void:
 
 func show_exterior_body(duration: float, arrival_end: float, departure_start: float) -> void:
 	_station_sequence_active = true
+	_station_vertical_offset_enabled = true
+	_station_vertical_blend = 1.0
 	_station_arrival_progress = 0.0
 	_station_departure_progress = 0.0
 	_apply_station_travel_position()
@@ -92,6 +96,7 @@ func show_exterior_body(duration: float, arrival_end: float, departure_start: fl
 func hide_exterior_body() -> void:
 	_exterior_sequence.end_sequence()
 	_station_sequence_active = false
+	_station_vertical_offset_enabled = true
 	_station_arrival_progress = 1.0
 	_station_departure_progress = 0.0
 	_apply_station_travel_position()
@@ -106,10 +111,30 @@ func set_station_departure_progress(value: float) -> void:
 	_station_departure_progress = clampf(value, 0.0, 1.0)
 	_apply_station_travel_position()
 
+
+func set_station_vertical_offset_enabled(value: bool) -> void:
+	if _station_vertical_offset_enabled == value:
+		return
+	_station_vertical_offset_enabled = value
+	_apply_station_travel_position()
+
+
+func set_station_vertical_blend(value: float) -> void:
+	var clamped_value: float = clampf(value, 0.0, 1.0)
+	if is_equal_approx(_station_vertical_blend, clamped_value):
+		return
+	_station_vertical_blend = clamped_value
+	_apply_station_travel_position()
+
+
+func get_station_vertical_blend() -> float:
+	return _station_vertical_blend
+
+
 func _apply_station_travel_position() -> void:
 	var arrival_offset: float = station_arrival_distance * (1.0 - _station_arrival_progress)
 	var departure_offset: float = -station_departure_distance * _station_departure_progress
-	var vertical_offset: float = station_vertical_offset if _station_sequence_active else 0.0
+	var vertical_offset: float = station_vertical_offset * _station_vertical_blend if _station_sequence_active and _station_vertical_offset_enabled else 0.0
 	var travel_offset := Vector2(arrival_offset + departure_offset, vertical_offset)
 	_cars.position = _cars_station_rest_position + travel_offset
 	station_travel_offset_changed.emit(travel_offset)

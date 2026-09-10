@@ -21,6 +21,7 @@ var _interactables: Array[Interactable] = []
 var _nearest: Interactable
 var _facing: float = 1.0
 var _footstep_timer: float = 0.0
+var _move_speed_multiplier: float = 1.0
 
 @onready var _animated_sprite: AnimatedSprite2D = %MCVisual
 @onready var _dialogue_anchor: Marker2D = %DialogueAnchor
@@ -35,7 +36,7 @@ func _physics_process(delta: float) -> void:
 	var direction: float = 0.0
 	if movement_enabled:
 		direction = Input.get_axis(&"move_left", &"move_right")
-	velocity.x = direction * move_speed
+	velocity.x = direction * move_speed * _move_speed_multiplier
 	if not is_on_floor():
 		velocity.y += _gravity * delta
 	else:
@@ -76,6 +77,15 @@ func get_radar_origin_world_position() -> Vector2:
 	return _radar_origin.global_position
 
 
+func set_move_speed_multiplier(value: float) -> void:
+	_move_speed_multiplier = maxf(value, 0.0)
+	_update_visual()
+
+
+func get_move_speed_multiplier() -> float:
+	return _move_speed_multiplier
+
+
 func _update_nearest() -> void:
 	var candidate: Interactable = null
 	var closest_distance: float = INF
@@ -102,7 +112,9 @@ func _set_nearest(candidate: Interactable) -> void:
 func _update_visual() -> void:
 	var flip_horizontally: bool = _facing > 0.0 if artwork_faces_left else _facing < 0.0
 	_animated_sprite.flip_h = flip_horizontally
-	_play_animation(walk_animation if absf(velocity.x) >= walk_animation_threshold else idle_animation)
+	var is_walking: bool = absf(velocity.x) >= walk_animation_threshold
+	_animated_sprite.speed_scale = _move_speed_multiplier if is_walking else 1.0
+	_play_animation(walk_animation if is_walking else idle_animation)
 
 
 func _play_animation(animation_name: StringName) -> void:

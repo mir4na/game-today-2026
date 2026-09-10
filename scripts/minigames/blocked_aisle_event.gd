@@ -99,23 +99,58 @@ func get_tracker_icon() -> Texture2D:
 	return tracker_icon
 
 
+func get_maintenance_bounds(observer_global_x: float = NAN) -> Rect2:
+	if not is_instance_valid(_npc_exclusion_collision) or _npc_exclusion_collision.shape == null:
+		return Rect2(global_position, Vector2.ZERO)
+	var collision_transform: Transform2D = _npc_exclusion_collision.global_transform
+	if not visible and is_instance_valid(_luggage_visual):
+		var planned_anchor: Node2D = _spawn_anchor_for_observer(observer_global_x)
+		if is_instance_valid(planned_anchor):
+			collision_transform.origin += planned_anchor.global_position - _luggage_visual.global_position
+	return _rectangle_collision_bounds(_npc_exclusion_collision, collision_transform)
+
+
 func _place_luggage_for_observer(observer_global_x: float) -> void:
 	if not is_instance_valid(_luggage_visual):
 		return
-	var selected_anchor: Node2D = _left_spawn_anchor
-	_active_spawn_side = &"left"
-	if (
-		not is_nan(observer_global_x)
-		and is_instance_valid(_door_center_anchor)
-		and observer_global_x > _door_center_anchor.global_position.x
-	):
-		selected_anchor = _right_spawn_anchor
-		_active_spawn_side = &"right"
+	var selected_anchor: Node2D = _spawn_anchor_for_observer(observer_global_x)
+	_active_spawn_side = &"right" if selected_anchor == _right_spawn_anchor else &"left"
 	if not is_instance_valid(selected_anchor):
 		return
 	_luggage_visual.position = selected_anchor.position
 	if is_instance_valid(_interaction_collision):
 		_interaction_collision.position = selected_anchor.position + _interaction_offset_from_luggage
+
+
+func _spawn_anchor_for_observer(observer_global_x: float) -> Node2D:
+	if (
+		not is_nan(observer_global_x)
+		and is_instance_valid(_door_center_anchor)
+		and observer_global_x > _door_center_anchor.global_position.x
+	):
+		return _right_spawn_anchor
+	return _left_spawn_anchor
+
+
+func _rectangle_collision_bounds(collision: CollisionShape2D, target_transform: Transform2D) -> Rect2:
+	var rectangle := collision.shape as RectangleShape2D
+	if rectangle == null:
+		return Rect2(target_transform.origin, Vector2.ZERO)
+	var half_size: Vector2 = rectangle.size * 0.5
+	var corners := PackedVector2Array([
+		Vector2(-half_size.x, -half_size.y),
+		Vector2(half_size.x, -half_size.y),
+		Vector2(half_size.x, half_size.y),
+		Vector2(-half_size.x, half_size.y),
+	])
+	var first_corner: Vector2 = target_transform * corners[0]
+	var minimum: Vector2 = first_corner
+	var maximum: Vector2 = first_corner
+	for index: int in range(1, corners.size()):
+		var world_corner: Vector2 = target_transform * corners[index]
+		minimum = minimum.min(world_corner)
+		maximum = maximum.max(world_corner)
+	return Rect2(minimum, maximum - minimum)
 
 
 func _validate_placement_nodes() -> void:

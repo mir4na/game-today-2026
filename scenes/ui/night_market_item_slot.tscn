@@ -1,21 +1,43 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=6 format=3 uid="uid://b4nkn6n7jlvt2"]
 
-[ext_resource type="Script" path="res://scripts/ui/night_market_item_slot.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://cqjmgqrrfuvfn" path="res://scripts/ui/night_market_item_slot.gd" id="1_script"]
 [ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
-[ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="3_font"]
-[ext_resource type="Material" path="res://resources/materials/hud_black_outline.tres" id="4_outline"]
+[ext_resource type="Texture2D" uid="uid://76xa8b6162yi" path="res://assets/ui/Ellipse 115 (1).png" id="4_p3rbs"]
+[ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="5_csyhk"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBox_transparent"]
 
-[node name="NightMarketItemSlot" type="Control"]
-custom_minimum_size = Vector2(88, 88)
-offset_right = 88.0
-offset_bottom = 88.0
+[sub_resource type="StyleBoxFlat" id="StyleBox_name_plate"]
+bg_color = Color(0.941176, 0.811765, 0.552941, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="NightMarketItemSlot" type="Control" unique_id=1129906588]
+custom_minimum_size = Vector2(128, 132)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 128.0
+offset_bottom = 132.0
 mouse_filter = 1
 theme = ExtResource("2_theme")
 script = ExtResource("1_script")
 
-[node name="ItemButton" type="Button" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=1812476632]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 6.0
+offset_top = 4.0
+offset_right = 122.0
+offset_bottom = 120.0
+mouse_filter = 2
+texture = ExtResource("4_p3rbs")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ItemButton" type="Button" parent="." unique_id=1460274364]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -26,36 +48,53 @@ grow_vertical = 2
 focus_mode = 0
 mouse_default_cursor_shape = 2
 theme_override_styles/normal = SubResource("StyleBox_transparent")
-theme_override_styles/hover = SubResource("StyleBox_transparent")
 theme_override_styles/pressed = SubResource("StyleBox_transparent")
+theme_override_styles/hover = SubResource("StyleBox_transparent")
 theme_override_styles/disabled = SubResource("StyleBox_transparent")
 
-[node name="Icon" type="TextureRect" parent="."]
+[node name="Icon" type="TextureRect" parent="." unique_id=771861680]
 unique_name_in_owner = true
-material = ExtResource("4_outline")
 layout_mode = 0
-offset_left = 4.0
-offset_top = 4.0
-offset_right = 84.0
-offset_bottom = 84.0
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 112.0
+offset_bottom = 108.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="AmountLabel" type="Label" parent="."]
+[node name="AmountLabel" type="Label" parent="." unique_id=1619402339]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 44.0
-offset_top = 63.0
-offset_right = 92.0
-offset_bottom = 91.0
-mouse_filter = 2
-theme_override_colors/font_color = Color(0.98, 0.91, 0.73, 1)
-theme_override_colors/font_outline_color = Color(0.01, 0.015, 0.025, 1)
-theme_override_constants/outline_size = 5
-theme_override_fonts/font = ExtResource("3_font")
-theme_override_font_sizes/font_size = 16
+offset_left = 88.0
+offset_top = -1.0
+offset_right = 128.0
+offset_bottom = 27.0
+theme_override_colors/font_color = Color(0.92941177, 0.89411765, 0.85490197, 1)
+theme_override_colors/font_outline_color = Color(0.20784314, 0.20784314, 0.2509804, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("5_csyhk")
+theme_override_font_sizes/font_size = 20
 text = "×0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NamePlate" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 112.0
+offset_right = 123.0
+offset_bottom = 132.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBox_name_plate")
+
+[node name="NameLabel" type="Label" parent="NamePlate"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
+theme_override_fonts/font = ExtResource("5_csyhk")
+theme_override_font_sizes/font_size = 15
+text = "ITEM"
 horizontal_alignment = 1
 vertical_alignment = 1
 

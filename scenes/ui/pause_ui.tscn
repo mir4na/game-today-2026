@@ -9,6 +9,16 @@
 [ext_resource type="Shader" uid="uid://bykwrt6kj3rdj" path="res://shaders/pause_menu_palette.gdshader" id="7_palette"]
 [ext_resource type="Script" uid="uid://fgch1jgxeocf" path="res://scripts/ui/hover_scale_button.gd" id="8_hover"]
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ticket_palette"]
+resource_local_to_scene = true
+shader = ExtResource("7_palette")
+shader_parameter/night_strength = 0.0
+shader_parameter/monochrome_tint = false
+shader_parameter/day_ink = Color(0.207843, 0.207843, 0.25098, 1)
+shader_parameter/night_ink = Color(0.957, 0.894, 0.62, 1)
+shader_parameter/night_paper_top = Color(0.22, 0.224, 0.345, 1)
+shader_parameter/night_paper_bottom = Color(0.173, 0.11, 0.235, 1)
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_title_palette"]
 resource_local_to_scene = true
 shader = ExtResource("7_palette")
@@ -88,6 +98,7 @@ stretch_mode = 6
 
 [node name="TicketArtwork" type="TextureRect" parent="Ticket" unique_id=2101954934]
 unique_name_in_owner = true
+material = SubResource("ShaderMaterial_ticket_palette")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -169,16 +180,31 @@ uses_slider = true
 
 [node name="Actions" type="HBoxContainer" parent="Ticket" unique_id=356072082]
 layout_mode = 0
-offset_left = 598.0
+offset_left = 435.0
 offset_top = 344.0
 offset_right = 954.0
 offset_bottom = 383.0
 theme_override_constants/separation = 10
 alignment = 2
 
+[node name="ResumeButton" type="Button" parent="Ticket/Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(163, 39)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.937255, 0.788235, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("ActionButtonStyle")
+theme_override_styles/hover = SubResource("ActionButtonStyle")
+theme_override_styles/pressed = SubResource("ActionButtonStyle")
+theme_override_styles/focus = SubResource("ActionButtonStyle")
+text = "Resume"
+script = ExtResource("8_hover")
+
 [node name="RestartButton" type="Button" parent="Ticket/Actions" unique_id=2123995975]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(173, 39)
+custom_minimum_size = Vector2(163, 39)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.937255, 0.788235, 1)
 theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
@@ -193,7 +219,7 @@ script = ExtResource("8_hover")
 
 [node name="MainMenuButton" type="Button" parent="Ticket/Actions" unique_id=762932059]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(173, 39)
+custom_minimum_size = Vector2(163, 39)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.937255, 0.788235, 1)
 theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
@@ -231,5 +257,6 @@ theme_override_font_sizes/font_size = 12
 text = "07 JUN 2026"
 horizontal_alignment = 2
 
+[connection signal="pressed" from="Ticket/Actions/ResumeButton" to="." method="_on_resume_button_pressed"]
 [connection signal="pressed" from="Ticket/Actions/RestartButton" to="." method="_on_restart_button_pressed"]
 [connection signal="pressed" from="Ticket/Actions/MainMenuButton" to="." method="_on_main_menu_button_pressed"]

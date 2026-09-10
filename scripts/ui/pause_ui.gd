@@ -45,6 +45,7 @@ var _menu_settings_mode: bool = false
 @onready var _options_title: TextureRect = %OptionsTitle
 @onready var _train_number_label: Label = %TrainNumber
 @onready var _service_date_label: Label = %ServiceDate
+@onready var _resume_button: Button = %ResumeButton
 @onready var _restart_button: Button = %RestartButton
 @onready var _main_menu_button: Button = %MainMenuButton
 @onready var _selectors: Dictionary = {
@@ -109,6 +110,7 @@ func configure_menu_settings_mode(enabled: bool) -> void:
 
 func _apply_context_mode() -> void:
 	var enabled: bool = _menu_settings_mode
+	_resume_button.visible = not enabled
 	_restart_button.visible = not enabled
 	_main_menu_button.text = "Back" if enabled else "Main menu"
 
@@ -129,6 +131,7 @@ func _apply_time_palette() -> void:
 	_train_number_label.add_theme_color_override(&"font_color", info_color)
 	_service_date_label.add_theme_color_override(&"font_color", info_color)
 	var button_tint: Color = NIGHT_BUTTON_TINT if _night_mode else Color.WHITE
+	_resume_button.self_modulate = button_tint
 	_restart_button.self_modulate = button_tint
 	_main_menu_button.self_modulate = button_tint
 
@@ -326,6 +329,10 @@ func _close_with_action(action: StringName) -> void:
 
 func _on_restart_button_pressed() -> void:
 	_close_with_action(&"restart")
+
+
+func _on_resume_button_pressed() -> void:
+	_close_with_action(&"resume")
 
 
 func _on_main_menu_button_pressed() -> void:

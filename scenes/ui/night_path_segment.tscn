@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/night_path_segment.gd" id="1_segment"]
+
+[node name="NightPathSegment" type="Line2D"]
+z_index = -1
+width = 3.0
+default_color = Color(0.27451, 0.231373, 0.211765, 0.8)
+antialiased = true
+script = ExtResource("1_segment")

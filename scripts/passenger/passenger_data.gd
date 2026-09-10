@@ -75,3 +75,12 @@ func get_required_day_dropoff_station() -> String:
 	if is_wrong_train_boarder() and not required_dropoff_station.is_empty():
 		return required_dropoff_station
 	return destination_station
+
+
+func get_character_artwork() -> Texture2D:
+	# Night assignment visuals represent the soul itself. A daytime portrait
+	# mismatch may replace id_photo with someone else's picture, so use the
+	# immutable identity artwork for character drags and station faces.
+	if identity_profile != null and identity_profile.id_photo != null:
+		return identity_profile.id_photo
+	return id_photo

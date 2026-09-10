@@ -1,0 +1,50 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/night_station_face_token.gd" id="1"]
+[ext_resource type="Shader" path="res://shaders/night_face_portrait.gdshader" id="2_shader"]
+
+[sub_resource type="ShaderMaterial" id="FaceMaterial"]
+shader = ExtResource("2_shader")
+
+[sub_resource type="StyleBoxFlat" id="PortraitRing"]
+bg_color = Color(0.105882, 0.0901961, 0.0862745, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.705882, 0.298039, 0.290196, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[node name="NightStationFaceToken" type="Control"]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 36.0
+offset_bottom = 36.0
+mouse_filter = 2
+script = ExtResource("1")
+
+[node name="Ring" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("PortraitRing")
+
+[node name="Portrait" type="TextureRect" parent="."]
+unique_name_in_owner = true
+material = SubResource("FaceMaterial")
+layout_mode = 0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = 33.0
+offset_bottom = 33.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6

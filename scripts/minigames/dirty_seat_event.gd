@@ -58,6 +58,30 @@ func get_tracker_icon() -> Texture2D:
 	return tracker_icon
 
 
+func get_maintenance_bounds(_observer_global_x: float = NAN) -> Rect2:
+	if not is_instance_valid(_npc_exclusion_collision) or _npc_exclusion_collision.shape == null:
+		return Rect2(global_position, Vector2.ZERO)
+	var rectangle := _npc_exclusion_collision.shape as RectangleShape2D
+	if rectangle == null:
+		return Rect2(_npc_exclusion_collision.global_position, Vector2.ZERO)
+	var half_size: Vector2 = rectangle.size * 0.5
+	var corners := PackedVector2Array([
+		Vector2(-half_size.x, -half_size.y),
+		Vector2(half_size.x, -half_size.y),
+		Vector2(half_size.x, half_size.y),
+		Vector2(-half_size.x, half_size.y),
+	])
+	var collision_transform: Transform2D = _npc_exclusion_collision.global_transform
+	var first_corner: Vector2 = collision_transform * corners[0]
+	var minimum: Vector2 = first_corner
+	var maximum: Vector2 = first_corner
+	for index: int in range(1, corners.size()):
+		var world_corner: Vector2 = collision_transform * corners[index]
+		minimum = minimum.min(world_corner)
+		maximum = maximum.max(world_corner)
+	return Rect2(minimum, maximum - minimum)
+
+
 func set_event_active(value: bool) -> void:
 	_resolved = false if value else _resolved
 	visible = value

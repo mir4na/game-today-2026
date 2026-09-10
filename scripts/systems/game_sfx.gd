@@ -120,8 +120,11 @@ func _stop_audio_loop(channel: StringName) -> void:
 		_loops.erase(channel)
 		return
 	player.stop()
-	player.queue_free()
+	# Detach the stream immediately so an already-buffered loop cannot remain
+	# audible for another mix frame after its owning animation has completed.
+	player.stream = null
 	_loops.erase(channel)
+	player.queue_free()
 
 
 func _available_player() -> AudioStreamPlayer:

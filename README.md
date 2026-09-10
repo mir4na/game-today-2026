@@ -57,13 +57,13 @@ Main                             gameplay scene
 ├── HUD                          duties, live passenger-dot minimap, prompt, clock, notifications
 └── ModalLayer
 	├── DayIntroUI                 full-black DAY 1 fade title card
-    ├── DocumentOverlayUI        ID and ticket documents; newspaper/statement reader
+    ├── DocumentOverlayUI        ID and ticket documents; newspaper reader
     ├── GuidebookUI             daily service, procedures, records, evidence, anomalies, night rules, and tools
     ├── StationStopCutsceneUI    letterbox + passenger staging over the gameplay camera
     ├── ShiftReportUI            receipt, net earnings, daily target, PASSED/FAILED, retry/menu actions
     ├── NightMarketUI            tools purchased with Blessings before night service
-    ├── NightPuzzleUI            deceased-passenger/night-stop clue board
-    ├── DepartureSequenceUI      four-station ending sequence
+    ├── NightSoulRecordUI        clickable biographies containing station-path clues
+    ├── NightPuzzleUI            draggable soul ledger plus animated station-path validation
     └── PauseUI
 ```
 
@@ -79,7 +79,7 @@ Every static hierarchy and visual is scene-owned: menu panels and backdrop, HUD 
 - `scripts/player/player.gd` handles horizontal `CharacterBody2D` movement, camera follow, facing, and nearest-interactable selection.
 - `scripts/train/carriage.gd` and `scripts/train/train.gd` animate the scene-authored modular carriages, day/night overlay, underframe, and train sway; their geometry and palette live in train scenes and assigned SVG textures.
 - `scripts/passenger/passenger_data.gd` is the designer-facing passenger Resource. `passenger.gd` presents it, emits inspection requests, and runs the selected ambient AI profile inside safe passenger-coach boundaries.
-- `scripts/systems/departure_puzzle_data.gd` stores the ordered symbolic night destinations, relational clues, and internal deceased-passenger assignment solution. The night phase asks the player to identify where each anomaly belongs; it does not simulate physical station stops.
+- `scripts/systems/departure_puzzle_data.gd` builds the four-node station-path case, Soul Record biographies, anomaly-based relational clues, and internal assignment solution. The night phase asks the player to recover clue sentences and place each soul on a symbolic node; it does not simulate physical station stops.
 - Scripts in `scripts/ui` project state into responsive Control/Container layouts and signal decisions back to `Main`.
 
 ## Adding a passenger
@@ -111,13 +111,9 @@ Configured deceased-anomaly values are `shadowless`, `unlisted_destination`, `po
 
 ## Creating another departure puzzle
 
-Duplicate `data/puzzles/first_departures.tres`, then edit:
+Duplicate `data/puzzles/first_departures.tres`, then edit its station names, clue templates, anomaly language, biography openings, and resonance text. The graph itself is authored in `scenes/ui/night_puzzle_ui.tscn`; its target order must match `night_stations` in the Resource.
 
-- `night_stations`: ordered night-train stops shown to the player;
-- `night_stop_clues`: newline-separated relational clues;
-- `correct_passenger_by_station`: `{ station_name: passenger_short_name }` entries.
-
-Assign the new Resource to `puzzle_resource` on `Main`. Keep one passenger per station and make clues reference discovered properties (“without a shadow”, “unlisted destination”), ordering, adjacency, or non-adjacency rather than naming a direct answer. Verify that the clues yield one solution before shipping the puzzle.
+Assign the new Resource to `puzzle_resource` on `Main`. Keep one passenger per node and make clues reference evidence found during the day, such as “without a shadow” or “wrong ticket date.” Verify that the graph and clues yield one solution before shipping the puzzle.
 
 ## Validation
 
