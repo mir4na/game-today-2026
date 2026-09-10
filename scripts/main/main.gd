@@ -110,6 +110,8 @@ var _day_blessing_award: Dictionary = {}
 var _night_blessing_award: Dictionary = {}
 var _night_assignment_attempts: int = 0
 var _night_world_prepared: bool = false
+var _terminal_station_waiting_for_night_transition: bool = false
+var _night_transition_camera_return_requested: bool = false
 var _radar_scan_active: bool = false
 var _swiftstep_active: bool = false
 var _world_time_scale: float = 1.0
@@ -1420,7 +1422,11 @@ func _start_station_stop_cutscene(station_name: String, departing_actors: Array[
 	_set_passenger_ai_enabled(false)
 	_hide_gameplay_actors_for_station_cutscene()
 	_set_station_foreground_hidden(true)
-	var stop_timeline: Vector3 = _station_stop_ui.get_stop_timeline()
+	var stop_timeline: Vector3 = (
+		_station_stop_ui.get_terminal_timeline()
+		if terminal_arrival
+		else _station_stop_ui.get_stop_timeline()
+	)
 	_train.show_exterior_body(stop_timeline.x, stop_timeline.y, stop_timeline.z)
 	_station_cinematic_view.begin(
 		_gameplay_camera,
@@ -1594,8 +1600,13 @@ func _on_station_cutscene_camera_return_started() -> void:
 
 
 func _on_station_cutscene_skip_requested() -> void:
-	# Skipping lands on the exact post-cutscene composition on this frame.
 	_ambience.skip_station_sequence()
+	if _station_cutscene_context == &"terminal_exchange":
+		# The terminal skip lands on the stopped wide shot used by the paycheck.
+		_station_cutscene_timeline_complete = true
+		_try_complete_station_cutscene()
+		return
+	# Other station skips land on the exact gameplay composition on this frame.
 	_station_cinematic_view.skip_to_gameplay()
 
 
@@ -1615,6 +1626,10 @@ func _on_train_exterior_fade_out_finished() -> void:
 
 
 func _try_complete_station_cutscene() -> void:
+	if _station_cutscene_context == &"terminal_exchange":
+		if _station_cutscene_timeline_complete and _station_stop_ui.visible:
+			_station_stop_ui.complete_sequence(false)
+		return
 	if (
 		_station_cutscene_timeline_complete
 		and _station_camera_return_complete
@@ -1649,6 +1664,23 @@ func _on_station_stop_finished() -> void:
 	_station_cutscene_timeline_complete = false
 	_station_camera_return_complete = false
 	_ambience.end_station_sequence()
+	if finished_context == &"terminal_exchange":
+		# Preserve the stopped exterior train and wide station camera beneath the
+		# paycheck. Continue resumes this exact shot into the veil transition.
+		_finish_staged_boarding()
+		if _active_modal == _station_stop_ui:
+			_active_modal = null
+		_route_index += 1
+		_hud.set_clock_progress(_day_station_clock_progress(), true)
+		_terminal_station_waiting_for_night_transition = true
+		_train.set_station_arrival_progress(1.0)
+		_train.set_station_departure_progress(0.0)
+		_set_train_stopped_for_night_transition()
+		_hud.set_cutscene_hidden(true)
+		_travel_background.set_tunnel_active(false, true)
+		_update_passenger_minimap()
+		_finalize_day_shift()
+		return
 	_train.hide_exterior_body()
 	_station_cinematic_view.finish()
 	_set_station_foreground_hidden(false)
@@ -1919,11 +1951,12 @@ func _on_shift_report_continue() -> void:
 		_restart_game()
 		return
 	_shift_report_ui.hide()
-	_open_night_market()
+	_start_night_transition()
 
 
 func _start_night_transition() -> void:
 	state = GameState.NIGHT_TRANSITION
+	_night_transition_camera_return_requested = false
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
@@ -1931,6 +1964,23 @@ func _start_night_transition() -> void:
 	_active_modal = _night_transition_ui
 	_resume_train_for_night()
 	_night_transition_ui.play_transition()
+
+
+func _on_night_transition_timeline_changed(_elapsed: float) -> void:
+	if state != GameState.NIGHT_TRANSITION or not _terminal_station_waiting_for_night_transition:
+		return
+	_train.set_station_arrival_progress(1.0)
+	_train.set_station_departure_progress(
+		_night_transition_ui.get_station_departure_progress()
+	)
+
+
+func _on_night_transition_camera_return_requested() -> void:
+	if state != GameState.NIGHT_TRANSITION or _night_transition_camera_return_requested:
+		return
+	_night_transition_camera_return_requested = true
+	_station_camera_return_complete = false
+	_station_cinematic_view.return_to_gameplay()
 
 
 func _on_night_transition_veil_crossed() -> void:
@@ -1941,13 +1991,27 @@ func _on_night_transition_finished() -> void:
 	if state != GameState.NIGHT_TRANSITION:
 		return
 	_active_modal = null
-	_hud.set_cutscene_hidden(false)
-	_enter_night()
+	_finish_terminal_night_transition_world()
+	_open_night_market()
+
+
+func _finish_terminal_night_transition_world() -> void:
+	if not _terminal_station_waiting_for_night_transition:
+		return
+	if not _station_camera_return_complete:
+		_station_cinematic_view.skip_to_gameplay()
+	_train.hide_exterior_body()
+	_station_cinematic_view.finish()
+	_set_station_foreground_hidden(false)
+	_restore_gameplay_actors_after_station_cutscene()
+	_finish_staged_boarding()
+	_terminal_station_waiting_for_night_transition = false
+	_update_passenger_minimap()
 
 
 func _open_night_market() -> void:
-	# The train remains stopped after the final station while the conductor shops.
-	# Departure and the night-transition cutscene begin only after the gate closes.
+	# The market opens only after the train has crossed the veil and the camera has
+	# completed its return to the night-time gameplay composition.
 	_set_train_stopped_for_night_transition()
 	state = GameState.MARKET
 	_player.movement_enabled = false
@@ -1975,9 +2039,21 @@ func _on_market_purchase_requested(tool_id: StringName) -> void:
 func _on_night_market_continue() -> void:
 	if state != GameState.MARKET:
 		return
-	_active_modal = null
-	_start_night_transition()
+	# The market closes over fog. Reveal the already prepared night carriage,
+	# then restore input only after the fog has cleared.
+	_enter_night(false, false)
 	_night_market_ui.call(&"release_transition_fog")
+	var fog_release_seconds: float = maxf(
+		float(_night_market_ui.get("transition_fog_release_duration")),
+		0.05
+	)
+	await get_tree().create_timer(fog_release_seconds, false).timeout
+	if state != GameState.NIGHT:
+		return
+	_active_modal = null
+	_hud.set_cutscene_hidden(false)
+	_hud.notify(night_shift_instruction, 5.0)
+	_set_player_control_for_state()
 
 
 func _on_market_inventory_changed(snapshot: Dictionary) -> void:
@@ -2118,7 +2194,7 @@ func _carriage_has_anomaly(carriage_number: int) -> bool:
 			return true
 	return false
 
-func _enter_night() -> void:
+func _enter_night(enable_controls: bool = true, show_instruction: bool = true) -> void:
 	_prepare_night_world()
 	state = GameState.NIGHT
 	_night_ledger_guardian.call(&"set_night_active", true)
@@ -2129,8 +2205,13 @@ func _enter_night() -> void:
 	_hud.set_clock_progress(1.0, true)
 	_hud.set_clock_night_mode(true, true)
 	_pause_ui.set_night_mode(true)
-	_hud.notify(night_shift_instruction, 5.0)
-	_set_player_control_for_state()
+	if show_instruction:
+		_hud.notify(night_shift_instruction, 5.0)
+	if enable_controls:
+		_set_player_control_for_state()
+	else:
+		_player.movement_enabled = false
+		_player.interaction_enabled = false
 
 
 func _prepare_night_world() -> void:

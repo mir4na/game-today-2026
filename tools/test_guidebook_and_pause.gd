@@ -29,28 +29,32 @@ func _run() -> void:
 	var guide: GuidebookUI = game._guidebook_ui
 	_check((guide.get_node("%TodayLayout") as Control).visible, "Today's Service uses its scene-authored layout.")
 	_check(not (guide.get_node("%Content") as RichTextLabel).visible, "The visible guidebook page is not the raw RichText document.")
-	_check((guide.get_node("%TodayRouteLabel") as Label).text.contains(game.manifest_config.service_train_number), "The scene-authored service page shows the generated service number.")
+	_check((guide.get_node("%TodayServiceMeta") as Label).text.contains(game.manifest_config.service_train_number), "The scene-authored service page shows the generated service number.")
 	_check((guide.get_node("%PassShiftBody") as Label).text.contains("Blessings"), "The scene-authored service page shows the paycheck target.")
+	if DisplayServer.get_name() != "headless":
+		await create_timer(0.6).timeout
+		root.get_texture().get_image().save_png("/tmp/guidebook-today.png")
 	var original_day: int = game.day_number
 	for day: int in range(1, 6):
 		game.day_number = day
 		game._open_guidebook()
-		_check(guide._content.text.contains("[b]Required[/b]  %d Blessings" % game._get_day_pass_target()), "Today's Service shows the paycheck target for day %d." % day)
+		_check((guide.get_node("%TodayThresholdValue") as Label).text.ends_with("/ %d" % game._get_day_pass_target()), "Today's Service shows the paycheck target for day %d." % day)
 	game.day_number = original_day
 	game._open_guidebook()
 	_check(not game._day_intro_ui.has_node("Center/Content/TargetLabel"), "The opening chapter card does not display the paycheck target.")
 	var starting_balance: int = game._market_tool_state.blessings
 	var initial_count: int = game._active_passenger_count()
-	_check(guide._content.text.contains("[b]Currently aboard[/b]  %d" % initial_count), "Today shows the actual opening passenger count.")
-	_check(guide._content.text.contains("[b]Boarded today[/b]  %d" % initial_count), "Opening passengers count toward the cumulative total.")
-	_check(guide._content.text.contains("[b]Train number[/b]  %s" % game.manifest_config.service_train_number), "Guidebook displays the generated service number.")
+	var passenger_status := guide.get_node("%TodayProgressLabel") as Label
+	_check(passenger_status.text.contains("Currently aboard\n%d" % initial_count), "Today shows the actual opening passenger count.")
+	_check(passenger_status.text.contains("Boarded today\n%d" % initial_count), "Opening passengers count toward the cumulative total.")
+	_check((guide.get_node("%TodayServiceMeta") as Label).text.contains("Train %s" % game.manifest_config.service_train_number), "Guidebook displays the generated service number.")
 	var stamp_subject: Passenger = game._passengers[0]
 	game._on_station_assignment_toggled(stamp_subject.data.passenger_name, true)
 	game._refresh_guidebook_progress()
-	_check(guide._content.text.contains("[b]Stamped aboard[/b]  1"), "Applying a stamp updates the onboard stamp count.")
+	_check(passenger_status.text.contains("Marked for next stop\n1"), "Applying a stamp updates the onboard stamp count.")
 	game._on_station_assignment_toggled(stamp_subject.data.passenger_name, false)
 	game._refresh_guidebook_progress()
-	_check(guide._content.text.contains("[b]Stamped aboard[/b]  0"), "Removing a stamp decreases the onboard stamp count.")
+	_check(passenger_status.text.contains("Marked for next stop\n0"), "Removing a stamp decreases the onboard stamp count.")
 	game._incorrectly_stamped_anomalies.clear()
 	var boarder: Passenger
 	for data: PassengerData in game._daily_manifest:
@@ -77,10 +81,11 @@ func _run() -> void:
 	game._route_index = 1
 	game._passengers.back().depart_train()
 	game._process(0.01)
-	_check(guide._content.text.contains("[b]Earned today[/b]  30 Blessings"), "Live earnings use +30/-20/-40 scoring.")
-	_check(guide._content.text.contains("[b]Still needed[/b]  %d Blessings" % maxi(0, game._get_day_pass_target() - 30)), "The remaining target reflects net earnings.")
-	_check(guide._content.text.contains("[b]Stops completed[/b]  1 / %d" % (game.day_route.size() - 1)), "Route progress excludes the departure station.")
-	_check(guide._content.text.contains("[b]Currently aboard[/b]  %d" % (initial_count - 1)), "Departed passengers disappear from the live count.")
+	_check((guide.get_node("%TodayThresholdValue") as Label).text.begins_with("30 /"), "Live earnings use +30/-20/-40 scoring.")
+	_check((guide.get_node("%PassShiftBody") as Label).text.contains("%d Blessings" % maxi(0, game._get_day_pass_target() - 30)), "The remaining target reflects net earnings.")
+	_check((guide.get_node("%TodayRouteProgress") as Label).text.contains("1 / %d" % (game.day_route.size() - 1)), "Route progress excludes the departure station.")
+	_check(passenger_status.text.contains("Currently aboard\n%d" % (initial_count - 1)), "Departed passengers disappear from the live count.")
+	_check(passenger_status.text.contains("Dropped off\n1"), "Today's Service shows the number of completed drop-offs.")
 	_check(guide._boarded_today == initial_count, "Departures do not reduce the cumulative boarding total.")
 	_check(guide._stamped_aboard == 0, "A departed stamped passenger is excluded even before assignments are cleared.")
 	game._station_assignment.clear()
@@ -90,11 +95,14 @@ func _run() -> void:
 	_check(guide._page_title.text == "Rules", "Live updates preserve the selected section.")
 	_check((guide.get_node("%RulesLayout") as Control).visible, "Rules uses its scene-authored layout.")
 	_check(not ((guide.get_node("Center/BookStage/Page/RulesLayout/RulesRightText") as Label).text.contains("TAB")), "Rules page avoids raw keyboard-control lists.")
+	if DisplayServer.get_name() != "headless":
+		await create_timer(0.6).timeout
+		root.get_texture().get_image().save_png("/tmp/guidebook-rules.png")
 	guide._show_today()
-	_check(guide._content.text.contains("[b]Earned today[/b]  -60 Blessings"), "Negative earnings are shown without hiding penalties.")
+	_check((guide.get_node("%TodayThresholdValue") as Label).text.begins_with("-60 /"), "Negative earnings are shown without hiding penalties.")
 	game._correct_drop_offs = 20
 	game._process(0.01)
-	_check(guide._content.text.contains("[b]Still needed[/b]  0 Blessings"), "Exceeding the target leaves zero still needed.")
+	_check((guide.get_node("%PassShiftBody") as Label).text.contains("0 Blessings"), "Exceeding the target leaves zero still needed.")
 	_check(game._market_tool_state.blessings == starting_balance and not game._market_tool_state._day_blessings_awarded, "Viewing progress never pays out or finalizes the shift.")
 	game._correct_drop_offs = 0
 	game._wrong_drop_offs = 0
@@ -107,7 +115,8 @@ func _run() -> void:
 	_check(game._day_minutes > before, "Guidebook does not pause the shift clock.")
 	_check(game._passengers[0].ai_enabled, "NPC activity continues while guidebook is open.")
 	guide._show_procedure()
-	_check(guide._content.text.contains("30 Blessings") and guide._content.text.contains("40 Blessings"), "Rules include the current paycheck scoring.")
+	var rules_rewards := guide.get_node("Center/BookStage/Page/RulesLayout/RulesRightText") as Label
+	_check(rules_rewards.text.contains("+30") and rules_rewards.text.contains("−40"), "Rules include the current paycheck scoring.")
 	guide._show_anomalies()
 	_check(guide._anomaly_list.visible, "Anomaly section uses its scene-authored page.")
 	_check((guide.get_node("%AnomalyIntroLabel") as Label).text.contains("Keep suspicious"), "Anomaly page has a short player-facing instruction.")

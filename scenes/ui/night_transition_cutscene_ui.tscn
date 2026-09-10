@@ -188,7 +188,7 @@ tracks/3/keys = {
 "times": PackedFloat32Array(0, 4.65, 5.2, 5.7, 7.0, 10.0),
 "transitions": PackedFloat32Array(1, 1.5, 1, 1.4, 1.2, 1),
 "update": 0,
-"values": [0.0, 0.0, 0.86, 0.22, 0.0, 0.0]
+"values": [0.0, 0.0, 1.0, 0.32, 0.0, 0.0]
 }
 tracks/4/type = "value"
 tracks/4/imported = false
@@ -260,6 +260,10 @@ script = ExtResource("1_script")
 transition_animation = &"transition"
 veil_crossing_time = 5.25
 skip_unlock_seconds = 1.5
+departure_start_time = 0.45
+veil_departure_progress = 0.58
+departure_end_time = 8.35
+camera_return_time = 8.55
 
 [node name="BackdropTint" type="ColorRect" parent="."]
 layout_mode = 1
@@ -309,7 +313,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.72, 0.9, 0.95, 1)
+color = Color(1, 0.985, 0.96, 1)
 
 [node name="VeilSymbol" type="Label" parent="."]
 layout_mode = 1

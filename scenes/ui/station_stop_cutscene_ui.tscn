@@ -270,6 +270,7 @@ stop_duration = 16.19043
 stop_deceleration_start = 2.0
 stop_arrival_end = 6.690431
 stop_departure_start = 11.340431
+terminal_hold_duration = 16.19043
 opening_duration = 16.19043
 opening_deceleration_start = 2.0
 opening_arrival_end = 6.690431

@@ -34,6 +34,7 @@ signal sequence_skip_requested
 @export_range(0.0, 5.0, 0.05) var stop_deceleration_start: float = 2.0
 @export_range(0.5, 10.0, 0.05) var stop_arrival_end: float = 6.690431
 @export_range(3.0, 18.0, 0.05) var stop_departure_start: float = 11.340431
+@export_range(8.0, 20.0, 0.05) var terminal_hold_duration: float = 15.340431
 @export_range(5.0, 20.0, 0.05) var opening_duration: float = 15.340431
 @export_range(0.0, 5.0, 0.05) var opening_deceleration_start: float = 2.0
 @export_range(0.5, 10.0, 0.05) var opening_arrival_end: float = 6.690431
@@ -159,15 +160,22 @@ func play_opening(station_name: String, boarding_actors: Array[Dictionary], door
 func play_terminal(departing_actors: Array[Dictionary], door_markers: Dictionary = {}, ambient_actors: Array[Dictionary] = []) -> void:
 	_opening_mode = false
 	_terminal_mode = true
-	_duration = stop_duration
+	_duration = maxf(terminal_hold_duration, stop_arrival_end + 0.5)
 	_deceleration_start = stop_deceleration_start
 	_arrival_end = stop_arrival_end
-	_departure_start = stop_departure_start
+	# The terminal sequence ends on a held wide shot. Departure is driven later
+	# by NightTransitionCutsceneUI after the paycheck has been acknowledged.
+	_departure_start = _duration
 	_begin_sequence("", departing_actors, [], door_markers, {}, ambient_actors)
 
 
 func get_stop_timeline() -> Vector3:
 	return Vector3(stop_duration, stop_arrival_end, stop_departure_start)
+
+
+func get_terminal_timeline() -> Vector3:
+	var duration: float = maxf(terminal_hold_duration, stop_arrival_end + 0.5)
+	return Vector3(duration, stop_arrival_end, duration)
 
 
 func get_opening_timeline() -> Vector3:
@@ -190,6 +198,8 @@ func get_arrival_progress() -> float:
 
 
 func get_departure_progress() -> float:
+	if _terminal_mode:
+		return 0.0
 	var movement_start: float = _get_departure_motion_start()
 	var linear_progress: float = clampf(
 		inverse_lerp(movement_start, _duration, _elapsed),
@@ -296,7 +306,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-func complete_sequence() -> void:
+func complete_sequence(return_camera: bool = true) -> void:
 	if _finished:
 		return
 	_finished = true
@@ -308,8 +318,9 @@ func complete_sequence() -> void:
 			actor_index + _departing_actors.size()
 		)
 		_emit_boarding_actor_entered(actor_index, door_position)
-	_start_camera_return_if_needed()
-	_set_train_motion_strength(1.0)
+	if return_camera:
+		_start_camera_return_if_needed()
+	_set_train_motion_strength(1.0 if return_camera else 0.0)
 	_screen_fade.modulate.a = 0.0
 	if _skip_requested:
 		_letterbox_animation.stop()
@@ -375,6 +386,9 @@ func _update_skip_button() -> void:
 
 
 func _update_train_motion() -> void:
+	if _terminal_mode and _elapsed >= _arrival_end:
+		_set_train_motion_strength(0.0)
+		return
 	var departure_motion_start: float = _get_departure_motion_start()
 	var strength: float = 1.0
 	if _elapsed < _deceleration_start:
@@ -391,6 +405,8 @@ func _update_train_motion() -> void:
 
 
 func _update_camera_return() -> void:
+	if _terminal_mode:
+		return
 	if get_departure_progress() >= camera_return_departure_progress:
 		_start_camera_return_if_needed()
 
