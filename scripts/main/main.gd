@@ -115,6 +115,9 @@ var _night_record_camera_rest_offset: Vector2
 var _night_record_camera_target_offset: Vector2
 var _night_record_camera_tween: Tween
 var _night_record_camera_shake_tween: Tween
+var _tutorial_camera_rest_offset: Vector2
+var _tutorial_camera_rest_zoom: Vector2
+var _tutorial_camera_tween: Tween
 var _blocked_aisle_events: Array[Node] = []
 var _dirty_seat_events: Array[Node] = []
 var _active_blocked_aisle_event: Node
@@ -186,6 +189,8 @@ func _ready() -> void:
 	_train_occupants_station_rest_position = _train_occupants.position
 	_night_record_camera_rest_offset = _gameplay_camera.offset
 	_night_record_camera_target_offset = _night_record_camera_rest_offset
+	_tutorial_camera_rest_offset = _gameplay_camera.offset
+	_tutorial_camera_rest_zoom = _gameplay_camera.zoom
 	_connect_hud_runtime_signals()
 	if day_route.size() < 2:
 		push_error("Main/Day Route requires at least an opening and final station.")
@@ -830,6 +835,63 @@ func _spawn_passenger(data: PassengerData, seat_slot: Marker2D) -> Passenger:
 	passenger.configure_seat_navigation(passenger.position, _get_passenger_activity_positions(), _get_passenger_carriage_ranges())
 	return passenger
 
+
+## Builds the scene-authored tutorial passenger only when its lesson begins.
+## The identity resource, carriage, and seat index are supplied by TutorialDirector.tscn.
+func spawn_tutorial_passenger(
+	profile: PassengerIdentityProfile,
+	carriage_number: int,
+	seat_index: int = 0
+) -> Passenger:
+	if not is_tutorial_mode or profile == null:
+		return null
+	for existing: Passenger in _passengers:
+		if _is_active_passenger(existing) and existing.data != null and existing.data.identity_profile == profile:
+			return existing
+	var seats: Array[Marker2D] = _train.get_passenger_seat_slots(carriage_number)
+	if seats.is_empty():
+		push_error("Tutorial passenger cannot spawn: carriage %d has no scene-authored seats." % carriage_number)
+		return null
+	var preferred_index: int = clampi(seat_index, 0, seats.size() - 1)
+	var chosen_seat: Marker2D
+	for offset: int in range(seats.size()):
+		var candidate: Marker2D = seats[(preferred_index + offset) % seats.size()]
+		var occupant := _seat_occupant_by_slot.get(candidate) as Passenger
+		if not _is_active_passenger(occupant) and not _is_seat_blocked_by_maintenance(candidate):
+			chosen_seat = candidate
+			break
+	if chosen_seat == null:
+		push_error("Tutorial passenger cannot spawn: carriage %d has no available seat." % carriage_number)
+		return null
+
+	var data: PassengerData = PassengerData.create_from_identity(profile)
+	if data == null:
+		push_error("Tutorial passenger profile is invalid.")
+		return null
+	data.origin_station = _current_day_station()
+	data.destination_station = _next_day_station()
+	data.required_dropoff_station = data.destination_station
+	data.ticket_owner = data.short_name
+	data.ticket_train_number = manifest_config.service_train_number.strip_edges()
+	data.ticket_service_date = manifest_config.service_date_text.strip_edges()
+	data.ticket_day_code = manifest_config.ticket_day_code.strip_edges()
+	data.ticket_number = "%s-%s-TUT12" % [data.ticket_day_code, data.ticket_train_number]
+	data.current_carriage = _train.get_passenger_carriage_number_at_world_x(chosen_seat.global_position.x)
+	data.initially_on_train = true
+	data.ai_behavior = "still"
+	data.ai_interval_seconds = 999.0
+	var passenger: Passenger = _spawn_passenger(data, chosen_seat)
+	if passenger == null:
+		return null
+	_daily_manifest.append(data)
+	passenger.hide()
+	passenger.enabled = false
+	passenger.set_ai_enabled(false)
+	_interactables.append(passenger)
+	_refresh_player_interactables(true)
+	_update_passenger_minimap()
+	return passenger
+
 func _stage_passenger_for_boarding(passenger: Passenger, actor_index: int) -> void:
 	if not _is_active_passenger(passenger):
 		return
@@ -950,7 +1012,6 @@ func _get_active_anomaly_trait_counts() -> Dictionary:
 func _validate_passenger_resource_constraints() -> void:
 	var trait_counts: Dictionary = {}
 	var deceased_count: int = 0
-	var wrong_train_boarder_count: int = 0
 	var observed_ticket_numbers: Dictionary = {}
 	var observed_identity_numbers: Dictionary = {}
 	var service_train_number: String = manifest_config.service_train_number.strip_edges()
@@ -996,17 +1057,7 @@ func _validate_passenger_resource_constraints() -> void:
 				push_error("Time-invalid ticket for %s still matches the active service day." % data.passenger_name)
 		elif data.ticket_service_date != service_date or data.ticket_day_code != service_day_code:
 			push_error("Regular ticket for %s carries an invalid service date." % data.passenger_name)
-		if data.is_wrong_train_boarder():
-			wrong_train_boarder_count += 1
-			var origin_index: int = day_route.find(data.origin_station)
-			var expected_immediate_station: String = day_route[origin_index + 1] if origin_index >= 0 and origin_index + 1 < day_route.size() else ""
-			if data.is_dead:
-				push_error("Wrong-train boarder %s must remain a living operational case, not a night passenger." % data.passenger_name)
-			if data.ticket_train_number == service_train_number:
-				push_error("Wrong-train boarder %s carries the active service number." % data.passenger_name)
-			if data.required_dropoff_station != expected_immediate_station:
-				push_error("Wrong-train boarder %s must leave at the first stop after boarding." % data.passenger_name)
-		elif data.ticket_issue_type != PassengerData.TICKET_ISSUE_NONE:
+		if data.ticket_issue_type != PassengerData.TICKET_ISSUE_NONE:
 			push_error("Passenger %s has an unsupported ticket issue: %s." % [data.passenger_name, String(data.ticket_issue_type)])
 		elif data.ticket_train_number != service_train_number:
 			push_error("Regular passenger %s carries train number %s instead of %s." % [data.passenger_name, data.ticket_train_number, service_train_number])
@@ -1014,8 +1065,6 @@ func _validate_passenger_resource_constraints() -> void:
 			trait_counts[anomaly_key] = int(trait_counts.get(anomaly_key, 0)) + 1
 	if deceased_count != manifest_config.deceased_passenger_count:
 		push_error("Generated manifest contains %d deceased passengers; Daily Manifest Config expects %d." % [deceased_count, manifest_config.deceased_passenger_count])
-	if wrong_train_boarder_count != manifest_config.wrong_train_boarder_count:
-		push_error("Generated manifest contains %d wrong-train boarders; Daily Manifest Config expects %d." % [wrong_train_boarder_count, manifest_config.wrong_train_boarder_count])
 	for anomaly_key: StringName in trait_counts:
 		var count: int = int(trait_counts[anomaly_key])
 		if count > manifest_config.max_passengers_per_anomaly_trait:
@@ -1043,20 +1092,15 @@ func _debug_print_configured_anomaly_roster() -> void:
 	if not debug_print_anomaly_roster:
 		return
 	var anomaly_rows := PackedStringArray()
-	var wrong_train_rows := PackedStringArray()
 	for data: PassengerData in _daily_manifest:
 		var traits: Array[StringName] = data.get_anomaly_traits(day_route)
 		if not traits.is_empty() or data.is_dead:
 			anomaly_rows.append(_format_anomaly_debug_row(data, traits))
-		if data.is_wrong_train_boarder():
-			wrong_train_rows.append(_format_wrong_train_debug_row(data))
 	print("\n========== ANOMALY DEBUG: CONFIGURED DAY ROSTER (%d) ==========" % anomaly_rows.size())
 	for debug_line: String in anomaly_rows:
 		print(debug_line)
 	print("[NEWSPAPER] %s: %s" % [_newspaper_case_debug_label(), _newspaper_subject_name])
-	print("[TICKET DEBUG] ACTIVE SERVICE %s | DATE %s | WRONG-TRAIN BOARDERS (%d)" % [manifest_config.service_train_number, manifest_config.service_date_text, wrong_train_rows.size()])
-	for debug_line: String in wrong_train_rows:
-		print(debug_line)
+	print("[TICKET DEBUG] ACTIVE SERVICE %s | DATE %s" % [manifest_config.service_train_number, manifest_config.service_date_text])
 	print("===============================================================\n")
 
 func _newspaper_case_debug_label() -> String:
@@ -1072,7 +1116,6 @@ func _debug_print_active_anomaly_roster(context: String) -> void:
 	if not debug_print_anomaly_roster:
 		return
 	var anomaly_rows := PackedStringArray()
-	var wrong_train_rows := PackedStringArray()
 	for passenger: Passenger in _passengers:
 		if not _is_active_passenger(passenger):
 			continue
@@ -1080,19 +1123,11 @@ func _debug_print_active_anomaly_roster(context: String) -> void:
 		var traits: Array[StringName] = data.get_anomaly_traits(day_route)
 		if not traits.is_empty() or data.is_dead:
 			anomaly_rows.append(_format_anomaly_debug_row(data, traits))
-		if data.is_wrong_train_boarder():
-			wrong_train_rows.append(_format_wrong_train_debug_row(data))
 	print("[ANOMALY DEBUG] ACTIVE AFTER %s (%d)" % [context, anomaly_rows.size()])
 	if anomaly_rows.is_empty():
 		print("  - NONE")
 	else:
 		for debug_line: String in anomaly_rows:
-			print(debug_line)
-	print("[TICKET DEBUG] ACTIVE WRONG-TRAIN BOARDERS (%d)" % wrong_train_rows.size())
-	if wrong_train_rows.is_empty():
-		print("  - NONE")
-	else:
-		for debug_line: String in wrong_train_rows:
 			print(debug_line)
 
 func _format_anomaly_debug_row(data: PassengerData, traits: Array[StringName]) -> String:
@@ -1114,16 +1149,6 @@ func _format_anomaly_debug_row(data: PassengerData, traits: Array[StringName]) -
 		data.current_carriage,
 		"DAY START" if data.initially_on_train else data.origin_station,
 		evidence,
-	]
-
-func _format_wrong_train_debug_row(data: PassengerData) -> String:
-	return "  - %s | ticket_train=%s | active_train=%s | printed_destination=%s | required_dropoff=%s | boards=%s" % [
-		data.passenger_name,
-		data.ticket_train_number,
-		manifest_config.service_train_number,
-		data.destination_station,
-		data.required_dropoff_station,
-		"DAY START" if data.initially_on_train else data.origin_station,
 	]
 
 func _collect_interactables(node: Node) -> void:
@@ -1550,6 +1575,138 @@ func _focus_night_record_camera() -> void:
 
 func _restore_night_record_camera() -> void:
 	_tween_night_record_camera_to(_night_record_camera_rest_offset)
+
+
+## Moves the player-owned gameplay camera to a tutorial subject without
+## reparenting it. TutorialDirector owns the timing and target selection.
+func focus_tutorial_camera(target: Node2D, target_zoom: Vector2, duration: float) -> Tween:
+	if not is_instance_valid(_gameplay_camera) or not is_instance_valid(target):
+		return null
+	if is_instance_valid(_tutorial_camera_tween) and _tutorial_camera_tween.is_valid():
+		_tutorial_camera_tween.kill()
+	var safe_zoom := Vector2(
+		maxf(absf(target_zoom.x), 0.001),
+		maxf(absf(target_zoom.y), 0.001)
+	)
+	# Respect the authored camera limits so the focus never pushes the train
+	# out of frame vertically.
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var half_view := Vector2(
+		viewport_size.x / safe_zoom.x,
+		viewport_size.y / safe_zoom.y
+	) * 0.5
+	var minimum_center := Vector2(
+		float(_gameplay_camera.limit_left),
+		float(_gameplay_camera.limit_top)
+	) + half_view
+	var maximum_center := Vector2(
+		float(_gameplay_camera.limit_right),
+		float(_gameplay_camera.limit_bottom)
+	) - half_view
+	var bounded_center: Vector2 = target.global_position
+	if maximum_center.x < minimum_center.x:
+		bounded_center.x = (minimum_center.x + maximum_center.x) * 0.5
+	else:
+		bounded_center.x = clampf(bounded_center.x, minimum_center.x, maximum_center.x)
+	if maximum_center.y < minimum_center.y:
+		bounded_center.y = (minimum_center.y + maximum_center.y) * 0.5
+	else:
+		bounded_center.y = clampf(bounded_center.y, minimum_center.y, maximum_center.y)
+	var current_center: Vector2 = _gameplay_camera.get_screen_center_position()
+	var target_offset: Vector2 = _gameplay_camera.offset + bounded_center - current_center
+	_tutorial_camera_tween = create_tween().set_parallel(true)
+	_tutorial_camera_tween.tween_property(
+		_gameplay_camera,
+		^"offset",
+		target_offset,
+		maxf(duration, 0.05)
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_tutorial_camera_tween.tween_property(
+		_gameplay_camera,
+		^"zoom",
+		target_zoom,
+		maxf(duration, 0.05)
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	return _tutorial_camera_tween
+
+
+func restore_tutorial_camera(duration: float) -> Tween:
+	if not is_instance_valid(_gameplay_camera):
+		return null
+	if is_instance_valid(_tutorial_camera_tween) and _tutorial_camera_tween.is_valid():
+		_tutorial_camera_tween.kill()
+	_tutorial_camera_tween = create_tween().set_parallel(true)
+	_tutorial_camera_tween.tween_property(
+		_gameplay_camera,
+		^"offset",
+		_tutorial_camera_rest_offset,
+		maxf(duration, 0.05)
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	_tutorial_camera_tween.tween_property(
+		_gameplay_camera,
+		^"zoom",
+		_tutorial_camera_rest_zoom,
+		maxf(duration, 0.05)
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	return _tutorial_camera_tween
+
+
+## Tutorial-only day camera shake (wrong stamp feedback). Restores the
+## tutorial rest offset afterward so the gameplay framing never drifts.
+func shake_tutorial_camera(strength: float = 9.0) -> void:
+	if not is_instance_valid(_gameplay_camera):
+		return
+	if is_instance_valid(_tutorial_camera_tween) and _tutorial_camera_tween.is_valid():
+		_tutorial_camera_tween.kill()
+	_tutorial_camera_tween = create_tween()
+	var shake_strength: float = maxf(strength, 0.5)
+	for direction: Vector2 in [Vector2(-1.0, 0.3), Vector2(0.85, -0.4), Vector2(-0.4, 0.2)]:
+		_tutorial_camera_tween.tween_property(
+			_gameplay_camera,
+			^"offset",
+			_tutorial_camera_rest_offset + direction * shake_strength,
+			0.05
+		)
+	_tutorial_camera_tween.tween_property(
+		_gameplay_camera, ^"offset", _tutorial_camera_rest_offset, 0.08
+	)
+
+
+## Removes the tutorial passenger after its jump-teleport vanish so later
+## systems (minimap, interactables, roster counts) never see it again.
+func remove_tutorial_passenger(passenger: Passenger) -> void:
+	if passenger == null:
+		return
+	if _inspected_passenger == passenger:
+		_inspected_passenger = null
+	_passengers.erase(passenger)
+	_interactables.erase(passenger)
+	_boarding_passengers.erase(passenger)
+	var seat_slot := _seat_slot_by_passenger.get(passenger) as Marker2D
+	if seat_slot != null:
+		_seat_slot_by_passenger.erase(passenger)
+		if _seat_occupant_by_slot.get(seat_slot) == passenger:
+			_seat_occupant_by_slot.erase(seat_slot)
+	if _station_assignment.has(passenger.data.passenger_name if passenger.data != null else ""):
+		_station_assignment.erase(passenger.data.passenger_name)
+	if is_instance_valid(passenger):
+		passenger.queue_free()
+	_update_passenger_minimap()
+	_refresh_player_interactables(true)
+
+
+## Forces the ticket face-up inside the open tutorial documents.
+func show_tutorial_ticket() -> void:
+	if not is_instance_valid(_document_overlay) or _active_modal != _document_overlay:
+		return
+	_document_overlay.show_ticket_view()
+
+
+## Returns one stamp choice control for spotlighting, or null.
+func get_tutorial_stamp_button(station_name: String) -> Control:
+	if not is_instance_valid(_document_overlay):
+		return null
+	return _document_overlay.get_node_or_null(NodePath("StampTrayUI/Tray/StampChoices/%s" % station_name)) as Control
 
 
 func _tween_night_record_camera_to(target_offset: Vector2) -> void:

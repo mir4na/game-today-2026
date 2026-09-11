@@ -26,11 +26,9 @@ extends Resource
 @export var service_train_codes: PackedStringArray = PackedStringArray([
 	"ATE-101", "ATE-202", "ATE-303", "ATE-404", "ATE-505",
 ])
-@export var alternate_train_numbers: PackedStringArray
 @export var service_date_text: String
 @export var ticket_day_code: String
 @export var invalid_service_dates_by_day_code: Dictionary = {}
-@export_range(0, 4, 1) var wrong_train_boarder_count: int = 1
 
 @export_category("Anomaly Rules")
 @export var anomaly_types: PackedStringArray

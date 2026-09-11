@@ -3,6 +3,7 @@ extends Control
 ## Scene-authored conductor guidebook. Scripts only populate daily runtime data.
 
 signal closed
+signal section_shown(section: int)
 
 @export var completed_service_text: String
 @export var night_title: String = "Night Shift"
@@ -180,6 +181,7 @@ func _set_section(active_button: Button, title: String) -> void:
 	_page_title.text = title
 	_content.text = ""
 	_update_section_visibility(next_section)
+	section_shown.emit(next_section)
 	if section_changed:
 		_play_section_rustle()
 

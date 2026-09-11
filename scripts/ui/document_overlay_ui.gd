@@ -222,6 +222,13 @@ func configure_stamp_lock(is_locked: bool) -> void:
 	_stamp_tray.set_stamp_locked(is_locked)
 
 
+## Shows the ticket face inside open passenger documents (tutorial stamp step).
+func show_ticket_view() -> bool:
+	if _data == null or _view_mode != ViewMode.PASSENGER_DOCUMENTS:
+		return false
+	return _documents.show_ticket()
+
+
 func request_close() -> void:
 	if not visible or _closing:
 		return

@@ -60,6 +60,7 @@ signal debug_night_requested
 @export_range(1.0, 1.2, 0.01) var prompt_pop_scale: float = 1.06
 
 @onready var _root: Control = %Root
+@onready var _minimap_anchor: Control = $Root/MinimapAnchor
 @onready var _minimap: TrainMinimap = %TrainMinimap
 @onready var _clock_panel: Control = %ClockPanel
 @onready var _clock_sign_assembly: Control = $Root/ClockPanel/ClockSignAssembly
@@ -119,6 +120,7 @@ var _radar_active: bool = false
 var _swiftstep_active: bool = false
 var _displayed_day: int = 1
 var _displayed_blessing_target: int = 0
+var _tutorial_visibility_snapshot: Dictionary = {}
 
 const CLOCK_FILL_ARC_DEGREES: float = 180.0
 
@@ -540,6 +542,60 @@ func set_day_hud_visible(value: bool) -> void:
 	_market_item_bar.visible = value
 	_floating_prompt.visible = value and not _prompt_label.text.is_empty()
 	# The train minimap remains visible through the night walk.
+
+
+func show_tutorial_minimap_only() -> void:
+	if _tutorial_visibility_snapshot.is_empty():
+		for child: Node in _root.get_children():
+			if child is CanvasItem:
+				_tutorial_visibility_snapshot[child] = (child as CanvasItem).visible
+	for child: Node in _root.get_children():
+		if child is CanvasItem:
+			(child as CanvasItem).visible = child == _minimap_anchor
+	_root.show()
+	_minimap_anchor.show()
+	visible = true
+	_fade_tutorial_reveal(_minimap_anchor)
+
+
+func reveal_tutorial_clock() -> void:
+	_clock_panel.show()
+	_fade_tutorial_reveal(_clock_panel)
+
+
+func reveal_tutorial_blessings() -> void:
+	_day_summary.show()
+	_blessing_summary.show()
+	_fade_tutorial_reveal(_day_summary)
+	_fade_tutorial_reveal(_blessing_summary)
+
+
+## Staged HUD pieces fade in instead of snapping visible.
+func _fade_tutorial_reveal(target: CanvasItem) -> void:
+	if target == null:
+		return
+	target.modulate.a = 0.0
+	var reveal := create_tween()
+	reveal.tween_property(target, ^"modulate:a", 1.0, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+
+func restore_tutorial_hud_visibility() -> void:
+	for child: Variant in _tutorial_visibility_snapshot:
+		if is_instance_valid(child) and child is CanvasItem:
+			(child as CanvasItem).visible = bool(_tutorial_visibility_snapshot[child])
+	_tutorial_visibility_snapshot.clear()
+
+
+func get_tutorial_minimap_focus_control() -> Control:
+	return _minimap
+
+
+func get_tutorial_clock_focus_control() -> Control:
+	return _clock_panel
+
+
+func get_tutorial_blessings_focus_control() -> Control:
+	return _blessing_summary
 
 
 func set_debug_next_station_available(value: bool) -> void:

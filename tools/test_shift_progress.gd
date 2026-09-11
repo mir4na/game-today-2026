@@ -83,7 +83,7 @@ func _run() -> void:
 		var daily_config: DailyManifestConfig = authored_config.create_daily_service(sample_day, checkpoint.seed)
 		generated_numbers[daily_config.service_train_number] = true
 		_check(daily_config.service_train_number == authored_config.create_daily_service(sample_day, checkpoint.seed).service_train_number, "Daily service generation is repeatable.")
-		_check(not daily_config.alternate_train_numbers.has(daily_config.service_train_number), "Wrong-train numbers remain distinct from the current service.")
+		_check(daily_config.service_train_codes.has(daily_config.service_train_number), "Service number must come from the authored train code pool.")
 		_check(
 			daily_config.deceased_passenger_count == expected_night_counts[sample_day - 1],
 			"Night Service must follow the authored 3, 3, 4, 4, 5 anomaly progression."

@@ -537,6 +537,7 @@ unique_name_in_owner = true
 [node name="TutorialDirector" parent="ModalLayer" instance=ExtResource("52_tutorial")]
 unique_name_in_owner = true
 layout_mode = 1
+use_empty_coach_flow = false
 
 [node name="PauseLayer" type="CanvasLayer" parent="." unique_id=1162735996]
 layer = 100

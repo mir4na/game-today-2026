@@ -8,16 +8,30 @@ signal tutorial_finished
 enum Step {
 	INACTIVE,
 	INTRO,
+	MOVEMENT_INTRO,
 	MOVEMENT,
+	MOVEMENT_SUCCESS,
+	HUD_INTRO,
 	HUD_MINIMAP,
 	HUD_CLOCK,
 	BLESSINGS,
+	PASSENGER_REVEAL,
+	PASSENGER_INTRO,
+	PASSENGER_PROMPT,
 	PASSENGER,
 	DOCUMENTS,
+	DOCUMENT_TICKET,
+	STAMP_GUIDE,
+	STAMP_RETRY,
+	NICE_WORK,
 	STAMP_CLOSE,
 	ANOMALY,
+	ANOMALY_INTRO,
 	GUIDEBOOK_PROMPT,
 	GUIDEBOOK,
+	GUIDEBOOK_TODAY,
+	GUIDEBOOK_RULES,
+	GUIDEBOOK_ANOMALY,
 	NEWSPAPER_PROMPT,
 	NEWSPAPER,
 	SIGNATURE_PROMPT,
@@ -32,7 +46,9 @@ enum Step {
 }
 
 @export_range(0.5, 10.0, 0.1) var movement_required_seconds: float = 3.0
-@export var movement_prompt: String = "Walk for 3 seconds with A / D or the Arrow Keys. I only need to see that you can move before the real work begins."
+@export var movement_intro_prompt: String = "Before we begin, let us make sure you can move around the carriage."
+@export var movement_prompt: String = "Try walking with A / D or the Arrow Keys. Keep moving for 3 seconds."
+@export var movement_success_prompt: String = "Good. You are ready to move around the train."
 @export var intro_dialogue_pages: PackedStringArray = PackedStringArray([
 	"Hello. I am the Inspector assigned to this train.",
 	"You died before reaching your job interview. The railway is offering you a second chance.",
@@ -53,6 +69,33 @@ enum Step {
 @export_range(0.0, 5.0, 0.1) var spotlight_search_seconds: float = 2.0
 @export_category("Toony Dialogue")
 @export_range(0.1, 1.0, 0.05) var bubble_pop_seconds: float = 0.42
+@export_category("HUD Reveal")
+@export_range(0.0, 2.0, 0.05) var hud_intro_hold_seconds: float = 0.75
+@export_range(0.0, 2.0, 0.05) var minimap_reveal_hold_seconds: float = 0.5
+@export_range(0.1, 2.0, 0.05) var minimap_spotlight_zoom_seconds: float = 0.6
+@export_range(0.05, 0.5, 0.01) var minimap_spotlight_radius: float = 0.24
+@export_range(0.0, 2.0, 0.05) var hud_feature_hold_seconds: float = 0.75
+@export_range(0.1, 2.0, 0.05) var hud_feature_spotlight_zoom_seconds: float = 0.6
+@export_range(0.05, 0.5, 0.01) var clock_spotlight_radius: float = 0.24
+@export_range(0.05, 0.5, 0.01) var blessings_spotlight_radius: float = 0.18
+@export_range(0.05, 0.5, 0.01) var stamp_button_spotlight_radius: float = 0.12
+@export_range(0.1, 1.0, 0.05) var stamp_spotlight_zoom_seconds: float = 0.5
+@export_range(0.1, 0.6, 0.01) var guidebook_section_spotlight_radius: float = 0.35
+@export_range(8.0, 320.0, 1.0) var vanish_jump_height_pixels: float = 120.0
+@export_range(0.2, 1.5, 0.05) var vanish_duration_seconds: float = 0.6
+@export_category("Passenger Reveal")
+@export var tutorial_passenger_profile: PassengerIdentityProfile
+@export_range(1, 4, 1) var tutorial_passenger_carriage: int = 2
+@export_range(0, 11, 1) var tutorial_passenger_seat_index: int = 5
+@export_range(0.0, 2.0, 0.05) var passenger_spawn_hold_seconds: float = 0.5
+@export_range(0.1, 2.0, 0.05) var passenger_camera_move_seconds: float = 0.65
+@export var passenger_camera_zoom: Vector2 = Vector2(1.75, 1.75)
+@export_range(0.1, 1.5, 0.05) var passenger_spawn_animation_seconds: float = 0.55
+@export_range(8.0, 160.0, 1.0) var passenger_spawn_jump_height: float = 54.0
+@export var passenger_intro_prompt: String = "This is a passenger. Hmm, I feel like I have seen this person before."
+@export var passenger_inspect_prompt: String = "Walk over and press E to inspect this passenger. Start with their face, then check their papers."
+@export_range(0.0, 24.0, 0.5) var inspect_pointer_bob_distance: float = 7.0
+@export_range(0.5, 5.0, 0.1) var inspect_pointer_bob_speed: float = 2.5
 @export_category("Typewriter")
 @export_range(20.0, 240.0, 5.0) var typewriter_characters_per_second: float = 90.0
 @export_category("Editor Preview")
@@ -72,11 +115,17 @@ enum Step {
 @export_category("Dialogue Markers")
 @export_node_path("Marker2D") var default_dialogue_marker_path: NodePath = NodePath("DialogueMarkers/Default")
 @export_node_path("Marker2D") var intro_dialogue_marker_path: NodePath = NodePath("DialogueMarkers/Intro")
+@export_node_path("Marker2D") var movement_intro_dialogue_marker_path: NodePath = NodePath("DialogueMarkers/MovementIntro")
 @export_node_path("Marker2D") var movement_dialogue_marker_path: NodePath = NodePath("DialogueMarkers/Movement")
+@export_node_path("Marker2D") var movement_success_dialogue_marker_path: NodePath = NodePath("DialogueMarkers/MovementSuccess")
+@export_node_path("Marker2D") var hud_intro_dialogue_marker_path: NodePath = NodePath("DialogueMarkers/HudIntro")
 @export_node_path("Marker2D") var hud_minimap_dialogue_marker_path: NodePath = NodePath("DialogueMarkers/HudMinimap")
 @export_node_path("Marker2D") var hud_clock_dialogue_marker_path: NodePath = NodePath("DialogueMarkers/HudClock")
 @export_node_path("Marker2D") var blessings_dialogue_marker_path: NodePath = NodePath("DialogueMarkers/Blessings")
+@export_node_path("Marker2D") var passenger_intro_dialogue_marker_path: NodePath = NodePath("DialogueMarkers/PassengerIntro")
+@export_node_path("Marker2D") var passenger_prompt_dialogue_marker_path: NodePath = NodePath("DialogueMarkers/PassengerPrompt")
 @export_node_path("Marker2D") var passenger_dialogue_marker_path: NodePath = NodePath("DialogueMarkers/Passenger")
+@export_node_path("Marker2D") var passenger_pointer_offset_path: NodePath = NodePath("WorldPointerSettings/PassengerOffset")
 @export_node_path("Marker2D") var documents_dialogue_marker_path: NodePath = NodePath("DialogueMarkers/Documents")
 @export_node_path("Marker2D") var anomaly_dialogue_marker_path: NodePath = NodePath("DialogueMarkers/Anomaly")
 @export_node_path("Marker2D") var guidebook_dialogue_marker_path: NodePath = NodePath("DialogueMarkers/Guidebook")
@@ -101,8 +150,17 @@ var _dialogue_tween: Tween
 var _shade_material: ShaderMaterial
 var _shade_alpha: float = 0.0
 var _spotlight_control: Control
+var _spotlight_world_target: Node2D
 var _spotlight_searching: bool = false
 var _spotlight_search_time: float = 0.0
+var _spotlight_override_active: bool = false
+var _spotlight_override_center: Vector2 = Vector2(0.5, 0.5)
+var _current_spotlight_radius: float = 0.125
+var _hud_reveal_token: int = 0
+var _passenger_reveal_token: int = 0
+var _tutorial_passenger: Passenger
+var _passenger_pointer_target: Node2D
+var _passenger_pointer_time: float = 0.0
 var _portrait_base_scale: Vector2 = Vector2.ONE
 var _portrait_rest_scale: Vector2 = Vector2.ONE
 var _tail_base_scale: Vector2 = Vector2(-0.9, -0.9)
@@ -126,6 +184,7 @@ var _typewriter_characters: float = 0.0
 @onready var _progress_label: Label = %ProgressLabel
 @onready var _arrow_label: Label = %ArrowLabel
 @onready var _dialogue_frames: Control = %DialogueFrames
+@onready var _passenger_pointer_offset: Marker2D = get_node_or_null(passenger_pointer_offset_path) as Marker2D
 
 
 func _ready() -> void:
@@ -137,6 +196,7 @@ func _ready() -> void:
 	_portrait_rest_scale = _portrait_base_scale
 	_tail_base_scale = _bubble_tail.scale
 	_panel_base_scale = _panel.scale
+	_current_spotlight_radius = spotlight_radius
 	_prepare_spotlight_material()
 	hide()
 	_continue_button.pressed.connect(_advance_from_continue)
@@ -155,6 +215,11 @@ func start(main_node: Node) -> void:
 		var callback := Callable(self, &"_on_main_tutorial_event")
 		if not _main.is_connected(&"tutorial_event", callback):
 			_main.connect(&"tutorial_event", callback)
+	var guidebook := _main.get_node_or_null("%GuidebookUI")
+	if guidebook != null and guidebook.has_signal(&"section_shown"):
+		var section_callback := Callable(self, &"_on_guidebook_section_shown")
+		if not guidebook.is_connected(&"section_shown", section_callback):
+			guidebook.connect(&"section_shown", section_callback)
 	if _main.has_method(&"set_tutorial_route_time_paused"):
 		_main.call(&"set_tutorial_route_time_paused", true)
 	show()
@@ -166,8 +231,13 @@ func finish_tutorial() -> void:
 		return
 	_step = Step.DONE
 	_intro_token += 1
+	_hud_reveal_token += 1
+	_passenger_reveal_token += 1
 	_spotlight_control = null
+	_spotlight_world_target = null
+	_passenger_pointer_target = null
 	_spotlight_searching = false
+	_spotlight_override_active = false
 	_stop_typewriter()
 	_set_tutorial_hud_visible(true)
 	if _main != null and _main.has_method(&"set_tutorial_route_time_paused"):
@@ -187,6 +257,7 @@ func _process(delta: float) -> void:
 	if _spotlight_searching:
 		_spotlight_search_time += delta
 	_update_spotlight()
+	_update_passenger_pointer(delta)
 	_update_typewriter(delta)
 	if _step != Step.MOVEMENT:
 		return
@@ -196,10 +267,10 @@ func _process(delta: float) -> void:
 	_progress_label.text = "%.1f / %.1f seconds" % [_walk_time, movement_required_seconds]
 	if _walk_time >= movement_required_seconds:
 		_show_continue_step(
-			Step.HUD_MINIMAP,
-			"Train Minimap",
-			"The minimap shows each carriage and the passengers inside it. Use it to find remaining passengers quickly, especially near the end of a route.",
-			"Click Continue to see the journey clock."
+			Step.MOVEMENT_SUCCESS,
+			"The Inspector",
+			movement_success_prompt,
+			""
 		)
 
 
@@ -213,8 +284,14 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _reset_visuals() -> void:
 	_intro_token += 1
+	_hud_reveal_token += 1
+	_passenger_reveal_token += 1
 	_spotlight_control = null
+	_spotlight_world_target = null
+	_passenger_pointer_target = null
 	_spotlight_searching = false
+	_spotlight_override_active = false
+	_current_spotlight_radius = spotlight_radius
 	_stop_typewriter()
 	_set_spotlight_shade(0.0)
 	_dialogue_dock.hide()
@@ -294,22 +371,39 @@ func _show_intro_page() -> void:
 	_show_continue_step(Step.INTRO, "The Inspector", body, "")
 
 
+func _start_movement_intro() -> void:
+	_show_continue_step(
+		Step.MOVEMENT_INTRO,
+		"The Inspector",
+		movement_intro_prompt,
+		""
+	)
+
+
 func _start_movement() -> void:
 	_step = Step.MOVEMENT
 	_spotlight_control = null
 	_waiting_for_continue = false
 	_walk_time = 0.0
 	_set_controls(true, false)
-	_set_panel("The Inspector", movement_prompt, "Move until the timer is full.", false)
+	# The bubble stays up while walking so the instruction remains readable.
+	_show_wait_step(Step.MOVEMENT, "The Inspector", movement_prompt, "")
 	_set_spotlight_shade(movement_step_dim_alpha)
-	_progress_label.show()
-	_progress_label.text = "0.0 / %.1f seconds" % movement_required_seconds
+
+
+func _hide_dialogue_for_task() -> void:
+	_stop_typewriter()
+	_waiting_for_continue = false
+	_dialogue_dock.hide()
+	_panel.hide()
+	_bubble_tail.hide()
+	_progress_label.hide()
+	if is_instance_valid(_continue_row):
+		_continue_row.hide()
 
 
 func _show_continue_step(step: Step, speaker: String, body: String, hint: String = "") -> void:
 	_step = step
-	if step in [Step.HUD_MINIMAP, Step.HUD_CLOCK, Step.BLESSINGS]:
-		_set_tutorial_hud_visible(true)
 	_waiting_for_continue = true
 	_set_controls(false, false)
 	_set_panel(speaker, body, hint, true)
@@ -325,6 +419,446 @@ func _show_wait_step(step: Step, speaker: String, body: String, hint: String = "
 	_progress_label.hide()
 
 
+func _begin_minimap_reveal() -> void:
+	_hud_reveal_token += 1
+	var token: int = _hud_reveal_token
+	_waiting_for_continue = false
+	_set_controls(false, false)
+	_dialogue_dock.hide()
+	_spotlight_control = null
+	_spotlight_override_active = false
+	_current_spotlight_radius = spotlight_radius
+	_set_spotlight_shade(continue_step_dim_alpha)
+	if hud_intro_hold_seconds > 0.0:
+		await get_tree().create_timer(hud_intro_hold_seconds).timeout
+	if token != _hud_reveal_token or _step != Step.HUD_INTRO or not is_inside_tree():
+		return
+	if is_instance_valid(_hud) and _hud.has_method(&"show_tutorial_minimap_only"):
+		_hud.call(&"show_tutorial_minimap_only")
+	if minimap_reveal_hold_seconds > 0.0:
+		await get_tree().create_timer(minimap_reveal_hold_seconds).timeout
+	if token != _hud_reveal_token or _step != Step.HUD_INTRO or not is_inside_tree():
+		return
+	var minimap_focus: Control
+	if is_instance_valid(_hud) and _hud.has_method(&"get_tutorial_minimap_focus_control"):
+		minimap_focus = _hud.call(&"get_tutorial_minimap_focus_control") as Control
+	if is_instance_valid(minimap_focus):
+		await _animate_spotlight_to_control(
+			minimap_focus,
+			minimap_spotlight_radius,
+			minimap_spotlight_zoom_seconds
+		)
+	if token != _hud_reveal_token or _step != Step.HUD_INTRO or not is_inside_tree():
+		return
+	_show_continue_step(
+		Step.HUD_MINIMAP,
+		"Train Minimap",
+		"The minimap shows each carriage and its passengers. Use it to find people quickly.",
+		""
+	)
+
+
+func _begin_clock_reveal() -> void:
+	_hud_reveal_token += 1
+	var token: int = _hud_reveal_token
+	_waiting_for_continue = false
+	_dialogue_dock.hide()
+	if hud_feature_hold_seconds > 0.0:
+		await get_tree().create_timer(hud_feature_hold_seconds).timeout
+	if token != _hud_reveal_token or _step != Step.HUD_MINIMAP or not is_inside_tree():
+		return
+	if is_instance_valid(_hud) and _hud.has_method(&"reveal_tutorial_clock"):
+		_hud.call(&"reveal_tutorial_clock")
+	var clock_focus: Control
+	if is_instance_valid(_hud) and _hud.has_method(&"get_tutorial_clock_focus_control"):
+		clock_focus = _hud.call(&"get_tutorial_clock_focus_control") as Control
+	if is_instance_valid(clock_focus):
+		await _animate_spotlight_to_control(
+			clock_focus,
+			clock_spotlight_radius,
+			hud_feature_spotlight_zoom_seconds
+		)
+	if token != _hud_reveal_token or _step != Step.HUD_MINIMAP or not is_inside_tree():
+		return
+	_show_continue_step(
+		Step.HUD_CLOCK,
+		"Journey Clock",
+		"Next, we have the clock. You have one full turn to finish your work on each route.",
+		""
+	)
+
+
+func _begin_blessings_reveal() -> void:
+	_hud_reveal_token += 1
+	var token: int = _hud_reveal_token
+	_waiting_for_continue = false
+	_dialogue_dock.hide()
+	if hud_feature_hold_seconds > 0.0:
+		await get_tree().create_timer(hud_feature_hold_seconds).timeout
+	if token != _hud_reveal_token or _step != Step.HUD_CLOCK or not is_inside_tree():
+		return
+	if is_instance_valid(_hud) and _hud.has_method(&"reveal_tutorial_blessings"):
+		_hud.call(&"reveal_tutorial_blessings")
+	var blessings_focus: Control
+	if is_instance_valid(_hud) and _hud.has_method(&"get_tutorial_blessings_focus_control"):
+		blessings_focus = _hud.call(&"get_tutorial_blessings_focus_control") as Control
+	if is_instance_valid(blessings_focus):
+		await _animate_spotlight_to_control(
+			blessings_focus,
+			blessings_spotlight_radius,
+			hud_feature_spotlight_zoom_seconds
+		)
+	if token != _hud_reveal_token or _step != Step.HUD_CLOCK or not is_inside_tree():
+		return
+	_show_continue_step(
+		Step.BLESSINGS,
+		"Daily Blessings",
+		"You need enough to pass each day of your internship. The left number is what you earned, while the right number is the required target.",
+		""
+	)
+
+
+func _begin_passenger_reveal() -> void:
+	_passenger_reveal_token += 1
+	var token: int = _passenger_reveal_token
+	_step = Step.PASSENGER_REVEAL
+	_hide_dialogue_for_task()
+	_set_controls(false, false)
+	_spotlight_control = null
+	_spotlight_world_target = null
+	_current_spotlight_radius = spotlight_radius
+	_set_spotlight_shade(continue_step_dim_alpha)
+	if passenger_spawn_hold_seconds > 0.0:
+		await get_tree().create_timer(passenger_spawn_hold_seconds).timeout
+	if token != _passenger_reveal_token or _step != Step.PASSENGER_REVEAL or not is_inside_tree():
+		return
+	if _main == null or not _main.has_method(&"spawn_tutorial_passenger"):
+		push_error("TutorialDirector requires Main.spawn_tutorial_passenger().")
+		return
+	_tutorial_passenger = _main.call(
+		&"spawn_tutorial_passenger",
+		tutorial_passenger_profile,
+		tutorial_passenger_carriage,
+		tutorial_passenger_seat_index
+	) as Passenger
+	if not is_instance_valid(_tutorial_passenger):
+		push_error("TutorialDirector could not spawn its configured passenger.")
+		return
+	# The tutorial passenger is always Goat, whatever identity was staged.
+	_tutorial_passenger.data.passenger_name = "Goat"
+	_tutorial_passenger.data.short_name = "Goat"
+	_tutorial_passenger.name = "Goat"
+	_tutorial_passenger.set_ai_enabled(false)
+	_tutorial_passenger.enabled = true
+	var passenger_anchor: Node2D = _tutorial_passenger.get_dialogue_anchor()
+	_spotlight_world_target = passenger_anchor
+	var rest_position: Vector2 = _tutorial_passenger.position
+	var rest_scale: Vector2 = _tutorial_passenger.scale
+	_tutorial_passenger.position = rest_position + Vector2(0.0, passenger_spawn_jump_height * 0.65)
+	_tutorial_passenger.scale = rest_scale * Vector2(0.72, 0.22)
+	_tutorial_passenger.modulate.a = 0.0
+	_tutorial_passenger.show()
+	if _main.has_method(&"focus_tutorial_camera"):
+		_main.call(
+			&"focus_tutorial_camera",
+			passenger_anchor,
+			passenger_camera_zoom,
+			passenger_camera_move_seconds
+		)
+	var jump_duration: float = maxf(passenger_spawn_animation_seconds, 0.1)
+	var rise := create_tween().set_parallel(true)
+	rise.tween_property(
+		_tutorial_passenger,
+		^"position",
+		rest_position - Vector2(0.0, passenger_spawn_jump_height),
+		jump_duration * 0.56
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	rise.tween_property(
+		_tutorial_passenger,
+		^"scale",
+		rest_scale * Vector2(1.12, 0.9),
+		jump_duration * 0.56
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	rise.tween_property(_tutorial_passenger, ^"modulate:a", 1.0, jump_duration * 0.28)
+	await rise.finished
+	if token != _passenger_reveal_token or not is_instance_valid(_tutorial_passenger):
+		return
+	var land := create_tween().set_parallel(true)
+	land.tween_property(
+		_tutorial_passenger,
+		^"position",
+		rest_position,
+		jump_duration * 0.44
+	).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	land.tween_property(
+		_tutorial_passenger,
+		^"scale",
+		rest_scale,
+		jump_duration * 0.44
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	await land.finished
+	if token != _passenger_reveal_token or _step != Step.PASSENGER_REVEAL or not is_inside_tree():
+		return
+	var remaining_camera_time: float = maxf(
+		0.0,
+		passenger_camera_move_seconds - passenger_spawn_animation_seconds
+	)
+	if remaining_camera_time > 0.0:
+		await get_tree().create_timer(remaining_camera_time).timeout
+	if token != _passenger_reveal_token or _step != Step.PASSENGER_REVEAL or not is_inside_tree():
+		return
+	_show_continue_step(
+		Step.PASSENGER_INTRO,
+		"The Inspector",
+		passenger_intro_prompt,
+		""
+	)
+
+
+func _begin_passenger_inspection_task() -> void:
+	_passenger_reveal_token += 1
+	var token: int = _passenger_reveal_token
+	_step = Step.PASSENGER
+	_hide_dialogue_for_task()
+	_set_controls(false, false)
+	_spotlight_control = null
+	_spotlight_world_target = null
+	_set_spotlight_shade(0.0)
+	_passenger_pointer_target = (
+		_tutorial_passenger.get_dialogue_anchor()
+		if is_instance_valid(_tutorial_passenger)
+		else null
+	)
+	_passenger_pointer_time = 0.0
+	_arrow_label.visible = is_instance_valid(_passenger_pointer_target)
+	if _main != null and _main.has_method(&"restore_tutorial_camera"):
+		_main.call(&"restore_tutorial_camera", passenger_camera_move_seconds)
+	if passenger_camera_move_seconds > 0.0:
+		await get_tree().create_timer(passenger_camera_move_seconds).timeout
+	if token != _passenger_reveal_token or _step != Step.PASSENGER or not is_inside_tree():
+		return
+	_set_controls(true, true)
+
+
+func _update_passenger_pointer(delta: float) -> void:
+	if not _arrow_label.visible or not is_instance_valid(_passenger_pointer_target):
+		return
+	_passenger_pointer_time += delta
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		return
+	var target_screen: Vector2 = _passenger_pointer_target.get_global_transform_with_canvas().origin
+	var authored_offset: Vector2 = (
+		_passenger_pointer_offset.position
+		if is_instance_valid(_passenger_pointer_offset)
+		else Vector2(0.0, -140.0)
+	)
+	var bob := Vector2(0.0, sin(_passenger_pointer_time * inspect_pointer_bob_speed * TAU) * inspect_pointer_bob_distance)
+	var desired_center: Vector2 = target_screen + authored_offset + bob
+	var margin := Vector2(
+		maxf(_arrow_label.size.x * 0.5 + 18.0, 48.0),
+		maxf(_arrow_label.size.y * 0.5 + 18.0, 48.0)
+	)
+	var clamped_center := Vector2(
+		clampf(desired_center.x, margin.x, viewport_size.x - margin.x),
+		clampf(desired_center.y, margin.y, viewport_size.y - margin.y)
+	)
+	_arrow_label.global_position = clamped_center - _arrow_label.size * 0.5
+	if clamped_center.distance_to(desired_center) > 1.0:
+		_arrow_label.rotation = (desired_center - clamped_center).angle() - PI * 0.5
+	else:
+		_arrow_label.rotation = 0.0
+
+## Stamp lesson entry: ticket face-up plus a spotlight on Goat's correct stamp.
+func _enter_stamp_guide() -> void:
+	_show_wait_step(
+		Step.STAMP_GUIDE,
+		"Stamping",
+		"Drag the glowing stamp onto Goat's ticket. Flip to the ticket with Q if you only see the ID card.",
+		""
+	)
+	if _main != null and _main.has_method(&"show_tutorial_ticket"):
+		_main.call(&"show_tutorial_ticket")
+	_spotlight_tutorial_stamp()
+
+
+func _spotlight_tutorial_stamp() -> void:
+	if _main == null or not _main.has_method(&"get_tutorial_stamp_button"):
+		return
+	var destination: String = ""
+	if is_instance_valid(_tutorial_passenger) and _tutorial_passenger.data != null:
+		destination = _tutorial_passenger.data.destination_station
+	if destination.is_empty():
+		return
+	var button := _main.call(&"get_tutorial_stamp_button", destination) as Control
+	if not is_instance_valid(button):
+		return
+	_animate_spotlight_to_control(button, stamp_button_spotlight_radius, stamp_spotlight_zoom_seconds)
+
+
+func _validate_tutorial_stamp(payload: Variant) -> void:
+	if not is_instance_valid(_tutorial_passenger) or _tutorial_passenger.data == null:
+		return
+	var expected: String = _tutorial_passenger.data.destination_station
+	var station: String = str((payload as Dictionary).get("station", "")) if payload is Dictionary else ""
+	if not station.is_empty() and station == expected:
+		var overlay := _main.get_node_or_null("%DocumentOverlayUI") if _main != null else null
+		if overlay != null and overlay.has_method(&"request_close"):
+			overlay.call(&"request_close")
+		_show_continue_step(
+			Step.NICE_WORK,
+			"Nice Work",
+			"Correct stamp. Goat leaves at the right stop. Watch closely...",
+			""
+		)
+		return
+	if _main != null and _main.has_method(&"shake_tutorial_camera"):
+		_main.call(&"shake_tutorial_camera")
+	if _main != null and _main.has_method(&"_on_station_assignment_toggled"):
+		_main.call(
+			&"_on_station_assignment_toggled",
+			_tutorial_passenger.data.passenger_name,
+			false
+		)
+	_show_wait_step(
+		Step.STAMP_RETRY,
+		"Wrong Stamp",
+		"That is the wrong station. The stamp is removed. Read the destination again, then drag the glowing stamp.",
+		""
+	)
+	_spotlight_tutorial_stamp()
+
+
+## Jump-teleport vanish, then the anomaly briefing.
+func _vanish_tutorial_passenger() -> void:
+	_passenger_reveal_token += 1
+	var token: int = _passenger_reveal_token
+	if not is_instance_valid(_tutorial_passenger):
+		_show_continue_step(
+			Step.ANOMALY_INTRO,
+			"Be Careful",
+			"Not every passenger on this train is human. Look closely at everyone you inspect. Some hide in plain sight.",
+			""
+		)
+		return
+	var target: Passenger = _tutorial_passenger
+	_tutorial_passenger = null
+	_passenger_pointer_target = null
+	_arrow_label.hide()
+	var rest_position: Vector2 = target.position
+	var rest_scale: Vector2 = target.scale
+	var vanish := create_tween().set_parallel(true)
+	vanish.tween_property(
+		target, ^"position", rest_position + Vector2(0.0, -vanish_jump_height_pixels), vanish_duration_seconds * 0.45
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	vanish.tween_property(
+		target, ^"scale", rest_scale * Vector2(1.12, 0.82), vanish_duration_seconds * 0.45
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	vanish.tween_property(target, ^"modulate:a", 0.0, vanish_duration_seconds * 0.8)
+	vanish.tween_property(target, ^"scale", Vector2.ZERO, vanish_duration_seconds * 0.55).set_delay(vanish_duration_seconds * 0.45)
+	await vanish.finished
+	if token != _passenger_reveal_token or _step != Step.NICE_WORK or not is_inside_tree():
+		return
+	if _main != null and _main.has_method(&"remove_tutorial_passenger"):
+		_main.call(&"remove_tutorial_passenger", target)
+	_show_continue_step(
+		Step.ANOMALY_INTRO,
+		"Be Careful",
+		"Not every passenger on this train is human. Look closely at everyone you inspect. Some hide in plain sight.",
+		""
+	)
+
+
+func _spotlight_guidebook_section(section_node_name: String) -> void:
+	if _main == null:
+		return
+	var guidebook := _main.get_node_or_null("%GuidebookUI") as Control
+	if guidebook == null:
+		return
+	var section := guidebook.get_node_or_null("%" + section_node_name) as Control
+	if not is_instance_valid(section):
+		return
+	_animate_spotlight_to_control(section, guidebook_section_spotlight_radius, stamp_spotlight_zoom_seconds)
+
+
+func _show_guidebook_today() -> void:
+	_show_continue_step(
+		Step.GUIDEBOOK_TODAY,
+		"Guidebook",
+		"This is the Guidebook. Check the Today page every day. It shows your route, your target, and your progress.",
+		""
+	)
+	_spotlight_guidebook_section("TodayLayout")
+
+
+func _show_guidebook_rules() -> void:
+	_show_continue_step(
+		Step.GUIDEBOOK_RULES,
+		"Rules",
+		"Confused about what to do? Read the Rules. It tells you exactly how scoring and penalties work.",
+		""
+	)
+	_spotlight_guidebook_section("RulesLayout")
+
+
+func _show_guidebook_anomaly() -> void:
+	_show_continue_step(
+		Step.GUIDEBOOK_ANOMALY,
+		"Anomaly Signs",
+		"This is the important part. IDENTIFY every passenger. If anyone matches one of these signs, do NOT stamp them. Close the book when you are done.",
+		""
+	)
+	_spotlight_guidebook_section("AnomalyList")
+
+
+func _on_guidebook_section_shown(section: int) -> void:
+	if (
+		_step != Step.ANOMALY_INTRO
+		and _step != Step.GUIDEBOOK_TODAY
+		and _step != Step.GUIDEBOOK_RULES
+		and _step != Step.GUIDEBOOK_ANOMALY
+	):
+		return
+	if section == GuidebookUI.SECTION_TODAY:
+		_show_guidebook_today()
+	elif section == GuidebookUI.SECTION_RULES:
+		_show_guidebook_rules()
+	elif section == GuidebookUI.SECTION_ANOMALIES:
+		_show_guidebook_anomaly()
+
+
+func _animate_spotlight_to_control(target: Control, target_radius: float, duration: float) -> void:
+	if not is_instance_valid(target) or _shade_material == null:
+		return
+	_update_spotlight()
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		return
+	var start_center: Vector2 = _shade_material.get_shader_parameter(&"spotlight_center")
+	var target_center: Vector2 = target.get_global_rect().get_center() / viewport_size
+	var start_radius: float = _current_spotlight_radius
+	_spotlight_override_center = start_center
+	_spotlight_override_active = true
+	var focus_tween := create_tween().set_parallel(true)
+	focus_tween.tween_method(
+		func(value: Vector2) -> void: _spotlight_override_center = value,
+		start_center,
+		target_center,
+		duration
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	focus_tween.tween_method(
+		func(value: float) -> void: _current_spotlight_radius = value,
+		start_radius,
+		target_radius,
+		duration
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	await focus_tween.finished
+	_spotlight_control = target
+	_spotlight_override_active = false
+	_current_spotlight_radius = target_radius
+	_update_spotlight()
+
+
 func _prepare_spotlight_material() -> void:
 	_shade_material = _shade.material as ShaderMaterial
 	if _shade_material != null:
@@ -338,7 +872,7 @@ func _set_spotlight_shade(alpha: float) -> void:
 	if _shade_material != null:
 		_shade.modulate = Color.WHITE
 		_shade_material.set_shader_parameter(&"dim_alpha", _shade_alpha)
-		_shade_material.set_shader_parameter(&"spotlight_radius", spotlight_radius)
+		_shade_material.set_shader_parameter(&"spotlight_radius", _current_spotlight_radius)
 		_shade_material.set_shader_parameter(&"spotlight_softness", spotlight_softness)
 		_shade_material.set_shader_parameter(&"inner_alpha", spotlight_inner_alpha)
 	else:
@@ -353,10 +887,14 @@ func _update_spotlight() -> void:
 	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
 		return
 	var center: Vector2 = viewport_size * 0.5
-	if _spotlight_searching:
+	if _spotlight_override_active:
+		center = _spotlight_override_center * viewport_size
+	elif _spotlight_searching:
 		center = _spotlight_search_center(viewport_size)
 	elif is_instance_valid(_spotlight_control) and _spotlight_control.visible:
 		center = _spotlight_control.get_global_rect().get_center()
+	elif is_instance_valid(_spotlight_world_target) and _spotlight_world_target.visible:
+		center = _spotlight_world_target.get_global_transform_with_canvas().origin
 	elif is_instance_valid(_player):
 		center = _player.get_global_transform_with_canvas().origin + Vector2(0.0, spotlight_player_vertical_offset)
 	center.x = clampf(center.x, 0.0, viewport_size.x)
@@ -364,7 +902,7 @@ func _update_spotlight() -> void:
 	_shade_material.set_shader_parameter(&"spotlight_center", center / viewport_size)
 	_shade_material.set_shader_parameter(&"viewport_aspect", viewport_size.x / viewport_size.y)
 	_shade_material.set_shader_parameter(&"dim_alpha", _shade_alpha)
-	_shade_material.set_shader_parameter(&"spotlight_radius", spotlight_radius)
+	_shade_material.set_shader_parameter(&"spotlight_radius", _current_spotlight_radius)
 	_shade_material.set_shader_parameter(&"spotlight_softness", spotlight_softness)
 	_shade_material.set_shader_parameter(&"inner_alpha", spotlight_inner_alpha)
 
@@ -390,21 +928,37 @@ func _get_dialogue_marker_path_for_step(step: Step) -> NodePath:
 	match step:
 		Step.INTRO:
 			return intro_dialogue_marker_path
+		Step.MOVEMENT_INTRO:
+			return movement_intro_dialogue_marker_path
 		Step.MOVEMENT:
 			return movement_dialogue_marker_path
+		Step.MOVEMENT_SUCCESS:
+			return movement_success_dialogue_marker_path
+		Step.HUD_INTRO:
+			return hud_intro_dialogue_marker_path
 		Step.HUD_MINIMAP:
 			return hud_minimap_dialogue_marker_path
 		Step.HUD_CLOCK:
 			return hud_clock_dialogue_marker_path
 		Step.BLESSINGS:
 			return blessings_dialogue_marker_path
+		Step.PASSENGER_REVEAL, Step.PASSENGER_INTRO:
+			return passenger_intro_dialogue_marker_path
+		Step.PASSENGER_PROMPT:
+			return passenger_prompt_dialogue_marker_path
 		Step.PASSENGER:
 			return passenger_dialogue_marker_path
 		Step.DOCUMENTS, Step.STAMP_CLOSE:
 			return documents_dialogue_marker_path
+		Step.DOCUMENT_TICKET, Step.STAMP_GUIDE, Step.STAMP_RETRY, Step.NICE_WORK:
+			return documents_dialogue_marker_path
 		Step.ANOMALY:
 			return anomaly_dialogue_marker_path
+		Step.ANOMALY_INTRO:
+			return anomaly_dialogue_marker_path
 		Step.GUIDEBOOK_PROMPT, Step.GUIDEBOOK:
+			return guidebook_dialogue_marker_path
+		Step.GUIDEBOOK_TODAY, Step.GUIDEBOOK_RULES, Step.GUIDEBOOK_ANOMALY:
 			return guidebook_dialogue_marker_path
 		Step.NEWSPAPER_PROMPT, Step.NEWSPAPER:
 			return newspaper_dialogue_marker_path
@@ -430,21 +984,37 @@ func _dialogue_frame_name_for_step(step: Step) -> StringName:
 	match step:
 		Step.INTRO:
 			return &"Intro"
+		Step.MOVEMENT_INTRO:
+			return &"MovementIntro"
 		Step.MOVEMENT:
 			return &"Movement"
+		Step.MOVEMENT_SUCCESS:
+			return &"MovementSuccess"
+		Step.HUD_INTRO:
+			return &"HudIntro"
 		Step.HUD_MINIMAP:
 			return &"HudMinimap"
 		Step.HUD_CLOCK:
 			return &"HudClock"
 		Step.BLESSINGS:
 			return &"Blessings"
+		Step.PASSENGER_REVEAL, Step.PASSENGER_INTRO:
+			return &"PassengerIntro"
+		Step.PASSENGER_PROMPT:
+			return &"PassengerPrompt"
 		Step.PASSENGER:
 			return &"Passenger"
 		Step.DOCUMENTS, Step.STAMP_CLOSE:
 			return &"Documents"
+		Step.DOCUMENT_TICKET, Step.STAMP_GUIDE, Step.STAMP_RETRY, Step.NICE_WORK:
+			return &"Documents"
 		Step.ANOMALY:
 			return &"Anomaly"
+		Step.ANOMALY_INTRO:
+			return &"Anomaly"
 		Step.GUIDEBOOK_PROMPT, Step.GUIDEBOOK:
+			return &"Guidebook"
+		Step.GUIDEBOOK_TODAY, Step.GUIDEBOOK_RULES, Step.GUIDEBOOK_ANOMALY:
 			return &"Guidebook"
 		Step.NEWSPAPER_PROMPT, Step.NEWSPAPER:
 			return &"Newspaper"
@@ -526,7 +1096,9 @@ func _pose_portrait_and_tail(frame: Control) -> void:
 			_bubble_tail.offset_right = tail_spot.offset_right
 			_bubble_tail.offset_bottom = tail_spot.offset_bottom
 			_bubble_tail.rotation = tail_spot.rotation
-			_bubble_tail.scale = _tail_base_scale * tail_spot.scale
+			# TailSpot is the complete scene-authored transform. Multiplying it by
+			# the runtime tail's negative base scale flips the pointer in-game.
+			_bubble_tail.scale = tail_spot.scale
 		else:
 			var dock_width: float = _dialogue_dock.offset_right - _dialogue_dock.offset_left
 			_bubble_tail.offset_left = dock_width - 181.0
@@ -558,24 +1130,48 @@ func _step_copy(step: Step) -> Array:
 			if not intro_dialogue_pages.is_empty():
 				preview_intro = intro_dialogue_pages[0]
 			return ["The Inspector", preview_intro, ""]
+		Step.MOVEMENT_INTRO:
+			return ["The Inspector", movement_intro_prompt, ""]
 		Step.MOVEMENT:
 			return ["The Inspector", movement_prompt, "Move until the timer is full."]
+		Step.MOVEMENT_SUCCESS:
+			return ["The Inspector", movement_success_prompt, ""]
+		Step.HUD_INTRO:
+			return ["The Inspector", "Now, let me explain the tools you will use on this train.", ""]
 		Step.HUD_MINIMAP:
-			return ["Train Minimap", "The minimap shows each carriage and the passengers inside it. Use it to find remaining passengers quickly, especially near the end of a route.", "Click Continue to see the journey clock."]
+			return ["Train Minimap", "The minimap shows each carriage and its passengers. Use it to find people quickly.", ""]
 		Step.HUD_CLOCK:
-			return ["Journey Clock", "The clock tracks the route. The HUD shows this day's Blessings over the target threshold; daytime Blessings reset each day, but your savings continue into the market.", "Correct drop-offs build Blessings. Wrong stamps cost Blessings."]
+			return ["Journey Clock", "Next, we have the clock. You have one full turn to finish your work on each route.", ""]
 		Step.BLESSINGS:
-			return ["Day Blessings", "Each day has a Blessings target: correct drop-offs pay +30, while mistakes reduce it. Ordinary passengers leave during the day; suspicious ones stay aboard for the night.", ""]
+			return ["Daily Blessings", "You need enough to pass each day of your internship. The left number is what you earned, while the right number is the required target.", ""]
+		Step.PASSENGER_REVEAL, Step.PASSENGER_INTRO:
+			return ["The Inspector", passenger_intro_prompt, ""]
+		Step.PASSENGER_PROMPT:
+			return ["The Inspector", passenger_inspect_prompt, ""]
 		Step.PASSENGER:
-			return ["First Inspection", passenger_prompt, "Look for the [E] prompt above passengers."]
+			return ["First Inspection", passenger_prompt, ""]
 		Step.DOCUMENTS:
-			return ["Passenger Documents", document_prompt, "Click Continue after you have checked the papers."]
+			return ["Identity Card", "This is Goat's ID card. Look at the portrait, the name, and the CID number. The face on the card must match the passenger.", ""]
+		Step.DOCUMENT_TICKET:
+			return ["Ticket", "This is the ticket. Check the service date, the train code, and the destination. Goat must leave at the next stop.", ""]
+		Step.STAMP_GUIDE:
+			return ["Stamping", "Drag the glowing stamp onto Goat's ticket. Flip to the ticket with Q if you only see the ID card.", ""]
+		Step.STAMP_RETRY:
+			return ["Wrong Stamp", "That is the wrong station. The stamp is removed. Read the destination again, then drag the glowing stamp.", ""]
+		Step.NICE_WORK:
+			return ["Nice Work", "Correct stamp. Goat leaves at the right stop. Watch closely...", ""]
+		Step.ANOMALY_INTRO:
+			return ["Be Careful", "Not every passenger on this train is human. Look closely at everyone you inspect. Some hide in plain sight.", ""]
 		Step.STAMP_CLOSE:
 			return ["Stamping", "Drag the station stamp onto the ticket only when the passenger should leave at that station. If they look anomalous, keep them aboard for tonight instead.", "After stamping, close the documents with the X button or Esc."]
 		Step.ANOMALY:
 			return ["Keep Aboard", "Some passengers are already dead, so never stamp them. Keep them aboard until Night Service can guide them.", ""]
-		Step.GUIDEBOOK_PROMPT:
-			return ["Guidebook", guidebook_prompt, "Click the Guidebook or press Tab."]
+		Step.GUIDEBOOK_TODAY:
+			return ["Guidebook", "This is the Guidebook. Check the Today page every day. It shows your route, your target, and your progress.", ""]
+		Step.GUIDEBOOK_RULES:
+			return ["Rules", "Confused about what to do? Read the Rules. It tells you exactly how scoring and penalties work.", ""]
+		Step.GUIDEBOOK_ANOMALY:
+			return ["Anomaly Signs", "This is the important part. IDENTIFY every passenger. If anyone matches one of these signs, do NOT stamp them. Close the book when you are done.", ""]
 		Step.GUIDEBOOK:
 			return ["Guidebook", "Today’s Service shows the target and route totals. Rules explains scoring, while Anomaly Signs shows suspicious evidence.", "Close the Guidebook after reading."]
 		Step.NEWSPAPER_PROMPT:
@@ -610,7 +1206,8 @@ func _preview_step_in_editor() -> void:
 	_speaker_label.text = str(copy[0])
 	_body_label.text = str(copy[1])
 	_body_label.visible_characters = -1
-	_hint_label.text = str(copy[2])
+	_hint_label.text = ""
+	_hint_label.hide()
 	_progress_label.hide()
 	if is_instance_valid(_continue_row):
 		_continue_row.show()
@@ -620,10 +1217,13 @@ func _preview_step_in_editor() -> void:
 	_panel.show()
 
 
-func _set_panel(speaker: String, body: String, hint: String, show_continue: bool) -> void:
+func _set_panel(speaker: String, body: String, _hint: String, show_continue: bool) -> void:
 	_place_dialogue_at_frame(_step)
 	_speaker_label.text = speaker
-	_hint_label.text = hint
+	# Tutorial copy is limited to the main dialogue; the secondary hint row is
+	# intentionally disabled for every beat.
+	_hint_label.text = ""
+	_hint_label.hide()
 	if is_instance_valid(_continue_row):
 		_continue_row.visible = show_continue
 	_continue_button.visible = show_continue
@@ -721,41 +1321,60 @@ func _advance_from_continue() -> void:
 			_show_intro_page()
 		else:
 			_waiting_for_continue = false
-			_start_movement()
+			_start_movement_intro()
 		return
 	_waiting_for_continue = false
 	match _step:
-		Step.HUD_MINIMAP:
+		Step.MOVEMENT_INTRO:
+			_start_movement()
+		Step.MOVEMENT_SUCCESS:
 			_show_continue_step(
-				Step.HUD_CLOCK,
-				"Journey Clock",
-				"The clock tracks the route. The HUD shows this day's Blessings over the target threshold; daytime Blessings reset each day, but your savings continue into the market.",
-				"Correct drop-offs build Blessings. Wrong stamps cost Blessings."
-			)
-		Step.HUD_CLOCK:
-			_show_continue_step(
-				Step.BLESSINGS,
-				"Day Blessings",
-				"Each day has a Blessings target: correct drop-offs pay +30, while mistakes reduce it. Ordinary passengers leave during the day; suspicious ones stay aboard for the night.",
+				Step.HUD_INTRO,
+				"The Inspector",
+				"Now, let me explain the tools you will use on this train.",
 				""
 			)
+		Step.HUD_INTRO:
+			_begin_minimap_reveal()
+		Step.HUD_MINIMAP:
+			_begin_clock_reveal()
+		Step.HUD_CLOCK:
+			_begin_blessings_reveal()
 		Step.BLESSINGS:
-			if use_empty_coach_flow:
-				_show_continue_step(
-					Step.DAY_SERVICE,
-					"Clean Coach",
-					clean_coach_prompt,
-					"Click Continue to finish this clean-start tutorial."
-				)
-			else:
-				_set_controls(true, true)
-				_show_wait_step(Step.PASSENGER, "First Inspection", passenger_prompt, "Look for the [E] prompt above passengers.")
+			_begin_passenger_reveal()
+		Step.PASSENGER_INTRO:
+			_passenger_pointer_target = (
+				_tutorial_passenger.get_dialogue_anchor()
+				if is_instance_valid(_tutorial_passenger)
+				else null
+			)
+			_passenger_pointer_time = 0.0
+			_arrow_label.visible = is_instance_valid(_passenger_pointer_target)
+			_show_continue_step(
+				Step.PASSENGER_PROMPT,
+				"The Inspector",
+				passenger_inspect_prompt,
+				""
+			)
+		Step.PASSENGER_PROMPT:
+			_begin_passenger_inspection_task()
 		Step.ANOMALY:
 			_set_controls(true, true)
 			_show_wait_step(Step.GUIDEBOOK_PROMPT, "Guidebook", guidebook_prompt, "Click the Guidebook or press Tab.")
 		Step.DOCUMENTS:
-			_set_controls(false, false)
-			_show_wait_step(Step.STAMP_CLOSE, "Stamping", "Drag the station stamp onto the ticket only when the passenger should leave at that station. If they look anomalous, keep them aboard for tonight instead.", "After stamping, close the documents with the X button or Esc.")
+			_show_continue_step(
+				Step.DOCUMENT_TICKET,
+				"Ticket",
+				"This is the ticket. Check the service date, the train code, and the destination. Goat must leave at the next stop.",
+				""
+			)
+		Step.DOCUMENT_TICKET:
+			_enter_stamp_guide()
+		Step.NICE_WORK:
+			_vanish_tutorial_passenger()
+		Step.ANOMALY_INTRO:
+			if _main != null and _main.has_method(&"_open_guidebook"):
+				_main.call(&"_open_guidebook")
 		Step.GUIDEBOOK:
 			_show_wait_step(Step.GUIDEBOOK, "Guidebook", "Close the Guidebook when you are ready. Next, check the newspaper because some evidence never appears on the ticket.", "Use the X button, Esc, or Tab to close it.")
 		Step.NEWSPAPER:
@@ -776,13 +1395,6 @@ func _advance_from_continue() -> void:
 			)
 		Step.DAY_SERVICE:
 			finish_tutorial()
-		Step.NIGHT_PAYOUT:
-			_show_continue_step(
-				Step.NIGHT_MAP,
-				"Station Path",
-				"This is the night station path. Use the exact statements in the ledger to place each soul; station pins appear only after you assign someone.",
-				"Complete the assignment to finish the tutorial. Correct souls release Blessings; retries cut the payout after the first attempt."
-			)
 		Step.NIGHT_MAP:
 			finish_tutorial()
 		_:
@@ -795,21 +1407,28 @@ func _on_main_tutorial_event(event_name: StringName, payload: Variant = null) ->
 	match event_name:
 		&"passenger_documents_opened":
 			if _step == Step.PASSENGER:
-				_show_continue_step(Step.DOCUMENTS, "Passenger Documents", document_prompt, "Click Continue after you have checked the papers.")
+				_passenger_pointer_target = null
+				_arrow_label.hide()
+				_show_continue_step(Step.DOCUMENTS, "Identity Card", "This is Goat's ID card. Look at the portrait, the name, and the CID number. The face on the card must match the passenger.", "")
 		&"ticket_stamped":
-			if _step in [Step.DOCUMENTS, Step.STAMP_CLOSE]:
-				_show_wait_step(Step.STAMP_CLOSE, "Ticket Stamped", "Good. The ink is permanent, so only stamp when the papers, person, and route all agree.", "Close the document view to continue.")
+			if _step in [Step.DOCUMENTS, Step.DOCUMENT_TICKET, Step.STAMP_GUIDE, Step.STAMP_RETRY]:
+				_validate_tutorial_stamp(payload)
 		&"document_closed":
 			if _step == Step.STAMP_CLOSE:
 				_show_continue_step(Step.ANOMALY, "Keep Aboard", "Some passengers are already dead, so never stamp them. Keep them aboard until Night Service can guide them.", "")
 			elif _step == Step.NEWSPAPER:
 				_set_controls(true, true)
+				# Full HUD only returns here, when the service button lesson needs it.
+				_set_tutorial_hud_visible(true)
 				_show_wait_step(Step.SIGNATURE_PROMPT, "Sign Off", signature_prompt, "Use the service button below the Guidebook.")
 		&"guidebook_opened":
 			if _step == Step.GUIDEBOOK_PROMPT:
 				_show_continue_step(Step.GUIDEBOOK, "Guidebook", "Today’s Service shows the target and route totals. Rules explains scoring, while Anomaly Signs shows suspicious evidence.", "Close the Guidebook after reading.")
 		&"guidebook_closed":
 			if _step == Step.GUIDEBOOK:
+				_set_controls(true, true)
+				_show_wait_step(Step.NEWSPAPER_PROMPT, "Newspaper", newspaper_prompt, "Find the newspaper interactable in the carriage.")
+			elif _step == Step.GUIDEBOOK_ANOMALY:
 				_set_controls(true, true)
 				_show_wait_step(Step.NEWSPAPER_PROMPT, "Newspaper", newspaper_prompt, "Find the newspaper interactable in the carriage.")
 		&"newspaper_opened":
@@ -845,4 +1464,6 @@ func _set_controls(can_move: bool, can_interact: bool) -> void:
 func _set_tutorial_hud_visible(value: bool) -> void:
 	if not is_instance_valid(_hud):
 		return
+	if value and _hud.has_method(&"restore_tutorial_hud_visibility"):
+		_hud.call(&"restore_tutorial_hud_visibility")
 	_hud.visible = value
