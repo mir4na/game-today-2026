@@ -4,7 +4,7 @@ render_mode unshaded;
 uniform vec4 rain_color : source_color = vec4(0.72, 0.86, 1.0, 0.82);
 uniform float intensity : hint_range(0.0, 1.5) = 1.0;
 uniform float density : hint_range(0.0, 1.0) = 0.48;
-uniform float fall_speed : hint_range(0.1, 8.0) = 2.4;
+uniform float fall_speed : hint_range(0.1, 8.0) = 3.6;
 uniform float slant : hint_range(-1.0, 1.0) = -0.22;
 uniform float streak_length : hint_range(0.02, 0.48) = 0.22;
 uniform float streak_width : hint_range(0.002, 0.08) = 0.018;
@@ -20,7 +20,7 @@ float rain_layer(vec2 uv, float cell_count, float speed_scale, float seed) {
 	vec2 position = uv;
 	position.x += position.y * slant;
 	position *= vec2(cell_count, cell_count * 0.58);
-	position.y += TIME * fall_speed * speed_scale * motion_boost;
+	position.y -= TIME * fall_speed * speed_scale * motion_boost;
 	vec2 cell = floor(position);
 	vec2 local = fract(position) - 0.5;
 	float random_value = hash21(cell + vec2(seed, seed * 1.73));
