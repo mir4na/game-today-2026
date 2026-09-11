@@ -43,6 +43,7 @@
 
 [node name="GuidebookUI" type="Control" unique_id=29174819]
 process_mode = 3
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

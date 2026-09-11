@@ -540,6 +540,7 @@ unique_name_in_owner = true
 [node name="TutorialDirector" parent="ModalLayer" instance=ExtResource("52_tutorial")]
 unique_name_in_owner = true
 layout_mode = 1
+use_empty_coach_flow = false
 
 [node name="EndingLayer" type="CanvasLayer" parent="."]
 editor_description = "Ending artwork renders above gameplay bloom and every normal HUD/modal, keeping all ending text crisp."
@@ -605,6 +606,8 @@ unique_name_in_owner = true
 [connection signal="departures_confirmed" from="ModalLayer/NightPuzzleUI" to="." method="_on_departures_confirmed"]
 [connection signal="validation_finished" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_validation_finished"]
 [connection signal="validation_impact_requested" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_validation_impact_requested"]
+[connection signal="day_restart_requested" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_puzzle_day_restart"]
+[connection signal="night_restart_requested" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_puzzle_night_restart"]
 [connection signal="closed" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signature_closed"]
 [connection signal="service_signed" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signed"]
 [connection signal="signature_rejected" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signature_rejected"]

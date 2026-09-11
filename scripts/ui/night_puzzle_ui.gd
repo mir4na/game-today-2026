@@ -7,6 +7,8 @@ signal closed
 signal departures_confirmed(assignments: Dictionary)
 signal validation_finished(succeeded: bool, attempt_count: int)
 signal validation_impact_requested(succeeded: bool)
+signal day_restart_requested
+signal night_restart_requested
 
 @export_category("Inspector Copy")
 @export var instruction_text: String = "Drag each soul to a station."
@@ -15,16 +17,13 @@ signal validation_impact_requested(succeeded: bool)
 @export var clue_count_template: String = "%d/%d FOUND"
 @export_category("Validation Presentation")
 @export var ledger_exit_offset: Vector2 = Vector2(-390.0, 0.0)
-@export var station_path_focus_offset: Vector2 = Vector2(-172.0, 0.0)
 @export var station_path_focus_scale: Vector2 = Vector2(1.12, 1.12)
-@export var station_path_focus_pivot: Vector2 = Vector2(812.0, 360.0)
 @export_range(0.05, 2.0, 0.05) var focus_transition_seconds: float = 0.5
 @export_range(0.0, 1.0, 0.05) var validation_map_shade_alpha: float = 0.5
 @export_range(0.05, 2.0, 0.05) var light_travel_seconds: float = 0.34
 @export_range(0.0, 1.0, 0.05) var station_hold_seconds: float = 0.16
 @export_range(0.1, 3.0, 0.05) var result_hold_seconds: float = 0.9
 @export_range(0.0, 2.0, 0.05) var paycheck_handoff_seconds: float = 0.5
-@export_range(0.05, 1.0, 0.05) var failed_attempt_exit_seconds: float = 0.28
 @export_category("Five-Soul Ledger Layout")
 @export var regular_card_origin: Vector2 = Vector2.ZERO
 @export_range(80.0, 140.0, 1.0) var regular_card_spacing: float = 120.0
@@ -62,6 +61,8 @@ var _validation_fuse_points := PackedVector2Array()
 @onready var _veil_note_label: Label = %VeilNoteStatement
 @onready var _error_label: Label = %ErrorLabel
 @onready var _confirm_button: Button = %ConfirmButton
+@onready var _fail_panel: Control = %FailPanel
+@onready var _fail_shade: ColorRect = %FailShade
 @onready var _board_anchor: Control = %BoardAnchor
 @onready var _ledger_anchor: Control = %LedgerAnchor
 @onready var _ledger_scroll: ScrollContainer = %LedgerScroll
@@ -402,19 +403,58 @@ func play_validation(station_results: Dictionary, attempt_count: int) -> void:
 	_selection_label.text = _current_instruction
 	_error_label.text = ""
 	_update_assignment_visuals()
-	await _dismiss_failed_attempt()
-	# Restore failed stars only after the board is fully gone, so a rejected
-	# station stays absent for the entire visible result beat.
+	# Restore failed stars only after the result beat, so a rejected station
+	# stays absent while the intern reads the outcome.
 	for target: NightStationTarget in _station_targets:
 		target.reset_validation_visual()
-	_validating = false
+	_show_fail_panel()
 	validation_finished.emit(false, attempt_count)
+
+
+func _show_fail_panel() -> void:
+	# The board stays open behind the panel. _validating remains true so the
+	# close shortcut and the confirm button stay locked until the player
+	# chooses retry or a full day restart.
+	_fail_shade.show()
+	_fail_panel.show()
+
+
+func _on_retry_night_pressed() -> void:
+	if not _validating or not _fail_panel.visible:
+		return
+	# Main replays the night-entry cutscene, so the board just steps aside.
+	_fail_shade.hide()
+	_fail_panel.hide()
+	night_restart_requested.emit()
+
+
+func _on_restart_day_pressed() -> void:
+	day_restart_requested.emit()
 
 
 func _focus_station_path() -> void:
 	if is_instance_valid(_focus_tween) and _focus_tween.is_valid():
 		_focus_tween.kill()
-	_set_station_path_pivot_preserving_visual(station_path_focus_pivot)
+	# Center the station content on screen instead of fixed offsets, so every
+	# scene-authored path layout lands in the middle during the scan.
+	var focus_position: Vector2 = _station_path_authored_position
+	var final_scale: Vector2 = _station_path_authored_scale * station_path_focus_scale
+	var centroid: Array = _visible_station_centroid()
+	if bool(centroid[0]):
+		var board_scale: Vector2 = _board_anchor.scale
+		var safe_scale := Vector2(
+			maxf(absf(board_scale.x), 0.001),
+			maxf(absf(board_scale.y), 0.001)
+		)
+		var global_centroid: Vector2 = centroid[1]
+		var local_centroid: Vector2 = centroid[2]
+		var canvas_center: Vector2 = get_global_rect().get_center()
+		var pivot: Vector2 = _station_path_anchor.pivot_offset
+		var scale_delta: Vector2 = final_scale - _station_path_anchor.scale
+		focus_position = _station_path_authored_position + Vector2(
+			(canvas_center.x - global_centroid.x) / safe_scale.x - scale_delta.x * (local_centroid.x - pivot.x),
+			(canvas_center.y - global_centroid.y) / safe_scale.y - scale_delta.y * (local_centroid.y - pivot.y)
+		)
 	_focus_tween = create_tween().set_parallel(true)
 	_focus_tween.tween_property(
 		_ledger_anchor,
@@ -428,13 +468,13 @@ func _focus_station_path() -> void:
 	_focus_tween.tween_property(
 		_station_path_anchor,
 		^"position",
-		_station_path_authored_position + station_path_focus_offset,
+		focus_position,
 		focus_transition_seconds
 	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	_focus_tween.tween_property(
 		_station_path_anchor,
 		^"scale",
-		_station_path_authored_scale * station_path_focus_scale,
+		final_scale,
 		focus_transition_seconds
 	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_focus_tween.tween_property(
@@ -450,16 +490,24 @@ func _focus_station_path() -> void:
 	await _focus_tween.finished
 
 
-func _dismiss_failed_attempt() -> void:
-	_board_anchor.pivot_offset = _board_anchor.size * 0.5
-	var tween: Tween = create_tween().set_parallel(true)
-	tween.tween_property(
-		_board_anchor, ^"scale", Vector2(0.97, 0.97), failed_attempt_exit_seconds
-	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	tween.tween_property(
-		_board_anchor, ^"modulate:a", 0.0, failed_attempt_exit_seconds
+## Global and anchor-local centroid of the visible station targets.
+## Returns [found: bool, global: Vector2, local: Vector2].
+func _visible_station_centroid() -> Array:
+	var sum := Vector2.ZERO
+	var count: int = 0
+	for target: NightStationTarget in _station_targets:
+		if not target.visible:
+			continue
+		sum += target.get_global_rect().get_center()
+		count += 1
+	if count == 0:
+		return [false, Vector2.ZERO, Vector2.ZERO]
+	var global_centroid: Vector2 = sum / float(count)
+	var local_centroid: Vector2 = (
+		_station_path_anchor.get_global_transform_with_canvas().affine_inverse()
+		* global_centroid
 	)
-	await tween.finished
+	return [true, global_centroid, local_centroid]
 
 
 func _move_validation_light(target: NightStationTarget, first_target: bool) -> void:
@@ -572,9 +620,8 @@ func _on_station_validation_impact(succeeded: bool) -> void:
 	validation_impact_requested.emit(succeeded)
 	if is_instance_valid(_map_impact_tween) and _map_impact_tween.is_valid():
 		_map_impact_tween.kill()
-	var base_position: Vector2 = _station_path_authored_position + station_path_focus_offset
+	var base_position: Vector2 = _station_path_anchor.position
 	var strength: float = 7.0 if succeeded else 4.0
-	_set_station_path_pivot_preserving_visual(station_path_focus_pivot)
 	_map_impact_tween = create_tween()
 	for direction: Vector2 in [Vector2(-1.0, 0.25), Vector2(0.72, -0.38), Vector2(-0.35, 0.2)]:
 		_map_impact_tween.tween_property(
@@ -614,6 +661,10 @@ func _validation_chrome() -> Array[CanvasItem]:
 func _reset_validation_presentation() -> void:
 	if is_instance_valid(_focus_tween) and _focus_tween.is_valid():
 		_focus_tween.kill()
+	if is_instance_valid(_fail_panel):
+		_fail_panel.hide()
+	if is_instance_valid(_fail_shade):
+		_fail_shade.hide()
 	_ledger_anchor.position = _ledger_rest_position
 	_ledger_anchor.modulate.a = 1.0
 	_station_path_anchor.position = _station_path_authored_position

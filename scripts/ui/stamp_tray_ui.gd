@@ -106,6 +106,23 @@ func mark_committed() -> void:
 	_slide_out_and_hide()
 
 
+## Reopens the drawer after a rejected stamp (tutorial retry, dropoff unassign).
+## Runs synchronously inside the drop, so it also aborts the in-flight return
+## tween whose chained callback would otherwise commit the rejected stamp.
+func reset_commit() -> void:
+	_kill_tween(_drag_tween)
+	_dragging = false
+	_committed = false
+	_drag_preview.hide()
+	_drag_preview.scale = Vector2.ONE
+	_drag_preview.rotation = 0.0
+	if is_instance_valid(_selected_choice):
+		_selected_choice.self_modulate = Color.WHITE
+	_selected_choice = null
+	_selected_station = ""
+	_refresh_availability(true)
+
+
 func cancel_drag() -> void:
 	if not _dragging:
 		return

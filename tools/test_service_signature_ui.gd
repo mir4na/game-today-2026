@@ -36,7 +36,7 @@ func _run() -> void:
 	_check(service_button.visible and not service_button.disabled, "The service button must be available during daytime gameplay.")
 	_check(service_button.tooltip_text.is_empty(), "The service button must not show a long hover caption over gameplay.")
 	_check(service_button.icon != null and service_button.icon.resource_path.ends_with("Group 176.png"), "The service button must use the Group 176 ledger asset.")
-	_check(service_button.position.y < guidebook_button.position.y, "The service button must sit above the Guidebook button.")
+	_check(service_button.position.y > guidebook_button.position.y, "The service button must sit below the Guidebook button.")
 	_check((pause_ui.get_node("%ResumeButton") as Button).text == "Resume", "The pause menu must expose a Resume text button.")
 	_check(
 		not game._station_stop_ui.show_terminal_title

@@ -50,12 +50,14 @@ This tutorial is a guided run that teaches the current service loop inside the r
    - The player spawns immediately inside a clean coach with no passengers or maintenance distractions.
    - Route time stays paused while the first tutorial instructions are active.
 
-3. **Angel briefing**
-   - A dimmed overlay shows the Angel portrait/head beside a speech bubble.
-   - Dialogue copy appears inside the bubble and explains the premise:
-     - the protagonist died before a job interview;
-     - the Angel gives them a second chance as an intern conductor;
-     - doing the job well matters.
+3. **Inspector briefing**
+   - A dimmed overlay shows the angelic Inspector portrait beside a speech bubble.
+   - The introduction is split across four short Continue beats:
+     1. `Hello. I am the Inspector assigned to this train.`
+     2. `You died before reaching your job interview. The railway is offering you a second chance.`
+     3. `You will work here as an intern conductor. During the day, inspect passengers and decide who should leave at each station.`
+     4. `At night, guide the souls who remain to the station where they belong. Do your work well, and this second chance is yours to keep.`
+   - Space completes the current typewriter line first, then advances on the next press. Clicking `CONTINUE` follows the same behavior.
 
 4. **Movement test**
    - Route time is paused.
@@ -128,7 +130,7 @@ The tutorial dialogue should directly cover these points because they are easy t
 
 ## Scene-based dialogue markers
 
-Every tutorial beat has its own `Marker2D` under `DialogueMarkers` in `scenes/tutorial/tutorial_director.tscn`. The runtime dialogue bubble uses the selected marker as its top-left origin. Reposition a tutorial dialogue by moving its marker in the 2D editor; the script does not contain screen coordinates.
+Every tutorial beat has its own `Marker2D` under `DialogueMarkers` in `scenes/tutorial/tutorial_director.tscn`. The runtime dialogue bubble uses the selected marker as its top-left origin. Reposition a tutorial dialogue by moving its marker in the 2D editor; the script does not contain screen coordinates. The matching guide under `DialogueFrames` controls only that beat's bubble size and the local portrait/tail pose.
 
 | Tutorial beat | Marker | Placement purpose |
 | --- | --- | --- |
@@ -147,7 +149,7 @@ Every tutorial beat has its own `Marker2D` under `DialogueMarkers` in `scenes/tu
 | Statement found | `NightRecord` | Leaves the ledger feedback visible. |
 | Station path | `NightMap` | Leaves station nodes and drag targets visible. |
 
-`Default` is only a fallback if a marker path is missing. The shared Angel portrait crop, bubble, tail, and text layout remain under `DialogueDock` and are authored once for every marker.
+`Default` is only a fallback if a marker path is missing. The live Inspector portrait crop, bubble, tail, and text layout remain under `DialogueDock`.
 
 ## Implementation status
 

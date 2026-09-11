@@ -345,6 +345,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	var key_event := event as InputEventKey
 	if key_event != null and key_event.echo:
 		return
-	if event.is_action_pressed(&"interact"):
+	if event.is_action_pressed(&"service_action"):
 		request_close()
 		get_viewport().set_input_as_handled()

@@ -569,9 +569,9 @@ script = ExtResource("18_hover")
 unique_name_in_owner = true
 custom_minimum_size = Vector2(310, 64)
 layout_mode = 0
-offset_top = 132.0
+offset_top = 137.0
 offset_right = 310.0
-offset_bottom = 196.0
+offset_bottom = 201.0
 pivot_offset = Vector2(155, 32)
 theme_override_colors/font_color = Color(0.06, 0.045, 0.06, 1)
 theme_override_colors/font_focus_color = Color(0.06, 0.045, 0.06, 1)
@@ -593,9 +593,9 @@ script = ExtResource("18_hover")
 unique_name_in_owner = true
 custom_minimum_size = Vector2(310, 64)
 layout_mode = 0
-offset_top = 199.0
+offset_top = 268.0
 offset_right = 310.0
-offset_bottom = 263.0
+offset_bottom = 332.0
 pivot_offset = Vector2(155, 32)
 theme_override_colors/font_color = Color(0.06, 0.045, 0.06, 1)
 theme_override_colors/font_pressed_color = Color(0.12, 0.04, 0.09, 1)
@@ -618,6 +618,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -64.0
+offset_bottom = -64.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -636,7 +638,7 @@ layout_mode = 1
 unique_name_in_owner = true
 libraries/ = SubResource("AnimationLibrary_loading_transition")
 
-[node name="SettingsLayer" type="CanvasLayer" parent="."]
+[node name="SettingsLayer" type="CanvasLayer" parent="." unique_id=864528912]
 layer = 300
 
 [node name="SettingsUI" parent="SettingsLayer" unique_id=1427181937 instance=ExtResource("16_settings_ui")]

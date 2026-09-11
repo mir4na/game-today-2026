@@ -58,11 +58,12 @@ func request_use() -> bool:
 func _refresh_presentation() -> void:
 	if not is_node_ready():
 		return
-	visible = _owned_amount > 0
+	# Slots always stay on the HUD so shortcut hints remain visible;
+	# empty stock simply reads ×0 with interaction disabled.
 	_amount_label.text = amount_template % _owned_amount
 	_button.disabled = _interaction_locked or _owned_amount <= 0
 	# Keep the authored item artwork untouched even while interaction is locked.
-	# Availability is already communicated by visibility and the amount label.
+	# Availability is already communicated by the amount label and the lock.
 	self_modulate = Color.WHITE
 
 
