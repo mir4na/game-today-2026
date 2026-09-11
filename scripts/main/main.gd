@@ -18,7 +18,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export var night_music_track: StringName = &"gameplay_night"
 @export_category("Day Progression")
 @export_range(1, 5, 1) var day_number: int = 1
-@export var day_pass_targets: PackedInt32Array = PackedInt32Array([300, 350, 400, 450, 500])
+@export var day_pass_targets: PackedInt32Array = PackedInt32Array([280, 290, 300, 310, 320])
 @export_category("Day Route")
 @export var day_route: PackedStringArray
 @export_category("Station Service")
@@ -47,7 +47,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export_range(1.0, 30.0, 0.5) var radar_anomaly_light_seconds: float = 4.0
 @export_category("Night Service")
 ## Maximum active service time before the final Night Service paycheck.
-@export_range(30.0, 600.0, 5.0) var night_service_duration_seconds: float = 300.0
+@export_range(30.0, 900.0, 5.0) var night_service_duration_seconds: float = 600.0
 ## A correct route with missing Soul Records earns less than the full quota.
 @export var night_requires_all_soul_records: bool = true
 @export_category("Newspaper")
@@ -3010,7 +3010,7 @@ func _enter_night(enable_controls: bool = true, show_instruction: bool = true) -
 	_resume_train_for_night()
 	_hud.set_next_stop("The End")
 	_hud.set_night_walk_mode()
-	# Night Service starts a fresh five-minute dial and fills the complete
+	# Night Service starts a fresh ten-minute dial and fills the complete
 	# 180-degree arc, independent from the completed daylight route.
 	_hud.set_clock_progress(_night_service_clock_progress())
 	if show_instruction and not night_shift_instruction.strip_edges().is_empty():
@@ -3167,7 +3167,11 @@ func _on_night_validation_finished(succeeded: bool, attempt_count: int) -> void:
 	if state != GameState.NIGHT_PUZZLE:
 		return
 	if not succeeded:
-		# The board stays open behind its own retry/day-restart panel.
+		# Tutorial retries happen in place. Reset the board here instead of
+		# depending on the tutorial dialogue state, so every rejected submission
+		# reliably unlocks a fresh attempt.
+		if is_tutorial_mode:
+			retry_tutorial_night_assignment()
 		_emit_tutorial_event(&"night_assignment_failed", attempt_count)
 		return
 	if is_tutorial_mode:

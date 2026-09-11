@@ -66,7 +66,7 @@ func _run() -> void:
 	menu.get_node("%ContinueButton").pressed.emit()
 	var game: AfterTheEndGame = await _wait_for_game()
 	_check(game.day_number == 2 and game._daily_seed == checkpoint.seed, "Continue restores the saved day and roster seed.")
-	var expected_day_targets := PackedInt32Array([300, 350, 400, 450, 500])
+	var expected_day_targets := PackedInt32Array([280, 290, 300, 310, 320])
 	for sample_day: int in range(1, 6):
 		game.day_number = sample_day
 		_check(
@@ -81,8 +81,13 @@ func _run() -> void:
 	_check(authored_config.create_daily_service(2, checkpoint.seed).service_train_number == service_number, "Continue restores the daily service number from its checkpoint seed.")
 	var generated_numbers: Dictionary = {}
 	var expected_night_counts := PackedInt32Array([3, 3, 4, 4, 5])
+	var previous_day_target: int = 0
+	var correct_dropoff_rate: int = int(game._market_tool_state.get("blessings_per_correct_dropoff"))
 	for sample_day: int in range(1, 6):
 		var daily_config: DailyManifestConfig = authored_config.create_daily_service(sample_day, checkpoint.seed)
+		var day_target: int = expected_day_targets[sample_day - 1]
+		var living_passenger_count: int = daily_config.total_passenger_count - daily_config.deceased_passenger_count
+		var maximum_day_paycheck: int = living_passenger_count * correct_dropoff_rate
 		generated_numbers[daily_config.service_train_number] = true
 		_check(daily_config.service_train_number == authored_config.create_daily_service(sample_day, checkpoint.seed).service_train_number, "Daily service generation is repeatable.")
 		_check(daily_config.service_train_codes.has(daily_config.service_train_number), "Service number must come from the authored train code pool.")
@@ -90,6 +95,12 @@ func _run() -> void:
 			daily_config.deceased_passenger_count == expected_night_counts[sample_day - 1],
 			"Night Service must follow the authored 3, 3, 4, 4, 5 anomaly progression."
 		)
+		_check(day_target > previous_day_target, "Daylight paycheck targets must increase every day.")
+		_check(
+			day_target <= maximum_day_paycheck,
+			"Day %d target must be reachable from its %d living passengers." % [sample_day, living_passenger_count]
+		)
+		previous_day_target = day_target
 	_check(generated_numbers.size() > 1 and authored_config.service_train_number == authored_number, "Daily randomization varies without modifying the authored config.")
 	scene_probe.free()
 	_check(game._market_tool_state.get("blessings") == 500, "Continue restores the day-start inventory.")
@@ -105,13 +116,10 @@ func _run() -> void:
 	game._on_station_assignment_toggled(anomaly.data.passenger_name, false)
 	game._on_station_assignment_toggled(anomaly.data.passenger_name, true)
 	_check(game._incorrectly_stamped_anomalies.size() == 1 and game._penalty_log.size() == 1, "Repeated anomaly stamps charge once per shift, even after removing the stamp.")
-	game._correct_drop_offs = 6
+	game._correct_drop_offs = 12
 	game._wrong_drop_offs = 1
-	# Day 2's authored target is intentionally higher than this small receipt
-	# fixture; use the existing preview override to exercise the market route.
-	game._debug_day_pass_override = true
 	game._finalize_day_shift()
-	_check(game._day_blessing_award.net_earnings == 120 and game._day_blessing_award.passed, "The debug preview may still pass the Day 2 receipt route.")
+	_check(game._day_blessing_award.net_earnings == 300 and game._day_blessing_award.passed, "A reachable Day 2 paycheck must pass without a debug override.")
 	game._on_shift_report_continue()
 	_check(game.state == AfterTheEndGame.GameState.NIGHT_TRANSITION, "Passing starts the terminal-to-night transition after the paycheck.")
 	_check(game._night_transition_ui.visible, "The veil transition appears before the Night Market.")

@@ -71,7 +71,7 @@ func _run() -> void:
 		game._collected_departure_statements.size() == puzzle.get_assignment_count(),
 		"A rejected route must preserve every Soul Record already found."
 	)
-	_check(game._night_service_elapsed_seconds >= 75.0, "A rejected route must never reset the five-minute timer.")
+	_check(game._night_service_elapsed_seconds >= 75.0, "A rejected route must never reset the ten-minute timer.")
 	_check(board._assigned_passenger_count() == 0, "A failed submission may clear its board placements for another try.")
 
 	(board.get_node("%RetryNightButton") as Button).pressed.emit()

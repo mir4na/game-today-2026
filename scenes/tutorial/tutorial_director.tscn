@@ -56,7 +56,7 @@ exam_passenger_names = PackedStringArray("Abby", "Reff", "Ratta", "Denta", "Mecc
 exam_anomaly_names = PackedStringArray("Abby", "Mecca")
 night_statement_transfer_wait_seconds = 1.6
 tutorial_passenger_profile = ExtResource("8_tutorial_passenger")
-anomaly_intro_dialogue_pages = PackedStringArray("Not every passenger on this train is alive. Some of them died before they boarded — yet here they stand, riding alongside the living.", "Your job is not just to stamp tickets. **Identify** anyone who does not belong. If something feels wrong — the shadow, the face, the date — do not stamp them. Keep them aboard for Night Service.")
+anomaly_intro_dialogue_pages = PackedStringArray("Not every passenger on this train is alive. Some of them died before they boarded, yet here they stand, riding alongside the living.", "Your job is not just to stamp tickets. Identify anyone who does not belong. If something feels wrong, such as the shadow, the face, or the date, do not stamp them. Keep them aboard for Night Service.")
 
 [node name="Shade" type="ColorRect" parent="." unique_id=1115400475]
 unique_name_in_owner = true

@@ -19,6 +19,10 @@ func run() -> void:
 		world.add_child(npc)
 		npc.set_process(false)
 		npc.position = Vector2(450, 0)
+		check(npc.z_index > rack.z_index, "NPC artwork must always render in front of the newspaper rack.")
+		npc.set_interaction_focus(true)
+		check(npc.z_index > rack.z_index, "Focused NPC artwork must stay in front of the newspaper rack.")
+		npc.set_interaction_focus(false)
 	inspected.configure_seat_navigation(Vector2(60, 0), PackedVector2Array([Vector2(250, 0), Vector2(700, 0), Vector2(860, 0)]), {1: Vector2(0, 960)})
 	other.configure_seat_navigation(Vector2(860, 0), PackedVector2Array([Vector2(250, 0), Vector2(700, 0)]), {1: Vector2(0, 960)})
 	inspected._boarding_handoff_active = true
