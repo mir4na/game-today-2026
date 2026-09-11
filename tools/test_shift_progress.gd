@@ -1,5 +1,6 @@
 extends SceneTree
-## Run with an isolated XDG_DATA_HOME so checks never replace a player's save.
+## Set WHERE_DO_YOU_BELONG_TEST_SAVE to an isolated path so checks never
+## replace a player's save on Linux or Windows.
 const Progress = preload("res://scripts/systems/shift_progress.gd")
 const MarketScene = preload("res://scenes/systems/market_tool_state.tscn")
 const MenuScene = preload("res://scenes/menu/main_menu.tscn")
@@ -14,8 +15,9 @@ func _check(condition: bool, message: String) -> void:
 		_failures += 1
 
 func _run() -> void:
-	if not OS.get_environment("XDG_DATA_HOME").begins_with("/tmp/"):
-		push_error("Use an isolated /tmp XDG_DATA_HOME for this test.")
+	var isolated_save_path: String = OS.get_environment(Progress.TEST_SAVE_PATH_ENV).replace("\\", "/")
+	if "where-do-you-belong-tests" not in isolated_save_path:
+		push_error("Set WHERE_DO_YOU_BELONG_TEST_SAVE to an isolated where-do-you-belong-tests path.")
 		quit(1)
 		return
 	var market: MarketToolState = MarketScene.instantiate()
@@ -133,10 +135,9 @@ func _run() -> void:
 	_check(game.state == AfterTheEndGame.GameState.NIGHT, "The whiteout must reveal night gameplay after the market closes.")
 	_check(not game._night_market_ui.visible, "The market must clear before night gameplay begins.")
 	game._market_tool_state.call("purchase", &"radar_charge")
+	var previous_game: AfterTheEndGame = game
 	game._restart_game()
-	await process_frame
-	await process_frame
-	game = current_scene as AfterTheEndGame
+	game = await _wait_for_reloaded_game(previous_game)
 	game.process_mode = Node.PROCESS_MODE_DISABLED
 	_check(_roster(game) == names and game.day_number == 2, "Restart must keep the day and manifest.")
 	_check(game.manifest_config.service_train_number == service_number, "Restart keeps the same service number.")
@@ -144,9 +145,13 @@ func _run() -> void:
 	game._finalize_day_shift()
 	_check(not game._day_blessing_award.passed, "A zero-earnings attempt must fail despite savings.")
 	game._on_shift_report_continue()
-	await process_frame
-	await process_frame
-	game = current_scene as AfterTheEndGame
+	_check(
+		game.state == AfterTheEndGame.GameState.HELL_ENDING and game._hell_ending_ui.visible,
+		"A failed daylight paycheck must enter the Hell cutscene before offering retry."
+	)
+	previous_game = game
+	game._on_hell_retry_requested()
+	game = await _wait_for_reloaded_game(previous_game)
 	game.process_mode = Node.PROCESS_MODE_DISABLED
 	_check(game.day_number == 2 and game._correct_drop_offs == 0, "Failure retries the same day without strikes or advancement.")
 	game.state = AfterTheEndGame.GameState.DAY
@@ -165,19 +170,43 @@ func _run() -> void:
 	game._enter_night()
 	_check(game._hud._next_stop_label.text == "THE END", "Night Service changes the clock sign destination to The End.")
 	game.state = AfterTheEndGame.GameState.NIGHT_PUZZLE
-	game._on_night_validation_finished(true, 1)
+	game._complete_night_service(_complete_night_fixture(game))
 	_check(Progress.load_checkpoint().day == 3, "Finishing the night checkpoints the next day.")
+	previous_game = game
 	game._continue_after_night_paycheck()
-	await process_frame
-	await process_frame
-	game = current_scene as AfterTheEndGame
+	game = await _wait_for_reloaded_game(previous_game)
 	game.process_mode = Node.PROCESS_MODE_DISABLED
 	_check(game.day_number == 3, "Continue after the night enters the next day.")
+	game._enter_night()
+	game.state = AfterTheEndGame.GameState.NIGHT_PUZZLE
+	game._complete_night_service({})
+	_check(
+		game._night_paycheck_failed and Progress.load_checkpoint().day == 3,
+		"An incomplete Night Service paycheck must not advance the saved day."
+	)
+	game._on_shift_report_continue()
+	_check(
+		game.state == AfterTheEndGame.GameState.HELL_ENDING,
+		"An under-quota Night Service paycheck must enter the Hell cutscene."
+	)
+	previous_game = game
+	game._on_hell_retry_requested()
+	game = await _wait_for_reloaded_game(previous_game)
+	game.process_mode = Node.PROCESS_MODE_DISABLED
+	_check(game.day_number == 3, "Retrying from Hell must restore the current day checkpoint.")
 	game.day_number = 5
 	game._enter_night()
 	game.state = AfterTheEndGame.GameState.NIGHT_PUZZLE
-	game._on_night_validation_finished(true, 1)
+	game._complete_night_service(_complete_night_fixture(game))
 	_check(Progress.load_checkpoint().completed and Progress.load_checkpoint().day == 5, "Day 5 ends the campaign; no Day 6.")
+	_check(
+		game.state == AfterTheEndGame.GameState.HEAVEN_ENDING and game._heaven_ending_ui.visible,
+		"A successful Day 5 must enter Heaven before the credits."
+	)
+	_check(
+		int(Progress.load_checkpoint().campaign_summary.get("days_completed", 0)) == 5,
+		"The completed checkpoint must retain the five-day final-paycheck summary."
+	)
 	game.free()
 	current_scene = null
 	menu = MenuScene.instantiate()
@@ -187,13 +216,16 @@ func _run() -> void:
 	var invalid := ConfigFile.new()
 	invalid.set_value("progress", "version", 1)
 	invalid.set_value("progress", "checkpoint", {"day": "broken"})
-	invalid.save(Progress.SAVE_PATH)
+	invalid.save(isolated_save_path)
 	_check(Progress.load_checkpoint().is_empty(), "Invalid save data must be rejected safely.")
 	menu = MenuScene.instantiate()
 	root.add_child(menu)
 	_check(menu.get_node("%ContinueButton").disabled, "Invalid saves must not enable Continue.")
 	current_scene = menu
 	menu.get_node("%StartButton").pressed.emit()
+	var intro: IntroCutscene = await _wait_for_intro()
+	intro.closing_fade_duration = 0.01
+	intro._finish_intro()
 	game = await _wait_for_game()
 	_check(
 		game.day_number == 1
@@ -204,10 +236,11 @@ func _run() -> void:
 	game.state = AfterTheEndGame.GameState.DAY
 	game._active_modal = null
 	game._route_index = 0
-	game._day_minutes = game.START_MINUTES
 	game._station_arrival_announced = false
 	game._station_exchange_processed = false
-	game._on_debug_next_station_requested()
+	game._day_minutes = game._next_arrival_minutes()
+	game._update_day_route_presentation()
+	game._announce_next_station()
 	_check(
 		game._station_arrival_announced
 		and is_equal_approx(game._day_minutes, game._next_arrival_minutes())
@@ -216,7 +249,7 @@ func _run() -> void:
 	)
 	game.free()
 	current_scene = null
-	DirAccess.remove_absolute(Progress.SAVE_PATH)
+	DirAccess.remove_absolute(isolated_save_path)
 	await process_frame
 	await process_frame
 	if _failures > 0:
@@ -235,8 +268,38 @@ func _wait_for_game() -> AfterTheEndGame:
 	_check(false, "Menu/loading transition did not reach the game within 10 seconds.")
 	return null
 
+
+func _wait_for_reloaded_game(previous_game: AfterTheEndGame) -> AfterTheEndGame:
+	for attempt: int in 200:
+		await create_timer(0.05).timeout
+		if current_scene is AfterTheEndGame and current_scene != previous_game:
+			var game := current_scene as AfterTheEndGame
+			game.process_mode = Node.PROCESS_MODE_DISABLED
+			return game
+	_check(false, "Loading transition did not reload the game within 10 seconds.")
+	return null
+
+
+func _wait_for_intro() -> IntroCutscene:
+	for attempt: int in 200:
+		await create_timer(0.05).timeout
+		if current_scene is IntroCutscene:
+			return current_scene as IntroCutscene
+	_check(false, "Menu/loading transition did not reach the intro within 10 seconds.")
+	return null
+
 func _roster(game: AfterTheEndGame) -> PackedStringArray:
 	var names := PackedStringArray()
 	for data: PassengerData in game._daily_manifest:
 		names.append("%s|%s|%s|%s" % [data.passenger_name, data.anomaly_type, data.origin_station, data.destination_station])
 	return names
+
+
+func _complete_night_fixture(game: AfterTheEndGame) -> Dictionary:
+	var puzzle: DeparturePuzzleData = game._get_departure_puzzle()
+	var assignments: Dictionary = {}
+	for station: String in puzzle.night_stations:
+		assignments[station] = puzzle.get_expected_passengers_for_station(station)
+	for data: PassengerData in game._get_dead_passenger_data():
+		game._collected_departure_statements[data.short_name] = "Recovered test record"
+	return assignments

@@ -127,8 +127,8 @@ func _run() -> void:
 		_check(
 			placeholder_sprite.sprite_frames != null
 			and placeholder_sprite.sprite_frames.get_frame_count(&"walk") == 9
-			and placeholder_sprite.is_playing(),
-			"The drag-preview scene must expose an animated walk placeholder in the editor."
+			and not placeholder_sprite.is_playing(),
+			"The drag-preview scene must expose a static soul pose without walking playback."
 		)
 		_check(
 			placeholder_preview.position == -placeholder_sprite.position,
@@ -149,8 +149,26 @@ func _run() -> void:
 				preview_sprite.sprite_frames != null
 				and preview_sprite.animation == &"walk"
 				and preview_sprite.sprite_frames.get_frame_count(&"walk") > 1
-				and preview_sprite.is_playing(),
-				"Dragging %s must play the walk SpriteFrames from that NPC's scene." % profile.short_name
+				and preview_sprite.frame == preview.pose_frame
+				and not preview_sprite.is_playing(),
+				"Dragging %s must use one still frame rather than play its walk animation." % profile.short_name
+			)
+			preview.update_drag_position(Vector2(200.0, 200.0), 0.016)
+			preview.update_drag_position(Vector2(260.0, 200.0), 0.016)
+			_check(
+				preview_sprite.rotation > 0.0,
+				"Dragging a soul right must lean its NPC visual to the right."
+			)
+			preview.update_drag_position(Vector2(140.0, 200.0), 0.016)
+			_check(
+				preview_sprite.rotation < 0.0,
+				"Dragging a soul left must lean its NPC visual to the left."
+			)
+			var moving_rotation: float = absf(preview_sprite.rotation)
+			preview.update_drag_position(Vector2(140.0, 200.0), 0.12)
+			_check(
+				absf(preview_sprite.rotation) < moving_rotation,
+				"A stationary dragged soul must ease back toward an upright pose."
 			)
 			_check(
 				preview.get_node_or_null("%PassengerName") == null,

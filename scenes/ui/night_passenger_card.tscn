@@ -7,6 +7,18 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/night_passenger_drag_preview.tscn" id="5_drag_preview"]
 [ext_resource type="Script" uid="uid://b1lbens1ur17i" path="res://scripts/ui/night_character_portrait.gd" id="6_portrait"]
 
+[sub_resource type="StyleBoxFlat" id="HoverOutlineStyle"]
+bg_color = Color(0, 0, 0, 0.08)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0, 0, 0, 0.95)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
 [node name="NightPassengerCard" type="Control"]
 custom_minimum_size = Vector2(318, 116)
 layout_mode = 3
@@ -112,3 +124,15 @@ theme_override_fonts/font = ExtResource("3_bold")
 theme_override_font_sizes/font_size = 10
 text = "UNASSIGNED"
 horizontal_alignment = 2
+
+[node name="HoverOutline" type="Panel" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("HoverOutlineStyle")

@@ -5,6 +5,7 @@ extends CanvasLayer
 signal period_changed(display_cycle_progress: float)
 
 enum Period { SUNRISE, AFTERNOON, SUNSET, NIGHT }
+const TUNNEL_SFX_CHANNEL: StringName = &"travel_tunnel"
 
 @export_category("Scene Periods")
 @export_node_path("Node2D") var sunrise_root_path: NodePath
@@ -31,6 +32,16 @@ enum Period { SUNRISE, AFTERNOON, SUNSET, NIGHT }
 @export_range(0.0, 0.04, 0.001) var tunnel_motion_blur_distance: float = 0.014
 @export_range(0.0, 1.0, 0.05) var tunnel_motion_blur_strength: float = 0.72
 @export_range(0.0, 1.0, 0.05) var tunnel_gray_strength: float = 0.58
+@export_category("Tunnel Audio")
+@export_range(-40.0, 6.0, 0.5) var tunnel_sfx_volume_db: float = -9.0
+@export_range(0.5, 1.5, 0.01) var tunnel_sfx_pitch: float = 1.0
+@export_range(0.1, 2.0, 0.05) var tunnel_sfx_fade_out_seconds: float = 0.8
+@export_category("Travel Weather")
+@export_range(0.0, 1.0, 0.01) var daytime_rain_chance: float = 0.38
+@export_range(0.0, 1.0, 0.01) var night_rain_chance: float = 0.55
+@export_range(0.1, 3.0, 0.05) var weather_fade_seconds: float = 1.0
+@export_range(0.0, 1.0, 0.01) var rain_opacity: float = 0.82
+@export_range(0.0, 1.0, 0.01) var rain_fog_opacity: float = 0.28
 @export_category("Tunnel Time Tint")
 @export var tunnel_sunrise_tint: Color = Color(0.18, 0.21, 0.25, 0.38)
 @export var tunnel_afternoon_tint: Color = Color(0.27, 0.25, 0.22, 0.34)
@@ -50,21 +61,32 @@ var _tunnel_scroll_offset: float = 0.0
 var _tunnel_layout_viewport_size: Vector2 = Vector2.ZERO
 var _pending_period: int = -1
 var _world_time_scale: float = 1.0
+var _cinematic_speed_multiplier: float = 1.0
+var _weather_raining: bool = false
+var _route_weather: Dictionary = {}
+var _weather_tween: Tween
+var _weather_rng := RandomNumberGenerator.new()
+
+@onready var _weather_fog: ColorRect = %WeatherFog
+@onready var _weather_rain: ColorRect = %WeatherRain
 
 
 func _ready() -> void:
+	_weather_rng.randomize()
 	_tunnel_panel = get_node_or_null(tunnel_panel_path) as Control
 	_tunnel_art = get_node_or_null(tunnel_art_path) as TextureRect
 	_tunnel_tint = get_node_or_null(tunnel_tint_path) as ColorRect
 	if is_instance_valid(_tunnel_panel):
 		_tunnel_panel.hide()
+	_weather_fog.self_modulate.a = 0.0
+	_weather_rain.self_modulate.a = 0.0
 	_layout_tunnel_art(_get_background_viewport_size())
 	_validate_scene_configuration()
 	_set_route_leg_background(0)
 
 
 func _process(delta: float) -> void:
-	var scaled_delta: float = delta * _world_time_scale
+	var scaled_delta: float = delta * _world_time_scale * _cinematic_speed_multiplier
 	if _motion_strength > 0.001 and is_instance_valid(_period_root):
 		for child: Node in _period_root.get_children():
 			var layer := child as Node2D
@@ -82,14 +104,35 @@ func set_traveling(value: bool) -> void:
 
 func set_motion_strength(value: float) -> void:
 	_motion_strength = clampf(value, 0.0, 1.0)
+	_update_rain_motion()
 
 
 func set_world_time_scale(value: float) -> void:
 	_world_time_scale = clampf(value, 0.05, 1.0)
+	_update_rain_motion()
+
+
+func set_cinematic_speed_multiplier(value: float) -> void:
+	_cinematic_speed_multiplier = clampf(value, 1.0, 6.0)
+	_update_rain_motion()
+
+
+func configure_weather_seed(seed: int) -> void:
+	_weather_rng.seed = ("travel-weather:%d" % seed).hash()
+	_route_weather.clear()
+
+
+func begin_night_service_weather() -> void:
+	_set_weather_raining(_weather_rng.randf() < night_rain_chance)
+
+
+func is_raining() -> bool:
+	return _weather_raining
 
 
 func begin_route_leg(route_leg_index: int, immediate: bool = false) -> void:
 	_current_route_leg = maxi(route_leg_index, 0)
+	_roll_route_weather(_current_route_leg, immediate)
 	var next_period: Period = _period_for_route_leg(_current_route_leg)
 	if immediate or next_period == _current_period:
 		_cancel_tunnel_transition()
@@ -118,7 +161,7 @@ func _start_period_transition(next_period: Period) -> void:
 		return
 	if _tunnel_tween and _tunnel_tween.is_valid():
 		_tunnel_tween.kill()
-	GameSFX.play(&"speed_woosh", -9.0, 1.0, 0.025, 0.5)
+	_start_tunnel_sfx()
 	var viewport_size: Vector2 = _get_background_viewport_size()
 	_pending_period = int(next_period)
 	_tunnel_active = true
@@ -150,6 +193,7 @@ func _start_period_transition(next_period: Period) -> void:
 	else:
 		_tunnel_tween.tween_interval(tunnel_loop_seconds)
 	_tunnel_tween.tween_callback(_commit_pending_period)
+	_tunnel_tween.tween_callback(_fade_out_tunnel_sfx)
 	_tunnel_tween.tween_property(
 		_tunnel_panel,
 		^"modulate:a",
@@ -184,6 +228,7 @@ func _cancel_tunnel_transition() -> void:
 	_tunnel_tween = null
 	_pending_period = -1
 	_tunnel_active = false
+	_stop_tunnel_sfx_immediately()
 	if not is_instance_valid(_tunnel_panel):
 		return
 	_tunnel_panel.hide()
@@ -205,6 +250,7 @@ func set_tunnel_active(value: bool, immediate: bool = false) -> void:
 	_tunnel_panel.size = viewport_size
 	_tunnel_active = value
 	if value:
+		_start_tunnel_sfx()
 		_pending_period = -1
 		_tunnel_scroll_offset = 0.0
 		_layout_tunnel_art(viewport_size)
@@ -229,6 +275,7 @@ func set_tunnel_active(value: bool, immediate: bool = false) -> void:
 		_tunnel_panel.modulate.a = 1.0
 		return
 	_pending_period = -1
+	_fade_out_tunnel_sfx()
 	_tunnel_tween = create_tween()
 	_tunnel_tween.tween_property(
 		_tunnel_panel,
@@ -237,6 +284,61 @@ func set_tunnel_active(value: bool, immediate: bool = false) -> void:
 		tunnel_exit_seconds
 	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 	_tunnel_tween.tween_callback(_finish_period_transition)
+
+
+func _start_tunnel_sfx() -> void:
+	GameSFX.start_loop(
+		TUNNEL_SFX_CHANNEL,
+		&"speed_woosh",
+		tunnel_sfx_volume_db,
+		tunnel_sfx_pitch
+	)
+
+
+func _fade_out_tunnel_sfx() -> void:
+	GameSFX.stop_loop(TUNNEL_SFX_CHANNEL, tunnel_sfx_fade_out_seconds)
+
+
+func _stop_tunnel_sfx_immediately() -> void:
+	GameSFX.stop_loop(TUNNEL_SFX_CHANNEL)
+
+
+func _roll_route_weather(route_leg_index: int, immediate: bool) -> void:
+	if not _route_weather.has(route_leg_index):
+		_route_weather[route_leg_index] = _weather_rng.randf() < daytime_rain_chance
+	_set_weather_raining(bool(_route_weather[route_leg_index]), immediate)
+
+
+func _set_weather_raining(value: bool, immediate: bool = false) -> void:
+	_weather_raining = value
+	if is_instance_valid(_weather_tween) and _weather_tween.is_valid():
+		_weather_tween.kill()
+	var rain_target: float = rain_opacity if value else 0.0
+	var fog_target: float = rain_fog_opacity if value else 0.0
+	if immediate or not is_inside_tree():
+		_weather_rain.self_modulate.a = rain_target
+		_weather_fog.self_modulate.a = fog_target
+		return
+	_weather_tween = create_tween().set_parallel(true)
+	_weather_tween.tween_property(
+		_weather_rain, ^"self_modulate:a", rain_target, weather_fade_seconds
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_weather_tween.tween_property(
+		_weather_fog, ^"self_modulate:a", fog_target, weather_fade_seconds
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+func _update_rain_motion() -> void:
+	if not is_node_ready():
+		return
+	var rain_material := _weather_rain.material as ShaderMaterial
+	if rain_material == null:
+		return
+	var movement: float = maxf(_motion_strength * _world_time_scale, 0.25)
+	rain_material.set_shader_parameter(
+		&"motion_boost",
+		clampf(movement * _cinematic_speed_multiplier, 0.5, 5.0)
+	)
 
 
 func _set_route_leg_background(route_leg_index: int) -> void:

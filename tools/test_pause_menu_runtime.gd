@@ -23,6 +23,12 @@ func _run() -> void:
 	assert(option_grid.get_child_count() == 8, "Pause menu must expose exactly eight options.")
 	var resume_button := pause_menu.get_node("%ResumeButton") as Button
 	assert(resume_button.visible and resume_button.text == "Resume", "The in-game pause menu must show a Resume text button.")
+	var restart_button := pause_menu.get_node("%RestartButton") as Button
+	var main_menu_button := pause_menu.get_node("%MainMenuButton") as Button
+	for action_button: Button in [resume_button, restart_button, main_menu_button]:
+		assert(action_button.custom_minimum_size.y >= 52.0, "Pause actions must use the larger click target.")
+		assert(action_button.get_theme_font_size(&"font_size") == 22, "Pause actions must use the larger matching text size.")
+		assert(action_button.get_theme_stylebox(&"normal") is StyleBoxEmpty, "Pause actions must remain text-only without button artwork.")
 	var master_slider := pause_menu.get_node("Ticket/OptionGrid/MasterVolumeOption/Content/VolumeSlider") as Control
 	assert(master_slider.visible, "Audio options must use the ticket slider control.")
 	var artwork := pause_menu.get_node("Ticket/TicketArtwork") as TextureRect

@@ -18,4 +18,4 @@ blessings_per_correct_dropoff = 30
 blessings_per_wrong_dropoff = 20
 blessings_per_incorrect_anomaly = 40
 blessings_per_correct_night_dropoff = 100
-blessings_per_night_attempt = 100
+blessings_per_night_statement = 50

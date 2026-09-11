@@ -145,6 +145,7 @@ target_scene_path = "res://scenes/main/main.tscn"
 
 [node name="BottomLeft" type="Control" parent="." unique_id=1364740154]
 editor_description = "Scene-authored loading composition. Move or resize this node to reposition both the walking MC and Loading text."
+z_index = 1
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0

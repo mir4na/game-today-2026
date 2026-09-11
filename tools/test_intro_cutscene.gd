@@ -9,6 +9,7 @@ func _initialize() -> void:
 func _run() -> void:
 	root.size = Vector2i(1280, 720)
 	var intro := load("res://scenes/ui/intro_cutscene.tscn").instantiate() as IntroCutscene
+	assert(is_equal_approx(intro.page_fade_duration, 0.9), "Intro page transitions must run at three times the original duration.")
 	intro.opening_fade_duration = 0.1
 	intro.page_fade_duration = 0.1
 	intro.preload_gameplay_during_intro = false

@@ -18,10 +18,12 @@ var _elapsed: float = 0.0
 var _load_complete: bool = false
 var _changing_scene: bool = false
 var _transition_duration_scale: float = 1.0
+var _fade_to_black_before_loading: bool = false
 
 @onready var _loading_label: Label = %LoadingLabel
 @onready var _mc_walk: AnimatedSprite2D = %MCWalk
 @onready var _transition_animation: AnimationPlayer = %TransitionAnimation
+@onready var _loading_content: Control = $BottomLeft
 
 
 func _ready() -> void:
@@ -32,23 +34,43 @@ func _ready() -> void:
 
 func begin_loading(
 	override_target_scene_path: String = "",
-	transition_duration_scale: float = 1.0
+	transition_duration_scale: float = 1.0,
+	fade_to_black_before_loading: bool = false
 ) -> void:
 	if _started:
 		return
 	if not override_target_scene_path.is_empty():
 		target_scene_path = override_target_scene_path
 	_transition_duration_scale = maxf(transition_duration_scale, 0.01)
+	_fade_to_black_before_loading = fade_to_black_before_loading
 	_started = true
 	_elapsed = 0.0
 	_load_complete = false
 	_changing_scene = false
 	_reset_presentation()
+	if _fade_to_black_before_loading:
+		_loading_content.hide()
 	show()
 	_mc_walk.play(&"walk")
 	if target_scene_path.is_empty():
+		_loading_content.show()
 		_fail_loading("LoadingScreenUI/Target Scene Path is empty in the Inspector.")
 		return
+	if _fade_to_black_before_loading:
+		_reveal_loading_after_black_cover()
+		return
+	_request_threaded_load()
+
+
+func _reveal_loading_after_black_cover() -> void:
+	await _play_transition(fade_to_black_animation)
+	if not is_inside_tree() or not _started:
+		return
+	_loading_content.show()
+	_request_threaded_load()
+
+
+func _request_threaded_load() -> void:
 	var existing_status := ResourceLoader.load_threaded_get_status(target_scene_path)
 	if existing_status == ResourceLoader.THREAD_LOAD_LOADED:
 		_load_complete = true
@@ -100,6 +122,7 @@ func _process(delta: float) -> void:
 func _reset_presentation() -> void:
 	_loading_label.text = loading_text
 	_loading_label.visible_characters = 0
+	_loading_content.show()
 	if _transition_animation.has_animation(&"RESET"):
 		_transition_animation.play(&"RESET")
 		_transition_animation.advance(0.0)
@@ -126,7 +149,8 @@ func _open_loaded_scene() -> void:
 		_changing_scene = false
 		_fail_loading("The loaded scene could not be instantiated: %s" % target_scene_path)
 		return
-	await _play_transition(fade_to_black_animation)
+	if not _fade_to_black_before_loading:
+		await _play_transition(fade_to_black_animation)
 	var tree := get_tree()
 	var previous_scene: Node = tree.current_scene
 	if previous_scene == null:

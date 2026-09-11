@@ -6,7 +6,7 @@ const ShiftProgress = preload("res://scripts/systems/shift_progress.gd")
 const DEFAULT_MANIFEST: DailyManifestConfig = preload("res://data/daily_manifest_config.tres")
 const INTRO_SCENE_PATH := "res://scenes/ui/intro_cutscene.tscn"
 const GAME_SCENE_PATH := "res://scenes/main/main.tscn"
-const INTRO_TRANSITION_DURATION_SCALE: float = 1.35
+const INTRO_TRANSITION_DURATION_SCALE: float = 3.0
 
 @export_category("Hand Grip Motion")
 @export_range(0.0, 4.0, 0.05) var hand_grip_sway_degrees: float = 1.15
@@ -29,6 +29,7 @@ const INTRO_TRANSITION_DURATION_SCALE: float = 1.35
 @onready var _settings_ui: PauseUI = %SettingsUI
 @onready var _start_button: Button = %StartButton
 @onready var _continue_button: Button = %ContinueButton
+@onready var _tutorial_button: Button = %TutorialButton
 @onready var _settings_button: Button = %SettingsButton
 @onready var _quit_button: Button = %QuitButton
 @onready var _loading_screen: LoadingScreenUI = %LoadingScreenUI
@@ -124,7 +125,7 @@ func _update_title_motion() -> void:
 
 
 func _setup_title_feedback() -> void:
-	for button: Button in [_start_button, _continue_button, _settings_button, _quit_button]:
+	for button: Button in [_start_button, _continue_button, _tutorial_button, _settings_button, _quit_button]:
 		button.focus_entered.connect(_kick_title)
 		button.mouse_entered.connect(_kick_title)
 
@@ -163,14 +164,32 @@ func _close_settings() -> void:
 func _start_game() -> void:
 	if _transitioning:
 		return
+	var run_context := get_node_or_null("/root/RunContext")
+	if run_context != null and run_context.has_method(&"request_standard_game"):
+		run_context.call(&"request_standard_game")
 	if ShiftProgress.start_new_run().is_empty():
 		push_error("A new run could not be saved. Please try again.")
 		return
 	_open_game(INTRO_SCENE_PATH, INTRO_TRANSITION_DURATION_SCALE)
 
+
+func _start_tutorial() -> void:
+	if _transitioning:
+		return
+	var run_context := get_node_or_null("/root/RunContext")
+	if run_context != null and run_context.has_method(&"request_tutorial"):
+		run_context.call(&"request_tutorial")
+	if ShiftProgress.start_new_run().is_empty():
+		push_error("A tutorial run could not be saved. Please try again.")
+		return
+	_open_game()
+
 func _continue_game() -> void:
 	if _transitioning:
 		return
+	var run_context := get_node_or_null("/root/RunContext")
+	if run_context != null and run_context.has_method(&"request_standard_game"):
+		run_context.call(&"request_standard_game")
 	var checkpoint: Dictionary = ShiftProgress.load_checkpoint()
 	if checkpoint.is_empty() or bool(checkpoint.get("completed", false)):
 		return
@@ -194,6 +213,7 @@ func _open_game(
 	_set_menu_buttons_disabled(true)
 	_loading_screen.begin_loading(target_scene_path, transition_duration_scale)
 	if _loading_transition_animation.has_animation(&"loading_transition"):
+		_loading_transition_animation.speed_scale = 1.0 / maxf(transition_duration_scale, 0.01)
 		_loading_transition_animation.play(&"loading_transition")
 
 func _quit_game() -> void:
@@ -204,6 +224,7 @@ func _quit_game() -> void:
 func _set_menu_buttons_disabled(value: bool) -> void:
 	_start_button.disabled = value
 	_continue_button.disabled = value
+	_tutorial_button.disabled = value
 	_settings_button.disabled = value
 	_quit_button.disabled = value
 	_refresh_mirrored_button_art(_continue_button)

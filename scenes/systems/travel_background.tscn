@@ -16,6 +16,8 @@
 [ext_resource type="Texture2D" uid="uid://bncr0xj2vcjt4" path="res://assets/environment/night_layer1.png" id="14_night_1"]
 [ext_resource type="Texture2D" uid="uid://b1fbnk8y3ssb0" path="res://assets/environment/Terowongan.png" id="15_tunnel"]
 [ext_resource type="Shader" path="res://shaders/tunnel_speed_blur.gdshader" id="16_tunnel_blur"]
+[ext_resource type="Shader" path="res://shaders/rain_overlay.gdshader" id="17_rain"]
+[ext_resource type="Shader" uid="uid://dq13hfpieecwx" path="res://shaders/night_atmosphere.gdshader" id="18_fog"]
 
 [sub_resource type="Gradient" id="Gradient_beach"]
 offsets = PackedFloat32Array(0, 0.58, 1)
@@ -72,13 +74,44 @@ shader_parameter/blur_distance = 0.014
 shader_parameter/blur_strength = 0.72
 shader_parameter/gray_strength = 0.58
 
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_weather"]
+seed = 247
+frequency = 0.006
+fractal_octaves = 4
+fractal_lacunarity = 2.1
+fractal_gain = 0.54
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture_weather"]
+noise = SubResource("FastNoiseLite_weather")
+seamless = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_weather_fog"]
+resource_local_to_scene = true
+shader = ExtResource("18_fog")
+shader_parameter/noise_texture = SubResource("NoiseTexture_weather")
+shader_parameter/density = 0.72
+shader_parameter/speed = Vector2(0.035, 0.008)
+shader_parameter/fog_scale = Vector2(0.42, 0.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_weather_rain"]
+resource_local_to_scene = true
+shader = ExtResource("17_rain")
+shader_parameter/rain_color = Color(0.72, 0.86, 1, 0.82)
+shader_parameter/intensity = 0.92
+shader_parameter/density = 0.46
+shader_parameter/fall_speed = 2.35
+shader_parameter/slant = -0.22
+shader_parameter/streak_length = 0.24
+shader_parameter/streak_width = 0.016
+shader_parameter/motion_boost = 1.0
+
 [node name="TravelBackground" type="CanvasLayer" unique_id=2116512518]
 editor_description = "Each route leg selects one Period root. TunnelTransition fully covers period changes, loops at high speed, then reveals the next background."
 layer = -9
 script = ExtResource("1_background")
 sunrise_root_path = NodePath("Periods/Beach")
-afternoon_root_path = NodePath("Periods/City")
-sunset_root_path = NodePath("Periods/Desert")
+afternoon_root_path = NodePath("Periods/Desert")
+sunset_root_path = NodePath("Periods/City")
 night_root_path = NodePath("Periods/NightSky")
 tunnel_panel_path = NodePath("TunnelTransition")
 tunnel_art_path = NodePath("TunnelTransition/TunnelArt")
@@ -95,6 +128,14 @@ tunnel_scroll_cycles_per_second = 1.15
 tunnel_motion_blur_distance = 0.014
 tunnel_motion_blur_strength = 0.72
 tunnel_gray_strength = 0.58
+tunnel_sfx_volume_db = -9.0
+tunnel_sfx_pitch = 1.0
+tunnel_sfx_fade_out_seconds = 0.8
+daytime_rain_chance = 0.38
+night_rain_chance = 0.55
+weather_fade_seconds = 1.0
+rain_opacity = 0.82
+rain_fog_opacity = 0.28
 tunnel_sunrise_tint = Color(0.18, 0.21, 0.25, 0.38)
 tunnel_afternoon_tint = Color(0.27, 0.25, 0.22, 0.34)
 tunnel_sunset_tint = Color(0.25, 0.21, 0.21, 0.4)
@@ -439,6 +480,43 @@ offset_bottom = 315.4593
 mouse_filter = 2
 texture = SubResource("GradientTexture_night")
 expand_mode = 1
+
+[node name="WeatherOverlay" type="Control" parent="."]
+editor_description = "Random per-leg exterior weather. It renders above the travel background but below the train interior, so rain stays outside the windows."
+z_index = 50
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+
+[node name="WeatherFog" type="ColorRect" parent="WeatherOverlay"]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_weather_fog")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -40.0
+offset_right = 80.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.68, 0.76, 0.82, 1)
+
+[node name="WeatherRain" type="ColorRect" parent="WeatherOverlay"]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_weather_rain")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 1)
 
 [node name="TunnelTransition" type="Control" parent="." unique_id=201962027]
 editor_description = "Full-screen period transition drawn above every parallax period layer but still behind the train. The panel always fills the viewport while its artwork races right."

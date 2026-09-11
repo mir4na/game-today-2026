@@ -40,11 +40,23 @@ func _run() -> void:
 	await process_frame
 	var documents: PassengerDocuments = overlay.get_node("PassengerDocumentCenter/PassengerDocumentAnchor/PassengerDocuments")
 	var tray: StampTrayUI = overlay.get_node("StampTrayUI")
+	_check(tray.STATIONS.size() == 4, "Stamp tray must expose only the four usable station stamps.")
+	_check(not tray.STATIONS.has("Eastmere"), "Eastmere must not be available as a ticket stamp.")
+	_check(tray.get_node_or_null("Tray/StampChoices/Eastmere") == null, "Eastmere stamp art must be absent from the tray.")
 	_check(not tray.visible, "Stamp tray must remain hidden while the ID card is active.")
 	documents.show_ticket()
-	await create_timer(0.75).timeout
+	await create_timer(1.25).timeout
 	_check(tray.visible, "Stamp tray must appear when the ticket finishes turning face-up.")
-	_check(is_equal_approx(tray._tray.position.x, tray.collapsed_x), "The tray must initially expose only its STAMP tab.")
+	_check(
+		is_equal_approx(tray._tray.position.x, tray.collapsed_x),
+		"The tray must initially expose only its STAMP tab (current %.2f, expected %.2f)." % [
+			tray._tray.position.x,
+			tray.collapsed_x,
+		]
+	)
+	for station_name: String in tray.STATIONS:
+		var hidden_choice := tray.get_node("Tray/StampChoices/%s" % station_name) as Control
+		_check(not hidden_choice.visible, "Station stamps must remain hidden until the drawer is hovered.")
 
 	tray._dragging = true
 	tray._set_expanded(true)
@@ -56,7 +68,14 @@ func _run() -> void:
 	var baseline_y: float = choice.position.y
 	for station_name: String in tray.STATIONS:
 		var row_choice := tray.get_node("Tray/StampChoices/%s" % station_name) as Control
+		_check(row_choice.visible, "Hovering the drawer must reveal every station stamp.")
 		_check(is_equal_approx(row_choice.position.y, baseline_y), "Station stamps must finish on one shared baseline.")
+		_check(
+			(tray.get_node("Tray/Background") as Control).get_global_rect().encloses(
+				row_choice.get_global_rect()
+			),
+			"Every station stamp must remain within the tray background."
+		)
 	tray._animate_choices_in()
 	await process_frame
 	tray._on_choice_hover(choice, true)

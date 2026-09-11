@@ -1,5 +1,5 @@
 extends SceneTree
-## Verifies five fixed 36-degree clock steps: four day arrivals and Night Service.
+## Verifies five fixed day steps plus the fresh five-minute Night Service dial.
 
 
 func _initialize() -> void:
@@ -11,18 +11,7 @@ func _run() -> void:
 	var hud := load("res://scenes/ui/hud.tscn").instantiate() as GameHUD
 	root.add_child(hud)
 	await process_frame
-	var debug_state: Dictionary = {"requested": false}
-	hud.debug_next_station_requested.connect(func() -> void: debug_state["requested"] = true)
-	hud.set_debug_next_station_available(true)
-	var debug_button := hud.get_node("%DebugNextStationButton") as Button
-	assert(debug_button.visible == OS.is_debug_build(), "Next-station button must only appear in debug builds.")
-	assert(debug_button.get_parent() == hud._clock_panel, "The debug skip button must move with the clock and Next Stop sign.")
-	var main_sign := hud._clock_sign_assembly.get_node("ClockSign") as TextureRect
-	assert(debug_button.size.x < main_sign.size.x, "The attached debug sign must remain smaller than the destination sign.")
-	var normal_style := debug_button.get_theme_stylebox(&"normal") as StyleBoxFlat
-	assert(normal_style.bg_color.is_equal_approx(Color("86735b")), "The skip box must use Clock Sign's sampled panel color.")
-	debug_button.pressed.emit()
-	assert(bool(debug_state.requested) == OS.is_debug_build(), "Debug next-station button must emit only in debug builds.")
+	assert(hud.get_node_or_null("%DebugNextStationButton") == null, "The clock must not contain a Skip Stop button.")
 	hud.set_clock_route_stop_count(5)
 	for step: int in range(6):
 		var progress: float = float(step) / 5.0
@@ -60,14 +49,14 @@ func _run() -> void:
 		is_equal_approx(game._day_travel_clock_progress(1.0), 0.8),
 		"Day travel must stop at 144 degrees and reserve 36 degrees for Night Service."
 	)
-	assert(is_equal_approx(game.night_service_duration_seconds, 180.0), "Night Service must last three minutes.")
+	assert(is_equal_approx(game.night_service_duration_seconds, 300.0), "Night Service must last five minutes.")
 	game._night_service_elapsed_seconds = 0.0
-	assert(is_equal_approx(game._night_service_clock_progress(), 0.8), "Night Service must begin at 144 degrees.")
-	game._night_service_elapsed_seconds = 90.0
-	assert(is_equal_approx(game._night_service_clock_progress(), 0.9), "Half of Night Service must place the clock at 162 degrees.")
-	game._night_service_elapsed_seconds = 180.0
+	assert(is_equal_approx(game._night_service_clock_progress(), 0.0), "Night Service must reset the clock to zero degrees.")
+	game._night_service_elapsed_seconds = 150.0
+	assert(is_equal_approx(game._night_service_clock_progress(), 0.5), "Half of Night Service must place the clock at 90 degrees.")
+	game._night_service_elapsed_seconds = 300.0
 	assert(is_equal_approx(game._night_service_clock_progress(), 1.0), "Night Service must finish at 180 degrees.")
 	game.free()
 	hud.free()
-	print("PASS: clock advances 36 degrees per station, reserves Night Service, and completes the day-to-night coin spin.")
+	print("PASS: day clock uses five divisions and Night Service resets for a full five-minute arc.")
 	quit()

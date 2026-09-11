@@ -19,7 +19,7 @@ const INTRO_PAGES: Array[Texture2D] = [
 
 @export_category("Page Transition")
 @export_range(0.1, 1.0, 0.01) var opening_fade_duration: float = 0.45
-@export_range(0.1, 0.8, 0.01) var page_fade_duration: float = 0.3
+@export_range(0.1, 2.4, 0.01) var page_fade_duration: float = 0.9
 @export_range(0.1, 1.0, 0.01) var closing_fade_duration: float = 0.48
 @export var preload_gameplay_during_intro: bool = true
 @export_category("Interaction")

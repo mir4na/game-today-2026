@@ -10,7 +10,6 @@ const STATIONS: Array[String] = [
 	"Brambleford",
 	"Cinderfield",
 	"Dunmere",
-	"Eastmere",
 ]
 
 const RESULT_TEXTURES := {
@@ -18,12 +17,11 @@ const RESULT_TEXTURES := {
 	"Brambleford": preload("res://assets/ui/Stamp/StampResult_B.png"),
 	"Cinderfield": preload("res://assets/ui/Stamp/StampResult_C.png"),
 	"Dunmere": preload("res://assets/ui/Stamp/StampResult_d.png"),
-	"Eastmere": preload("res://assets/ui/Stamp/StampResult_E.png"),
 }
 
 @export_category("Drawer Motion")
 @export var expanded_x: float = 18.0
-@export var collapsed_x: float = -626.0
+@export var collapsed_x: float = -506.0
 @export_range(0.1, 1.0, 0.01) var drawer_duration: float = 0.34
 @export_range(0.0, 1.0, 0.01) var collapse_delay: float = 0.2
 @export_category("Stamp Motion")
@@ -82,6 +80,8 @@ func configure(ticket_target: Control, already_stamped: bool, is_locked: bool) -
 	for station_name: String in STATIONS:
 		var choice := get_node_or_null("Tray/StampChoices/%s" % station_name) as Control
 		if choice != null:
+			_kill_tween(_choice_tweens.get(choice) as Tween)
+			_choice_tweens.erase(choice)
 			_reset_choice_for_closed_drawer(choice)
 	_expanded = false
 	_set_drawer_x(collapsed_x)
@@ -299,9 +299,10 @@ func _animate_choices_in() -> void:
 			continue
 		_kill_tween(_choice_tweens.get(choice) as Tween)
 		var rest_position: Vector2 = _choice_rest_positions.get(choice, choice.position)
-		choice.position = rest_position + Vector2(0.0, 28.0)
+		choice.position = rest_position
 		choice.scale = Vector2(0.72, 0.72)
 		choice.self_modulate = Color(1.0, 1.0, 1.0, 0.0)
+		choice.show()
 		var tween := create_tween()
 		_choice_tweens[choice] = tween
 		tween.set_parallel(true)
@@ -320,16 +321,18 @@ func _animate_choices_out() -> void:
 		var tween := create_tween()
 		_choice_tweens[choice] = tween
 		tween.set_parallel(true)
-		tween.tween_property(choice, ^"position", rest_position + Vector2(0.0, 16.0), 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tween.tween_property(choice, ^"position", rest_position, 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 		tween.tween_property(choice, ^"scale", Vector2(0.82, 0.82), 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 		tween.tween_property(choice, ^"self_modulate", Color(1.0, 1.0, 1.0, 0.0), 0.12).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tween.chain().tween_callback(choice.hide)
 
 
 func _reset_choice_for_closed_drawer(choice: Control) -> void:
 	var rest_position: Vector2 = _choice_rest_positions.get(choice, choice.position)
-	choice.position = rest_position + Vector2(0.0, 28.0)
+	choice.position = rest_position
 	choice.scale = Vector2(0.72, 0.72)
 	choice.self_modulate = Color(1.0, 1.0, 1.0, 0.0)
+	choice.hide()
 
 
 func _set_drawer_x(value: float) -> void:

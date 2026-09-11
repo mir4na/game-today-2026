@@ -4,7 +4,6 @@ extends CanvasLayer
 
 signal guidebook_requested
 signal service_action_requested
-signal debug_next_station_requested
 signal market_tool_requested(tool_id: StringName)
 signal debug_night_requested
 
@@ -34,6 +33,7 @@ signal debug_night_requested
 @export_range(0.1, 0.8, 0.01) var clock_hover_out_duration: float = 0.24
 @export_range(0.8, 1.0, 0.01) var clock_sign_hidden_y_scale: float = 0.92
 @export_category("Route Briefing")
+@export var route_briefing_enabled: bool = false
 @export_range(1.0, 8.0, 0.25) var route_briefing_hold_seconds: float = 3.0
 @export_range(-16.0, 0.0, 1.0) var route_briefing_attached_y: float = -8.0
 @export_range(0.0, 16.0, 1.0) var route_briefing_overshoot_pixels: float = 8.0
@@ -85,7 +85,6 @@ signal debug_night_requested
 @onready var _debug_night_button: Button = %DebugNightButton
 @onready var _guidebook_button: Button = %GuidebookButton
 @onready var _service_action_button: Button = %ServiceActionButton
-@onready var _debug_next_station_button: Button = %DebugNextStationButton
 @onready var _market_item_bar: HBoxContainer = %MarketItemBar
 @onready var _veil_note_slot: Control = %VeilNoteSlot
 @onready var _radar_slot: Control = %RadarSlot
@@ -138,13 +137,7 @@ func _ready() -> void:
 	_route_banner_rest_scale = _route_briefing_banner.scale
 	_clock_hover_area.mouse_entered.connect(_on_clock_hover_entered)
 	_clock_hover_area.mouse_exited.connect(_on_clock_hover_exited)
-	# Keep the clock lifted while the pointer crosses onto the attached button.
-	# As a later ClockPanel sibling, the button also receives clicks ahead of the
-	# broad hover catcher instead of being occluded by it.
-	_debug_next_station_button.mouse_entered.connect(_on_clock_hover_entered)
-	_debug_next_station_button.mouse_exited.connect(_on_clock_hover_exited)
 	_route_briefing_banner.hide()
-	_debug_next_station_button.visible = false
 	_service_action_button.visible = false
 	set_swiftstep_active(false)
 
@@ -536,11 +529,10 @@ func set_day_hud_visible(value: bool) -> void:
 	# The train minimap remains visible through the night walk.
 
 
-func set_debug_next_station_available(value: bool) -> void:
-	_debug_next_station_button.visible = OS.is_debug_build() and value
-
-
 func show_route_briefing() -> void:
+	if not route_briefing_enabled:
+		_hide_route_briefing(true)
+		return
 	_clock_panel.show()
 	_play_route_briefing()
 
@@ -605,10 +597,6 @@ func _on_debug_night_button_pressed() -> void:
 	if OS.is_debug_build():
 		debug_night_requested.emit()
 
-
-func _on_debug_next_station_button_pressed() -> void:
-	if OS.is_debug_build():
-		debug_next_station_requested.emit()
 
 func set_night_walk_mode() -> void:
 	_clock_panel.show()
@@ -757,10 +745,15 @@ func _hide_route_briefing(immediate: bool) -> void:
 	if immediate:
 		_finish_route_briefing()
 
-func notify(message: String, seconds: float = 3.0) -> void:
+func notify(
+	message: String,
+	seconds: float = 3.0,
+	font_color: Color = Color(0.0, 0.0, 0.0, 1.0)
+) -> void:
 	if is_instance_valid(_notification_tween):
 		_notification_tween.kill()
 	_notification_label.text = message
+	_notification_label.add_theme_color_override(&"font_color", font_color)
 	_notification_panel.visible = true
 	_notification_panel.modulate.a = 0.0
 	_notification_tween = create_tween()

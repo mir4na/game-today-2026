@@ -26,16 +26,19 @@ signal continue_requested
 @export_category("Night Paycheck Copy")
 @export var night_title_text: String = "PAYCHECK"
 @export var night_subtitle_template: String = "NIGHT SHIFT • DAY %d"
-@export var night_souls_caption: String = "SOULS RELEASED"
-@export var night_failed_attempts_caption: String = "RETRY COST"
-@export var night_attempts_caption: String = "TOTAL ATTEMPTS"
-@export var night_route_caption: String = "STATION PATH"
-@export var night_detail_title: String = "RETRY DEDUCTION"
+@export var night_souls_caption: String = "CORRECT ASSIGNMENTS"
+@export var night_information_caption: String = "SOUL RECORDS FOUND"
+@export var night_missing_caption: String = "WRONG / MISSING"
+@export var night_route_caption: String = "ASSIGNMENT RESULT"
+@export var night_detail_title: String = "EARNINGS BREAKDOWN"
 @export var night_net_caption: String = "NIGHT TOTAL"
 @export var night_balance_caption: String = "CURRENT BALANCE"
-@export var night_result_text: String = "NIGHT SHIFT COMPLETE"
-@export var night_payment_template: String = "%d Blessings added after retry deductions."
-@export_multiline var night_attempt_breakdown_template: String = "• %d retry attempt(s) × %d Blessings\n• Reward reduced by %d Blessings."
+@export var night_result_passed_text: String = "NIGHT SHIFT COMPLETE"
+@export var night_result_incomplete_text: String = "NIGHT SHIFT INCOMPLETE"
+@export var night_payment_template: String = "%d Blessings added from Night Service."
+@export_multiline var night_earnings_breakdown_template: String = "• %d correct assignment(s) × %d = %d Blessings\n• %d Soul Record(s) × %d = %d Blessings"
+@export var night_records_template: String = "Records: %s"
+@export var night_no_records_text: String = "Records: none"
 @export_category("Typewriter")
 @export var typewriter_target_paths: Array[NodePath] = []
 @export_range(20.0, 600.0, 5.0) var typewriter_characters_per_second: float = 180.0
@@ -129,30 +132,48 @@ func open_night_report(day: int, soul_total: int, award: Dictionary, balance: in
 	_continue_sent = false
 	_title.text = night_title_text
 	_subtitle.text = night_subtitle_template % day
-	_correct_caption.text = "%s  (%d)" % [night_souls_caption, soul_total]
-	_correct.text = reward_template % int(award.get("base_reward", 0))
-	_wrong_caption.text = night_failed_attempts_caption
-	_wrong.text = deduction_template % int(award.get("attempt_deduction", 0))
-	_anomaly_caption.text = night_attempts_caption
-	_anomaly.text = str(int(award.get("attempt_count", 1)))
+	var correct_count: int = int(award.get("correct_night_dropoffs", 0))
+	var information_count: int = int(award.get("information_found", 0))
+	var missing_count: int = maxi(
+		int(award.get("incorrect_or_missing_assignments", soul_total)),
+		soul_total - information_count
+	)
+	var assignment_succeeded: bool = bool(award.get("assignment_succeeded", false))
+	var paycheck_passed: bool = bool(award.get("passed", assignment_succeeded))
+	_correct_caption.text = "%s  (%d/%d)" % [night_souls_caption, correct_count, soul_total]
+	_correct.text = reward_template % int(award.get("assignment_reward", 0))
+	_wrong_caption.text = night_information_caption
+	_wrong.text = reward_template % int(award.get("information_reward", 0))
+	_anomaly_caption.text = night_missing_caption
+	_anomaly.text = str(missing_count)
 	_anomaly.add_theme_color_override(&"font_color", Color("333340"))
 	_retained_caption.text = night_route_caption
-	_retained.text = "ALIGNED"
+	_retained.text = "ALIGNED" if assignment_succeeded else "INCOMPLETE"
 	_detail_title.text = night_detail_title
-	_breakdown.text = night_attempt_breakdown_template % [
-		int(award.get("failed_attempts", 0)),
-		int(award.get("attempt_rate", 0)),
-		int(award.get("attempt_deduction", 0)),
+	var information_names: Array = award.get("information_names", []) as Array
+	var records_line: String = (
+		night_records_template % ", ".join(PackedStringArray(information_names))
+		if not information_names.is_empty()
+		else night_no_records_text
+	)
+	_breakdown.text = night_earnings_breakdown_template % [
+		correct_count,
+		int(award.get("correct_rate", 0)),
+		int(award.get("assignment_reward", 0)),
+		information_count,
+		int(award.get("information_rate", 0)),
+		int(award.get("information_reward", 0)),
 	]
+	_breakdown.text += "\n" + records_line
 	_breakdown.scroll_to_line(0)
 	_net_caption.text = night_net_caption
 	_net.text = amount_template % int(award.get("earned", 0))
-	_target_caption.text = night_balance_caption
-	_target.text = amount_template % maxi(0, balance)
-	_result.text = night_result_text
-	_result.add_theme_color_override(&"font_color", passed_result_color)
+	_target_caption.text = "REQUIRED TO PASS"
+	_target.text = amount_template % int(award.get("pass_target", maxi(0, balance)))
+	_result.text = night_result_passed_text if paycheck_passed else night_result_incomplete_text
+	_result.add_theme_color_override(&"font_color", passed_result_color if paycheck_passed else failed_result_color)
 	_payment.text = night_payment_template % int(award.get("earned", 0))
-	_continue_hint.text = passed_continue_text
+	_continue_hint.text = passed_continue_text if paycheck_passed else failed_continue_text
 	show()
 	_present()
 	_start_typewriter()

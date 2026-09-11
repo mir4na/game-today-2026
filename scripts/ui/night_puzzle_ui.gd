@@ -244,6 +244,10 @@ func refresh_collected_statements(collected_statements: Dictionary) -> void:
 	_update_assignment_visuals()
 
 
+func get_assignments_snapshot() -> Dictionary:
+	return _assignments.duplicate(true)
+
+
 func request_close() -> void:
 	if not visible or _validating:
 		return

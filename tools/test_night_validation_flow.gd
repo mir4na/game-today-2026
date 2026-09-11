@@ -1,5 +1,5 @@
 extends SceneTree
-## Checks animated station-path validation, retry enforcement, and retry deductions.
+## Checks validation retries, retained investigation progress, and the final paycheck.
 
 const MainScene = preload("res://scenes/main/main.tscn")
 
@@ -47,6 +47,7 @@ func _run() -> void:
 		target.star_pulse_seconds = 0.01
 		target.failure_burst_seconds = 0.01
 
+	game._night_service_elapsed_seconds = 75.0
 	var correct_names: Array = puzzle.correct_station_by_passenger.keys()
 	for passenger_value: Variant in correct_names:
 		var passenger_name: String = str(passenger_value)
@@ -64,13 +65,15 @@ func _run() -> void:
 	var failed_result: Array = await board.validation_finished
 	_check(not bool(failed_result[0]), "Any wrong station must reject the whole night attempt.")
 	_check(int(failed_result[1]) == 1, "The first rejected submission must count as attempt one.")
-	_check(game.state == AfterTheEndGame.GameState.NIGHT, "A rejected station path must restart the playable night investigation.")
+	_check(game.state == AfterTheEndGame.GameState.NIGHT, "A rejected station path must return to the playable investigation.")
 	_check(not board.visible, "The ledger must close after the station path rejects an attempt.")
-	_check(game._collected_departure_statements.is_empty(), "A repeated night shift must require its hidden statements again.")
-	_check(board._assigned_passenger_count() == 0, "A failed night attempt must clear every assignment for a full retry.")
+	_check(
+		game._collected_departure_statements.size() == puzzle.get_assignment_count(),
+		"A rejected route must preserve every Soul Record already found."
+	)
+	_check(game._night_service_elapsed_seconds >= 75.0, "A rejected route must never reset the five-minute timer.")
+	_check(board._assigned_passenger_count() == 0, "A failed submission may clear its board placements for another try.")
 
-	for data: PassengerData in game._get_dead_passenger_data():
-		game._collected_departure_statements[data.short_name] = puzzle.get_statement_for_passenger(data.short_name)
 	game._open_night_puzzle()
 	await process_frame
 	for passenger_value: Variant in puzzle.correct_station_by_passenger:
@@ -86,23 +89,25 @@ func _run() -> void:
 	await process_frame
 	_check(game.state == AfterTheEndGame.GameState.COMPLETE, "A correct retry must enter the night paycheck state.")
 	_check(game._shift_report_ui.visible, "The existing scene-authored paycheck must appear after a correct station path.")
-	_check(board.visible, "The completed station path must remain visible behind the night paycheck.")
+	_check(not board.visible, "The completed station path must close beneath the final paycheck.")
 	_check(game.get_node_or_null("ModalLayer/DepartureSequenceUI") == null, "The obsolete assignment result screen must be removed.")
 	var award: Dictionary = game._night_blessing_award
-	_check(int(award.get("failed_attempts", -1)) == 1, "Only failed attempts may reduce the reward.")
 	_check(
-		int(award.get("base_reward", -1)) == puzzle.get_assignment_count() * 100,
-		"Every correctly released soul must contribute 100 Blessings."
+		int(award.get("assignment_reward", -1)) == puzzle.get_assignment_count() * 100,
+		"Every correct assignment must contribute 100 Blessings."
 	)
-	_check(int(award.get("attempt_deduction", -1)) == 100, "Two submissions must cost one retry penalty.")
+	_check(
+		int(award.get("information_reward", -1)) == puzzle.get_assignment_count() * 50,
+		"Every Soul Record found must contribute 50 Blessings."
+	)
 	_check(
 		int(award.get("earned", -1))
-		== int(award.get("base_reward", 0)) - int(award.get("attempt_deduction", 0)),
-		"Night earnings must equal the base reward minus accumulated retry deductions."
+		== int(award.get("assignment_reward", 0)) + int(award.get("information_reward", 0)),
+		"Night earnings must combine correct assignments and gathered information."
 	)
 	_check(
-		(game._shift_report_ui.get_node("%WrongCaption") as Label).text == "RETRY COST",
-		"The night paycheck must display the retry deduction breakdown."
+		(game._shift_report_ui.get_node("%WrongCaption") as Label).text == "SOUL RECORDS FOUND",
+		"The night paycheck must display the Soul Record reward."
 	)
 	_check(
 		(game._shift_report_ui.get_node("%Title") as Label).text == "PAYCHECK",
@@ -110,19 +115,12 @@ func _run() -> void:
 	)
 	var floor_test := MarketToolState.new()
 	floor_test.blessings_per_correct_night_dropoff = 100
-	floor_test.blessings_per_night_attempt = 100
-	var first_try_award: Dictionary = floor_test.award_night_blessings(3, 1)
-	_check(int(first_try_award.get("attempt_deduction", -1)) == 0, "The first night attempt must not deduct Blessings.")
-	_check(int(first_try_award.get("earned", -1)) == 300, "A first-try three-soul night should award the full 300 Blessings.")
-
-	floor_test = MarketToolState.new()
-	floor_test.blessings_per_correct_night_dropoff = 100
-	floor_test.blessings_per_night_attempt = 100
-	var floor_award: Dictionary = floor_test.award_night_blessings(3, 16)
-	_check(int(floor_award.get("base_reward", -1)) == 300, "Three released souls must be worth 300 Blessings.")
-	_check(int(floor_award.get("earned", -1)) == 0, "Night reward must never fall below zero after many failed attempts.")
+	floor_test.blessings_per_night_statement = 50
+	var partial_award: Dictionary = floor_test.award_night_blessings(2, 1, 3, ["Mira"])
+	_check(int(partial_award.get("earned", -1)) == 250, "Two assignments and one record must award 250 Blessings.")
+	_check(not bool(partial_award.get("assignment_succeeded", true)), "A partial assignment must be reported as incomplete.")
 
 	game.free()
 	if _failures == 0:
-		print("PASS: night station-path validation, retry, and paycheck deductions.")
+		print("PASS: night validation preserves time and records, then pays for assignments and information.")
 	quit(1 if _failures > 0 else 0)
