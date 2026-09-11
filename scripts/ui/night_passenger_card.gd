@@ -21,6 +21,12 @@ var _drag_ghost: NightPassengerDragPreview
 @onready var _portrait_name_label: Label = %PortraitName
 @onready var _statement_label: Label = %StatementLabel
 @onready var _assignment_label: Label = %AssignmentLabel
+@onready var _hover_outline: Panel = %HoverOutline
+
+
+func _ready() -> void:
+	mouse_entered.connect(_set_hovered.bind(true))
+	mouse_exited.connect(_set_hovered.bind(false))
 
 
 func configure(data: PassengerData, statement: String) -> void:
@@ -51,6 +57,11 @@ func set_assignment(station: String) -> void:
 	assigned_station = station
 	_assignment_label.text = station.to_upper() if not station.is_empty() else "UNASSIGNED"
 	_assigned_overlay.visible = not station.is_empty()
+
+
+func _set_hovered(hovered: bool) -> void:
+	if is_instance_valid(_hover_outline):
+		_hover_outline.visible = hovered
 
 
 func _get_drag_data(_at_position: Vector2) -> Variant:

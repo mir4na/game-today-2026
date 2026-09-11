@@ -30,16 +30,19 @@
 [ext_resource type="Texture2D" uid="uid://baaxiq71pdhcv" path="res://assets/ui/guidebook/newspaper.png" id="25_newspaper"]
 [ext_resource type="Texture2D" uid="uid://dybtwy50qx4b6" path="res://assets/ui/guidebook/inspect (1).png" id="27_inspect_art"]
 [ext_resource type="Texture2D" uid="uid://dq5ufjh0bc610" path="res://assets/ui/guidebook/day 1 (1).png" id="28_day_art"]
+[ext_resource type="Texture2D" uid="uid://cdvwyl2srvvpg" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 14-41-27.png" id="28_jbx2b"]
+[ext_resource type="Texture2D" uid="uid://4ku3hrxxjh3u" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 14-43-35-1.png" id="29_qvavt"]
 [ext_resource type="Texture2D" uid="uid://bg5km7i8p8o1r" path="res://assets/ui/guidebook/paycheck 1 (1).png" id="30_paycheck_art"]
 [ext_resource type="Texture2D" uid="uid://das3t3h8hbe6c" path="res://assets/ui/guidebook/night 1 (1).png" id="31_night_art"]
-[ext_resource type="Texture2D" uid="uid://cvsli236qi2rk" path="res://assets/ui/id_card.png" id="32_id_card"]
-[ext_resource type="Texture2D" uid="uid://lkud6gnp6bf3" path="res://assets/ui/passenger_ticket.png" id="33_ticket"]
+[ext_resource type="Texture2D" uid="uid://cayo8tkkmtvq8" path="res://assets/characters/Where Do You Belong_/NPC9.png" id="33_qvavt"]
+[ext_resource type="Texture2D" uid="uid://cu0rsf2u3vtsp" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 11-22-24.png" id="33_wdqcv"]
+[ext_resource type="Texture2D" uid="uid://du1umrmwigf0k" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 12-04-23-1.png" id="35_jbx2b"]
+[ext_resource type="Texture2D" uid="uid://fi8341eivf3m" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 12-04-43.png" id="36_qvavt"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_button"]
 
 [node name="GuidebookUI" type="Control" unique_id=29174819]
 process_mode = 3
-visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -233,6 +236,7 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="SectionTabs" type="Control" parent="Center/BookStage" unique_id=1388151723]
+unique_name_in_owner = true
 editor_description = "Artwork and invisible hit areas for Today's Service, Anomaly List, and Rules."
 anchors_preset = 0
 offset_left = 1000.0
@@ -395,6 +399,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 8.71235
+offset_top = -0.43834525
+offset_right = 8.712341
+offset_bottom = -0.4383545
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -456,6 +464,7 @@ scroll_active = false
 
 [node name="TodayLayout" type="Control" parent="Center/BookStage/Page" unique_id=921652152]
 unique_name_in_owner = true
+visible = false
 anchors_preset = 0
 offset_left = 56.0
 offset_top = 122.0
@@ -551,27 +560,97 @@ theme_override_font_sizes/font_size = 17
 text = "0 Blessings remaining for today's threshold."
 autowrap_mode = 2
 
-[node name="TodayProgressLabel" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=760986733]
-unique_name_in_owner = true
+[node name="TodayBoardedCaption" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010240]
 layout_mode = 0
 offset_left = 488.32874
 offset_top = 259.7534
+offset_right = 684.0
+offset_bottom = 281.7534
+theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 13
+text = "BOARDED TODAY"
+
+[node name="TodayBoardedValue" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010241]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 488.32874
+offset_top = 281.7534
+offset_right = 684.0
+offset_bottom = 335.7534
+theme_override_colors/font_color = Color(0.25, 0.205, 0.18, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 30
+text = "0"
+
+[node name="TodayDroppedCaption" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010242]
+layout_mode = 0
+offset_left = 688.0
+offset_top = 259.7534
 offset_right = 884.2192
-offset_bottom = 465.7534
-theme_override_colors/font_color = Color(0.31, 0.255, 0.22, 1)
-theme_override_font_sizes/font_size = 16
-text = "Boarded today
-0
+offset_bottom = 281.7534
+theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 13
+text = "DROPPED OFF"
 
-Dropped off
-0
+[node name="TodayDroppedValue" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010243]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 688.0
+offset_top = 281.7534
+offset_right = 884.2192
+offset_bottom = 335.7534
+theme_override_colors/font_color = Color(0.25, 0.205, 0.18, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 30
+text = "0"
 
-Currently aboard
-0
+[node name="TodayAboardCaption" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010244]
+layout_mode = 0
+offset_left = 488.32874
+offset_top = 339.7534
+offset_right = 684.0
+offset_bottom = 361.7534
+theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 13
+text = "CURRENTLY ABOARD"
 
-Marked for next stop
-0"
-autowrap_mode = 2
+[node name="TodayAboardValue" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010245]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 488.32874
+offset_top = 361.7534
+offset_right = 684.0
+offset_bottom = 415.7534
+theme_override_colors/font_color = Color(0.25, 0.205, 0.18, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 30
+text = "0"
+
+[node name="TodayStampedCaption" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010246]
+layout_mode = 0
+offset_left = 688.0
+offset_top = 339.7534
+offset_right = 884.2192
+offset_bottom = 361.7534
+theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 13
+text = "MARKED NEXT STOP"
+
+[node name="TodayStampedValue" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010247]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 688.0
+offset_top = 361.7534
+offset_right = 884.2192
+offset_bottom = 415.7534
+theme_override_colors/font_color = Color(0.25, 0.205, 0.18, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 30
+text = "0"
 
 [node name="NightHeading" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=618711841]
 layout_mode = 0
@@ -633,24 +712,99 @@ offset_bottom = 185.64366
 theme_override_colors/font_color = Color(0.48, 0.25, 0.22, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 15
-text = "STOPS COMPLETED  0 / 4"
+text = "STOPS COMPLETED  0 / 3"
 
-[node name="TodayServiceMeta" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=26978015]
+[node name="TodayMetaDayCaption" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010230]
+layout_mode = 0
+offset_left = 212.98631
+offset_top = 287.04108
+offset_right = 270.21918
+offset_bottom = 313.04108
+theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 13
+text = "DAY"
+
+[node name="TodayMetaDay" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010231]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 204.76714
-offset_top = 278.93152
-offset_right = 352.2908
-offset_bottom = 380.93152
-scale = Vector2(1.5, 1.5)
-theme_override_colors/font_color = Color(0.31, 0.255, 0.22, 1)
-theme_override_font_sizes/font_size = 17
-text = "Day 1
-Train ATE-000
-Service date 
-07 JUN 2026
-Day code 260607"
-autowrap_mode = 2
+offset_left = 272.21918
+offset_top = 283.04108
+offset_right = 368.21918
+offset_bottom = 313.04108
+theme_override_colors/font_color = Color(0.55, 0.23, 0.2, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 19
+text = "1"
+
+[node name="TodayMetaTrainCaption" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010232]
+layout_mode = 0
+offset_left = 212.98631
+offset_top = 317.04108
+offset_right = 270.21918
+offset_bottom = 343.04108
+theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 13
+text = "TRAIN"
+
+[node name="TodayMetaTrain" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010233]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 272.21918
+offset_top = 313.04108
+offset_right = 388.21918
+offset_bottom = 343.04108
+theme_override_colors/font_color = Color(0.55, 0.23, 0.2, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 19
+text = "ATE-000"
+
+[node name="TodayMetaDateCaption" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010234]
+layout_mode = 0
+offset_left = 212.98631
+offset_top = 347.04108
+offset_right = 270.21918
+offset_bottom = 373.04108
+theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 13
+text = "DATE"
+
+[node name="TodayMetaDate" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010235]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 272.21918
+offset_top = 343.04108
+offset_right = 408.21918
+offset_bottom = 373.04108
+theme_override_colors/font_color = Color(0.55, 0.23, 0.2, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 19
+text = "07 JUN 2026"
+
+[node name="TodayMetaCodeCaption" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010236]
+layout_mode = 0
+offset_left = 212.98631
+offset_top = 377.04108
+offset_right = 270.21918
+offset_bottom = 403.04108
+theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 13
+text = "CODE"
+
+[node name="TodayMetaCode" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010237]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 272.21918
+offset_top = 373.04108
+offset_right = 388.21918
+offset_bottom = 403.04108
+theme_override_colors/font_color = Color(0.55, 0.23, 0.2, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 19
+text = "260607"
 
 [node name="RulesLayout" type="Control" parent="Center/BookStage/Page" unique_id=2129324942]
 unique_name_in_owner = true
@@ -671,18 +825,6 @@ offset_bottom = 136.73972
 scale = Vector2(1.8, 1.8)
 mouse_filter = 2
 texture = ExtResource("27_inspect_art")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="RulesNightArt" type="TextureRect" parent="Center/BookStage/Page/RulesLayout" unique_id=263283956]
-visible = false
-layout_mode = 0
-offset_left = 758.1918
-offset_top = 343.31506
-offset_right = 898.1918
-offset_bottom = 483.31503
-mouse_filter = 2
-texture = ExtResource("31_night_art")
 expand_mode = 1
 stretch_mode = 5
 
@@ -730,19 +872,6 @@ offset_bottom = 484.41095
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
 theme_override_font_sizes/font_size = 19
 text = "Do not stamp suspicious passengers. They remain aboard until the end."
-autowrap_mode = 2
-
-[node name="RulesNightText" type="Label" parent="Center/BookStage/Page/RulesLayout" unique_id=1190846331]
-visible = false
-layout_mode = 0
-offset_left = 522.5753
-offset_top = 357.01367
-offset_right = 738.5753
-offset_bottom = 503.01367
-theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
-theme_override_font_sizes/font_size = 16
-text = "NIGHT SERVICE
-Find Departure Statements in each Soul Record, then assign every soul to the correct station path. Every assignment must be correct."
 autowrap_mode = 2
 
 [node name="InspectTitle" type="Label" parent="Center/BookStage/Page/RulesLayout" unique_id=741564778]
@@ -844,10 +973,240 @@ text = "+30  Correct passenger drop-off
 −40  Anomaly wrongly stamped"
 autowrap_mode = 2
 
+[node name="RulesControlsTitle" type="Label" parent="Center/BookStage/Page/RulesLayout" unique_id=770010220]
+layout_mode = 0
+offset_left = 563.67126
+offset_top = 325.50684
+offset_right = 795.17804
+offset_bottom = 360.50684
+theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 24
+text = "BASIC CONTROLS"
+autowrap_mode = 2
+
+[node name="RulesControlsBody" type="Label" parent="Center/BookStage/Page/RulesLayout" unique_id=770010221]
+layout_mode = 0
+offset_left = 489.69864
+offset_top = 373.45203
+offset_right = 790.6211
+offset_bottom = 458.0456
+scale = Vector2(1.5, 1.5)
+theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
+theme_override_font_sizes/font_size = 15
+text = "A/D — Walk             E — Interact
+TAB — Guidebook     ESC — Pause
+   "
+autowrap_mode = 2
+
+[node name="RulesNightArt" type="TextureRect" parent="Center/BookStage/Page/RulesLayout" unique_id=263283956]
+visible = false
+layout_mode = 0
+offset_left = 758.1918
+offset_top = 343.31506
+offset_right = 898.1918
+offset_bottom = 483.31503
+mouse_filter = 2
+texture = ExtResource("31_night_art")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RulesNightText" type="Label" parent="Center/BookStage/Page/RulesLayout" unique_id=1190846331]
+visible = false
+layout_mode = 0
+offset_left = 522.5753
+offset_top = 357.01367
+offset_right = 738.5753
+offset_bottom = 503.01367
+theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
+theme_override_font_sizes/font_size = 16
+text = "NIGHT SERVICE
+Find Departure Statements in each Soul Record, then assign every soul to the correct station path. Every assignment must be correct."
+autowrap_mode = 2
+
+[node name="NightLayout" type="Control" parent="Center/BookStage/Page" unique_id=770010200]
+unique_name_in_owner = true
+editor_description = "Night shift single page. Scene-authored copy of the day rules; edit these nodes to diverge the night shift wording."
+visible = false
+anchors_preset = 0
+offset_left = 56.0
+offset_top = 122.0
+offset_right = 940.0
+offset_bottom = 592.0
+mouse_filter = 2
+
+[node name="NightInspectArt" type="TextureRect" parent="Center/BookStage/Page/NightLayout" unique_id=770010201]
+layout_mode = 0
+offset_left = 692.43835
+offset_top = -110.109604
+offset_right = 832.43835
+offset_bottom = 29.890411
+scale = Vector2(1.8, 1.8)
+mouse_filter = 2
+texture = ExtResource("31_night_art")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NightPenalties" type="TextureRect" parent="Center/BookStage/Page/NightLayout" unique_id=770010203]
+layout_mode = 0
+offset_left = 426.68494
+offset_top = 102.21918
+offset_right = 566.68494
+offset_bottom = 242.21918
+scale = Vector2(1.8, 1.8)
+mouse_filter = 2
+texture = ExtResource("25_8ejn2")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NightAnomaliesDescription" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010205]
+layout_mode = 0
+offset_left = 476.0
+offset_top = 20.02739
+offset_right = 702.02734
+offset_bottom = 109.02739
+theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
+theme_override_font_sizes/font_size = 20
+text = "Use your clues, solve it, and place every soul in the correct station."
+autowrap_mode = 2
+
+[node name="NightInspectTitle" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010206]
+layout_mode = 0
+offset_left = 215.72601
+offset_top = 46.054764
+offset_right = 436.274
+offset_bottom = 97.05476
+theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 24
+text = "CHECK THE STATION ROUTE"
+autowrap_mode = 2
+
+[node name="NightInspectDescription" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010207]
+layout_mode = 0
+offset_left = 215.72603
+offset_top = 110.43834
+offset_right = 433.53424
+offset_bottom = 191.43835
+theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
+theme_override_fonts/font = ExtResource("25_dlivy")
+theme_override_font_sizes/font_size = 17
+text = "Look at the map and learn the route. This will help you in the next steps."
+autowrap_mode = 2
+
+[node name="NightDropTitle" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010208]
+layout_mode = 0
+offset_left = 89.698654
+offset_top = 207.69861
+offset_right = 288.32874
+offset_bottom = 231.69861
+theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 24
+text = "FIND THE CLUE"
+autowrap_mode = 2
+
+[node name="NightDropDescription" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010210]
+layout_mode = 0
+offset_left = -18.520548
+offset_top = 441.9452
+offset_right = 444.49313
+offset_bottom = 519.9452
+theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
+theme_override_font_sizes/font_size = 20
+text = "Inspect every soul and find the hidden statement. Use the statement as a clue to finish your shift."
+autowrap_mode = 2
+
+[node name="NightAnomaliesTitle" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010211]
+layout_mode = 0
+offset_left = 470.52054
+offset_top = -21.068504
+offset_right = 712.98627
+offset_bottom = 68.93156
+theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 28
+text = "PASS THE SHIFT!"
+autowrap_mode = 2
+
+[node name="NightPenaltiesTitle" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010212]
+layout_mode = 0
+offset_left = 673.2602
+offset_top = 157.01369
+offset_right = 836.27386
+offset_bottom = 208.01369
+theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 24
+text = "REWARD & PENALTY"
+autowrap_mode = 2
+
+[node name="NightRightText2" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010213]
+layout_mode = 0
+offset_left = 671.89044
+offset_top = 218.65752
+offset_right = 880.5312
+offset_bottom = 310.65753
+scale = Vector2(1.3, 1.3)
+theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
+theme_override_font_sizes/font_size = 16
+text = "+100  Every correct soul
+−100  Every wrong try
+
+You get paid only if you finish the shift!"
+autowrap_mode = 2
+
+[node name="NightControlsTitle" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010222]
+layout_mode = 0
+offset_left = 578.7398
+offset_top = 374.82184
+offset_right = 802.0274
+offset_bottom = 409.82187
+theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
+theme_override_fonts/font = ExtResource("21_body_bold")
+theme_override_font_sizes/font_size = 24
+text = "BASIC CONTROLS"
+autowrap_mode = 2
+
+[node name="NightControlsBody" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010223]
+layout_mode = 0
+offset_left = 511.6164
+offset_top = 425.50677
+offset_right = 912.61646
+offset_bottom = 530.50684
+theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
+theme_override_font_sizes/font_size = 22
+text = "A/D — Walk             E — Interact
+TAB — Guidebook     ESC — Pause"
+autowrap_mode = 2
+
+[node name="NightInspectArt2" type="TextureRect" parent="Center/BookStage/Page/NightLayout" unique_id=1517805876]
+layout_mode = 0
+offset_left = -17.150635
+offset_top = 7.6986256
+offset_right = 122.849304
+offset_bottom = 147.69862
+scale = Vector2(1.5, 1.5)
+mouse_filter = 2
+texture = ExtResource("28_jbx2b")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NightInspectArt3" type="TextureRect" parent="Center/BookStage/Page/NightLayout" unique_id=669260020]
+layout_mode = 0
+offset_left = 22.575336
+offset_top = 198.10959
+offset_right = 247.50674
+offset_bottom = 381.67126
+scale = Vector2(1.5, 1.5)
+mouse_filter = 2
+texture = ExtResource("29_qvavt")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="AnomalyList" type="Control" parent="Center/BookStage/Page" unique_id=637261252]
 unique_name_in_owner = true
 editor_description = "Scene-based Anomaly Signs spread. Adjust each GuidebookAnomalyEntry instance and its Photo settings here."
-visible = false
 anchors_preset = 0
 offset_left = 56.0
 offset_top = 122.0
@@ -902,18 +1261,16 @@ position = Vector2(69, 40)
 scale = Vector2(0.23121387, 0.23121387)
 
 [node name="Photo" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/Shadowless/PhotoFrame/PhotoClip/PhotoContent" index="0" unique_id=328331925]
-visible = true
 position = Vector2(0, 31.993017)
 scale = Vector2(1, 1.1849307)
 texture = ExtResource("23_shadowless")
 
-[node name="Placeholder" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/Shadowless/PhotoFrame/PhotoClip" index="1" unique_id=1733963593]
-visible = false
-
 [node name="Heading" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/Shadowless/Text" parent_id_path=PackedInt32Array(920499715, 242403726) index="0" unique_id=1091116954]
+theme_override_font_sizes/font_size = 22
 text = "SHADOWLESS"
 
 [node name="Description" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/Shadowless/Text" parent_id_path=PackedInt32Array(920499715, 242403726) index="1" unique_id=1199178315]
+theme_override_font_sizes/font_size = 18
 text = "No shadow follows the passenger."
 
 [node name="PortraitMismatch" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries" unique_id=1524288881 instance=ExtResource("3_entry")]
@@ -925,16 +1282,18 @@ offset_right = 420.0
 offset_bottom = 247.47946
 heading = "PORTRAIT MISMATCH"
 description = "The ID portrait and passenger do not match."
-photo = ExtResource("32_id_card")
+photo = ExtResource("33_wdqcv")
 photo_side = 1
 photo_frame_size = Vector2(150, 90)
 photo_offset = Vector2(0, -10)
 
 [node name="Heading" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/Text" parent_id_path=PackedInt32Array(1524288881, 242403726) index="0" unique_id=1091116954]
+theme_override_font_sizes/font_size = 22
 text = "PORTRAIT MISMATCH"
 horizontal_alignment = 2
 
 [node name="Description" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/Text" parent_id_path=PackedInt32Array(1524288881, 242403726) index="1" unique_id=1199178315]
+theme_override_font_sizes/font_size = 18
 text = "The ID portrait and passenger do not match."
 horizontal_alignment = 2
 
@@ -947,14 +1306,19 @@ custom_minimum_size = Vector2(138, 78)
 
 [node name="PhotoContent" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/PhotoFrame/PhotoClip" index="0" unique_id=943558789]
 position = Vector2(69, 29)
-scale = Vector2(0.084455326, 0.084455326)
+scale = Vector2(0.22402598, 0.22402598)
 
-[node name="Photo" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/PhotoFrame/PhotoClip/PhotoContent" index="0" unique_id=328331925]
-visible = true
-texture = ExtResource("32_id_card")
+[node name="PhotoB" type="Sprite2D" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/PhotoFrame/PhotoClip/PhotoContent" index="0" unique_id=771854729]
+editor_description = "Second static photo for two-image evidence. Pick a texture; it stays where placed."
+texture_filter = 1
+position = Vector2(-210.16403, 166.87128)
+scale = Vector2(-1, 1)
+texture = ExtResource("33_qvavt")
 
-[node name="Placeholder" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/PhotoFrame/PhotoClip" index="1" unique_id=1733963593]
-visible = false
+[node name="Photo" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/PhotoFrame/PhotoClip/PhotoContent" index="1" unique_id=328331925]
+position = Vector2(150.60617, 69.03522)
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("33_wdqcv")
 
 [node name="NewspaperDeath" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries" unique_id=1716115659 instance=ExtResource("3_entry")]
 editor_description = "Free-positioned anomaly section. Adjust offsets to move this section; uses the same clipped-photo setup as newspaper-style pictures."
@@ -981,18 +1345,16 @@ position = Vector2(69, 40)
 scale = Vector2(0.08560311, 0.08560311)
 
 [node name="Photo" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/NewspaperDeath/PhotoFrame/PhotoClip/PhotoContent" index="0" unique_id=328331925]
-visible = true
 position = Vector2(52.168186, 46.80938)
 scale = Vector2(1.0579969, 1.086364)
 texture = ExtResource("25_newspaper")
 
-[node name="Placeholder" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/NewspaperDeath/PhotoFrame/PhotoClip" index="1" unique_id=1733963593]
-visible = false
-
 [node name="Heading" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/NewspaperDeath/Text" parent_id_path=PackedInt32Array(1716115659, 242403726) index="0" unique_id=1091116954]
+theme_override_font_sizes/font_size = 22
 text = "NEWSPAPER DEATH"
 
 [node name="Description" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/NewspaperDeath/Text" parent_id_path=PackedInt32Array(1716115659, 242403726) index="1" unique_id=1199178315]
+theme_override_font_sizes/font_size = 18
 text = "A death notice names this passenger."
 
 [node name="RightPageEntries" type="Control" parent="Center/BookStage/Page/AnomalyList/Entries" unique_id=987178345]
@@ -1026,18 +1388,16 @@ position = Vector2(69, 39)
 scale = Vector2(0.22873901, 0.22873901)
 
 [node name="Photo" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/UnlistedDestination/PhotoFrame/PhotoClip/PhotoContent" index="0" unique_id=328331925]
-visible = true
 position = Vector2(101.80908, 35.932495)
 scale = Vector2(1.4, 1.4)
 texture = ExtResource("24_unlisted")
 
-[node name="Placeholder" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/UnlistedDestination/PhotoFrame/PhotoClip" index="1" unique_id=1733963593]
-visible = false
-
 [node name="Heading" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/UnlistedDestination/Text" parent_id_path=PackedInt32Array(765249923, 242403726) index="0" unique_id=1091116954]
+theme_override_font_sizes/font_size = 22
 text = "UNLISTED DESTINATION"
 
 [node name="Description" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/UnlistedDestination/Text" parent_id_path=PackedInt32Array(765249923, 242403726) index="1" unique_id=1199178315]
+theme_override_font_sizes/font_size = 18
 text = "The destination is not on today's route."
 
 [node name="TimeInvalidTicket" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries" unique_id=216565996 instance=ExtResource("3_entry")]
@@ -1049,16 +1409,19 @@ offset_right = 364.0
 offset_bottom = 250.08221
 heading = "TIME-INVALID TICKET"
 description = "The ticket date or day code is wrong."
-photo = ExtResource("33_ticket")
+photo = ExtResource("35_jbx2b")
+photo_secondary = ExtResource("36_qvavt")
 photo_side = 1
 photo_frame_size = Vector2(150, 90)
 photo_offset = Vector2(-10, -2)
 
 [node name="Heading" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/Text" parent_id_path=PackedInt32Array(216565996, 242403726) index="0" unique_id=1091116954]
+theme_override_font_sizes/font_size = 22
 text = "TIME-INVALID TICKET"
 horizontal_alignment = 2
 
 [node name="Description" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/Text" parent_id_path=PackedInt32Array(216565996, 242403726) index="1" unique_id=1199178315]
+theme_override_font_sizes/font_size = 18
 text = "The ticket date or day code is wrong."
 horizontal_alignment = 2
 
@@ -1071,14 +1434,19 @@ custom_minimum_size = Vector2(138, 78)
 
 [node name="PhotoContent" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/PhotoFrame/PhotoClip" index="0" unique_id=943558789]
 position = Vector2(59, 37)
-scale = Vector2(0.0942029, 0.0942029)
+scale = Vector2(0.18302387, 0.18302387)
 
 [node name="Photo" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/PhotoFrame/PhotoClip/PhotoContent" index="0" unique_id=328331925]
-visible = true
-texture = ExtResource("33_ticket")
+position = Vector2(-73.27411, -48.27603)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("35_jbx2b")
 
-[node name="Placeholder" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/PhotoFrame/PhotoClip" index="1" unique_id=1733963593]
-visible = false
+[node name="PhotoB" type="Sprite2D" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/PhotoFrame/PhotoClip/PhotoContent" index="1" unique_id=771854728]
+editor_description = "Second static photo for two-image evidence. Pick a texture; it stays where placed."
+texture_filter = 1
+position = Vector2(-28.366348, 303.5008)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("36_qvavt")
 
 [node name="Clip" type="TextureRect" parent="Center/BookStage" unique_id=1818967348]
 unique_name_in_owner = true

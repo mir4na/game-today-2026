@@ -15,23 +15,24 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
 [node name="NightMarketItemSlot" type="Control" unique_id=1129906588]
-custom_minimum_size = Vector2(128, 132)
+editor_description = "Scene-based HUD item slot. Reposition Background/Icon/AmountLabel/NamePlate here; script only fills count/name and handles clicks."
+custom_minimum_size = Vector2(148, 150)
 layout_mode = 3
 anchors_preset = 0
-offset_right = 128.0
-offset_bottom = 132.0
+offset_right = 148.0
+offset_bottom = 150.0
 mouse_filter = 1
 theme = ExtResource("2_theme")
 script = ExtResource("1_script")
 
 [node name="Background" type="TextureRect" parent="." unique_id=1812476632]
+texture_filter = 1
 unique_name_in_owner = true
-visible = false
 layout_mode = 0
-offset_left = 6.0
-offset_top = 4.0
-offset_right = 122.0
-offset_bottom = 120.0
+offset_left = 7.0
+offset_top = 0.0
+offset_right = 141.0
+offset_bottom = 134.0
 mouse_filter = 2
 texture = ExtResource("4_p3rbs")
 expand_mode = 1
@@ -53,12 +54,13 @@ theme_override_styles/hover = SubResource("StyleBox_transparent")
 theme_override_styles/disabled = SubResource("StyleBox_transparent")
 
 [node name="Icon" type="TextureRect" parent="." unique_id=771861680]
+texture_filter = 1
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 16.0
-offset_top = 12.0
-offset_right = 112.0
-offset_bottom = 108.0
+offset_left = 31.0
+offset_top = 24.0
+offset_right = 117.0
+offset_bottom = 110.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -66,25 +68,25 @@ stretch_mode = 5
 [node name="AmountLabel" type="Label" parent="." unique_id=1619402339]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 88.0
-offset_top = -1.0
-offset_right = 128.0
-offset_bottom = 27.0
+offset_left = 102.0
+offset_top = 2.0
+offset_right = 146.0
+offset_bottom = 34.0
 theme_override_colors/font_color = Color(0.92941177, 0.89411765, 0.85490197, 1)
 theme_override_colors/font_outline_color = Color(0.20784314, 0.20784314, 0.2509804, 1)
 theme_override_constants/outline_size = 2
 theme_override_fonts/font = ExtResource("5_csyhk")
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 text = "×0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="NamePlate" type="PanelContainer" parent="."]
 layout_mode = 0
-offset_left = 5.0
-offset_top = 112.0
-offset_right = 123.0
-offset_bottom = 132.0
+offset_left = 18.0
+offset_top = 125.0
+offset_right = 130.0
+offset_bottom = 148.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBox_name_plate")
 

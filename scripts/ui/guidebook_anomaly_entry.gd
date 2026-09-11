@@ -18,6 +18,12 @@ enum PhotoFit { COVER, CONTAIN, MANUAL }
 	set(value):
 		photo = value
 		_refresh()
+## Optional second photo. Applied to a Sprite2D named "PhotoB" under
+## PhotoFrame/PhotoClip/PhotoContent when such a node exists.
+@export var photo_secondary: Texture2D:
+	set(value):
+		photo_secondary = value
+		_refresh()
 @export var allow_manual_photo_content: bool = true:
 	set(value):
 		allow_manual_photo_content = value
@@ -52,7 +58,81 @@ enum PhotoFit { COVER, CONTAIN, MANUAL }
 		_refresh()
 
 func _ready() -> void:
+	# Adopt runs in the editor too: @tool _refresh() on scene-open would
+	# otherwise snap nested arrangements back to stale exports before play.
+	_adopt_scene_state()
 	_refresh()
+
+
+## Whatever is arranged directly on the scene wins at runtime: texture,
+## frame size, copy, offset, rotation, and scale are read back into the
+## exports before the layout pass, so the editor view and the game match.
+## (Export edits already propagate to the nested nodes live via @tool.)
+func _adopt_scene_state() -> void:
+	_adopt_scene_photo()
+	var photo_frame := get_node_or_null(^"PhotoFrame") as Control
+	if photo_frame != null and not photo_frame.custom_minimum_size.is_equal_approx(photo_frame_size):
+		photo_frame_size = photo_frame.custom_minimum_size
+	var heading_label := get_node_or_null(^"Text/Heading") as Label
+	if heading_label != null and heading_label.text != heading:
+		heading = heading_label.text
+	var description_label := get_node_or_null(^"Text/Description") as Label
+	if description_label != null and description_label.text != description:
+		description = description_label.text
+	_adopt_scene_content_transform()
+
+
+func _adopt_scene_content_transform() -> void:
+	var photo_content := get_node_or_null(^"PhotoFrame/PhotoClip/PhotoContent") as Node2D
+	if photo_content == null:
+		return
+	var inner_size := _inner_photo_size()
+	var scene_offset: Vector2 = photo_content.position - inner_size * 0.5
+	if scene_offset.distance_to(photo_offset) > 0.01:
+		photo_offset = scene_offset
+	var scene_rotation: float = rad_to_deg(float(photo_content.rotation))
+	if not is_equal_approx(scene_rotation, photo_rotation_degrees):
+		photo_rotation_degrees = scene_rotation
+	var scene_scale := photo_content.scale as Vector2
+	if photo_fit == PhotoFit.MANUAL:
+		if not scene_scale.is_equal_approx(photo_scale):
+			photo_scale = scene_scale
+		return
+	var fit_scale: Vector2 = _fit_scale_for_texture(photo)
+	if fit_scale.x <= 0.0 or fit_scale.y <= 0.0:
+		return
+	var derived := Vector2(
+		scene_scale.x / fit_scale.x,
+		scene_scale.y / fit_scale.y
+	)
+	if not derived.is_equal_approx(photo_scale):
+		photo_scale = derived
+
+
+## A texture painted directly on the scene's Photo sprite wins over the
+## photo export, so editor edits stay WYSIWYG at runtime.
+func _adopt_scene_photo() -> void:
+	var photo_sprite := get_node_or_null(^"PhotoFrame/PhotoClip/PhotoContent/Photo") as Sprite2D
+	if (
+		photo != null
+		and photo_sprite != null
+		and photo_sprite.texture != null
+		and photo_sprite.texture != photo
+	):
+		photo = photo_sprite.texture
+		return
+	var photo_b := get_node_or_null(^"PhotoFrame/PhotoClip/PhotoContent/PhotoB") as Sprite2D
+	if (
+		photo_secondary != null
+		and photo_b != null
+		and photo_b.texture != null
+		and photo_b.texture != photo_secondary
+	):
+		photo_secondary = photo_b.texture
+		return
+	var legacy_photo := get_node_or_null(^"PhotoFrame/Photo") as TextureRect
+	if legacy_photo != null and legacy_photo.texture != null and legacy_photo.texture != photo:
+		photo = legacy_photo.texture
 
 func _refresh() -> void:
 	if not is_node_ready():
@@ -88,6 +168,7 @@ func _refresh() -> void:
 	if photo_sprite != null:
 		photo_sprite.texture = photo
 		photo_sprite.visible = photo != null
+	_refresh_secondary_photo()
 	var has_manual_content: bool = allow_manual_photo_content and _has_manual_photo_content(photo_content)
 	if placeholder != null:
 		placeholder.visible = photo == null and not has_manual_content
@@ -97,6 +178,14 @@ func _refresh() -> void:
 		photo_content.scale = _resolved_photo_scale(photo)
 	_apply_text_alignment(heading_label, description_label)
 
+
+
+func _refresh_secondary_photo() -> void:
+	var photo_b := get_node_or_null(^"PhotoFrame/PhotoClip/PhotoContent/PhotoB") as Sprite2D
+	if photo_b == null:
+		return
+	photo_b.texture = photo_secondary
+	photo_b.visible = photo_secondary != null
 
 
 func _refresh_legacy_photo_frame() -> void:
@@ -138,11 +227,20 @@ func _resolved_photo_scale(texture: Texture2D) -> Vector2:
 	var texture_size: Vector2 = texture.get_size()
 	if texture_size.x <= 0.0 or texture_size.y <= 0.0:
 		return photo_scale
+	return _fit_scale_for_texture(texture) * photo_scale
+
+
+func _fit_scale_for_texture(texture: Texture2D) -> Vector2:
+	if texture == null:
+		return Vector2.ONE
+	var texture_size: Vector2 = texture.get_size()
+	if texture_size.x <= 0.0 or texture_size.y <= 0.0:
+		return Vector2.ONE
 	var frame_size: Vector2 = _inner_photo_size()
 	var fit: float = maxf(frame_size.x / texture_size.x, frame_size.y / texture_size.y)
 	if photo_fit == PhotoFit.CONTAIN:
 		fit = minf(frame_size.x / texture_size.x, frame_size.y / texture_size.y)
-	return Vector2(fit, fit) * photo_scale
+	return Vector2(fit, fit)
 
 
 func _has_manual_photo_content(photo_content: Node) -> bool:

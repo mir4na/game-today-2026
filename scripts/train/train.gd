@@ -131,11 +131,15 @@ func get_station_vertical_blend() -> float:
 	return _station_vertical_blend
 
 
-func _apply_station_travel_position() -> void:
+func get_station_travel_offset() -> Vector2:
 	var arrival_offset: float = station_arrival_distance * (1.0 - _station_arrival_progress)
 	var departure_offset: float = -station_departure_distance * _station_departure_progress
 	var vertical_offset: float = station_vertical_offset * _station_vertical_blend if _station_sequence_active and _station_vertical_offset_enabled else 0.0
-	var travel_offset := Vector2(arrival_offset + departure_offset, vertical_offset)
+	return Vector2(arrival_offset + departure_offset, vertical_offset)
+
+
+func _apply_station_travel_position() -> void:
+	var travel_offset := get_station_travel_offset()
 	_cars.position = _cars_station_rest_position + travel_offset
 	station_travel_offset_changed.emit(travel_offset)
 

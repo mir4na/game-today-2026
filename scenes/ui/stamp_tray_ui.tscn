@@ -1,16 +1,14 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene format=3 uid="uid://cfk63ldw08kig"]
 
-[ext_resource type="Script" path="res://scripts/ui/stamp_tray_ui.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/ui/Stamp/Stamp_Background.png" id="2_background"]
-[ext_resource type="Texture2D" path="res://assets/ui/Stamp/Alderwick_Stamp.png" id="3_alderwick"]
-[ext_resource type="Texture2D" path="res://assets/ui/Stamp/Brambleford_Stamp.png" id="4_brambleford"]
-[ext_resource type="Texture2D" path="res://assets/ui/Stamp/Cinderfield_Stamp.png" id="5_cinderfield"]
-[ext_resource type="Texture2D" path="res://assets/ui/Stamp/Dunmere_Stamp.png" id="6_dunmere"]
-[ext_resource type="Texture2D" path="res://assets/ui/Stamp/Eastmere_Stamp.png" id="7_eastmere"]
-[ext_resource type="Texture2D" path="res://assets/ui/Stamp/Stamp_TopView.png" id="8_top_view"]
+[ext_resource type="Script" uid="uid://ekvj3ukrq4vc" path="res://scripts/ui/stamp_tray_ui.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://bplqi37bj4no5" path="res://assets/ui/Stamp/Stamp_Background.png" id="2_background"]
+[ext_resource type="Texture2D" uid="uid://cd18s5ukau7x8" path="res://assets/ui/Stamp/Alderwick_Stamp.png" id="3_alderwick"]
+[ext_resource type="Texture2D" uid="uid://bhqrux0lmj0pq" path="res://assets/ui/Stamp/Brambleford_Stamp.png" id="4_brambleford"]
+[ext_resource type="Texture2D" uid="uid://ctrj3io4cwr12" path="res://assets/ui/Stamp/Cinderfield_Stamp.png" id="5_cinderfield"]
+[ext_resource type="Texture2D" uid="uid://hlk678m1jxu1" path="res://assets/ui/Stamp/Dunmere_Stamp.png" id="6_dunmere"]
+[ext_resource type="Texture2D" uid="uid://dny1vrwo0k6rm" path="res://assets/ui/Stamp/Stamp_TopView.png" id="8_top_view"]
 
-[node name="StampTrayUI" type="Control"]
-visible = false
+[node name="StampTrayUI" type="Control" unique_id=881556503]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +18,7 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_script")
 
-[node name="Tray" type="Control" parent="."]
+[node name="Tray" type="Control" parent="." unique_id=454585258]
 unique_name_in_owner = true
 z_index = 80
 layout_mode = 1
@@ -32,13 +30,16 @@ offset_top = -204.0
 offset_right = 94.0
 offset_bottom = -16.0
 grow_vertical = 0
-mouse_filter = 0
 
-[node name="Background" type="TextureRect" parent="Tray"]
+[node name="Background" type="TextureRect" parent="Tray" unique_id=1221118687]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 102.0
+offset_top = -74.0
+offset_right = -12.0
+offset_bottom = 59.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -46,25 +47,25 @@ texture = ExtResource("2_background")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="StampChoices" type="Control" parent="Tray"]
+[node name="StampChoices" type="Control" parent="Tray" unique_id=886225733]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 128.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Alderwick" type="Control" parent="Tray/StampChoices"]
-layout_mode = 0
+[node name="Alderwick" type="Control" parent="Tray/StampChoices" unique_id=352377967]
+anchors_preset = 0
 offset_left = 16.0
 offset_top = 18.0
 offset_right = 124.0
 offset_bottom = 164.0
 pivot_offset = Vector2(54, 73)
-mouse_filter = 0
 
-[node name="Art" type="TextureRect" parent="Tray/StampChoices/Alderwick"]
+[node name="Art" type="TextureRect" parent="Tray/StampChoices/Alderwick" unique_id=1346450402]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -76,16 +77,15 @@ texture = ExtResource("3_alderwick")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Brambleford" type="Control" parent="Tray/StampChoices"]
-layout_mode = 0
+[node name="Brambleford" type="Control" parent="Tray/StampChoices" unique_id=1397336879]
+anchors_preset = 0
 offset_left = 136.0
 offset_top = 18.0
 offset_right = 244.0
 offset_bottom = 164.0
 pivot_offset = Vector2(54, 73)
-mouse_filter = 0
 
-[node name="Art" type="TextureRect" parent="Tray/StampChoices/Brambleford"]
+[node name="Art" type="TextureRect" parent="Tray/StampChoices/Brambleford" unique_id=587735051]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -97,16 +97,15 @@ texture = ExtResource("4_brambleford")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Cinderfield" type="Control" parent="Tray/StampChoices"]
-layout_mode = 0
+[node name="Cinderfield" type="Control" parent="Tray/StampChoices" unique_id=360279211]
+anchors_preset = 0
 offset_left = 256.0
 offset_top = 18.0
 offset_right = 364.0
 offset_bottom = 164.0
 pivot_offset = Vector2(54, 73)
-mouse_filter = 0
 
-[node name="Art" type="TextureRect" parent="Tray/StampChoices/Cinderfield"]
+[node name="Art" type="TextureRect" parent="Tray/StampChoices/Cinderfield" unique_id=1446161911]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -118,16 +117,15 @@ texture = ExtResource("5_cinderfield")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Dunmere" type="Control" parent="Tray/StampChoices"]
-layout_mode = 0
+[node name="Dunmere" type="Control" parent="Tray/StampChoices" unique_id=1202630420]
+anchors_preset = 0
 offset_left = 376.0
 offset_top = 18.0
 offset_right = 484.0
 offset_bottom = 164.0
 pivot_offset = Vector2(54, 73)
-mouse_filter = 0
 
-[node name="Art" type="TextureRect" parent="Tray/StampChoices/Dunmere"]
+[node name="Art" type="TextureRect" parent="Tray/StampChoices/Dunmere" unique_id=900918613]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -139,28 +137,7 @@ texture = ExtResource("6_dunmere")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Eastmere" type="Control" parent="Tray/StampChoices"]
-layout_mode = 0
-offset_left = 496.0
-offset_top = 18.0
-offset_right = 604.0
-offset_bottom = 164.0
-pivot_offset = Vector2(54, 73)
-mouse_filter = 0
-
-[node name="Art" type="TextureRect" parent="Tray/StampChoices/Eastmere"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("7_eastmere")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="DragPreview" type="TextureRect" parent="."]
+[node name="DragPreview" type="TextureRect" parent="." unique_id=1263667642]
 unique_name_in_owner = true
 visible = false
 z_index = 200
@@ -173,14 +150,14 @@ texture = ExtResource("8_top_view")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="DragSealHint" type="TextureRect" parent="DragPreview"]
+[node name="DragSealHint" type="TextureRect" parent="DragPreview" unique_id=1080716970]
 unique_name_in_owner = true
+self_modulate = Color(1, 1, 1, 0.2)
 layout_mode = 0
 offset_left = 25.0
 offset_top = 25.0
 offset_right = 101.0
 offset_bottom = 101.0
 mouse_filter = 2
-self_modulate = Color(1, 1, 1, 0.2)
 expand_mode = 1
 stretch_mode = 5

@@ -21,7 +21,7 @@ signal debug_night_requested
 @export_range(0.0, 1440.0, 1.0) var clock_default_start_minutes: float = 840.0
 @export_range(0.0, 1440.0, 1.0) var clock_default_end_minutes: float = 1320.0
 @export_range(-180.0, 180.0, 0.1) var clock_pointer_start_degrees: float = -29.8
-@export_range(1.0, 90.0, 0.5) var clock_degrees_per_stop: float = 36.0
+@export_range(1.0, 90.0, 0.5) var clock_degrees_per_stop: float = 45.0
 @export_range(1, 12, 1) var clock_stop_count: int = 5
 @export_range(0.1, 1.5, 0.05) var clock_station_step_duration: float = 0.5
 @export_range(0.8, 3.0, 0.05) var clock_symbol_flip_duration: float = 1.65
@@ -34,6 +34,7 @@ signal debug_night_requested
 @export_range(0.1, 0.8, 0.01) var clock_hover_out_duration: float = 0.24
 @export_range(0.8, 1.0, 0.01) var clock_sign_hidden_y_scale: float = 0.92
 @export_category("Route Briefing")
+@export var route_briefing_enabled: bool = false
 @export_range(1.0, 8.0, 0.25) var route_briefing_hold_seconds: float = 3.0
 @export_range(-16.0, 0.0, 1.0) var route_briefing_attached_y: float = -8.0
 @export_range(0.0, 16.0, 1.0) var route_briefing_overshoot_pixels: float = 8.0
@@ -541,6 +542,9 @@ func set_debug_next_station_available(value: bool) -> void:
 
 
 func show_route_briefing() -> void:
+	if not route_briefing_enabled:
+		_hide_route_briefing(true)
+		return
 	_clock_panel.show()
 	_play_route_briefing()
 
