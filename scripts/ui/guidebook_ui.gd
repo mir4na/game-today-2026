@@ -130,6 +130,7 @@ func set_tabs_locked(locked: bool) -> void:
 	_today_button.disabled = locked
 	_procedure_button.disabled = locked
 	_anomalies_button.disabled = locked
+	_close_button.disabled = locked
 
 
 func update_shift_progress(route_index: int, net_earnings: int, passenger_count: int, boarded_today: int, stamped_aboard: int) -> void:

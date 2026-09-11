@@ -576,7 +576,6 @@ unique_name_in_owner = true
 [connection signal="newspaper_read" from="GameplayWorld/Train/Cars/PassengerCoach4/Newspaper" to="." method="_on_newspaper_read"]
 [connection signal="timeout" from="MaintenanceTimers/BlockedAisleTimer" to="." method="_on_blocked_aisle_timer_timeout"]
 [connection signal="timeout" from="MaintenanceTimers/DirtySeatTimer" to="." method="_on_dirty_seat_timer_timeout"]
-[connection signal="debug_night_requested" from="HUD" to="." method="_on_debug_night_requested"]
 [connection signal="guidebook_requested" from="HUD" to="." method="_on_guidebook_requested"]
 [connection signal="service_action_requested" from="HUD" to="." method="_on_service_action_requested"]
 [connection signal="closed" from="ModalLayer/DocumentOverlayUI" to="." method="_on_modal_closed"]

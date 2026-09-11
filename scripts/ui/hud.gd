@@ -5,7 +5,6 @@ extends CanvasLayer
 signal guidebook_requested
 signal service_action_requested
 signal market_tool_requested(tool_id: StringName)
-signal debug_night_requested
 
 @export_category("Inspector Copy")
 @export var clock_template: String = "%02d:%02d %s"
@@ -83,7 +82,6 @@ signal debug_night_requested
 @onready var _blessing_summary: Control = %BlessingSummary
 @onready var _blessing_earned_label: Label = %BlessingEarnedLabel
 @onready var _blessing_target_label: Label = %BlessingTargetLabel
-@onready var _debug_night_button: Button = %DebugNightButton
 @onready var _guidebook_button: Button = %GuidebookButton
 @onready var _service_action_button: Button = %ServiceActionButton
 @onready var _market_item_bar: HBoxContainer = %MarketItemBar
@@ -524,7 +522,6 @@ func set_day_hud_visible(value: bool) -> void:
 	_blessing_summary.visible = value
 	_guidebook_button.tooltip_text = "Open guidebook"
 	set_service_action_mode(false, value)
-	_debug_night_button.visible = OS.is_debug_build() and value
 	if not value:
 		_reset_clock_hover(true)
 		_hide_route_briefing(true)
@@ -667,16 +664,10 @@ func _on_market_item_requested(tool_id: StringName) -> void:
 	market_tool_requested.emit(tool_id)
 
 
-func _on_debug_night_button_pressed() -> void:
-	if OS.is_debug_build():
-		debug_night_requested.emit()
-
-
 func set_night_walk_mode() -> void:
 	_clock_panel.show()
 	_day_summary.show()
 	_blessing_summary.show()
-	_debug_night_button.hide()
 	_guidebook_button.tooltip_text = "Open guidebook"
 	set_service_action_mode(true)
 	_tool_status_label.visible = false

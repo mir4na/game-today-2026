@@ -1222,21 +1222,10 @@ func _show_guidebook_anomaly() -> void:
 	_spotlight_guidebook_section("AnomalyList")
 
 
-func _on_guidebook_section_shown(section: int) -> void:
-	if (
-		_step != Step.ANOMALY_INTRO
-		and _step != Step.GUIDEBOOK_PROMPT
-		and _step != Step.GUIDEBOOK_TODAY
-		and _step != Step.GUIDEBOOK_RULES
-		and _step != Step.GUIDEBOOK_ANOMALY
-	):
-		return
-	if section == GuidebookUI.SECTION_TODAY:
-		_show_guidebook_today()
-	elif section == GuidebookUI.SECTION_RULES:
-		_show_guidebook_rules()
-	elif section == GuidebookUI.SECTION_ANOMALIES:
-		_show_guidebook_anomaly()
+func _on_guidebook_section_shown(_section: int) -> void:
+	# Section changes during tutorial are driven entirely by _advance_from_continue.
+	# We do not react to section_shown here to avoid double-triggering dialogs.
+	pass
 
 
 func _animate_spotlight_to_control(target: Control, target_radius: float, duration: float) -> void:
@@ -1846,10 +1835,13 @@ func _advance_from_continue() -> void:
 				_begin_guidebook_button_reveal()
 		Step.GUIDEBOOK:
 			_switch_guidebook_section(GuidebookUI.SECTION_TODAY)
+			_show_guidebook_today()
 		Step.GUIDEBOOK_TODAY:
 			_switch_guidebook_section(GuidebookUI.SECTION_RULES)
+			_show_guidebook_rules()
 		Step.GUIDEBOOK_RULES:
 			_switch_guidebook_section(GuidebookUI.SECTION_ANOMALIES)
+			_show_guidebook_anomaly()
 		Step.GUIDEBOOK_ANOMALY:
 			_close_guidebook_and_proceed()
 		Step.NEWSPAPER:

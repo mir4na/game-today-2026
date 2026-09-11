@@ -147,7 +147,6 @@ var _night_soul_record_repulsed: Dictionary = {}
 var _night_world_prepared: bool = false
 var _terminal_station_waiting_for_night_transition: bool = false
 var _night_transition_camera_return_requested: bool = false
-var _debug_day_pass_override: bool = false
 var _night_service_elapsed_seconds: float = 0.0
 var _night_service_expired: bool = false
 var _night_service_timeout_presented: bool = false
@@ -298,7 +297,6 @@ func _prepare_tutorial_clean_start() -> void:
 	_progress_advanced = false
 	_terminal_station_waiting_for_night_transition = false
 	_night_world_prepared = false
-	_debug_day_pass_override = false
 	_route_index = 0
 	_day_minutes = START_MINUTES
 	_station_arrival_announced = false
@@ -315,7 +313,6 @@ func _prepare_tutorial_clean_start() -> void:
 		_night_transition_ui.hide()
 	_collect_interactables(self)
 	_configure_maintenance_events()
-	_clear_day_distractions_for_debug()
 	_hud.set_cutscene_hidden(false)
 	_hud.set_day_hud_visible(true)
 	_hud.set_clock_route_stop_count(day_route.size())
@@ -2128,8 +2125,6 @@ func _process_station_arrival() -> void:
 	# The transition preview may be requested before later-station anomalies have
 	# boarded. Once the terminal exchange has freed the living passengers' seats,
 	# restore those authored anomalies so the night roster remains complete.
-	if is_terminal_arrival and _debug_day_pass_override:
-		_ensure_complete_debug_night_roster()
 
 	# Station boarding is capacity-based and independent from drop-offs. A player
 	# who keeps all eight opening passengers can still receive later boarders,
@@ -2583,85 +2578,6 @@ func _on_guidebook_requested() -> void:
 	_toggle_guidebook()
 
 
-func _on_debug_night_requested() -> void:
-	if not OS.is_debug_build() or state not in [GameState.DAY, GameState.SUNSET] or _active_modal != null:
-		return
-	_clear_day_distractions_for_debug()
-	_debug_day_pass_override = true
-	_route_index = maxi(day_route.size() - 2, 0)
-	_day_minutes = _final_arrival_minutes()
-	_station_assignment.clear()
-	_station_arrival_announced = true
-	_station_exchange_processed = false
-	_shift_report_finalized = false
-	_process_station_arrival()
-	_refresh_player_interactables(true)
-	_update_passenger_minimap()
-
-
-func _jump_directly_to_debug_night() -> void:
-	_prepare_debug_night_roster()
-	_route_index = maxi(day_route.size() - 1, 0)
-	_day_minutes = _final_arrival_minutes()
-	_station_assignment.clear()
-	_station_arrival_announced = false
-	_station_exchange_processed = true
-	_enter_night()
-	_refresh_player_interactables(true)
-	_update_passenger_minimap()
-
-
-func _prepare_debug_night_roster() -> void:
-	_clear_day_distractions_for_debug()
-
-	# A direct jump has no terminal exchange to remove ordinary passengers.
-	for passenger: Passenger in _passengers:
-		if _is_active_passenger(passenger) and not passenger.data.is_dead:
-			_release_passenger_seat(passenger)
-			passenger.depart_train()
-	_ensure_complete_debug_night_roster()
-	_set_passenger_ai_enabled(false)
-
-
-func _clear_day_distractions_for_debug() -> void:
-	_blocked_aisle_timer.stop()
-	_dirty_seat_timer.stop()
-	_radar_scan_active = false
-	_hud.set_radar_active(false)
-	_train.clear_radar_anomaly_signals(true)
-	for event: Node in _blocked_aisle_events:
-		if is_instance_valid(event):
-			event.call(&"set_event_active", false)
-	for event: Node in _dirty_seat_events:
-		if is_instance_valid(event):
-			event.call(&"set_event_active", false)
-	_active_blocked_aisle_event = null
-	_active_dirty_seat_event = null
-	_train.clear_blocked_connector_effect(true)
-	_hud.set_maintenance_targets([])
-	_set_service_sealed(false, true)
-	_finish_staged_boarding()
-
-
-
-func _ensure_complete_debug_night_roster() -> void:
-	# Some anomalies are scheduled to board at later stations. Add them now so
-	# this shortcut always opens the complete authored night case.
-	for data: PassengerData in _daily_manifest:
-		if not data.is_dead or _find_active_passenger_by_name(data.passenger_name) != null:
-			continue
-		var seat_slot: Marker2D = _find_station_boarding_seat(data.current_carriage)
-		if seat_slot == null:
-			push_warning("Debug Night Shift could not find a seat for %s." % data.passenger_name)
-			continue
-		data.current_carriage = _train.get_passenger_carriage_number_at_world_x(seat_slot.global_position.x)
-		var passenger: Passenger = _spawn_passenger(data, seat_slot)
-		if passenger == null:
-			continue
-		passenger.randomize_initial_activity()
-		_interactables.append(passenger)
-
-
 func _on_market_tool_requested(tool_id: StringName) -> void:
 	if (
 		_service_seal_active
@@ -2759,11 +2675,6 @@ func _finalize_day_shift() -> void:
 		_incorrectly_stamped_anomalies.size(),
 		_get_day_pass_target()
 	)
-	if _debug_day_pass_override:
-		# This temporary route exists to preview the terminal-to-night cutscene.
-		# Preserve the real paycheck figures while bypassing its pass gate.
-		_day_blessing_award["passed"] = true
-		_day_blessing_award["debug_pass_override"] = true
 	_active_modal = _shift_report_ui
 	if _shift_report_ui.has_method(&"set_external_input_locked"):
 		_shift_report_ui.call(&"set_external_input_locked", is_tutorial_mode)
@@ -2798,7 +2709,6 @@ func _on_shift_report_continue() -> void:
 		)
 		return
 	_shift_report_ui.hide()
-	_debug_day_pass_override = false
 	_start_night_transition()
 
 
