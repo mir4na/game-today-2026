@@ -86,10 +86,7 @@ func open_record(data: PassengerData, puzzle: DeparturePuzzleData, already_recor
 	# the soul being inspected, so it always uses that NPC's real character art.
 	_portrait.set_passenger(data)
 	_name_label.text = data.short_name.to_upper()
-	_details_label.text = "%s  •  %s" % [
-		data.occupation.to_upper(),
-		puzzle.get_anomaly_label(data.anomaly_type),
-	]
+	_details_label.text = data.occupation.to_upper()
 	_closing = false
 	_correct_reveal_characters = -1
 	_extracted_sentence_index = -1

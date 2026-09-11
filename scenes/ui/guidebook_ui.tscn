@@ -30,19 +30,19 @@
 [ext_resource type="Texture2D" uid="uid://baaxiq71pdhcv" path="res://assets/ui/guidebook/newspaper.png" id="25_newspaper"]
 [ext_resource type="Texture2D" uid="uid://dybtwy50qx4b6" path="res://assets/ui/guidebook/inspect (1).png" id="27_inspect_art"]
 [ext_resource type="Texture2D" uid="uid://dq5ufjh0bc610" path="res://assets/ui/guidebook/day 1 (1).png" id="28_day_art"]
+[ext_resource type="Texture2D" uid="uid://cdvwyl2srvvpg" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 14-41-27.png" id="28_jbx2b"]
+[ext_resource type="Texture2D" uid="uid://4ku3hrxxjh3u" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 14-43-35-1.png" id="29_qvavt"]
 [ext_resource type="Texture2D" uid="uid://bg5km7i8p8o1r" path="res://assets/ui/guidebook/paycheck 1 (1).png" id="30_paycheck_art"]
 [ext_resource type="Texture2D" uid="uid://das3t3h8hbe6c" path="res://assets/ui/guidebook/night 1 (1).png" id="31_night_art"]
 [ext_resource type="PackedScene" uid="uid://c13pgmifh1x2g" path="res://scenes/passengers/npc_1.tscn" id="31_s6bny"]
 [ext_resource type="Texture2D" uid="uid://cvsli236qi2rk" path="res://assets/ui/id_card.png" id="32_id_card"]
 [ext_resource type="Texture2D" uid="uid://lkud6gnp6bf3" path="res://assets/ui/passenger_ticket.png" id="33_ticket"]
-[ext_resource type="Texture2D" uid="uid://du1umrmwigf0k" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 12-04-23-1.png" id="35_jbx2b"]
 [ext_resource type="Texture2D" uid="uid://fi8341eivf3m" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 12-04-43.png" id="36_qvavt"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_button"]
 
 [node name="GuidebookUI" type="Control" unique_id=29174819]
 process_mode = 3
-visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -292,7 +292,6 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_button")
 
 [node name="AnomalyTab" type="Control" parent="Center/BookStage/SectionTabs" unique_id=613962503]
 unique_name_in_owner = true
-visible = false
 anchors_preset = 0
 offset_top = 86.0
 offset_right = 196.0
@@ -400,6 +399,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 8.71235
+offset_top = -0.43834525
+offset_right = 8.712341
+offset_bottom = -0.4383545
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -713,10 +716,10 @@ text = "STOPS COMPLETED  0 / 3"
 
 [node name="TodayMetaDayCaption" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010230]
 layout_mode = 0
-offset_left = 204.76714
-offset_top = 272.93152
-offset_right = 262.0
-offset_bottom = 298.93152
+offset_left = 212.98631
+offset_top = 287.04108
+offset_right = 270.21918
+offset_bottom = 313.04108
 theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 13
@@ -725,10 +728,10 @@ text = "DAY"
 [node name="TodayMetaDay" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010231]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 264.0
-offset_top = 268.93152
-offset_right = 360.0
-offset_bottom = 298.93152
+offset_left = 272.21918
+offset_top = 283.04108
+offset_right = 368.21918
+offset_bottom = 313.04108
 theme_override_colors/font_color = Color(0.55, 0.23, 0.2, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 19
@@ -736,10 +739,10 @@ text = "1"
 
 [node name="TodayMetaTrainCaption" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010232]
 layout_mode = 0
-offset_left = 204.76714
-offset_top = 302.93152
-offset_right = 262.0
-offset_bottom = 328.93152
+offset_left = 212.98631
+offset_top = 317.04108
+offset_right = 270.21918
+offset_bottom = 343.04108
 theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 13
@@ -748,10 +751,10 @@ text = "TRAIN"
 [node name="TodayMetaTrain" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010233]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 264.0
-offset_top = 298.93152
-offset_right = 380.0
-offset_bottom = 328.93152
+offset_left = 272.21918
+offset_top = 313.04108
+offset_right = 388.21918
+offset_bottom = 343.04108
 theme_override_colors/font_color = Color(0.55, 0.23, 0.2, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 19
@@ -759,10 +762,10 @@ text = "ATE-000"
 
 [node name="TodayMetaDateCaption" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010234]
 layout_mode = 0
-offset_left = 204.76714
-offset_top = 332.93152
-offset_right = 262.0
-offset_bottom = 358.93152
+offset_left = 212.98631
+offset_top = 347.04108
+offset_right = 270.21918
+offset_bottom = 373.04108
 theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 13
@@ -771,10 +774,10 @@ text = "DATE"
 [node name="TodayMetaDate" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010235]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 264.0
-offset_top = 328.93152
-offset_right = 400.0
-offset_bottom = 358.93152
+offset_left = 272.21918
+offset_top = 343.04108
+offset_right = 408.21918
+offset_bottom = 373.04108
 theme_override_colors/font_color = Color(0.55, 0.23, 0.2, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 19
@@ -782,10 +785,10 @@ text = "07 JUN 2026"
 
 [node name="TodayMetaCodeCaption" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010236]
 layout_mode = 0
-offset_left = 204.76714
-offset_top = 362.93152
-offset_right = 262.0
-offset_bottom = 388.93152
+offset_left = 212.98631
+offset_top = 377.04108
+offset_right = 270.21918
+offset_bottom = 403.04108
 theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 13
@@ -794,10 +797,10 @@ text = "CODE"
 [node name="TodayMetaCode" type="Label" parent="Center/BookStage/Page/TodayLayout" unique_id=770010237]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 264.0
-offset_top = 358.93152
-offset_right = 380.0
-offset_bottom = 388.93152
+offset_left = 272.21918
+offset_top = 373.04108
+offset_right = 388.21918
+offset_bottom = 403.04108
 theme_override_colors/font_color = Color(0.55, 0.23, 0.2, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 19
@@ -972,27 +975,28 @@ autowrap_mode = 2
 
 [node name="RulesControlsTitle" type="Label" parent="Center/BookStage/Page/RulesLayout" unique_id=770010220]
 layout_mode = 0
-offset_left = 489.0
-offset_top = 325.0
-offset_right = 700.0
-offset_bottom = 360.0
+offset_left = 563.67126
+offset_top = 325.50684
+offset_right = 795.17804
+offset_bottom = 360.50684
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 24
-text = "CONTROLS"
+text = "BASIC CONTROLS"
 autowrap_mode = 2
 
 [node name="RulesControlsBody" type="Label" parent="Center/BookStage/Page/RulesLayout" unique_id=770010221]
 layout_mode = 0
-offset_left = 489.0
-offset_top = 363.0
-offset_right = 890.0
-offset_bottom = 468.0
+offset_left = 489.69864
+offset_top = 373.45203
+offset_right = 790.6211
+offset_bottom = 458.0456
+scale = Vector2(1.5, 1.5)
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
 theme_override_font_sizes/font_size = 15
-text = "A D — Walk   E — Talk
-Q — Papers   R — Radar
-TAB — Book   ESC — Pause"
+text = "A/D — Walk             E — Interact
+TAB — Guidebook     ESC — Pause
+   "
 autowrap_mode = 2
 
 [node name="RulesNightArt" type="TextureRect" parent="Center/BookStage/Page/RulesLayout" unique_id=263283956]
@@ -1023,7 +1027,6 @@ autowrap_mode = 2
 [node name="NightLayout" type="Control" parent="Center/BookStage/Page" unique_id=770010200]
 unique_name_in_owner = true
 editor_description = "Night shift single page. Scene-authored copy of the day rules; edit these nodes to diverge the night shift wording."
-visible = false
 anchors_preset = 0
 offset_left = 56.0
 offset_top = 122.0
@@ -1033,187 +1036,177 @@ mouse_filter = 2
 
 [node name="NightInspectArt" type="TextureRect" parent="Center/BookStage/Page/NightLayout" unique_id=770010201]
 layout_mode = 0
-offset_left = 215.72603
-offset_top = -3.2602806
-offset_right = 355.726
-offset_bottom = 136.73972
+offset_left = 692.43835
+offset_top = -110.109604
+offset_right = 832.43835
+offset_bottom = 29.890411
 scale = Vector2(1.8, 1.8)
 mouse_filter = 2
-texture = ExtResource("27_inspect_art")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="NightDropOff" type="TextureRect" parent="Center/BookStage/Page/NightLayout" unique_id=770010202]
-layout_mode = 0
-offset_left = 0.65755177
-offset_top = 195.36986
-offset_right = 140.65753
-offset_bottom = 335.36984
-scale = Vector2(1.4, 1.4)
-mouse_filter = 2
-texture = ExtResource("24_hwxqh")
+texture = ExtResource("31_night_art")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="NightPenalties" type="TextureRect" parent="Center/BookStage/Page/NightLayout" unique_id=770010203]
 layout_mode = 0
-offset_left = 433.53427
-offset_top = -111.47947
-offset_right = 573.5343
-offset_bottom = 28.52053
+offset_left = 426.68494
+offset_top = 102.21918
+offset_right = 566.68494
+offset_bottom = 242.21918
 scale = Vector2(1.8, 1.8)
 mouse_filter = 2
 texture = ExtResource("25_8ejn2")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="NightRightText" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010204]
-layout_mode = 0
-offset_left = 492.43835
-offset_top = 270.7123
-offset_right = 892.43835
-offset_bottom = 309.06845
-theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
-theme_override_font_sizes/font_size = 18
-text = "Press Finalize when all souls have a station."
-autowrap_mode = 2
-
 [node name="NightAnomaliesDescription" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010205]
 layout_mode = 0
-offset_left = 12.986313
-offset_top = 381.6712
-offset_right = 222.57536
-offset_bottom = 484.41095
+offset_left = 476.0
+offset_top = 20.02739
+offset_right = 702.02734
+offset_bottom = 109.02739
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
-theme_override_font_sizes/font_size = 19
-text = "Drag each soul to a station, then press Finalize Assignments."
+theme_override_font_sizes/font_size = 20
+text = "Use your clues, solve it, and place every soul in the correct station."
 autowrap_mode = 2
 
 [node name="NightInspectTitle" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010206]
 layout_mode = 0
-offset_left = -0.71230316
-offset_top = 33.725876
-offset_right = 254.08218
-offset_bottom = 84.725876
+offset_left = 215.72601
+offset_top = 46.054764
+offset_right = 436.274
+offset_bottom = 97.05476
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 24
-text = "1. CHECK THE MAP"
+text = "CHECK THE STATION ROUTE"
 autowrap_mode = 2
 
 [node name="NightInspectDescription" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010207]
 layout_mode = 0
-offset_left = 3.3972778
-offset_top = 69.34247
-offset_right = 229.42468
-offset_bottom = 213.34247
+offset_left = 215.72603
+offset_top = 110.43834
+offset_right = 433.53424
+offset_bottom = 191.43835
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
 theme_override_fonts/font = ExtResource("25_dlivy")
 theme_override_font_sizes/font_size = 17
-text = "Open the night map. If two stations have a line between them, they are connected."
+text = "Look at the map and learn the route. This will help you in the next steps."
 autowrap_mode = 2
 
 [node name="NightDropTitle" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010208]
 layout_mode = 0
-offset_left = 218.46582
-offset_top = 246.05502
-offset_right = 381.4795
-offset_bottom = 270.05502
+offset_left = 89.698654
+offset_top = 207.69861
+offset_right = 288.32874
+offset_bottom = 231.69861
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 24
-text = "2. READ EVERY"
-autowrap_mode = 2
-
-[node name="NightDropTitleSuffix" type="Label" parent="Center/BookStage/Page/NightLayout/NightDropTitle" unique_id=770010209]
-layout_mode = 0
-offset_left = 357.53412
-offset_top = -8.219467
-offset_right = 615.06836
-offset_bottom = 15.780533
-theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
-theme_override_fonts/font = ExtResource("21_body_bold")
-theme_override_font_sizes/font_size = 24
-text = "SOUL RECORD"
+text = "FIND THE CLUE"
 autowrap_mode = 2
 
 [node name="NightDropDescription" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010210]
 layout_mode = 0
-offset_left = 219.83572
-offset_top = 283.04108
-offset_right = 422.57538
-offset_bottom = 347.42468
+offset_left = -18.520548
+offset_top = 441.9452
+offset_right = 444.49313
+offset_bottom = 519.9452
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
-theme_override_font_sizes/font_size = 16
-text = "Open each Soul Record and save its Departure Statement. A soul with no statement cannot move."
+theme_override_font_sizes/font_size = 20
+text = "Inspect every soul and find the hidden statement. Use the statement as a clue to finish your shift."
 autowrap_mode = 2
 
 [node name="NightAnomaliesTitle" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010211]
 layout_mode = 0
-offset_left = 218.46579
-offset_top = 385.78082
-offset_right = 419.83566
-offset_bottom = 475.78082
+offset_left = 470.52054
+offset_top = -21.068504
+offset_right = 712.98627
+offset_bottom = 68.93156
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 28
-text = "3. ASSIGN EVERY SOUL"
+text = "PASS THE SHIFT!"
 autowrap_mode = 2
 
 [node name="NightPenaltiesTitle" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010212]
 layout_mode = 0
-offset_left = 678.7397
-offset_top = 58.383564
-offset_right = 841.75336
-offset_bottom = 109.38356
+offset_left = 673.2602
+offset_top = 157.01369
+offset_right = 836.27386
+offset_bottom = 208.01369
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 24
-text = "POINTS"
+text = "REWARD & PENALTY"
 autowrap_mode = 2
 
 [node name="NightRightText2" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010213]
 layout_mode = 0
-offset_left = 489.69867
-offset_top = 133.72601
-offset_right = 740.38367
-offset_bottom = 198.00418
+offset_left = 671.89044
+offset_top = 218.65752
+offset_right = 880.5312
+offset_bottom = 310.65753
 scale = Vector2(1.3, 1.3)
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
 theme_override_font_sizes/font_size = 16
-text = "+100  Each correct soul
--100  Each wrong try
-First try is free"
+text = "+100  Every correct soul
+−100  Every wrong try
+
+You get paid only if you finish the shift!"
 autowrap_mode = 2
 
 [node name="NightControlsTitle" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010222]
 layout_mode = 0
-offset_left = 489.0
-offset_top = 325.0
-offset_right = 700.0
-offset_bottom = 360.0
+offset_left = 578.7398
+offset_top = 374.82184
+offset_right = 802.0274
+offset_bottom = 409.82187
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 24
-text = "CONTROLS"
+text = "BASIC CONTROLS"
 autowrap_mode = 2
 
 [node name="NightControlsBody" type="Label" parent="Center/BookStage/Page/NightLayout" unique_id=770010223]
 layout_mode = 0
-offset_left = 489.0
-offset_top = 363.0
-offset_right = 890.0
-offset_bottom = 468.0
+offset_left = 511.6164
+offset_top = 425.50677
+offset_right = 912.61646
+offset_bottom = 530.50684
 theme_override_colors/font_color = Color(0.27, 0.225, 0.195, 1)
-theme_override_font_sizes/font_size = 15
-text = "Drag — Move a soul
-Click a soul, then a station
-E — Close the book"
+theme_override_font_sizes/font_size = 22
+text = "A/D — Walk             E — Interact
+TAB — Guidebook     ESC — Pause"
 autowrap_mode = 2
+
+[node name="NightInspectArt2" type="TextureRect" parent="Center/BookStage/Page/NightLayout" unique_id=1517805876]
+layout_mode = 0
+offset_left = -17.150635
+offset_top = 7.6986256
+offset_right = 122.849304
+offset_bottom = 147.69862
+scale = Vector2(1.5, 1.5)
+mouse_filter = 2
+texture = ExtResource("28_jbx2b")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NightInspectArt3" type="TextureRect" parent="Center/BookStage/Page/NightLayout" unique_id=669260020]
+layout_mode = 0
+offset_left = 22.575336
+offset_top = 198.10959
+offset_right = 247.50674
+offset_bottom = 381.67126
+scale = Vector2(1.5, 1.5)
+mouse_filter = 2
+texture = ExtResource("29_qvavt")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="AnomalyList" type="Control" parent="Center/BookStage/Page" unique_id=637261252]
 unique_name_in_owner = true
 editor_description = "Scene-based Anomaly Signs spread. Adjust each GuidebookAnomalyEntry instance and its Photo settings here."
+visible = false
 anchors_preset = 0
 offset_left = 56.0
 offset_top = 122.0
@@ -1321,6 +1314,7 @@ scale = Vector2(0.084455326, 0.084455326)
 [node name="Photo" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/PhotoFrame/PhotoClip/PhotoContent" index="0" unique_id=328331925]
 position = Vector2(303.74023, 128.75977)
 scale = Vector2(2, 2)
+texture = ExtResource("32_id_card")
 
 [node name="npc_1" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/PhotoFrame/PhotoClip/PhotoContent" index="1" unique_id=469341268 instance=ExtResource("31_s6bny")]
 position = Vector2(-460.16055, 296.66245)
@@ -1451,9 +1445,9 @@ position = Vector2(59, 37)
 scale = Vector2(0.0942029, 0.0942029)
 
 [node name="Photo" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/PhotoFrame/PhotoClip/PhotoContent" index="0" unique_id=328331925]
-position = Vector2(3.053627, -79.25264)
+position = Vector2(-69.65448, -108.33588)
 scale = Vector2(2.5, 2.5)
-texture = ExtResource("35_jbx2b")
+texture = ExtResource("33_ticket")
 
 [node name="Photo2" type="Sprite2D" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/PhotoFrame/PhotoClip/PhotoContent" index="1" unique_id=771854728]
 editor_description = "Default single texture photo. The parent entry assigns its texture and crop."

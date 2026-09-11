@@ -140,7 +140,7 @@ offset_bottom = 159.0
 theme_override_colors/font_color = Color(0.482353, 0.305882, 0.286275, 1)
 theme_override_fonts/font = ExtResource("5_josefin")
 theme_override_font_sizes/font_size = 13
-text = "OCCUPATION  •  ANOMALY"
+text = "OCCUPATION"
 text_overrun_behavior = 3
 
 [node name="Divider" type="HSeparator" parent="RecordAnchor" unique_id=455958742]

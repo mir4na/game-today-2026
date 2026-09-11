@@ -616,15 +616,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			_open_pause()
 			get_viewport().set_input_as_handled()
 		return
-	if (
-		event.is_action_pressed(&"use_radar")
-		and not _service_seal_active
-		and _active_modal == null
-		and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
-	):
-		_use_carriage_radar()
-		get_viewport().set_input_as_handled()
-		return
 	if not event.is_action_pressed(&"ui_cancel"):
 		return
 	if _pause_ui.visible:
