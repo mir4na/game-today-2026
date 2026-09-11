@@ -53,6 +53,15 @@ func _run() -> void:
 	tray._dragging = false
 	var choice := tray.get_node("Tray/StampChoices/Alderwick") as Control
 	_check(choice.self_modulate.a > 0.95 and choice.scale.distance_to(Vector2.ONE) < 0.08, "Station stamps must animate into their tray slots.")
+	var baseline_y: float = choice.position.y
+	for station_name: String in tray.STATIONS:
+		var row_choice := tray.get_node("Tray/StampChoices/%s" % station_name) as Control
+		_check(is_equal_approx(row_choice.position.y, baseline_y), "Station stamps must finish on one shared baseline.")
+	tray._animate_choices_in()
+	await process_frame
+	tray._on_choice_hover(choice, true)
+	await create_timer(0.17).timeout
+	_check(is_equal_approx(choice.position.y, baseline_y), "Hover must not strand an interrupted stamp outside the shared baseline.")
 	tray._begin_drag("Alderwick", choice)
 	tray._finish_drag(false)
 	await create_timer(tray.return_duration + 0.08).timeout

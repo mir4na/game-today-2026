@@ -124,7 +124,7 @@ func _update_footsteps(delta: float) -> void:
 	if _animation_move_speed < walk_animation_threshold or departed or not visible:
 		return
 	if _footstep_timer <= 0.0:
-		GameSFX.play(&"footstep", -23.0, 0.88, 0.08, 0.07)
+		GameSFX.play(&"footstep", -18.0, 0.88, 0.08, 0.07)
 		_footstep_timer = _rng.randf_range(0.55, 0.72)
 
 func interact() -> void:

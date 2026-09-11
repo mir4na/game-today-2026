@@ -54,6 +54,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/veil_note_reveal_ui.tscn" id="48_veil_note_reveal"]
 [ext_resource type="PackedScene" path="res://scenes/ui/service_signature_ui.tscn" id="50_signature_ui"]
 [ext_resource type="PackedScene" uid="uid://dl1hatq1cq2qy" path="res://scenes/ui/hint.tscn" id="51_hint_ui"]
+[ext_resource type="PackedScene" uid="uid://j5aa62op4yf5" path="res://scenes/ui/loading_screen_ui.tscn" id="52_loading"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_day_cycle_sky"]
 shader = ExtResource("39")
@@ -535,9 +536,15 @@ unique_name_in_owner = true
 unique_name_in_owner = true
 
 [node name="PauseLayer" type="CanvasLayer" parent="." unique_id=1162735996]
-layer = 100
+layer = 300
 
 [node name="PauseUI" parent="PauseLayer" unique_id=680489697 instance=ExtResource("10")]
+unique_name_in_owner = true
+
+[node name="LoadingLayer" type="CanvasLayer" parent="."]
+layer = 200
+
+[node name="LoadingScreenUI" parent="LoadingLayer" instance=ExtResource("52_loading")]
 unique_name_in_owner = true
 
 [connection signal="inventory_changed" from="MarketToolState" to="." method="_on_market_inventory_changed"]

@@ -63,6 +63,8 @@ const BLOOM_SUNSET_BLEND_START_PROGRESS: float = 0.38
 const TOOL_VEIL_NOTE: StringName = &"veil_note"
 const TOOL_RADAR_CHARGE: StringName = &"radar_charge"
 const TOOL_SWIFTSTEP: StringName = &"swiftstep"
+const MAIN_SCENE_PATH := "res://scenes/main/main.tscn"
+const MAIN_MENU_SCENE_PATH := "res://scenes/menu/main_menu.tscn"
 
 var state: GameState = GameState.OPENING
 var _day_minutes: float = START_MINUTES
@@ -134,6 +136,7 @@ var _night_service_expired: bool = false
 var _night_service_timeout_presented: bool = false
 var _radar_scan_active: bool = false
 var _swiftstep_active: bool = false
+var _scene_transitioning: bool = false
 
 @onready var _train: TrainWorld = %Train
 @onready var _player: ConductorPlayer = %Player
@@ -171,6 +174,7 @@ var _swiftstep_active: bool = false
 @onready var _sky_gradient: ColorRect = %NightSkyOverlay
 @onready var _night_atmosphere: ColorRect = %NightAtmosphere
 @onready var _bloom_rect: ColorRect = $BloomLayer/Bloom
+@onready var _loading_screen: LoadingScreenUI = %LoadingScreenUI
 
 var _bloom_material: ShaderMaterial
 
@@ -2193,7 +2197,6 @@ func _open_pause() -> void:
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
-	_pause_ui.set_night_mode(state == GameState.NIGHT)
 	_pause_ui.open_pause()
 	get_tree().paused = true
 
@@ -2520,11 +2523,11 @@ func _enter_night(enable_controls: bool = true, show_instruction: bool = true) -
 	_night_service_expired = false
 	_night_service_timeout_presented = false
 	_resume_train_for_night()
+	_hud.set_next_stop("The End")
 	_hud.set_night_walk_mode()
 	# Night Service owns the final 36-degree division. It fills continuously over
 	# the three-minute service window instead of jumping straight to 180 degrees.
 	_hud.set_clock_progress(_night_service_clock_progress())
-	_pause_ui.set_night_mode(true)
 	if show_instruction and not night_shift_instruction.strip_edges().is_empty():
 		_hud.notify(night_shift_instruction, 5.0)
 	if enable_controls:
@@ -2950,14 +2953,23 @@ func _continue_after_night_paycheck() -> void:
 	if day_number >= ShiftProgress.DAY_COUNT:
 		_return_to_main_menu()
 	else:
-		get_tree().reload_current_scene()
+		_begin_scene_loading(MAIN_SCENE_PATH)
 
 
 func _restart_game() -> void:
 	if ShiftProgress.save_checkpoint(_shift_checkpoint):
-		get_tree().paused = false
-		get_tree().reload_current_scene()
+		_begin_scene_loading(MAIN_SCENE_PATH)
 
 func _return_to_main_menu() -> void:
-	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
+	_begin_scene_loading(MAIN_MENU_SCENE_PATH)
+
+
+func _begin_scene_loading(target_scene_path: String) -> void:
+	if _scene_transitioning:
+		return
+	if not is_instance_valid(_loading_screen):
+		push_error("Main/LoadingScreenUI scene instance is missing.")
+		return
+	_scene_transitioning = true
+	get_tree().paused = true
+	_loading_screen.begin_loading(target_scene_path)

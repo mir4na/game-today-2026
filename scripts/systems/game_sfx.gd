@@ -2,30 +2,29 @@ class_name GameSFX
 extends Node
 
 const SOUNDS: Dictionary = {
+	&"buttonclick_sfx": preload("res://assets/sfx/ButtonClick.mp3"),
 	&"carriage_creak": preload("res://assets/sfx/carriage_creak.ogg"),
-	&"button_hover": preload("res://assets/sfx/button_hover.mp3"),
 	&"clock_ticking": preload("res://assets/sfx/clock_ticking.ogg"),
 	&"coin_flip": preload("res://assets/sfx/coin_flip.ogg"),
 	&"footstep": preload("res://assets/sfx/footstep.mp3"),
 	&"ghost_whisper": preload("res://assets/sfx/ghost_whisper.ogg"),
 	&"grab": preload("res://assets/sfx/grab.ogg"),
+	&"hover_sfx": preload("res://assets/sfx/hover_sfx.mp3"),
 	&"magic_shimmer": preload("res://assets/sfx/magic_shimmer.ogg"),
 	&"mechanical_door": preload("res://assets/sfx/mechanical_door.ogg"),
-	&"paper_rustle": preload("res://assets/sfx/paper_rustle.ogg"),
+	&"paper_rustle": preload("res://assets/sfx/paper_rustle.mp3"),
 	&"radar_ping": preload("res://assets/sfx/radar_ping.ogg"),
 	&"speed_woosh": preload("res://assets/sfx/speed_woosh.ogg"),
 	&"stamp_impact": preload("res://assets/sfx/stamp_impact.ogg"),
 	&"success": preload("res://assets/sfx/success.ogg"),
 	&"time_warp": preload("res://assets/sfx/time_warp.ogg"),
 	&"typewriter": preload("res://assets/sfx/typewriter.ogg"),
-	&"ui_confirm": preload("res://assets/sfx/ui_confirm.ogg"),
 	&"ui_error": preload("res://assets/sfx/ui_error.ogg"),
 	&"wipe": preload("res://assets/sfx/wipe.ogg"),
 }
 
 const POOL_SIZE := 20
 const BUTTON_META := &"game_sfx_connected"
-const BUTTON_CONFIRM_SUPPRESS_META := &"suppress_global_confirm_sfx"
 
 var _players: Array[AudioStreamPlayer] = []
 var _loops: Dictionary = {}
@@ -161,13 +160,9 @@ func _register_button(button: BaseButton) -> void:
 
 func _on_button_hovered(button: BaseButton) -> void:
 	if is_instance_valid(button) and button.is_visible_in_tree() and not button.disabled:
-		_play_one_shot(&"button_hover", -14.0, 1.0, 0.025, 0.045)
+		_play_one_shot(&"hover_sfx", -14.0, 1.0, 0.025, 0.045)
 
 
 func _on_button_pressed(button: BaseButton) -> void:
-	if (
-		is_instance_valid(button)
-		and not button.disabled
-		and not bool(button.get_meta(BUTTON_CONFIRM_SUPPRESS_META, false))
-	):
-		_play_one_shot(&"ui_confirm", -10.0, 1.0, 0.02, 0.035)
+	if is_instance_valid(button) and button.is_visible_in_tree() and not button.disabled:
+		_play_one_shot(&"buttonclick_sfx", -10.0, 1.0, 0.02, 0.035)

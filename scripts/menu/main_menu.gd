@@ -63,7 +63,6 @@ func _ready() -> void:
 	_setup_mirrored_button_art(_quit_button)
 	_start_train_sfx()
 	_settings_ui.configure_menu_settings_mode(true)
-	_settings_ui.set_night_mode(false)
 	_settings_ui.configure_service_info(DEFAULT_MANIFEST.service_train_number, DEFAULT_MANIFEST.service_date_text)
 	var checkpoint: Dictionary = ShiftProgress.load_checkpoint()
 	var can_continue: bool = not checkpoint.is_empty() and not bool(checkpoint.get("completed", false))

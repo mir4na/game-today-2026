@@ -41,6 +41,7 @@ var _page_tween: Tween
 @onready var _fade_cover: ColorRect = %FadeCover
 @onready var _prompt_label: Label = %PromptLabel
 @onready var _hold_ring: IntroHoldRing = %HoldRing
+@onready var _loading_screen: LoadingScreenUI = %LoadingScreenUI
 
 
 func _ready() -> void:
@@ -164,14 +165,8 @@ func _finish_intro() -> void:
 
 
 func _open_game_scene() -> void:
-	var packed_scene: PackedScene
-	var status := ResourceLoader.load_threaded_get_status(GAME_SCENE_PATH)
-	if status == ResourceLoader.THREAD_LOAD_LOADED:
-		packed_scene = ResourceLoader.load_threaded_get(GAME_SCENE_PATH) as PackedScene
-	if packed_scene == null:
-		packed_scene = load(GAME_SCENE_PATH) as PackedScene
-	if packed_scene == null:
-		push_error("IntroCutscene could not load %s." % GAME_SCENE_PATH)
+	if not is_instance_valid(_loading_screen):
+		push_error("IntroCutscene/LoadingScreenUI scene instance is missing.")
 		_finishing = false
 		return
-	get_tree().change_scene_to_packed(packed_scene)
+	_loading_screen.begin_loading(GAME_SCENE_PATH)

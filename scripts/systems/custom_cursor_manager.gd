@@ -6,9 +6,9 @@ const POINT_SOURCE: Texture2D = preload("res://assets/ui/Cursor_Point.png")
 const HOLD_SOURCE: Texture2D = preload("res://assets/ui/Cursor_Hold.png")
 
 const REFERENCE_WINDOW_HEIGHT: float = 1080.0
-const CURSOR_LONG_SIDE_AT_REFERENCE: float = 26.0
-const MIN_CURSOR_LONG_SIDE: int = 18
-const MAX_CURSOR_LONG_SIDE: int = 40
+const CURSOR_LONG_SIDE_AT_REFERENCE: float = 30.0
+const MIN_CURSOR_LONG_SIDE: int = 20
+const MAX_CURSOR_LONG_SIDE: int = 46
 
 # Hotspots are stored relative to the source artwork, so resizing cannot move
 # the click point away from the fingertip/palm.

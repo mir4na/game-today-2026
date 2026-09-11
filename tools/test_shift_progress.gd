@@ -163,6 +163,7 @@ func _run() -> void:
 	game._finalize_day_shift()
 	_check(game._day_blessing_award.wrong_deduction == 20 * living_count, "Station settlement applies a flat 20 Blessings per wrong drop-off.")
 	game._enter_night()
+	_check(game._hud._next_stop_label.text == "THE END", "Night Service changes the clock sign destination to The End.")
 	game.state = AfterTheEndGame.GameState.NIGHT_PUZZLE
 	game._on_night_validation_finished(true, 1)
 	_check(Progress.load_checkpoint().day == 3, "Finishing the night checkpoints the next day.")

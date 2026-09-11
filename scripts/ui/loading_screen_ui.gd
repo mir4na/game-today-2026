@@ -49,6 +49,14 @@ func begin_loading(
 	if target_scene_path.is_empty():
 		_fail_loading("LoadingScreenUI/Target Scene Path is empty in the Inspector.")
 		return
+	var existing_status := ResourceLoader.load_threaded_get_status(target_scene_path)
+	if existing_status == ResourceLoader.THREAD_LOAD_LOADED:
+		_load_complete = true
+		set_process(true)
+		return
+	if existing_status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+		set_process(true)
+		return
 	var request_error: Error = ResourceLoader.load_threaded_request(
 		target_scene_path,
 		"PackedScene",
@@ -123,19 +131,23 @@ func _open_loaded_scene() -> void:
 	var previous_scene: Node = tree.current_scene
 	if previous_scene == null:
 		previous_scene = get_parent()
+	var transition_host: Node = self
+	if get_parent() is CanvasLayer and get_parent().get_parent() == previous_scene:
+		transition_host = get_parent()
 	# Keep the loaded gameplay still while the scene-authored black cover moves
 	# above it. This also prevents its timers from advancing during the reveal.
 	next_scene.process_mode = Node.PROCESS_MODE_DISABLED
 	tree.root.add_child(next_scene)
-	reparent(tree.root)
+	transition_host.reparent(tree.root)
 	tree.current_scene = next_scene
 	if is_instance_valid(previous_scene):
 		previous_scene.queue_free()
 	await tree.process_frame
 	await _play_transition(fade_from_black_animation)
+	tree.paused = false
 	if is_instance_valid(next_scene):
 		next_scene.process_mode = Node.PROCESS_MODE_INHERIT
-	queue_free()
+	transition_host.queue_free()
 
 
 func _play_transition(animation_name: StringName) -> void:

@@ -54,7 +54,7 @@ func _update_footsteps(delta: float) -> void:
 	if not movement_enabled or not is_on_floor() or absf(velocity.x) < walk_animation_threshold:
 		return
 	if _footstep_timer <= 0.0:
-		GameSFX.play(&"footstep", -16.0, 0.94, 0.055, 0.08)
+		GameSFX.play(&"footstep", -11.0, 0.94, 0.055, 0.08)
 		_footstep_timer = 0.42
 
 func _unhandled_input(event: InputEvent) -> void:

@@ -310,7 +310,7 @@ func _update_crowd_footsteps(delta: float) -> void:
 	)
 	var exchange_walking: bool = _elapsed >= exchange_start and _elapsed <= _departure_start
 	if not _ambient_actors.is_empty() or exchange_walking:
-		GameSFX.play(&"footstep", -24.0, 0.85, 0.08, 0.07)
+		GameSFX.play(&"footstep", -19.0, 0.85, 0.08, 0.07)
 	_crowd_footstep_timer = _motion_rng.randf_range(0.55, 0.72)
 
 

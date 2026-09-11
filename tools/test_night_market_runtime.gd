@@ -42,10 +42,15 @@ func _run() -> void:
 	assert(angel_entrance.modulate.a > 0.99, "The angel must enter after the gate is open.")
 	assert(gate_layer.modulate.a > 0.99, "The gate must be revealed only after fog conceals the set change.")
 	assert(is_equal_approx(left_door.position.x, 170.0) and is_equal_approx(right_door.position.x, 1110.0), "The gate must finish opening before purchases unlock.")
-	market.call(&"_set_item_highlight", 1, true)
+	market.call(&"_on_item_hover_changed", 1, true)
 	await create_timer(0.25).timeout
+	var veil_note_highlight := market.get_node("MarketActors/VeilNoteEntrance/VeilNoteFloat/VeilNoteHighlight") as Sprite2D
+	var radar_float := market.get_node("MarketActors/RadarEntrance/RadarFloat") as Node2D
 	var radar_highlight := market.get_node("MarketActors/RadarEntrance/RadarFloat/RadarHighlight") as Sprite2D
-	assert(radar_highlight.modulate.a > 0.7, "Focused items must reveal ItemHighlight.png.")
+	assert(radar_highlight.modulate.a > 0.95, "Hovered items must reveal a strong ItemHighlight glow.")
+	assert(veil_note_highlight.modulate.a < 0.05, "Pointer hover must override the previous keyboard-focused highlight.")
+	assert(radar_float.scale.x > 1.08, "Hovered items must visibly scale up.")
+	assert(market._item_hover_lifts[1] > 12.0, "Hovered items must lift above their resting float animation.")
 	if DisplayServer.get_name() != "headless":
 		await process_frame
 		root.get_texture().get_image().save_png("res://.godot/night_market_preview.png")
