@@ -107,7 +107,11 @@ func open_report(day: int, retained: int, anomaly_total: int, penalties: PackedS
 	_correct.text = reward_template % int(award.dropoff_reward)
 	_wrong.text = deduction_template % int(award.wrong_deduction)
 	_anomaly.text = deduction_template % int(award.anomaly_deduction)
-	_retained.text = retained_template % [retained, anomaly_total]
+	var retained_reward: int = int(award.get("retained_reward", 0))
+	if retained_reward > 0:
+		_retained.text = "%d / %d  (+%d)" % [retained, anomaly_total, retained_reward]
+	else:
+		_retained.text = retained_template % [retained, anomaly_total]
 	_net.text = amount_template % int(award.net_earnings)
 	_target.text = amount_template % int(award.pass_target)
 	var passed: bool = bool(award.passed)

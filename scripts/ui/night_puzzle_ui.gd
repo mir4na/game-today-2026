@@ -9,6 +9,7 @@ signal validation_finished(succeeded: bool, attempt_count: int)
 signal validation_impact_requested(succeeded: bool)
 signal day_restart_requested
 signal night_restart_requested
+signal give_up_requested
 
 @export_category("Inspector Copy")
 @export var instruction_text: String = "Drag each soul to a station."
@@ -433,14 +434,19 @@ func retry_tutorial_assignment_in_place() -> void:
 func _on_retry_night_pressed() -> void:
 	if not _validating or not _fail_panel.visible:
 		return
-	# Main replays the night-entry cutscene, so the board just steps aside.
+	# Retry in-place: no cutscene replay, no penalty — just reset the board.
 	_fail_shade.hide()
 	_fail_panel.hide()
-	night_restart_requested.emit()
+	_validating = false
+	_confirm_button.disabled = false
+	_error_label.text = ""
+	_selection_label.text = _current_instruction
 
 
 func _on_restart_day_pressed() -> void:
-	day_restart_requested.emit()
+	# Do not restart immediately — let Main show the night paycheck first
+	# so the player sees their result before reaching the hell ending.
+	give_up_requested.emit()
 
 
 func _focus_station_path() -> void:

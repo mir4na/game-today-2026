@@ -18,7 +18,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export var night_music_track: StringName = &"gameplay_night"
 @export_category("Day Progression")
 @export_range(1, 5, 1) var day_number: int = 1
-@export var day_pass_targets: PackedInt32Array = PackedInt32Array([300, 350, 400, 450, 500])
+@export var day_pass_targets: PackedInt32Array = PackedInt32Array([250, 300, 350, 400, 400])
 @export_category("Day Route")
 @export var day_route: PackedStringArray
 @export_category("Station Service")
@@ -47,7 +47,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export_range(1.0, 30.0, 0.5) var radar_anomaly_light_seconds: float = 4.0
 @export_category("Night Service")
 ## Maximum active service time before the final Night Service paycheck.
-@export_range(30.0, 600.0, 5.0) var night_service_duration_seconds: float = 300.0
+@export_range(30.0, 1200.0, 5.0) var night_service_duration_seconds: float = 600.0
 ## A correct route with missing Soul Records earns less than the full quota.
 @export var night_requires_all_soul_records: bool = true
 @export_category("Newspaper")
@@ -2659,9 +2659,11 @@ func _finalize_day_shift() -> void:
 		var correct_rate: int = int(_market_tool_state.get("blessings_per_correct_dropoff"))
 		var wrong_rate: int = int(_market_tool_state.get("blessings_per_wrong_dropoff"))
 		var anomaly_rate: int = int(_market_tool_state.get("blessings_per_incorrect_anomaly"))
+		var retained_rate: int = int(_market_tool_state.get("blessings_per_retained_anomaly"))
 		var tutorial_target: int = _get_day_pass_target()
 		var tutorial_net: int = (
 			correct_rate * _correct_drop_offs
+			+ retained_rate * _retained_anomalies
 			- wrong_rate * _wrong_drop_offs
 			- anomaly_rate * _incorrectly_stamped_anomalies.size()
 		)
@@ -2673,7 +2675,8 @@ func _finalize_day_shift() -> void:
 		_correct_drop_offs,
 		_wrong_drop_offs,
 		_incorrectly_stamped_anomalies.size(),
-		_get_day_pass_target()
+		_get_day_pass_target(),
+		_retained_anomalies
 	)
 	_active_modal = _shift_report_ui
 	if _shift_report_ui.has_method(&"set_external_input_locked"):
@@ -2688,14 +2691,7 @@ func _get_day_pass_target() -> int:
 
 func _on_shift_report_continue() -> void:
 	if state == GameState.COMPLETE:
-		if _night_paycheck_failed:
-			_shift_report_ui.hide()
-			_show_hell_ending(
-				"NIGHT PAYCHECK BELOW QUOTA",
-				int(_night_blessing_award.get("earned", 0)),
-				int(_night_blessing_award.get("pass_target", 0))
-			)
-			return
+		# Night paycheck only shows for a successful night; just continue.
 		_continue_after_night_paycheck()
 		return
 	if state != GameState.SHIFT_REPORT:
@@ -3175,15 +3171,46 @@ func _on_night_puzzle_day_restart() -> void:
 	_restart_game()
 
 
+func _on_night_puzzle_give_up() -> void:
+	if state != GameState.NIGHT_PUZZLE:
+		return
+	# Player gave up — call _complete_night_service with empty assignments.
+	# A failed night now goes directly to the hell ending (no paycheck shown).
+	_night_puzzle_ui.hide()
+	_complete_night_service({})
+
+
 func _on_night_puzzle_night_restart() -> void:
 	if state != GameState.NIGHT_PUZZLE:
 		return
-	# Replay the night-entry cutscene: fresh board, market, and service dial.
-	_night_puzzle_ui.hide()
+	_restart_night_shift()
+
+
+func _restart_night_shift() -> void:
+	if is_instance_valid(_pause_ui) and _pause_ui.visible:
+		_pause_ui.hide()
+	get_tree().paused = false
+	if is_instance_valid(_night_puzzle_ui):
+		_night_puzzle_ui.hide()
+	if is_instance_valid(_night_soul_record_ui):
+		_night_soul_record_ui.hide()
+	if is_instance_valid(_document_overlay):
+		_document_overlay.hide()
+	if is_instance_valid(_active_modal) and _active_modal != null:
+		_active_modal.hide()
 	_active_modal = null
+	if _night_statement_active:
+		_restore_night_record_camera()
+		_night_statement_active = false
+	if is_instance_valid(_inspected_passenger):
+		_inspected_passenger.set_inspection_paused(false)
+		_inspected_passenger = null
+	_finish_terminal_night_transition_world()
 	_night_world_prepared = false
 	_runtime_puzzle = null
-	_start_night_transition()
+	_enter_night(true, true)
+	_hud.set_cutscene_hidden(false)
+	_set_player_control_for_state()
 
 
 func _complete_night_service(assignments: Dictionary) -> void:
@@ -3224,10 +3251,19 @@ func _complete_night_service(assignments: Dictionary) -> void:
 	_night_paycheck_failed = not night_paycheck_passed
 	_hud.set_service_action_mode(true, false)
 	_dismiss_night_modal_for_paycheck()
+	# Failed assignments → straight to hell; no paycheck screen shown.
+	if not night_paycheck_passed:
+		state = GameState.COMPLETE
+		_show_hell_ending(
+			"NIGHT ASSIGNMENTS INCORRECT",
+			int(_night_blessing_award.get("earned", 0)),
+			night_pass_target
+		)
+		return
 	_active_modal = _shift_report_ui
 	state = GameState.COMPLETE
 	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
-	if night_paycheck_passed and day_number >= ShiftProgress.DAY_COUNT and not is_tutorial_mode:
+	if day_number >= ShiftProgress.DAY_COUNT and not is_tutorial_mode:
 		_save_night_completion()
 		if _progress_advanced:
 			_show_heaven_ending()
@@ -3238,8 +3274,7 @@ func _complete_night_service(assignments: Dictionary) -> void:
 		_night_blessing_award,
 		int(snapshot.get("blessings", 0))
 	)
-	if night_paycheck_passed:
-		_save_night_completion()
+	_save_night_completion()
 
 
 func _dismiss_night_modal_for_paycheck() -> void:
@@ -3329,7 +3364,8 @@ func _get_day_blessing_preview() -> Dictionary:
 		_correct_drop_offs,
 		_wrong_drop_offs,
 		_incorrectly_stamped_anomalies.size(),
-		_get_day_pass_target()
+		_get_day_pass_target(),
+		_retained_anomalies
 	)
 
 
@@ -3576,6 +3612,9 @@ func _on_hell_retry_requested() -> void:
 
 
 func _restart_game() -> void:
+	if state in [GameState.NIGHT, GameState.NIGHT_PUZZLE]:
+		_restart_night_shift()
+		return
 	if ShiftProgress.save_checkpoint(_shift_checkpoint):
 		_begin_scene_loading(MAIN_SCENE_PATH, true)
 
