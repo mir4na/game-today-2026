@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://c26j3kd6op5w3"
+path="res://.godot/imported/gameplay_siang.mp3-6fca89f16d71223c70099b67b5e83e70.mp3str"
+
+[deps]
+
+source_file="res://assets/music & bgm/gameplay_siang.mp3"
+dest_files=["res://.godot/imported/gameplay_siang.mp3-6fca89f16d71223c70099b67b5e83e70.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,24 @@
+[gd_scene load_steps=8 format=3 uid="uid://music_manager"]
+
+[ext_resource type="Script" path="res://scripts/systems/music_manager.gd" id="1_music"]
+[ext_resource type="AudioStream" path="res://assets/music & bgm/main menu.mp3" id="2_menu"]
+[ext_resource type="AudioStream" path="res://assets/music & bgm/intro_game.mp3" id="3_intro"]
+[ext_resource type="AudioStream" path="res://assets/music & bgm/gameplay_siang.mp3" id="4_day"]
+[ext_resource type="AudioStream" path="res://assets/music & bgm/bgm_gameplay_malam.mp3" id="5_night"]
+[ext_resource type="AudioStream" path="res://assets/music & bgm/outro_good_ending_heaven.mp3" id="6_heaven"]
+[ext_resource type="AudioStream" path="res://assets/music & bgm/outro_bad_ending_heaven.mp3" id="7_bad"]
+
+[node name="MusicManager" type="Node"]
+script = ExtResource("1_music")
+main_menu_stream = ExtResource("2_menu")
+intro_stream = ExtResource("3_intro")
+gameplay_day_stream = ExtResource("4_day")
+gameplay_night_stream = ExtResource("5_night")
+heaven_outro_stream = ExtResource("6_heaven")
+bad_ending_outro_stream = ExtResource("7_bad")
+music_volume = 0.5
+fade_duration = 1.2
+
+[node name="PlayerA" type="AudioStreamPlayer" parent="."]
+
+[node name="PlayerB" type="AudioStreamPlayer" parent="."]

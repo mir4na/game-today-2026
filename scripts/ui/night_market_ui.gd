@@ -45,6 +45,7 @@ signal continue_requested
 var _snapshot: Dictionary = {}
 var _continue_sent: bool = false
 var _input_locked: bool = false
+var _purchases_enabled: bool = true
 var _motion_time: float = 0.0
 var _market_tween: Tween
 var _highlight_tweens: Dictionary = {}
@@ -175,9 +176,9 @@ func _open_standalone_preview() -> void:
 		{
 			"blessings": preview_blessings,
 			"veil_notes": 0,
-			"radar_charges": 2,
+			"radar_charges": 0,
 			"radar_max_charges": 3,
-			"swift_charges": 1,
+			"swift_charges": 0,
 			"swift_max_charges": 5,
 			"veil_note_cost": 200,
 			"radar_charge_cost": 150,
@@ -206,14 +207,20 @@ func set_snapshot(snapshot: Dictionary) -> void:
 	_item_info_labels[0].text = veil_note_stock_template % [veil_note_count, veil_note_cost]
 	_item_info_labels[1].text = radar_stock_template % [radar_count, radar_maximum, radar_cost]
 	_item_info_labels[2].text = swift_stock_template % [swift_count, swift_maximum, swift_cost]
-	_item_buttons[0].disabled = _input_locked or veil_note_count >= 1 or blessings < veil_note_cost
-	_item_buttons[1].disabled = _input_locked or radar_count >= radar_maximum or blessings < radar_cost
-	_item_buttons[2].disabled = _input_locked or swift_count >= swift_maximum or blessings < swift_cost
+	_item_buttons[0].disabled = not _purchases_enabled or _input_locked or veil_note_count >= 1 or blessings < veil_note_cost
+	_item_buttons[1].disabled = not _purchases_enabled or _input_locked or radar_count >= radar_maximum or blessings < radar_cost
+	_item_buttons[2].disabled = not _purchases_enabled or _input_locked or swift_count >= swift_maximum or blessings < swift_cost
 	_continue_button.disabled = _input_locked
 	for index: int in range(_item_buttons.size()):
 		_item_entrances[index].self_modulate = Color(0.62, 0.62, 0.68, 1.0) if _item_buttons[index].disabled else Color.WHITE
 		if _item_buttons[index].disabled:
 			_set_item_highlight(index, false)
+
+
+func set_purchases_enabled(value: bool) -> void:
+	_purchases_enabled = value
+	if not _snapshot.is_empty():
+		set_snapshot(_snapshot)
 
 
 func show_purchase_result(result: Dictionary, snapshot: Dictionary) -> void:

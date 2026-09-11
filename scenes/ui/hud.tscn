@@ -100,7 +100,6 @@ text = "BLESSINGS 0"
 [node name="DebugNightButton" type="Button" parent="Root" unique_id=2040065380]
 unique_name_in_owner = true
 editor_description = "Temporary scene-authored shortcut for testing Night Shift. Hide or remove this node when the debug shortcut is no longer needed."
-visible = false
 layout_mode = 1
 offset_left = 10.0
 offset_top = 146.0

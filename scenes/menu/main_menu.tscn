@@ -181,71 +181,47 @@ tracks/7/keys = {
 tracks/8/type = "value"
 tracks/8/imported = false
 tracks/8/enabled = true
-tracks/8/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/TutorialButton:position")
+tracks/8/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/SettingsButton:position")
 tracks/8/interp = 2
 tracks/8/loop_wrap = true
 tracks/8/keys = {
 "times": PackedFloat32Array(0.16, 0.68),
 "transitions": PackedFloat32Array(0.55, 1),
 "update": 0,
-"values": [Vector2(0, 134), Vector2(-31, 640)]
+"values": [Vector2(0, 134), Vector2(38, 640)]
 }
 tracks/9/type = "value"
 tracks/9/imported = false
 tracks/9/enabled = true
-tracks/9/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/TutorialButton:rotation")
+tracks/9/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/SettingsButton:rotation")
 tracks/9/interp = 2
 tracks/9/loop_wrap = true
 tracks/9/keys = {
 "times": PackedFloat32Array(0.16, 0.68),
 "transitions": PackedFloat32Array(0.7, 1),
 "update": 0,
-"values": [0.0, -0.15]
+"values": [0.0, 0.23]
 }
 tracks/10/type = "value"
 tracks/10/imported = false
 tracks/10/enabled = true
-tracks/10/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/SettingsButton:position")
+tracks/10/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/QuitButton:position")
 tracks/10/interp = 2
 tracks/10/loop_wrap = true
 tracks/10/keys = {
 "times": PackedFloat32Array(0.21, 0.73),
 "transitions": PackedFloat32Array(0.55, 1),
 "update": 0,
-"values": [Vector2(0, 201), Vector2(38, 700)]
+"values": [Vector2(0, 201), Vector2(-22, 700)]
 }
 tracks/11/type = "value"
 tracks/11/imported = false
 tracks/11/enabled = true
-tracks/11/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/SettingsButton:rotation")
+tracks/11/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/QuitButton:rotation")
 tracks/11/interp = 2
 tracks/11/loop_wrap = true
 tracks/11/keys = {
 "times": PackedFloat32Array(0.21, 0.73),
-"transitions": PackedFloat32Array(0.7, 1),
-"update": 0,
-"values": [0.0, 0.23]
-}
-tracks/12/type = "value"
-tracks/12/imported = false
-tracks/12/enabled = true
-tracks/12/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/QuitButton:position")
-tracks/12/interp = 2
-tracks/12/loop_wrap = true
-tracks/12/keys = {
-"times": PackedFloat32Array(0.26, 0.78),
-"transitions": PackedFloat32Array(0.55, 1),
-"update": 0,
-"values": [Vector2(0, 268), Vector2(-22, 760)]
-}
-tracks/13/type = "value"
-tracks/13/imported = false
-tracks/13/enabled = true
-tracks/13/path = NodePath("UI/MenuPanel/MenuContent/ButtonStack/QuitButton:rotation")
-tracks/13/interp = 2
-tracks/13/loop_wrap = true
-tracks/13/keys = {
-"times": PackedFloat32Array(0.26, 0.78),
 "transitions": PackedFloat32Array(0.7, 1),
 "update": 0,
 "values": [0.0, -0.18]
@@ -265,6 +241,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2")
 script = ExtResource("1")
+music_track = &"main_menu"
 
 [node name="TrainSfx" type="AudioStreamPlayer" parent="." unique_id=1651061389]
 unique_name_in_owner = true
@@ -478,7 +455,7 @@ anchors_preset = 0
 offset_left = 230.0
 offset_top = 382.0
 offset_right = 540.0
-offset_bottom = 714.0
+offset_bottom = 647.0
 
 [node name="StartButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=1848000711]
 unique_name_in_owner = true
@@ -540,38 +517,13 @@ expand_mode = 1
 stretch_mode = 5
 flip_h = true
 
-[node name="TutorialButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=1138320554]
+[node name="SettingsButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=2090027751]
 unique_name_in_owner = true
-visible = false
 custom_minimum_size = Vector2(310, 64)
 layout_mode = 0
 offset_top = 134.0
 offset_right = 310.0
 offset_bottom = 198.0
-pivot_offset = Vector2(155, 32)
-theme_override_colors/font_color = Color(0.06, 0.045, 0.06, 1)
-theme_override_colors/font_focus_color = Color(0.06, 0.045, 0.06, 1)
-theme_override_colors/font_pressed_color = Color(0.12, 0.04, 0.09, 1)
-theme_override_colors/font_hover_color = Color(0.25, 0.055, 0.15, 1)
-theme_override_colors/font_disabled_color = Color(0.22, 0.22, 0.24, 0.75)
-theme_override_fonts/font = ExtResource("11_irish")
-theme_override_font_sizes/font_size = 27
-theme_override_styles/normal = SubResource("StyleBoxTexture_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxTexture_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxTexture_button_disabled")
-theme_override_styles/focus = SubResource("StyleBoxTexture_button_hover")
-text = "Tutorial"
-alignment = 0
-script = ExtResource("18_hover")
-
-[node name="SettingsButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=2090027751]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(310, 64)
-layout_mode = 0
-offset_top = 137.0
-offset_right = 310.0
-offset_bottom = 201.0
 pivot_offset = Vector2(155, 32)
 theme_override_colors/font_color = Color(0.06, 0.045, 0.06, 1)
 theme_override_colors/font_focus_color = Color(0.06, 0.045, 0.06, 1)
@@ -593,9 +545,9 @@ script = ExtResource("18_hover")
 unique_name_in_owner = true
 custom_minimum_size = Vector2(310, 64)
 layout_mode = 0
-offset_top = 268.0
+offset_top = 201.0
 offset_right = 310.0
-offset_bottom = 332.0
+offset_bottom = 265.0
 pivot_offset = Vector2(155, 32)
 theme_override_colors/font_color = Color(0.06, 0.045, 0.06, 1)
 theme_override_colors/font_pressed_color = Color(0.12, 0.04, 0.09, 1)
@@ -618,8 +570,6 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -64.0
-offset_bottom = -64.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -646,7 +596,6 @@ unique_name_in_owner = true
 
 [connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/StartButton" to="." method="_start_game"]
 [connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/ContinueButton" to="." method="_continue_game"]
-[connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/TutorialButton" to="." method="_start_tutorial"]
 [connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/SettingsButton" to="." method="_show_settings"]
 [connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/QuitButton" to="." method="_quit_game"]
 [connection signal="main_menu_requested" from="SettingsLayer/SettingsUI" to="." method="_close_settings"]

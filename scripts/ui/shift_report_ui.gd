@@ -78,6 +78,7 @@ var _typewriter_characters: float = 0.0
 var _typewriter_pause_remaining: float = 0.0
 var _typewriter_running: bool = false
 var _input_lock_remaining: float = 0.0
+var _external_input_locked: bool = false
 var _day_receipt_copy: Dictionary = {}
 
 
@@ -230,7 +231,7 @@ func _process(delta: float) -> void:
 		_advance_typewriter_target()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not visible or not _is_continue_input(event):
+	if not visible or _external_input_locked or not _is_continue_input(event):
 		return
 	get_viewport().set_input_as_handled()
 	if _input_lock_remaining > 0.0:
@@ -239,6 +240,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		_finish_typewriter()
 		return
 	_request_continue()
+
+
+func set_external_input_locked(value: bool) -> void:
+	_external_input_locked = value
 
 func _request_continue() -> void:
 	if _continue_sent or _typewriter_running:

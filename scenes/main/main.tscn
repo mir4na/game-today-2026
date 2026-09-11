@@ -246,9 +246,12 @@ passenger_identity_profiles = Array[ExtResource("2_08tbl")]([ExtResource("11"), 
 puzzle_resource = ExtResource("17")
 passenger_scene = ExtResource("34")
 manifest_config = ExtResource("37")
+day_music_track = &"gameplay_day"
+night_music_track = &"gameplay_night"
 day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere")
 station_travel_durations_seconds = PackedFloat32Array(120, 120, 120, 120)
 debug_print_anomaly_roster = true
+tutorial_day_route = PackedStringArray("Alderwick", "Brambleford")
 
 [node name="MarketToolState" parent="." unique_id=1541596097 instance=ExtResource("40_market_state")]
 unique_name_in_owner = true

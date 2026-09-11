@@ -23,6 +23,13 @@ func _run() -> void:
 	var market := MarketScene.instantiate() as MarketToolState
 	root.add_child(market)
 	_check(
+		market.blessings == 0
+		and market.veil_notes == 0
+		and market.radar_charges == 0
+		and market.swift_charges == 0,
+		"A fresh run must start with zero Blessings and zero owned tools."
+	)
+	_check(
 		market.veil_note_cost == 200
 		and market.radar_charge_cost == 150
 		and market.swift_charge_cost == 75,

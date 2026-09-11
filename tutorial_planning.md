@@ -72,7 +72,7 @@ This tutorial is a guided run that teaches the current service loop inside the r
    - Interaction is enabled.
    - Player walks to any passenger and presses `E`.
    - The document UI opens.
-   - Tutorial text explains checking the visible passenger, ID, ticket date, train number, and destination.
+   - Tutorial text explains checking the visible passenger, ID, ticket date, and destination.
 
 7. **Stamping**
    - Tutorial explains that the correct station stamp is permanent.
@@ -85,41 +85,51 @@ This tutorial is a guided run that teaches the current service loop inside the r
      - Rules explains scoring;
      - Anomaly Signs helps identify passengers to keep aboard for Night Service.
 
-9. **Newspaper clue**
-   - Player reads the morning newspaper.
-   - Tutorial explains that the newspaper can reveal an anomaly if it names someone aboard as already dead.
+9. **Two-minute stamp test**
+   - The Inspector announces a test, then Abby, Reff, Ratta, Denta, and Mecca spawn near the player.
+   - Player stamps Reff, Ratta, and Denta; Abby and Mecca are anomalies and must remain unstamped.
+   - The test lasts one clock turn, or two minutes.
+   - Stamping either anomaly or running out of time clears the temporary stamps and restarts from the Inspector's test dialogue.
+   - Success displays: `Good job. You are 50 percent ready to begin your internship.`
 
 10. **Day service sign-off**
-    - Player uses the service action button above the Guidebook.
-    - The signature UI opens.
-    - Player traces the mark.
-    - If accepted, the train fast-forwards to the next station.
-    - Tutorial then lets the player finish the rest of day service normally.
+    - The service action button fades in and receives the spotlight.
+    - The Inspector explains that signing lets a worker who finished early fast-forward to the next assignment.
+    - Player opens Sign Service and must successfully trace the mark.
+    - Brambleford is the tutorial's terminal stop, so the accepted signature starts its station sequence and continues directly into the night transition.
 
-11. **Terminal transition and Night Market**
+11. **Terminal transition, Paycheck, and Night Market**
     - At the terminal, daylight service ends.
     - Paycheck appears.
+    - The Inspector explains that correct daytime work earns Blessings for useful tools.
+    - Continuing the Inspector dialogue resumes the transition automatically.
     - The train enters fog/whiteout.
     - Night Market opens during the whiteout.
-    - Tutorial explains Veil Note, Radar, and Swiftstep Soles with current price/stock rules.
+    - Tutorial explains that Veil Note, Radar, and Swiftstep can make the internship easier.
+    - Purchases are disabled during training; the player only continues with Begin.
 
 12. **Night Service**
     - After the market, the train exits the fog at night.
-    - Player inspects remaining souls.
-    - Correct hidden statements are pulled into the ledger.
-    - The ledger starts empty and fills only when the player finds statements.
+    - The Inspector welcomes the player and gives a short two-part briefing.
+    - Abby's Departure Statement is already stored as the ledger example.
+    - A pointer directs the player to inspect Mecca, the only soul used for this lesson.
+    - The Soul Record explanation identifies the biography and its hidden Departure Statement.
+    - Mecca's correct statement is highlighted red for the tutorial and unlocks after the explanation.
+    - Clicking it pulls the statement into the ledger, then the Soul Record closes.
+    - The Inspector spotlights the ledger/map button and asks the player to open it.
 
 13. **Station path assignment**
-    - Player opens the station path/ledger button.
-    - Player drags found souls from the ledger to stations.
+    - The open map explains the station path and the two stored soul clues.
+    - Player drags Abby and Mecca from the ledger to their correct stations.
     - One station can hold more than one soul; some stations can remain empty depending on the puzzle.
-    - Player finalizes assignments and sees scan/paycheck feedback.
+    - A wrong Finalize returns to the ledger explanation checkpoint while keeping the map open.
+    - A correct Finalize completes the tutorial and starts a clean Day 1 run.
 
 ## Dialogue coverage notes
 
 The tutorial dialogue should directly cover these points because they are easy to miss during first play:
 
-- Stamps are permanent, so the player should compare the passenger body, ID, ticket date, train number, route, and destination before stamping.
+- Stamps are permanent, so the player should compare the passenger body, ID, ticket date, route, and destination before stamping.
 - Ordinary passengers leave during day service; suspicious/anomalous passengers should remain aboard for Night Service.
 - The Guidebook is split by purpose: Today’s Service for route targets, Rules for Blessing math, and Anomaly Signs for evidence.
 - The newspaper can reveal death-related anomalies that documents alone do not prove.
@@ -146,7 +156,8 @@ Every tutorial beat has its own `Marker2D` under `DialogueMarkers` in `scenes/tu
 | Day service handoff | `DayService` | Returns guidance to the gameplay view. |
 | Night Market | `NightMarket` | Leaves the item cards and Begin action visible. |
 | Night soul inspection | `NightWalk` | Leaves the soul and biography interaction visible. |
-| Statement found | `NightRecord` | Leaves the ledger feedback visible. |
+| Statement found | `NightRecord` | Leaves the Soul Record biography and red tutorial statement visible. |
+| Ledger checkpoint | `NightLedger` | Leaves the highlighted ledger/map button visible and clickable. |
 | Station path | `NightMap` | Leaves station nodes and drag targets visible. |
 
 `Default` is only a fallback if a marker path is missing. The live Inspector portrait crop, bubble, tail, and text layout remain under `DialogueDock`.

@@ -45,6 +45,8 @@ var _error_flash_material: ShaderMaterial
 var _presentation_tween: Tween
 var _record_rest_position: Vector2
 var _closing: bool = false
+var _tutorial_interaction_locked: bool = false
+var _tutorial_highlight_statement: bool = false
 
 @onready var _shade: ColorRect = %Shade
 @onready var _error_flash: ColorRect = %ErrorFlash
@@ -95,6 +97,13 @@ func open_record(data: PassengerData, puzzle: DeparturePuzzleData, already_recor
 	_build_biography(puzzle.get_biography_for_passenger(_passenger_name))
 	show()
 	_present_record()
+
+
+func set_tutorial_guidance(interaction_locked: bool, highlight_statement: bool) -> void:
+	_tutorial_interaction_locked = interaction_locked
+	_tutorial_highlight_statement = highlight_statement
+	if is_node_ready():
+		_render_biography()
 
 
 func request_close() -> void:
@@ -149,7 +158,10 @@ func _render_biography() -> void:
 				])
 				continue
 			var color: Color = sentence_color
-			if sentence_index == _hovered_sentence_index:
+			if (
+				sentence_index == _hovered_sentence_index
+				or (_tutorial_highlight_statement and sentence == _correct_statement)
+			):
 				color = hovered_sentence_color
 			rendered.append("[url=%d][color=#%s]%s[/color][/url]" % [
 				sentence_index,
@@ -178,6 +190,8 @@ func _on_sentence_hover_ended(meta: Variant) -> void:
 
 
 func _on_sentence_clicked(meta: Variant) -> void:
+	if _tutorial_interaction_locked:
+		return
 	var index: int = int(str(meta))
 	if not _sentence_by_index.has(index):
 		return

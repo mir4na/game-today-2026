@@ -227,6 +227,12 @@ func _run() -> void:
 	intro.closing_fade_duration = 0.01
 	intro._finish_intro()
 	game = await _wait_for_game()
+	_check(game.is_tutorial_mode, "New Game must continue from the story intro into the tutorial.")
+	var tutorial_game := game
+	game.process_mode = Node.PROCESS_MODE_INHERIT
+	game._tutorial_director.call(&"_start_day_one")
+	game = await _wait_for_reloaded_game(tutorial_game)
+	_check(not game.is_tutorial_mode, "Skipping the tutorial must reload a clean standard Day 1 run.")
 	_check(
 		game.day_number == 1
 		and game._market_tool_state.get("blessings") == 0

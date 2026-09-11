@@ -13,6 +13,9 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export var puzzle_resource: Resource
 @export var passenger_scene: PackedScene
 @export var manifest_config: DailyManifestConfig
+@export_category("Music")
+@export var day_music_track: StringName = &"gameplay_day"
+@export var night_music_track: StringName = &"gameplay_night"
 @export_category("Day Progression")
 @export_range(1, 5, 1) var day_number: int = 1
 @export var day_pass_targets: PackedInt32Array = PackedInt32Array([300, 350, 400, 450, 500])
@@ -52,6 +55,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export_category("Debug")
 @export var debug_print_anomaly_roster: bool = false
 @export var is_tutorial_mode: bool = false
+@export var tutorial_day_route: PackedStringArray = PackedStringArray(["Alderwick", "Brambleford"])
 @export_category("Inspector Copy")
 @export_multiline var night_shift_instruction: String
 @export_category("Night Statement Dialogue")
@@ -116,6 +120,7 @@ var _station_railroad_was_visible: bool = true
 var _train_occupants_station_rest_position: Vector2
 var _inspected_passenger: Passenger
 var _night_statement_active: bool = false
+var _tutorial_night_inspection_target_name: String = ""
 var _night_record_camera_rest_offset: Vector2
 var _night_record_camera_target_offset: Vector2
 var _night_record_camera_tween: Tween
@@ -197,6 +202,7 @@ var _bloom_material: ShaderMaterial
 
 func _ready() -> void:
 	_consume_tutorial_mode_request()
+	_play_music(day_music_track)
 	_configure_bloom_material()
 	_train_occupants_station_rest_position = _train_occupants.position
 	_night_record_camera_rest_offset = _gameplay_camera.offset
@@ -265,6 +271,8 @@ func _ready() -> void:
 
 
 func _prepare_tutorial_clean_start() -> void:
+	if tutorial_day_route.size() >= 2:
+		day_route = tutorial_day_route.duplicate()
 	state = GameState.DAY
 	_interactables.clear()
 	_daily_manifest.clear()
@@ -884,7 +892,10 @@ func spawn_tutorial_passenger(
 ## Spawns the five tutorial exam passengers (three ordinary souls bound for
 ## the next stop, one portrait mismatch, one invalid ticket) on free seats,
 ## preferring the player's carriage. Returns the spawned passengers.
-func spawn_tutorial_exam_group() -> Array[Passenger]:
+func spawn_tutorial_exam_group(
+	configured_names: PackedStringArray = PackedStringArray(["Abby", "Reff", "Ratta", "Denta", "Mecca"]),
+	anomaly_names: PackedStringArray = PackedStringArray(["Abby", "Mecca"])
+) -> Array[Passenger]:
 	var spawned: Array[Passenger] = []
 	if not is_tutorial_mode:
 		return spawned
@@ -898,16 +909,30 @@ func spawn_tutorial_exam_group() -> Array[Passenger]:
 	var far_stop: String = day_route[clampi(_route_index + 2, 0, day_route.size() - 1)]
 	for slot_index: int in range(5):
 		var profile: PassengerIdentityProfile = passenger_identity_profiles[slot_index]
-		var seat_slot := _find_available_seat(player_carriage)
+		var seat_slot: Marker2D
+		# Fill the player's carriage first, then the adjacent carriages. This keeps
+		# the group close while guaranteeing all five have a visible spawn point.
+		for carriage_offset: int in range(4):
+			var candidate_carriage: int = ((player_carriage - 1 + carriage_offset) % 4) + 1
+			seat_slot = _find_available_seat(candidate_carriage)
+			if seat_slot != null:
+				break
 		if seat_slot == null:
 			break
 		var data := PassengerData.create_from_identity(profile)
 		if data == null:
 			continue
+		var exam_name: String = (
+			configured_names[slot_index].strip_edges()
+			if slot_index < configured_names.size()
+			else "Passenger %d" % (slot_index + 1)
+		)
+		data.passenger_name = exam_name
+		data.short_name = exam_name
 		data.origin_station = _current_day_station()
 		data.destination_station = next_stop
 		data.required_dropoff_station = next_stop
-		data.ticket_owner = data.short_name
+		data.ticket_owner = exam_name
 		data.ticket_train_number = manifest_config.service_train_number.strip_edges()
 		data.ticket_service_date = manifest_config.service_date_text.strip_edges()
 		data.ticket_day_code = manifest_config.ticket_day_code.strip_edges()
@@ -916,17 +941,19 @@ func spawn_tutorial_exam_group() -> Array[Passenger]:
 		data.initially_on_train = true
 		data.ai_behavior = "still"
 		data.ai_interval_seconds = 999.0
-		# Both anomalies ride past the exam station so only the three stamped
-		# ordinary passengers ever depart at Brambleford.
-		if slot_index == 3:
+		# Abby and Mecca remain aboard for Night Service. Every ticket still uses
+		# this train's valid service code; their anomaly evidence is elsewhere.
+		if anomaly_names.has(exam_name) and exam_name == "Abby":
+			data.is_dead = true
 			data.anomaly_type = "portrait_mismatch"
 			data.destination_station = far_stop
 			data.required_dropoff_station = far_stop
-			var donor := PassengerData.create_from_identity(passenger_identity_profiles[0])
+			var donor := PassengerData.create_from_identity(passenger_identity_profiles[1])
 			if donor != null and donor.id_photo != null:
 				data.id_photo = donor.id_photo
-				data.id_photo_owner = donor.passenger_name
-		elif slot_index == 4:
+				data.id_photo_owner = "Reff"
+		elif anomaly_names.has(exam_name) and exam_name == "Mecca":
+			data.is_dead = true
 			data.anomaly_type = "time_invalid_ticket"
 			data.destination_station = far_stop
 			data.required_dropoff_station = far_stop
@@ -946,6 +973,58 @@ func spawn_tutorial_exam_group() -> Array[Passenger]:
 	_refresh_player_interactables(true)
 	_update_passenger_minimap()
 	return spawned
+
+
+func reset_tutorial_exam_group(exam_passengers: Array) -> void:
+	if not is_tutorial_mode:
+		return
+	var exam_names := PackedStringArray()
+	for value: Variant in exam_passengers:
+		var passenger := value as Passenger
+		if not is_instance_valid(passenger) or passenger.data == null:
+			continue
+		var passenger_name: String = passenger.data.passenger_name
+		exam_names.append(passenger_name)
+		_station_assignment.erase(passenger_name)
+		passenger.data.stamped_station = ""
+		passenger.data.stamp_ticket_position = Vector2.ZERO
+		_incorrectly_stamped_anomalies.erase(passenger_name)
+	var retained_penalties := PackedStringArray()
+	for penalty: String in _penalty_log:
+		var belongs_to_exam: bool = false
+		for passenger_name: String in exam_names:
+			if penalty.begins_with(passenger_name + ":"):
+				belongs_to_exam = true
+				break
+		if not belongs_to_exam:
+			retained_penalties.append(penalty)
+	_penalty_log = retained_penalties
+	if _active_modal == _document_overlay and _document_overlay.visible:
+		_close_exam_document_and_restore_tutorial()
+	elif is_instance_valid(_tutorial_director) and (_tutorial_director as Control).visible:
+		_active_modal = _tutorial_director as Control
+		_player.movement_enabled = false
+		_player.interaction_enabled = false
+	_refresh_day_blessing_hud()
+	_refresh_guidebook_progress()
+
+
+func _close_exam_document_and_restore_tutorial() -> void:
+	await _document_overlay.request_close()
+	if not is_tutorial_mode or not is_instance_valid(_tutorial_director):
+		return
+	var tutorial_control := _tutorial_director as Control
+	if tutorial_control.visible:
+		_active_modal = tutorial_control
+		_player.movement_enabled = false
+		_player.interaction_enabled = false
+
+
+func continue_tutorial_paycheck() -> void:
+	if is_tutorial_mode and state == GameState.SHIFT_REPORT:
+		if _shift_report_ui.has_method(&"set_external_input_locked"):
+			_shift_report_ui.call(&"set_external_input_locked", false)
+		_on_shift_report_continue()
 
 
 ## Releases the tutorial modal so the HUD service button and its shortcut work.
@@ -1132,7 +1211,7 @@ func _validate_passenger_resource_constraints() -> void:
 		if data.ticket_issue_type != PassengerData.TICKET_ISSUE_NONE:
 			push_error("Passenger %s has an unsupported ticket issue: %s." % [data.passenger_name, String(data.ticket_issue_type)])
 		elif data.ticket_train_number != service_train_number:
-			push_error("Regular passenger %s carries train number %s instead of %s." % [data.passenger_name, data.ticket_train_number, service_train_number])
+			push_error("Passenger %s must carry the active service number %s, received %s." % [data.passenger_name, service_train_number, data.ticket_train_number])
 		for anomaly_key: StringName in traits:
 			trait_counts[anomaly_key] = int(trait_counts.get(anomaly_key, 0)) + 1
 	if deceased_count != manifest_config.deceased_passenger_count:
@@ -1489,11 +1568,23 @@ func _refresh_player_interactables(immediate: bool = false) -> void:
 		if not is_instance_valid(interactable):
 			continue
 		var is_allowed: bool = not _service_seal_active or _is_seal_allowed_interactable(interactable)
+		if (
+			is_allowed
+			and is_tutorial_mode
+			and state == GameState.NIGHT
+			and interactable is Passenger
+			and not _tutorial_night_inspection_target_name.is_empty()
+		):
+			var tutorial_passenger := interactable as Passenger
+			is_allowed = (
+				tutorial_passenger.data != null
+				and tutorial_passenger.data.short_name == _tutorial_night_inspection_target_name
+			)
 		interactable.set_interaction_locked(not is_allowed, immediate)
 		# Locked passengers remain proximity targets so they can explain the
 		# maintenance block from their own dialogue anchor. The input handler below
 		# still prevents their documents from opening until the seat is clean.
-		if is_allowed or interactable is Passenger:
+		if is_allowed or (interactable is Passenger and _service_seal_active):
 			available_interactables.append(interactable)
 	_player.set_interactables(available_interactables)
 
@@ -1505,6 +1596,15 @@ func _is_seal_allowed_interactable(interactable: Interactable) -> bool:
 
 func _on_interaction_pressed(interactable: Interactable) -> void:
 	if _service_seal_active and not _is_seal_allowed_interactable(interactable):
+		return
+	if (
+		is_tutorial_mode
+		and state == GameState.NIGHT
+		and interactable is Passenger
+		and not _tutorial_night_inspection_target_name.is_empty()
+		and (interactable as Passenger).data != null
+		and (interactable as Passenger).data.short_name != _tutorial_night_inspection_target_name
+	):
 		return
 	interactable.interact()
 
@@ -1620,6 +1720,79 @@ func _on_night_statement_recorded(passenger_name: String, statement: String) -> 
 		revealed_passenger.set_night_identity_revealed(true)
 	_night_puzzle_ui.refresh_collected_statements(_collected_departure_statements)
 	_emit_tutorial_event(&"night_statement_recorded", {"passenger": passenger_name, "statement": statement})
+
+
+## Sets up the compact tutorial case after the night world has generated its
+## runtime clues. One soul is already in the ledger; only the requested target
+## remains interactable for the Soul Record lesson.
+func prepare_tutorial_night_lesson(
+	prefilled_name: String,
+	inspection_name: String
+) -> Dictionary:
+	var result: Dictionary = {}
+	if not is_tutorial_mode or state != GameState.NIGHT:
+		return result
+	var puzzle: DeparturePuzzleData = _get_departure_puzzle()
+	if puzzle == null:
+		return result
+	var dead_passengers: Array[Passenger] = []
+	for passenger: Passenger in _passengers:
+		if (
+			_is_active_passenger(passenger)
+			and passenger.data != null
+			and passenger.data.is_dead
+		):
+			dead_passengers.append(passenger)
+	if dead_passengers.is_empty():
+		return result
+	var prefilled: Passenger = _find_passenger_in_list(dead_passengers, prefilled_name)
+	var target: Passenger = _find_passenger_in_list(dead_passengers, inspection_name)
+	if prefilled == null:
+		prefilled = dead_passengers[0]
+	if target == null or target == prefilled:
+		for candidate: Passenger in dead_passengers:
+			if candidate != prefilled:
+				target = candidate
+				break
+	if target == null:
+		target = prefilled
+	var stored_statement: String = puzzle.get_statement_for_passenger(prefilled.data.short_name)
+	if not stored_statement.is_empty():
+		_collected_departure_statements[prefilled.data.short_name] = stored_statement
+		prefilled.set_night_identity_revealed(true)
+	_tutorial_night_inspection_target_name = target.data.short_name
+	_night_puzzle_ui.refresh_collected_statements(_collected_departure_statements)
+	_refresh_player_interactables(true)
+	result["prefilled_name"] = prefilled.data.short_name
+	result["inspection_name"] = target.data.short_name
+	result["inspection_target"] = target
+	return result
+
+
+func _find_passenger_in_list(passengers: Array[Passenger], passenger_name: String) -> Passenger:
+	for passenger: Passenger in passengers:
+		if passenger.data != null and passenger.data.short_name.casecmp_to(passenger_name) == 0:
+			return passenger
+	return null
+
+
+func set_tutorial_night_record_guidance(interaction_locked: bool, highlight_statement: bool) -> void:
+	if is_tutorial_mode and is_instance_valid(_night_soul_record_ui):
+		_night_soul_record_ui.call(
+			&"set_tutorial_guidance",
+			interaction_locked,
+			highlight_statement
+		)
+
+
+func close_tutorial_night_record() -> void:
+	if is_tutorial_mode:
+		_close_night_statement_dialogue()
+
+
+func retry_tutorial_night_assignment() -> void:
+	if is_tutorial_mode and state == GameState.NIGHT_PUZZLE:
+		_night_puzzle_ui.call(&"retry_tutorial_assignment_in_place")
 
 
 func _on_night_statement_feedback_requested(succeeded: bool) -> void:
@@ -2597,6 +2770,8 @@ func _finalize_day_shift() -> void:
 		_day_blessing_award["passed"] = true
 		_day_blessing_award["debug_pass_override"] = true
 	_active_modal = _shift_report_ui
+	if _shift_report_ui.has_method(&"set_external_input_locked"):
+		_shift_report_ui.call(&"set_external_input_locked", is_tutorial_mode)
 	_shift_report_ui.open_report(day_number, _retained_anomalies, _get_dead_passenger_data().size(), _penalty_log, _day_blessing_award)
 	_emit_tutorial_event(&"shift_report_opened")
 
@@ -2713,10 +2888,12 @@ func _on_night_transition_finished() -> void:
 	_finish_terminal_night_transition_world()
 	_enter_night(false, false)
 	_hud.set_cutscene_hidden(false)
-	_emit_tutorial_event(&"night_started")
-	if not night_shift_instruction.strip_edges().is_empty():
-		_hud.notify(night_shift_instruction, 5.0)
 	_set_player_control_for_state()
+	if not is_tutorial_mode and not night_shift_instruction.strip_edges().is_empty():
+		_hud.notify(night_shift_instruction, 5.0)
+	# Emit after the normal control handoff so TutorialDirector's dialogue lock
+	# remains authoritative for the welcome and inspection briefing.
+	_emit_tutorial_event(&"night_started")
 
 
 func _finish_terminal_night_transition_world() -> void:
@@ -2742,6 +2919,8 @@ func _open_night_market() -> void:
 	_hud.set_prompt("")
 	_active_modal = _night_market_ui
 	_emit_tutorial_event(&"night_market_opened")
+	if _night_market_ui.has_method(&"set_purchases_enabled"):
+		_night_market_ui.call(&"set_purchases_enabled", not is_tutorial_mode)
 	_night_market_ui.call(
 		&"open_market",
 		_market_tool_state.call(&"get_snapshot"),
@@ -2914,6 +3093,7 @@ func _carriage_has_anomaly(carriage_number: int) -> bool:
 func _enter_night(enable_controls: bool = true, show_instruction: bool = true) -> void:
 	_prepare_night_world()
 	state = GameState.NIGHT
+	_play_music(night_music_track)
 	_night_service_elapsed_seconds = 0.0
 	_night_service_expired = false
 	_night_service_timeout_presented = false
@@ -3078,6 +3258,10 @@ func _on_night_validation_finished(succeeded: bool, attempt_count: int) -> void:
 		return
 	if not succeeded:
 		# The board stays open behind its own retry/day-restart panel.
+		_emit_tutorial_event(&"night_assignment_failed", attempt_count)
+		return
+	if is_tutorial_mode:
+		_emit_tutorial_event(&"night_assignment_succeeded", attempt_count)
 		return
 	_complete_night_service(_night_puzzle_ui.get_assignments_snapshot())
 
@@ -3492,6 +3676,12 @@ func _restart_game() -> void:
 
 func _return_to_main_menu() -> void:
 	_begin_scene_loading(MAIN_MENU_SCENE_PATH)
+
+
+func _play_music(track_id: StringName, loop: bool = true) -> void:
+	var music_manager := get_node_or_null("/root/MusicManager")
+	if music_manager != null and music_manager.has_method(&"play"):
+		music_manager.call(&"play", track_id, loop)
 
 
 func _begin_scene_loading(

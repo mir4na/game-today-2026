@@ -5,6 +5,9 @@ extends Control
 signal retry_requested
 signal main_menu_requested
 
+@export_category("Music")
+@export var music_track: StringName = &"ending_bad"
+@export var music_loops: bool = false
 @export_range(0.1, 4.0, 0.05) var fade_in_seconds: float = 0.65
 @export_range(0.5, 8.0, 0.05) var fall_seconds: float = 2.8
 @export_range(0.0, 8.0, 0.05) var choice_delay_seconds: float = 2.4
@@ -43,6 +46,7 @@ func _ready() -> void:
 
 
 func play_ending(reason: String, paycheck: int = 0, required: int = 0) -> void:
+	_play_scene_music()
 	_sequence_id += 1
 	var sequence: int = _sequence_id
 	_motion_time = 0.0
@@ -84,6 +88,12 @@ func play_ending(reason: String, paycheck: int = 0, required: int = 0) -> void:
 	_retry_button.disabled = false
 	_menu_button.disabled = false
 	_retry_button.grab_focus()
+
+
+func _play_scene_music() -> void:
+	var music_manager := get_node_or_null("/root/MusicManager")
+	if music_manager != null and music_manager.has_method(&"play"):
+		music_manager.call(&"play", music_track, music_loops)
 
 
 func _process(delta: float) -> void:

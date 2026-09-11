@@ -116,6 +116,22 @@ func set_night_mode(enabled: bool) -> void:
 		_show_today()
 
 
+func show_section(section: int) -> void:
+	match section:
+		SECTION_TODAY:
+			_show_today()
+		SECTION_RULES:
+			_show_procedure()
+		SECTION_ANOMALIES:
+			_show_anomalies()
+
+
+func set_tabs_locked(locked: bool) -> void:
+	_today_button.disabled = locked
+	_procedure_button.disabled = locked
+	_anomalies_button.disabled = locked
+
+
 func update_shift_progress(route_index: int, net_earnings: int, passenger_count: int, boarded_today: int, stamped_aboard: int) -> void:
 	var next_route_index: int = clampi(route_index, 0, maxi(0, _route_stations.size() - 1))
 	if _route_index == next_route_index and _net_earnings == net_earnings and _passenger_count == passenger_count and _boarded_today == boarded_today and _stamped_aboard == stamped_aboard:
