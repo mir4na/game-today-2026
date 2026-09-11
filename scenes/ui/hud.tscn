@@ -97,21 +97,6 @@ theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 14
 text = "BLESSINGS 0"
 
-[node name="DebugNightButton" type="Button" parent="Root" unique_id=2040065380]
-unique_name_in_owner = true
-editor_description = "Temporary scene-authored shortcut for testing Night Shift. Hide or remove this node when the debug shortcut is no longer needed."
-layout_mode = 1
-offset_left = 10.0
-offset_top = 146.0
-offset_right = 206.0
-offset_bottom = 188.0
-tooltip_text = "Skip daylight and enter Night Shift"
-focus_mode = 0
-mouse_default_cursor_shape = 2
-theme_override_font_sizes/font_size = 14
-text = "TEMP: NIGHT SHIFT"
-script = ExtResource("24_hover")
-
 [node name="MaintenanceTrackers" type="Control" parent="Root" unique_id=527339909]
 editor_description = "Off-screen minigame pointers. The high Z index keeps these above the Night Market item bar."
 visible = false
@@ -823,7 +808,6 @@ mouse_filter = 2
 texture = ExtResource("28_t0png")
 expand_mode = 1
 
-[connection signal="pressed" from="Root/DebugNightButton" to="." method="_on_debug_night_button_pressed"]
 [connection signal="pressed" from="Root/GuidebookButton" to="." method="_on_guidebook_button_pressed"]
 [connection signal="pressed" from="Root/ServiceActionButton" to="." method="_on_service_action_button_pressed"]
 [connection signal="tool_requested" from="Root/MarketItemBar/RadarSlot" to="." method="_on_market_item_requested"]

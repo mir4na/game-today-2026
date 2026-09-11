@@ -111,8 +111,10 @@ func mark_committed() -> void:
 ## tween whose chained callback would otherwise commit the rejected stamp.
 func reset_commit() -> void:
 	_kill_tween(_drag_tween)
+	_kill_tween(_drawer_tween)
 	_dragging = false
 	_committed = false
+	_drag_preview.position = Vector2.ZERO
 	_drag_preview.hide()
 	_drag_preview.scale = Vector2.ONE
 	_drag_preview.rotation = 0.0
