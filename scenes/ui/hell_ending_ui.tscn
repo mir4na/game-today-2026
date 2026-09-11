@@ -88,6 +88,8 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 0
 script = ExtResource("1_script")
+music_track = &"ending_bad"
+music_loops = false
 
 [node name="SceneRoot" type="Control" parent="."]
 unique_name_in_owner = true

@@ -190,19 +190,13 @@ Ada 5 jenis anomali — semuanya adalah orang yang sudah meninggal tapi menyamar
 
 ---
 
-#### 5. Wrong Train Boarder
-
-Selain anomali, ada penumpang hidup yang naik kereta yang salah — tiketnya menunjukkan nomor kereta yang berbeda dari kereta yang sedang berjalan. Penumpang ini tetap harus dicap (bukan anomali), tapi **wajib diturunkan di stasiun berikutnya** setelah dia naik, bukan di stasiun tujuan yang tertulis di tiketnya.
-
----
-
-#### 6. Route Sign-Off
+#### 5. Route Sign-Off
 
 Setelah selesai memeriksa penumpang di satu segmen perjalanan, player menandatangani rute sebagai konfirmasi bahwa tugasnya di segmen itu sudah selesai. Player men-trace pola tanda tangan di layar — jika berhasil, kereta melanjutkan perjalanan ke stasiun berikutnya; jika gagal, player harus coba ulang.
 
 ---
 
-#### 7. Night Market
+#### 6. Night Market
 
 Sebelum shift malam dimulai, player masuk ke Night Market dan bisa menggunakan Blessings dari shift siang untuk membeli tool.
 

@@ -22,6 +22,7 @@ config/icon="res://icon.svg"
 GameSFXRuntime="*res://scripts/systems/game_sfx.gd"
 CustomCursor="*res://scripts/systems/custom_cursor_manager.gd"
 RunContext="*res://scripts/systems/run_context.gd"
+MusicManager="*res://scenes/systems/music_manager.tscn"
 
 [display]
 

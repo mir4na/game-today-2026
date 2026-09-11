@@ -17,6 +17,9 @@ const INTRO_PAGES: Array[Texture2D] = [
 	preload("res://assets/Cutscene/Intro/Intro/Intro10.png"),
 ]
 
+@export_category("Music")
+@export var music_track: StringName = &"intro"
+@export var music_loops: bool = true
 @export_category("Page Transition")
 @export_range(0.1, 1.0, 0.01) var opening_fade_duration: float = 0.45
 @export_range(0.1, 2.4, 0.01) var page_fade_duration: float = 0.9
@@ -46,6 +49,9 @@ var _page_tween: Tween
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	var music_manager := get_node_or_null("/root/MusicManager")
+	if music_manager != null and music_manager.has_method(&"play"):
+		music_manager.call(&"play", music_track, music_loops)
 	_current_page.texture = INTRO_PAGES[0]
 	_current_page.modulate.a = 0.0
 	_next_page.modulate.a = 0.0
@@ -169,4 +175,9 @@ func _open_game_scene() -> void:
 		push_error("IntroCutscene/LoadingScreenUI scene instance is missing.")
 		_finishing = false
 		return
+	# A new run always continues into the interactive tutorial. Continue from
+	# the main menu bypasses this scene and therefore remains normal gameplay.
+	var run_context := get_node_or_null("/root/RunContext")
+	if run_context != null and run_context.has_method(&"request_tutorial"):
+		run_context.call(&"request_tutorial")
 	_loading_screen.begin_loading(GAME_SCENE_PATH)

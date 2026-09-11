@@ -27,7 +27,7 @@ func _run() -> void:
 	var menu := MainMenuScene.instantiate() as MainMenu
 	root.add_child(menu)
 	await process_frame
-	_check(menu.get_node_or_null("%TutorialButton") != null, "Main Menu must expose a Tutorial button.")
+	_check(menu.get_node_or_null("%TutorialButton") == null, "Tutorial must launch after the intro instead of appearing in the Main Menu.")
 	menu.free()
 
 	var run_context := root.get_node_or_null("RunContext")
@@ -49,12 +49,21 @@ func _run() -> void:
 	_check(not game._station_stop_ui.visible, "Tutorial must not show the opening station cutscene.")
 	_check(game._daily_manifest.is_empty(), "Tutorial must not generate a passenger manifest.")
 	_check(game._passengers.is_empty(), "Tutorial must start with no NPC passengers.")
+	_check(game.day_route == PackedStringArray(["Alderwick", "Brambleford"]), "Tutorial must use Brambleford as its terminal transition stop.")
 	_check(game.get_node_or_null("%TutorialDirector") != null, "Main scene must include TutorialDirector.")
 	if not game._tutorial_started:
 		_check(game._start_tutorial_if_needed(), "TutorialDirector must start on request.")
 	var tutorial := game.get_node("%TutorialDirector") as TutorialDirector
 	# Pin the clean-coach path: the production scene runs the full Goat flow.
 	tutorial.use_empty_coach_flow = true
+	_check(tutorial.get_node_or_null("%SkipPrompt") is Control, "Tutorial must expose its scene-authored hold-to-skip prompt.")
+	_check(tutorial.get_node_or_null("%SkipHoldRing") is IntroHoldRing, "Tutorial skip must expose radial hold progress.")
+	_check(tutorial.get_node_or_null("%LoadingScreenUI") is LoadingScreenUI, "Tutorial must own the loading transition into Day 1.")
+	tutorial._begin_skip_hold()
+	tutorial._update_skip_hold(tutorial.hold_to_skip_seconds * 0.5)
+	_check(tutorial._skip_hold_ring.progress > 0.0 and not tutorial._skip_transitioning, "A short tutorial skip hold must show progress without leaving.")
+	tutorial._cancel_skip_hold()
+	_check(is_zero_approx(tutorial._skip_hold_ring.progress), "Releasing tutorial skip early must reset its progress.")
 	_check(tutorial.get_node_or_null("%DialogueDock") != null, "TutorialDirector must expose the Angel dialogue dock.")
 	_check(tutorial.get_node_or_null("%DialogueMarkers") != null, "TutorialDirector must expose scene-authored dialogue markers.")
 	_check(tutorial.get_node_or_null("%DialogueMarkers/Intro") is Marker2D, "TutorialDirector must expose a marker for the Angel briefing.")
@@ -203,7 +212,123 @@ func _run() -> void:
 	_check(tutorial._step == TutorialDirector.Step.DOCUMENTS, "Inspecting NPC 12 must advance to the document lesson.")
 	_check(game._document_overlay.visible, "NPC 12 interaction must open the actual passenger document UI.")
 	_check(not (tutorial.get_node("%ArrowLabel") as Label).visible, "Inspect pointer must disappear once the passenger documents open.")
+	game._document_overlay.hide()
+	game._active_modal = game._tutorial_director
+	tutorial._start_exam()
+	_check(tutorial._exam_passengers.size() == 5, "Stamp test must spawn five scene-configured passengers.")
+	var exam_names := PackedStringArray()
+	var anomaly_names := PackedStringArray()
+	for passenger: Passenger in tutorial._exam_passengers:
+		exam_names.append(passenger.data.passenger_name)
+		_check(passenger.data.ticket_train_number == game.manifest_config.service_train_number, "%s must carry this train's valid service code." % passenger.data.passenger_name)
+		if passenger.data.anomaly_type != "none":
+			anomaly_names.append(passenger.data.passenger_name)
+			_check(passenger.data.is_dead, "%s must remain aboard as a Night Service soul." % passenger.data.passenger_name)
+	_check(exam_names == PackedStringArray(["Abby", "Reff", "Ratta", "Denta", "Mecca"]), "Stamp test roster must use the authored five names in order.")
+	_check(anomaly_names == PackedStringArray(["Abby", "Mecca"]), "Only Abby and Mecca may be anomalies in the stamp test.")
+	var abby: Passenger = tutorial._exam_passengers[0]
+	abby.data.stamped_station = game._next_day_station()
+	game._station_assignment.append("Abby")
+	game._record_incorrect_anomaly(abby.data, game._next_day_station())
+	tutorial._step = TutorialDirector.Step.EXAM_ACTIVE
+	tutorial._exam_running = true
+	tutorial._on_exam_stamp({"passenger": "Abby", "station": game._next_day_station()})
+	_check(tutorial._step == TutorialDirector.Step.EXAM_INTRO, "Stamping an anomaly must restart from the Inspector's test dialogue.")
+	_check(abby.data.stamped_station.is_empty() and not game._incorrectly_stamped_anomalies.has("Abby"), "A restarted stamp test must clear its temporary stamp and penalty.")
+	tutorial._begin_exam_brief()
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	_check(tutorial._step == TutorialDirector.Step.EXAM_ACTIVE and not tutorial.get_node("%DialogueDock").visible, "Stamp test dialogue must close while the timed task is active.")
+	tutorial._update_exam_timer(tutorial.exam_duration_seconds + 1.0)
+	_check(tutorial._step == TutorialDirector.Step.EXAM_INTRO, "Running out of the two-minute clock must restart the stamp test briefing.")
+	tutorial._begin_exam_brief()
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	for passenger: Passenger in tutorial._exam_passengers:
+		if passenger.data.anomaly_type == "none":
+			passenger.data.stamped_station = passenger.data.destination_station
+	tutorial._on_exam_stamp({"passenger": "Denta", "station": game._next_day_station()})
+	_check(tutorial._step == TutorialDirector.Step.EXAM_SUCCESS, "Stamping all three ordinary passengers must pass the test.")
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	_check(tutorial._step == TutorialDirector.Step.EXAM_SIGN_INTRO, "Passing the test must introduce the fast-forward feature.")
+	_check(game._hud.get_node("%ServiceActionButton").visible, "Sign Service must fade in after the stamp test succeeds.")
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	_check(tutorial._step == TutorialDirector.Step.EXAM_SIGN, "Fast-forward explanation must lead to the Sign Service instruction.")
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	_check(not tutorial.get_node("%DialogueDock").visible, "Sign Service dialogue must close before the player traces the signature.")
+
+	# Compact Night Service lesson: Abby starts in the ledger and Mecca is the
+	# only soul the player must inspect before opening the station path.
+	game._prepare_night_world()
+	game.state = AfterTheEndGame.GameState.NIGHT
+	var night_lesson: Dictionary = game.prepare_tutorial_night_lesson("Abby", "Mecca")
+	_check(str(night_lesson.get("prefilled_name", "")) == "Abby", "Night tutorial must prefill Abby's ledger clue.")
+	_check(str(night_lesson.get("inspection_name", "")) == "Mecca", "Night tutorial must select Mecca as its only inspection target.")
+	_check(game._collected_departure_statements.size() == 1, "Night tutorial must begin with exactly one stored statement.")
+	_check(game._collected_departure_statements.has("Abby"), "Abby's statement must already be stored in the tutorial ledger.")
+	_check(tutorial.get_node_or_null("%DialogueMarkers/NightLedger") is Marker2D, "Night ledger checkpoint must expose a scene-authored dialogue marker.")
+	tutorial._begin_night_lesson()
+	_check(tutorial._step == TutorialDirector.Step.NIGHT_WELCOME, "Night lesson must begin with a short welcome.")
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	_check(tutorial._step == TutorialDirector.Step.NIGHT_TASK, "Night welcome must explain the assignment before inspection.")
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	_check(tutorial._step == TutorialDirector.Step.NIGHT_INSPECT, "Night assignment briefing must close before the player inspects Mecca.")
+	_check(not tutorial.get_node("%DialogueDock").visible, "Night inspection task must hide the dialogue bubble.")
+	_check((tutorial.get_node("%ArrowLabel") as Label).visible, "Night inspection task must point to the one unrecorded soul.")
+
+	var mecca := night_lesson.get("inspection_target") as Passenger
+	_check(is_instance_valid(mecca), "Night tutorial inspection target must be a live Passenger node.")
+	if is_instance_valid(mecca):
+		game._on_night_passenger_interacted(mecca)
+		await process_frame
+	_check(tutorial._step == TutorialDirector.Step.NIGHT_RECORD_INTRO, "Opening Mecca's Soul Record must start the record explanation.")
+	_check(game._night_soul_record_ui._tutorial_interaction_locked, "Soul Record sentences must stay locked during their explanation.")
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	_check(tutorial._step == TutorialDirector.Step.NIGHT_RECORD_FIND, "Soul Record explanation must introduce the hidden statement.")
+	_check(game._night_soul_record_ui._tutorial_highlight_statement, "Tutorial hidden statement must be highlighted red.")
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	_check(tutorial._step == TutorialDirector.Step.NIGHT_RECORD_CLICK, "Tutorial must wait for the player to click the hidden statement.")
+	_check(not game._night_soul_record_ui._tutorial_interaction_locked, "Hidden statement must unlock only after the click instruction closes.")
+
+	tutorial.night_statement_transfer_wait_seconds = 0.01
+	var mecca_statement: String = game._get_departure_puzzle().get_statement_for_passenger("Mecca")
+	game._on_night_statement_recorded("Mecca", mecca_statement)
+	await create_timer(0.03).timeout
+	_check(tutorial._step == TutorialDirector.Step.NIGHT_LEDGER_SAVED, "Collecting Mecca's statement must explain that it was stored.")
+	_check(game._collected_departure_statements.size() == 2, "Both tutorial soul statements must be present before the map opens.")
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	_check(tutorial._step == TutorialDirector.Step.NIGHT_LEDGER_PROMPT, "Stored statement explanation must checkpoint at the ledger button.")
+	_check(tutorial._spotlight_control == game._hud.get_tutorial_service_action_focus_control(), "Night ledger prompt must spotlight the actual map button.")
+
+	game._open_night_puzzle()
+	await process_frame
+	_check(tutorial._step == TutorialDirector.Step.NIGHT_MAP_INTRO, "Opening the ledger must introduce the station path.")
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	_check(tutorial._step == TutorialDirector.Step.NIGHT_MAP_ASSIGN, "Map explanation must lead to the assignment instruction.")
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	_check(not tutorial.get_node("%DialogueDock").visible, "Station assignment task must leave the map unobstructed.")
+	tutorial._on_main_tutorial_event(&"night_assignment_failed", 2)
+	_check(tutorial._step == TutorialDirector.Step.NIGHT_MAP_RETRY, "Wrong Finalize must return to the open-map ledger checkpoint.")
+	_check(game._night_puzzle_ui.visible, "Wrong Finalize must keep the Night Puzzle UI open.")
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	_check(tutorial._step == TutorialDirector.Step.NIGHT_MAP_ASSIGN, "Ledger checkpoint must re-enter the map assignment instruction.")
+	for tween: Tween in get_processed_tweens():
+		tween.kill()
 	game.free()
+	await process_frame
 
 	if _failures == 0:
 		print("PASS: tutorial launch plumbing and first onboarding gates.")

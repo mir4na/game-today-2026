@@ -5,6 +5,9 @@ extends Control
 
 signal credits_requested
 
+@export_category("Music")
+@export var music_track: StringName = &"ending_good"
+@export var music_loops: bool = false
 @export_range(0.1, 4.0, 0.05) var fade_in_seconds: float = 0.8
 @export_range(0.5, 8.0, 0.05) var ascent_seconds: float = 4.2
 @export_range(0.0, 8.0, 0.05) var paycheck_delay_seconds: float = 3.0
@@ -36,6 +39,7 @@ func _ready() -> void:
 
 
 func play_ending(summary: Dictionary) -> void:
+	_play_scene_music()
 	_sequence_id += 1
 	var sequence: int = _sequence_id
 	_motion_time = 0.0
@@ -73,6 +77,12 @@ func play_ending(summary: Dictionary) -> void:
 	_can_continue = true
 	_continue_button.disabled = false
 	_continue_button.grab_focus()
+
+
+func _play_scene_music() -> void:
+	var music_manager := get_node_or_null("/root/MusicManager")
+	if music_manager != null and music_manager.has_method(&"play"):
+		music_manager.call(&"play", music_track, music_loops)
 
 
 func _process(delta: float) -> void:

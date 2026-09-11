@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://b4y0uq3tfudfc"
+path="res://.godot/imported/bgm_gameplay_malam.mp3-15f40cf0d7a826a7bdc8ae13db2fb132.mp3str"
+
+[deps]
+
+source_file="res://assets/music & bgm/bgm_gameplay_malam.mp3"
+dest_files=["res://.godot/imported/bgm_gameplay_malam.mp3-15f40cf0d7a826a7bdc8ae13db2fb132.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

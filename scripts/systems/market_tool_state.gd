@@ -10,9 +10,9 @@ const TOOL_SWIFTSTEP: StringName = &"swiftstep"
 
 @export_category("Starting Inventory")
 @export_range(0, 999, 1) var starting_blessings: int = 0
-@export_range(0, 1, 1) var starting_veil_notes: int = 1
+@export_range(0, 1, 1) var starting_veil_notes: int = 0
 @export_range(0, 3, 1) var starting_radar_charges: int = 0
-@export_range(0, 5, 1) var starting_swift_charges: int = 1
+@export_range(0, 5, 1) var starting_swift_charges: int = 0
 @export_category("Carry Limits")
 @export_range(1, 3, 1) var maximum_radar_charges: int = 3
 @export_range(1, 5, 1) var maximum_swift_charges: int = 5

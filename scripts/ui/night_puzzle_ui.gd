@@ -419,6 +419,17 @@ func _show_fail_panel() -> void:
 	_fail_panel.show()
 
 
+## Tutorial retries keep the authored ledger and station path on screen. The
+## Director supplies the explanation layer, then hands input back to this board.
+func retry_tutorial_assignment_in_place() -> void:
+	_fail_shade.hide()
+	_fail_panel.hide()
+	_validating = false
+	_confirm_button.disabled = false
+	_error_label.text = ""
+	_selection_label.text = _current_instruction
+
+
 func _on_retry_night_pressed() -> void:
 	if not _validating or not _fail_panel.visible:
 		return

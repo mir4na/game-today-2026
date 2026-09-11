@@ -562,6 +562,11 @@ func reveal_tutorial_blessings() -> void:
 	_fade_tutorial_reveal(_blessing_summary)
 
 
+func reveal_tutorial_guidebook_button() -> void:
+	_guidebook_button.show()
+	_fade_tutorial_reveal(_guidebook_button)
+
+
 ## Staged HUD pieces fade in instead of snapping visible.
 func _fade_tutorial_reveal(target: CanvasItem) -> void:
 	if target == null:
@@ -588,6 +593,14 @@ func get_tutorial_clock_focus_control() -> Control:
 
 func get_tutorial_blessings_focus_control() -> Control:
 	return _blessing_summary
+
+
+func get_tutorial_guidebook_focus_control() -> Control:
+	return _guidebook_button
+
+
+func get_tutorial_service_action_focus_control() -> Control:
+	return _service_action_button
 
 
 func show_route_briefing() -> void:

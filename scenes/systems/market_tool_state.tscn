@@ -6,9 +6,9 @@
 editor_description = "Scene-authored starting inventory and market economy. Veil Note has a one-item capacity and reveals one extra Night Shift clue."
 script = ExtResource("1")
 starting_blessings = 0
-starting_veil_notes = 1
+starting_veil_notes = 0
 starting_radar_charges = 0
-starting_swift_charges = 1
+starting_swift_charges = 0
 maximum_radar_charges = 3
 maximum_swift_charges = 5
 veil_note_cost = 200
