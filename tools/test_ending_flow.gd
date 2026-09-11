@@ -32,7 +32,7 @@ func _run() -> void:
 	var music_manager := root.get_node_or_null("MusicManager")
 	_check(music_manager != null, "The scene-authored MusicManager autoload must exist.")
 	if music_manager != null:
-		_check(is_equal_approx(float(music_manager.get("music_volume")), 0.5), "Music must play at the scene-authored 50 percent volume.")
+		_check(is_equal_approx(float(music_manager.get("music_volume")), 0.35), "Music must play at the scene-authored 35 percent volume.")
 		_check(music_manager.get("gameplay_day_stream") != null, "Day gameplay music must be assigned in MusicManager.tscn.")
 		_check(music_manager.get("heaven_outro_stream") != null, "Heaven outro must be assigned in MusicManager.tscn.")
 		_check(music_manager.get("bad_ending_outro_stream") != null, "Bad-ending outro must be assigned in MusicManager.tscn.")

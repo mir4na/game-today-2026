@@ -10,7 +10,7 @@ extends Node
 @export var heaven_outro_stream: AudioStream
 @export var bad_ending_outro_stream: AudioStream
 @export_category("Mix")
-@export_range(0.0, 1.0, 0.01) var music_volume: float = 0.5
+@export_range(0.0, 1.0, 0.01) var music_volume: float = 0.35
 @export_range(0.2, 3.0, 0.1) var fade_duration: float = 1.2
 
 var _current_track: StringName = &""

@@ -16,7 +16,7 @@ gameplay_day_stream = ExtResource("4_day")
 gameplay_night_stream = ExtResource("5_night")
 heaven_outro_stream = ExtResource("6_heaven")
 bad_ending_outro_stream = ExtResource("7_bad")
-music_volume = 0.5
+music_volume = 0.35
 fade_duration = 1.2
 
 [node name="PlayerA" type="AudioStreamPlayer" parent="."]

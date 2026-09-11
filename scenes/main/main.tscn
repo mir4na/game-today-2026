@@ -248,8 +248,8 @@ passenger_scene = ExtResource("34")
 manifest_config = ExtResource("37")
 day_music_track = &"gameplay_day"
 night_music_track = &"gameplay_night"
-day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere")
-station_travel_durations_seconds = PackedFloat32Array(120, 120, 120, 120)
+day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere")
+station_travel_durations_seconds = PackedFloat32Array(120, 120, 120)
 debug_print_anomaly_roster = true
 tutorial_day_route = PackedStringArray("Alderwick", "Brambleford")
 
@@ -610,6 +610,7 @@ unique_name_in_owner = true
 [connection signal="validation_impact_requested" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_validation_impact_requested"]
 [connection signal="day_restart_requested" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_puzzle_day_restart"]
 [connection signal="night_restart_requested" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_puzzle_night_restart"]
+[connection signal="give_up_requested" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_puzzle_give_up"]
 [connection signal="closed" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signature_closed"]
 [connection signal="service_signed" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signed"]
 [connection signal="signature_rejected" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signature_rejected"]

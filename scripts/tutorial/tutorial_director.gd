@@ -970,6 +970,11 @@ func _on_exam_stamp(payload: Variant) -> void:
 	if ordinary_total > 0 and correct_count >= ordinary_total:
 		_exam_running = false
 		_progress_label.hide()
+		var overlay := _main.get_node_or_null("%DocumentOverlayUI") if _main != null else null
+		if overlay != null and overlay.has_method(&"request_close"):
+			overlay.call(&"request_close")
+		if _main != null and _main.has_method(&"release_tutorial_modal"):
+			_main.call(&"release_tutorial_modal")
 		_show_continue_step(
 			Step.EXAM_SUCCESS,
 			"The Inspector",
@@ -979,6 +984,10 @@ func _on_exam_stamp(payload: Variant) -> void:
 
 
 func _enter_exam_sign_intro() -> void:
+	# Close any open document overlay (ticket/ID view) before revealing the service button.
+	var overlay := _main.get_node_or_null("%DocumentOverlayUI") if _main != null else null
+	if overlay != null and overlay.has_method(&"request_close"):
+		overlay.call(&"request_close")
 	if _main != null and _main.has_method(&"release_tutorial_modal"):
 		_main.call(&"release_tutorial_modal")
 	if is_instance_valid(_hud) and _hud.has_method(&"set_service_action_mode"):
@@ -1080,6 +1089,11 @@ func _validate_tutorial_stamp(payload: Variant) -> void:
 			_tutorial_passenger.data.passenger_name,
 			false
 		)
+	var overlay := _main.get_node_or_null("%DocumentOverlayUI") if _main != null else null
+	if overlay != null:
+		var tray := overlay.get_node_or_null("StampTrayUI")
+		if tray != null and tray.has_method(&"reset_commit"):
+			tray.call(&"reset_commit")
 	_show_wait_step(
 		Step.STAMP_RETRY,
 		"Wrong Stamp",
