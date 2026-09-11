@@ -1,0 +1,301 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/service_signature_ui.gd" id="1_script"]
+[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
+[ext_resource type="FontFile" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="3_irish"]
+[ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Medium.ttf" id="4_josefin"]
+[ext_resource type="Script" path="res://scripts/ui/hover_scale_button.gd" id="5_hover"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/round_close_button.tscn" id="6_close"]
+
+[sub_resource type="StyleBoxFlat" id="PanelStyle"]
+bg_color = Color(0.055, 0.065, 0.08, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.76, 0.61, 0.36, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0.42)
+shadow_size = 14
+
+[sub_resource type="StyleBoxFlat" id="ButtonStyle"]
+bg_color = Color(0.72, 0.24, 0.24, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.94, 0.75, 0.42, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="DrawingStyle"]
+bg_color = Color(0.105, 0.12, 0.145, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.43, 0.38, 0.3, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="ServiceSignatureUI" type="Control"]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.015, 0.02, 0.03, 0.64)
+
+[node name="TransitionFade" type="ColorRect" parent="."]
+unique_name_in_owner = true
+editor_description = "Scene-authored black cover used between an accepted signature and the next station cutscene."
+modulate = Color(1, 1, 1, 0)
+z_index = 100
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Panel" type="Panel" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -390.0
+offset_top = -300.0
+offset_right = 390.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(390, 300)
+theme_override_styles/panel = SubResource("PanelStyle")
+
+[node name="FeedbackFlash" type="ColorRect" parent="Panel"]
+unique_name_in_owner = true
+z_index = 3
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.66, 0.12, 0.18, 1)
+
+[node name="Title" type="Label" parent="Panel"]
+z_index = 4
+layout_mode = 0
+offset_left = 82.0
+offset_top = 28.0
+offset_right = 698.0
+offset_bottom = 76.0
+theme_override_colors/font_color = Color(1, 0.89, 0.65, 1)
+theme_override_fonts/font = ExtResource("3_irish")
+theme_override_font_sizes/font_size = 36
+text = "SERVICE SIGN-OFF"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CloseButton" parent="Panel" instance=ExtResource("6_close")]
+unique_name_in_owner = true
+z_index = 5
+layout_mode = 0
+offset_left = 704.0
+offset_top = 22.0
+offset_right = 758.0
+offset_bottom = 76.0
+tooltip_text = "Close [E]"
+
+[node name="QuestionStage" type="Control" parent="Panel"]
+unique_name_in_owner = true
+z_index = 4
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Question" type="Label" parent="Panel/QuestionStage"]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 172.0
+offset_right = 675.0
+offset_bottom = 288.0
+theme_override_colors/font_color = Color(0.96, 0.9, 0.78, 1)
+theme_override_fonts/font = ExtResource("4_josefin")
+theme_override_font_sizes/font_size = 24
+text = "Is this route's work complete?"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="RouteLabel" type="Label" parent="Panel/QuestionStage"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 90.0
+offset_top = 286.0
+offset_right = 690.0
+offset_bottom = 356.0
+theme_override_colors/font_color = Color(0.76, 0.68, 0.55, 1)
+theme_override_fonts/font = ExtResource("4_josefin")
+theme_override_font_sizes/font_size = 19
+text = "ALDERWICK  →  BRAMBLEFORD"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="QuestionActions" type="HBoxContainer" parent="Panel/QuestionStage"]
+layout_mode = 0
+offset_left = 203.0
+offset_top = 392.0
+offset_right = 577.0
+offset_bottom = 448.0
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="NotYetButton" type="Button" parent="Panel/QuestionStage/QuestionActions"]
+custom_minimum_size = Vector2(178, 54)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.94, 0.82, 1)
+theme_override_fonts/font = ExtResource("4_josefin")
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("ButtonStyle")
+theme_override_styles/hover = SubResource("ButtonStyle")
+theme_override_styles/pressed = SubResource("ButtonStyle")
+theme_override_styles/focus = SubResource("ButtonStyle")
+text = "NOT YET"
+script = ExtResource("5_hover")
+
+[node name="ConfirmButton" type="Button" parent="Panel/QuestionStage/QuestionActions"]
+custom_minimum_size = Vector2(178, 54)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.94, 0.82, 1)
+theme_override_fonts/font = ExtResource("4_josefin")
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("ButtonStyle")
+theme_override_styles/hover = SubResource("ButtonStyle")
+theme_override_styles/pressed = SubResource("ButtonStyle")
+theme_override_styles/focus = SubResource("ButtonStyle")
+text = "SIGN SERVICE"
+script = ExtResource("5_hover")
+
+[node name="SignatureStage" type="Control" parent="Panel"]
+unique_name_in_owner = true
+visible = false
+z_index = 4
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Instruction" type="Label" parent="Panel/SignatureStage"]
+layout_mode = 0
+offset_left = 90.0
+offset_top = 78.0
+offset_right = 690.0
+offset_bottom = 118.0
+theme_override_colors/font_color = Color(0.96, 0.9, 0.78, 1)
+theme_override_fonts/font = ExtResource("4_josefin")
+theme_override_font_sizes/font_size = 19
+text = "Trace the mark to confirm your service."
+horizontal_alignment = 1
+
+[node name="DrawingArea" type="Panel" parent="Panel/SignatureStage"]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 0
+offset_left = 110.0
+offset_top = 126.0
+offset_right = 670.0
+offset_bottom = 486.0
+mouse_default_cursor_shape = 2
+theme_override_styles/panel = SubResource("DrawingStyle")
+
+[node name="GuideLines" type="Node2D" parent="Panel/SignatureStage/DrawingArea"]
+
+[node name="PulsePattern" type="Line2D" parent="Panel/SignatureStage/DrawingArea/GuideLines"]
+unique_name_in_owner = true
+points = PackedVector2Array(101, 211, 141, 189, 173, 119, 209, 241, 251, 69, 331, 291, 375, 121, 421, 173, 459, 217)
+width = 9.0
+default_color = Color(0.78, 0.62, 0.35, 0.72)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="LoopPattern" type="Line2D" parent="Panel/SignatureStage/DrawingArea/GuideLines"]
+unique_name_in_owner = true
+points = PackedVector2Array(222, 282, 262, 216, 218, 162, 174, 180, 216, 210, 314, 120, 386, 186, 342, 246, 284, 210, 258, 150, 260, 78)
+width = 9.0
+default_color = Color(0.78, 0.62, 0.35, 0.72)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="UserStroke" type="Line2D" parent="Panel/SignatureStage/DrawingArea"]
+unique_name_in_owner = true
+z_index = 2
+width = 7.0
+default_color = Color(1, 0.945, 0.71, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="FeedbackLabel" type="Label" parent="Panel/SignatureStage"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 90.0
+offset_top = 505.0
+offset_right = 690.0
+offset_bottom = 542.0
+theme_override_colors/font_color = Color(0.83, 0.75, 0.62, 1)
+theme_override_fonts/font = ExtResource("4_josefin")
+theme_override_font_sizes/font_size = 16
+text = "Hold and trace the mark."
+horizontal_alignment = 1
+
+[node name="CloseHint" type="Label" parent="Panel"]
+z_index = 4
+layout_mode = 0
+offset_left = 270.0
+offset_top = 558.0
+offset_right = 510.0
+offset_bottom = 582.0
+theme_override_colors/font_color = Color(0.57, 0.52, 0.44, 1)
+theme_override_fonts/font = ExtResource("4_josefin")
+theme_override_font_sizes/font_size = 14
+text = "PRESS E TO CLOSE"
+horizontal_alignment = 1
+
+[connection signal="pressed" from="Panel/CloseButton" to="." method="request_close"]
+[connection signal="pressed" from="Panel/QuestionStage/QuestionActions/NotYetButton" to="." method="_on_not_yet_pressed"]
+[connection signal="pressed" from="Panel/QuestionStage/QuestionActions/ConfirmButton" to="." method="_on_confirm_pressed"]

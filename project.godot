@@ -13,6 +13,8 @@ config_version=5
 config/name="Where Do You Belong?"
 run/main_scene="res://scenes/menu/main_menu.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
+boot_splash/bg_color=Color(0, 0, 0, 1)
+boot_splash/image="uid://c1pu1bgtaje86"
 config/icon="res://icon.svg"
 
 [autoload]

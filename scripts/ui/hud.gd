@@ -3,12 +3,20 @@ extends CanvasLayer
 ## Persistent, low-profile HUD. Modal screens live in sibling UI scenes.
 
 signal guidebook_requested
+signal service_action_requested
 signal debug_next_station_requested
 signal market_tool_requested(tool_id: StringName)
+signal debug_night_requested
 
 @export_category("Inspector Copy")
 @export var clock_template: String = "%02d:%02d %s"
 @export var tool_status_template: String = "BLESSINGS %d"
+@export var day_template: String = "Day %d"
+@export_category("Day Blessing Progress")
+@export_range(0.1, 1.0, 0.05) var blessing_near_threshold_ratio: float = 0.7
+@export var blessing_far_color: Color = Color(0.96, 0.95, 0.92, 1.0)
+@export var blessing_near_color: Color = Color(1.0, 0.82, 0.28, 1.0)
+@export var blessing_reached_color: Color = Color(1.0, 0.34, 0.3, 1.0)
 @export_category("Journey Clock")
 @export_range(0.0, 1440.0, 1.0) var clock_default_start_minutes: float = 840.0
 @export_range(0.0, 1440.0, 1.0) var clock_default_end_minutes: float = 1320.0
@@ -69,10 +77,17 @@ signal market_tool_requested(tool_id: StringName)
 @onready var _notification_panel: PanelContainer = %NotificationPanel
 @onready var _notification_label: Label = %NotificationLabel
 @onready var _tool_status_label: Label = %ToolStatusLabel
+@onready var _day_summary: Control = %DaySummary
+@onready var _day_label: Label = %DayLabel
+@onready var _blessing_summary: Control = %BlessingSummary
+@onready var _blessing_earned_label: Label = %BlessingEarnedLabel
+@onready var _blessing_target_label: Label = %BlessingTargetLabel
+@onready var _debug_night_button: Button = %DebugNightButton
 @onready var _guidebook_button: Button = %GuidebookButton
+@onready var _service_action_button: Button = %ServiceActionButton
 @onready var _debug_next_station_button: Button = %DebugNextStationButton
-@onready var _market_item_bar: VBoxContainer = %MarketItemBar
-@onready var _audit_slot: Control = %AuditSlot
+@onready var _market_item_bar: HBoxContainer = %MarketItemBar
+@onready var _veil_note_slot: Control = %VeilNoteSlot
 @onready var _radar_slot: Control = %RadarSlot
 @onready var _swift_slot: Control = %SwiftSlot
 @onready var _maintenance_trackers: Array[Control] = [
@@ -101,6 +116,8 @@ var _route_banner_rest_scale: Vector2
 var _service_sealed: bool = false
 var _radar_active: bool = false
 var _swiftstep_active: bool = false
+var _displayed_day: int = 1
+var _displayed_blessing_target: int = 0
 
 const CLOCK_FILL_ARC_DEGREES: float = 180.0
 
@@ -128,6 +145,7 @@ func _ready() -> void:
 	_debug_next_station_button.mouse_exited.connect(_on_clock_hover_exited)
 	_route_briefing_banner.hide()
 	_debug_next_station_button.visible = false
+	_service_action_button.visible = false
 	set_swiftstep_active(false)
 
 func _process(delta: float) -> void:
@@ -263,17 +281,40 @@ func set_passenger_counts_by_carriage(counts: Dictionary) -> void:
 
 
 func set_market_tool_inventory(snapshot: Dictionary) -> void:
-	_tool_status_label.text = tool_status_template % int(snapshot.get("blessings", 0))
-	_audit_slot.call(&"set_owned_amount", int(snapshot.get("audit_slips", 0)))
+	var blessings: int = int(snapshot.get("blessings", 0))
+	_tool_status_label.text = tool_status_template % blessings
+	_veil_note_slot.call(&"set_owned_amount", int(snapshot.get("veil_notes", 0)))
 	_radar_slot.call(&"set_owned_amount", int(snapshot.get("radar_charges", 0)))
-	_swift_slot.call(&"set_owned_amount", int(snapshot.get("speed_level", 0)))
+	_swift_slot.call(&"set_owned_amount", int(snapshot.get("swift_charges", 0)))
 	_update_action_button_locks()
+
+
+func set_service_progress(day: int, blessings: int, target: int) -> void:
+	_displayed_day = maxi(1, day)
+	_displayed_blessing_target = maxi(0, target)
+	_day_label.text = day_template % _displayed_day
+	_refresh_service_summary(blessings)
+
+
+func _refresh_service_summary(blessings: int) -> void:
+	if not is_instance_valid(_blessing_earned_label) or not is_instance_valid(_blessing_target_label):
+		return
+	var day_blessings: int = maxi(0, blessings)
+	_blessing_earned_label.text = str(day_blessings)
+	_blessing_target_label.text = str(_displayed_blessing_target)
+	var earned_color: Color = blessing_far_color
+	if _displayed_blessing_target > 0:
+		if day_blessings >= _displayed_blessing_target:
+			earned_color = blessing_reached_color
+		elif float(day_blessings) / float(_displayed_blessing_target) >= blessing_near_threshold_ratio:
+			earned_color = blessing_near_color
+	_blessing_earned_label.add_theme_color_override(&"font_color", earned_color)
 
 
 func request_market_item(shortcut_number: int) -> bool:
 	match shortcut_number:
 		1:
-			return bool(_audit_slot.call(&"request_use"))
+			return bool(_veil_note_slot.call(&"request_use"))
 		2:
 			return bool(_radar_slot.call(&"request_use"))
 		3:
@@ -479,10 +520,17 @@ func _update_dialogue_pointer(target_local_x: float, prompt_width: float) -> voi
 
 func set_day_hud_visible(value: bool) -> void:
 	_clock_panel.visible = value
+	_day_summary.visible = value
+	_blessing_summary.visible = value
+	_guidebook_button.tooltip_text = "Open guidebook"
+	set_service_action_mode(false, value)
+	_debug_night_button.visible = OS.is_debug_build() and value
 	if not value:
 		_reset_clock_hover(true)
 		_hide_route_briefing(true)
-	_tool_status_label.visible = value
+	# Blessings now live in the illustrated service summary. Keep the legacy
+	# status label available for old scene references without drawing it twice.
+	_tool_status_label.visible = false
 	_market_item_bar.visible = value
 	_floating_prompt.visible = value and not _prompt_label.text.is_empty()
 	# The train minimap remains visible through the night walk.
@@ -514,7 +562,7 @@ func set_swiftstep_active(value: bool) -> void:
 	_update_action_button_locks()
 	_swift_slot.call(
 		&"set_item_tooltip",
-		"Swiftstep is bending time" if value else "Swiftstep Soles — slow the world for 15 seconds"
+		"Swiftstep Soles active — movement speed ×3" if value else "Swiftstep Soles — movement speed ×3 for 10 seconds"
 	)
 
 
@@ -525,7 +573,8 @@ func set_service_sealed(value: bool) -> void:
 
 func _update_action_button_locks() -> void:
 	_guidebook_button.disabled = _service_sealed
-	_audit_slot.call(&"set_interaction_locked", _service_sealed)
+	_service_action_button.disabled = _service_sealed
+	_veil_note_slot.call(&"set_interaction_locked", _service_sealed)
 	_radar_slot.call(&"set_interaction_locked", _service_sealed or _radar_active)
 	_swift_slot.call(&"set_interaction_locked", _service_sealed or _swiftstep_active)
 
@@ -534,8 +583,27 @@ func _on_guidebook_button_pressed() -> void:
 	guidebook_requested.emit()
 
 
+func get_night_ledger_button_center() -> Vector2:
+	return _service_action_button.get_global_rect().get_center()
+
+
+func set_service_action_mode(is_night: bool, available: bool = true) -> void:
+	_service_action_button.visible = available
+	_service_action_button.tooltip_text = ""
+	_service_action_button.set_meta(&"service_action_mode", &"night" if is_night else &"day")
+
+
+func _on_service_action_button_pressed() -> void:
+	service_action_requested.emit()
+
+
 func _on_market_item_requested(tool_id: StringName) -> void:
 	market_tool_requested.emit(tool_id)
+
+
+func _on_debug_night_button_pressed() -> void:
+	if OS.is_debug_build():
+		debug_night_requested.emit()
 
 
 func _on_debug_next_station_button_pressed() -> void:
@@ -544,7 +612,12 @@ func _on_debug_next_station_button_pressed() -> void:
 
 func set_night_walk_mode() -> void:
 	_clock_panel.show()
-	_tool_status_label.visible = true
+	_day_summary.show()
+	_blessing_summary.show()
+	_debug_night_button.hide()
+	_guidebook_button.tooltip_text = "Open guidebook"
+	set_service_action_mode(true)
+	_tool_status_label.visible = false
 	_market_item_bar.visible = true
 	_floating_prompt.visible = not _prompt_label.text.is_empty()
 

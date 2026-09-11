@@ -20,7 +20,7 @@ func _run() -> void:
 		return
 	var market: MarketToolState = MarketScene.instantiate()
 	root.add_child(market)
-	var initial: Dictionary = {"blessings": 500, "audit_slips": 2, "radar_charges": 3, "speed_level": 1}
+	var initial: Dictionary = {"blessings": 500, "veil_notes": 1, "radar_charges": 3, "swift_charges": 1}
 	market.restore_shift_inventory(initial)
 	var award: Dictionary = market.award_day_blessings(6, 1, 1, 100)
 	_check(award.net_earnings == 120 and award.passed and market.blessings == 620, "Receipt must use +30/-20/-40 independently of the starting balance.")
@@ -64,17 +64,30 @@ func _run() -> void:
 	menu.get_node("%ContinueButton").pressed.emit()
 	var game: AfterTheEndGame = await _wait_for_game()
 	_check(game.day_number == 2 and game._daily_seed == checkpoint.seed, "Continue restores the saved day and roster seed.")
+	var expected_day_targets := PackedInt32Array([300, 350, 400, 450, 500])
+	for sample_day: int in range(1, 6):
+		game.day_number = sample_day
+		_check(
+			game._get_day_pass_target() == expected_day_targets[sample_day - 1],
+			"Day %d must use its authored Blessings threshold." % sample_day
+		)
+	game.day_number = 2
 	var service_number: String = game.manifest_config.service_train_number
 	var scene_probe: AfterTheEndGame = load("res://scenes/main/main.tscn").instantiate()
 	var authored_config: DailyManifestConfig = scene_probe.manifest_config
 	var authored_number: String = authored_config.service_train_number
 	_check(authored_config.create_daily_service(2, checkpoint.seed).service_train_number == service_number, "Continue restores the daily service number from its checkpoint seed.")
 	var generated_numbers: Dictionary = {}
+	var expected_night_counts := PackedInt32Array([3, 3, 4, 4, 5])
 	for sample_day: int in range(1, 6):
 		var daily_config: DailyManifestConfig = authored_config.create_daily_service(sample_day, checkpoint.seed)
 		generated_numbers[daily_config.service_train_number] = true
 		_check(daily_config.service_train_number == authored_config.create_daily_service(sample_day, checkpoint.seed).service_train_number, "Daily service generation is repeatable.")
 		_check(not daily_config.alternate_train_numbers.has(daily_config.service_train_number), "Wrong-train numbers remain distinct from the current service.")
+		_check(
+			daily_config.deceased_passenger_count == expected_night_counts[sample_day - 1],
+			"Night Service must follow the authored 3, 3, 4, 4, 5 anomaly progression."
+		)
 	_check(generated_numbers.size() > 1 and authored_config.service_train_number == authored_number, "Daily randomization varies without modifying the authored config.")
 	scene_probe.free()
 	_check(game._market_tool_state.get("blessings") == 500, "Continue restores the day-start inventory.")
@@ -92,16 +105,33 @@ func _run() -> void:
 	_check(game._incorrectly_stamped_anomalies.size() == 1 and game._penalty_log.size() == 1, "Repeated anomaly stamps charge once per shift, even after removing the stamp.")
 	game._correct_drop_offs = 6
 	game._wrong_drop_offs = 1
+	# Day 2's authored target is intentionally higher than this small receipt
+	# fixture; use the existing preview override to exercise the market route.
+	game._debug_day_pass_override = true
 	game._finalize_day_shift()
-	_check(game._day_blessing_award.net_earnings == 120 and game._day_blessing_award.passed, "Main paycheck passes at the Day 2 threshold.")
+	_check(game._day_blessing_award.net_earnings == 120 and game._day_blessing_award.passed, "The debug preview may still pass the Day 2 receipt route.")
 	game._on_shift_report_continue()
-	_check(game.state == AfterTheEndGame.GameState.MARKET, "Passing routes through the Night Market before night service.")
-	_check(game._night_market_ui.visible, "The Night Market opens after the paycheck.")
-	game._on_night_market_continue()
-	_check(game.state == AfterTheEndGame.GameState.NIGHT_TRANSITION, "Leaving the Night Market starts the symbolic night transition.")
-	_check(game._night_market_ui.visible, "Night Market fog remains briefly above the starting night transition.")
+	_check(game.state == AfterTheEndGame.GameState.NIGHT_TRANSITION, "Passing starts the terminal-to-night transition after the paycheck.")
+	_check(game._night_transition_ui.visible, "The veil transition appears before the Night Market.")
+	game._night_transition_ui.pre_market_white_hold_seconds = 0.0
 	game._night_transition_ui.skip_sequence()
-	_check(game.state == AfterTheEndGame.GameState.NIGHT, "Completing the transition enters night assignment gameplay.")
+	_check(game.state == AfterTheEndGame.GameState.MARKET, "Completing the transition opens the Night Market.")
+	_check(game._night_market_ui.visible, "The Night Market opens after the train crosses the veil.")
+	game._night_market_ui.content_exit_duration = 0.01
+	game._night_market_ui.gate_close_duration = 0.01
+	game._night_market_ui.transition_fog_rise_duration = 0.01
+	game._night_market_ui.transition_fog_hold_seconds = 0.0
+	game._night_market_ui.transition_fog_release_duration = 0.01
+	game._night_transition_ui.white_screen_hold_seconds = 0.01
+	game._night_transition_ui.post_market_fade_seconds = 0.01
+	game._night_transition_ui.night_reveal_hold_seconds = 0.0
+	game._night_transition_ui.exterior_hold_after_zoom_seconds = 0.0
+	game.process_mode = Node.PROCESS_MODE_PAUSABLE
+	game._on_night_market_continue()
+	_check(game.state == AfterTheEndGame.GameState.NIGHT_TRANSITION, "Leaving the market must return to the white transition first.")
+	await create_timer(2.0).timeout
+	_check(game.state == AfterTheEndGame.GameState.NIGHT, "The whiteout must reveal night gameplay after the market closes.")
+	_check(not game._night_market_ui.visible, "The market must clear before night gameplay begins.")
 	game._market_tool_state.call("purchase", &"radar_charge")
 	game._restart_game()
 	await process_frame
@@ -133,10 +163,10 @@ func _run() -> void:
 	game._finalize_day_shift()
 	_check(game._day_blessing_award.wrong_deduction == 20 * living_count, "Station settlement applies a flat 20 Blessings per wrong drop-off.")
 	game._enter_night()
-	game._on_departures_confirmed(game._get_departure_puzzle().correct_passenger_by_station)
-	game._sequence_ui._show_complete()
+	game.state = AfterTheEndGame.GameState.NIGHT_PUZZLE
+	game._on_night_validation_finished(true, 1)
 	_check(Progress.load_checkpoint().day == 3, "Finishing the night checkpoints the next day.")
-	game._on_journey_continue()
+	game._continue_after_night_paycheck()
 	await process_frame
 	await process_frame
 	game = current_scene as AfterTheEndGame
@@ -144,8 +174,8 @@ func _run() -> void:
 	_check(game.day_number == 3, "Continue after the night enters the next day.")
 	game.day_number = 5
 	game._enter_night()
-	game._on_departures_confirmed(game._get_departure_puzzle().correct_passenger_by_station)
-	game._sequence_ui._show_complete()
+	game.state = AfterTheEndGame.GameState.NIGHT_PUZZLE
+	game._on_night_validation_finished(true, 1)
 	_check(Progress.load_checkpoint().completed and Progress.load_checkpoint().day == 5, "Day 5 ends the campaign; no Day 6.")
 	game.free()
 	current_scene = null
@@ -164,7 +194,12 @@ func _run() -> void:
 	current_scene = menu
 	menu.get_node("%StartButton").pressed.emit()
 	game = await _wait_for_game()
-	_check(game.day_number == 1 and game._market_tool_state.get("blessings") == 0, "New Game starts Day 1 with fresh inventory through the loading screen.")
+	_check(
+		game.day_number == 1
+		and game._market_tool_state.get("blessings") == 0
+		and game._market_tool_state.get("veil_notes") == 1,
+		"New Game starts Day 1 with its scene-authored Veil Note through the loading screen."
+	)
 	game.state = AfterTheEndGame.GameState.DAY
 	game._active_modal = null
 	game._route_index = 0

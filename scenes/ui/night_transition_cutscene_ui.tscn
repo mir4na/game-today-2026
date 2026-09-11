@@ -93,7 +93,7 @@ tracks/3/keys = {
 tracks/4/type = "value"
 tracks/4/imported = false
 tracks/4/enabled = true
-tracks/4/path = NodePath("VeilSymbol:self_modulate:a")
+tracks/4/path = NodePath("TopBar:self_modulate:a")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
@@ -105,34 +105,10 @@ tracks/4/keys = {
 tracks/5/type = "value"
 tracks/5/imported = false
 tracks/5/enabled = true
-tracks/5/path = NodePath("NightTitle:self_modulate:a")
+tracks/5/path = NodePath("BottomBar:self_modulate:a")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [0.0]
-}
-tracks/6/type = "value"
-tracks/6/imported = false
-tracks/6/enabled = true
-tracks/6/path = NodePath("TopBar:self_modulate:a")
-tracks/6/interp = 1
-tracks/6/loop_wrap = true
-tracks/6/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [0.0]
-}
-tracks/7/type = "value"
-tracks/7/imported = false
-tracks/7/enabled = true
-tracks/7/path = NodePath("BottomBar:self_modulate:a")
-tracks/7/interp = 1
-tracks/7/loop_wrap = true
-tracks/7/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
@@ -149,10 +125,10 @@ tracks/0/path = NodePath("BackdropTint:self_modulate:a")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 2.0, 4.8, 7.2, 10.0),
-"transitions": PackedFloat32Array(1, 1.3, 1, 1.2, 1),
+"times": PackedFloat32Array(0, 3.4, 5.8, 6.5, 8.2, 10.0),
+"transitions": PackedFloat32Array(1, 1.3, 1, 1.2, 1.2, 1),
 "update": 0,
-"values": [0.0, 0.1, 0.52, 0.18, 0.0]
+"values": [0.0, 0.0, 0.3, 0.5, 0.1, 0.0]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
@@ -161,10 +137,10 @@ tracks/1/path = NodePath("FogBack:self_modulate:a")
 tracks/1/interp = 2
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 1.5, 4.7, 5.5, 7.5, 9.5, 10.0),
-"transitions": PackedFloat32Array(1, 1.4, 1.2, 1, 1.25, 1.2, 1),
+"times": PackedFloat32Array(0, 3.45, 3.9, 4.95, 6.05, 7.2, 8.15, 10.0),
+"transitions": PackedFloat32Array(1, 1.4, 1.2, 1, 1.25, 1.2, 1.2, 1),
 "update": 0,
-"values": [0.0, 0.12, 0.88, 1.0, 0.54, 0.06, 0.0]
+"values": [0.0, 0.0, 0.18, 0.9, 1.0, 0.5, 0.02, 0.0]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -173,10 +149,10 @@ tracks/2/path = NodePath("FogFront:self_modulate:a")
 tracks/2/interp = 2
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0, 2.8, 4.9, 5.6, 6.6, 8.6, 10.0),
-"transitions": PackedFloat32Array(1, 1.4, 1.2, 1, 1.2, 1.3, 1),
+"times": PackedFloat32Array(0, 3.6, 4.0, 4.95, 6.1, 7.3, 8.2, 10.0),
+"transitions": PackedFloat32Array(1, 1.4, 1.2, 1, 1.2, 1.3, 1.2, 1),
 "update": 0,
-"values": [0.0, 0.08, 0.82, 1.0, 0.68, 0.04, 0.0]
+"values": [0.0, 0.0, 0.12, 0.88, 1.0, 0.48, 0.01, 0.0]
 }
 tracks/3/type = "value"
 tracks/3/imported = false
@@ -185,54 +161,30 @@ tracks/3/path = NodePath("VeilFlash:self_modulate:a")
 tracks/3/interp = 2
 tracks/3/loop_wrap = true
 tracks/3/keys = {
-"times": PackedFloat32Array(0, 4.65, 5.2, 5.7, 7.0, 10.0),
+"times": PackedFloat32Array(0, 4.95, 6.0, 6.4, 7.2, 10.0),
 "transitions": PackedFloat32Array(1, 1.5, 1, 1.4, 1.2, 1),
 "update": 0,
-"values": [0.0, 0.0, 0.86, 0.22, 0.0, 0.0]
+"values": [0.0, 0.0, 1.0, 0.45, 0.0, 0.0]
 }
 tracks/4/type = "value"
 tracks/4/imported = false
 tracks/4/enabled = true
-tracks/4/path = NodePath("VeilSymbol:self_modulate:a")
+tracks/4/path = NodePath("TopBar:self_modulate:a")
 tracks/4/interp = 2
 tracks/4/loop_wrap = true
 tracks/4/keys = {
-"times": PackedFloat32Array(0, 4.55, 5.05, 5.45, 6.2, 10.0),
-"transitions": PackedFloat32Array(1, 1.6, 1, 1.3, 1.2, 1),
-"update": 0,
-"values": [0.0, 0.0, 0.92, 0.7, 0.0, 0.0]
-}
-tracks/5/type = "value"
-tracks/5/imported = false
-tracks/5/enabled = true
-tracks/5/path = NodePath("NightTitle:self_modulate:a")
-tracks/5/interp = 2
-tracks/5/loop_wrap = true
-tracks/5/keys = {
-"times": PackedFloat32Array(0, 6.6, 7.3, 8.7, 9.5, 10.0),
-"transitions": PackedFloat32Array(1, 1.5, 1, 1, 1.4, 1),
-"update": 0,
-"values": [0.0, 0.0, 1.0, 1.0, 0.0, 0.0]
-}
-tracks/6/type = "value"
-tracks/6/imported = false
-tracks/6/enabled = true
-tracks/6/path = NodePath("TopBar:self_modulate:a")
-tracks/6/interp = 2
-tracks/6/loop_wrap = true
-tracks/6/keys = {
 "times": PackedFloat32Array(0, 0.45, 9.4, 10.0),
 "transitions": PackedFloat32Array(1.4, 1, 1.4, 1),
 "update": 0,
 "values": [0.0, 1.0, 1.0, 0.0]
 }
-tracks/7/type = "value"
-tracks/7/imported = false
-tracks/7/enabled = true
-tracks/7/path = NodePath("BottomBar:self_modulate:a")
-tracks/7/interp = 2
-tracks/7/loop_wrap = true
-tracks/7/keys = {
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("BottomBar:self_modulate:a")
+tracks/5/interp = 2
+tracks/5/loop_wrap = true
+tracks/5/keys = {
 "times": PackedFloat32Array(0, 0.45, 9.4, 10.0),
 "transitions": PackedFloat32Array(1.4, 1, 1.4, 1),
 "update": 0,
@@ -258,8 +210,16 @@ mouse_filter = 0
 theme = ExtResource("2_theme")
 script = ExtResource("1_script")
 transition_animation = &"transition"
-veil_crossing_time = 5.25
+veil_crossing_time = 6.0
+pre_market_white_hold_seconds = 1.0
 skip_unlock_seconds = 1.5
+departure_start_time = 0.45
+departure_follow_time = 0.65
+station_fade_start_time = 1.2
+station_fade_end_time = 3.2
+veil_departure_progress = 0.68
+departure_end_time = 8.15
+camera_return_time = 8.25
 
 [node name="BackdropTint" type="ColorRect" parent="."]
 layout_mode = 1
@@ -309,48 +269,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.72, 0.9, 0.95, 1)
-
-[node name="VeilSymbol" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_colors/font_color = Color(0.88, 0.97, 1, 1)
-theme_override_colors/font_shadow_color = Color(0.08, 0.24, 0.31, 0.75)
-theme_override_constants/shadow_offset_x = 0
-theme_override_constants/shadow_offset_y = 4
-theme_override_font_sizes/font_size = 86
-text = "◇"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="NightTitle" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = 76.0
-offset_right = 300.0
-offset_bottom = 126.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_type_variation = &"HeaderLabel"
-theme_override_colors/font_color = Color(0.86, 0.95, 0.98, 1)
-theme_override_colors/font_shadow_color = Color(0.02, 0.08, 0.12, 0.9)
-theme_override_constants/shadow_offset_x = 0
-theme_override_constants/shadow_offset_y = 3
-theme_override_font_sizes/font_size = 30
-text = "NIGHT SERVICE"
-horizontal_alignment = 1
-vertical_alignment = 1
+color = Color(1, 0.985, 0.96, 1)
 
 [node name="TopBar" type="ColorRect" parent="."]
 layout_mode = 1

@@ -13,6 +13,7 @@ z_index = 2
 script = ExtResource("1")
 prompt_text = "Read newspaper"
 interaction_distance = 150.0
+passenger_idle_collision_path = NodePath("CollisionShape2D")
 prompt_anchor_path = NodePath("InteractionPromptAnchor")
 focus_visual_path = NodePath("Visual")
 raise_on_focus = false

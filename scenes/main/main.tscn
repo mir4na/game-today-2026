@@ -4,12 +4,11 @@
 [ext_resource type="PackedScene" uid="uid://b18t7ho1drja1" path="res://scenes/train/train.tscn" id="2"]
 [ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="2_08tbl"]
 [ext_resource type="PackedScene" uid="uid://cq24ye24eom3u" path="res://scenes/player/player.tscn" id="3"]
-[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="4"]
+[ext_resource type="PackedScene" uid="uid://dk8ihi0buonf0" path="res://scenes/ui/hud.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/document_overlay_ui.tscn" id="5"]
-[ext_resource type="PackedScene" path="res://scenes/ui/guidebook_ui.tscn" id="6"]
-[ext_resource type="PackedScene" path="res://scenes/ui/night_puzzle_ui.tscn" id="8"]
-[ext_resource type="PackedScene" path="res://scenes/night/departure_sequence_ui.tscn" id="9"]
-[ext_resource type="PackedScene" path="res://scenes/ui/pause_ui.tscn" id="10"]
+[ext_resource type="PackedScene" uid="uid://4vcwjjpkoty4" path="res://scenes/ui/guidebook_ui.tscn" id="6"]
+[ext_resource type="PackedScene" uid="uid://shq6f5saupvr" path="res://scenes/ui/night_puzzle_ui.tscn" id="8"]
+[ext_resource type="PackedScene" uid="uid://cqy4vojmyhgdi" path="res://scenes/ui/pause_ui.tscn" id="10"]
 [ext_resource type="Resource" uid="uid://cx6ttdmtj4lgd" path="res://data/passengers/npc_1_profile.tres" id="11"]
 [ext_resource type="Resource" uid="uid://d1llapidnrg01" path="res://data/passengers/npc_2_profile.tres" id="12"]
 [ext_resource type="Resource" uid="uid://j3f80mwvqkci" path="res://data/passengers/npc_3_profile.tres" id="13"]
@@ -31,15 +30,19 @@
 [ext_resource type="Resource" uid="uid://cj3r8yb3lqr2s" path="res://data/passengers/npc_14_profile.tres" id="29"]
 [ext_resource type="Resource" uid="uid://diyhq8nh7l86r" path="res://data/passengers/npc_15_profile.tres" id="30"]
 [ext_resource type="Resource" uid="uid://58rs41etoeoh" path="res://data/passengers/npc_16_profile.tres" id="31"]
+[ext_resource type="Shader" uid="uid://dmt6cangn2bap" path="res://shaders/blocked_carriage_grayscale.gdshader" id="31_6miv3"]
+[ext_resource type="Shader" uid="uid://df3d6yvnee1ie" path="res://shaders/radar_carriage_scan.gdshader" id="32_yisfj"]
 [ext_resource type="PackedScene" path="res://scenes/passengers/passenger_placeholder.tscn" id="34"]
 [ext_resource type="PackedScene" uid="uid://drn1e0xhyylll" path="res://scenes/systems/travel_foreground.tscn" id="36"]
 [ext_resource type="Resource" uid="uid://b37vfh7cgqlw5" path="res://data/daily_manifest_config.tres" id="37"]
 [ext_resource type="Shader" uid="uid://dq13hfpieecwx" path="res://shaders/night_atmosphere.gdshader" id="38"]
-[ext_resource type="PackedScene" path="res://scenes/ui/blocked_aisle_puzzle_ui.tscn" id="38_blocked_ui"]
+[ext_resource type="PackedScene" uid="uid://bd7f1bhggbm10" path="res://scenes/ui/blocked_aisle_puzzle_ui.tscn" id="38_blocked_ui"]
+[ext_resource type="Shader" uid="uid://ce1bimgy548dk" path="res://shaders/clock_progress_fill.gdshader" id="38_pd34m"]
 [ext_resource type="Shader" uid="uid://dws5qbo4ng6g" path="res://shaders/day_cycle_sky.gdshader" id="39"]
-[ext_resource type="PackedScene" path="res://scenes/ui/clean_seat_ui.tscn" id="39_clean_ui"]
+[ext_resource type="PackedScene" uid="uid://dxh8uc0ytsvkm" path="res://scenes/ui/clean_seat_ui.tscn" id="39_clean_ui"]
+[ext_resource type="Shader" uid="uid://b7v5jwqdcye4y" path="res://shaders/ui_texture_outline.gdshader" id="39_qjyke"]
 [ext_resource type="PackedScene" path="res://scenes/systems/market_tool_state.tscn" id="40_market_state"]
-[ext_resource type="PackedScene" path="res://scenes/ui/night_market_ui.tscn" id="41_market_ui"]
+[ext_resource type="PackedScene" uid="uid://5s6mup82ct4p" path="res://scenes/ui/night_market_ui.tscn" id="41_market_ui"]
 [ext_resource type="Script" uid="uid://cr77segdw7blg" path="res://scripts/systems/camera_bounds_2d.gd" id="42_camera_bounds"]
 [ext_resource type="PackedScene" uid="uid://c8qmx71qn8rq6" path="res://scenes/systems/travel_background.tscn" id="43_travel_background"]
 [ext_resource type="Texture2D" uid="uid://bnl61bhej8bp4" path="res://assets/environment/railroad.png" id="44_railroad"]
@@ -47,6 +50,10 @@
 [ext_resource type="PackedScene" path="res://scenes/systems/station_cinematic_view.tscn" id="45_station_view"]
 [ext_resource type="PackedScene" path="res://scenes/ui/swiftstep_effect_ui.tscn" id="46_swiftstep_effect"]
 [ext_resource type="Material" path="res://resources/materials/screen_bloom.tres" id="47_screen_bloom"]
+[ext_resource type="PackedScene" uid="uid://bn7q3awivg60d" path="res://scenes/ui/night_soul_record_ui.tscn" id="47_soul_record"]
+[ext_resource type="PackedScene" path="res://scenes/ui/veil_note_reveal_ui.tscn" id="48_veil_note_reveal"]
+[ext_resource type="PackedScene" path="res://scenes/ui/service_signature_ui.tscn" id="50_signature_ui"]
+[ext_resource type="PackedScene" uid="uid://dl1hatq1cq2qy" path="res://scenes/ui/hint.tscn" id="51_hint_ui"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_day_cycle_sky"]
 shader = ExtResource("39")
@@ -78,21 +85,167 @@ shader_parameter/density = 0.52
 shader_parameter/speed = Vector2(0.02, 0.01)
 shader_parameter/fog_scale = Vector2(0.48, 0.48)
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_o8kno"]
+resource_local_to_scene = true
+shader = ExtResource("31_6miv3")
+shader_parameter/grayscale_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7ahn0"]
+resource_local_to_scene = true
+shader = ExtResource("32_yisfj")
+shader_parameter/scan_progress = 0.0
+shader_parameter/scan_aspect = 2.85
+shader_parameter/scan_origin = Vector2(0.5, 0.88)
+shader_parameter/band_width = 0.24
+shader_parameter/grid_density = 11.0
+shader_parameter/grid_line_width = 0.035
+shader_parameter/grid_feather = 0.018
+shader_parameter/edge_width = 0.004
+shader_parameter/edge_glow_width = 0.022
+shader_parameter/fill_strength = 0.04
+shader_parameter/scanned_grid_strength = 0.46
+shader_parameter/scanned_fill_strength = 0.025
+shader_parameter/trail_falloff = 2.25
+shader_parameter/warp_strength = 0.004
+shader_parameter/grid_color = Color(0.24, 1, 0.56, 0.68)
+shader_parameter/edge_color = Color(0.52, 1, 0.7, 0.92)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vyrcm"]
+resource_local_to_scene = true
+shader = ExtResource("31_6miv3")
+shader_parameter/grayscale_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_3ql0k"]
+resource_local_to_scene = true
+shader = ExtResource("31_6miv3")
+shader_parameter/grayscale_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8biwb"]
+resource_local_to_scene = true
+shader = ExtResource("32_yisfj")
+shader_parameter/scan_progress = 0.0
+shader_parameter/scan_aspect = 2.85
+shader_parameter/scan_origin = Vector2(0.5, 0.88)
+shader_parameter/band_width = 0.24
+shader_parameter/grid_density = 11.0
+shader_parameter/grid_line_width = 0.035
+shader_parameter/grid_feather = 0.018
+shader_parameter/edge_width = 0.004
+shader_parameter/edge_glow_width = 0.022
+shader_parameter/fill_strength = 0.04
+shader_parameter/scanned_grid_strength = 0.46
+shader_parameter/scanned_fill_strength = 0.025
+shader_parameter/trail_falloff = 2.25
+shader_parameter/warp_strength = 0.004
+shader_parameter/grid_color = Color(0.24, 1, 0.56, 0.68)
+shader_parameter/edge_color = Color(0.52, 1, 0.7, 0.92)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_m0t6v"]
+resource_local_to_scene = true
+shader = ExtResource("31_6miv3")
+shader_parameter/grayscale_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_axmsw"]
+resource_local_to_scene = true
+shader = ExtResource("31_6miv3")
+shader_parameter/grayscale_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0fdjx"]
+resource_local_to_scene = true
+shader = ExtResource("32_yisfj")
+shader_parameter/scan_progress = 0.0
+shader_parameter/scan_aspect = 2.85
+shader_parameter/scan_origin = Vector2(0.5, 0.88)
+shader_parameter/band_width = 0.24
+shader_parameter/grid_density = 11.0
+shader_parameter/grid_line_width = 0.035
+shader_parameter/grid_feather = 0.018
+shader_parameter/edge_width = 0.004
+shader_parameter/edge_glow_width = 0.022
+shader_parameter/fill_strength = 0.04
+shader_parameter/scanned_grid_strength = 0.46
+shader_parameter/scanned_fill_strength = 0.025
+shader_parameter/trail_falloff = 2.25
+shader_parameter/warp_strength = 0.004
+shader_parameter/grid_color = Color(0.24, 1, 0.56, 0.68)
+shader_parameter/edge_color = Color(0.52, 1, 0.7, 0.92)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ky173"]
+resource_local_to_scene = true
+shader = ExtResource("31_6miv3")
+shader_parameter/grayscale_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_scupx"]
+resource_local_to_scene = true
+shader = ExtResource("31_6miv3")
+shader_parameter/grayscale_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_62gx1"]
+resource_local_to_scene = true
+shader = ExtResource("32_yisfj")
+shader_parameter/scan_progress = 0.0
+shader_parameter/scan_aspect = 2.85
+shader_parameter/scan_origin = Vector2(0.5, 0.88)
+shader_parameter/band_width = 0.24
+shader_parameter/grid_density = 11.0
+shader_parameter/grid_line_width = 0.035
+shader_parameter/grid_feather = 0.018
+shader_parameter/edge_width = 0.004
+shader_parameter/edge_glow_width = 0.022
+shader_parameter/fill_strength = 0.04
+shader_parameter/scanned_grid_strength = 0.46
+shader_parameter/scanned_fill_strength = 0.025
+shader_parameter/trail_falloff = 2.25
+shader_parameter/warp_strength = 0.004
+shader_parameter/grid_color = Color(0.24, 1, 0.56, 0.68)
+shader_parameter/edge_color = Color(0.52, 1, 0.7, 0.92)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ae8n2"]
+resource_local_to_scene = true
+shader = ExtResource("31_6miv3")
+shader_parameter/grayscale_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_obdhw"]
+resource_local_to_scene = true
+shader = ExtResource("38_pd34m")
+shader_parameter/progress = 0.0
+shader_parameter/edge_softness = 0.003
+shader_parameter/fill_origin = Vector2(0.477, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_budmp"]
+resource_local_to_scene = true
+shader = ExtResource("39_qjyke")
+shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
+shader_parameter/outline_size = 9.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_32ji7"]
+resource_local_to_scene = true
+shader = ExtResource("39_qjyke")
+shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
+shader_parameter/outline_size = 9.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sveqe"]
+resource_local_to_scene = true
+shader = ExtResource("39_qjyke")
+shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
+shader_parameter/outline_size = 9.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lakrh"]
+resource_local_to_scene = true
+shader = ExtResource("39_qjyke")
+shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
+shader_parameter/outline_size = 9.0
+
 [node name="Main" type="Node2D" unique_id=604105226]
 script = ExtResource("1")
 passenger_identity_profiles = Array[ExtResource("2_08tbl")]([ExtResource("11"), ExtResource("12"), ExtResource("13"), ExtResource("14"), ExtResource("15"), ExtResource("16"), ExtResource("19"), ExtResource("20"), ExtResource("21"), ExtResource("22"), ExtResource("23"), ExtResource("24"), ExtResource("28"), ExtResource("29"), ExtResource("30"), ExtResource("31")])
 puzzle_resource = ExtResource("17")
 passenger_scene = ExtResource("34")
 manifest_config = ExtResource("37")
-maintenance_minigame_unlock_day = 1
 day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere")
 station_travel_durations_seconds = PackedFloat32Array(120, 120, 120, 120)
-radar_anomaly_light_seconds = 4.0
 debug_print_anomaly_roster = true
-night_shift_instruction = "Night shift · 03:00
-Interview the deceased before time runs out, then finalize the ledger"
-departure_statement_recorded_template = "Departure statement recorded
-%d / %d collected"
+night_shift_instruction = ""
 
 [node name="MarketToolState" parent="." unique_id=1541596097 instance=ExtResource("40_market_state")]
 unique_name_in_owner = true
@@ -162,7 +315,7 @@ color = Color(0.84, 0.88, 0.94, 1)
 
 [node name="StationCinematicView" parent="GameplayWorld" unique_id=1840407460 instance=ExtResource("45_station_view")]
 
-[node name="TrainOccupants" type="Node2D" parent="GameplayWorld"]
+[node name="TrainOccupants" type="Node2D" parent="GameplayWorld" unique_id=1793042415]
 unique_name_in_owner = true
 editor_description = "Player and runtime passengers follow the exact station travel offset of Train/Cars during arrival and departure."
 
@@ -182,8 +335,44 @@ interaction_enabled = false
 unique_name_in_owner = true
 position = Vector2(-16, 0)
 
+[node name="ArtRoot" parent="GameplayWorld/Train/Cars/PassengerCoach4" parent_id_path=PackedInt32Array(1577522868, 398983735) index="1" unique_id=1724717493]
+material = SubResource("ShaderMaterial_o8kno")
+
+[node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach4/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 398983735, 545678927) index="0" unique_id=398318395]
+material = SubResource("ShaderMaterial_7ahn0")
+
+[node name="InteriorLighting" parent="GameplayWorld/Train/Cars/PassengerCoach4" parent_id_path=PackedInt32Array(1577522868, 398983735) index="2" unique_id=1422164408]
+material = SubResource("ShaderMaterial_vyrcm")
+
 [node name="Newspaper" parent="GameplayWorld/Train/Cars/PassengerCoach4" parent_id_path=PackedInt32Array(1577522868, 398983735) index="4" unique_id=891876982]
 position = Vector2(533, 495)
+
+[node name="ArtRoot" parent="GameplayWorld/Train/Cars/PassengerCoach3" parent_id_path=PackedInt32Array(1577522868, 534537403) index="1" unique_id=1724717493]
+material = SubResource("ShaderMaterial_3ql0k")
+
+[node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach3/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 534537403, 545678927) index="0" unique_id=398318395]
+material = SubResource("ShaderMaterial_8biwb")
+
+[node name="InteriorLighting" parent="GameplayWorld/Train/Cars/PassengerCoach3" parent_id_path=PackedInt32Array(1577522868, 534537403) index="2" unique_id=1422164408]
+material = SubResource("ShaderMaterial_m0t6v")
+
+[node name="ArtRoot" parent="GameplayWorld/Train/Cars/PassengerCoach2" parent_id_path=PackedInt32Array(1577522868, 213345118) index="1" unique_id=1724717493]
+material = SubResource("ShaderMaterial_axmsw")
+
+[node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach2/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 213345118, 545678927) index="0" unique_id=398318395]
+material = SubResource("ShaderMaterial_0fdjx")
+
+[node name="InteriorLighting" parent="GameplayWorld/Train/Cars/PassengerCoach2" parent_id_path=PackedInt32Array(1577522868, 213345118) index="2" unique_id=1422164408]
+material = SubResource("ShaderMaterial_ky173")
+
+[node name="ArtRoot" parent="GameplayWorld/Train/Cars/PassengerCoach1" parent_id_path=PackedInt32Array(1577522868, 297172719) index="1" unique_id=1724717493]
+material = SubResource("ShaderMaterial_scupx")
+
+[node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach1/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 297172719, 545678927) index="0" unique_id=398318395]
+material = SubResource("ShaderMaterial_62gx1")
+
+[node name="InteriorLighting" parent="GameplayWorld/Train/Cars/PassengerCoach1" parent_id_path=PackedInt32Array(1577522868, 297172719) index="2" unique_id=1422164408]
+material = SubResource("ShaderMaterial_ae8n2")
 
 [node name="BlockedAisle43" parent="GameplayWorld/Train/Cars/CarConnections/MaintenanceEvents" parent_id_path=PackedInt32Array(1577522868, 1440122565) index="0" unique_id=1176730495]
 editor_description = ""
@@ -239,18 +428,17 @@ mouse_filter = 2
 texture = ExtResource("44_railroad")
 expand_mode = 1
 
-[node name="SwiftstepEffectUI" parent="." instance=ExtResource("46_swiftstep_effect")]
+[node name="SwiftstepEffectUI" parent="." unique_id=1129699900 instance=ExtResource("46_swiftstep_effect")]
 unique_name_in_owner = true
-world_lighting_path = NodePath("../GameplayWorld/WorldLighting")
 
-[node name="BloomLayer" type="CanvasLayer" parent="."]
+[node name="BloomLayer" type="CanvasLayer" parent="." unique_id=2034352473]
 editor_description = "Subtle highlight bloom for the rendered world. It sits below the HUD and modal layers so interface text stays crisp."
 layer = 9
 
-[node name="RefreshScreenTexture" type="BackBufferCopy" parent="BloomLayer"]
+[node name="RefreshScreenTexture" type="BackBufferCopy" parent="BloomLayer" unique_id=1819045204]
 copy_mode = 2
 
-[node name="Bloom" type="ColorRect" parent="BloomLayer"]
+[node name="Bloom" type="ColorRect" parent="BloomLayer" unique_id=1026832635]
 material = ExtResource("47_screen_bloom")
 anchors_preset = 15
 anchor_right = 1.0
@@ -261,6 +449,44 @@ mouse_filter = 2
 
 [node name="HUD" parent="." unique_id=1053587110 instance=ExtResource("4")]
 unique_name_in_owner = true
+
+[node name="FloatingPrompt" parent="HUD/Root" parent_id_path=PackedInt32Array(1053587110, 664657133) index="4" unique_id=266769048]
+visible = true
+
+[node name="ClockFilled" parent="HUD/Root/ClockPanel/ClockFace" parent_id_path=PackedInt32Array(1053587110, 2018867802) index="2" unique_id=652018143]
+material = SubResource("ShaderMaterial_obdhw")
+
+[node name="ClockPointer" parent="HUD/Root/ClockPanel/ClockFace/ClockNeedlePivot" parent_id_path=PackedInt32Array(1053587110, 1197693786) index="0" unique_id=1810178768]
+material = SubResource("ShaderMaterial_budmp")
+
+[node name="DaySymbol" parent="HUD/Root/ClockPanel/ClockFace/ClockSymbolPivot" parent_id_path=PackedInt32Array(1053587110, 1736318714) index="0" unique_id=1300180946]
+material = SubResource("ShaderMaterial_budmp")
+
+[node name="NightSymbol" parent="HUD/Root/ClockPanel/ClockFace/ClockSymbolPivot" parent_id_path=PackedInt32Array(1053587110, 1736318714) index="1" unique_id=1397011548]
+material = SubResource("ShaderMaterial_budmp")
+
+[node name="Background" parent="HUD/Root/MarketItemBar/RadarSlot" parent_id_path=PackedInt32Array(1053587110, 943347102) index="0" unique_id=1812476632]
+material = SubResource("ShaderMaterial_32ji7")
+
+[node name="Icon" parent="HUD/Root/MarketItemBar/RadarSlot" parent_id_path=PackedInt32Array(1053587110, 943347102) index="2" unique_id=771861680]
+material = SubResource("ShaderMaterial_32ji7")
+
+[node name="Background" parent="HUD/Root/MarketItemBar/SwiftSlot" parent_id_path=PackedInt32Array(1053587110, 2093275063) index="0" unique_id=1812476632]
+material = SubResource("ShaderMaterial_sveqe")
+
+[node name="Icon" parent="HUD/Root/MarketItemBar/SwiftSlot" parent_id_path=PackedInt32Array(1053587110, 2093275063) index="2" unique_id=771861680]
+material = SubResource("ShaderMaterial_sveqe")
+
+[node name="Background" parent="HUD/Root/MarketItemBar/VeilNoteSlot" parent_id_path=PackedInt32Array(1053587110, 907689913) index="0" unique_id=1812476632]
+material = SubResource("ShaderMaterial_lakrh")
+
+[node name="Icon" parent="HUD/Root/MarketItemBar/VeilNoteSlot" parent_id_path=PackedInt32Array(1053587110, 907689913) index="2" unique_id=771861680]
+material = SubResource("ShaderMaterial_lakrh")
+
+[node name="NotificationPanel" parent="HUD/Root" parent_id_path=PackedInt32Array(1053587110, 664657133) index="10" unique_id=1320290712]
+visible = true
+offset_top = 224.0
+offset_bottom = 284.0
 
 [node name="ModalLayer" type="CanvasLayer" parent="." unique_id=1356756245]
 layer = 20
@@ -286,10 +512,17 @@ unique_name_in_owner = true
 [node name="NightMarketUI" parent="ModalLayer" unique_id=372416607 instance=ExtResource("41_market_ui")]
 unique_name_in_owner = true
 
-[node name="NightPuzzleUI" parent="ModalLayer" unique_id=1779434419 instance=ExtResource("8")]
+[node name="NightSoulRecordUI" parent="ModalLayer" unique_id=839261540 instance=ExtResource("47_soul_record")]
 unique_name_in_owner = true
 
-[node name="DepartureSequenceUI" parent="ModalLayer" unique_id=348132804 instance=ExtResource("9")]
+[node name="NightPuzzleUI" parent="ModalLayer" unique_id=1779434419 instance=ExtResource("8")]
+unique_name_in_owner = true
+visible = false
+
+[node name="ServiceSignatureUI" parent="ModalLayer" unique_id=1304038471 instance=ExtResource("50_signature_ui")]
+unique_name_in_owner = true
+
+[node name="VeilNoteRevealUI" parent="ModalLayer" unique_id=2131935263 instance=ExtResource("48_veil_note_reveal")]
 unique_name_in_owner = true
 
 [node name="BlockedAislePuzzleUI" parent="ModalLayer" unique_id=559761803 instance=ExtResource("38_blocked_ui")]
@@ -298,13 +531,17 @@ unique_name_in_owner = true
 [node name="CleanSeatUI" parent="ModalLayer" unique_id=1148165085 instance=ExtResource("39_clean_ui")]
 unique_name_in_owner = true
 
-[node name="PauseLayer" type="CanvasLayer" parent="."]
+[node name="HintUI" parent="ModalLayer" unique_id=198971249 instance=ExtResource("51_hint_ui")]
+unique_name_in_owner = true
+
+[node name="PauseLayer" type="CanvasLayer" parent="." unique_id=1162735996]
 layer = 100
 
 [node name="PauseUI" parent="PauseLayer" unique_id=680489697 instance=ExtResource("10")]
 unique_name_in_owner = true
 
 [connection signal="inventory_changed" from="MarketToolState" to="." method="_on_market_inventory_changed"]
+[connection signal="camera_handoff_finished" from="GameplayWorld/StationCinematicView" to="." method="_on_station_cinematic_camera_handoff_finished"]
 [connection signal="interaction_pressed" from="GameplayWorld/TrainOccupants/PlayerSpawnPoint/Player" to="." method="_on_interaction_pressed"]
 [connection signal="nearby_interactable_changed" from="GameplayWorld/TrainOccupants/PlayerSpawnPoint/Player" to="." method="_on_nearby_interactable_changed"]
 [connection signal="exterior_fade_out_finished" from="GameplayWorld/Train" to="." method="_on_train_exterior_fade_out_finished"]
@@ -312,8 +549,10 @@ unique_name_in_owner = true
 [connection signal="newspaper_read" from="GameplayWorld/Train/Cars/PassengerCoach4/Newspaper" to="." method="_on_newspaper_read"]
 [connection signal="timeout" from="MaintenanceTimers/BlockedAisleTimer" to="." method="_on_blocked_aisle_timer_timeout"]
 [connection signal="timeout" from="MaintenanceTimers/DirtySeatTimer" to="." method="_on_dirty_seat_timer_timeout"]
-[connection signal="guidebook_requested" from="HUD" to="." method="_on_guidebook_requested"]
 [connection signal="debug_next_station_requested" from="HUD" to="." method="_on_debug_next_station_requested"]
+[connection signal="debug_night_requested" from="HUD" to="." method="_on_debug_night_requested"]
+[connection signal="guidebook_requested" from="HUD" to="." method="_on_guidebook_requested"]
+[connection signal="service_action_requested" from="HUD" to="." method="_on_service_action_requested"]
 [connection signal="closed" from="ModalLayer/DocumentOverlayUI" to="." method="_on_modal_closed"]
 [connection signal="station_assignment_toggled" from="ModalLayer/DocumentOverlayUI" to="." method="_on_station_assignment_toggled"]
 [connection signal="station_stamp_applied" from="ModalLayer/DocumentOverlayUI" to="." method="_on_station_stamp_applied"]
@@ -321,29 +560,52 @@ unique_name_in_owner = true
 [connection signal="intro_finished" from="ModalLayer/DayIntroUI" to="." method="_on_day_intro_finished"]
 [connection signal="boarding_actor_entered" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_boarding_actor_entered"]
 [connection signal="camera_return_started" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_camera_return_started"]
-[connection signal="sequence_skip_requested" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_skip_requested"]
-[connection signal="camera_handoff_finished" from="GameplayWorld/StationCinematicView" to="." method="_on_station_cinematic_camera_handoff_finished"]
 [connection signal="sequence_finished" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_stop_finished"]
+[connection signal="sequence_skip_requested" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_skip_requested"]
 [connection signal="sequence_timeline_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_timeline_changed"]
 [connection signal="timeline_completed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_timeline_completed"]
 [connection signal="train_motion_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_train_motion_changed"]
 [connection signal="continue_requested" from="ModalLayer/ShiftReportUI" to="." method="_on_shift_report_continue"]
+[connection signal="camera_return_requested" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_camera_return_requested"]
+[connection signal="departure_follow_requested" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_departure_follow_requested"]
 [connection signal="sequence_finished" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_finished"]
+[connection signal="sequence_timeline_changed" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_timeline_changed"]
 [connection signal="veil_crossed" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_veil_crossed"]
+[connection signal="whiteout_reached" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_whiteout_reached"]
 [connection signal="continue_requested" from="ModalLayer/NightMarketUI" to="." method="_on_night_market_continue"]
 [connection signal="purchase_requested" from="ModalLayer/NightMarketUI" to="." method="_on_market_purchase_requested"]
+[connection signal="closed" from="ModalLayer/NightSoulRecordUI" to="." method="_on_night_soul_record_closed"]
+[connection signal="closing" from="ModalLayer/NightSoulRecordUI" to="." method="_on_night_soul_record_closing"]
+[connection signal="statement_feedback_requested" from="ModalLayer/NightSoulRecordUI" to="." method="_on_night_statement_feedback_requested"]
+[connection signal="statement_recorded" from="ModalLayer/NightSoulRecordUI" to="." method="_on_night_statement_recorded"]
+[connection signal="closed" from="ModalLayer/NightPuzzleUI" to="." method="_close_night_puzzle"]
 [connection signal="departures_confirmed" from="ModalLayer/NightPuzzleUI" to="." method="_on_departures_confirmed"]
-[connection signal="journey_continue_requested" from="ModalLayer/DepartureSequenceUI" to="." method="_on_journey_continue"]
-[connection signal="sequence_finished" from="ModalLayer/DepartureSequenceUI" to="." method="_on_night_sequence_finished"]
-[connection signal="main_menu_requested" from="PauseLayer/PauseUI" to="." method="_return_to_main_menu"]
-[connection signal="restart_requested" from="PauseLayer/PauseUI" to="." method="_restart_game"]
-[connection signal="resume_requested" from="PauseLayer/PauseUI" to="." method="_resume_from_pause"]
+[connection signal="validation_finished" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_validation_finished"]
+[connection signal="validation_impact_requested" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_validation_impact_requested"]
+[connection signal="closed" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signature_closed"]
+[connection signal="service_signed" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signed"]
+[connection signal="signature_rejected" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signature_rejected"]
+[connection signal="reveal_finished" from="ModalLayer/VeilNoteRevealUI" to="." method="_on_veil_note_reveal_finished"]
 [connection signal="closed" from="ModalLayer/BlockedAislePuzzleUI" to="." method="_on_maintenance_minigame_closed"]
 [connection signal="completed" from="ModalLayer/BlockedAislePuzzleUI" to="." method="_on_maintenance_minigame_completed"]
 [connection signal="closed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_closed"]
 [connection signal="completed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_completed"]
+[connection signal="dismissed" from="ModalLayer/HintUI" to="." method="_on_level_start_hint_dismissed"]
+[connection signal="main_menu_requested" from="PauseLayer/PauseUI" to="." method="_return_to_main_menu"]
+[connection signal="restart_requested" from="PauseLayer/PauseUI" to="." method="_restart_game"]
+[connection signal="resume_requested" from="PauseLayer/PauseUI" to="." method="_resume_from_pause"]
 
 [editable path="GameplayWorld/Train"]
 [editable path="GameplayWorld/Train/Cars/PassengerCoach4"]
+[editable path="GameplayWorld/Train/Cars/PassengerCoach4/InteriorLighting"]
+[editable path="GameplayWorld/Train/Cars/PassengerCoach3"]
+[editable path="GameplayWorld/Train/Cars/PassengerCoach3/InteriorLighting"]
 [editable path="GameplayWorld/Train/Cars/PassengerCoach2"]
+[editable path="GameplayWorld/Train/Cars/PassengerCoach2/InteriorLighting"]
+[editable path="GameplayWorld/Train/Cars/PassengerCoach1"]
+[editable path="GameplayWorld/Train/Cars/PassengerCoach1/InteriorLighting"]
 [editable path="TravelForeground"]
+[editable path="HUD"]
+[editable path="HUD/Root/MarketItemBar/RadarSlot"]
+[editable path="HUD/Root/MarketItemBar/SwiftSlot"]
+[editable path="HUD/Root/MarketItemBar/VeilNoteSlot"]

@@ -9,6 +9,7 @@ size = Vector2(220, 120)
 [node name="ConductorDesk" type="Area2D" unique_id=1581011509]
 visible = false
 script = ExtResource("1")
+passenger_idle_collision_path = NodePath("CollisionShape2D")
 night_prompt = "Open night drop-off ledger"
 prompt_text = "Open night drop-off ledger"
 enabled = false

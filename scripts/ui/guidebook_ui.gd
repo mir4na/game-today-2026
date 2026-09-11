@@ -4,11 +4,7 @@ extends Control
 
 signal closed
 
-@export_category("Dynamic Copy")
-@export_multiline var today_document_template: String
 @export var completed_service_text: String
-@export_category("Guide Sections")
-@export_multiline var procedure_document: String
 @export_category("Scene Motion")
 @export_range(1.0, 1.2, 0.01) var button_hover_scale: float = 1.07
 @export_range(0.05, 0.4, 0.01) var button_hover_duration: float = 0.12
@@ -35,6 +31,16 @@ var _section_tween: Tween
 
 @onready var _page_title: Label = %PageTitle
 @onready var _content: RichTextLabel = %Content
+@onready var _today_layout: Control = %TodayLayout
+@onready var _rules_layout: Control = %RulesLayout
+@onready var _today_route_label: Label = %TodayRouteLabel
+@onready var _today_progress_label: Label = %TodayProgressLabel
+@onready var _pass_shift_body: Label = %PassShiftBody
+@onready var _today_threshold_value: Label = %TodayThresholdValue
+@onready var _today_target_fill: ColorRect = %TodayTargetFill
+@onready var _today_status_label: Label = %TodayStatusLabel
+@onready var _today_route_progress: Label = %TodayRouteProgress
+@onready var _today_service_meta: Label = %TodayServiceMeta
 @onready var _today_button: Button = %TodayButton
 @onready var _procedure_button: Button = %ProcedureButton
 @onready var _anomaly_list: Control = %AnomalyList
@@ -106,40 +112,20 @@ func _show_today() -> void:
 	var next_station: String = completed_service_text
 	if _route_index + 1 < _route_stations.size():
 		next_station = _route_stations[_route_index + 1]
-	_set_section(
-		_today_button,
-		"Today's Service",
-		today_document_template % [
-			_day_number,
-			_service_date,
-			_service_train_number,
-			_pass_target,
-			_net_earnings,
-			maxi(0, _pass_target - _net_earnings),
-			_boarded_today,
-			_passenger_count,
-			_stamped_aboard,
-			_route_index,
-			maxi(0, _route_stations.size() - 1),
-			_service_day_code,
-			current_station,
-			next_station,
-			_format_route(),
-		]
-	)
+	var still_needed: int = maxi(0, _pass_target - _net_earnings)
+	_refresh_today_layout(current_station, next_station, still_needed)
+	_set_section(_today_button, "Today's Service")
 
 
 func _show_procedure() -> void:
-	_set_section(_procedure_button, "Rules", procedure_document)
+	_set_section(_procedure_button, "Rules")
 
 
 func _show_anomalies() -> void:
-	_set_section(_anomalies_button, "Anomaly List", "")
-	_content.hide()
-	_anomaly_list.show()
+	_set_section(_anomalies_button, "Anomaly Signs")
 
 
-func _set_section(active_button: Button, title: String, document: String) -> void:
+func _set_section(active_button: Button, title: String) -> void:
 	var next_section: int = SECTION_RULES
 	if active_button == _today_button:
 		next_section = SECTION_TODAY
@@ -148,12 +134,57 @@ func _set_section(active_button: Button, title: String, document: String) -> voi
 	var section_changed: bool = next_section != _active_section
 	_active_section = next_section
 	_update_tab_presentation()
-	_content.show()
-	_anomaly_list.hide()
 	_page_title.text = title
-	_content.text = document
+	_content.text = ""
+	_update_section_visibility(next_section)
 	if section_changed:
 		_play_section_rustle()
+
+
+func _refresh_today_layout(current_station: String, next_station: String, still_needed: int) -> void:
+	if not is_node_ready():
+		return
+	var completed_stops: int = clampi(_route_index, 0, maxi(0, _route_stations.size() - 1))
+	var total_stops: int = maxi(0, _route_stations.size() - 1)
+	var dropped_off: int = maxi(0, _boarded_today - _passenger_count)
+	var displayed_earnings: int = _net_earnings
+	var target_ratio: float = 1.0 if _pass_target <= 0 else clampf(
+		float(maxi(0, displayed_earnings)) / float(_pass_target),
+		0.0,
+		1.0
+	)
+	var route_line: String = "%s → %s" % [current_station, next_station]
+	if next_station == completed_service_text:
+		route_line = "%s → service complete" % current_station
+	_today_route_label.text = route_line
+	_today_route_progress.text = "STOPS COMPLETED  %d / %d" % [completed_stops, total_stops]
+	_today_threshold_value.text = "%d / %d" % [displayed_earnings, _pass_target]
+	_today_target_fill.size.x = 270.0 * target_ratio
+	_today_status_label.text = "TARGET MET" if still_needed == 0 else "IN PROGRESS"
+	_pass_shift_body.text = "%d Blessings remaining for today's threshold." % still_needed
+	_today_progress_label.text = (
+		"Boarded today\n%d\n\nDropped off\n%d\n\nCurrently aboard\n%d\n\nMarked for next stop\n%d"
+	) % [
+		_boarded_today,
+		dropped_off,
+		_passenger_count,
+		_stamped_aboard,
+	]
+	_today_service_meta.text = "Day %d\nTrain %s\nService date %s\nDay code %s" % [
+		_day_number,
+		_service_train_number,
+		_service_date,
+		_service_day_code,
+	]
+
+
+func _update_section_visibility(section: int) -> void:
+	if not is_node_ready():
+		return
+	_content.hide()
+	_today_layout.visible = section == SECTION_TODAY
+	_rules_layout.visible = section == SECTION_RULES
+	_anomaly_list.visible = section == SECTION_ANOMALIES
 
 
 func _section_buttons() -> Array[Button]:
@@ -318,16 +349,3 @@ func _station_at(index: int) -> String:
 	if _route_stations.is_empty():
 		return "UNAVAILABLE"
 	return _route_stations[clampi(index, 0, _route_stations.size() - 1)]
-
-
-func _format_route() -> String:
-	var parts := PackedStringArray()
-	for index: int in range(_route_stations.size()):
-		var station: String = _route_stations[index]
-		if index < _route_index:
-			parts.append("[color=#8d8371]%s[/color]" % station)
-		elif index == _route_index:
-			parts.append("[color=#7d382d][b][ %s ][/b][/color]" % station)
-		else:
-			parts.append("[color=#332b23]%s[/color]" % station)
-	return "  →  ".join(parts)

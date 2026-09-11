@@ -1,0 +1,114 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/night_passenger_card.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/NightShift/Frame 28.png" id="2_card"]
+[ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="3_bold"]
+[ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Medium.ttf" id="4_medium"]
+[ext_resource type="PackedScene" path="res://scenes/ui/night_passenger_drag_preview.tscn" id="5_drag_preview"]
+[ext_resource type="Script" uid="uid://b1lbens1ur17i" path="res://scripts/ui/night_character_portrait.gd" id="6_portrait"]
+
+[node name="NightPassengerCard" type="Control"]
+custom_minimum_size = Vector2(318, 116)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 318.0
+offset_bottom = 116.0
+mouse_default_cursor_shape = 6
+script = ExtResource("1")
+drag_preview_scene = ExtResource("5_drag_preview")
+regular_statement_bottom = 91.0
+compact_statement_bottom = 108.0
+hide_assignment_in_compact = true
+
+[node name="CardPaper" type="TextureRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_card")
+expand_mode = 1
+stretch_mode = 0
+
+[node name="Portrait" type="TextureRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 10.0
+offset_top = 12.0
+offset_right = 81.0
+offset_bottom = 78.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("6_portrait")
+
+[node name="AssignedOverlay" type="ColorRect" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 10.0
+offset_top = 12.0
+offset_right = 81.0
+offset_bottom = 78.0
+mouse_filter = 2
+color = Color(0.2, 0.211765, 0.227451, 0.58)
+
+[node name="PassengerName" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 92.0
+offset_top = 7.0
+offset_right = 303.0
+offset_bottom = 31.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.219608, 0.192157, 0.184314, 1)
+theme_override_fonts/font = ExtResource("3_bold")
+theme_override_font_sizes/font_size = 16
+text = "PASSENGER"
+
+[node name="PortraitName" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 8.0
+offset_top = 80.0
+offset_right = 84.0
+offset_bottom = 101.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.486275, 0.270588, 0.254902, 1)
+theme_override_fonts/font = ExtResource("3_bold")
+theme_override_font_sizes/font_size = 9
+text = "PASSENGER"
+horizontal_alignment = 1
+text_overrun_behavior = 3
+
+[node name="StatementLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 92.0
+offset_top = 32.0
+offset_right = 303.0
+offset_bottom = 91.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.270588, 0.231373, 0.219608, 1)
+theme_override_fonts/font = ExtResource("4_medium")
+theme_override_font_sizes/font_size = 11
+text = "Statement not recorded"
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="AssignmentLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 94.0
+offset_top = 94.0
+offset_right = 303.0
+offset_bottom = 112.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.584314, 0.270588, 0.258824, 1)
+theme_override_fonts/font = ExtResource("3_bold")
+theme_override_font_sizes/font_size = 10
+text = "UNASSIGNED"
+horizontal_alignment = 2
