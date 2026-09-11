@@ -59,6 +59,7 @@ func _ready() -> void:
 		if choice == null:
 			push_error("Stamp tray is missing the %s stamp choice." % station_name)
 			continue
+		choice.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		choice.tooltip_text = "%s station stamp" % station_name
 		_choice_rest_positions[choice] = choice.position
 		choice.gui_input.connect(_on_choice_gui_input.bind(station_name, choice))

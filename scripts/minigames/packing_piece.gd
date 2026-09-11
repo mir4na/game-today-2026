@@ -26,6 +26,7 @@ var _artwork_rest_position: Vector2
 
 
 func _ready() -> void:
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	if not is_instance_valid(_artwork):
 		return
 	_artwork_rest_position = _artwork.position

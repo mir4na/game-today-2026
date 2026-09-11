@@ -17,6 +17,7 @@ var _started: bool = false
 var _elapsed: float = 0.0
 var _load_complete: bool = false
 var _changing_scene: bool = false
+var _transition_duration_scale: float = 1.0
 
 @onready var _loading_label: Label = %LoadingLabel
 @onready var _mc_walk: AnimatedSprite2D = %MCWalk
@@ -29,9 +30,15 @@ func _ready() -> void:
 	_reset_presentation()
 
 
-func begin_loading() -> void:
+func begin_loading(
+	override_target_scene_path: String = "",
+	transition_duration_scale: float = 1.0
+) -> void:
 	if _started:
 		return
+	if not override_target_scene_path.is_empty():
+		target_scene_path = override_target_scene_path
+	_transition_duration_scale = maxf(transition_duration_scale, 0.01)
 	_started = true
 	_elapsed = 0.0
 	_load_complete = false
@@ -134,8 +141,10 @@ func _open_loaded_scene() -> void:
 func _play_transition(animation_name: StringName) -> void:
 	if not _transition_animation.has_animation(animation_name):
 		return
+	_transition_animation.speed_scale = 1.0 / _transition_duration_scale
 	_transition_animation.play(animation_name)
 	await _transition_animation.animation_finished
+	_transition_animation.speed_scale = 1.0
 
 
 func _fail_loading(message: String) -> void:
