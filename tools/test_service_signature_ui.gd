@@ -41,7 +41,7 @@ func _run() -> void:
 	_check(
 		not game._station_stop_ui.show_terminal_title
 		and game._station_stop_ui.terminal_heading_text.is_empty(),
-		"The terminal cutscene must not place EASTMERE copy in the middle of the screen."
+		"The terminal cutscene must not place terminal copy in the middle of the screen."
 	)
 
 	service_button.pressed.emit()

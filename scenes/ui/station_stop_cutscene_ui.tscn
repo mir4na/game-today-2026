@@ -256,7 +256,7 @@ terminal_subtitle_text = ""
 opening_status_template = "%d BOARDING"
 exchange_status_template = "%d OFF  •  %d ON"
 terminal_status_template = "%d DISEMBARKING"
-skip_hint_text = "PRESS [SPACE] TO"
+skip_hint_text = "CLICK TO"
 skip_button_text = "SKIP"
 letterbox_in_animation = &"letterbox_in"
 letterbox_out_animation = &"letterbox_out"
@@ -610,7 +610,7 @@ theme_override_colors/font_outline_color = Color(0.0117647, 0.0156863, 0.0235294
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("4_josefin")
 theme_override_font_sizes/font_size = 15
-text = "PRESS [SPACE] TO"
+text = "CLICK TO"
 vertical_alignment = 1
 
 [node name="SkipButton" type="Button" parent="CinematicBorderLayer/SkipHint"]

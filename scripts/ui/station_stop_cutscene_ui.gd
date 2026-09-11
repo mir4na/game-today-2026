@@ -22,7 +22,7 @@ signal sequence_skip_requested
 @export var opening_status_template: String = "%d BOARDING"
 @export var exchange_status_template: String = "%d OFF  •  %d ON"
 @export var terminal_status_template: String = "%d DISEMBARKING"
-@export var skip_hint_text: String = "PRESS [SPACE] TO"
+@export var skip_hint_text: String = "CLICK TO"
 @export var skip_button_text: String = "SKIP"
 @export_category("Scene Animation")
 @export var letterbox_in_animation: StringName = &"letterbox_in"
@@ -312,17 +312,6 @@ func _update_crowd_footsteps(delta: float) -> void:
 	if not _ambient_actors.is_empty() or exchange_walking:
 		GameSFX.play(&"footstep", -24.0, 0.85, 0.08, 0.07)
 	_crowd_footstep_timer = _motion_rng.randf_range(0.55, 0.72)
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if not visible or _elapsed < screen_fade_duration:
-		return
-	var key_event := event as InputEventKey
-	if key_event != null and key_event.echo:
-		return
-	if event.is_action_pressed(&"stamp_ticket"):
-		skip_sequence()
-		get_viewport().set_input_as_handled()
 
 
 func complete_sequence(return_camera: bool = true) -> void:

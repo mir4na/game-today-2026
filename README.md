@@ -117,7 +117,7 @@ Assign the new Resource to `puzzle_resource` on `Main`. Keep one passenger per n
 
 ## Validation
 
-The project was parsed and run using Godot 4.7 stable. Tests cover Main Menu → Settings → Start, the DAY 1 fade, ten-passenger Alderwick boarding, leftward departure, diverse passenger AI (including stationary, wandering, and cross-car movement), live minimap population dots, all four 60-second route legs in order, repeated proximity-based exit selection, equal exchanges at Brambleford/Cinderfield/Dunmere/Eastmere, impostors boarding from different stations, deferred penalties, paycheck results, and final night drop-offs:
+The project was parsed and run using Godot 4.7 stable. Tests cover Main Menu → Settings → Start, the DAY 1 fade, ten-passenger Alderwick boarding, leftward departure, diverse passenger AI (including stationary, wandering, and cross-car movement), live minimap population dots, all three 60-second route legs in order, repeated proximity-based exit selection, equal exchanges at Brambleford/Cinderfield/Dunmere, impostors boarding from different stations, deferred penalties, paycheck results, and final night drop-offs:
 
 ```bash
 godot --headless --path . --script res://tests/menu_flow_test.gd --audio-driver Dummy

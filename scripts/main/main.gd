@@ -1,5 +1,7 @@
 class_name AfterTheEndGame
 extends Node2D
+
+signal tutorial_event(event_name: StringName, payload: Variant)
 ## Owns the vertical-slice state and coordinates data, world presentation and UI.
 
 enum GameState { OPENING, DAY, SUNSET, SHIFT_REPORT, NIGHT_TRANSITION, MARKET, NIGHT, NIGHT_PUZZLE, COMPLETE }
@@ -47,6 +49,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export_enum("Random", "Force Non-Death", "Force Death") var newspaper_edition_mode: int = NewspaperEditionMode.RANDOM
 @export_category("Debug")
 @export var debug_print_anomaly_roster: bool = false
+@export var is_tutorial_mode: bool = false
 @export_category("Inspector Copy")
 @export_multiline var night_shift_instruction: String
 @export_category("Night Statement Dialogue")
@@ -134,6 +137,8 @@ var _night_service_expired: bool = false
 var _night_service_timeout_presented: bool = false
 var _radar_scan_active: bool = false
 var _swiftstep_active: bool = false
+var _tutorial_route_time_paused: bool = false
+var _tutorial_started: bool = false
 
 @onready var _train: TrainWorld = %Train
 @onready var _player: ConductorPlayer = %Player
@@ -156,6 +161,7 @@ var _swiftstep_active: bool = false
 @onready var _veil_note_reveal_ui: Variant = %VeilNoteRevealUI
 @onready var _swiftstep_effect_ui: Variant = %SwiftstepEffectUI
 @onready var _hint_ui: Variant = %HintUI
+@onready var _tutorial_director: Variant = %TutorialDirector
 @onready var _market_tool_state: Node = %MarketToolState
 @onready var _blocked_aisle_timer: Timer = %BlockedAisleTimer
 @onready var _dirty_seat_timer: Timer = %DirtySeatTimer
@@ -175,6 +181,7 @@ var _swiftstep_active: bool = false
 var _bloom_material: ShaderMaterial
 
 func _ready() -> void:
+	_consume_tutorial_mode_request()
 	_configure_bloom_material()
 	_train_occupants_station_rest_position = _train_occupants.position
 	_night_record_camera_rest_offset = _gameplay_camera.offset
@@ -229,6 +236,46 @@ func _ready() -> void:
 	_set_passenger_ai_enabled(false)
 	_active_modal = _day_intro_ui
 	_day_intro_ui.play_intro(day_number)
+
+
+func _consume_tutorial_mode_request() -> void:
+	var run_context := get_node_or_null("/root/RunContext")
+	if run_context != null and run_context.has_method(&"consume_tutorial_requested"):
+		is_tutorial_mode = is_tutorial_mode or bool(run_context.call(&"consume_tutorial_requested"))
+	if is_tutorial_mode:
+		day_number = 1
+
+
+func _emit_tutorial_event(event_name: StringName, payload: Variant = null) -> void:
+	if not is_tutorial_mode:
+		return
+	tutorial_event.emit(event_name, payload)
+
+
+func set_tutorial_route_time_paused(value: bool) -> void:
+	_tutorial_route_time_paused = value
+	if value:
+		_set_passenger_ai_enabled(false)
+
+
+func _start_tutorial_if_needed() -> bool:
+	if not is_tutorial_mode or _tutorial_started or not is_instance_valid(_tutorial_director):
+		return false
+	_tutorial_started = true
+	_tutorial_route_time_paused = true
+	var finish_callback := Callable(self, &"_on_tutorial_finished")
+	if _tutorial_director.has_signal(&"tutorial_finished") and not _tutorial_director.is_connected(&"tutorial_finished", finish_callback):
+		_tutorial_director.connect(&"tutorial_finished", finish_callback)
+	_tutorial_director.call(&"start", self)
+	_emit_tutorial_event(&"tutorial_started")
+	return true
+
+
+func _on_tutorial_finished() -> void:
+	_tutorial_route_time_paused = false
+	if state in [GameState.DAY, GameState.SUNSET] and not _station_arrival_announced:
+		_set_player_control_for_state()
+		_schedule_maintenance_events()
 
 
 func _connect_hud_runtime_signals() -> void:
@@ -500,16 +547,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			_open_pause()
 			get_viewport().set_input_as_handled()
 		return
-	var market_shortcut: int = _market_item_shortcut(event)
-	if market_shortcut > 0:
-		if (
-			not _service_seal_active
-			and _active_modal == null
-			and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
-		):
-			_hud.request_market_item(market_shortcut)
-		get_viewport().set_input_as_handled()
-		return
 	if (
 		event.is_action_pressed(&"use_radar")
 		and not _service_seal_active
@@ -547,19 +584,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif state not in [GameState.OPENING, GameState.SHIFT_REPORT, GameState.MARKET, GameState.COMPLETE]:
 		_open_pause()
 	get_viewport().set_input_as_handled()
-
-
-func _market_item_shortcut(event: InputEvent) -> int:
-	var key_event := event as InputEventKey
-	if key_event != null and key_event.echo:
-		return 0
-	if event.is_action_pressed(&"use_market_item_1"):
-		return 1
-	if event.is_action_pressed(&"use_market_item_2"):
-		return 2
-	if event.is_action_pressed(&"use_market_item_3"):
-		return 3
-	return 0
 
 
 func _spawn_initial_passengers() -> void:
@@ -1345,6 +1369,7 @@ func _open_passenger_documents(passenger: Passenger) -> void:
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
 	_document_overlay.show_passenger(passenger.data)
+	_emit_tutorial_event(&"passenger_documents_opened", passenger.data)
 	if state in [GameState.DAY, GameState.SUNSET] and _has_next_day_station() and not _station_exchange_processed:
 		_document_overlay.configure_station_assignment(not passenger.data.stamped_station.is_empty())
 		_document_overlay.configure_stamp_lock(_is_dropoff_locked())
@@ -1370,6 +1395,7 @@ func _on_night_passenger_interacted(passenger: Passenger) -> void:
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
 	_focus_night_record_camera()
+	_emit_tutorial_event(&"night_record_opened", passenger.data)
 	_night_soul_record_ui.call(
 		&"open_record",
 		passenger.data,
@@ -1404,6 +1430,7 @@ func _on_night_statement_recorded(passenger_name: String, statement: String) -> 
 	if revealed_passenger != null:
 		revealed_passenger.set_night_identity_revealed(true)
 	_night_puzzle_ui.refresh_collected_statements(_collected_departure_statements)
+	_emit_tutorial_event(&"night_statement_recorded", {"passenger": passenger_name, "statement": statement})
 
 
 func _on_night_statement_feedback_requested(succeeded: bool) -> void:
@@ -1534,6 +1561,7 @@ func _on_station_stamp_applied(passenger_name: String, station_name: String, tic
 	if passenger.data.is_dead:
 		_record_incorrect_anomaly(passenger.data, station_name)
 	_refresh_guidebook_progress()
+	_emit_tutorial_event(&"ticket_stamped", {"passenger": passenger_name, "station": station_name})
 
 func _on_newspaper_read() -> void:
 	_newspaper_read = true
@@ -1542,6 +1570,7 @@ func _on_newspaper_read() -> void:
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
 	_document_overlay.show_newspaper(_newspaper_document)
+	_emit_tutorial_event(&"newspaper_opened", _newspaper_document)
 
 func _process_station_arrival() -> void:
 	if _station_exchange_processed or not _station_arrival_announced or not _has_next_day_station():
@@ -1612,10 +1641,10 @@ func _process_station_arrival() -> void:
 
 	# Station boarding is capacity-based and independent from drop-offs. A player
 	# who keeps all eight opening passengers can still receive later boarders,
-	# but the active roster can never exceed the configured onboard maximum.
+	# but the active roster can never exceed the configured per-day onboard maximum.
 	var available_capacity: int = maxi(
 		0,
-		manifest_config.maximum_onboard_passenger_count - _active_passenger_count()
+		manifest_config.get_maximum_onboard_passenger_count(day_number) - _active_passenger_count()
 	)
 	while not is_terminal_arrival and boarded < available_capacity and not available_boarders.is_empty():
 		var boarder_index: int = _find_next_station_boarder(available_boarders)
@@ -1842,41 +1871,18 @@ func _on_station_cutscene_camera_return_started() -> void:
 func _settle_station_cutscene_train_framing() -> void:
 	if _station_cutscene_context not in [&"opening", &"station_exchange"]:
 		return
-	if is_instance_valid(_station_vertical_settle_tween) and _station_vertical_settle_tween.is_valid():
-		_station_vertical_settle_tween.kill()
-	# The cutscene parks Cars 24px above gameplay rest. Snapping that offset
-	# at return start pops the visible train while the wide camera is still
-	# active. Capture the post-snap handoff first (synchronous, nothing is
-	# rendered in between), then glide the train down in sync with the camera.
-	_train.set_station_vertical_offset_enabled(false)
+	var offset_delta: Vector2 = _snap_station_vertical_settle()
+	_station_cinematic_view.offset_active_camera(offset_delta)
 	_station_cinematic_view.align_handoff_vertical_to_gameplay()
-	_train.set_station_vertical_offset_enabled(true)
-	_train.set_station_vertical_blend(1.0)
-	var duration: float = maxf(_station_cinematic_view.return_duration, 0.05)
-	_station_vertical_settle_tween = create_tween()
-	_station_vertical_settle_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
-	_station_vertical_settle_tween.tween_method(_update_station_vertical_settle, 0.0, 1.0, duration)
-	_station_vertical_settle_tween.tween_callback(_finish_station_vertical_settle)
 
 
-func _update_station_vertical_settle(progress: float) -> void:
-	# Mirror StationCinematicView's smoothstep so the train settles on the
-	# same beat as the camera push-in.
-	var clamped: float = clampf(progress, 0.0, 1.0)
-	var eased: float = clamped * clamped * (3.0 - 2.0 * clamped)
-	_train.set_station_vertical_blend(1.0 - eased)
-
-
-func _finish_station_vertical_settle() -> void:
-	_train.set_station_vertical_blend(0.0)
-	_train.set_station_vertical_offset_enabled(false)
-
-
-func _snap_station_vertical_settle() -> void:
+func _snap_station_vertical_settle() -> Vector2:
 	if is_instance_valid(_station_vertical_settle_tween) and _station_vertical_settle_tween.is_valid():
 		_station_vertical_settle_tween.kill()
+	var previous_offset: Vector2 = _train.get_station_travel_offset()
 	_train.set_station_vertical_blend(0.0)
 	_train.set_station_vertical_offset_enabled(false)
+	return _train.get_station_travel_offset() - previous_offset
 
 
 func _on_station_cutscene_skip_requested() -> void:
@@ -1979,6 +1985,8 @@ func _on_station_stop_finished() -> void:
 		_hud.show_route_briefing()
 		_update_passenger_minimap()
 		_set_passenger_ai_enabled(true)
+		if _start_tutorial_if_needed():
+			return
 		if _show_level_start_hint_if_needed():
 			return
 		_set_player_control_for_state()
@@ -2031,6 +2039,7 @@ func _open_guidebook() -> void:
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
+	_guidebook_ui.set_night_mode(state == GameState.NIGHT)
 	_guidebook_ui.open_guidebook(
 		day_number,
 		manifest_config.service_train_number,
@@ -2042,6 +2051,7 @@ func _open_guidebook() -> void:
 		_get_day_pass_target()
 	)
 	_refresh_guidebook_progress()
+	_emit_tutorial_event(&"guidebook_opened")
 
 
 func _refresh_guidebook_progress() -> void:
@@ -2182,7 +2192,12 @@ func _on_modal_closed() -> void:
 	# A newspaper may still be descending after the station sequence has begun.
 	if _active_modal not in [_document_overlay, _guidebook_ui]:
 		return
+	var closed_modal: Control = _active_modal
 	_active_modal = null
+	if closed_modal == _document_overlay:
+		_emit_tutorial_event(&"document_closed")
+	elif closed_modal == _guidebook_ui:
+		_emit_tutorial_event(&"guidebook_closed")
 	_set_player_control_for_state()
 
 func _open_pause() -> void:
@@ -2320,6 +2335,7 @@ func _on_night_transition_finished() -> void:
 	_finish_terminal_night_transition_world()
 	_enter_night(false, false)
 	_hud.set_cutscene_hidden(false)
+	_emit_tutorial_event(&"night_started")
 	if not night_shift_instruction.strip_edges().is_empty():
 		_hud.notify(night_shift_instruction, 5.0)
 	_set_player_control_for_state()
@@ -2347,6 +2363,7 @@ func _open_night_market() -> void:
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
 	_active_modal = _night_market_ui
+	_emit_tutorial_event(&"night_market_opened")
 	_night_market_ui.call(
 		&"open_market",
 		_market_tool_state.call(&"get_snapshot"),
@@ -2580,6 +2597,7 @@ func _open_night_puzzle() -> void:
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
 	_active_modal = _night_puzzle_ui
+	_emit_tutorial_event(&"night_puzzle_opened")
 	_night_puzzle_ui.open_puzzle(
 		_get_dead_passenger_data(),
 		_get_departure_puzzle(),
@@ -2608,6 +2626,7 @@ func _open_service_signature() -> void:
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
+	_emit_tutorial_event(&"service_signature_opened")
 	_service_signature_ui.open_signature(
 		_current_day_station(),
 		_next_day_station(),
@@ -2637,6 +2656,7 @@ func _on_service_signed() -> void:
 		return
 	_day_minutes = _next_arrival_minutes()
 	_update_day_route_presentation()
+	_emit_tutorial_event(&"service_signed")
 	_announce_next_station()
 
 func _close_night_puzzle() -> void:
@@ -2814,7 +2834,7 @@ func _is_passenger_inspection_active() -> bool:
 	)
 
 func _is_world_simulation_active() -> bool:
-	return not get_tree().paused and _active_modal not in [
+	return not get_tree().paused and not _tutorial_route_time_paused and _active_modal not in [
 		_pause_ui,
 		_day_intro_ui,
 		_station_stop_ui,

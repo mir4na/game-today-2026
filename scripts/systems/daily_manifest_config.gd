@@ -6,6 +6,7 @@ extends Resource
 @export_range(1, 40, 1) var total_passenger_count: int = 17
 @export_range(1, 20, 1) var initial_passenger_count: int = 8
 @export_range(1, 40, 1) var maximum_onboard_passenger_count: int = 12
+@export var maximum_onboard_passenger_count_by_day: PackedInt32Array = PackedInt32Array([14, 15, 15, 16, 16])
 @export_range(1, 5, 1) var deceased_passenger_count: int = 3
 @export_range(0, 5, 1) var minimum_initial_deceased: int = 1
 @export_range(1, 8, 1) var passenger_carriage_count: int = 4
@@ -47,6 +48,14 @@ extends Resource
 @export var use_random_seed: bool = true
 @export var debug_seed: int = 2026
 
+const SERVICE_DATE_YEAR: int = 2026
+const SERVICE_DATE_LAST_MONTH: int = 12
+const SERVICE_DATE_LAST_DAY: int = 27
+const MONTH_ABBREVIATIONS: Array[String] = [
+	"JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+	"JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
+]
+
 
 func create_daily_service(day: int, shift_seed: int) -> DailyManifestConfig:
 	var daily := duplicate(true) as DailyManifestConfig
@@ -59,7 +68,83 @@ func create_daily_service(day: int, shift_seed: int) -> DailyManifestConfig:
 		if not alternate_train_numbers.has(candidate):
 			numbers.append(candidate)
 	daily.service_train_number = numbers[service_rng.randi_range(0, numbers.size() - 1)]
+	daily.randomize_service_date(shift_seed)
 	return daily
+
+
+## Picks the campaign service date deterministically from the shift seed, so
+## every New Game lands on a different 2026 date while Continue restores the
+## same one. The ticket day code (YYMMDD) always matches the picked date.
+func randomize_service_date(shift_seed: int) -> void:
+	var date_rng := RandomNumberGenerator.new()
+	date_rng.seed = ("service-date:%d" % shift_seed).hash()
+	var noon := {"hour": 12, "minute": 0, "second": 0}
+	var first_day: Dictionary = {"year": SERVICE_DATE_YEAR, "month": 1, "day": 1}
+	first_day.merge(noon)
+	var last_day: Dictionary = {
+		"year": SERVICE_DATE_YEAR, "month": SERVICE_DATE_LAST_MONTH, "day": SERVICE_DATE_LAST_DAY
+	}
+	last_day.merge(noon)
+	var first_unix: float = Time.get_unix_time_from_datetime_dict(first_day)
+	var last_unix: float = Time.get_unix_time_from_datetime_dict(last_day)
+	var span_days: int = maxi(0, int((last_unix - first_unix) / 86400.0))
+	var picked: Dictionary = Time.get_datetime_dict_from_unix_time(
+		first_unix + float(date_rng.randi_range(0, span_days)) * 86400.0
+	)
+	service_date_text = format_service_date(int(picked["day"]), int(picked["month"]), int(picked["year"]))
+	ticket_day_code = format_day_code(int(picked["day"]), int(picked["month"]), int(picked["year"]))
+
+
+static func format_service_date(day: int, month: int, year: int) -> String:
+	var month_name: String = MONTH_ABBREVIATIONS[clampi(month - 1, 0, 11)]
+	return "%02d %s %04d" % [day, month_name, year]
+
+
+static func format_day_code(day: int, month: int, year: int) -> String:
+	return "%02d%02d%02d" % [year % 100, month, day]
+
+
+static func parse_service_date(date_text: String) -> Dictionary:
+	var parts: PackedStringArray = date_text.strip_edges().split(" ", false)
+	if parts.size() != 3:
+		return {}
+	var month: int = MONTH_ABBREVIATIONS.find(parts[1].strip_edges().to_upper()) + 1
+	if month <= 0 or not parts[0].is_valid_int() or not parts[2].is_valid_int():
+		return {}
+	return {"year": parts[2].to_int(), "month": month, "day": parts[0].to_int()}
+
+
+## Neighboring wrong dates for the time-invalid-ticket anomaly: the day
+## before, the day after, and the same date next year. Codes stay consistent
+## with their printed dates.
+func get_invalid_service_date_candidates() -> Array[Dictionary]:
+	var active: Dictionary = parse_service_date(service_date_text)
+	if active.is_empty():
+		return []
+	var noon := {"hour": 12, "minute": 0, "second": 0}
+	var active_noon: Dictionary = active.duplicate()
+	active_noon.merge(noon)
+	var active_unix: float = Time.get_unix_time_from_datetime_dict(active_noon)
+	var neighbors: Array[Dictionary] = [
+		Time.get_datetime_dict_from_unix_time(active_unix - 86400.0),
+		Time.get_datetime_dict_from_unix_time(active_unix + 86400.0),
+		{"year": int(active["year"]) + 1, "month": int(active["month"]), "day": int(active["day"])},
+	]
+	var candidates: Array[Dictionary] = []
+	for neighbor: Dictionary in neighbors:
+		var day: int = int(neighbor.get("day", 0))
+		var month: int = int(neighbor.get("month", 0))
+		var year: int = int(neighbor.get("year", 0))
+		if day <= 0 or month <= 0 or year <= 0:
+			continue
+		var day_code: String = format_day_code(day, month, year)
+		var printed_date: String = format_service_date(day, month, year)
+		if day_code == ticket_day_code.strip_edges():
+			continue
+		if printed_date.to_lower() == service_date_text.strip_edges().to_lower():
+			continue
+		candidates.append({"day_code": day_code, "printed_date": printed_date})
+	return candidates
 
 
 func get_night_anomaly_count(level: int) -> int:
@@ -74,6 +159,15 @@ func get_night_anomaly_count(level: int) -> int:
 
 func should_guarantee_newspaper_anomaly(level: int) -> bool:
 	return guaranteed_newspaper_anomaly_level > 0 and level >= guaranteed_newspaper_anomaly_level
+
+
+func get_maximum_onboard_passenger_count(day_number: int) -> int:
+	if maximum_onboard_passenger_count_by_day.is_empty():
+		return maximum_onboard_passenger_count
+	return maxi(
+		maximum_onboard_passenger_count_by_day[clampi(day_number - 1, 0, maximum_onboard_passenger_count_by_day.size() - 1)],
+		initial_passenger_count
+	)
 
 
 func get_all_passenger_names() -> PackedStringArray:

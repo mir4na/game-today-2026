@@ -192,6 +192,11 @@ func align_handoff_vertical_to_gameplay() -> void:
 	sync_follow_target()
 
 
+func offset_active_camera(delta: Vector2) -> void:
+	if _active and not _camera_handed_off:
+		_station_camera.global_position += delta
+
+
 func sync_follow_target() -> void:
 	# Train travel offsets are signal-driven. Sync immediately on that signal so
 	# a large skipped timeline step cannot leave the cinematic camera one frame

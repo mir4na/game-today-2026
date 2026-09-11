@@ -430,17 +430,20 @@ static func _assign_invalid_ticket_date(
 	config: DailyManifestConfig,
 	rng: RandomNumberGenerator
 ) -> bool:
-	var candidates: Array[Dictionary] = []
-	var active_code: String = config.ticket_day_code.strip_edges()
-	var active_date: String = config.service_date_text.strip_edges()
-	for configured_code: Variant in config.invalid_service_dates_by_day_code.keys():
-		var day_code: String = str(configured_code).strip_edges()
-		var printed_date: String = str(config.invalid_service_dates_by_day_code[configured_code]).strip_edges()
-		if day_code.is_empty() or printed_date.is_empty():
-			continue
-		if day_code == active_code or printed_date.to_lower() == active_date.to_lower():
-			continue
-		candidates.append({"day_code": day_code, "printed_date": printed_date})
+	var candidates: Array[Dictionary] = config.get_invalid_service_date_candidates()
+	if candidates.is_empty():
+		# Fallback to the Inspector-authored table when the service date
+		# cannot be parsed (for example after a manual tres edit).
+		var active_code: String = config.ticket_day_code.strip_edges()
+		var active_date: String = config.service_date_text.strip_edges()
+		for configured_code: Variant in config.invalid_service_dates_by_day_code.keys():
+			var day_code: String = str(configured_code).strip_edges()
+			var printed_date: String = str(config.invalid_service_dates_by_day_code[configured_code]).strip_edges()
+			if day_code.is_empty() or printed_date.is_empty():
+				continue
+			if day_code == active_code or printed_date.to_lower() == active_date.to_lower():
+				continue
+			candidates.append({"day_code": day_code, "printed_date": printed_date})
 	if candidates.is_empty():
 		push_error("Time-invalid-ticket anomalies require at least one alternate service date and day code.")
 		return false

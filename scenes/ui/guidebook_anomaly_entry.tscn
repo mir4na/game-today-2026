@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://cn2kl7tdaloya"]
 
 [ext_resource type="Script" uid="uid://cxpymh8itfeft" path="res://scripts/ui/guidebook_anomaly_entry.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://cu0rsf2u3vtsp" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 11-22-24.png" id="2_2mheu"]
 [ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="2_title_font"]
 
 [sub_resource type="StyleBoxFlat" id="PhotoStyle"]
@@ -42,8 +43,10 @@ position = Vector2(69, 33)
 
 [node name="Photo" type="Sprite2D" parent="PhotoFrame/PhotoClip/PhotoContent" unique_id=328331925]
 editor_description = "Default single texture photo. The parent entry assigns its texture and crop."
-visible = false
 texture_filter = 1
+position = Vector2(28, -1)
+scale = Vector2(0.15, 0.15)
+texture = ExtResource("2_2mheu")
 
 [node name="Placeholder" type="Label" parent="PhotoFrame/PhotoClip" unique_id=1733963593]
 layout_mode = 1

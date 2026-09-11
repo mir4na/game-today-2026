@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/stamp_tray_ui.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/ui/Stamp/Stamp_Background.png" id="2_background"]
@@ -6,7 +6,6 @@
 [ext_resource type="Texture2D" path="res://assets/ui/Stamp/Brambleford_Stamp.png" id="4_brambleford"]
 [ext_resource type="Texture2D" path="res://assets/ui/Stamp/Cinderfield_Stamp.png" id="5_cinderfield"]
 [ext_resource type="Texture2D" path="res://assets/ui/Stamp/Dunmere_Stamp.png" id="6_dunmere"]
-[ext_resource type="Texture2D" path="res://assets/ui/Stamp/Eastmere_Stamp.png" id="7_eastmere"]
 [ext_resource type="Texture2D" path="res://assets/ui/Stamp/Stamp_TopView.png" id="8_top_view"]
 
 [node name="StampTrayUI" type="Control"]
@@ -136,27 +135,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("6_dunmere")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Eastmere" type="Control" parent="Tray/StampChoices"]
-layout_mode = 0
-offset_left = 496.0
-offset_top = 18.0
-offset_right = 604.0
-offset_bottom = 164.0
-pivot_offset = Vector2(54, 73)
-mouse_filter = 0
-
-[node name="Art" type="TextureRect" parent="Tray/StampChoices/Eastmere"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("7_eastmere")
 expand_mode = 1
 stretch_mode = 5
 
