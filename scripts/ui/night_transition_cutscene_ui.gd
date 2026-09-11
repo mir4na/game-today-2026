@@ -7,6 +7,8 @@ signal whiteout_reached
 signal departure_follow_requested
 signal camera_return_requested
 signal camera_return_completed
+signal exterior_fade_requested
+signal exterior_fade_completed
 signal sequence_timeline_changed(elapsed: float)
 signal sequence_finished
 
@@ -18,6 +20,8 @@ signal sequence_finished
 @export_range(0.1, 3.0, 0.05) var post_market_fade_seconds: float = 1.15
 @export_range(0.0, 5.0, 0.05) var night_reveal_hold_seconds: float = 1.0
 @export_range(0.0, 5.0, 0.05) var exterior_hold_after_zoom_seconds: float = 1.0
+@export_range(0.1, 2.0, 0.05) var market_bar_fade_seconds: float = 0.5
+@export_range(0.1, 2.0, 0.05) var closing_bar_fade_seconds: float = 0.6
 @export_range(0.0, 10.0, 0.05) var skip_unlock_seconds: float = 1.5
 @export_category("Station Train Motion")
 @export_range(0.0, 10.0, 0.05) var departure_start_time: float = 0.45
@@ -45,6 +49,8 @@ var _market_whiteout_active: bool = false
 var _whiteout_reached_emitted: bool = false
 var _resuming_after_market: bool = false
 var _camera_return_completed: bool = false
+var _exterior_fade_completed: bool = false
+var _bar_tween: Tween
 
 
 func _ready() -> void:
@@ -61,6 +67,9 @@ func play_transition() -> void:
 	_whiteout_reached_emitted = false
 	_resuming_after_market = false
 	_camera_return_completed = false
+	_exterior_fade_completed = false
+	if is_instance_valid(_bar_tween) and _bar_tween.is_valid():
+		_bar_tween.kill()
 	show()
 	set_process(true)
 	_animation_player.play(&"RESET")
@@ -101,6 +110,10 @@ func resume_after_market() -> void:
 	if _finished or not _market_whiteout_active or _resuming_after_market:
 		return
 	_resuming_after_market = true
+	_exterior_fade_completed = false
+	# The second cutscene plays with cinematic bars again. They fade in over
+	# the white screen, so the market-to-cutscene handoff stays seamless.
+	_fade_bars(1.0, market_bar_fade_seconds)
 	if white_screen_hold_seconds > 0.0:
 		await get_tree().create_timer(white_screen_hold_seconds).timeout
 	if _finished or not is_inside_tree():
@@ -110,8 +123,6 @@ func resume_after_market() -> void:
 	reveal.tween_property(_fog_back, ^"self_modulate:a", 0.0, post_market_fade_seconds).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	reveal.tween_property(_fog_front, ^"self_modulate:a", 0.0, post_market_fade_seconds).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	reveal.tween_property(_backdrop_tint, ^"self_modulate:a", 0.0, post_market_fade_seconds).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	reveal.tween_property(_top_bar, ^"self_modulate:a", 0.0, post_market_fade_seconds * 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	reveal.tween_property(_bottom_bar, ^"self_modulate:a", 0.0, post_market_fade_seconds * 0.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	await reveal.finished
 	# Let the night carriage settle in its normal framing before the camera moves
 	# toward the player. The exterior remains onscreen for the full handoff.
@@ -120,12 +131,26 @@ func resume_after_market() -> void:
 	if _finished or not is_inside_tree():
 		return
 	_emit_camera_return_requested()
+	# The exterior fades during the final camera push-in, so it is fully
+	# gone the moment gameplay takes over. No extra beat is added.
+	exterior_fade_requested.emit()
 	if not _camera_return_completed:
 		await camera_return_completed
+	if not _exterior_fade_completed:
+		await exterior_fade_completed
 	if _finished or not is_inside_tree():
 		return
 	if exterior_hold_after_zoom_seconds > 0.0:
 		await get_tree().create_timer(exterior_hold_after_zoom_seconds).timeout
+	if _finished or not is_inside_tree():
+		return
+	# Cutscene-style ending: the bars ease out last. The UI hides only
+	# after they are fully gone, so nothing pops.
+	_fade_bars(0.0, closing_bar_fade_seconds)
+	if is_instance_valid(_bar_tween) and _bar_tween.is_valid():
+		await _bar_tween.finished
+	if _finished or not is_inside_tree():
+		return
 	_elapsed = maxf(_elapsed, departure_end_time)
 	sequence_timeline_changed.emit(_elapsed)
 	_finish_sequence()
@@ -136,6 +161,25 @@ func notify_camera_return_completed() -> void:
 		return
 	_camera_return_completed = true
 	camera_return_completed.emit()
+
+
+func notify_exterior_fade_finished() -> void:
+	if _exterior_fade_completed:
+		return
+	_exterior_fade_completed = true
+	exterior_fade_completed.emit()
+
+
+func _fade_bars(target_alpha: float, duration: float) -> void:
+	if is_instance_valid(_bar_tween) and _bar_tween.is_valid():
+		_bar_tween.kill()
+	_bar_tween = create_tween().set_parallel(true)
+	_bar_tween.tween_property(
+		_top_bar, ^"self_modulate:a", clampf(target_alpha, 0.0, 1.0), maxf(duration, 0.05)
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_bar_tween.tween_property(
+		_bottom_bar, ^"self_modulate:a", clampf(target_alpha, 0.0, 1.0), maxf(duration, 0.05)
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 
 func _on_transition_animation_finished(animation_name: StringName) -> void:
@@ -156,10 +200,9 @@ func _hold_at_market_whiteout() -> void:
 	_market_whiteout_active = true
 	_elapsed = maxf(_elapsed, veil_crossing_time)
 	_animation_player.pause()
-	# The market sits behind a true full-screen whiteout, without the cinematic
-	# bars left over from the departing-station shot.
-	_top_bar.self_modulate.a = 0.0
-	_bottom_bar.self_modulate.a = 0.0
+	# The market sits behind a true full-screen whiteout. The cinematic bars
+	# ease out instead of snapping away, like a cutscene ending.
+	_fade_bars(0.0, market_bar_fade_seconds)
 	set_process(false)
 	_emit_veil_crossed()
 	_emit_whiteout_reached_after_hold()

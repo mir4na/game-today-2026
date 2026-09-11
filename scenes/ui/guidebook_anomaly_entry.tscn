@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://cn2kl7tdaloya"]
 
 [ext_resource type="Script" uid="uid://cxpymh8itfeft" path="res://scripts/ui/guidebook_anomaly_entry.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://cu0rsf2u3vtsp" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 11-22-24.png" id="2_2mheu"]
 [ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="2_title_font"]
 
 [sub_resource type="StyleBoxFlat" id="PhotoStyle"]
@@ -17,7 +16,7 @@ border_width_bottom = 2
 border_color = Color(0.51, 0.41, 0.3, 1)
 
 [node name="AnomalyEntry" type="HBoxContainer" unique_id=1177967712]
-editor_description = "Reusable guidebook anomaly section. In guidebook_ui.tscn, set Photo Side/Frame/Offset/Scale or add manual Sprite2D children under PhotoFrame/PhotoClip/PhotoContent."
+editor_description = "Reusable guidebook anomaly section. In guidebook_ui.tscn, set Photo Side/Frame/Offset/Scale or arrange nodes directly: nested edits win and sync back into the exports, so editor and game always match."
 custom_minimum_size = Vector2(0, 82)
 size_flags_horizontal = 3
 theme_override_constants/separation = 18
@@ -42,13 +41,13 @@ editor_description = "Move/scale this group with Photo Offset, Photo Scale, and 
 position = Vector2(69, 33)
 
 [node name="Photo" type="Sprite2D" parent="PhotoFrame/PhotoClip/PhotoContent" unique_id=328331925]
-editor_description = "Default single texture photo. The parent entry assigns its texture and crop."
+editor_description = "Default single texture photo. Painting a texture here directly also updates the entry at runtime."
 texture_filter = 1
 position = Vector2(28, -1)
 scale = Vector2(0.15, 0.15)
-texture = ExtResource("2_2mheu")
 
 [node name="Placeholder" type="Label" parent="PhotoFrame/PhotoClip" unique_id=1733963593]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

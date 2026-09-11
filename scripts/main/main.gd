@@ -1973,6 +1973,9 @@ func _on_station_cutscene_timeline_completed() -> void:
 
 
 func _on_train_exterior_fade_out_finished() -> void:
+	if state == GameState.NIGHT_TRANSITION:
+		_night_transition_ui.notify_exterior_fade_finished()
+		return
 	_try_complete_station_cutscene()
 
 
@@ -2380,6 +2383,18 @@ func _on_night_transition_camera_return_requested() -> void:
 
 func _on_night_transition_veil_crossed() -> void:
 	_prepare_night_world()
+
+
+func _on_night_transition_exterior_fade_requested() -> void:
+	if state != GameState.NIGHT_TRANSITION or not _terminal_station_waiting_for_night_transition:
+		_night_transition_ui.notify_exterior_fade_finished()
+		return
+	# The cutscene ending fades the train exterior instead of hiding it, so
+	# the handoff to night gameplay has no visible pop.
+	if _train.is_exterior_fade_out_complete():
+		_night_transition_ui.notify_exterior_fade_finished()
+		return
+	_train.ensure_exterior_fade_out_started()
 
 
 func _on_night_transition_whiteout_reached() -> void:

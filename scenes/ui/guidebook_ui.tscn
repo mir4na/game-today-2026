@@ -34,9 +34,9 @@
 [ext_resource type="Texture2D" uid="uid://4ku3hrxxjh3u" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 14-43-35-1.png" id="29_qvavt"]
 [ext_resource type="Texture2D" uid="uid://bg5km7i8p8o1r" path="res://assets/ui/guidebook/paycheck 1 (1).png" id="30_paycheck_art"]
 [ext_resource type="Texture2D" uid="uid://das3t3h8hbe6c" path="res://assets/ui/guidebook/night 1 (1).png" id="31_night_art"]
-[ext_resource type="PackedScene" uid="uid://c13pgmifh1x2g" path="res://scenes/passengers/npc_1.tscn" id="31_s6bny"]
-[ext_resource type="Texture2D" uid="uid://cvsli236qi2rk" path="res://assets/ui/id_card.png" id="32_id_card"]
-[ext_resource type="Texture2D" uid="uid://lkud6gnp6bf3" path="res://assets/ui/passenger_ticket.png" id="33_ticket"]
+[ext_resource type="Texture2D" uid="uid://cayo8tkkmtvq8" path="res://assets/characters/Where Do You Belong_/NPC9.png" id="33_qvavt"]
+[ext_resource type="Texture2D" uid="uid://cu0rsf2u3vtsp" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 11-22-24.png" id="33_wdqcv"]
+[ext_resource type="Texture2D" uid="uid://du1umrmwigf0k" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 12-04-23-1.png" id="35_jbx2b"]
 [ext_resource type="Texture2D" uid="uid://fi8341eivf3m" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 12-04-43.png" id="36_qvavt"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_button"]
@@ -1027,6 +1027,7 @@ autowrap_mode = 2
 [node name="NightLayout" type="Control" parent="Center/BookStage/Page" unique_id=770010200]
 unique_name_in_owner = true
 editor_description = "Night shift single page. Scene-authored copy of the day rules; edit these nodes to diverge the night shift wording."
+visible = false
 anchors_preset = 0
 offset_left = 56.0
 offset_top = 122.0
@@ -1206,7 +1207,6 @@ stretch_mode = 5
 [node name="AnomalyList" type="Control" parent="Center/BookStage/Page" unique_id=637261252]
 unique_name_in_owner = true
 editor_description = "Scene-based Anomaly Signs spread. Adjust each GuidebookAnomalyEntry instance and its Photo settings here."
-visible = false
 anchors_preset = 0
 offset_left = 56.0
 offset_top = 122.0
@@ -1265,9 +1265,6 @@ position = Vector2(0, 31.993017)
 scale = Vector2(1, 1.1849307)
 texture = ExtResource("23_shadowless")
 
-[node name="Placeholder" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/Shadowless/PhotoFrame/PhotoClip" index="1" unique_id=1733963593]
-visible = false
-
 [node name="Heading" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/Shadowless/Text" parent_id_path=PackedInt32Array(920499715, 242403726) index="0" unique_id=1091116954]
 theme_override_font_sizes/font_size = 22
 text = "SHADOWLESS"
@@ -1285,7 +1282,7 @@ offset_right = 420.0
 offset_bottom = 247.47946
 heading = "PORTRAIT MISMATCH"
 description = "The ID portrait and passenger do not match."
-photo = ExtResource("32_id_card")
+photo = ExtResource("33_wdqcv")
 photo_side = 1
 photo_frame_size = Vector2(150, 90)
 photo_offset = Vector2(0, -10)
@@ -1309,19 +1306,19 @@ custom_minimum_size = Vector2(138, 78)
 
 [node name="PhotoContent" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/PhotoFrame/PhotoClip" index="0" unique_id=943558789]
 position = Vector2(69, 29)
-scale = Vector2(0.084455326, 0.084455326)
+scale = Vector2(0.22402598, 0.22402598)
 
-[node name="Photo" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/PhotoFrame/PhotoClip/PhotoContent" index="0" unique_id=328331925]
-position = Vector2(303.74023, 128.75977)
-scale = Vector2(2, 2)
-texture = ExtResource("32_id_card")
+[node name="PhotoB" type="Sprite2D" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/PhotoFrame/PhotoClip/PhotoContent" index="0" unique_id=771854729]
+editor_description = "Second static photo for two-image evidence. Pick a texture; it stays where placed."
+texture_filter = 1
+position = Vector2(-210.16403, 166.87128)
+scale = Vector2(-1, 1)
+texture = ExtResource("33_qvavt")
 
-[node name="npc_1" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/PhotoFrame/PhotoClip/PhotoContent" index="1" unique_id=469341268 instance=ExtResource("31_s6bny")]
-position = Vector2(-460.16055, 296.66245)
-scale = Vector2(-8, 8)
-
-[node name="Placeholder" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/PhotoFrame/PhotoClip" index="1" unique_id=1733963593]
-visible = false
+[node name="Photo" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/PhotoFrame/PhotoClip/PhotoContent" index="1" unique_id=328331925]
+position = Vector2(150.60617, 69.03522)
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("33_wdqcv")
 
 [node name="NewspaperDeath" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries" unique_id=1716115659 instance=ExtResource("3_entry")]
 editor_description = "Free-positioned anomaly section. Adjust offsets to move this section; uses the same clipped-photo setup as newspaper-style pictures."
@@ -1351,9 +1348,6 @@ scale = Vector2(0.08560311, 0.08560311)
 position = Vector2(52.168186, 46.80938)
 scale = Vector2(1.0579969, 1.086364)
 texture = ExtResource("25_newspaper")
-
-[node name="Placeholder" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/NewspaperDeath/PhotoFrame/PhotoClip" index="1" unique_id=1733963593]
-visible = false
 
 [node name="Heading" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/NewspaperDeath/Text" parent_id_path=PackedInt32Array(1716115659, 242403726) index="0" unique_id=1091116954]
 theme_override_font_sizes/font_size = 22
@@ -1398,9 +1392,6 @@ position = Vector2(101.80908, 35.932495)
 scale = Vector2(1.4, 1.4)
 texture = ExtResource("24_unlisted")
 
-[node name="Placeholder" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/UnlistedDestination/PhotoFrame/PhotoClip" index="1" unique_id=1733963593]
-visible = false
-
 [node name="Heading" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/UnlistedDestination/Text" parent_id_path=PackedInt32Array(765249923, 242403726) index="0" unique_id=1091116954]
 theme_override_font_sizes/font_size = 22
 text = "UNLISTED DESTINATION"
@@ -1418,7 +1409,8 @@ offset_right = 364.0
 offset_bottom = 250.08221
 heading = "TIME-INVALID TICKET"
 description = "The ticket date or day code is wrong."
-photo = ExtResource("33_ticket")
+photo = ExtResource("35_jbx2b")
+photo_secondary = ExtResource("36_qvavt")
 photo_side = 1
 photo_frame_size = Vector2(150, 90)
 photo_offset = Vector2(-10, -2)
@@ -1442,22 +1434,19 @@ custom_minimum_size = Vector2(138, 78)
 
 [node name="PhotoContent" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/PhotoFrame/PhotoClip" index="0" unique_id=943558789]
 position = Vector2(59, 37)
-scale = Vector2(0.0942029, 0.0942029)
+scale = Vector2(0.18302387, 0.18302387)
 
 [node name="Photo" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/PhotoFrame/PhotoClip/PhotoContent" index="0" unique_id=328331925]
-position = Vector2(-69.65448, -108.33588)
-scale = Vector2(2.5, 2.5)
-texture = ExtResource("33_ticket")
+position = Vector2(-73.27411, -48.27603)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("35_jbx2b")
 
-[node name="Photo2" type="Sprite2D" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/PhotoFrame/PhotoClip/PhotoContent" index="1" unique_id=771854728]
-editor_description = "Default single texture photo. The parent entry assigns its texture and crop."
+[node name="PhotoB" type="Sprite2D" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/PhotoFrame/PhotoClip/PhotoContent" index="1" unique_id=771854728]
+editor_description = "Second static photo for two-image evidence. Pick a texture; it stays where placed."
 texture_filter = 1
-position = Vector2(46.678493, 516.95386)
-scale = Vector2(2.5, 2.5)
+position = Vector2(-28.366348, 303.5008)
+scale = Vector2(1.5, 1.5)
 texture = ExtResource("36_qvavt")
-
-[node name="Placeholder" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/PhotoFrame/PhotoClip" index="1" unique_id=1733963593]
-visible = false
 
 [node name="Clip" type="TextureRect" parent="Center/BookStage" unique_id=1818967348]
 unique_name_in_owner = true

@@ -121,6 +121,31 @@ text = "SERVICE SIGN-OFF"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="TextureRect" type="TextureRect" parent="Panel" unique_id=652309831]
+z_index = 10
+layout_mode = 0
+offset_left = 285.0
+offset_top = 222.0
+offset_right = 696.0
+offset_bottom = 280.0
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("7_wvrxk")
+
+[node name="ClosingStatement" type="Label" parent="Panel" unique_id=301511389]
+z_index = 10
+layout_mode = 0
+offset_left = 202.0
+offset_top = 549.0
+offset_right = 575.0
+offset_bottom = 572.0
+theme_override_colors/font_color = Color(0.20784314, 0.20784314, 0.2509804, 1)
+theme_override_fonts/font = ExtResource("4_josefin")
+theme_override_font_sizes/font_size = 9
+text = "I acknowledge that all tasks, deliveries, or inspections on this route have been executed in accordance with official regulations. Any discrepancies must be reported immediately"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
 [node name="QuestionStage" type="Control" parent="Panel" unique_id=906106773]
 unique_name_in_owner = true
 z_index = 4
@@ -262,7 +287,7 @@ position = Vector2(-49.090942, -38.181885)
 scale = Vector2(1.2, 1.2)
 points = PackedVector2Array(101, 211, 141, 189, 173, 119, 209, 241, 251, 69, 331, 291, 375, 121, 421, 173, 459, 217)
 width = 9.0
-default_color = Color(0, 0, 0, 0.85)
+default_color = Color(0.55, 0.9, 1, 0.7)
 joint_mode = 2
 begin_cap_mode = 2
 end_cap_mode = 2
@@ -273,7 +298,7 @@ position = Vector2(-96.36365, -72.72733)
 scale = Vector2(1.4, 1.4)
 points = PackedVector2Array(277.92206, 267.5325, 211.6883, 277.9221, 177.92206, 211.68826, 174, 180, 216.88312, 127.272675, 314, 120, 386, 186, 342, 246, 284, 210, 258, 150, 260, 78)
 width = 9.0
-default_color = Color(0, 0, 0, 0.85)
+default_color = Color(0.55, 0.9, 1, 0.7)
 joint_mode = 2
 begin_cap_mode = 2
 end_cap_mode = 2
@@ -282,7 +307,7 @@ end_cap_mode = 2
 unique_name_in_owner = true
 z_index = 2
 width = 7.0
-default_color = Color(0, 0, 0, 1)
+default_color = Color(0.55, 0.9, 1, 1)
 joint_mode = 2
 begin_cap_mode = 2
 end_cap_mode = 2
@@ -314,31 +339,6 @@ theme_override_fonts/font = ExtResource("4_josefin")
 theme_override_font_sizes/font_size = 18
 text = "PRESS E TO CLOSE"
 horizontal_alignment = 1
-
-[node name="TextureRect" type="TextureRect" parent="." unique_id=652309831]
-z_index = 10
-layout_mode = 0
-offset_left = 535.0
-offset_top = 282.0
-offset_right = 946.0
-offset_bottom = 340.0
-scale = Vector2(0.5, 0.5)
-texture = ExtResource("7_wvrxk")
-
-[node name="ClosingStatement" type="Label" parent="." unique_id=301511389]
-z_index = 10
-layout_mode = 0
-offset_left = 452.0
-offset_top = 609.0
-offset_right = 825.0
-offset_bottom = 632.0
-theme_override_colors/font_color = Color(0.20784314, 0.20784314, 0.2509804, 1)
-theme_override_fonts/font = ExtResource("4_josefin")
-theme_override_font_sizes/font_size = 9
-text = "I acknowledge that all tasks, deliveries, or inspections on this route have been executed in accordance with official regulations. Any discrepancies must be reported immediately"
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 2
 
 [connection signal="pressed" from="Panel/QuestionStage/QuestionActions/ConfirmButton" to="." method="_on_confirm_pressed"]
 [connection signal="pressed" from="Panel/QuestionStage/QuestionActions/NotYetButton" to="." method="_on_not_yet_pressed"]

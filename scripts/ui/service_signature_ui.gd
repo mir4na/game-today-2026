@@ -160,7 +160,7 @@ func _on_drawing_area_gui_input(event: InputEvent) -> void:
 
 func _begin_stroke(point: Vector2) -> void:
 	_drawing = true
-	_user_stroke.default_color = Color("000000")
+	_user_stroke.default_color = Color(0.55, 0.9, 1.0)
 	_user_stroke.clear_points()
 	_user_stroke.add_point(_clamp_to_drawing_area(point))
 	_feedback_label.text = ""
