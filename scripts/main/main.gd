@@ -616,6 +616,26 @@ func _unhandled_input(event: InputEvent) -> void:
 			_open_pause()
 			get_viewport().set_input_as_handled()
 		return
+	var market_shortcut: int = _market_item_shortcut(event)
+	if market_shortcut > 0:
+		if (
+			not _service_seal_active
+			and _active_modal == null
+			and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
+		):
+			_hud.request_market_item(market_shortcut)
+		get_viewport().set_input_as_handled()
+		return
+	if (
+		event.is_action_pressed(&"service_action")
+		and not _service_seal_active
+		and _active_modal == null
+		and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
+		and _hud.is_service_action_available()
+	):
+		_on_service_action_requested()
+		get_viewport().set_input_as_handled()
+		return
 	if not event.is_action_pressed(&"ui_cancel"):
 		return
 	if _pause_ui.visible:
@@ -644,6 +664,19 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif state not in [GameState.OPENING, GameState.SHIFT_REPORT, GameState.MARKET, GameState.COMPLETE]:
 		_open_pause()
 	get_viewport().set_input_as_handled()
+
+
+func _market_item_shortcut(event: InputEvent) -> int:
+	var key_event := event as InputEventKey
+	if key_event != null and key_event.echo:
+		return 0
+	if event.is_action_pressed(&"use_market_item_1"):
+		return 1
+	if event.is_action_pressed(&"use_market_item_2"):
+		return 2
+	if event.is_action_pressed(&"use_market_item_3"):
+		return 3
+	return 0
 
 
 func _spawn_initial_passengers() -> void:

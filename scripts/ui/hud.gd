@@ -313,14 +313,19 @@ func _refresh_service_summary(blessings: int) -> void:
 
 
 func request_market_item(shortcut_number: int) -> bool:
+	# Shortcut order follows the visual bar order: Radar, Swiftstep, Veil Note.
 	match shortcut_number:
 		1:
-			return bool(_veil_note_slot.call(&"request_use"))
-		2:
 			return bool(_radar_slot.call(&"request_use"))
-		3:
+		2:
 			return bool(_swift_slot.call(&"request_use"))
+		3:
+			return bool(_veil_note_slot.call(&"request_use"))
 	return false
+
+
+func is_service_action_available() -> bool:
+	return _service_action_button.visible and not _service_action_button.disabled
 
 
 func set_maintenance_targets(target_entries: Array[Dictionary]) -> void:

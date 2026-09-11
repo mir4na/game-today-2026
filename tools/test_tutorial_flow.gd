@@ -61,22 +61,57 @@ func _run() -> void:
 	_check(angel_portrait_frame != null, "TutorialDirector must expose a circular Angel portrait frame.")
 	_check(angel_portrait_frame.clip_children != CanvasItem.CLIP_CHILDREN_DISABLED, "Angel portrait frame must circularly mask its child portrait.")
 	_check(tutorial.get_node_or_null("%AngelPortrait") != null, "TutorialDirector must expose the Angel head texture.")
+	_check(tutorial.get_node_or_null("%AngelPortraitContent") is Node2D, "Angel portrait crop content must use a scene-authored Node2D transform.")
+	_check(not tutorial.get_node_or_null("%AngelPortraitContent") is CanvasGroup, "Angel portrait crop must avoid CanvasGroup clipping artifacts.")
 	_check(tutorial.get_node_or_null("DialogueDock/BubbleTail") != null, "TutorialDirector must expose a speech bubble tail aimed at the portrait.")
 	_check(tutorial.visible, "TutorialDirector must become visible after starting.")
+	_check(not tutorial._hud.visible, "Tutorial intro must hide the gameplay HUD.")
+	_check(not (tutorial.get_node("%Panel") as Control).visible, "Intro search must keep the dialogue bubble hidden.")
+	_check(not (tutorial.get_node("%BubbleTail") as Control).visible, "Intro search must keep the bubble tail hidden with the dialogue.")
+	# The spotlight search plus the angel circle reveal and its hold beat
+	# play before the intro bubble.
+	await create_timer(3.6).timeout
 	var intro_marker := tutorial.get_node("%DialogueMarkers/Intro") as Marker2D
 	var dialogue_dock := tutorial.get_node("%DialogueDock") as Control
+	var intro_frame := tutorial.get_node("%DialogueFrames/Intro") as Control
+	var intro_portrait_spot := intro_frame.get_node("PortraitSpot") as Control
 	_check(dialogue_dock.position.is_equal_approx(intro_marker.position), "Intro dialogue must initialize at its scene marker.")
+	_check(dialogue_dock.scale.is_equal_approx(intro_frame.scale), "Bubble animation must not alter the DialogueFrames-authored dock scale.")
+	_check(
+		angel_portrait_frame.scale.is_equal_approx(tutorial._portrait_base_scale * intro_portrait_spot.scale),
+		"Intro reveal must preserve the portrait scale authored in DialogueFrames/Intro/PortraitSpot."
+	)
+	_check(tutorial._spotlight_control == null, "Intro spotlight must return to the player after revealing the Inspector.")
+	_check(is_equal_approx(tutorial._shade_alpha, tutorial.continue_step_dim_alpha), "Intro briefing must keep the game screen dimmed.")
 	_check(game._tutorial_route_time_paused, "Tutorial onboarding must pause route time.")
 	_check(not game._player.movement_enabled and not game._player.interaction_enabled, "Tutorial intro must lock player controls.")
+	_check(tutorial.intro_dialogue_pages.size() == 4, "Inspector briefing must be split into four short dialogue pages.")
+	for page: String in tutorial.intro_dialogue_pages:
+		var sentence_count: int = page.count(".") + page.count("!") + page.count("?")
+		_check(sentence_count <= 2, "Each Inspector intro bubble must contain at most two sentences.")
+	_check((tutorial.get_node("%SpeakerLabel") as Label).text == "The Inspector", "Intro speaker must identify the character as the Inspector.")
+	_check((tutorial.get_node("%BodyLabel") as Label).text == tutorial.intro_dialogue_pages[0], "Intro must begin with the short Inspector greeting.")
+	for page_index: int in range(1, tutorial.intro_dialogue_pages.size()):
+		tutorial._complete_typewriter()
+		tutorial._advance_from_continue()
+		_check((tutorial.get_node("%BodyLabel") as Label).text == tutorial.intro_dialogue_pages[page_index], "Intro Continue must reveal dialogue page %d." % (page_index + 1))
+	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
 	_check(game._player.movement_enabled and not game._player.interaction_enabled, "Movement step must allow walking while keeping interaction locked.")
+	_check(not tutorial._hud.visible, "A/D movement training must keep the gameplay HUD hidden.")
 	var movement_marker := tutorial.get_node("%DialogueMarkers/Movement") as Marker2D
 	_check(dialogue_dock.position.is_equal_approx(movement_marker.position), "Movement guidance must move to its own scene marker.")
 	tutorial._show_continue_step(TutorialDirector.Step.HUD_CLOCK, "Journey Clock", "Test", "")
+	_check(tutorial._hud.visible, "Gameplay HUD must appear when HUD guidance begins.")
 	var clock_marker := tutorial.get_node("%DialogueMarkers/HudClock") as Marker2D
 	_check(dialogue_dock.position.is_equal_approx(clock_marker.position), "HUD clock guidance must move to its own scene marker.")
 	tutorial._advance_from_continue()
+	tutorial._advance_from_continue()
+	_check(tutorial._step == TutorialDirector.Step.BLESSINGS, "Clock guidance must continue into day Blessings scoring.")
+	tutorial._advance_from_continue()
+	tutorial._advance_from_continue()
 	_check(tutorial._step == TutorialDirector.Step.DAY_SERVICE, "Empty-coach tutorial must skip passenger inspection.")
+	tutorial._advance_from_continue()
 	tutorial._advance_from_continue()
 	_check(not game._tutorial_route_time_paused, "Tutorial finish must release route time.")
 	_check(game._passengers.is_empty(), "Tutorial must remain empty after finishing onboarding.")

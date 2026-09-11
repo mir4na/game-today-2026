@@ -530,10 +530,10 @@ layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 18.0
-offset_top = -145.0
-offset_right = 130.0
-offset_bottom = -14.0
+offset_left = 16.0
+offset_top = -263.0
+offset_right = 132.0
+offset_bottom = -155.0
 grow_vertical = 0
 tooltip_text = "Open guidebook"
 focus_mode = 0
@@ -549,6 +549,20 @@ theme_override_styles/disabled = SubResource("GuidebookButtonTransparent")
 icon = ExtResource("23_guidebook_button")
 expand_icon = true
 script = ExtResource("24_hover")
+
+[node name="ShortcutHint" type="Label" parent="Root/GuidebookButton" unique_id=77200201]
+layout_mode = 0
+offset_left = 66.0
+offset_top = 85.0
+offset_right = 122.0
+offset_bottom = 123.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.02, 0.03, 0.95)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 18
+text = "TAB"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="GuidebookOutline" type="TextureRect" parent="Root/GuidebookButton" unique_id=1893492123]
 self_modulate = Color(0.015, 0.018, 0.024, 0.98)
@@ -569,16 +583,16 @@ expand_mode = 1
 
 [node name="ServiceActionButton" type="Button" parent="Root" unique_id=1388490062]
 unique_name_in_owner = true
-editor_description = "Scene-authored service action above Guidebook. During the day it opens the sign-off trace; at night it opens the station-path ledger."
+editor_description = "Scene-authored service action below Guidebook. During the day it opens the sign-off trace; at night it opens the station-path ledger."
 visible = false
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = -263.0
-offset_right = 132.0
-offset_bottom = -155.0
+offset_left = 18.0
+offset_top = -145.0
+offset_right = 130.0
+offset_bottom = -14.0
 grow_vertical = 0
 focus_mode = 0
 mouse_default_cursor_shape = 2
@@ -593,6 +607,20 @@ theme_override_styles/disabled = SubResource("GuidebookButtonTransparent")
 icon = ExtResource("25_service_action")
 expand_icon = true
 script = ExtResource("24_hover")
+
+[node name="ShortcutHint" type="Label" parent="Root/ServiceActionButton" unique_id=77200202]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 76.0
+offset_right = 124.0
+offset_bottom = 114.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.02, 0.03, 0.95)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 18
+text = "SPACE"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="ServiceActionOutline" type="TextureRect" parent="Root/ServiceActionButton" unique_id=1782019830]
 self_modulate = Color(0.015, 0.018, 0.024, 0.98)
@@ -613,7 +641,7 @@ expand_mode = 1
 
 [node name="MarketItemBar" type="HBoxContainer" parent="Root" unique_id=505008182]
 unique_name_in_owner = true
-editor_description = "Scene-authored Night Market inventory. Slots appear only while their item is owned; shortcut numbers stay hidden from the HUD."
+editor_description = "Scene-authored Night Market inventory. Slots stay visible at ×0 stock; shortcut numbers follow the visual bar order."
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -651,6 +679,19 @@ offset_left = 95.0
 offset_right = 139.0
 scale = Vector2(1.2, 1.2)
 
+[node name="ShortcutHint" type="Label" parent="Root/MarketItemBar/RadarSlot" unique_id=77200203]
+layout_mode = 0
+offset_left = 4.0
+offset_right = 48.0
+offset_bottom = 36.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.02, 0.03, 0.95)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 25
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="SwiftSlot" parent="Root/MarketItemBar" unique_id=2093275063 instance=ExtResource("19_market_slot")]
 unique_name_in_owner = true
 layout_mode = 2
@@ -673,6 +714,19 @@ texture = ExtResource("22_swift_item")
 offset_left = 96.0
 offset_right = 140.0
 scale = Vector2(1.2, 1.2)
+
+[node name="ShortcutHint" type="Label" parent="Root/MarketItemBar/SwiftSlot" unique_id=77200204]
+layout_mode = 0
+offset_left = 4.0
+offset_right = 48.0
+offset_bottom = 36.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.02, 0.03, 0.95)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 25
+text = "2"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="VeilNoteSlot" parent="Root/MarketItemBar" unique_id=907689913 instance=ExtResource("19_market_slot")]
 unique_name_in_owner = true
@@ -700,6 +754,19 @@ self_modulate = Color(0.207843, 0.207843, 0.25098, 1)
 
 [node name="NameLabel" parent="Root/MarketItemBar/VeilNoteSlot/NamePlate" index="0"]
 theme_override_colors/font_color = Color(0.92941177, 0.89411765, 0.85490197, 1)
+
+[node name="ShortcutHint" type="Label" parent="Root/MarketItemBar/VeilNoteSlot" unique_id=77200205]
+layout_mode = 0
+offset_left = 4.0
+offset_right = 48.0
+offset_bottom = 36.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.02, 0.03, 0.95)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 22
+text = "3"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="NotificationPanel" type="PanelContainer" parent="Root" unique_id=1320290712]
 unique_name_in_owner = true
