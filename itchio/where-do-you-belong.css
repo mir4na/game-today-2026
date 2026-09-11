@@ -15,6 +15,9 @@
   --wdyb-gold: #d8bb70;
   --wdyb-gold-bright: #f0d990;
   --wdyb-warning: #b9655c;
+  --wdyb-spirit: #a8e0d2;
+  --wdyb-spirit-dim: rgba(117, 198, 182, 0.22);
+  --wdyb-veil: #8179a5;
   --wdyb-ink: #17212a;
   --wdyb-line: rgba(216, 187, 112, 0.38);
 
@@ -25,10 +28,11 @@
   line-height: 1.65;
   background-color: var(--wdyb-night);
   background-image:
-    linear-gradient(90deg, transparent 0 48%, rgba(216, 187, 112, 0.035) 48% 52%, transparent 52%),
-    repeating-linear-gradient(0deg, transparent 0 46px, rgba(133, 130, 159, 0.06) 47px 48px),
-    radial-gradient(circle at 18% 8%, rgba(133, 130, 159, 0.3), transparent 33%),
-    radial-gradient(circle at 82% 40%, rgba(56, 85, 108, 0.25), transparent 38%),
+    radial-gradient(ellipse at 50% -12%, rgba(168, 224, 210, 0.2), transparent 34%),
+    repeating-linear-gradient(90deg, transparent 0 106px, rgba(216, 187, 112, 0.055) 107px 109px),
+    repeating-linear-gradient(0deg, transparent 0 46px, rgba(133, 130, 159, 0.075) 47px 48px),
+    radial-gradient(circle at 18% 8%, rgba(129, 121, 165, 0.34), transparent 33%),
+    radial-gradient(circle at 82% 40%, rgba(67, 130, 123, 0.23), transparent 38%),
     linear-gradient(180deg, #1b2834 0%, #101923 72%, #0a1118 100%);
   background-attachment: fixed;
   --itchio_link_color: var(--wdyb-gold-bright);
@@ -55,11 +59,14 @@
   border: 1px solid rgba(216, 187, 112, 0.46);
   border-radius: 6px;
   background:
+    radial-gradient(circle at 12px 12px, #9c8754 0 2px, transparent 2.5px),
+    radial-gradient(circle at calc(100% - 12px) 12px, #9c8754 0 2px, transparent 2.5px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.025), transparent 16%, transparent 84%, rgba(255, 255, 255, 0.025)),
     var(--wdyb-panel);
   box-shadow:
     0 28px 70px rgba(0, 0, 0, 0.55),
     0 0 0 7px rgba(9, 16, 22, 0.38),
+    0 0 48px rgba(117, 198, 182, 0.09),
     inset 0 1px rgba(255, 255, 255, 0.06);
 }
 
@@ -74,6 +81,17 @@
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
 }
 
+#wrapper #inner_column::after {
+  content: "";
+  display: block;
+  height: 16px;
+  border-top: 2px solid #756442;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 18px, #080e13 18px 28px),
+    linear-gradient(180deg, #293842 0 5px, #111a21 5px 11px, #876f3d 11px 13px, #0b1117 13px);
+  box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.36);
+}
+
 #wrapper .header {
   position: relative;
   padding: 0;
@@ -81,13 +99,45 @@
   background: linear-gradient(180deg, rgba(133, 130, 159, 0.22), rgba(16, 25, 35, 0.2));
 }
 
+#wrapper .header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 17% 44%, rgba(168, 224, 210, 0.13), transparent 23%),
+    radial-gradient(ellipse at 72% 18%, rgba(129, 121, 165, 0.2), transparent 29%);
+}
+
+#wrapper .header::after {
+  content: "NIGHT SERVICE  •  EASTMERE TERMINUS";
+  position: absolute;
+  right: 22px;
+  bottom: 16px;
+  z-index: 3;
+  padding: 7px 12px 6px;
+  border: 1px solid rgba(240, 217, 144, 0.62);
+  color: var(--wdyb-gold-bright);
+  background: rgba(7, 14, 19, 0.88);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.35), inset 0 0 12px rgba(168, 224, 210, 0.06);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
 #wrapper .header img {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: auto;
 }
 
 #wrapper .header h1 {
+  position: relative;
+  z-index: 1;
   margin: 0;
   padding: 42px 48px 35px;
   color: var(--wdyb-paper);
@@ -100,12 +150,34 @@
 }
 
 #wrapper .columns {
+  position: relative;
   gap: 34px;
   padding: 38px 42px 46px;
 }
 
+/* A faint moving veil under the carriage content. */
+#wrapper .columns::before {
+  content: "";
+  position: absolute;
+  right: -12%;
+  bottom: -45px;
+  left: -12%;
+  height: 145px;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.42;
+  filter: blur(10px);
+  background:
+    radial-gradient(ellipse at 12% 70%, var(--wdyb-spirit-dim), transparent 29%),
+    radial-gradient(ellipse at 45% 40%, rgba(129, 121, 165, 0.17), transparent 32%),
+    radial-gradient(ellipse at 83% 65%, var(--wdyb-spirit-dim), transparent 27%);
+  animation: wdyb-veil-drift 11s ease-in-out infinite alternate;
+}
+
 #wrapper .left_col.column,
 #wrapper .right_col.column {
+  position: relative;
+  z-index: 1;
   min-width: 0;
 }
 
@@ -149,6 +221,16 @@
   text-transform: uppercase;
 }
 
+#wrapper h2::after {
+  content: "  ◇  LAST TRAIN";
+  float: right;
+  padding-top: 0.2em;
+  color: var(--wdyb-spirit);
+  font-size: 0.58em;
+  letter-spacing: 0.14em;
+  opacity: 0.7;
+}
+
 #wrapper h3 {
   margin-top: 1.8rem;
   font-size: 1.08rem;
@@ -186,7 +268,10 @@
   border: 1px solid var(--wdyb-gold-bright);
   border-radius: 3px;
   color: var(--wdyb-ink);
-  background: linear-gradient(180deg, var(--wdyb-gold-bright), var(--wdyb-gold));
+  background:
+    radial-gradient(circle at 0 50%, var(--wdyb-carriage) 0 5px, transparent 5.5px),
+    radial-gradient(circle at 100% 50%, var(--wdyb-carriage) 0 5px, transparent 5.5px),
+    linear-gradient(180deg, var(--wdyb-gold-bright), var(--wdyb-gold));
   box-shadow: 0 4px 0 #7a6330, 0 8px 18px rgba(0, 0, 0, 0.25);
   font-weight: 800;
   letter-spacing: 0.045em;
@@ -222,7 +307,8 @@
   box-shadow:
     0 0 0 1px rgba(216, 187, 112, 0.5),
     0 10px 24px rgba(0, 0, 0, 0.38),
-    inset 0 0 18px rgba(255, 255, 255, 0.08);
+    inset 0 0 18px rgba(255, 255, 255, 0.08),
+    0 0 24px rgba(168, 224, 210, 0.06);
   transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
@@ -245,6 +331,18 @@
   border: 2px solid var(--wdyb-gold);
   border-radius: 5px;
   box-shadow: 0 16px 38px rgba(0, 0, 0, 0.52);
+}
+
+/* Responsive trailer embedded by description.html. */
+#wrapper .formatted_description iframe {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border: 2px solid var(--wdyb-gold);
+  border-radius: 5px;
+  background: #05090d;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.46);
 }
 
 #wrapper blockquote {
@@ -275,12 +373,52 @@
 /* Optional classes for HTML mode in the itch.io description. */
 #wrapper .custom-training-card,
 #wrapper .custom-warning,
-#wrapper .custom-manifest {
+#wrapper .custom-manifest,
+#wrapper .custom-route-board,
+#wrapper .custom-soul-notice {
   margin: 1.5rem 0;
   padding: 1.2rem 1.3rem;
   border: 1px solid var(--wdyb-line);
   background: rgba(12, 21, 29, 0.58);
   box-shadow: inset 4px 0 var(--wdyb-gold);
+}
+
+#wrapper .custom-route-board {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid #897448;
+  color: var(--wdyb-gold-bright);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(216, 187, 112, 0.1) 31px 32px),
+    #0a1219;
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.7), 0 8px 18px rgba(0, 0, 0, 0.3);
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+#wrapper .custom-route-board::after {
+  content: "NEXT STOP  ·  THE END";
+  display: block;
+  margin-top: 0.85rem;
+  padding-top: 0.7rem;
+  border-top: 1px dashed rgba(168, 224, 210, 0.45);
+  color: var(--wdyb-spirit);
+  text-shadow: 0 0 12px rgba(168, 224, 210, 0.42);
+}
+
+#wrapper .custom-soul-notice {
+  border-color: rgba(168, 224, 210, 0.5);
+  color: #ddf5ed;
+  background:
+    radial-gradient(ellipse at 85% 30%, rgba(168, 224, 210, 0.15), transparent 35%),
+    rgba(11, 24, 28, 0.74);
+  box-shadow: inset 4px 0 var(--wdyb-spirit), 0 0 24px rgba(117, 198, 182, 0.08);
+}
+
+#wrapper .custom-soul-notice p,
+#wrapper .custom-soul-notice strong {
+  color: #ddf5ed;
 }
 
 #wrapper .custom-warning {
@@ -312,6 +450,18 @@
   background: rgba(7, 13, 18, 0.45);
 }
 
+@keyframes wdyb-veil-drift {
+  from {
+    transform: translate3d(-2%, 5px, 0) scaleX(0.98);
+    opacity: 0.28;
+  }
+
+  to {
+    transform: translate3d(2%, -5px, 0) scaleX(1.04);
+    opacity: 0.48;
+  }
+}
+
 @media (max-width: 760px) {
   #wrapper {
     background-attachment: scroll;
@@ -326,6 +476,15 @@
   #wrapper .header h1 {
     padding: 30px 22px 25px;
     font-size: clamp(1.85rem, 11vw, 3.2rem);
+  }
+
+  #wrapper .header::after {
+    right: 12px;
+    bottom: 9px;
+    max-width: calc(100% - 24px);
+    padding: 5px 8px;
+    font-size: 0.56rem;
+    letter-spacing: 0.1em;
   }
 
   #wrapper .columns {
@@ -345,6 +504,10 @@
   #wrapper h2 {
     letter-spacing: 0.06em;
   }
+
+  #wrapper h2::after {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -352,6 +515,7 @@
   #wrapper *::before,
   #wrapper *::after {
     scroll-behavior: auto !important;
+    animation: none !important;
     transition-duration: 0.01ms !important;
   }
 }

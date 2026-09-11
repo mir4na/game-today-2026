@@ -2,6 +2,10 @@
 
 Paste `where-do-you-belong.css` into **Edit theme > Custom CSS**.
 
+Paste `description.html` into the project description editor's **HTML mode**. It
+already includes the responsive YouTube trailer embed and uses the custom card
+classes defined by the supplied page CSS.
+
 Suggested built-in theme values:
 
 - Background: `#101923`
