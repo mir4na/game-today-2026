@@ -10,6 +10,7 @@ night_anomaly_count_by_level = PackedInt32Array(3, 3, 4, 4, 5)
 female_passenger_names = PackedStringArray("Eleni", "Daphne", "Irene", "Kalliope", "Melina", "Nefeli", "Thalia", "Xenia", "Zoe", "Anthea", "Ariadne", "Despina", "Lydia", "Penelope", "Helena", "Dimitra", "Georgia", "Myrto")
 male_passenger_names = PackedStringArray("Andreas", "Dimitris", "Elias", "Leonidas", "Nikolas", "Stavros", "Theo", "Petros", "Yannis", "Alexios", "Christos", "Konstantinos", "Kyriakos", "Manolis", "Michalis", "Panagiotis", "Spyros", "Vasileios")
 service_train_number = "505"
+service_train_codes = PackedStringArray("ATE-101", "ATE-202", "ATE-303", "ATE-404", "ATE-505")
 alternate_train_numbers = PackedStringArray("318", "742", "901")
 service_date_text = "07 JUN 2026"
 ticket_day_code = "260607"

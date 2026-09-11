@@ -1,59 +1,44 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3 uid="uid://ct1yu561kv7fv"]
 
-[ext_resource type="Script" path="res://scripts/tutorial/tutorial_director.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bv75kqrtuc6fu" path="res://scripts/tutorial/tutorial_director.gd" id="1_script"]
 [ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" uid="uid://bc6iifil8i167" path="res://assets/nightmarket/Angel.png" id="3_angel"]
+[ext_resource type="Texture2D" uid="uid://cm00awa5lejd5" path="res://assets/ui/dialogue_bubble.png" id="4_dialogue_bubble"]
+[ext_resource type="Texture2D" uid="uid://cnxjqwj7xqhw8" path="res://assets/ui/dialogue_pointer.png" id="5_dialogue_pointer"]
+[ext_resource type="Shader" uid="uid://dfsxbbaijvcfu" path="res://shaders/tutorial_spotlight.gdshader" id="6_spotlight"]
+[ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="7_w7vd0"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_spotlight"]
+shader = ExtResource("6_spotlight")
+shader_parameter/dim_color = Color(0, 0, 0, 1)
+shader_parameter/dim_alpha = 0.62
+shader_parameter/spotlight_center = Vector2(0.5, 0.5)
+shader_parameter/spotlight_radius = 0.125
+shader_parameter/spotlight_softness = 0.115
+shader_parameter/viewport_aspect = 1.7778
+shader_parameter/inner_alpha = 0.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_portrait"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
 bg_color = Color(0.0352941, 0.0431373, 0.054902, 0.94)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.76, 0.63, 0.39, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
-content_margin_left = 28.0
-content_margin_top = 22.0
-content_margin_right = 28.0
-content_margin_bottom = 22.0
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.85, 0.69, 0.38, 1)
+corner_radius_top_left = 96
+corner_radius_top_right = 96
+corner_radius_bottom_right = 96
+corner_radius_bottom_left = 96
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button"]
-bg_color = Color(0.247059, 0.329412, 0.4, 0.94)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.91, 0.76, 0.48, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-content_margin_left = 18.0
-content_margin_top = 10.0
-content_margin_right = 18.0
-content_margin_bottom = 10.0
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_continue_text"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_hover"]
-bg_color = Color(0.47, 0.35, 0.46, 0.98)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.86, 0.56, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-content_margin_left = 18.0
-content_margin_top = 10.0
-content_margin_right = 18.0
-content_margin_bottom = 10.0
-
-[node name="TutorialDirector" type="Control"]
-visible = false
+[node name="TutorialDirector" type="Control" unique_id=1065008962]
 process_mode = 3
+editor_description = "Scene-based tutorial overlay. Move the named Marker2D nodes under DialogueMarkers to place each tutorial beat; edit DialogueDock for the shared Angel portrait and bubble layout."
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -64,8 +49,9 @@ mouse_filter = 2
 theme = ExtResource("2_theme")
 script = ExtResource("1_script")
 
-[node name="Shade" type="ColorRect" parent="."]
+[node name="Shade" type="ColorRect" parent="." unique_id=1115400475]
 unique_name_in_owner = true
+material = SubResource("ShaderMaterial_spotlight")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -73,9 +59,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0, 0, 0, 1)
 
-[node name="ArrowLabel" type="Label" parent="."]
+[node name="ArrowLabel" type="Label" parent="." unique_id=1793955105]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
@@ -96,67 +81,239 @@ text = "↓"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Panel" type="PanelContainer" parent="."]
+[node name="DialogueMarkers" type="Node2D" parent="." unique_id=1900415001]
 unique_name_in_owner = true
+editor_description = "One screen-space Marker2D per tutorial beat. Move these markers in the 2D editor; their positions are used directly at runtime."
+
+[node name="Default" type="Marker2D" parent="DialogueMarkers" unique_id=1900415002]
+editor_description = "Fallback dialogue origin. Move this marker to reposition any tutorial beat without its own valid marker."
+position = Vector2(82, 482)
+
+[node name="Intro" type="Marker2D" parent="DialogueMarkers" unique_id=1900415003]
+editor_description = "Angel briefing dialogue origin."
+position = Vector2(82, 482)
+
+[node name="Movement" type="Marker2D" parent="DialogueMarkers" unique_id=1900415004]
+editor_description = "Movement test dialogue origin."
+position = Vector2(82, 34)
+
+[node name="HudMinimap" type="Marker2D" parent="DialogueMarkers" unique_id=1900415005]
+editor_description = "Train minimap explanation dialogue origin."
+position = Vector2(82, 482)
+
+[node name="HudClock" type="Marker2D" parent="DialogueMarkers" unique_id=1751550895]
+editor_description = "Journey clock and daily Blessings explanation dialogue origin."
+position = Vector2(82, 34)
+
+[node name="Passenger" type="Marker2D" parent="DialogueMarkers" unique_id=667448896]
+editor_description = "First passenger inspection dialogue origin."
+position = Vector2(124, 254)
+
+[node name="Documents" type="Marker2D" parent="DialogueMarkers" unique_id=1851035084]
+editor_description = "Document comparison and stamping dialogue origin."
+position = Vector2(82, 482)
+
+[node name="Guidebook" type="Marker2D" parent="DialogueMarkers" unique_id=1700776631]
+editor_description = "Guidebook prompt and guidebook explanation dialogue origin."
+position = Vector2(124, 254)
+
+[node name="Newspaper" type="Marker2D" parent="DialogueMarkers" unique_id=408737519]
+editor_description = "Newspaper prompt and death-evidence explanation dialogue origin."
+position = Vector2(56, 254)
+
+[node name="Signature" type="Marker2D" parent="DialogueMarkers" unique_id=1610237140]
+editor_description = "Service sign-off and signature tracing dialogue origin."
+position = Vector2(82, 34)
+
+[node name="DayService" type="Marker2D" parent="DialogueMarkers" unique_id=460043538]
+editor_description = "Dialogue origin after a successful daytime sign-off."
+position = Vector2(82, 482)
+
+[node name="NightMarket" type="Marker2D" parent="DialogueMarkers" unique_id=329119422]
+editor_description = "Night Market item explanation dialogue origin."
+position = Vector2(82, 482)
+
+[node name="NightWalk" type="Marker2D" parent="DialogueMarkers" unique_id=1740034723]
+editor_description = "Night Service soul inspection dialogue origin."
+position = Vector2(82, 482)
+
+[node name="NightRecord" type="Marker2D" parent="DialogueMarkers" unique_id=1424814201]
+editor_description = "Hidden statement and ledger explanation dialogue origin."
+position = Vector2(82, 34)
+
+[node name="NightMap" type="Marker2D" parent="DialogueMarkers" unique_id=1372927012]
+editor_description = "Station path assignment dialogue origin."
+position = Vector2(82, 482)
+
+[node name="DialogueDock" type="Control" parent="." unique_id=1705916610]
+unique_name_in_owner = true
+editor_description = "Runtime dialogue presentation. Its top-left corner is placed at the active Marker2D under DialogueMarkers; edit this node only to change the shared bubble layout and size."
+z_index = 10
 layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
+anchors_preset = 0
+offset_left = 82.0
+offset_top = 413.0
+offset_right = 1184.0
+offset_bottom = 625.0
+mouse_filter = 2
+
+[node name="AngelPortraitFrame" type="PanelContainer" parent="DialogueDock" unique_id=80737866]
+unique_name_in_owner = true
+editor_description = "Circular Angel portrait mask and border. Its rendered round shape clips the portrait; reposition the image through AngelPortraitClip/AngelPortraitContent."
+clip_children = 2
+custom_minimum_size = Vector2(174, 174)
+clip_contents = true
+layout_mode = 1
+offset_left = 992.0
+offset_top = -220.0
+offset_right = 1166.0
+offset_bottom = -46.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="AngelPortraitClip" type="Control" parent="DialogueDock/AngelPortraitFrame" unique_id=1900415006]
+unique_name_in_owner = true
+editor_description = "Visible crop window for the Angel portrait. Keep this as the mask area; move AngelPortraitContent to reframe the artwork."
+clip_contents = true
+layout_mode = 2
+mouse_filter = 2
+
+[node name="AngelPortraitContent" type="CanvasGroup" parent="DialogueDock/AngelPortraitFrame/AngelPortraitClip" unique_id=1900415007]
+unique_name_in_owner = true
+editor_description = "Scene-authored Angel portrait content. Move, scale, or rotate this node to crop the Angel head without changing the frame."
+position = Vector2(87, 88)
+scale = Vector2(0.4, 0.4)
+
+[node name="AngelPortrait" type="Sprite2D" parent="DialogueDock/AngelPortraitFrame/AngelPortraitClip/AngelPortraitContent" unique_id=1274887331]
+unique_name_in_owner = true
+editor_description = "Angel portrait sprite. The parent AngelPortraitContent controls crop placement, matching the guidebook anomaly photo workflow."
+texture_filter = 1
+position = Vector2(192.49997, 200)
+texture = ExtResource("3_angel")
+
+[node name="BubbleTail" type="TextureRect" parent="DialogueDock" unique_id=172333076]
+editor_description = "Uses the same dialogue pointer texture as the in-game interaction prompt. Move it so it points from the bubble toward the Angel portrait."
+z_index = -1
+layout_mode = 1
+offset_left = 921.00006
+offset_top = -133.0
+offset_right = 1004.00006
+offset_bottom = -62.0
+rotation = 1.8027644
+scale = Vector2(-0.9, -0.9)
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Panel" type="NinePatchRect" parent="DialogueDock" unique_id=1354808889]
+unique_name_in_owner = true
+editor_description = "Dialogue bubble using the same NinePatch asset as passenger inspection prompts. Resize/reposition here; script does not force layout."
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 243.99997
+offset_top = -281.0
+offset_right = 24.0
+offset_bottom = -69.0
+grow_horizontal = 2
+scale = Vector2(0.8, 0.8)
+mouse_filter = 0
+texture = ExtResource("4_dialogue_bubble")
+patch_margin_left = 24
+patch_margin_top = 20
+patch_margin_right = 24
+patch_margin_bottom = 20
+
+[node name="Content" type="VBoxContainer" parent="DialogueDock/Panel" unique_id=1661021300]
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 220.0
-offset_top = -214.0
-offset_right = -220.0
-offset_bottom = -28.0
+offset_left = 36.0
+offset_top = 22.0
+offset_right = -36.0
+offset_bottom = -22.0
 grow_horizontal = 2
-grow_vertical = 0
-mouse_filter = 0
-theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+grow_vertical = 2
+theme_override_constants/separation = 7
 
-[node name="Content" type="VBoxContainer" parent="Panel"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="SpeakerLabel" type="Label" parent="Panel/Content"]
+[node name="SpeakerLabel" type="Label" parent="DialogueDock/Panel/Content" unique_id=2101759467]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"HeaderLabel"
 theme_override_colors/font_color = Color(1, 0.84, 0.54, 1)
-theme_override_font_sizes/font_size = 27
-text = "The Angel"
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.72)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 3
+theme_override_fonts/font = ExtResource("7_w7vd0")
+theme_override_font_sizes/font_size = 42
+text = "Instructor"
 
-[node name="BodyLabel" type="Label" parent="Panel/Content"]
+[node name="BodyLabel" type="Label" parent="DialogueDock/Panel/Content" unique_id=1573014772]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.96, 0.93, 0.86, 1)
-theme_override_font_sizes/font_size = 22
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 21
 text = "Tutorial copy."
 autowrap_mode = 3
 
-[node name="HintLabel" type="Label" parent="Panel/Content"]
+[node name="HintLabel" type="Label" parent="DialogueDock/Panel/Content" unique_id=1653066343]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.76, 0.69, 0.62, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.58)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 16
 text = "Hint"
 autowrap_mode = 3
 
-[node name="ProgressLabel" type="Label" parent="Panel/Content"]
+[node name="ProgressLabel" type="Label" parent="DialogueDock/Panel/Content" unique_id=634065223]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.47, 1, 0.53, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.62)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 20
 text = "0.0 / 3.0 seconds"
 horizontal_alignment = 1
 
-[node name="ContinueButton" type="Button" parent="Panel/Content"]
+[node name="ContinueRow" type="HBoxContainer" parent="DialogueDock/Panel/Content" unique_id=1900415008]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.93, 0.8, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxFlat_button")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_hover")
+theme_override_constants/separation = 8
+alignment = 2
+
+[node name="ContinuePrefixLabel" type="Label" parent="DialogueDock/Panel/Content/ContinueRow" unique_id=1900415009]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.58)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 17
+text = "PRESS SPACE TO"
+vertical_alignment = 1
+
+[node name="ContinueButton" type="Button" parent="DialogueDock/Panel/Content/ContinueRow" unique_id=1242997618]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.99999994, 0.91523725, 0.76352084, 1)
+theme_override_colors/font_focus_color = Color(1, 0.96, 0.72, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.72, 0.38, 1)
+theme_override_colors/font_hover_color = Color(1, 0.96, 0.72, 1)
+theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.95)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxEmpty_continue_text")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_continue_text")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_continue_text")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_continue_text")
 text = "CONTINUE"
+flat = true

@@ -27,7 +27,7 @@ signal statement_feedback_requested(succeeded: bool)
 @export_range(0.0, 0.08, 0.005) var letter_stagger_seconds: float = 0.012
 @export_range(0.0, 80.0, 1.0) var letter_source_spread: float = 48.0
 @export_range(8, 28, 1) var extracted_letter_font_size: int = 15
-@export var extracted_letter_color: Color = Color("fff8ed")
+@export var extracted_letter_color: Color = Color("000000")
 
 var _passenger_name: String = ""
 var _correct_statement: String = ""

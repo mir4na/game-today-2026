@@ -35,11 +35,14 @@
 [ext_resource type="PackedScene" uid="uid://c13pgmifh1x2g" path="res://scenes/passengers/npc_1.tscn" id="31_s6bny"]
 [ext_resource type="Texture2D" uid="uid://cvsli236qi2rk" path="res://assets/ui/id_card.png" id="32_id_card"]
 [ext_resource type="Texture2D" uid="uid://lkud6gnp6bf3" path="res://assets/ui/passenger_ticket.png" id="33_ticket"]
+[ext_resource type="Texture2D" uid="uid://du1umrmwigf0k" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 12-04-23-1.png" id="35_jbx2b"]
+[ext_resource type="Texture2D" uid="uid://fi8341eivf3m" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 12-04-43.png" id="36_qvavt"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_button"]
 
 [node name="GuidebookUI" type="Control" unique_id=29174819]
 process_mode = 3
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -289,6 +292,7 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_button")
 
 [node name="AnomalyTab" type="Control" parent="Center/BookStage/SectionTabs" unique_id=613962503]
 unique_name_in_owner = true
+visible = false
 anchors_preset = 0
 offset_top = 86.0
 offset_right = 196.0
@@ -457,6 +461,7 @@ scroll_active = false
 
 [node name="TodayLayout" type="Control" parent="Center/BookStage/Page" unique_id=921652152]
 unique_name_in_owner = true
+visible = false
 anchors_preset = 0
 offset_left = 56.0
 offset_top = 122.0
@@ -558,7 +563,6 @@ offset_left = 488.32874
 offset_top = 259.7534
 offset_right = 684.0
 offset_bottom = 281.7534
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 13
@@ -571,7 +575,6 @@ offset_left = 488.32874
 offset_top = 281.7534
 offset_right = 684.0
 offset_bottom = 335.7534
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.25, 0.205, 0.18, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 30
@@ -583,7 +586,6 @@ offset_left = 688.0
 offset_top = 259.7534
 offset_right = 884.2192
 offset_bottom = 281.7534
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 13
@@ -596,7 +598,6 @@ offset_left = 688.0
 offset_top = 281.7534
 offset_right = 884.2192
 offset_bottom = 335.7534
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.25, 0.205, 0.18, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 30
@@ -608,7 +609,6 @@ offset_left = 488.32874
 offset_top = 339.7534
 offset_right = 684.0
 offset_bottom = 361.7534
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 13
@@ -621,7 +621,6 @@ offset_left = 488.32874
 offset_top = 361.7534
 offset_right = 684.0
 offset_bottom = 415.7534
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.25, 0.205, 0.18, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 30
@@ -633,7 +632,6 @@ offset_left = 688.0
 offset_top = 339.7534
 offset_right = 884.2192
 offset_bottom = 361.7534
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 13
@@ -646,7 +644,6 @@ offset_left = 688.0
 offset_top = 361.7534
 offset_right = 884.2192
 offset_bottom = 415.7534
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.25, 0.205, 0.18, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 30
@@ -720,7 +717,6 @@ offset_left = 204.76714
 offset_top = 272.93152
 offset_right = 262.0
 offset_bottom = 298.93152
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 13
@@ -733,7 +729,6 @@ offset_left = 264.0
 offset_top = 268.93152
 offset_right = 360.0
 offset_bottom = 298.93152
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.55, 0.23, 0.2, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 19
@@ -745,7 +740,6 @@ offset_left = 204.76714
 offset_top = 302.93152
 offset_right = 262.0
 offset_bottom = 328.93152
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 13
@@ -758,7 +752,6 @@ offset_left = 264.0
 offset_top = 298.93152
 offset_right = 380.0
 offset_bottom = 328.93152
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.55, 0.23, 0.2, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 19
@@ -770,7 +763,6 @@ offset_left = 204.76714
 offset_top = 332.93152
 offset_right = 262.0
 offset_bottom = 358.93152
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 13
@@ -783,7 +775,6 @@ offset_left = 264.0
 offset_top = 328.93152
 offset_right = 400.0
 offset_bottom = 358.93152
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.55, 0.23, 0.2, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 19
@@ -795,7 +786,6 @@ offset_left = 204.76714
 offset_top = 362.93152
 offset_right = 262.0
 offset_bottom = 388.93152
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.47, 0.37, 0.31, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 13
@@ -808,7 +798,6 @@ offset_left = 264.0
 offset_top = 358.93152
 offset_right = 380.0
 offset_bottom = 388.93152
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.55, 0.23, 0.2, 1)
 theme_override_fonts/font = ExtResource("21_body_bold")
 theme_override_font_sizes/font_size = 19
@@ -1225,7 +1214,6 @@ autowrap_mode = 2
 [node name="AnomalyList" type="Control" parent="Center/BookStage/Page" unique_id=637261252]
 unique_name_in_owner = true
 editor_description = "Scene-based Anomaly Signs spread. Adjust each GuidebookAnomalyEntry instance and its Photo settings here."
-visible = false
 anchors_preset = 0
 offset_left = 56.0
 offset_top = 122.0
@@ -1288,9 +1276,11 @@ texture = ExtResource("23_shadowless")
 visible = false
 
 [node name="Heading" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/Shadowless/Text" parent_id_path=PackedInt32Array(920499715, 242403726) index="0" unique_id=1091116954]
+theme_override_font_sizes/font_size = 22
 text = "SHADOWLESS"
 
 [node name="Description" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/Shadowless/Text" parent_id_path=PackedInt32Array(920499715, 242403726) index="1" unique_id=1199178315]
+theme_override_font_sizes/font_size = 18
 text = "No shadow follows the passenger."
 
 [node name="PortraitMismatch" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries" unique_id=1524288881 instance=ExtResource("3_entry")]
@@ -1308,10 +1298,12 @@ photo_frame_size = Vector2(150, 90)
 photo_offset = Vector2(0, -10)
 
 [node name="Heading" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/Text" parent_id_path=PackedInt32Array(1524288881, 242403726) index="0" unique_id=1091116954]
+theme_override_font_sizes/font_size = 22
 text = "PORTRAIT MISMATCH"
 horizontal_alignment = 2
 
 [node name="Description" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/Text" parent_id_path=PackedInt32Array(1524288881, 242403726) index="1" unique_id=1199178315]
+theme_override_font_sizes/font_size = 18
 text = "The ID portrait and passenger do not match."
 horizontal_alignment = 2
 
@@ -1370,9 +1362,11 @@ texture = ExtResource("25_newspaper")
 visible = false
 
 [node name="Heading" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/NewspaperDeath/Text" parent_id_path=PackedInt32Array(1716115659, 242403726) index="0" unique_id=1091116954]
+theme_override_font_sizes/font_size = 22
 text = "NEWSPAPER DEATH"
 
 [node name="Description" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/NewspaperDeath/Text" parent_id_path=PackedInt32Array(1716115659, 242403726) index="1" unique_id=1199178315]
+theme_override_font_sizes/font_size = 18
 text = "A death notice names this passenger."
 
 [node name="RightPageEntries" type="Control" parent="Center/BookStage/Page/AnomalyList/Entries" unique_id=987178345]
@@ -1414,9 +1408,11 @@ texture = ExtResource("24_unlisted")
 visible = false
 
 [node name="Heading" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/UnlistedDestination/Text" parent_id_path=PackedInt32Array(765249923, 242403726) index="0" unique_id=1091116954]
+theme_override_font_sizes/font_size = 22
 text = "UNLISTED DESTINATION"
 
 [node name="Description" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/UnlistedDestination/Text" parent_id_path=PackedInt32Array(765249923, 242403726) index="1" unique_id=1199178315]
+theme_override_font_sizes/font_size = 18
 text = "The destination is not on today's route."
 
 [node name="TimeInvalidTicket" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries" unique_id=216565996 instance=ExtResource("3_entry")]
@@ -1434,10 +1430,12 @@ photo_frame_size = Vector2(150, 90)
 photo_offset = Vector2(-10, -2)
 
 [node name="Heading" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/Text" parent_id_path=PackedInt32Array(216565996, 242403726) index="0" unique_id=1091116954]
+theme_override_font_sizes/font_size = 22
 text = "TIME-INVALID TICKET"
 horizontal_alignment = 2
 
 [node name="Description" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/Text" parent_id_path=PackedInt32Array(216565996, 242403726) index="1" unique_id=1199178315]
+theme_override_font_sizes/font_size = 18
 text = "The ticket date or day code is wrong."
 horizontal_alignment = 2
 
@@ -1453,7 +1451,16 @@ position = Vector2(59, 37)
 scale = Vector2(0.0942029, 0.0942029)
 
 [node name="Photo" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/PhotoFrame/PhotoClip/PhotoContent" index="0" unique_id=328331925]
-texture = ExtResource("33_ticket")
+position = Vector2(3.053627, -79.25264)
+scale = Vector2(2.5, 2.5)
+texture = ExtResource("35_jbx2b")
+
+[node name="Photo2" type="Sprite2D" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/PhotoFrame/PhotoClip/PhotoContent" index="1" unique_id=771854728]
+editor_description = "Default single texture photo. The parent entry assigns its texture and crop."
+texture_filter = 1
+position = Vector2(46.678493, 516.95386)
+scale = Vector2(2.5, 2.5)
+texture = ExtResource("36_qvavt")
 
 [node name="Placeholder" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket/PhotoFrame/PhotoClip" index="1" unique_id=1733963593]
 visible = false

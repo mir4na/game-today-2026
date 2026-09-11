@@ -44,12 +44,15 @@ This tutorial is a guided run that teaches the current service loop inside the r
    - The normal loading screen opens the gameplay scene with tutorial mode requested.
    - A new Day 1 run is started.
 
-2. **Opening cutscene**
-   - The normal Day 1 intro and station boarding cutscene plays.
-   - When gameplay begins, tutorial guidance appears.
+2. **Clean gameplay start**
+   - The loading screen fades to black, then fades into the normal gameplay view.
+   - The opening station cutscene is skipped.
+   - The player spawns immediately inside a clean coach with no passengers or maintenance distractions.
+   - Route time stays paused while the first tutorial instructions are active.
 
 3. **Angel briefing**
-   - A dimmed overlay and bottom instruction panel explain the premise:
+   - A dimmed overlay shows the Angel portrait/head beside a speech bubble.
+   - Dialogue copy appears inside the bubble and explains the premise:
      - the protagonist died before a job interview;
      - the Angel gives them a second chance as an intern conductor;
      - doing the job well matters.
@@ -110,6 +113,42 @@ This tutorial is a guided run that teaches the current service loop inside the r
     - One station can hold more than one soul; some stations can remain empty depending on the puzzle.
     - Player finalizes assignments and sees scan/paycheck feedback.
 
+## Dialogue coverage notes
+
+The tutorial dialogue should directly cover these points because they are easy to miss during first play:
+
+- Stamps are permanent, so the player should compare the passenger body, ID, ticket date, train number, route, and destination before stamping.
+- Ordinary passengers leave during day service; suspicious/anomalous passengers should remain aboard for Night Service.
+- The Guidebook is split by purpose: Today’s Service for route targets, Rules for Blessing math, and Anomaly Signs for evidence.
+- The newspaper can reveal death-related anomalies that documents alone do not prove.
+- The service button changes role by shift: sign-off during day, station path during night.
+- At night, the ledger starts empty and only the exact hidden statement sentence clicked in a soul record is saved.
+- The station path always has four stations; one station may remain empty and another can hold more than one soul.
+- The first night assignment attempt is free; retries reduce the night payout.
+
+## Scene-based dialogue markers
+
+Every tutorial beat has its own `Marker2D` under `DialogueMarkers` in `scenes/tutorial/tutorial_director.tscn`. The runtime dialogue bubble uses the selected marker as its top-left origin. Reposition a tutorial dialogue by moving its marker in the 2D editor; the script does not contain screen coordinates.
+
+| Tutorial beat | Marker | Placement purpose |
+| --- | --- | --- |
+| Angel briefing | `Intro` | Keeps the opening speech away from the highlighted player. |
+| Movement test | `Movement` | Leaves the aisle and player visible while movement is measured. |
+| Train minimap | `HudMinimap` | Avoids covering the minimap being explained. |
+| Journey clock and Blessings | `HudClock` | Avoids covering the top HUD values being explained. |
+| Passenger inspection | `Passenger` | Leaves the target passenger and interaction prompt visible. |
+| Documents and stamping | `Documents` | Leaves the active document area readable. |
+| Guidebook | `Guidebook` | Leaves the relevant guidebook page readable. |
+| Newspaper | `Newspaper` | Leaves the newspaper evidence readable. |
+| Service signature | `Signature` | Leaves the tracing area visible. |
+| Day service handoff | `DayService` | Returns guidance to the gameplay view. |
+| Night Market | `NightMarket` | Leaves the item cards and Begin action visible. |
+| Night soul inspection | `NightWalk` | Leaves the soul and biography interaction visible. |
+| Statement found | `NightRecord` | Leaves the ledger feedback visible. |
+| Station path | `NightMap` | Leaves station nodes and drag targets visible. |
+
+`Default` is only a fallback if a marker path is missing. The shared Angel portrait crop, bubble, tail, and text layout remain under `DialogueDock` and are authored once for every marker.
+
 ## Implementation status
 
-The current implementation uses `TutorialDirector` as an in-game overlay that listens to tutorial events emitted by `main.gd`. It pauses route time during the onboarding portion, then releases normal day progression after the first successful service sign-off.
+The current implementation uses `TutorialDirector` as an in-game overlay that listens to tutorial events emitted by `main.gd`. Dialogue is presented through a scene-authored Angel portrait/head and speech bubble, and each tutorial beat chooses a dedicated scene marker for placement. It pauses route time during onboarding, then releases normal day progression when the clean-coach introduction ends.

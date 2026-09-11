@@ -23,6 +23,9 @@ extends Resource
 
 @export_category("Ticket Service")
 @export var service_train_number: String
+@export var service_train_codes: PackedStringArray = PackedStringArray([
+	"ATE-101", "ATE-202", "ATE-303", "ATE-404", "ATE-505",
+])
 @export var alternate_train_numbers: PackedStringArray
 @export var service_date_text: String
 @export var ticket_day_code: String
@@ -62,12 +65,11 @@ func create_daily_service(day: int, shift_seed: int) -> DailyManifestConfig:
 	daily.deceased_passenger_count = get_night_anomaly_count(day)
 	var service_rng := RandomNumberGenerator.new()
 	service_rng.seed = ("train:%d:day:%d" % [shift_seed, day]).hash()
-	var numbers := PackedStringArray()
-	for number: int in range(100, 1000):
-		var candidate: String = str(number)
-		if not alternate_train_numbers.has(candidate):
-			numbers.append(candidate)
-	daily.service_train_number = numbers[service_rng.randi_range(0, numbers.size() - 1)]
+	var codes: PackedStringArray = service_train_codes.duplicate()
+	if codes.is_empty():
+		codes.append(service_train_number.strip_edges())
+	var picked_code: String = codes[service_rng.randi_range(0, codes.size() - 1)].strip_edges()
+	daily.service_train_number = picked_code if not picked_code.is_empty() else "ATE-000"
 	daily.randomize_service_date(shift_seed)
 	return daily
 

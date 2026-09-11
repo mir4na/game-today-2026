@@ -203,6 +203,9 @@ func _ready() -> void:
 	manifest_config = manifest_config.create_daily_service(day_number, _daily_seed)
 	_shift_checkpoint = ShiftProgress.make_checkpoint(day_number, _market_tool_state.call(&"get_snapshot"), _daily_seed)
 	ShiftProgress.save_checkpoint(_shift_checkpoint)
+	if is_tutorial_mode:
+		_prepare_tutorial_clean_start()
+		return
 	_choose_newspaper_case()
 	_daily_manifest = DailyManifestGenerator.generate(
 		passenger_identity_profiles,
@@ -238,6 +241,68 @@ func _ready() -> void:
 	_day_intro_ui.play_intro(day_number)
 
 
+func _prepare_tutorial_clean_start() -> void:
+	state = GameState.DAY
+	_interactables.clear()
+	_daily_manifest.clear()
+	for child: Node in _passenger_container.get_children():
+		if child is Passenger:
+			child.queue_free()
+	_passengers.clear()
+	_boarding_passengers.clear()
+	_seat_occupant_by_slot.clear()
+	_seat_slot_by_passenger.clear()
+	_station_assignment.clear()
+	_collected_departure_statements.clear()
+	_collected_veil_note_statement = ""
+	_incorrectly_stamped_anomalies.clear()
+	_penalty_log.clear()
+	_newspaper_subject_name = ""
+	_newspaper_document = ""
+	_newspaper_read = false
+	_correct_drop_offs = 0
+	_wrong_drop_offs = 0
+	_retained_anomalies = 0
+	_shift_report_finalized = false
+	_progress_advanced = false
+	_terminal_station_waiting_for_night_transition = false
+	_night_world_prepared = false
+	_debug_day_pass_override = false
+	_route_index = 0
+	_day_minutes = START_MINUTES
+	_station_arrival_announced = false
+	_station_exchange_processed = false
+	_station_cutscene_context = &""
+	_active_modal = null
+	if is_instance_valid(_day_intro_ui):
+		_day_intro_ui.hide()
+	if is_instance_valid(_station_stop_ui):
+		_station_stop_ui.hide()
+	if is_instance_valid(_shift_report_ui):
+		_shift_report_ui.hide()
+	if is_instance_valid(_night_transition_ui):
+		_night_transition_ui.hide()
+	_collect_interactables(self)
+	_configure_maintenance_events()
+	_clear_day_distractions_for_debug()
+	_hud.set_cutscene_hidden(false)
+	_hud.set_day_hud_visible(true)
+	_hud.set_clock_route_stop_count(day_route.size())
+	_hud.set_clock(int(_day_minutes), _day_station_clock_progress())
+	_hud.set_next_stop(_next_day_station())
+	_hud.set_clock_night_mode(false, false)
+	_hud.set_prompt("")
+	_pause_ui.configure_service_info(manifest_config.service_train_number, manifest_config.service_date_text)
+	_set_sky_cycle_progress(0.0)
+	_travel_background.begin_route_leg(_route_index, true)
+	_on_market_inventory_changed(_market_tool_state.call(&"get_snapshot"))
+	_update_passenger_minimap()
+	_set_passenger_ai_enabled(false)
+	_refresh_player_interactables(true)
+	_set_player_control_for_state()
+	_start_tutorial_if_needed()
+
+
 func _consume_tutorial_mode_request() -> void:
 	var run_context := get_node_or_null("/root/RunContext")
 	if run_context != null and run_context.has_method(&"consume_tutorial_requested"):
@@ -263,6 +328,7 @@ func _start_tutorial_if_needed() -> bool:
 		return false
 	_tutorial_started = true
 	_tutorial_route_time_paused = true
+	_active_modal = _tutorial_director as Control
 	var finish_callback := Callable(self, &"_on_tutorial_finished")
 	if _tutorial_director.has_signal(&"tutorial_finished") and not _tutorial_director.is_connected(&"tutorial_finished", finish_callback):
 		_tutorial_director.connect(&"tutorial_finished", finish_callback)
@@ -273,9 +339,12 @@ func _start_tutorial_if_needed() -> bool:
 
 func _on_tutorial_finished() -> void:
 	_tutorial_route_time_paused = false
+	if _active_modal == _tutorial_director:
+		_active_modal = null
 	if state in [GameState.DAY, GameState.SUNSET] and not _station_arrival_announced:
 		_set_player_control_for_state()
-		_schedule_maintenance_events()
+		if not is_tutorial_mode:
+			_schedule_maintenance_events()
 
 
 func _connect_hud_runtime_signals() -> void:
@@ -1434,7 +1503,9 @@ func _on_night_statement_recorded(passenger_name: String, statement: String) -> 
 
 
 func _on_night_statement_feedback_requested(succeeded: bool) -> void:
-	_shake_night_record_camera(13.0 if succeeded else 16.0)
+	if succeeded:
+		return
+	_shake_night_record_camera(16.0)
 
 
 func _on_night_validation_impact_requested(succeeded: bool) -> void:
