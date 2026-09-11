@@ -32,6 +32,11 @@ signal documents_requested(passenger: Passenger)
 @export var dead_shadow_offset: Vector2 = Vector2(9.0, 5.0)
 @export_range(1.0, 1.5, 0.01) var dead_shadow_scale: float = 1.12
 @export var dead_twitch_interval_seconds: Vector2 = Vector2(4.0, 8.0)
+@export_category("Night Repulsion")
+@export_range(120.0, 720.0, 10.0) var night_repel_distance: float = 420.0
+@export_range(0.2, 1.5, 0.05) var night_repel_duration_seconds: float = 0.72
+@export_range(10.0, 120.0, 2.0) var night_repel_arc_height: float = 58.0
+@export_range(20.0, 140.0, 5.0) var night_repel_edge_margin: float = 80.0
 var documents_checked: bool = false
 var night_mode: bool = false
 var night_identity_revealed: bool = false
@@ -66,6 +71,15 @@ var _escaping_navigation_blocker: bool = false
 var _settling_for_night: bool = false
 var _world_time_scale: float = 1.0
 var _footstep_timer: float = 0.0
+var _night_repel_tween: Tween
+var _night_repel_start_position: Vector2
+var _night_repel_target_position: Vector2
+var _night_repel_direction: float = 1.0
+var _night_repel_lift_offset: float = 0.0
+var _night_repel_rotation: float = 0.0
+var _night_repel_airborne: float = 0.0
+var _night_repel_visibility: float = 1.0
+var _night_repel_arrival_start_position: Vector2
 
 const PASSENGER_WALK_SPEED: float = 92.0
 
@@ -124,7 +138,7 @@ func _update_footsteps(delta: float) -> void:
 	if _animation_move_speed < walk_animation_threshold or departed or not visible:
 		return
 	if _footstep_timer <= 0.0:
-		GameSFX.play(&"footstep", -23.0, 0.88, 0.08, 0.07)
+		GameSFX.play(&"footstep", -18.0, 0.88, 0.08, 0.07)
 		_footstep_timer = _rng.randf_range(0.55, 0.72)
 
 func interact() -> void:
@@ -185,7 +199,186 @@ func set_night_identity_revealed(value: bool) -> void:
 	night_identity_revealed = value
 	_update_visual()
 
+
+func fly_away_from(threat_world_position: Vector2) -> bool:
+	if not _is_dead_night_visual_active() or get_parent() == null:
+		return false
+	if is_instance_valid(_night_repel_tween) and _night_repel_tween.is_valid():
+		_night_repel_tween.kill()
+	var threat_position: Vector2 = get_parent().to_local(threat_world_position)
+	_night_repel_start_position = position
+	_night_repel_target_position = _find_night_repel_target(threat_position)
+	_night_repel_direction = signf(_night_repel_target_position.x - position.x)
+	if is_zero_approx(_night_repel_direction):
+		_night_repel_direction = 1.0 if position.x <= threat_position.x else -1.0
+	_inspection_resume_walking = false
+	_ai_walking = false
+	_ai_target_position = position
+	enabled = false
+	set_interaction_focus(false)
+	_night_repel_visibility = 1.0
+	_night_repel_tween = create_tween()
+	_night_repel_tween.tween_method(
+		_set_night_repel_departure_progress,
+		0.0,
+		1.0,
+		night_repel_duration_seconds * 0.46
+	).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+	_night_repel_tween.tween_callback(_teleport_night_repel)
+	_night_repel_tween.tween_method(
+		_set_night_repel_arrival_progress,
+		0.0,
+		1.0,
+		night_repel_duration_seconds * 0.54
+	).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+	_night_repel_tween.tween_callback(_finish_night_repel)
+	return true
+
+
+func _find_night_repel_target(threat_position: Vector2) -> Vector2:
+	var current_carriage: int = _carriage_from_world_x(position.x)
+	var other_carriages: Array[int] = []
+	for carriage: int in _get_configured_carriages():
+		if carriage != current_carriage:
+			other_carriages.append(carriage)
+	if not other_carriages.is_empty():
+		var target_carriage: int = other_carriages[_rng.randi_range(0, other_carriages.size() - 1)]
+		var activity_candidates: PackedVector2Array = _available_activity_points(target_carriage)
+		if not activity_candidates.is_empty():
+			return activity_candidates[_rng.randi_range(0, activity_candidates.size() - 1)]
+		var carriage_range: Vector2 = _carriage_ranges.get(
+			target_carriage,
+			Vector2(position.x - night_repel_distance, position.x + night_repel_distance)
+		)
+		var range_left: float = minf(carriage_range.x, carriage_range.y) + night_repel_edge_margin
+		var range_right: float = maxf(carriage_range.x, carriage_range.y) - night_repel_edge_margin
+		if range_left > range_right:
+			var range_middle: float = (carriage_range.x + carriage_range.y) * 0.5
+			range_left = range_middle
+			range_right = range_middle
+		for attempt: int in 8:
+			var candidate := Vector2(_rng.randf_range(range_left, range_right), position.y)
+			if _is_stop_position_available(candidate):
+				return candidate
+		return Vector2((range_left + range_right) * 0.5, position.y)
+	# Single-carriage fallback preserves the older flee-away behavior.
+	var train_range := Vector2(position.x - night_repel_distance, position.x + night_repel_distance)
+	if not _carriage_ranges.is_empty():
+		train_range = Vector2(INF, -INF)
+		for carriage_value: Variant in _carriage_ranges.values():
+			var carriage_range: Vector2 = carriage_value
+			train_range.x = minf(train_range.x, minf(carriage_range.x, carriage_range.y))
+			train_range.y = maxf(train_range.y, maxf(carriage_range.x, carriage_range.y))
+	var left_limit: float = minf(train_range.x + night_repel_edge_margin, position.x)
+	var right_limit: float = maxf(train_range.y - night_repel_edge_margin, position.x)
+	var away_direction: float = signf(position.x - threat_position.x)
+	if is_zero_approx(away_direction):
+		away_direction = 1.0 if right_limit - position.x >= position.x - left_limit else -1.0
+	var desired_x: float = clampf(
+		position.x + away_direction * night_repel_distance,
+		left_limit,
+		right_limit
+	)
+	var desired := Vector2(desired_x, position.y)
+	var best_authored_target := Vector2.ZERO
+	var best_authored_score: float = INF
+	var found_authored_target: bool = false
+	for point: Vector2 in _activity_points:
+		if point.x < left_limit or point.x > right_limit:
+			continue
+		if signf(point.x - position.x) != away_direction:
+			continue
+		if absf(point.x - threat_position.x) <= absf(position.x - threat_position.x) + 1.0:
+			continue
+		if not _is_stop_position_available(point):
+			continue
+		var score: float = absf(point.x - desired.x) + absf(point.y - position.y) * 0.35
+		if score < best_authored_score:
+			best_authored_score = score
+			best_authored_target = point
+			found_authored_target = true
+	if found_authored_target:
+		return best_authored_target
+	# Land at the farthest clear point in the chosen direction. The fallback is
+	# still inside the authored train bounds because souls may pass through props.
+	for step: int in range(13):
+		var blend: float = float(step) / 12.0
+		var candidate := Vector2(lerpf(desired.x, position.x, blend), position.y)
+		if absf(candidate.x - threat_position.x) <= absf(position.x - threat_position.x) + 1.0:
+			continue
+		if _is_stop_position_available(candidate):
+			return candidate
+	return desired
+
+
+func _set_night_repel_departure_progress(progress: float) -> void:
+	var clamped_progress: float = clampf(progress, 0.0, 1.0)
+	var departure_distance: float = minf(
+		120.0,
+		absf(_night_repel_target_position.x - _night_repel_start_position.x) * 0.24
+	)
+	var departure_target := _night_repel_start_position + Vector2(
+		_night_repel_direction * departure_distance,
+		0.0
+	)
+	position = _night_repel_start_position.lerp(departure_target, clamped_progress)
+	_night_repel_lift_offset = -night_repel_arc_height * clamped_progress
+	_night_repel_rotation = deg_to_rad(9.0) * clamped_progress * _night_repel_direction
+	_night_repel_airborne = clamped_progress
+	_night_repel_visibility = 1.0 - smoothstep(0.08, 0.92, clamped_progress)
+	_update_visual()
+
+
+func _teleport_night_repel() -> void:
+	var arrival_distance: float = minf(
+		105.0,
+		absf(_night_repel_target_position.x - _night_repel_start_position.x) * 0.2
+	)
+	_night_repel_arrival_start_position = _night_repel_target_position - Vector2(
+		_night_repel_direction * arrival_distance,
+		0.0
+	)
+	position = _night_repel_arrival_start_position
+	_night_repel_visibility = 0.0
+	_update_visual()
+
+
+func _set_night_repel_arrival_progress(progress: float) -> void:
+	var clamped_progress: float = clampf(progress, 0.0, 1.0)
+	position = _night_repel_arrival_start_position.lerp(
+		_night_repel_target_position,
+		clamped_progress
+	)
+	_night_repel_lift_offset = -night_repel_arc_height * (1.0 - clamped_progress)
+	_night_repel_rotation = deg_to_rad(9.0) * (1.0 - clamped_progress) * _night_repel_direction
+	_night_repel_airborne = 1.0 - clamped_progress
+	_night_repel_visibility = smoothstep(0.08, 0.78, clamped_progress)
+	_update_visual()
+
+
+func _finish_night_repel() -> void:
+	position = _night_repel_target_position
+	_ai_target_position = position
+	runtime_carriage = _carriage_from_world_x(position.x)
+	if data != null:
+		data.current_carriage = runtime_carriage
+	_night_repel_lift_offset = 0.0
+	_night_repel_rotation = 0.0
+	_night_repel_airborne = 0.0
+	_night_repel_visibility = 1.0
+	enabled = not departed
+	_night_repel_tween = null
+	_update_visual()
+
+
 func depart_train() -> void:
+	if is_instance_valid(_night_repel_tween) and _night_repel_tween.is_valid():
+		_night_repel_tween.kill()
+	_night_repel_tween = null
+	_night_repel_lift_offset = 0.0
+	_night_repel_rotation = 0.0
+	_night_repel_airborne = 0.0
+	_night_repel_visibility = 1.0
 	departed = true
 	boarding_staged = false
 	_inspection_paused = false
@@ -666,27 +859,36 @@ func _update_visual() -> void:
 	body_tint.a = 1.0
 	if is_instance_valid(_body_tint):
 		_body_tint.modulate = body_tint
+	ghost_alpha *= lerpf(1.0, 0.78, _night_repel_airborne) * _night_repel_visibility
 	_passenger_visual.modulate = Color(1.0, 1.0, 1.0, ghost_alpha)
 	# The authored NPC sprites face left by default; the procedural fallback faces right.
 	var faces_left: bool = artwork_faces_left if animated_artwork_active else uses_authored_character_artwork
 	var visual_direction: float = -_facing_direction if faces_left else _facing_direction
-	_passenger_visual.scale = Vector2(visual_direction, 1.0)
+	_passenger_visual.scale = Vector2(
+		visual_direction * (1.0 + _night_repel_airborne * 0.08),
+		1.0 - _night_repel_airborne * 0.06
+	)
 	var dead_idle_y: float = sin(_sway_time * 0.32 + _dead_idle_phase) * 0.45 if dead_visual_active else 0.0
 	_passenger_visual.position = Vector2(
 		_dead_twitch_offset.x if dead_visual_active else 0.0,
 		(sin(_walk_phase) * 1.8 if _ai_walking and not animated_artwork_active else 0.0)
 		+ dead_idle_y
 		+ (_dead_twitch_offset.y if dead_visual_active else 0.0)
+		+ _night_repel_lift_offset
 	)
 	_passenger_visual.rotation = (
 		sin(_sway_time * 0.24 + _dead_idle_phase) * deg_to_rad(0.32) + _dead_twitch_rotation
 		if dead_visual_active
 		else 0.0
-	)
+	) + _night_repel_rotation
 	_shadow.visible = data.anomaly_type != "shadowless"
 	_shadow.position = _shadow_rest_position + (dead_shadow_offset if dead_visual_active else Vector2.ZERO)
 	_shadow.scale = _shadow_rest_scale * (dead_shadow_scale if dead_visual_active else 1.0)
-	_shadow.modulate.a = dead_shadow_alpha if dead_visual_active else 0.52
+	_shadow.modulate.a = (
+		(dead_shadow_alpha if dead_visual_active else 0.52)
+		* lerpf(1.0, 0.12, _night_repel_airborne)
+		* _night_repel_visibility
+	)
 	if is_instance_valid(_focus_material):
 		_focus_material.set_shader_parameter(
 			&"dead_effect_strength",

@@ -2,6 +2,7 @@ extends RefCounted
 ## A checkpoint is the start of a day, never an in-progress payout or purchase.
 
 const SAVE_PATH: String = "user://shift_progress.cfg"
+const TEST_SAVE_PATH_ENV: String = "WHERE_DO_YOU_BELONG_TEST_SAVE"
 const VERSION: int = 4
 const LEGACY_STARTER_RADAR_VERSION: int = 1
 const AUDIT_SLIP_VERSION: int = 2
@@ -13,13 +14,15 @@ const SWIFT_CARRY_LIMIT: int = 5
 
 ## Creates the only checkpoint that replaces an existing campaign from scratch.
 ## Continue and normal application exit never call this function.
-static func start_new_run(path: String = SAVE_PATH) -> Dictionary:
+static func start_new_run(path: String = "") -> Dictionary:
+	path = _resolve_save_path(path)
 	var checkpoint: Dictionary = make_checkpoint(1, {}, new_seed())
 	if not save_checkpoint(checkpoint, path):
 		return {}
 	return checkpoint
 
-static func load_checkpoint(path: String = SAVE_PATH) -> Dictionary:
+static func load_checkpoint(path: String = "") -> Dictionary:
+	path = _resolve_save_path(path)
 	var file := ConfigFile.new()
 	if file.load(path) != OK:
 		return {}
@@ -89,7 +92,12 @@ static func _migrate_swift_stock(checkpoint: Dictionary) -> Dictionary:
 	migrated.inventory = inventory
 	return migrated
 
-static func make_checkpoint(day: int, inventory: Dictionary, seed_value: int) -> Dictionary:
+static func make_checkpoint(
+	day: int,
+	inventory: Dictionary,
+	seed_value: int,
+	campaign_summary: Dictionary = {}
+) -> Dictionary:
 	var saved_inventory: Dictionary = {}
 	for key: String in ["blessings", "radar_charges", "swift_charges"]:
 		if inventory.has(key):
@@ -113,14 +121,37 @@ static func make_checkpoint(day: int, inventory: Dictionary, seed_value: int) ->
 			0,
 			1
 		)
-	return {"day": clampi(day, 1, DAY_COUNT), "seed": seed_value, "inventory": saved_inventory, "completed": false}
+	return {
+		"day": clampi(day, 1, DAY_COUNT),
+		"seed": seed_value,
+		"inventory": saved_inventory,
+		"completed": false,
+		"campaign_summary": _sanitize_campaign_summary(campaign_summary),
+	}
+
+
+static func _sanitize_campaign_summary(summary: Dictionary) -> Dictionary:
+	var sanitized: Dictionary = {}
+	for key: String in [
+		"days_completed",
+		"correct_dropoffs",
+		"wrong_dropoffs",
+		"anomalies_retained",
+		"souls_released",
+		"night_attempts",
+		"blessings_earned",
+		"blessing_balance",
+	]:
+		sanitized[key] = maxi(0, int(summary.get(key, 0)))
+	return sanitized
 
 static func new_seed() -> int:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	return rng.seed
 
-static func save_checkpoint(checkpoint: Dictionary, path: String = SAVE_PATH) -> bool:
+static func save_checkpoint(checkpoint: Dictionary, path: String = "") -> bool:
+	path = _resolve_save_path(path)
 	var file := ConfigFile.new()
 	file.set_value("progress", "version", VERSION)
 	file.set_value("progress", "checkpoint", checkpoint)
@@ -130,3 +161,10 @@ static func save_checkpoint(checkpoint: Dictionary, path: String = SAVE_PATH) ->
 	if error != OK:
 		push_error("Could not save shift progress: %s" % error_string(error))
 	return error == OK
+
+
+static func _resolve_save_path(path: String) -> String:
+	if not path.is_empty():
+		return path
+	var test_override: String = OS.get_environment(TEST_SAVE_PATH_ENV).strip_edges()
+	return test_override if not test_override.is_empty() else SAVE_PATH

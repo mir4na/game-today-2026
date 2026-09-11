@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://dr2sfspj4lf58"
+path="res://.godot/imported/outro_bad_ending_heaven.mp3-b13aed3168f1e4ce77fe2902d69ea56c.mp3str"
+
+[deps]
+
+source_file="res://assets/music & bgm/outro_bad_ending_heaven.mp3"
+dest_files=["res://.godot/imported/outro_bad_ending_heaven.mp3-b13aed3168f1e4ce77fe2902d69ea56c.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

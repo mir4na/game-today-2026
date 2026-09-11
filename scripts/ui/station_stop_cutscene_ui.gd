@@ -22,8 +22,8 @@ signal sequence_skip_requested
 @export var opening_status_template: String = "%d BOARDING"
 @export var exchange_status_template: String = "%d OFF  •  %d ON"
 @export var terminal_status_template: String = "%d DISEMBARKING"
-@export var skip_hint_text: String = "PRESS [SPACE] TO"
-@export var skip_button_text: String = "SKIP"
+@export var skip_hint_text: String = "CLICK TO"
+@export var skip_word_text: String = "SKIP"
 @export_category("Scene Animation")
 @export var letterbox_in_animation: StringName = &"letterbox_in"
 @export var letterbox_out_animation: StringName = &"letterbox_out"
@@ -129,7 +129,7 @@ var _motion_rng := RandomNumberGenerator.new()
 @onready var _subtitle_label: Label = %SubtitleLabel
 @onready var _status_label: Label = %StatusLabel
 @onready var _skip_prompt_label: Label = %SkipPromptLabel
-@onready var _skip_button: Button = %SkipButton
+@onready var _skip_word_label: Label = %SkipWordLabel
 @onready var _cinematic_title: Control = %CinematicTitle
 @onready var _screen_fade: ColorRect = %ScreenFade
 @onready var _station_actor_canvas: CanvasLayer = %StationActorCanvas
@@ -252,7 +252,7 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 	_build_ambient_motion_profiles()
 	_update_scene_copy()
 	_skip_prompt_label.text = skip_hint_text
-	_skip_button.text = skip_button_text
+	_skip_word_label.text = skip_word_text
 	show()
 	_station_actor_canvas.show()
 	_cinematic_border_layer.show()
@@ -278,6 +278,18 @@ func skip_sequence() -> void:
 	sequence_timeline_changed.emit(_elapsed)
 	_update_visuals()
 	sequence_skip_requested.emit()
+
+
+func _gui_input(event: InputEvent) -> void:
+	var mouse_button := event as InputEventMouseButton
+	if mouse_button != null and mouse_button.button_index == MOUSE_BUTTON_LEFT and mouse_button.pressed:
+		skip_sequence()
+		accept_event()
+		return
+	var touch := event as InputEventScreenTouch
+	if touch != null and touch.pressed:
+		skip_sequence()
+		accept_event()
 
 
 func _process(delta: float) -> void:
@@ -310,19 +322,8 @@ func _update_crowd_footsteps(delta: float) -> void:
 	)
 	var exchange_walking: bool = _elapsed >= exchange_start and _elapsed <= _departure_start
 	if not _ambient_actors.is_empty() or exchange_walking:
-		GameSFX.play(&"footstep", -24.0, 0.85, 0.08, 0.07)
+		GameSFX.play(&"footstep", -19.0, 0.85, 0.08, 0.07)
 	_crowd_footstep_timer = _motion_rng.randf_range(0.55, 0.72)
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if not visible or _elapsed < screen_fade_duration:
-		return
-	var key_event := event as InputEventKey
-	if key_event != null and key_event.echo:
-		return
-	if event.is_action_pressed(&"stamp_ticket"):
-		skip_sequence()
-		get_viewport().set_input_as_handled()
 
 
 func complete_sequence(return_camera: bool = true) -> void:
@@ -388,7 +389,6 @@ func confirm_camera_return_complete() -> void:
 
 func _update_visuals() -> void:
 	_update_screen_fade()
-	_update_skip_button()
 	_update_camera_return()
 	_update_train_motion()
 	_update_exchange_actors()
@@ -398,10 +398,6 @@ func _update_visuals() -> void:
 func _update_screen_fade() -> void:
 	var fade_progress: float = clampf(_elapsed / maxf(screen_fade_duration, 0.01), 0.0, 1.0)
 	_screen_fade.modulate.a = 1.0 - _ease_in_out_sine(fade_progress)
-
-
-func _update_skip_button() -> void:
-	_skip_button.disabled = _camera_return_started or _elapsed < screen_fade_duration
 
 
 func _update_train_motion() -> void:

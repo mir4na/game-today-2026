@@ -351,10 +351,10 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 z_index = 4
 layout_mode = 0
-offset_left = 406.6667
-offset_top = 513.3334
-offset_right = 724.6667
-offset_bottom = 584.44446
+offset_left = 451.1905
+offset_top = 541.6667
+offset_right = 769.1905
+offset_bottom = 612.7778
 theme_override_colors/font_color = Color(0.364706, 0.294118, 0.270588, 1)
 theme_override_fonts/font = ExtResource("17_medium")
 theme_override_font_sizes/font_size = 24
@@ -392,7 +392,7 @@ theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("ConfirmNormal")
 theme_override_styles/pressed = SubResource("ConfirmPressed")
 theme_override_styles/hover = SubResource("ConfirmHover")
-text = "FINALIZE ASSIGNMENTS"
+text = "FINALIZE"
 script = ExtResource("20_hover")
 
 [node name="ErrorLabel" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=972805423]
@@ -470,6 +470,93 @@ offset_bottom = 104.0
 scale = Vector2(1.2, 1.2)
 tooltip_text = "Close Night Ledger [E]"
 
+[node name="FailShade" type="ColorRect" parent="BoardAnchor" unique_id=320000001]
+unique_name_in_owner = true
+visible = false
+z_index = 40
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02745098, 0.07058824, 0.13725491, 0.88)
+
+[node name="FailPanel" type="Panel" parent="BoardAnchor" unique_id=320000002]
+unique_name_in_owner = true
+visible = false
+z_index = 41
+layout_mode = 0
+offset_left = 390.0
+offset_top = 210.0
+offset_right = 890.0
+offset_bottom = 510.0
+theme_override_styles/panel = SubResource("VeilNotePaper")
+
+[node name="FailTitle" type="Label" parent="BoardAnchor/FailPanel" unique_id=320000003]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 484.0
+offset_bottom = 60.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.24705882, 0.21176471, 0.2, 1)
+theme_override_fonts/font = ExtResource("16_irish")
+theme_override_font_sizes/font_size = 30
+text = "NIGHT SHIFT FAILED"
+horizontal_alignment = 1
+
+[node name="FailBody" type="Label" parent="BoardAnchor/FailPanel" unique_id=320000004]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 66.0
+offset_right = 484.0
+offset_bottom = 150.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.27058824, 0.23137255, 0.21960784, 1)
+theme_override_fonts/font = ExtResource("17_medium")
+theme_override_font_sizes/font_size = 16
+text = "The route was wrong. But since you are an intern, you can try again."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="RetryNightButton" type="Button" parent="BoardAnchor/FailPanel" unique_id=320000005]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 16.0
+offset_top = 160.0
+offset_right = 484.0
+offset_bottom = 208.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.97254902, 0.94117647, 0.87843138, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("18_bold")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("ConfirmNormal")
+theme_override_styles/pressed = SubResource("ConfirmPressed")
+theme_override_styles/hover = SubResource("ConfirmHover")
+text = "RESTART NIGHT SHIFT"
+script = ExtResource("20_hover")
+
+[node name="RestartDayButton" type="Button" parent="BoardAnchor/FailPanel" unique_id=320000006]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 16.0
+offset_top = 216.0
+offset_right = 484.0
+offset_bottom = 264.0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.97254902, 0.94117647, 0.87843138, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("18_bold")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("ConfirmNormal")
+theme_override_styles/pressed = SubResource("ConfirmPressed")
+theme_override_styles/hover = SubResource("ConfirmHover")
+text = "RESTART DAY"
+script = ExtResource("20_hover")
+
 [node name="MapTitle" type="Label" parent="BoardAnchor/StationPathAnchor" unique_id=67688186]
 visible = false
 z_index = 4
@@ -501,3 +588,5 @@ horizontal_alignment = 1
 
 [connection signal="pressed" from="BoardAnchor/StationPathAnchor/ConfirmButton" to="." method="_confirm"]
 [connection signal="pressed" from="BoardAnchor/StationPathAnchor/CloseButton" to="." method="request_close"]
+[connection signal="pressed" from="BoardAnchor/FailPanel/RetryNightButton" to="." method="_on_retry_night_pressed"]
+[connection signal="pressed" from="BoardAnchor/FailPanel/RestartDayButton" to="." method="_on_restart_day_pressed"]

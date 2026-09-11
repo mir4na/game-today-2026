@@ -23,6 +23,13 @@ func _run() -> void:
 	var market := MarketScene.instantiate() as MarketToolState
 	root.add_child(market)
 	_check(
+		market.blessings == 0
+		and market.veil_notes == 0
+		and market.radar_charges == 0
+		and market.swift_charges == 0,
+		"A fresh run must start with zero Blessings and zero owned tools."
+	)
+	_check(
 		market.veil_note_cost == 200
 		and market.radar_charge_cost == 150
 		and market.swift_charge_cost == 75,
@@ -91,6 +98,15 @@ func _run() -> void:
 	})
 	game._on_market_tool_requested(&"veil_note")
 	_check(game._market_tool_state.veil_notes == 1, "Veil Note activation must be rejected during Day Shift.")
+	_check(
+		game._hud._notification_label.get_theme_color(&"font_color").is_equal_approx(Color.WHITE),
+		"The daytime-only Veil Note notification must render in white."
+	)
+	game._hud.notify("Default notification", 0.01)
+	_check(
+		game._hud._notification_label.get_theme_color(&"font_color").is_equal_approx(Color.BLACK),
+		"Other HUD notifications must retain the default black text."
+	)
 
 	game._jump_directly_to_debug_night()
 	var puzzle: DeparturePuzzleData = game._get_departure_puzzle()

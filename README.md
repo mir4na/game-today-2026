@@ -97,12 +97,12 @@ The current roster contains 16 unique visual profiles: NPC 1, 3, 4, 6, 7, 9, 11,
 
 - Identity numbers use `CID-0001`: the `CID` document prefix followed by a stable four-digit identity serial.
 - Service dates use `DD MON YYYY`, while the ticket's compact day code uses `YYMMDD`.
-- Train numbers use three digits and normally match the active service configured in `DailyManifestConfig`.
-- Ticket numbers use `YYMMDD-TRAIN-SERIAL`, for example `260607-505-0001`. A time-invalid ticket changes both its printed service date and the matching `YYMMDD` segment; a wrong-train boarder changes the train segment.
+- Train numbers use letters plus digits (for example `ATE-505`) and normally match the active service configured in `DailyManifestConfig`.
+- Ticket numbers use `YYMMDD-TRAIN-SERIAL`, for example `260607-ATE-505-0001`. A time-invalid ticket changes both its printed service date and the matching `YYMMDD` segment.
 
 ## Adding an anomaly
 
-Configured deceased-anomaly values are `shadowless`, `unlisted_destination`, `portrait_mismatch`, `time_invalid_ticket`, and `newspaper_death`; `none` marks a normal passenger. `wrong_train_boarder` is a daytime ticket violation, not a deceased anomaly.
+Configured deceased-anomaly values are `shadowless`, `unlisted_destination`, `portrait_mismatch`, `time_invalid_ticket`, and `newspaper_death`; `none` marks a normal passenger.
 
 1. Add a new value to `anomaly_type` in `passenger_data.gd`.
 2. Add only its visible/body presentation to `passenger.gd` or the relevant interactable/environment script.
@@ -117,7 +117,7 @@ Assign the new Resource to `puzzle_resource` on `Main`. Keep one passenger per n
 
 ## Validation
 
-The project was parsed and run using Godot 4.7 stable. Tests cover Main Menu → Settings → Start, the DAY 1 fade, ten-passenger Alderwick boarding, leftward departure, diverse passenger AI (including stationary, wandering, and cross-car movement), live minimap population dots, all four 60-second route legs in order, repeated proximity-based exit selection, equal exchanges at Brambleford/Cinderfield/Dunmere/Eastmere, impostors boarding from different stations, deferred penalties, paycheck results, and final night drop-offs:
+The project was parsed and run using Godot 4.7 stable. Tests cover Main Menu → Settings → Start, the DAY 1 fade, ten-passenger Alderwick boarding, leftward departure, diverse passenger AI (including stationary, wandering, and cross-car movement), live minimap population dots, all three 60-second route legs in order, repeated proximity-based exit selection, equal exchanges at Brambleford/Cinderfield/Dunmere, impostors boarding from different stations, deferred penalties, paycheck results, and final night drop-offs:
 
 ```bash
 godot --headless --path . --script res://tests/menu_flow_test.gd --audio-driver Dummy

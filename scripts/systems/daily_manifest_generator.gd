@@ -55,8 +55,6 @@ static func generate(
 		include_matching_newspaper_case
 	):
 		return generated_manifest
-	if not _assign_wrong_train_boarders(passengers, scheduled_count, route, config, rng):
-		return generated_manifest
 	if not _validate_distinct_origins_and_destinations(passengers, scheduled_count):
 		return generated_manifest
 	_assign_ticket_numbers(passengers, scheduled_count, config)
@@ -273,82 +271,6 @@ static func _distribute_intermediate_boarders(total_boarders: int, intermediate_
 		boarding_counts.append(even_count + (1 if station_offset < remainder else 0))
 	return boarding_counts
 
-static func _assign_wrong_train_boarders(
-	passengers: Array[PassengerData],
-	scheduled_count: int,
-	route: PackedStringArray,
-	config: DailyManifestConfig,
-	rng: RandomNumberGenerator
-) -> bool:
-	if config.wrong_train_boarder_count <= 0:
-		return true
-	var service_train_number: String = config.service_train_number.strip_edges()
-	if service_train_number.is_empty():
-		push_error("Daily Manifest Config/Service Train Number cannot be empty.")
-		return false
-	var alternate_numbers := PackedStringArray()
-	for configured_number: String in config.alternate_train_numbers:
-		var cleaned_number: String = configured_number.strip_edges()
-		if not cleaned_number.is_empty() and cleaned_number != service_train_number and not alternate_numbers.has(cleaned_number):
-			alternate_numbers.append(cleaned_number)
-	if alternate_numbers.is_empty():
-		push_error("Wrong-train boarders require at least one alternate train number different from the active service.")
-		return false
-
-	var reserved_passengers: Dictionary = {}
-	for _case_index: int in range(config.wrong_train_boarder_count):
-		var candidates: Array[PassengerData] = []
-		for index: int in range(scheduled_count):
-			var candidate: PassengerData = passengers[index]
-			if candidate.is_dead or reserved_passengers.has(candidate):
-				continue
-			var origin_index: int = route.find(candidate.origin_station)
-			var destination_index: int = route.find(candidate.destination_station)
-			if origin_index < 0 or origin_index + 1 >= route.size() or destination_index <= origin_index + 1:
-				continue
-			var immediate_station: String = route[origin_index + 1]
-			if _find_dropoff_swap_candidate(passengers, scheduled_count, candidate, immediate_station, reserved_passengers) != null:
-				candidates.append(candidate)
-		if candidates.is_empty():
-			push_error("The manifest cannot place %d wrong-train boarder case(s) without breaking station exchange counts." % config.wrong_train_boarder_count)
-			return false
-		_shuffle_passengers(candidates, rng)
-		var wrong_train_data: PassengerData = candidates[0]
-		var wrong_origin_index: int = route.find(wrong_train_data.origin_station)
-		var required_station: String = route[wrong_origin_index + 1]
-		var swap_candidate: PassengerData = _find_dropoff_swap_candidate(
-			passengers,
-			scheduled_count,
-			wrong_train_data,
-			required_station,
-			reserved_passengers
-		)
-		if swap_candidate == null:
-			push_error("Wrong-train boarder generation lost its station-exchange swap candidate.")
-			return false
-		swap_candidate.destination_station = wrong_train_data.destination_station
-		wrong_train_data.ticket_issue_type = PassengerData.TICKET_ISSUE_WRONG_TRAIN_BOARDER
-		wrong_train_data.ticket_train_number = alternate_numbers[rng.randi_range(0, alternate_numbers.size() - 1)]
-		wrong_train_data.required_dropoff_station = required_station
-		reserved_passengers[wrong_train_data] = true
-		reserved_passengers[swap_candidate] = true
-	return true
-
-static func _find_dropoff_swap_candidate(
-	passengers: Array[PassengerData],
-	scheduled_count: int,
-	wrong_train_candidate: PassengerData,
-	required_station: String,
-	reserved_passengers: Dictionary
-) -> PassengerData:
-	for index: int in range(scheduled_count):
-		var candidate: PassengerData = passengers[index]
-		if candidate == wrong_train_candidate or candidate.is_dead or reserved_passengers.has(candidate):
-			continue
-		if candidate.destination_station == required_station:
-			return candidate
-	return null
-
 static func _assign_ticket_numbers(passengers: Array[PassengerData], scheduled_count: int, config: DailyManifestConfig) -> void:
 	for index: int in range(scheduled_count):
 		var data: PassengerData = passengers[index]
@@ -430,17 +352,20 @@ static func _assign_invalid_ticket_date(
 	config: DailyManifestConfig,
 	rng: RandomNumberGenerator
 ) -> bool:
-	var candidates: Array[Dictionary] = []
-	var active_code: String = config.ticket_day_code.strip_edges()
-	var active_date: String = config.service_date_text.strip_edges()
-	for configured_code: Variant in config.invalid_service_dates_by_day_code.keys():
-		var day_code: String = str(configured_code).strip_edges()
-		var printed_date: String = str(config.invalid_service_dates_by_day_code[configured_code]).strip_edges()
-		if day_code.is_empty() or printed_date.is_empty():
-			continue
-		if day_code == active_code or printed_date.to_lower() == active_date.to_lower():
-			continue
-		candidates.append({"day_code": day_code, "printed_date": printed_date})
+	var candidates: Array[Dictionary] = config.get_invalid_service_date_candidates()
+	if candidates.is_empty():
+		# Fallback to the Inspector-authored table when the service date
+		# cannot be parsed (for example after a manual tres edit).
+		var active_code: String = config.ticket_day_code.strip_edges()
+		var active_date: String = config.service_date_text.strip_edges()
+		for configured_code: Variant in config.invalid_service_dates_by_day_code.keys():
+			var day_code: String = str(configured_code).strip_edges()
+			var printed_date: String = str(config.invalid_service_dates_by_day_code[configured_code]).strip_edges()
+			if day_code.is_empty() or printed_date.is_empty():
+				continue
+			if day_code == active_code or printed_date.to_lower() == active_date.to_lower():
+				continue
+			candidates.append({"day_code": day_code, "printed_date": printed_date})
 	if candidates.is_empty():
 		push_error("Time-invalid-ticket anomalies require at least one alternate service date and day code.")
 		return false

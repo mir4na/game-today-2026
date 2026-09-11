@@ -5,6 +5,7 @@ extends Control
 signal closed
 signal station_assignment_toggled(passenger_name: String, should_assign: bool)
 signal station_stamp_applied(passenger_name: String, station_name: String, ticket_position: Vector2)
+signal ticket_face_shown
 
 enum ViewMode {
 	NONE,
@@ -52,6 +53,11 @@ enum ViewMode {
 var _data: PassengerData
 var _view_mode: ViewMode = ViewMode.NONE
 var _closing: bool = false
+## Tutorial locks: when true, the player cannot flip back (Q) or close (X).
+var tutorial_lock_flip: bool = false
+var tutorial_lock_close: bool = false
+## When true alongside tutorial_lock_flip, a single ID-to-ticket flip is allowed.
+var tutorial_flip_one_way: bool = false
 var _view_revision: int = 0
 var _is_assigned_to_next_station: bool = false
 var _newspaper_headline: String = ""
@@ -79,6 +85,7 @@ func show_passenger(data: PassengerData) -> void:
 	GameSFX.play(&"paper_rustle", -7.0, 0.98, 0.025, 0.1)
 	_view_revision += 1
 	_closing = false
+	set_tutorial_locks(false, false)
 	_data = data
 	_view_mode = ViewMode.PASSENGER_DOCUMENTS
 	_is_assigned_to_next_station = false
@@ -213,6 +220,8 @@ func configure_station_assignment(is_assigned: bool, animate_stamp: bool = false
 	_documents.set_disembark_stamped(is_assigned, animate_stamp)
 	if is_assigned:
 		_stamp_tray.mark_committed()
+	elif is_instance_valid(_stamp_tray):
+		_stamp_tray.reset_commit()
 
 
 func configure_stamp_lock(is_locked: bool) -> void:
@@ -222,7 +231,37 @@ func configure_stamp_lock(is_locked: bool) -> void:
 	_stamp_tray.set_stamp_locked(is_locked)
 
 
+## Shows the ticket face inside open passenger documents (tutorial stamp step).
+func show_ticket_view() -> bool:
+	if _data == null or _view_mode != ViewMode.PASSENGER_DOCUMENTS:
+		return false
+	return _documents.show_ticket()
+
+
+## Locks or unlocks tutorial-only Q/X restrictions. Close-button state follows.
+## one_way opens a single ID-to-ticket flip while the flip lock stays engaged.
+func set_tutorial_locks(flip_locked: bool, close_locked: bool, one_way: bool = false) -> void:
+	tutorial_lock_flip = flip_locked
+	tutorial_lock_close = close_locked
+	tutorial_flip_one_way = one_way and flip_locked
+	_apply_tutorial_lock_chrome()
+
+
+## Hides the close button and flip hints while tutorial locks are engaged.
+func _apply_tutorial_lock_chrome() -> void:
+	var chrome_hidden := tutorial_lock_flip or tutorial_lock_close
+	if is_instance_valid(_passenger_close_button):
+		_passenger_close_button.visible = not chrome_hidden
+		_passenger_close_button.disabled = tutorial_lock_close
+	if _documents != null and _documents.has_method(&"set_instruction_visible"):
+		_documents.set_instruction_visible(not chrome_hidden)
+
+
 func request_close() -> void:
+	tutorial_lock_flip = false
+	tutorial_lock_close = false
+	tutorial_flip_one_way = false
+	_apply_tutorial_lock_chrome()
 	if not visible or _closing:
 		return
 	_closing = true
@@ -263,16 +302,28 @@ func _unhandled_input(event: InputEvent) -> void:
 	if key_event != null and key_event.echo:
 		return
 	if event.is_action_pressed(&"interact"):
+		if tutorial_lock_close:
+			get_viewport().set_input_as_handled()
+			return
 		request_close()
 		get_viewport().set_input_as_handled()
 		return
 	if _view_mode != ViewMode.PASSENGER_DOCUMENTS or _data == null:
+		return
+	# Tutorial flip lock: hard block, unless a single one-way flip is armed.
+	# The follow-up signal fires when the flip animation finishes (see below).
+	if tutorial_lock_flip and not tutorial_flip_one_way:
 		return
 	if event.is_action_pressed(&"switch_document") and _documents.toggle_document():
 		get_viewport().set_input_as_handled()
 
 
 func _on_ticket_visibility_changed(is_ticket_visible: bool) -> void:
+	# Fires when the flip animation lands. This is the tutorial's "flip done" hook:
+	# the immediate post-toggle state still reports the animation as playing.
+	if is_ticket_visible and (tutorial_lock_flip or tutorial_flip_one_way):
+		tutorial_flip_one_way = false
+		ticket_face_shown.emit()
 	# PassengerDocuments enters its reset state before this parent's @onready
 	# references are assigned during scene construction.
 	if not is_instance_valid(_stamp_tray):
@@ -293,7 +344,9 @@ func _on_stamp_dropped(station_name: String, ticket_position: Vector2) -> void:
 	station_stamp_applied.emit(_data.passenger_name, station_name, ticket_position)
 	# The main game handles authoritative validation synchronously. Only reveal
 	# ink after it has accepted and persisted this exact station choice.
-	if _data.stamped_station == station_name:
+	var accepted: bool = _data.stamped_station == station_name
+	_stamp_tray.resolve_current_drop(accepted)
+	if accepted:
 		_documents.set_station_stamp(station_name, ticket_position, true)
 
 

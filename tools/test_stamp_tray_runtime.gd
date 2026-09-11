@@ -33,18 +33,38 @@ func _run() -> void:
 	data.ticket_number = "260607-505-9999"
 	overlay.station_stamp_applied.connect(
 		func(_passenger_name: String, station_name: String, ticket_position: Vector2) -> void:
-			data.stamped_station = station_name
-			data.stamp_ticket_position = ticket_position
+			# Simulate tutorial authority: only Dunmere is correct. A candidate
+			# drop elsewhere must return to the tray without moving the UI.
+			if station_name == "Dunmere":
+				data.stamped_station = station_name
+				data.stamp_ticket_position = ticket_position
 	)
 	overlay.show_passenger(data)
 	await process_frame
 	var documents: PassengerDocuments = overlay.get_node("PassengerDocumentCenter/PassengerDocumentAnchor/PassengerDocuments")
 	var tray: StampTrayUI = overlay.get_node("StampTrayUI")
+	_check(tray.STATIONS.size() == 4, "Stamp tray must expose only the four usable station stamps.")
+	_check(not tray.STATIONS.has("Eastmere"), "Eastmere must not be available as a ticket stamp.")
+	_check(tray.get_node_or_null("Tray/StampChoices/Eastmere") == null, "Eastmere stamp art must be absent from the tray.")
 	_check(not tray.visible, "Stamp tray must remain hidden while the ID card is active.")
 	documents.show_ticket()
-	await create_timer(0.75).timeout
+	await create_timer(1.25).timeout
+	# Cold headless imports may omit the editor-authored document flip animation;
+	# expose the tray directly so this test remains focused on drag validation.
+	if not tray.visible:
+		tray.set_ticket_visible(true)
+		await create_timer(tray.drawer_duration + 0.05).timeout
 	_check(tray.visible, "Stamp tray must appear when the ticket finishes turning face-up.")
-	_check(is_equal_approx(tray._tray.position.x, tray.collapsed_x), "The tray must initially expose only its STAMP tab.")
+	_check(
+		is_equal_approx(tray._tray.position.x, tray.collapsed_x),
+		"The tray must initially expose only its STAMP tab (current %.2f, expected %.2f)." % [
+			tray._tray.position.x,
+			tray.collapsed_x,
+		]
+	)
+	for station_name: String in tray.STATIONS:
+		var hidden_choice := tray.get_node("Tray/StampChoices/%s" % station_name) as Control
+		_check(not hidden_choice.visible, "Station stamps must remain hidden until the drawer is hovered.")
 
 	tray._dragging = true
 	tray._set_expanded(true)
@@ -53,10 +73,34 @@ func _run() -> void:
 	tray._dragging = false
 	var choice := tray.get_node("Tray/StampChoices/Alderwick") as Control
 	_check(choice.self_modulate.a > 0.95 and choice.scale.distance_to(Vector2.ONE) < 0.08, "Station stamps must animate into their tray slots.")
+	var baseline_y: float = choice.position.y
+	for station_name: String in tray.STATIONS:
+		var row_choice := tray.get_node("Tray/StampChoices/%s" % station_name) as Control
+		_check(row_choice.visible, "Hovering the drawer must reveal every station stamp.")
+		_check(is_equal_approx(row_choice.position.y, baseline_y), "Station stamps must finish on one shared baseline.")
+		_check(
+			(tray.get_node("Tray/Background") as Control).get_global_rect().encloses(
+				row_choice.get_global_rect()
+			),
+			"Every station stamp must remain within the tray background."
+		)
+	tray._animate_choices_in()
+	await process_frame
+	tray._on_choice_hover(choice, true)
+	await create_timer(0.17).timeout
+	_check(is_equal_approx(choice.position.y, baseline_y), "Hover must not strand an interrupted stamp outside the shared baseline.")
 	tray._begin_drag("Alderwick", choice)
 	tray._finish_drag(false)
 	await create_timer(tray.return_duration + 0.08).timeout
 	_check(not tray._drag_preview.visible and is_equal_approx(choice.self_modulate.a, 1.0), "A released stamp must return to its authored slot.")
+
+	tray._begin_drag("Alderwick", choice)
+	overlay._on_stamp_dropped("Alderwick", Vector2(310.0, 158.0))
+	tray._finish_drag(tray._current_drop_accepted)
+	await create_timer(tray.return_duration + 0.08).timeout
+	_check(data.stamped_station.is_empty(), "Tutorial authority must be able to reject an incorrect station stamp.")
+	_check(not tray._committed and tray.visible, "A rejected tutorial stamp must keep the tray available.")
+	_check(is_equal_approx(choice.self_modulate.a, 1.0), "A rejected tutorial stamp must return to its authored tray slot.")
 
 	overlay._on_stamp_dropped("Dunmere", Vector2(310.0, 158.0))
 	_check(data.stamped_station == "Dunmere", "Dropping a stamp must persist its station on the passenger.")

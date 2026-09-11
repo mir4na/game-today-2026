@@ -32,8 +32,12 @@ signal continue_requested
 @export_range(0.2, 3.0, 0.05) var transition_fog_rise_duration: float = 1.15
 @export_range(0.0, 1.5, 0.05) var transition_fog_hold_seconds: float = 0.2
 @export_range(0.2, 2.0, 0.05) var transition_fog_release_duration: float = 0.8
+@export_category("Gate Audio")
+@export_range(0.4, 1.2, 0.01) var gate_open_pitch: float = 0.68
+@export_range(0.4, 1.2, 0.01) var gate_close_pitch: float = 0.56
 @export_category("Button Feedback")
-@export_range(1.0, 1.2, 0.01) var item_button_hover_scale: float = 1.06
+@export_range(1.0, 1.2, 0.01) var item_button_hover_scale: float = 1.1
+@export_range(0.0, 32.0, 1.0) var item_button_hover_lift: float = 14.0
 @export_range(0.05, 0.35, 0.01) var item_button_hover_duration: float = 0.14
 @export_category("Standalone Preview")
 @export_range(0, 999, 1) var preview_blessings: int = 500
@@ -41,10 +45,14 @@ signal continue_requested
 var _snapshot: Dictionary = {}
 var _continue_sent: bool = false
 var _input_locked: bool = false
+var _purchases_enabled: bool = true
 var _motion_time: float = 0.0
 var _market_tween: Tween
 var _highlight_tweens: Dictionary = {}
 var _item_float_tweens: Dictionary = {}
+var _item_highlight_states: Array[bool] = [false, false, false]
+var _item_hover_lifts := PackedFloat32Array([0.0, 0.0, 0.0])
+var _hovered_item_index: int = -1
 var _entrance_positions: Dictionary = {}
 var _light_scales: Dictionary = {}
 var _highlight_scales: Dictionary = {}
@@ -123,7 +131,10 @@ func _process(delta: float) -> void:
 	for index: int in range(_item_floats.size()):
 		var phase: float = float(index) * 1.85
 		var item_float: Node2D = _item_floats[index]
-		item_float.position.y = sin(_motion_time * shelf_float_speed + phase) * shelf_float_height
+		item_float.position.y = (
+			sin(_motion_time * shelf_float_speed + phase) * shelf_float_height
+			- _item_hover_lifts[index]
+		)
 		item_float.rotation = deg_to_rad(sin(_motion_time * shelf_float_speed * 0.72 + phase) * shelf_sway_degrees)
 		var direction: float = -1.0 if index == 1 else 1.0
 		var speed_variation: float = 1.0 + float(index) * 0.12
@@ -146,11 +157,14 @@ func open_market(snapshot: Dictionary, _day_award: Dictionary) -> void:
 	_continue_sent = false
 	_input_locked = true
 	_motion_time = 0.0
+	_hovered_item_index = -1
 	_reset_gate()
 	show()
 	set_snapshot(snapshot)
 	for index: int in range(_item_highlights.size()):
 		var highlight: Sprite2D = _item_highlights[index]
+		_item_highlight_states[index] = false
+		_item_hover_lifts[index] = 0.0
 		highlight.modulate.a = 0.0
 		highlight.scale = (_highlight_scales[highlight] as Vector2) * 0.88
 		_item_floats[index].scale = Vector2.ONE
@@ -162,9 +176,9 @@ func _open_standalone_preview() -> void:
 		{
 			"blessings": preview_blessings,
 			"veil_notes": 0,
-			"radar_charges": 2,
+			"radar_charges": 0,
 			"radar_max_charges": 3,
-			"swift_charges": 1,
+			"swift_charges": 0,
 			"swift_max_charges": 5,
 			"veil_note_cost": 200,
 			"radar_charge_cost": 150,
@@ -193,14 +207,20 @@ func set_snapshot(snapshot: Dictionary) -> void:
 	_item_info_labels[0].text = veil_note_stock_template % [veil_note_count, veil_note_cost]
 	_item_info_labels[1].text = radar_stock_template % [radar_count, radar_maximum, radar_cost]
 	_item_info_labels[2].text = swift_stock_template % [swift_count, swift_maximum, swift_cost]
-	_item_buttons[0].disabled = _input_locked or veil_note_count >= 1 or blessings < veil_note_cost
-	_item_buttons[1].disabled = _input_locked or radar_count >= radar_maximum or blessings < radar_cost
-	_item_buttons[2].disabled = _input_locked or swift_count >= swift_maximum or blessings < swift_cost
+	_item_buttons[0].disabled = not _purchases_enabled or _input_locked or veil_note_count >= 1 or blessings < veil_note_cost
+	_item_buttons[1].disabled = not _purchases_enabled or _input_locked or radar_count >= radar_maximum or blessings < radar_cost
+	_item_buttons[2].disabled = not _purchases_enabled or _input_locked or swift_count >= swift_maximum or blessings < swift_cost
 	_continue_button.disabled = _input_locked
 	for index: int in range(_item_buttons.size()):
 		_item_entrances[index].self_modulate = Color(0.62, 0.62, 0.68, 1.0) if _item_buttons[index].disabled else Color.WHITE
 		if _item_buttons[index].disabled:
 			_set_item_highlight(index, false)
+
+
+func set_purchases_enabled(value: bool) -> void:
+	_purchases_enabled = value
+	if not _snapshot.is_empty():
+		set_snapshot(_snapshot)
 
 
 func show_purchase_result(result: Dictionary, snapshot: Dictionary) -> void:
@@ -215,10 +235,10 @@ func show_purchase_result(result: Dictionary, snapshot: Dictionary) -> void:
 func _connect_item_feedback() -> void:
 	for index: int in range(_item_buttons.size()):
 		var button: Button = _item_buttons[index]
-		button.mouse_entered.connect(_set_item_highlight.bind(index, true))
-		button.mouse_exited.connect(_refresh_item_highlight.bind(index))
-		button.focus_entered.connect(_set_item_highlight.bind(index, true))
-		button.focus_exited.connect(_refresh_item_highlight.bind(index))
+		button.mouse_entered.connect(_on_item_hover_changed.bind(index, true))
+		button.mouse_exited.connect(_on_item_hover_changed.bind(index, false))
+		button.focus_entered.connect(_refresh_item_highlights)
+		button.focus_exited.connect(_refresh_item_highlights)
 
 
 func _focus_first_available_action() -> void:
@@ -229,20 +249,30 @@ func _focus_first_available_action() -> void:
 	_continue_button.grab_focus()
 
 
-func _refresh_item_highlight(index: int) -> void:
-	call_deferred(&"_apply_item_highlight_state", index)
+func _on_item_hover_changed(index: int, hovered: bool) -> void:
+	if hovered:
+		_hovered_item_index = index
+	elif _hovered_item_index == index:
+		_hovered_item_index = -1
+	_refresh_item_highlights()
 
 
-func _apply_item_highlight_state(index: int) -> void:
-	if index < 0 or index >= _item_buttons.size():
-		return
+func _refresh_item_highlights() -> void:
+	call_deferred(&"_apply_item_highlight_states")
+
+
+func _apply_item_highlight_states() -> void:
 	# A deferred focus refresh can outlive the market when a transition or retry
 	# immediately replaces the gameplay scene.
 	if not is_inside_tree() or get_viewport() == null:
 		return
-	var button: Button = _item_buttons[index]
-	var hovered: bool = button.get_global_rect().has_point(get_viewport().get_mouse_position())
-	_set_item_highlight(index, not button.disabled and (button.has_focus() or hovered))
+	for index: int in range(_item_buttons.size()):
+		var button: Button = _item_buttons[index]
+		var active: bool = not button.disabled and (
+			index == _hovered_item_index
+			or (_hovered_item_index < 0 and button.has_focus())
+		)
+		_set_item_highlight(index, active)
 
 
 func _set_item_highlight(index: int, active: bool) -> void:
@@ -250,6 +280,9 @@ func _set_item_highlight(index: int, active: bool) -> void:
 		return
 	if _item_buttons[index].disabled:
 		active = false
+	if _item_highlight_states[index] == active:
+		return
+	_item_highlight_states[index] = active
 	var highlight: Sprite2D = _item_highlights[index]
 	var existing := _highlight_tweens.get(highlight) as Tween
 	if existing and existing.is_valid():
@@ -257,9 +290,9 @@ func _set_item_highlight(index: int, active: bool) -> void:
 	var rest_scale: Vector2 = _highlight_scales.get(highlight, highlight.scale)
 	var tween := create_tween().set_parallel(true)
 	_highlight_tweens[highlight] = tween
-	tween.tween_property(highlight, ^"modulate:a", 0.82 if active else 0.0, 0.18).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tween.tween_property(highlight, ^"scale", rest_scale * (1.06 if active else 0.88), 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	_animate_item_hover(index, active and _item_buttons[index].is_hovered())
+	tween.tween_property(highlight, ^"modulate:a", 1.0 if active else 0.0, 0.18).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(highlight, ^"scale", rest_scale * (1.12 if active else 0.88), 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_animate_item_hover(index, active)
 
 
 func _animate_item_hover(index: int, active: bool) -> void:
@@ -267,7 +300,7 @@ func _animate_item_hover(index: int, active: bool) -> void:
 	var existing := _item_float_tweens.get(item_float) as Tween
 	if is_instance_valid(existing):
 		existing.kill()
-	var tween := create_tween()
+	var tween := create_tween().set_parallel(true)
 	_item_float_tweens[item_float] = tween
 	tween.tween_property(
 		item_float,
@@ -275,6 +308,17 @@ func _animate_item_hover(index: int, active: bool) -> void:
 		Vector2.ONE * (item_button_hover_scale if active else 1.0),
 		item_button_hover_duration
 	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_method(
+		_set_item_hover_lift.bind(index),
+		_item_hover_lifts[index],
+		item_button_hover_lift if active else 0.0,
+		item_button_hover_duration
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+
+func _set_item_hover_lift(value: float, index: int) -> void:
+	if index >= 0 and index < _item_hover_lifts.size():
+		_item_hover_lifts[index] = value
 
 
 func _pulse_item(index: int) -> void:
@@ -284,9 +328,7 @@ func _pulse_item(index: int) -> void:
 	var existing := _item_float_tweens.get(item_float) as Tween
 	if is_instance_valid(existing):
 		existing.kill()
-	var resting_scale: Vector2 = Vector2.ONE * (
-		item_button_hover_scale if _item_buttons[index].is_hovered() else 1.0
-	)
+	var resting_scale: Vector2 = Vector2.ONE * (item_button_hover_scale if _item_highlight_states[index] else 1.0)
 	var tween := create_tween()
 	_item_float_tweens[item_float] = tween
 	tween.tween_property(item_float, ^"scale", Vector2.ONE * 1.1, 0.09).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
@@ -375,7 +417,7 @@ func _raise_entrance_fog() -> void:
 
 
 func _open_gate_and_release_entrance_fog() -> void:
-	GameSFX.play(&"mechanical_door", -7.0, 1.04, 0.02, 0.3)
+	GameSFX.play(&"mechanical_door", -7.0, gate_open_pitch, 0.015, 0.3)
 	_market_tween = create_tween().set_parallel(true)
 	_market_tween.tween_property(_left_door, ^"position", _left_door_open_position, gate_open_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	_market_tween.tween_property(_right_door, ^"position", _right_door_open_position, gate_open_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
@@ -426,7 +468,7 @@ func _play_exit_animation() -> void:
 
 
 func _close_gate() -> void:
-	GameSFX.play(&"mechanical_door", -6.0, 0.9, 0.02, 0.3)
+	GameSFX.play(&"mechanical_door", -6.0, gate_close_pitch, 0.015, 0.3)
 	_market_tween = create_tween().set_parallel(true)
 	_market_tween.tween_property(_left_door, ^"position:x", LEFT_DOOR_CLOSED_X, gate_close_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN_OUT)
 	_market_tween.tween_property(_right_door, ^"position:x", RIGHT_DOOR_CLOSED_X, gate_close_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN_OUT)

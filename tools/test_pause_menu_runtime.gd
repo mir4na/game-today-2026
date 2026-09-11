@@ -23,17 +23,21 @@ func _run() -> void:
 	assert(option_grid.get_child_count() == 8, "Pause menu must expose exactly eight options.")
 	var resume_button := pause_menu.get_node("%ResumeButton") as Button
 	assert(resume_button.visible and resume_button.text == "Resume", "The in-game pause menu must show a Resume text button.")
+	var restart_button := pause_menu.get_node("%RestartButton") as Button
+	var main_menu_button := pause_menu.get_node("%MainMenuButton") as Button
+	for action_button: Button in [resume_button, restart_button, main_menu_button]:
+		assert(action_button.custom_minimum_size.y >= 52.0, "Pause actions must use the larger click target.")
+		assert(action_button.get_theme_font_size(&"font_size") == 22, "Pause actions must use the larger matching text size.")
+		assert(action_button.get_theme_stylebox(&"normal") is StyleBoxEmpty, "Pause actions must remain text-only without button artwork.")
 	var master_slider := pause_menu.get_node("Ticket/OptionGrid/MasterVolumeOption/Content/VolumeSlider") as Control
 	assert(master_slider.visible, "Audio options must use the ticket slider control.")
-	pause_menu.set_night_mode(true)
 	var artwork := pause_menu.get_node("Ticket/TicketArtwork") as TextureRect
-	var artwork_material := artwork.material as ShaderMaterial
-	assert(is_equal_approx(float(artwork_material.get_shader_parameter(&"night_strength")), 1.0), "Night service must apply the night ticket palette.")
+	assert(artwork.material == null, "Pause artwork must always render with its default texture colors.")
+	var options_title := pause_menu.get_node("Ticket/OptionsTitle") as TextureRect
+	assert(options_title.material == null, "Pause title must not use a time-dependent palette shader.")
 	var display_option := pause_menu.get_node("Ticket/OptionGrid/DisplayModeOption") as PauseOptionSelector
 	var display_label := display_option.get_node("Content/OptionLabel") as Label
-	assert(display_label.get_theme_color(&"font_color").is_equal_approx(Color("f4e49e")), "Night service must recolor option labels.")
-	pause_menu.set_night_mode(false)
-	assert(display_label.get_theme_color(&"font_color").is_equal_approx(Color("353540")), "Day service must restore the exact original asset ink color.")
+	assert(display_label.get_theme_color(&"font_color").is_equal_approx(Color("353540")), "Pause labels must always retain the default ink color.")
 	var resume_events: Array[bool] = [false]
 	pause_menu.resume_requested.connect(func() -> void: resume_events[0] = true)
 	resume_button.pressed.emit()
@@ -53,7 +57,9 @@ func _run() -> void:
 	(menu.get_node("%SettingsButton") as Button).pressed.emit()
 	await process_frame
 	var menu_settings := menu.get_node("%SettingsUI") as PauseUI
+	var menu_settings_layer := menu.get_node("SettingsLayer") as CanvasLayer
 	assert(menu_settings.visible, "Main menu Settings must open the shared in-game settings UI.")
+	assert(menu_settings_layer.layer == 300, "Main-menu PauseUI must render on the frontmost UI layer.")
 	assert(menu_settings.get_node("Ticket/OptionGrid").get_child_count() == 8, "Main menu must expose the same eight options as in-game.")
 	assert(not (menu_settings.get_node("%ResumeButton") as Button).visible, "Resume must stay hidden in main-menu settings mode.")
 	assert(not (menu_settings.get_node("%RestartButton") as Button).visible, "Restart shift must stay hidden in main-menu settings mode.")
@@ -65,9 +71,11 @@ func _run() -> void:
 	var hud_layer := gameplay.get_node("HUD") as CanvasLayer
 	var modal_layer := gameplay.get_node("ModalLayer") as CanvasLayer
 	var pause_layer := gameplay.get_node("PauseLayer") as CanvasLayer
+	var loading_layer := gameplay.get_node("LoadingLayer") as CanvasLayer
 	assert(bloom_layer.layer < hud_layer.layer, "Gameplay bloom must render below the HUD.")
 	assert(bloom_layer.layer < modal_layer.layer, "Gameplay bloom must render below all modal UI.")
 	assert(bloom_layer.layer < pause_layer.layer, "Gameplay bloom must render below PauseUI.")
+	assert(modal_layer.layer < pause_layer.layer and loading_layer.layer < pause_layer.layer, "PauseUI must remain the frontmost gameplay layer.")
 	gameplay.free()
 	print("Pause menu runtime test passed.")
 	quit()

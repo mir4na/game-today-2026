@@ -17,6 +17,7 @@ var _motion_strength: float = 0.0
 var _scenery_started: bool = false
 var _station_hidden: bool = false
 var _world_time_scale: float = 1.0
+var _cinematic_speed_multiplier: float = 1.0
 var _rng := RandomNumberGenerator.new()
 
 @onready var _travel_scenery: Node2D = %TravelScenery
@@ -78,8 +79,28 @@ func set_world_time_scale(value: float) -> void:
 	_apply_animation_speed()
 
 
+func set_cinematic_speed_multiplier(value: float) -> void:
+	var previous_multiplier: float = _cinematic_speed_multiplier
+	_cinematic_speed_multiplier = clampf(value, 1.0, 6.0)
+	_rescale_running_timer(
+		_cable_timer,
+		previous_multiplier,
+		_cinematic_speed_multiplier
+	)
+	_rescale_running_timer(
+		_pole_timer,
+		previous_multiplier,
+		_cinematic_speed_multiplier
+	)
+	_apply_animation_speed()
+
+
 func _apply_animation_speed() -> void:
-	var effective_speed: float = _motion_strength * _world_time_scale
+	var effective_speed: float = (
+		_motion_strength
+		* _world_time_scale
+		* _cinematic_speed_multiplier
+	)
 	_cable_animation.speed_scale = effective_speed
 	_pole_animation.speed_scale = effective_speed
 
@@ -111,14 +132,20 @@ func _schedule_next_cable() -> void:
 		return
 	var minimum_interval: float = minf(minimum_cable_interval, maximum_cable_interval)
 	var maximum_interval: float = maxf(minimum_cable_interval, maximum_cable_interval)
-	_cable_timer.start(_rng.randf_range(minimum_interval, maximum_interval) / _world_time_scale)
+	_cable_timer.start(
+		_rng.randf_range(minimum_interval, maximum_interval)
+		/ (_world_time_scale * _cinematic_speed_multiplier)
+	)
 
 func _schedule_next_pole() -> void:
 	if not _traveling:
 		return
 	var minimum_interval: float = minf(minimum_pole_interval, maximum_pole_interval)
 	var maximum_interval: float = maxf(minimum_pole_interval, maximum_pole_interval)
-	_pole_timer.start(_rng.randf_range(minimum_interval, maximum_interval) / _world_time_scale)
+	_pole_timer.start(
+		_rng.randf_range(minimum_interval, maximum_interval)
+		/ (_world_time_scale * _cinematic_speed_multiplier)
+	)
 
 func _on_pole_timer_timeout() -> void:
 	if not _traveling:

@@ -11,7 +11,6 @@ const RESULT_TEXTURES := {
 	"Brambleford": preload("res://assets/ui/Stamp/StampResult_B.png"),
 	"Cinderfield": preload("res://assets/ui/Stamp/StampResult_C.png"),
 	"Dunmere": preload("res://assets/ui/Stamp/StampResult_d.png"),
-	"Eastmere": preload("res://assets/ui/Stamp/StampResult_E.png"),
 }
 
 @export_category("Service Copy")

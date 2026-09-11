@@ -1,0 +1,1250 @@
+[gd_scene format=3 uid="uid://ct1yu561kv7fv"]
+
+[ext_resource type="Script" uid="uid://bv75kqrtuc6fu" path="res://scripts/tutorial/tutorial_director.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://bw1nxmpl5x4yr" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" uid="uid://bc6iifil8i167" path="res://assets/nightmarket/Angel.png" id="3_angel"]
+[ext_resource type="Texture2D" uid="uid://cm00awa5lejd5" path="res://assets/ui/dialogue_bubble.png" id="4_dialogue_bubble"]
+[ext_resource type="Texture2D" uid="uid://cnxjqwj7xqhw8" path="res://assets/ui/dialogue_pointer.png" id="5_dialogue_pointer"]
+[ext_resource type="Shader" uid="uid://dfsxbbaijvcfu" path="res://shaders/tutorial_spotlight.gdshader" id="6_spotlight"]
+[ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="7_w7vd0"]
+[ext_resource type="Resource" uid="uid://04q085qiaa4u" path="res://data/passengers/npc_12_profile.tres" id="8_tutorial_passenger"]
+[ext_resource type="Script" uid="uid://dq6rqsjqbjoli" path="res://scripts/ui/intro_hold_ring.gd" id="9_skip_ring"]
+[ext_resource type="PackedScene" uid="uid://j5aa62op4yf5" path="res://scenes/ui/loading_screen_ui.tscn" id="10_loading"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_spotlight"]
+shader = ExtResource("6_spotlight")
+shader_parameter/dim_color = Color(0, 0, 0, 1)
+shader_parameter/dim_alpha = 0.62
+shader_parameter/spotlight_center = Vector2(0.5, 0.5)
+shader_parameter/spotlight_radius = 0.125
+shader_parameter/spotlight_softness = 0.115
+shader_parameter/viewport_aspect = 1.7778
+shader_parameter/inner_alpha = 0.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_portrait"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.0352941, 0.0431373, 0.054902, 0.94)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.85, 0.69, 0.38, 1)
+corner_radius_top_left = 96
+corner_radius_top_right = 96
+corner_radius_bottom_right = 96
+corner_radius_bottom_left = 96
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_continue_text"]
+
+[node name="TutorialDirector" type="Control" unique_id=1065008962]
+process_mode = 3
+editor_description = "Scene-based tutorial overlay. Move the named Marker2D nodes under DialogueMarkers to place each tutorial beat; edit DialogueDock for the shared Angel portrait and bubble layout."
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+intro_dialogue_pages = PackedStringArray("Hello. I am the Inspector assigned to this train.", "You died before reaching your job interview. The railway is offering you a second chance.", "You will work here as an intern conductor. During the day, inspect passengers and decide who should leave at each station.", "At night, guide the souls who remain to the station where they belong. Do your work well, and this second chance is yours to keep.")
+exam_passenger_names = PackedStringArray("Abby", "Reff", "Ratta", "Denta", "Mecca")
+exam_anomaly_names = PackedStringArray("Abby", "Mecca")
+night_statement_transfer_wait_seconds = 1.6
+tutorial_passenger_profile = ExtResource("8_tutorial_passenger")
+anomaly_intro_dialogue_pages = PackedStringArray("Not every passenger on this train is alive. Some of them died before they boarded, yet here they stand, riding alongside the living.", "Your job is not just to stamp tickets. Identify anyone who does not belong. If something feels wrong, such as the shadow, the face, or the date, do not stamp them. Keep them aboard for Night Service.")
+
+[node name="Shade" type="ColorRect" parent="." unique_id=1115400475]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_spotlight")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ArrowLabel" type="Label" parent="." unique_id=1793955105]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -42.0
+offset_top = -180.0
+offset_right = 42.0
+offset_bottom = -90.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(42, 45)
+theme_override_colors/font_color = Color(1, 0.81, 0.27, 1)
+theme_override_font_sizes/font_size = 72
+text = "↓"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="WorldPointerSettings" type="Node2D" parent="." unique_id=204072375]
+editor_description = "Scene-authored offsets for pointers that track world objects. Move each child marker to tune its pointer relative to the target."
+
+[node name="PassengerOffset" type="Marker2D" parent="WorldPointerSettings" unique_id=265080477]
+editor_description = "Offset of the inspect pointer from NPC 12's dialogue anchor. Move this marker to reposition the pointer without code changes."
+position = Vector2(0, -42)
+
+[node name="SkipPrompt" type="MarginContainer" parent="." unique_id=1706201256]
+unique_name_in_owner = true
+visible = false
+z_index = 90
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -340.0
+offset_top = -72.0
+offset_right = -24.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_default_cursor_shape = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="SkipRow" type="HBoxContainer" parent="SkipPrompt" unique_id=1005826790]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SkipLabel" type="Label" parent="SkipPrompt/SkipRow" unique_id=1269106639]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.93, 0.94, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 18
+text = "Hold Esc or click to skip"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="SkipHoldRing" type="Control" parent="SkipPrompt/SkipRow" unique_id=1274597278]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("9_skip_ring")
+
+[node name="DialogueMarkers" type="Node2D" parent="." unique_id=1900415001]
+unique_name_in_owner = true
+editor_description = "One screen-space Marker2D per tutorial beat. Move these markers in the 2D editor; their positions are used directly at runtime."
+
+[node name="Default" type="Marker2D" parent="DialogueMarkers" unique_id=1900415002]
+editor_description = "Fallback dialogue origin. Move this marker to reposition any tutorial beat without its own valid marker."
+position = Vector2(82, 482)
+
+[node name="Intro" type="Marker2D" parent="DialogueMarkers" unique_id=1900415003]
+editor_description = "Angel briefing dialogue origin."
+position = Vector2(183, 99)
+
+[node name="MovementIntro" type="Marker2D" parent="DialogueMarkers" unique_id=2026768651]
+editor_description = "Short briefing before movement controls are enabled."
+position = Vector2(82, 34)
+
+[node name="Movement" type="Marker2D" parent="DialogueMarkers" unique_id=1900415004]
+editor_description = "Movement test dialogue origin."
+position = Vector2(82, 34)
+
+[node name="MovementSuccess" type="Marker2D" parent="DialogueMarkers" unique_id=1187654686]
+editor_description = "Inspector response after the movement test succeeds."
+position = Vector2(82, 34)
+
+[node name="HudIntro" type="Marker2D" parent="DialogueMarkers" unique_id=1216933005]
+editor_description = "Briefing before the HUD begins its staged reveal."
+position = Vector2(82, 34)
+
+[node name="HudMinimap" type="Marker2D" parent="DialogueMarkers" unique_id=1900415005]
+editor_description = "Train minimap explanation dialogue origin."
+position = Vector2(82, 482)
+
+[node name="HudClock" type="Marker2D" parent="DialogueMarkers" unique_id=1751550895]
+editor_description = "Journey clock and daily Blessings explanation dialogue origin."
+position = Vector2(82, 34)
+
+[node name="Blessings" type="Marker2D" parent="DialogueMarkers" unique_id=77200140]
+editor_description = "Day Blessings target and scoring dialogue origin."
+position = Vector2(82, 256)
+
+[node name="PassengerIntro" type="Marker2D" parent="DialogueMarkers" unique_id=77200190]
+editor_description = "Dialogue shown while the camera remains focused on the newly spawned passenger."
+position = Vector2(124, 254)
+
+[node name="PassengerPrompt" type="Marker2D" parent="DialogueMarkers" unique_id=77200191]
+editor_description = "Final Inspector instruction before the dialogue closes and the player walks to inspect NPC 12."
+position = Vector2(124, 254)
+
+[node name="Passenger" type="Marker2D" parent="DialogueMarkers" unique_id=667448896]
+editor_description = "First passenger inspection dialogue origin."
+position = Vector2(124, 254)
+
+[node name="Documents" type="Marker2D" parent="DialogueMarkers" unique_id=1851035084]
+editor_description = "Document comparison and stamping dialogue origin."
+position = Vector2(82, 482)
+
+[node name="Anomaly" type="Marker2D" parent="DialogueMarkers" unique_id=77200141]
+editor_description = "Keep-suspicious-passengers-aboard dialogue origin."
+position = Vector2(82, 482)
+
+[node name="Guidebook" type="Marker2D" parent="DialogueMarkers" unique_id=1700776631]
+editor_description = "Guidebook prompt and guidebook explanation dialogue origin."
+position = Vector2(124, 254)
+
+[node name="Newspaper" type="Marker2D" parent="DialogueMarkers" unique_id=408737519]
+editor_description = "Newspaper prompt and death-evidence explanation dialogue origin."
+position = Vector2(56, 254)
+
+[node name="Signature" type="Marker2D" parent="DialogueMarkers" unique_id=1610237140]
+editor_description = "Service sign-off and signature tracing dialogue origin."
+position = Vector2(82, 34)
+
+[node name="DayService" type="Marker2D" parent="DialogueMarkers" unique_id=460043538]
+editor_description = "Dialogue origin after a successful daytime sign-off."
+position = Vector2(82, 482)
+
+[node name="NightMarket" type="Marker2D" parent="DialogueMarkers" unique_id=329119422]
+editor_description = "Night Market item explanation dialogue origin."
+position = Vector2(82, 482)
+
+[node name="NightWalk" type="Marker2D" parent="DialogueMarkers" unique_id=1740034723]
+editor_description = "Night Service soul inspection dialogue origin."
+position = Vector2(82, 482)
+
+[node name="NightRecord" type="Marker2D" parent="DialogueMarkers" unique_id=1424814201]
+editor_description = "Hidden statement and ledger explanation dialogue origin."
+position = Vector2(82, 34)
+
+[node name="NightLedger" type="Marker2D" parent="DialogueMarkers" unique_id=77200142]
+editor_description = "Night ledger checkpoint and button prompt dialogue origin."
+position = Vector2(82, 482)
+
+[node name="NightMap" type="Marker2D" parent="DialogueMarkers" unique_id=1372927012]
+editor_description = "Station path assignment dialogue origin."
+position = Vector2(82, 482)
+
+[node name="DialogueFrames" type="Control" parent="." unique_id=77200100]
+unique_name_in_owner = true
+editor_description = "Scene-authored bubble size and portrait/tail pose per tutorial beat. DialogueMarkers owns runtime position. Toggle a frame visible to edit its size and local composition."
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Intro" type="ColorRect" parent="DialogueFrames" unique_id=77200101]
+editor_description = "Angel briefing bubble rect."
+visible = false
+layout_mode = 0
+offset_left = 183.0
+offset_top = 99.0
+offset_right = 965.0
+offset_bottom = 309.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/Intro" unique_id=77200150]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = 818.0
+offset_top = 105.0
+offset_right = 1023.25
+offset_bottom = 300.25
+scale = Vector2(0.8, 0.8)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/Intro" unique_id=77200151]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 740.0
+offset_top = 175.0
+offset_right = 823.0
+offset_bottom = 245.99998
+rotation = 1.8027644
+scale = Vector2(-1, -1)
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MovementIntro" type="ColorRect" parent="DialogueFrames" unique_id=1969110130]
+editor_description = "Briefing shown before movement controls are enabled."
+visible = false
+layout_mode = 0
+offset_left = 309.0
+offset_top = 70.0
+offset_right = 985.0
+offset_bottom = 246.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/MovementIntro" unique_id=427477297]
+editor_description = "Inspector portrait placement for the movement briefing."
+layout_mode = 0
+offset_left = 736.0
+offset_top = 84.0
+offset_right = 910.0
+offset_bottom = 258.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/MovementIntro" unique_id=522985551]
+editor_description = "Bubble tail placement for the movement briefing."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 721.0
+offset_top = 145.00003
+offset_right = 804.0
+offset_bottom = 216.0
+rotation = 2.764781
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Movement" type="ColorRect" parent="DialogueFrames" unique_id=77200103]
+editor_description = "Movement test bubble rect."
+visible = false
+layout_mode = 0
+offset_left = 309.0
+offset_top = 70.0
+offset_right = 985.0
+offset_bottom = 246.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/Movement" unique_id=77200152]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = 736.0
+offset_top = 84.0
+offset_right = 910.0
+offset_bottom = 258.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/Movement" unique_id=77200153]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 721.0
+offset_top = 145.00003
+offset_right = 804.0
+offset_bottom = 216.0
+rotation = 2.764781
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MovementSuccess" type="ColorRect" parent="DialogueFrames" unique_id=1141282766]
+editor_description = "Inspector response after movement succeeds."
+visible = false
+layout_mode = 0
+offset_left = 309.0
+offset_top = 70.0
+offset_right = 985.0
+offset_bottom = 246.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/MovementSuccess" unique_id=1148000548]
+editor_description = "Inspector portrait placement for movement success."
+layout_mode = 0
+offset_left = 736.0
+offset_top = 84.0
+offset_right = 910.0
+offset_bottom = 258.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/MovementSuccess" unique_id=669468281]
+editor_description = "Bubble tail placement for movement success."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 721.0
+offset_top = 145.00003
+offset_right = 804.0
+offset_bottom = 216.0
+rotation = 2.764781
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HudIntro" type="ColorRect" parent="DialogueFrames" unique_id=1687778864]
+editor_description = "Briefing shown before the staged HUD reveal."
+visible = false
+layout_mode = 0
+offset_left = 309.0
+offset_top = 70.0
+offset_right = 985.0
+offset_bottom = 246.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/HudIntro" unique_id=1912118251]
+editor_description = "Inspector portrait placement before the HUD reveal."
+layout_mode = 0
+offset_left = 736.0
+offset_top = 84.0
+offset_right = 910.0
+offset_bottom = 258.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/HudIntro" unique_id=1966159096]
+editor_description = "Bubble tail placement before the HUD reveal."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 721.0
+offset_top = 145.00003
+offset_right = 804.0
+offset_bottom = 216.0
+rotation = 2.764781
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HudMinimap" type="ColorRect" parent="DialogueFrames" unique_id=77200105]
+editor_description = "Train minimap explanation bubble rect."
+visible = false
+layout_mode = 0
+offset_left = 243.0
+offset_top = 473.0
+offset_right = 1100.0
+offset_bottom = 654.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/HudMinimap" unique_id=77200154]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = 826.0
+offset_top = -194.0
+offset_right = 1000.0
+offset_bottom = -20.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/HudMinimap" unique_id=77200155]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 867.0
+offset_top = -11.0
+offset_right = 950.0
+offset_bottom = 60.0
+rotation = 1.8027644
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HudClock" type="ColorRect" parent="DialogueFrames" unique_id=77200107]
+editor_description = "Journey clock explanation bubble rect."
+visible = false
+layout_mode = 0
+offset_left = 274.0
+offset_top = 77.0
+offset_right = 1005.0
+offset_bottom = 261.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/HudClock" unique_id=77200156]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = 760.0
+offset_top = 129.0
+offset_right = 934.0
+offset_bottom = 303.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/HudClock" unique_id=77200157]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 755.0
+offset_top = 185.00003
+offset_right = 838.0
+offset_bottom = 256.00003
+rotation = 3.142325
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Blessings" type="ColorRect" parent="DialogueFrames" unique_id=77200143]
+editor_description = "Day Blessings target bubble rect."
+visible = false
+layout_mode = 0
+offset_left = 152.0
+offset_top = 457.0
+offset_right = 941.0
+offset_bottom = 645.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/Blessings" unique_id=77200180]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = 853.0
+offset_top = -37.0
+offset_right = 1027.0
+offset_bottom = 137.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/Blessings" unique_id=77200181]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 824.0
+offset_top = 34.0
+offset_right = 907.0
+offset_bottom = 105.0
+rotation = 2.3473086
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PassengerIntro" type="ColorRect" parent="DialogueFrames" unique_id=419334661]
+editor_description = "Passenger introduction bubble. Resize this frame and move its PortraitSpot/TailSpot to edit this beat."
+visible = false
+layout_mode = 0
+offset_left = 188.0
+offset_top = 43.0
+offset_right = 1081.0
+offset_bottom = 206.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/PassengerIntro" unique_id=1148609146]
+editor_description = "Inspector portrait placement during the passenger introduction."
+layout_mode = 0
+offset_left = 896.0
+offset_top = 136.0
+offset_right = 1070.0
+offset_bottom = 310.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/PassengerIntro" unique_id=711938981]
+editor_description = "Bubble tail placement during the passenger introduction."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 879.9999
+offset_top = 98.0
+offset_right = 962.9999
+offset_bottom = 169.0
+rotation = 1.2958314
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PassengerPrompt" type="ColorRect" parent="DialogueFrames" unique_id=518899162]
+editor_description = "Inspect instruction bubble. Resize this frame and move its PortraitSpot/TailSpot to edit this beat."
+visible = false
+layout_mode = 0
+offset_left = 188.0
+offset_top = 43.0
+offset_right = 1081.0
+offset_bottom = 206.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/PassengerPrompt" unique_id=271909430]
+editor_description = "Inspector portrait placement for the inspect instruction."
+layout_mode = 0
+offset_left = 896.0
+offset_top = 136.0
+offset_right = 1070.0
+offset_bottom = 310.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/PassengerPrompt" unique_id=315696849]
+editor_description = "Bubble tail placement for the inspect instruction."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 879.9999
+offset_top = 98.0
+offset_right = 962.9999
+offset_bottom = 169.0
+rotation = 1.2958314
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Passenger" type="ColorRect" parent="DialogueFrames" unique_id=77200109]
+editor_description = "First passenger inspection bubble rect."
+visible = false
+layout_mode = 0
+offset_left = 188.0
+offset_top = 43.0
+offset_right = 1081.0
+offset_bottom = 206.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/Passenger" unique_id=77200158]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = 896.0
+offset_top = 136.0
+offset_right = 1070.0
+offset_bottom = 310.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/Passenger" unique_id=77200159]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 879.9999
+offset_top = 98.0
+offset_right = 962.9999
+offset_bottom = 169.0
+rotation = 1.2958314
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Documents" type="ColorRect" parent="DialogueFrames" unique_id=77200111]
+editor_description = "Document comparison bubble rect."
+layout_mode = 0
+offset_left = 177.0
+offset_top = 562.0
+offset_right = 946.0
+offset_bottom = 695.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/Documents" unique_id=77200160]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = 770.0
+offset_top = -161.99998
+offset_right = 944.0
+offset_bottom = 12.000015
+scale = Vector2(0.8, 0.8)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/Documents" unique_id=77200161]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 759.0
+offset_top = 62.0
+offset_right = 842.0
+offset_bottom = 133.0
+rotation = 4.024108
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Anomaly" type="ColorRect" parent="DialogueFrames" unique_id=77200145]
+editor_description = "Keep-aboard bubble rect."
+visible = false
+layout_mode = 0
+offset_left = 196.0
+offset_top = 59.0
+offset_right = 1065.0
+offset_bottom = 233.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/Anomaly" unique_id=77200182]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = 888.0
+offset_top = 71.0
+offset_right = 1062.0
+offset_bottom = 245.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/Anomaly" unique_id=77200183]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 847.0
+offset_top = 22.99997
+offset_right = 930.0
+offset_bottom = 93.99997
+rotation = 0.82319385
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Guidebook" type="ColorRect" parent="DialogueFrames" unique_id=77200113]
+editor_description = "Guidebook prompt bubble rect."
+layout_mode = 0
+offset_left = 222.0
+offset_top = 562.0
+offset_right = 1057.0
+offset_bottom = 703.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/Guidebook" unique_id=77200162]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = 893.0
+offset_top = -88.99999
+offset_right = 1067.0
+offset_bottom = 85.00001
+scale = Vector2(0.8, 0.8)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/Guidebook" unique_id=77200163]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 779.9998
+offset_top = 15.999944
+offset_right = 862.9998
+offset_bottom = 86.99995
+rotation = -0.1454851
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Newspaper" type="ColorRect" parent="DialogueFrames" unique_id=77200115]
+editor_description = "Newspaper prompt bubble rect."
+visible = false
+layout_mode = 0
+offset_left = 194.0
+offset_top = 67.0
+offset_right = 1296.0
+offset_bottom = 279.0
+scale = Vector2(0.6, 0.6)
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/Newspaper" unique_id=77200164]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = -256.66663
+offset_top = -36.66667
+offset_right = -82.666626
+offset_bottom = 137.33333
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/Newspaper" unique_id=77200165]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = -53.333336
+offset_top = 58.33332
+offset_right = 29.666664
+offset_bottom = 129.33331
+rotation = -0.560899
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Signature" type="ColorRect" parent="DialogueFrames" unique_id=77200117]
+editor_description = "Service sign-off bubble rect."
+layout_mode = 0
+offset_left = 208.0
+offset_top = 34.0
+offset_right = 1088.0
+offset_bottom = 203.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/Signature" unique_id=77200166]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = 874.0
+offset_top = 181.0
+offset_right = 1048.0
+offset_bottom = 355.0
+scale = Vector2(0.8, 0.8)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/Signature" unique_id=77200167]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 867.99994
+offset_top = 107.0
+offset_right = 950.99994
+offset_bottom = 178.0
+rotation = 1.1102633
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DayService" type="ColorRect" parent="DialogueFrames" unique_id=77200119]
+editor_description = "Post sign-off bubble rect."
+visible = false
+layout_mode = 0
+offset_left = 82.0
+offset_top = 482.0
+offset_right = 1184.0
+offset_bottom = 694.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/DayService" unique_id=77200168]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = 992.0
+offset_top = -220.0
+offset_right = 1166.0
+offset_bottom = -46.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/DayService" unique_id=77200169]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 921.0
+offset_top = -133.0
+offset_right = 1004.0
+offset_bottom = -62.0
+rotation = 1.8027644
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NightMarket" type="ColorRect" parent="DialogueFrames" unique_id=77200121]
+editor_description = "Night Market bubble rect."
+layout_mode = 0
+offset_left = 27.0
+offset_top = 155.0
+offset_right = 496.0
+offset_bottom = 349.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/NightMarket" unique_id=77200170]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = 808.0
+offset_top = -442.0
+offset_right = 982.0
+offset_bottom = -268.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/NightMarket" unique_id=77200171]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 457.99988
+offset_top = 72.0
+offset_right = 540.9999
+offset_bottom = 143.0
+rotation = 4.118153
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NightWalk" type="ColorRect" parent="DialogueFrames" unique_id=77200123]
+editor_description = "Night Service bubble rect."
+layout_mode = 0
+offset_left = 258.0
+offset_top = 66.0
+offset_right = 1037.0
+offset_bottom = 204.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/NightWalk" unique_id=77200172]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = 819.0
+offset_top = -39.0
+offset_right = 993.0
+offset_bottom = 135.0
+scale = Vector2(0.8, 0.8)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/NightWalk" unique_id=77200173]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 789.0
+offset_top = -14.999985
+offset_right = 872.0
+offset_bottom = 56.000015
+rotation = 1.8027644
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NightRecord" type="ColorRect" parent="DialogueFrames" unique_id=77200125]
+editor_description = "Hidden statement bubble rect."
+visible = false
+layout_mode = 0
+offset_left = 330.0
+offset_top = 28.0
+offset_right = 1004.0
+offset_bottom = 159.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/NightRecord" unique_id=77200174]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = -227.0
+offset_top = 18.0
+offset_right = -53.0
+offset_bottom = 192.0
+scale = Vector2(0.9, 0.9)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/NightRecord" unique_id=77200175]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 17.0
+offset_top = 55.0
+offset_right = 100.0
+offset_bottom = 126.0
+rotation = 1.5259299
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NightLedger" type="ColorRect" parent="DialogueFrames" unique_id=77200147]
+editor_description = "Night ledger checkpoint and button prompt bubble rect."
+visible = false
+layout_mode = 0
+offset_left = 266.0
+offset_top = 41.0
+offset_right = 1011.0
+offset_bottom = 196.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/NightLedger" unique_id=77200184]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = 797.0
+offset_top = -19.0
+offset_right = 971.0
+offset_bottom = 155.0
+scale = Vector2(0.8, 0.8)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/NightLedger" unique_id=77200185]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 779.0
+offset_top = 58.999985
+offset_right = 862.0
+offset_bottom = 129.99998
+rotation = 2.107369
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NightMap" type="ColorRect" parent="DialogueFrames" unique_id=77200127]
+editor_description = "Station path bubble rect."
+visible = false
+layout_mode = 0
+offset_left = 523.0
+offset_top = 537.0
+offset_right = 1231.0
+offset_bottom = 700.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/NightMap" unique_id=77200176]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = 600.0
+offset_top = -187.0
+offset_right = 774.0
+offset_bottom = -13.0
+scale = Vector2(0.8, 0.8)
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/NightMap" unique_id=77200177]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 680.0
+offset_top = -40.0
+offset_right = 763.0
+offset_bottom = 31.0
+rotation = 1.4212126
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Default" type="ColorRect" parent="DialogueFrames" unique_id=77200129]
+editor_description = "Fallback bubble rect."
+visible = false
+layout_mode = 0
+offset_left = 82.0
+offset_top = 482.0
+offset_right = 1184.0
+offset_bottom = 694.0
+mouse_filter = 2
+color = Color(1, 0.81, 0.27, 0.1)
+
+[node name="PortraitSpot" type="Panel" parent="DialogueFrames/Default" unique_id=77200178]
+editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
+layout_mode = 0
+offset_left = 992.0
+offset_top = -220.0
+offset_right = 1166.0
+offset_bottom = -46.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="TailSpot" type="TextureRect" parent="DialogueFrames/Default" unique_id=77200179]
+editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
+modulate = Color(1, 1, 1, 0.65)
+layout_mode = 0
+offset_left = 921.0
+offset_top = -133.0
+offset_right = 1004.0
+offset_bottom = -62.0
+rotation = 1.8027644
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DialogueDock" type="Control" parent="." unique_id=1705916610]
+unique_name_in_owner = true
+editor_description = "Runtime dialogue presentation. Its position comes from DialogueMarkers; its size and portrait/tail pose come from the matching DialogueFrames guide."
+visible = false
+z_index = 10
+layout_mode = 1
+anchors_preset = 0
+offset_left = 82.0
+offset_top = 482.0
+offset_right = 1184.0
+offset_bottom = 694.0
+mouse_filter = 2
+
+[node name="AngelPortraitFrame" type="PanelContainer" parent="DialogueDock" unique_id=80737866]
+unique_name_in_owner = true
+editor_description = "Circular Angel portrait mask and border. Anchored to the bubble top-right so it follows every step frame."
+clip_children = 2
+custom_minimum_size = Vector2(174, 174)
+clip_contents = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -438.0
+offset_top = -180.0
+offset_right = -264.0
+offset_bottom = -6.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
+
+[node name="AngelPortraitClip" type="Control" parent="DialogueDock/AngelPortraitFrame" unique_id=1900415006]
+unique_name_in_owner = true
+editor_description = "Visible crop window for the Angel portrait. Keep this as the mask area; move AngelPortraitContent to reframe the artwork."
+clip_contents = true
+layout_mode = 2
+mouse_filter = 2
+
+[node name="AngelPortraitContent" type="Node2D" parent="DialogueDock/AngelPortraitFrame/AngelPortraitClip" unique_id=1900415007]
+unique_name_in_owner = true
+editor_description = "Scene-authored Angel portrait content. Move, scale, or rotate this Node2D to crop the Angel head without changing the frame. Keep it as Node2D: CanvasGroup breaks the rounded portrait clip at runtime."
+position = Vector2(87, 88)
+scale = Vector2(0.4, 0.4)
+
+[node name="AngelPortrait" type="Sprite2D" parent="DialogueDock/AngelPortraitFrame/AngelPortraitClip/AngelPortraitContent" unique_id=1274887331]
+unique_name_in_owner = true
+editor_description = "Angel portrait sprite. The parent AngelPortraitContent controls crop placement, matching the guidebook anomaly photo workflow."
+texture_filter = 1
+position = Vector2(-20, 80)
+scale = Vector2(0.7, 0.7)
+texture = ExtResource("3_angel")
+
+[node name="BubbleTail" type="TextureRect" parent="DialogueDock" unique_id=172333076]
+unique_name_in_owner = true
+editor_description = "Bubble tail pointing toward the Angel portrait. Anchored to the bubble top-right."
+visible = false
+z_index = -1
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.99994
+offset_top = 291.0
+offset_right = -137.99994
+offset_bottom = 362.0
+grow_horizontal = 0
+rotation = 1.8027644
+scale = Vector2(-0.9, -0.9)
+mouse_filter = 2
+texture = ExtResource("5_dialogue_pointer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Panel" type="NinePatchRect" parent="DialogueDock" unique_id=1354808889]
+unique_name_in_owner = true
+editor_description = "Dialogue bubble filling the active step frame. Resize the step frame, not this node; script does not force layout. Click-through so world input (stamp drag) works beneath the bubble; only ContinueButton stays clickable."
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_dialogue_bubble")
+patch_margin_left = 24
+patch_margin_top = 20
+patch_margin_right = 24
+patch_margin_bottom = 20
+
+[node name="Content" type="VBoxContainer" parent="DialogueDock/Panel" unique_id=1661021300]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = 22.0
+offset_right = -36.0
+offset_bottom = -22.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 7
+
+[node name="SpeakerLabel" type="Label" parent="DialogueDock/Panel/Content" unique_id=2101759467]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HeaderLabel"
+theme_override_colors/font_color = Color(1, 0.84, 0.54, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.72)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 3
+theme_override_fonts/font = ExtResource("7_w7vd0")
+theme_override_font_sizes/font_size = 42
+text = "Instructor"
+
+[node name="BodyLabel" type="Label" parent="DialogueDock/Panel/Content" unique_id=1573014772]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 21
+text = "Tutorial copy."
+autowrap_mode = 3
+
+[node name="HintLabel" type="Label" parent="DialogueDock/Panel/Content" unique_id=1653066343]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.76, 0.69, 0.62, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.58)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 16
+text = "Hint"
+autowrap_mode = 3
+
+[node name="ProgressLabel" type="Label" parent="DialogueDock/Panel/Content" unique_id=634065223]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.47, 1, 0.53, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.62)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 20
+text = "0.0 / 3.0 seconds"
+horizontal_alignment = 1
+
+[node name="ContinueRow" type="HBoxContainer" parent="DialogueDock/Panel/Content" unique_id=1900415008]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+alignment = 2
+
+[node name="ContinuePrefixLabel" type="Label" parent="DialogueDock/Panel/Content/ContinueRow" unique_id=1900415009]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.58)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 17
+text = "PRESS SPACE TO"
+vertical_alignment = 1
+
+[node name="ContinueButton" type="Button" parent="DialogueDock/Panel/Content/ContinueRow" unique_id=1242997618]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.99999994, 0.91523725, 0.76352084, 1)
+theme_override_colors/font_focus_color = Color(1, 0.96, 0.72, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.72, 0.38, 1)
+theme_override_colors/font_hover_color = Color(1, 0.96, 0.72, 1)
+theme_override_colors/font_outline_color = Color(0.0156863, 0.0196078, 0.027451, 0.95)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxEmpty_continue_text")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_continue_text")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_continue_text")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_continue_text")
+text = "CONTINUE"
+flat = true
+
+[node name="LoadingScreenUI" parent="." unique_id=2138415583 instance=ExtResource("10_loading")]
+unique_name_in_owner = true
+visible = false
+z_index = 200
+layout_mode = 1

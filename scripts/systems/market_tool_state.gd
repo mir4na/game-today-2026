@@ -10,9 +10,9 @@ const TOOL_SWIFTSTEP: StringName = &"swiftstep"
 
 @export_category("Starting Inventory")
 @export_range(0, 999, 1) var starting_blessings: int = 0
-@export_range(0, 1, 1) var starting_veil_notes: int = 1
+@export_range(0, 1, 1) var starting_veil_notes: int = 0
 @export_range(0, 3, 1) var starting_radar_charges: int = 0
-@export_range(0, 5, 1) var starting_swift_charges: int = 1
+@export_range(0, 5, 1) var starting_swift_charges: int = 0
 @export_category("Carry Limits")
 @export_range(1, 3, 1) var maximum_radar_charges: int = 3
 @export_range(1, 5, 1) var maximum_swift_charges: int = 5
@@ -24,8 +24,9 @@ const TOOL_SWIFTSTEP: StringName = &"swiftstep"
 @export_range(0, 100, 1) var blessings_per_correct_dropoff: int = 30
 @export_range(0, 100, 1) var blessings_per_wrong_dropoff: int = 20
 @export_range(0, 100, 1) var blessings_per_incorrect_anomaly: int = 40
+@export_range(0, 100, 1) var blessings_per_retained_anomaly: int = 50
 @export_range(0, 500, 1) var blessings_per_correct_night_dropoff: int = 100
-@export_range(0, 500, 1) var blessings_per_night_attempt: int = 100
+@export_range(0, 500, 1) var blessings_per_night_statement: int = 50
 
 var blessings: int = 0
 var veil_notes: int = 0
@@ -57,16 +58,24 @@ func _set_starting_inventory() -> void:
 	_last_night_award.clear()
 
 
-func preview_day_blessings(correct_dropoffs: int, wrong_dropoffs: int, incorrect_anomalies: int, pass_target: int) -> Dictionary:
+func preview_day_blessings(
+	correct_dropoffs: int,
+	wrong_dropoffs: int,
+	incorrect_anomalies: int,
+	pass_target: int,
+	retained_anomalies: int = 0
+) -> Dictionary:
 	var dropoff_reward: int = maxi(0, correct_dropoffs) * blessings_per_correct_dropoff
+	var retained_reward: int = maxi(0, retained_anomalies) * blessings_per_retained_anomaly
 	var wrong_deduction: int = maxi(0, wrong_dropoffs) * blessings_per_wrong_dropoff
 	var anomaly_deduction: int = maxi(0, incorrect_anomalies) * blessings_per_incorrect_anomaly
-	var net_earnings: int = dropoff_reward - wrong_deduction - anomaly_deduction
+	var net_earnings: int = dropoff_reward + retained_reward - wrong_deduction - anomaly_deduction
 	var passed: bool = net_earnings >= pass_target
 	var earned: int = maxi(0, net_earnings) if passed else 0
 	return {
 		"earned": earned,
 		"dropoff_reward": dropoff_reward,
+		"retained_reward": retained_reward,
 		"wrong_deduction": wrong_deduction,
 		"anomaly_deduction": anomaly_deduction,
 		"penalty_deduction": wrong_deduction + anomaly_deduction,
@@ -76,17 +85,31 @@ func preview_day_blessings(correct_dropoffs: int, wrong_dropoffs: int, incorrect
 		"correct_rate": blessings_per_correct_dropoff,
 		"wrong_rate": blessings_per_wrong_dropoff,
 		"anomaly_rate": blessings_per_incorrect_anomaly,
+		"retained_rate": blessings_per_retained_anomaly,
 		"correct_dropoffs": maxi(0, correct_dropoffs),
 		"wrong_dropoffs": maxi(0, wrong_dropoffs),
 		"incorrect_anomalies": maxi(0, incorrect_anomalies),
+		"retained_anomalies": maxi(0, retained_anomalies),
 	}
 
 
-func award_day_blessings(correct_dropoffs: int, wrong_dropoffs: int, incorrect_anomalies: int, pass_target: int) -> Dictionary:
+func award_day_blessings(
+	correct_dropoffs: int,
+	wrong_dropoffs: int,
+	incorrect_anomalies: int,
+	pass_target: int,
+	retained_anomalies: int = 0
+) -> Dictionary:
 	if _day_blessings_awarded:
 		return _last_day_award.duplicate(true)
 	_day_blessings_awarded = true
-	_last_day_award = preview_day_blessings(correct_dropoffs, wrong_dropoffs, incorrect_anomalies, pass_target)
+	_last_day_award = preview_day_blessings(
+		correct_dropoffs,
+		wrong_dropoffs,
+		incorrect_anomalies,
+		pass_target,
+		retained_anomalies
+	)
 	blessings += int(_last_day_award.earned)
 	_emit_inventory_changed()
 	return _last_day_award.duplicate(true)
@@ -117,26 +140,35 @@ func restore_shift_inventory(snapshot: Dictionary) -> void:
 	_emit_inventory_changed()
 
 
-func award_night_blessings(correct_night_dropoffs: int, attempt_count: int = 1) -> Dictionary:
+func award_night_blessings(
+	correct_night_dropoffs: int,
+	information_found: int,
+	total_souls: int,
+	information_names: Array[String] = []
+) -> Dictionary:
 	if _night_blessings_awarded:
 		return _last_night_award.duplicate(true)
 	_night_blessings_awarded = true
-	var correct_count: int = maxi(0, correct_night_dropoffs)
-	var safe_attempt_count: int = maxi(1, attempt_count)
-	var failed_attempts: int = maxi(0, safe_attempt_count - 1)
-	var base_reward: int = correct_count * blessings_per_correct_night_dropoff
-	var attempt_deduction: int = failed_attempts * blessings_per_night_attempt
-	var earned: int = maxi(0, base_reward - attempt_deduction)
+	var safe_total: int = maxi(0, total_souls)
+	var correct_count: int = clampi(correct_night_dropoffs, 0, safe_total)
+	var found_count: int = clampi(information_found, 0, safe_total)
+	var assignment_reward: int = correct_count * blessings_per_correct_night_dropoff
+	var information_reward: int = found_count * blessings_per_night_statement
+	var earned: int = assignment_reward + information_reward
 	blessings += earned
 	_last_night_award = {
 		"earned": earned,
-		"base_reward": base_reward,
-		"attempt_deduction": attempt_deduction,
-		"attempt_count": safe_attempt_count,
-		"failed_attempts": failed_attempts,
+		"base_reward": earned,
+		"assignment_reward": assignment_reward,
+		"information_reward": information_reward,
 		"correct_rate": blessings_per_correct_night_dropoff,
-		"attempt_rate": blessings_per_night_attempt,
+		"information_rate": blessings_per_night_statement,
 		"correct_night_dropoffs": correct_count,
+		"information_found": found_count,
+		"information_names": information_names.duplicate(),
+		"total_souls": safe_total,
+		"incorrect_or_missing_assignments": safe_total - correct_count,
+		"assignment_succeeded": safe_total > 0 and correct_count == safe_total,
 	}
 	_emit_inventory_changed()
 	return _last_night_award.duplicate(true)

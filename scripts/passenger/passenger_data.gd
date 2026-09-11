@@ -6,7 +6,6 @@ extends Resource
 ## Everything else is assigned at runtime by DailyManifestGenerator.
 
 const TICKET_ISSUE_NONE: StringName = &"none"
-const TICKET_ISSUE_WRONG_TRAIN_BOARDER: StringName = &"wrong_train_boarder"
 
 var identity_profile: PassengerIdentityProfile
 var passenger_name: String = "Unnamed"
@@ -68,12 +67,7 @@ func get_anomaly_traits(route_stations: PackedStringArray) -> Array[StringName]:
 		traits.append(&"unlisted_destination")
 	return traits
 
-func is_wrong_train_boarder() -> bool:
-	return ticket_issue_type == TICKET_ISSUE_WRONG_TRAIN_BOARDER
-
 func get_required_day_dropoff_station() -> String:
-	if is_wrong_train_boarder() and not required_dropoff_station.is_empty():
-		return required_dropoff_station
 	return destination_station
 
 

@@ -141,13 +141,7 @@ func get_assignment_count() -> int:
 
 
 func get_assignment_instruction() -> String:
-	match service_level:
-		1, 2:
-			return "Drag each soul to a station. One station remains empty."
-		3, 4:
-			return "Drag each soul to a station. Each station holds one soul."
-		_:
-			return "Drag each soul to a station. One station holds two souls."
+	return "Drag each soul to a station."
 
 
 func get_service_label() -> String:

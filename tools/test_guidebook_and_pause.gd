@@ -29,7 +29,7 @@ func _run() -> void:
 	var guide: GuidebookUI = game._guidebook_ui
 	_check((guide.get_node("%TodayLayout") as Control).visible, "Today's Service uses its scene-authored layout.")
 	_check(not (guide.get_node("%Content") as RichTextLabel).visible, "The visible guidebook page is not the raw RichText document.")
-	_check((guide.get_node("%TodayServiceMeta") as Label).text.contains(game.manifest_config.service_train_number), "The scene-authored service page shows the generated service number.")
+	_check((guide.get_node("%TodayMetaTrain") as Label).text.contains(game.manifest_config.service_train_number), "The scene-authored service page shows the generated service number.")
 	_check((guide.get_node("%PassShiftBody") as Label).text.contains("Blessings"), "The scene-authored service page shows the paycheck target.")
 	if DisplayServer.get_name() != "headless":
 		await create_timer(0.6).timeout
@@ -44,17 +44,20 @@ func _run() -> void:
 	_check(not game._day_intro_ui.has_node("Center/Content/TargetLabel"), "The opening chapter card does not display the paycheck target.")
 	var starting_balance: int = game._market_tool_state.blessings
 	var initial_count: int = game._active_passenger_count()
-	var passenger_status := guide.get_node("%TodayProgressLabel") as Label
-	_check(passenger_status.text.contains("Currently aboard\n%d" % initial_count), "Today shows the actual opening passenger count.")
-	_check(passenger_status.text.contains("Boarded today\n%d" % initial_count), "Opening passengers count toward the cumulative total.")
-	_check((guide.get_node("%TodayServiceMeta") as Label).text.contains("Train %s" % game.manifest_config.service_train_number), "Guidebook displays the generated service number.")
+	var aboard_value := guide.get_node("%TodayAboardValue") as Label
+	var boarded_value := guide.get_node("%TodayBoardedValue") as Label
+	var stamped_value := guide.get_node("%TodayStampedValue") as Label
+	var dropped_value := guide.get_node("%TodayDroppedValue") as Label
+	_check(aboard_value.text == str(initial_count), "Today shows the actual opening passenger count.")
+	_check(boarded_value.text == str(initial_count), "Opening passengers count toward the cumulative total.")
+	_check((guide.get_node("%TodayMetaTrain") as Label).text.contains(game.manifest_config.service_train_number), "Guidebook displays the generated service number.")
 	var stamp_subject: Passenger = game._passengers[0]
 	game._on_station_assignment_toggled(stamp_subject.data.passenger_name, true)
 	game._refresh_guidebook_progress()
-	_check(passenger_status.text.contains("Marked for next stop\n1"), "Applying a stamp updates the onboard stamp count.")
+	_check(stamped_value.text == "1", "Applying a stamp updates the onboard stamp count.")
 	game._on_station_assignment_toggled(stamp_subject.data.passenger_name, false)
 	game._refresh_guidebook_progress()
-	_check(passenger_status.text.contains("Marked for next stop\n0"), "Removing a stamp decreases the onboard stamp count.")
+	_check(stamped_value.text == "0", "Removing a stamp decreases the onboard stamp count.")
 	game._incorrectly_stamped_anomalies.clear()
 	var boarder: Passenger
 	for data: PassengerData in game._daily_manifest:
@@ -84,8 +87,8 @@ func _run() -> void:
 	_check((guide.get_node("%TodayThresholdValue") as Label).text.begins_with("30 /"), "Live earnings use +30/-20/-40 scoring.")
 	_check((guide.get_node("%PassShiftBody") as Label).text.contains("%d Blessings" % maxi(0, game._get_day_pass_target() - 30)), "The remaining target reflects net earnings.")
 	_check((guide.get_node("%TodayRouteProgress") as Label).text.contains("1 / %d" % (game.day_route.size() - 1)), "Route progress excludes the departure station.")
-	_check(passenger_status.text.contains("Currently aboard\n%d" % (initial_count - 1)), "Departed passengers disappear from the live count.")
-	_check(passenger_status.text.contains("Dropped off\n1"), "Today's Service shows the number of completed drop-offs.")
+	_check(aboard_value.text == str(initial_count - 1), "Departed passengers disappear from the live count.")
+	_check(dropped_value.text == "1", "Today's Service shows the number of completed drop-offs.")
 	_check(guide._boarded_today == initial_count, "Departures do not reduce the cumulative boarding total.")
 	_check(guide._stamped_aboard == 0, "A departed stamped passenger is excluded even before assignments are cleared.")
 	game._station_assignment.clear()

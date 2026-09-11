@@ -21,6 +21,12 @@ var _drag_ghost: NightPassengerDragPreview
 @onready var _portrait_name_label: Label = %PortraitName
 @onready var _statement_label: Label = %StatementLabel
 @onready var _assignment_label: Label = %AssignmentLabel
+@onready var _hover_outline: Panel = %HoverOutline
+
+
+func _ready() -> void:
+	mouse_entered.connect(_set_hovered.bind(true))
+	mouse_exited.connect(_set_hovered.bind(false))
 
 
 func configure(data: PassengerData, statement: String) -> void:
@@ -53,6 +59,11 @@ func set_assignment(station: String) -> void:
 	_assigned_overlay.visible = not station.is_empty()
 
 
+func _set_hovered(hovered: bool) -> void:
+	if is_instance_valid(_hover_outline):
+		_hover_outline.visible = hovered
+
+
 func _get_drag_data(_at_position: Vector2) -> Variant:
 	if passenger_name.is_empty() or _passenger_data == null:
 		return null
@@ -73,14 +84,14 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	}
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if not is_instance_valid(_drag_ghost):
 		_drag_ghost = null
 		return
 	if not get_viewport().gui_is_dragging():
 		_free_drag_ghost()
 		return
-	_update_drag_ghost()
+	_update_drag_ghost(delta)
 
 
 func _notification(what: int) -> void:
@@ -109,7 +120,7 @@ func _spawn_drag_ghost() -> void:
 	ghost.z_as_relative = false
 	_drag_ghost_host().add_child(ghost)
 	_drag_ghost = ghost
-	_update_drag_ghost()
+	_update_drag_ghost(0.0)
 
 
 func _drag_ghost_host() -> Node:
@@ -123,10 +134,10 @@ func _drag_ghost_host() -> Node:
 	return self
 
 
-func _update_drag_ghost() -> void:
+func _update_drag_ghost(delta: float) -> void:
 	if not is_instance_valid(_drag_ghost):
 		return
-	_drag_ghost.global_position = get_global_mouse_position() - _drag_ghost.preview_center
+	_drag_ghost.update_drag_position(get_global_mouse_position(), delta)
 
 
 func _free_drag_ghost() -> void:

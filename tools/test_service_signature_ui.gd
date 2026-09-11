@@ -36,22 +36,30 @@ func _run() -> void:
 	_check(service_button.visible and not service_button.disabled, "The service button must be available during daytime gameplay.")
 	_check(service_button.tooltip_text.is_empty(), "The service button must not show a long hover caption over gameplay.")
 	_check(service_button.icon != null and service_button.icon.resource_path.ends_with("Group 176.png"), "The service button must use the Group 176 ledger asset.")
-	_check(service_button.position.y < guidebook_button.position.y, "The service button must sit above the Guidebook button.")
+	_check(service_button.position.y > guidebook_button.position.y, "The service button must sit below the Guidebook button.")
 	_check((pause_ui.get_node("%ResumeButton") as Button).text == "Resume", "The pause menu must expose a Resume text button.")
 	_check(
 		not game._station_stop_ui.show_terminal_title
 		and game._station_stop_ui.terminal_heading_text.is_empty(),
-		"The terminal cutscene must not place EASTMERE copy in the middle of the screen."
+		"The terminal cutscene must not place terminal copy in the middle of the screen."
 	)
 
 	service_button.pressed.emit()
 	await process_frame
 	_check(signature.visible, "Pressing the daytime service button must open service sign-off.")
 	_check(game._active_modal == signature, "Service sign-off must own gameplay input while open.")
-	var close_button := signature.get_node("%CloseButton") as Button
-	close_button.pressed.emit()
+	var not_yet_label := signature.get_node(
+		"Panel/QuestionStage/QuestionActions/NotYetButton/Instruction"
+	) as Label
+	_check(
+		not_yet_label.get_theme_color(&"font_color").is_equal_approx(Color.WHITE),
+		"The Not Yet button label must remain white."
+	)
+	var close_hint := signature.get_node("%CloseHint") as Label
+	_check(close_hint.text.contains("E"), "The sign-off panel directs the player to close with E.")
+	signature.request_close()
 	await process_frame
-	_check(not signature.visible, "The service sign-off close button must close the UI.")
+	_check(not signature.visible, "Closing sign-off must hide the UI.")
 	_check(game._active_modal == null, "Closing service sign-off must restore modal ownership.")
 	service_button.pressed.emit()
 	await process_frame

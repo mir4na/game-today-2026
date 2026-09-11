@@ -2,33 +2,33 @@ class_name GameSFX
 extends Node
 
 const SOUNDS: Dictionary = {
+	&"buttonclick_sfx": preload("res://assets/sfx/ButtonClick.mp3"),
 	&"carriage_creak": preload("res://assets/sfx/carriage_creak.ogg"),
-	&"button_hover": preload("res://assets/sfx/button_hover.mp3"),
 	&"clock_ticking": preload("res://assets/sfx/clock_ticking.ogg"),
 	&"coin_flip": preload("res://assets/sfx/coin_flip.ogg"),
 	&"footstep": preload("res://assets/sfx/footstep.mp3"),
 	&"ghost_whisper": preload("res://assets/sfx/ghost_whisper.ogg"),
 	&"grab": preload("res://assets/sfx/grab.ogg"),
+	&"hover_sfx": preload("res://assets/sfx/hover_sfx.mp3"),
 	&"magic_shimmer": preload("res://assets/sfx/magic_shimmer.ogg"),
 	&"mechanical_door": preload("res://assets/sfx/mechanical_door.ogg"),
-	&"paper_rustle": preload("res://assets/sfx/paper_rustle.ogg"),
+	&"paper_rustle": preload("res://assets/sfx/paper_rustle.mp3"),
 	&"radar_ping": preload("res://assets/sfx/radar_ping.ogg"),
 	&"speed_woosh": preload("res://assets/sfx/speed_woosh.ogg"),
 	&"stamp_impact": preload("res://assets/sfx/stamp_impact.ogg"),
 	&"success": preload("res://assets/sfx/success.ogg"),
 	&"time_warp": preload("res://assets/sfx/time_warp.ogg"),
 	&"typewriter": preload("res://assets/sfx/typewriter.ogg"),
-	&"ui_confirm": preload("res://assets/sfx/ui_confirm.ogg"),
 	&"ui_error": preload("res://assets/sfx/ui_error.ogg"),
 	&"wipe": preload("res://assets/sfx/wipe.ogg"),
 }
 
 const POOL_SIZE := 20
 const BUTTON_META := &"game_sfx_connected"
-const BUTTON_CONFIRM_SUPPRESS_META := &"suppress_global_confirm_sfx"
 
 var _players: Array[AudioStreamPlayer] = []
 var _loops: Dictionary = {}
+var _loop_fade_tweens: Dictionary = {}
 var _cooldown_until: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
 var _silent := false
@@ -62,10 +62,10 @@ static func start_loop(channel: StringName, sound_id: StringName, volume_db: flo
 		runtime._start_audio_loop(channel, sound_id, volume_db, pitch)
 
 
-static func stop_loop(channel: StringName) -> void:
+static func stop_loop(channel: StringName, fade_out_seconds: float = 0.0) -> void:
 	var runtime := _runtime()
 	if is_instance_valid(runtime):
-		runtime._stop_audio_loop(channel)
+		runtime._stop_audio_loop(channel, fade_out_seconds)
 
 
 static func _runtime() -> GameSFX:
@@ -114,16 +114,40 @@ func _start_audio_loop(channel: StringName, sound_id: StringName, volume_db: flo
 	player.play()
 
 
-func _stop_audio_loop(channel: StringName) -> void:
+func _stop_audio_loop(channel: StringName, fade_out_seconds: float = 0.0) -> void:
 	var player := _loops.get(channel) as AudioStreamPlayer
 	if not is_instance_valid(player):
 		_loops.erase(channel)
+		_loop_fade_tweens.erase(channel)
+		return
+	var active_fade := _loop_fade_tweens.get(channel) as Tween
+	if active_fade and active_fade.is_valid():
+		active_fade.kill()
+	_loop_fade_tweens.erase(channel)
+	if fade_out_seconds > 0.0 and player.playing:
+		var fade_tween := create_tween()
+		_loop_fade_tweens[channel] = fade_tween
+		fade_tween.tween_property(
+			player,
+			^"volume_db",
+			-80.0,
+			fade_out_seconds
+		).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+		fade_tween.tween_callback(_finish_audio_loop_stop.bind(channel, player))
+		return
+	_finish_audio_loop_stop(channel, player)
+
+
+func _finish_audio_loop_stop(channel: StringName, player: AudioStreamPlayer) -> void:
+	if _loops.get(channel) == player:
+		_loops.erase(channel)
+	_loop_fade_tweens.erase(channel)
+	if not is_instance_valid(player):
 		return
 	player.stop()
 	# Detach the stream immediately so an already-buffered loop cannot remain
 	# audible for another mix frame after its owning animation has completed.
 	player.stream = null
-	_loops.erase(channel)
 	player.queue_free()
 
 
@@ -161,13 +185,9 @@ func _register_button(button: BaseButton) -> void:
 
 func _on_button_hovered(button: BaseButton) -> void:
 	if is_instance_valid(button) and button.is_visible_in_tree() and not button.disabled:
-		_play_one_shot(&"button_hover", -14.0, 1.0, 0.025, 0.045)
+		_play_one_shot(&"hover_sfx", -14.0, 1.0, 0.025, 0.045)
 
 
 func _on_button_pressed(button: BaseButton) -> void:
-	if (
-		is_instance_valid(button)
-		and not button.disabled
-		and not bool(button.get_meta(BUTTON_CONFIRM_SUPPRESS_META, false))
-	):
-		_play_one_shot(&"ui_confirm", -10.0, 1.0, 0.02, 0.035)
+	if is_instance_valid(button) and button.is_visible_in_tree() and not button.disabled:
+		_play_one_shot(&"buttonclick_sfx", -10.0, 1.0, 0.02, 0.035)

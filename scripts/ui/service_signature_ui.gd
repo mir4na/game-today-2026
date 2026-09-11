@@ -11,6 +11,13 @@ signal signature_rejected
 @export_range(20.0, 120.0, 1.0) var maximum_tolerance: float = 62.0
 @export_range(0.4, 0.95, 0.05) var minimum_length_ratio: float = 0.7
 @export_range(1.05, 2.0, 0.05) var maximum_length_ratio: float = 1.45
+@export_category("Question Buttons")
+@export var confirm_texture_normal: Texture2D
+@export var confirm_texture_hover: Texture2D
+@export var confirm_texture_pressed: Texture2D
+@export var not_yet_texture_normal: Texture2D
+@export var not_yet_texture_hover: Texture2D
+@export var not_yet_texture_pressed: Texture2D
 @export_category("Success Transition")
 @export_range(200.0, 900.0, 10.0) var success_drop_distance: float = 560.0
 @export_range(0.15, 0.8, 0.05) var success_drop_duration: float = 0.42
@@ -25,8 +32,10 @@ var _transition_tween: Tween
 var _panel_rest_position: Vector2
 
 @onready var _panel: Control = %Panel
-@onready var _close_button: Button = %CloseButton
+@onready var _confirm_button: TextureButton = %ConfirmButton
+@onready var _not_yet_button: TextureButton = %NotYetButton
 @onready var _question_stage: Control = %QuestionStage
+@onready var _question_actions: Control = %QuestionActions
 @onready var _signature_stage: Control = %SignatureStage
 @onready var _route_label: Label = %RouteLabel
 @onready var _drawing_area: Control = %DrawingArea
@@ -34,19 +43,27 @@ var _panel_rest_position: Vector2
 @onready var _loop_pattern: Line2D = %LoopPattern
 @onready var _user_stroke: Line2D = %UserStroke
 @onready var _feedback_label: Label = %FeedbackLabel
-@onready var _feedback_flash: ColorRect = %FeedbackFlash
+@onready var _feedback_flash: TextureRect = %FeedbackFlash
 @onready var _transition_fade: ColorRect = %TransitionFade
 
 
 func _ready() -> void:
 	_panel_rest_position = _panel.position
-	var close_callable := Callable(self, "request_close")
-	if not _close_button.pressed.is_connected(close_callable):
-		_close_button.pressed.connect(close_callable)
-	_close_button.disabled = false
-	_close_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	_apply_button_textures(_confirm_button, confirm_texture_normal, confirm_texture_hover, confirm_texture_pressed)
+	_apply_button_textures(_not_yet_button, not_yet_texture_normal, not_yet_texture_hover, not_yet_texture_pressed)
 	_drawing_area.gui_input.connect(_on_drawing_area_gui_input)
 	hide()
+
+
+func _apply_button_textures(button: TextureButton, normal: Texture2D, hover: Texture2D, pressed: Texture2D) -> void:
+	if not is_instance_valid(button):
+		return
+	if normal != null:
+		button.texture_normal = normal
+	if hover != null:
+		button.texture_hover = hover
+	if pressed != null:
+		button.texture_pressed = pressed
 
 
 func open_signature(from_station: String, to_station: String, route_leg: int) -> void:
@@ -69,6 +86,7 @@ func open_signature(from_station: String, to_station: String, route_leg: int) ->
 	_pulse_pattern.visible = _active_pattern == _pulse_pattern
 	_loop_pattern.visible = _active_pattern == _loop_pattern
 	_question_stage.show()
+	_question_actions.show()
 	_signature_stage.hide()
 	show()
 	_panel.position = _panel_rest_position + Vector2(0.0, 24.0)
@@ -100,7 +118,7 @@ func request_close() -> void:
 
 
 func _on_confirm_pressed() -> void:
-	_question_stage.hide()
+	_question_actions.hide()
 	_signature_stage.show()
 	_user_stroke.clear_points()
 	_feedback_label.text = "Hold and trace the mark."
@@ -142,7 +160,7 @@ func _on_drawing_area_gui_input(event: InputEvent) -> void:
 
 func _begin_stroke(point: Vector2) -> void:
 	_drawing = true
-	_user_stroke.default_color = Color("fff1b5")
+	_user_stroke.default_color = Color(0.0, 0.0, 0.0, 1.0)
 	_user_stroke.clear_points()
 	_user_stroke.add_point(_clamp_to_drawing_area(point))
 	_feedback_label.text = ""
@@ -158,10 +176,26 @@ func _finish_stroke() -> void:
 	if not _drawing:
 		return
 	_drawing = false
-	if _trace_matches_pattern(_user_stroke.points, _active_pattern.points):
+	if _trace_matches_pattern(_user_stroke.points, _pattern_effective_points(_active_pattern)):
 		_play_acceptance()
 	else:
 		_play_rejection()
+
+
+## Pattern nodes carry scene-authored position/scale, while the user stroke
+## lives in DrawingArea space. Compare in one space so edited line shapes
+## stay traceable.
+func _pattern_effective_points(pattern: Line2D) -> PackedVector2Array:
+	var result := PackedVector2Array()
+	if not is_instance_valid(pattern) or not is_instance_valid(_drawing_area):
+		return result
+	var to_drawing: Transform2D = (
+		_drawing_area.get_global_transform_with_canvas().affine_inverse()
+		* pattern.get_global_transform_with_canvas()
+	)
+	for point: Vector2 in pattern.points:
+		result.append(to_drawing * point)
+	return result
 
 
 func _trace_matches_pattern(trace: PackedVector2Array, pattern: PackedVector2Array) -> bool:
@@ -234,7 +268,7 @@ func _play_rejection() -> void:
 	_user_stroke.default_color = Color("dc4747")
 	if is_instance_valid(_feedback_tween):
 		_feedback_tween.kill()
-	_feedback_flash.color = Color("a91f2c")
+	_feedback_flash.self_modulate = Color("a91f2c")
 	_feedback_flash.modulate.a = 0.0
 	_feedback_tween = create_tween()
 	_feedback_tween.tween_property(_feedback_flash, ^"modulate:a", 0.32, 0.08)
@@ -250,7 +284,7 @@ func _play_acceptance() -> void:
 	_user_stroke.default_color = Color("9be5a1")
 	if is_instance_valid(_feedback_tween):
 		_feedback_tween.kill()
-	_feedback_flash.color = Color("f5d982")
+	_feedback_flash.self_modulate = Color("f5d982")
 	_feedback_flash.modulate.a = 0.0
 	_feedback_tween = create_tween()
 	_feedback_tween.tween_property(_feedback_flash, ^"modulate:a", 0.3, 0.1)
@@ -311,6 +345,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	var key_event := event as InputEventKey
 	if key_event != null and key_event.echo:
 		return
-	if event.is_action_pressed(&"interact"):
+	if event.is_action_pressed(&"service_action"):
 		request_close()
 		get_viewport().set_input_as_handled()

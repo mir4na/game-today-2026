@@ -3,8 +3,10 @@ extends Control
 ## Scene-authored conductor guidebook. Scripts only populate daily runtime data.
 
 signal closed
+signal section_shown(section: int)
 
 @export var completed_service_text: String
+@export var night_title: String = "Night Shift"
 @export_category("Scene Motion")
 @export_range(1.0, 1.2, 0.01) var button_hover_scale: float = 1.07
 @export_range(0.05, 0.4, 0.01) var button_hover_duration: float = 0.12
@@ -23,6 +25,7 @@ var _service_day_code: String = ""
 var _route_stations: PackedStringArray = PackedStringArray()
 var _route_index: int = 0
 var _active_section: int = -1
+var _night_mode: bool = false
 var _scene_motion_ready: bool = false
 var _motion_bases: Dictionary = {}
 var _hover_tweens: Dictionary = {}
@@ -33,14 +36,22 @@ var _section_tween: Tween
 @onready var _content: RichTextLabel = %Content
 @onready var _today_layout: Control = %TodayLayout
 @onready var _rules_layout: Control = %RulesLayout
+@onready var _night_layout: Control = %NightLayout
+@onready var _section_tabs: Control = %SectionTabs
 @onready var _today_route_label: Label = %TodayRouteLabel
-@onready var _today_progress_label: Label = %TodayProgressLabel
+@onready var _today_boarded_value: Label = %TodayBoardedValue
+@onready var _today_dropped_value: Label = %TodayDroppedValue
+@onready var _today_aboard_value: Label = %TodayAboardValue
+@onready var _today_stamped_value: Label = %TodayStampedValue
 @onready var _pass_shift_body: Label = %PassShiftBody
 @onready var _today_threshold_value: Label = %TodayThresholdValue
 @onready var _today_target_fill: ColorRect = %TodayTargetFill
 @onready var _today_status_label: Label = %TodayStatusLabel
 @onready var _today_route_progress: Label = %TodayRouteProgress
-@onready var _today_service_meta: Label = %TodayServiceMeta
+@onready var _today_meta_day: Label = %TodayMetaDay
+@onready var _today_meta_train: Label = %TodayMetaTrain
+@onready var _today_meta_date: Label = %TodayMetaDate
+@onready var _today_meta_code: Label = %TodayMetaCode
 @onready var _today_button: Button = %TodayButton
 @onready var _procedure_button: Button = %ProcedureButton
 @onready var _anomaly_list: Control = %AnomalyList
@@ -58,6 +69,7 @@ var _section_tween: Tween
 const SECTION_TODAY: int = 0
 const SECTION_ANOMALIES: int = 1
 const SECTION_RULES: int = 2
+const SECTION_NIGHT: int = 3
 
 
 func _ready() -> void:
@@ -94,6 +106,33 @@ func request_close() -> void:
 	closed.emit()
 
 
+func set_night_mode(enabled: bool) -> void:
+	_night_mode = enabled
+	if not is_node_ready() or not visible:
+		return
+	if _night_mode:
+		_show_night()
+	else:
+		_show_today()
+
+
+func show_section(section: int) -> void:
+	match section:
+		SECTION_TODAY:
+			_show_today()
+		SECTION_RULES:
+			_show_procedure()
+		SECTION_ANOMALIES:
+			_show_anomalies()
+
+
+func set_tabs_locked(locked: bool) -> void:
+	_today_button.disabled = locked
+	_procedure_button.disabled = locked
+	_anomalies_button.disabled = locked
+	_close_button.disabled = locked
+
+
 func update_shift_progress(route_index: int, net_earnings: int, passenger_count: int, boarded_today: int, stamped_aboard: int) -> void:
 	var next_route_index: int = clampi(route_index, 0, maxi(0, _route_stations.size() - 1))
 	if _route_index == next_route_index and _net_earnings == net_earnings and _passenger_count == passenger_count and _boarded_today == boarded_today and _stamped_aboard == stamped_aboard:
@@ -108,6 +147,9 @@ func update_shift_progress(route_index: int, net_earnings: int, passenger_count:
 
 
 func _show_today() -> void:
+	if _night_mode:
+		_show_night()
+		return
 	var current_station: String = _station_at(_route_index)
 	var next_station: String = completed_service_text
 	if _route_index + 1 < _route_stations.size():
@@ -118,11 +160,30 @@ func _show_today() -> void:
 
 
 func _show_procedure() -> void:
+	if _night_mode:
+		_show_night()
+		return
 	_set_section(_procedure_button, "Rules")
 
 
 func _show_anomalies() -> void:
+	if _night_mode:
+		_show_night()
+		return
 	_set_section(_anomalies_button, "Anomaly Signs")
+
+
+func _show_night() -> void:
+	# Night shift has a single scene-authored page. Section tabs stay
+	# hidden while night mode is active.
+	var section_changed: bool = _active_section != SECTION_NIGHT
+	_active_section = SECTION_NIGHT
+	_update_tab_presentation()
+	_page_title.text = night_title
+	_content.text = ""
+	_update_section_visibility(SECTION_NIGHT)
+	if section_changed:
+		_play_section_rustle()
 
 
 func _set_section(active_button: Button, title: String) -> void:
@@ -137,6 +198,7 @@ func _set_section(active_button: Button, title: String) -> void:
 	_page_title.text = title
 	_content.text = ""
 	_update_section_visibility(next_section)
+	section_shown.emit(next_section)
 	if section_changed:
 		_play_section_rustle()
 
@@ -162,20 +224,14 @@ func _refresh_today_layout(current_station: String, next_station: String, still_
 	_today_target_fill.size.x = 270.0 * target_ratio
 	_today_status_label.text = "TARGET MET" if still_needed == 0 else "IN PROGRESS"
 	_pass_shift_body.text = "%d Blessings remaining for today's threshold." % still_needed
-	_today_progress_label.text = (
-		"Boarded today\n%d\n\nDropped off\n%d\n\nCurrently aboard\n%d\n\nMarked for next stop\n%d"
-	) % [
-		_boarded_today,
-		dropped_off,
-		_passenger_count,
-		_stamped_aboard,
-	]
-	_today_service_meta.text = "Day %d\nTrain %s\nService date %s\nDay code %s" % [
-		_day_number,
-		_service_train_number,
-		_service_date,
-		_service_day_code,
-	]
+	_today_boarded_value.text = str(_boarded_today)
+	_today_dropped_value.text = str(dropped_off)
+	_today_aboard_value.text = str(_passenger_count)
+	_today_stamped_value.text = str(_stamped_aboard)
+	_today_meta_day.text = str(_day_number)
+	_today_meta_train.text = _service_train_number
+	_today_meta_date.text = _service_date
+	_today_meta_code.text = _service_day_code
 
 
 func _update_section_visibility(section: int) -> void:
@@ -185,6 +241,8 @@ func _update_section_visibility(section: int) -> void:
 	_today_layout.visible = section == SECTION_TODAY
 	_rules_layout.visible = section == SECTION_RULES
 	_anomaly_list.visible = section == SECTION_ANOMALIES
+	_night_layout.visible = section == SECTION_NIGHT
+	_section_tabs.visible = section != SECTION_NIGHT
 
 
 func _section_buttons() -> Array[Button]:
@@ -192,6 +250,8 @@ func _section_buttons() -> Array[Button]:
 
 
 func _show_next_section() -> void:
+	if _night_mode:
+		return
 	match _active_section:
 		SECTION_TODAY:
 			_show_anomalies()

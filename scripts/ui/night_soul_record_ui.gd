@@ -27,7 +27,7 @@ signal statement_feedback_requested(succeeded: bool)
 @export_range(0.0, 0.08, 0.005) var letter_stagger_seconds: float = 0.012
 @export_range(0.0, 80.0, 1.0) var letter_source_spread: float = 48.0
 @export_range(8, 28, 1) var extracted_letter_font_size: int = 15
-@export var extracted_letter_color: Color = Color("fff8ed")
+@export var extracted_letter_color: Color = Color("000000")
 
 var _passenger_name: String = ""
 var _correct_statement: String = ""
@@ -45,6 +45,8 @@ var _error_flash_material: ShaderMaterial
 var _presentation_tween: Tween
 var _record_rest_position: Vector2
 var _closing: bool = false
+var _tutorial_interaction_locked: bool = false
+var _tutorial_highlight_statement: bool = false
 
 @onready var _shade: ColorRect = %Shade
 @onready var _error_flash: ColorRect = %ErrorFlash
@@ -86,10 +88,7 @@ func open_record(data: PassengerData, puzzle: DeparturePuzzleData, already_recor
 	# the soul being inspected, so it always uses that NPC's real character art.
 	_portrait.set_passenger(data)
 	_name_label.text = data.short_name.to_upper()
-	_details_label.text = "%s  •  %s" % [
-		data.occupation.to_upper(),
-		puzzle.get_anomaly_label(data.anomaly_type),
-	]
+	_details_label.text = data.occupation.to_upper()
 	_closing = false
 	_correct_reveal_characters = -1
 	_extracted_sentence_index = -1
@@ -98,6 +97,13 @@ func open_record(data: PassengerData, puzzle: DeparturePuzzleData, already_recor
 	_build_biography(puzzle.get_biography_for_passenger(_passenger_name))
 	show()
 	_present_record()
+
+
+func set_tutorial_guidance(interaction_locked: bool, highlight_statement: bool) -> void:
+	_tutorial_interaction_locked = interaction_locked
+	_tutorial_highlight_statement = highlight_statement
+	if is_node_ready():
+		_render_biography()
 
 
 func request_close() -> void:
@@ -152,7 +158,10 @@ func _render_biography() -> void:
 				])
 				continue
 			var color: Color = sentence_color
-			if sentence_index == _hovered_sentence_index:
+			if (
+				sentence_index == _hovered_sentence_index
+				or (_tutorial_highlight_statement and sentence == _correct_statement)
+			):
 				color = hovered_sentence_color
 			rendered.append("[url=%d][color=#%s]%s[/color][/url]" % [
 				sentence_index,
@@ -181,6 +190,8 @@ func _on_sentence_hover_ended(meta: Variant) -> void:
 
 
 func _on_sentence_clicked(meta: Variant) -> void:
+	if _tutorial_interaction_locked:
+		return
 	var index: int = int(str(meta))
 	if not _sentence_by_index.has(index):
 		return

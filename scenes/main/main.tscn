@@ -51,9 +51,13 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/swiftstep_effect_ui.tscn" id="46_swiftstep_effect"]
 [ext_resource type="Material" path="res://resources/materials/screen_bloom.tres" id="47_screen_bloom"]
 [ext_resource type="PackedScene" uid="uid://bn7q3awivg60d" path="res://scenes/ui/night_soul_record_ui.tscn" id="47_soul_record"]
-[ext_resource type="PackedScene" path="res://scenes/ui/veil_note_reveal_ui.tscn" id="48_veil_note_reveal"]
+[ext_resource type="PackedScene" uid="uid://cmaixkslqrorg" path="res://scenes/ui/veil_note_reveal_ui.tscn" id="48_veil_note_reveal"]
 [ext_resource type="PackedScene" path="res://scenes/ui/service_signature_ui.tscn" id="50_signature_ui"]
 [ext_resource type="PackedScene" uid="uid://dl1hatq1cq2qy" path="res://scenes/ui/hint.tscn" id="51_hint_ui"]
+[ext_resource type="PackedScene" uid="uid://j5aa62op4yf5" path="res://scenes/ui/loading_screen_ui.tscn" id="52_loading"]
+[ext_resource type="PackedScene" path="res://scenes/tutorial/tutorial_director.tscn" id="52_tutorial"]
+[ext_resource type="PackedScene" path="res://scenes/ui/heaven_ending_ui.tscn" id="53_heaven"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hell_ending_ui.tscn" id="54_hell"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_day_cycle_sky"]
 shader = ExtResource("39")
@@ -85,12 +89,12 @@ shader_parameter/density = 0.52
 shader_parameter/speed = Vector2(0.02, 0.01)
 shader_parameter/fog_scale = Vector2(0.48, 0.48)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_o8kno"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pd34m"]
 resource_local_to_scene = true
 shader = ExtResource("31_6miv3")
 shader_parameter/grayscale_strength = 0.0
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_7ahn0"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qjyke"]
 resource_local_to_scene = true
 shader = ExtResource("32_yisfj")
 shader_parameter/scan_progress = 0.0
@@ -110,10 +114,35 @@ shader_parameter/warp_strength = 0.004
 shader_parameter/grid_color = Color(0.24, 1, 0.56, 0.68)
 shader_parameter/edge_color = Color(0.52, 1, 0.7, 0.92)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_vyrcm"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_o8kno"]
 resource_local_to_scene = true
 shader = ExtResource("31_6miv3")
 shader_parameter/grayscale_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7ahn0"]
+resource_local_to_scene = true
+shader = ExtResource("31_6miv3")
+shader_parameter/grayscale_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vyrcm"]
+resource_local_to_scene = true
+shader = ExtResource("32_yisfj")
+shader_parameter/scan_progress = 0.0
+shader_parameter/scan_aspect = 2.85
+shader_parameter/scan_origin = Vector2(0.5, 0.88)
+shader_parameter/band_width = 0.24
+shader_parameter/grid_density = 11.0
+shader_parameter/grid_line_width = 0.035
+shader_parameter/grid_feather = 0.018
+shader_parameter/edge_width = 0.004
+shader_parameter/edge_glow_width = 0.022
+shader_parameter/fill_strength = 0.04
+shader_parameter/scanned_grid_strength = 0.46
+shader_parameter/scanned_fill_strength = 0.025
+shader_parameter/trail_falloff = 2.25
+shader_parameter/warp_strength = 0.004
+shader_parameter/grid_color = Color(0.24, 1, 0.56, 0.68)
+shader_parameter/edge_color = Color(0.52, 1, 0.7, 0.92)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3ql0k"]
 resource_local_to_scene = true
@@ -122,6 +151,11 @@ shader_parameter/grayscale_strength = 0.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_8biwb"]
 resource_local_to_scene = true
+shader = ExtResource("31_6miv3")
+shader_parameter/grayscale_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_m0t6v"]
+resource_local_to_scene = true
 shader = ExtResource("32_yisfj")
 shader_parameter/scan_progress = 0.0
 shader_parameter/scan_aspect = 2.85
@@ -139,11 +173,6 @@ shader_parameter/trail_falloff = 2.25
 shader_parameter/warp_strength = 0.004
 shader_parameter/grid_color = Color(0.24, 1, 0.56, 0.68)
 shader_parameter/edge_color = Color(0.52, 1, 0.7, 0.92)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_m0t6v"]
-resource_local_to_scene = true
-shader = ExtResource("31_6miv3")
-shader_parameter/grayscale_strength = 0.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_axmsw"]
 resource_local_to_scene = true
@@ -152,6 +181,11 @@ shader_parameter/grayscale_strength = 0.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_0fdjx"]
 resource_local_to_scene = true
+shader = ExtResource("31_6miv3")
+shader_parameter/grayscale_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ky173"]
+resource_local_to_scene = true
 shader = ExtResource("32_yisfj")
 shader_parameter/scan_progress = 0.0
 shader_parameter/scan_aspect = 2.85
@@ -169,11 +203,6 @@ shader_parameter/trail_falloff = 2.25
 shader_parameter/warp_strength = 0.004
 shader_parameter/grid_color = Color(0.24, 1, 0.56, 0.68)
 shader_parameter/edge_color = Color(0.52, 1, 0.7, 0.92)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_ky173"]
-resource_local_to_scene = true
-shader = ExtResource("31_6miv3")
-shader_parameter/grayscale_strength = 0.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_scupx"]
 resource_local_to_scene = true
@@ -182,35 +211,22 @@ shader_parameter/grayscale_strength = 0.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_62gx1"]
 resource_local_to_scene = true
-shader = ExtResource("32_yisfj")
-shader_parameter/scan_progress = 0.0
-shader_parameter/scan_aspect = 2.85
-shader_parameter/scan_origin = Vector2(0.5, 0.88)
-shader_parameter/band_width = 0.24
-shader_parameter/grid_density = 11.0
-shader_parameter/grid_line_width = 0.035
-shader_parameter/grid_feather = 0.018
-shader_parameter/edge_width = 0.004
-shader_parameter/edge_glow_width = 0.022
-shader_parameter/fill_strength = 0.04
-shader_parameter/scanned_grid_strength = 0.46
-shader_parameter/scanned_fill_strength = 0.025
-shader_parameter/trail_falloff = 2.25
-shader_parameter/warp_strength = 0.004
-shader_parameter/grid_color = Color(0.24, 1, 0.56, 0.68)
-shader_parameter/edge_color = Color(0.52, 1, 0.7, 0.92)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_ae8n2"]
-resource_local_to_scene = true
-shader = ExtResource("31_6miv3")
-shader_parameter/grayscale_strength = 0.0
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_obdhw"]
-resource_local_to_scene = true
 shader = ExtResource("38_pd34m")
 shader_parameter/progress = 0.0
 shader_parameter/edge_softness = 0.003
 shader_parameter/fill_origin = Vector2(0.477, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ae8n2"]
+resource_local_to_scene = true
+shader = ExtResource("39_qjyke")
+shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
+shader_parameter/outline_size = 9.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_obdhw"]
+resource_local_to_scene = true
+shader = ExtResource("39_qjyke")
+shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
+shader_parameter/outline_size = 9.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_budmp"]
 resource_local_to_scene = true
@@ -224,28 +240,18 @@ shader = ExtResource("39_qjyke")
 shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
 shader_parameter/outline_size = 9.0
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_sveqe"]
-resource_local_to_scene = true
-shader = ExtResource("39_qjyke")
-shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
-shader_parameter/outline_size = 9.0
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_lakrh"]
-resource_local_to_scene = true
-shader = ExtResource("39_qjyke")
-shader_parameter/outline_color = Color(0.015, 0.018, 0.024, 0.96)
-shader_parameter/outline_size = 9.0
-
 [node name="Main" type="Node2D" unique_id=604105226]
 script = ExtResource("1")
 passenger_identity_profiles = Array[ExtResource("2_08tbl")]([ExtResource("11"), ExtResource("12"), ExtResource("13"), ExtResource("14"), ExtResource("15"), ExtResource("16"), ExtResource("19"), ExtResource("20"), ExtResource("21"), ExtResource("22"), ExtResource("23"), ExtResource("24"), ExtResource("28"), ExtResource("29"), ExtResource("30"), ExtResource("31")])
 puzzle_resource = ExtResource("17")
 passenger_scene = ExtResource("34")
 manifest_config = ExtResource("37")
-day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere")
-station_travel_durations_seconds = PackedFloat32Array(120, 120, 120, 120)
+day_music_track = &"gameplay_day"
+night_music_track = &"gameplay_night"
+day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere")
+station_travel_durations_seconds = PackedFloat32Array(120, 120, 120)
 debug_print_anomaly_roster = true
-night_shift_instruction = ""
+tutorial_day_route = PackedStringArray("Alderwick", "Brambleford")
 
 [node name="MarketToolState" parent="." unique_id=1541596097 instance=ExtResource("40_market_state")]
 unique_name_in_owner = true
@@ -336,43 +342,43 @@ unique_name_in_owner = true
 position = Vector2(-16, 0)
 
 [node name="ArtRoot" parent="GameplayWorld/Train/Cars/PassengerCoach4" parent_id_path=PackedInt32Array(1577522868, 398983735) index="1" unique_id=1724717493]
-material = SubResource("ShaderMaterial_o8kno")
+material = SubResource("ShaderMaterial_pd34m")
 
 [node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach4/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 398983735, 545678927) index="0" unique_id=398318395]
-material = SubResource("ShaderMaterial_7ahn0")
+material = SubResource("ShaderMaterial_qjyke")
 
 [node name="InteriorLighting" parent="GameplayWorld/Train/Cars/PassengerCoach4" parent_id_path=PackedInt32Array(1577522868, 398983735) index="2" unique_id=1422164408]
-material = SubResource("ShaderMaterial_vyrcm")
+material = SubResource("ShaderMaterial_o8kno")
 
 [node name="Newspaper" parent="GameplayWorld/Train/Cars/PassengerCoach4" parent_id_path=PackedInt32Array(1577522868, 398983735) index="4" unique_id=891876982]
 position = Vector2(533, 495)
 
 [node name="ArtRoot" parent="GameplayWorld/Train/Cars/PassengerCoach3" parent_id_path=PackedInt32Array(1577522868, 534537403) index="1" unique_id=1724717493]
-material = SubResource("ShaderMaterial_3ql0k")
+material = SubResource("ShaderMaterial_7ahn0")
 
 [node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach3/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 534537403, 545678927) index="0" unique_id=398318395]
-material = SubResource("ShaderMaterial_8biwb")
+material = SubResource("ShaderMaterial_vyrcm")
 
 [node name="InteriorLighting" parent="GameplayWorld/Train/Cars/PassengerCoach3" parent_id_path=PackedInt32Array(1577522868, 534537403) index="2" unique_id=1422164408]
-material = SubResource("ShaderMaterial_m0t6v")
+material = SubResource("ShaderMaterial_3ql0k")
 
 [node name="ArtRoot" parent="GameplayWorld/Train/Cars/PassengerCoach2" parent_id_path=PackedInt32Array(1577522868, 213345118) index="1" unique_id=1724717493]
-material = SubResource("ShaderMaterial_axmsw")
+material = SubResource("ShaderMaterial_8biwb")
 
 [node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach2/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 213345118, 545678927) index="0" unique_id=398318395]
-material = SubResource("ShaderMaterial_0fdjx")
+material = SubResource("ShaderMaterial_m0t6v")
 
 [node name="InteriorLighting" parent="GameplayWorld/Train/Cars/PassengerCoach2" parent_id_path=PackedInt32Array(1577522868, 213345118) index="2" unique_id=1422164408]
-material = SubResource("ShaderMaterial_ky173")
+material = SubResource("ShaderMaterial_axmsw")
 
 [node name="ArtRoot" parent="GameplayWorld/Train/Cars/PassengerCoach1" parent_id_path=PackedInt32Array(1577522868, 297172719) index="1" unique_id=1724717493]
-material = SubResource("ShaderMaterial_scupx")
+material = SubResource("ShaderMaterial_0fdjx")
 
 [node name="RadarScanEffect" parent="GameplayWorld/Train/Cars/PassengerCoach1/ArtRoot/RadarEffectBounds" parent_id_path=PackedInt32Array(1577522868, 297172719, 545678927) index="0" unique_id=398318395]
-material = SubResource("ShaderMaterial_62gx1")
+material = SubResource("ShaderMaterial_ky173")
 
 [node name="InteriorLighting" parent="GameplayWorld/Train/Cars/PassengerCoach1" parent_id_path=PackedInt32Array(1577522868, 297172719) index="2" unique_id=1422164408]
-material = SubResource("ShaderMaterial_ae8n2")
+material = SubResource("ShaderMaterial_scupx")
 
 [node name="BlockedAisle43" parent="GameplayWorld/Train/Cars/CarConnections/MaintenanceEvents" parent_id_path=PackedInt32Array(1577522868, 1440122565) index="0" unique_id=1176730495]
 editor_description = ""
@@ -454,39 +460,39 @@ unique_name_in_owner = true
 visible = true
 
 [node name="ClockFilled" parent="HUD/Root/ClockPanel/ClockFace" parent_id_path=PackedInt32Array(1053587110, 2018867802) index="2" unique_id=652018143]
-material = SubResource("ShaderMaterial_obdhw")
+material = SubResource("ShaderMaterial_62gx1")
 
 [node name="ClockPointer" parent="HUD/Root/ClockPanel/ClockFace/ClockNeedlePivot" parent_id_path=PackedInt32Array(1053587110, 1197693786) index="0" unique_id=1810178768]
-material = SubResource("ShaderMaterial_budmp")
+material = SubResource("ShaderMaterial_ae8n2")
 
 [node name="DaySymbol" parent="HUD/Root/ClockPanel/ClockFace/ClockSymbolPivot" parent_id_path=PackedInt32Array(1053587110, 1736318714) index="0" unique_id=1300180946]
-material = SubResource("ShaderMaterial_budmp")
+material = SubResource("ShaderMaterial_ae8n2")
 
 [node name="NightSymbol" parent="HUD/Root/ClockPanel/ClockFace/ClockSymbolPivot" parent_id_path=PackedInt32Array(1053587110, 1736318714) index="1" unique_id=1397011548]
-material = SubResource("ShaderMaterial_budmp")
+material = SubResource("ShaderMaterial_ae8n2")
 
 [node name="Background" parent="HUD/Root/MarketItemBar/RadarSlot" parent_id_path=PackedInt32Array(1053587110, 943347102) index="0" unique_id=1812476632]
-material = SubResource("ShaderMaterial_32ji7")
+material = SubResource("ShaderMaterial_obdhw")
 
 [node name="Icon" parent="HUD/Root/MarketItemBar/RadarSlot" parent_id_path=PackedInt32Array(1053587110, 943347102) index="2" unique_id=771861680]
-material = SubResource("ShaderMaterial_32ji7")
+material = SubResource("ShaderMaterial_obdhw")
 
 [node name="Background" parent="HUD/Root/MarketItemBar/SwiftSlot" parent_id_path=PackedInt32Array(1053587110, 2093275063) index="0" unique_id=1812476632]
-material = SubResource("ShaderMaterial_sveqe")
+material = SubResource("ShaderMaterial_budmp")
 
 [node name="Icon" parent="HUD/Root/MarketItemBar/SwiftSlot" parent_id_path=PackedInt32Array(1053587110, 2093275063) index="2" unique_id=771861680]
-material = SubResource("ShaderMaterial_sveqe")
+material = SubResource("ShaderMaterial_budmp")
 
 [node name="Background" parent="HUD/Root/MarketItemBar/VeilNoteSlot" parent_id_path=PackedInt32Array(1053587110, 907689913) index="0" unique_id=1812476632]
-material = SubResource("ShaderMaterial_lakrh")
+material = SubResource("ShaderMaterial_32ji7")
 
 [node name="Icon" parent="HUD/Root/MarketItemBar/VeilNoteSlot" parent_id_path=PackedInt32Array(1053587110, 907689913) index="2" unique_id=771861680]
-material = SubResource("ShaderMaterial_lakrh")
+material = SubResource("ShaderMaterial_32ji7")
 
 [node name="NotificationPanel" parent="HUD/Root" parent_id_path=PackedInt32Array(1053587110, 664657133) index="10" unique_id=1320290712]
 visible = true
-offset_top = 224.0
-offset_bottom = 284.0
+offset_top = 184.0
+offset_bottom = 244.0
 
 [node name="ModalLayer" type="CanvasLayer" parent="." unique_id=1356756245]
 layer = 20
@@ -534,10 +540,31 @@ unique_name_in_owner = true
 [node name="HintUI" parent="ModalLayer" unique_id=198971249 instance=ExtResource("51_hint_ui")]
 unique_name_in_owner = true
 
+[node name="TutorialDirector" parent="ModalLayer" instance=ExtResource("52_tutorial")]
+unique_name_in_owner = true
+layout_mode = 1
+use_empty_coach_flow = false
+
+[node name="EndingLayer" type="CanvasLayer" parent="."]
+editor_description = "Ending artwork renders above gameplay bloom and every normal HUD/modal, keeping all ending text crisp."
+layer = 150
+
+[node name="HeavenEndingUI" parent="EndingLayer" instance=ExtResource("53_heaven")]
+unique_name_in_owner = true
+
+[node name="HellEndingUI" parent="EndingLayer" instance=ExtResource("54_hell")]
+unique_name_in_owner = true
+
 [node name="PauseLayer" type="CanvasLayer" parent="." unique_id=1162735996]
-layer = 100
+layer = 300
 
 [node name="PauseUI" parent="PauseLayer" unique_id=680489697 instance=ExtResource("10")]
+unique_name_in_owner = true
+
+[node name="LoadingLayer" type="CanvasLayer" parent="."]
+layer = 200
+
+[node name="LoadingScreenUI" parent="LoadingLayer" instance=ExtResource("52_loading")]
 unique_name_in_owner = true
 
 [connection signal="inventory_changed" from="MarketToolState" to="." method="_on_market_inventory_changed"]
@@ -549,8 +576,6 @@ unique_name_in_owner = true
 [connection signal="newspaper_read" from="GameplayWorld/Train/Cars/PassengerCoach4/Newspaper" to="." method="_on_newspaper_read"]
 [connection signal="timeout" from="MaintenanceTimers/BlockedAisleTimer" to="." method="_on_blocked_aisle_timer_timeout"]
 [connection signal="timeout" from="MaintenanceTimers/DirtySeatTimer" to="." method="_on_dirty_seat_timer_timeout"]
-[connection signal="debug_next_station_requested" from="HUD" to="." method="_on_debug_next_station_requested"]
-[connection signal="debug_night_requested" from="HUD" to="." method="_on_debug_night_requested"]
 [connection signal="guidebook_requested" from="HUD" to="." method="_on_guidebook_requested"]
 [connection signal="service_action_requested" from="HUD" to="." method="_on_service_action_requested"]
 [connection signal="closed" from="ModalLayer/DocumentOverlayUI" to="." method="_on_modal_closed"]
@@ -567,6 +592,7 @@ unique_name_in_owner = true
 [connection signal="train_motion_changed" from="ModalLayer/StationStopCutsceneUI" to="." method="_on_station_cutscene_train_motion_changed"]
 [connection signal="continue_requested" from="ModalLayer/ShiftReportUI" to="." method="_on_shift_report_continue"]
 [connection signal="camera_return_requested" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_camera_return_requested"]
+[connection signal="exterior_fade_requested" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_exterior_fade_requested"]
 [connection signal="departure_follow_requested" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_departure_follow_requested"]
 [connection signal="sequence_finished" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_finished"]
 [connection signal="sequence_timeline_changed" from="ModalLayer/NightTransitionCutsceneUI" to="." method="_on_night_transition_timeline_changed"]
@@ -582,6 +608,9 @@ unique_name_in_owner = true
 [connection signal="departures_confirmed" from="ModalLayer/NightPuzzleUI" to="." method="_on_departures_confirmed"]
 [connection signal="validation_finished" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_validation_finished"]
 [connection signal="validation_impact_requested" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_validation_impact_requested"]
+[connection signal="day_restart_requested" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_puzzle_day_restart"]
+[connection signal="night_restart_requested" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_puzzle_night_restart"]
+[connection signal="give_up_requested" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_puzzle_give_up"]
 [connection signal="closed" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signature_closed"]
 [connection signal="service_signed" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signed"]
 [connection signal="signature_rejected" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signature_rejected"]
@@ -591,6 +620,9 @@ unique_name_in_owner = true
 [connection signal="closed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_closed"]
 [connection signal="completed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_completed"]
 [connection signal="dismissed" from="ModalLayer/HintUI" to="." method="_on_level_start_hint_dismissed"]
+[connection signal="credits_requested" from="EndingLayer/HeavenEndingUI" to="." method="_on_heaven_credits_requested"]
+[connection signal="main_menu_requested" from="EndingLayer/HellEndingUI" to="." method="_return_to_main_menu"]
+[connection signal="retry_requested" from="EndingLayer/HellEndingUI" to="." method="_on_hell_retry_requested"]
 [connection signal="main_menu_requested" from="PauseLayer/PauseUI" to="." method="_return_to_main_menu"]
 [connection signal="restart_requested" from="PauseLayer/PauseUI" to="." method="_restart_game"]
 [connection signal="resume_requested" from="PauseLayer/PauseUI" to="." method="_resume_from_pause"]

@@ -4,9 +4,7 @@ extends CanvasLayer
 
 signal guidebook_requested
 signal service_action_requested
-signal debug_next_station_requested
 signal market_tool_requested(tool_id: StringName)
-signal debug_night_requested
 
 @export_category("Inspector Copy")
 @export var clock_template: String = "%02d:%02d %s"
@@ -34,6 +32,7 @@ signal debug_night_requested
 @export_range(0.1, 0.8, 0.01) var clock_hover_out_duration: float = 0.24
 @export_range(0.8, 1.0, 0.01) var clock_sign_hidden_y_scale: float = 0.92
 @export_category("Route Briefing")
+@export var route_briefing_enabled: bool = false
 @export_range(1.0, 8.0, 0.25) var route_briefing_hold_seconds: float = 3.0
 @export_range(-16.0, 0.0, 1.0) var route_briefing_attached_y: float = -8.0
 @export_range(0.0, 16.0, 1.0) var route_briefing_overshoot_pixels: float = 8.0
@@ -59,6 +58,7 @@ signal debug_night_requested
 @export_range(1.0, 1.2, 0.01) var prompt_pop_scale: float = 1.06
 
 @onready var _root: Control = %Root
+@onready var _minimap_anchor: Control = $Root/MinimapAnchor
 @onready var _minimap: TrainMinimap = %TrainMinimap
 @onready var _clock_panel: Control = %ClockPanel
 @onready var _clock_sign_assembly: Control = $Root/ClockPanel/ClockSignAssembly
@@ -82,10 +82,8 @@ signal debug_night_requested
 @onready var _blessing_summary: Control = %BlessingSummary
 @onready var _blessing_earned_label: Label = %BlessingEarnedLabel
 @onready var _blessing_target_label: Label = %BlessingTargetLabel
-@onready var _debug_night_button: Button = %DebugNightButton
 @onready var _guidebook_button: Button = %GuidebookButton
 @onready var _service_action_button: Button = %ServiceActionButton
-@onready var _debug_next_station_button: Button = %DebugNextStationButton
 @onready var _market_item_bar: HBoxContainer = %MarketItemBar
 @onready var _veil_note_slot: Control = %VeilNoteSlot
 @onready var _radar_slot: Control = %RadarSlot
@@ -118,6 +116,7 @@ var _radar_active: bool = false
 var _swiftstep_active: bool = false
 var _displayed_day: int = 1
 var _displayed_blessing_target: int = 0
+var _tutorial_visibility_snapshot: Dictionary = {}
 
 const CLOCK_FILL_ARC_DEGREES: float = 180.0
 
@@ -138,13 +137,7 @@ func _ready() -> void:
 	_route_banner_rest_scale = _route_briefing_banner.scale
 	_clock_hover_area.mouse_entered.connect(_on_clock_hover_entered)
 	_clock_hover_area.mouse_exited.connect(_on_clock_hover_exited)
-	# Keep the clock lifted while the pointer crosses onto the attached button.
-	# As a later ClockPanel sibling, the button also receives clicks ahead of the
-	# broad hover catcher instead of being occluded by it.
-	_debug_next_station_button.mouse_entered.connect(_on_clock_hover_entered)
-	_debug_next_station_button.mouse_exited.connect(_on_clock_hover_exited)
 	_route_briefing_banner.hide()
-	_debug_next_station_button.visible = false
 	_service_action_button.visible = false
 	set_swiftstep_active(false)
 
@@ -191,8 +184,8 @@ func set_clock_progress(value: float, animate: bool = false) -> void:
 
 func _apply_clock_progress(progress: float) -> void:
 	_clock_progress = clampf(progress, 0.0, 1.0)
-	var completed_stops: float = _clock_progress * float(clock_stop_count)
-	var traveled_degrees: float = completed_stops * clock_degrees_per_stop
+	# One full dial sweep per leg (day) or per Night Service (night).
+	var traveled_degrees: float = _clock_progress * CLOCK_FILL_ARC_DEGREES
 	var fill_material := _clock_fill.material as ShaderMaterial
 	if fill_material != null:
 		# The shader covers a 180-degree semicircle. Deriving its progress from the
@@ -312,14 +305,19 @@ func _refresh_service_summary(blessings: int) -> void:
 
 
 func request_market_item(shortcut_number: int) -> bool:
+	# Shortcut order follows the visual bar order: Radar, Swiftstep, Veil Note.
 	match shortcut_number:
 		1:
-			return bool(_veil_note_slot.call(&"request_use"))
-		2:
 			return bool(_radar_slot.call(&"request_use"))
-		3:
+		2:
 			return bool(_swift_slot.call(&"request_use"))
+		3:
+			return bool(_veil_note_slot.call(&"request_use"))
 	return false
+
+
+func is_service_action_available() -> bool:
+	return _service_action_button.visible and not _service_action_button.disabled
 
 
 func set_maintenance_targets(target_entries: Array[Dictionary]) -> void:
@@ -524,7 +522,6 @@ func set_day_hud_visible(value: bool) -> void:
 	_blessing_summary.visible = value
 	_guidebook_button.tooltip_text = "Open guidebook"
 	set_service_action_mode(false, value)
-	_debug_night_button.visible = OS.is_debug_build() and value
 	if not value:
 		_reset_clock_hover(true)
 		_hide_route_briefing(true)
@@ -536,11 +533,77 @@ func set_day_hud_visible(value: bool) -> void:
 	# The train minimap remains visible through the night walk.
 
 
-func set_debug_next_station_available(value: bool) -> void:
-	_debug_next_station_button.visible = OS.is_debug_build() and value
+func show_tutorial_minimap_only() -> void:
+	if _tutorial_visibility_snapshot.is_empty():
+		for child: Node in _root.get_children():
+			if child is CanvasItem:
+				_tutorial_visibility_snapshot[child] = (child as CanvasItem).visible
+	for child: Node in _root.get_children():
+		if child is CanvasItem:
+			(child as CanvasItem).visible = child == _minimap_anchor
+	_root.show()
+	_minimap_anchor.show()
+	visible = true
+	_fade_tutorial_reveal(_minimap_anchor)
+
+
+func reveal_tutorial_clock() -> void:
+	_clock_panel.show()
+	_fade_tutorial_reveal(_clock_panel)
+
+
+func reveal_tutorial_blessings() -> void:
+	_day_summary.show()
+	_blessing_summary.show()
+	_fade_tutorial_reveal(_day_summary)
+	_fade_tutorial_reveal(_blessing_summary)
+
+
+func reveal_tutorial_guidebook_button() -> void:
+	_guidebook_button.show()
+	_fade_tutorial_reveal(_guidebook_button)
+
+
+## Staged HUD pieces fade in instead of snapping visible.
+func _fade_tutorial_reveal(target: CanvasItem) -> void:
+	if target == null:
+		return
+	target.modulate.a = 0.0
+	var reveal := create_tween()
+	reveal.tween_property(target, ^"modulate:a", 1.0, 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+
+func restore_tutorial_hud_visibility() -> void:
+	for child: Variant in _tutorial_visibility_snapshot:
+		if is_instance_valid(child) and child is CanvasItem:
+			(child as CanvasItem).visible = bool(_tutorial_visibility_snapshot[child])
+	_tutorial_visibility_snapshot.clear()
+
+
+func get_tutorial_minimap_focus_control() -> Control:
+	return _minimap
+
+
+func get_tutorial_clock_focus_control() -> Control:
+	return _clock_panel
+
+
+func get_tutorial_blessings_focus_control() -> Control:
+	return _blessing_summary
+
+
+func get_tutorial_guidebook_focus_control() -> Control:
+	return _guidebook_button
+
+
+func get_tutorial_service_action_focus_control() -> Control:
+	return _service_action_button
 
 
 func show_route_briefing() -> void:
+	if not route_briefing_enabled:
+		_hide_route_briefing(true)
+		return
 	_clock_panel.show()
 	_play_route_briefing()
 
@@ -601,20 +664,10 @@ func _on_market_item_requested(tool_id: StringName) -> void:
 	market_tool_requested.emit(tool_id)
 
 
-func _on_debug_night_button_pressed() -> void:
-	if OS.is_debug_build():
-		debug_night_requested.emit()
-
-
-func _on_debug_next_station_button_pressed() -> void:
-	if OS.is_debug_build():
-		debug_next_station_requested.emit()
-
 func set_night_walk_mode() -> void:
 	_clock_panel.show()
 	_day_summary.show()
 	_blessing_summary.show()
-	_debug_night_button.hide()
 	_guidebook_button.tooltip_text = "Open guidebook"
 	set_service_action_mode(true)
 	_tool_status_label.visible = false
@@ -757,10 +810,15 @@ func _hide_route_briefing(immediate: bool) -> void:
 	if immediate:
 		_finish_route_briefing()
 
-func notify(message: String, seconds: float = 3.0) -> void:
+func notify(
+	message: String,
+	seconds: float = 3.0,
+	font_color: Color = Color(0.0, 0.0, 0.0, 1.0)
+) -> void:
 	if is_instance_valid(_notification_tween):
 		_notification_tween.kill()
 	_notification_label.text = message
+	_notification_label.add_theme_color_override(&"font_color", font_color)
 	_notification_panel.visible = true
 	_notification_panel.modulate.a = 0.0
 	_notification_tween = create_tween()

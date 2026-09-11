@@ -22,11 +22,6 @@ func set_value_no_signal(new_value: int) -> void:
 	queue_redraw()
 
 
-func set_ink_color(new_color: Color) -> void:
-	ink_color = new_color
-	queue_redraw()
-
-
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		_dragging = event.pressed
