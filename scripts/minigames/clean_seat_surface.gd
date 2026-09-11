@@ -37,6 +37,7 @@ var _foam_present: bool = false
 
 
 func _ready() -> void:
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	_material = _dirt_layer.material.duplicate() as ShaderMaterial
 	_material.resource_local_to_scene = true
 	_dirt_layer.material = _material

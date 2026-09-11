@@ -20,6 +20,7 @@ enum Step {
 	PASSENGER_PROMPT,
 	PASSENGER,
 	DOCUMENTS,
+	PRESS_Q,
 	DOCUMENT_TICKET,
 	STAMP_GUIDE,
 	STAMP_RETRY,
@@ -42,6 +43,12 @@ enum Step {
 	NIGHT_RECORD,
 	NIGHT_PAYOUT,
 	NIGHT_MAP,
+	EXAM_INTRO,
+	EXAM_BRIEF,
+	EXAM_SUCCESS,
+	EXAM_SIGN,
+	EXAM_TRAVEL,
+	PAYCHECK,
 	DONE,
 }
 
@@ -83,13 +90,15 @@ enum Step {
 @export_range(0.1, 0.6, 0.01) var guidebook_section_spotlight_radius: float = 0.35
 @export_range(8.0, 320.0, 1.0) var vanish_jump_height_pixels: float = 120.0
 @export_range(0.2, 1.5, 0.05) var vanish_duration_seconds: float = 0.6
+@export_category("Stamp Exam")
+@export_range(30.0, 300.0, 5.0) var exam_duration_seconds: float = 120.0
+@export_range(0.05, 0.5, 0.01) var exam_button_spotlight_radius: float = 0.14
 @export_category("Passenger Reveal")
 @export var tutorial_passenger_profile: PassengerIdentityProfile
 @export_range(1, 4, 1) var tutorial_passenger_carriage: int = 2
 @export_range(0, 11, 1) var tutorial_passenger_seat_index: int = 5
 @export_range(0.0, 2.0, 0.05) var passenger_spawn_hold_seconds: float = 0.5
-@export_range(0.1, 2.0, 0.05) var passenger_camera_move_seconds: float = 0.65
-@export var passenger_camera_zoom: Vector2 = Vector2(1.75, 1.75)
+@export_range(0.1, 2.0, 0.05) var passenger_camera_move_seconds: float = 1.2
 @export_range(0.1, 1.5, 0.05) var passenger_spawn_animation_seconds: float = 0.55
 @export_range(8.0, 160.0, 1.0) var passenger_spawn_jump_height: float = 54.0
 @export var passenger_intro_prompt: String = "This is a passenger. Hmm, I feel like I have seen this person before."
@@ -159,6 +168,9 @@ var _current_spotlight_radius: float = 0.125
 var _hud_reveal_token: int = 0
 var _passenger_reveal_token: int = 0
 var _tutorial_passenger: Passenger
+var _exam_passengers: Array[Passenger] = []
+var _exam_time_remaining: float = 0.0
+var _exam_running: bool = false
 var _passenger_pointer_target: Node2D
 var _passenger_pointer_time: float = 0.0
 var _portrait_base_scale: Vector2 = Vector2.ONE
@@ -220,6 +232,11 @@ func start(main_node: Node) -> void:
 		var section_callback := Callable(self, &"_on_guidebook_section_shown")
 		if not guidebook.is_connected(&"section_shown", section_callback):
 			guidebook.connect(&"section_shown", section_callback)
+	var overlay := _main.get_node_or_null("%DocumentOverlayUI")
+	if overlay != null and overlay.has_signal(&"ticket_face_shown"):
+		var ticket_callback := Callable(self, &"_on_ticket_face_shown")
+		if not overlay.is_connected(&"ticket_face_shown", ticket_callback):
+			overlay.connect(&"ticket_face_shown", ticket_callback)
 	if _main.has_method(&"set_tutorial_route_time_paused"):
 		_main.call(&"set_tutorial_route_time_paused", true)
 	show()
@@ -259,6 +276,8 @@ func _process(delta: float) -> void:
 	_update_spotlight()
 	_update_passenger_pointer(delta)
 	_update_typewriter(delta)
+	if _exam_running:
+		_update_exam_timer(delta)
 	if _step != Step.MOVEMENT:
 		return
 	var walking := absf(Input.get_axis(&"move_left", &"move_right")) > 0.1
@@ -552,19 +571,23 @@ func _begin_passenger_reveal() -> void:
 	_tutorial_passenger.enabled = true
 	var passenger_anchor: Node2D = _tutorial_passenger.get_dialogue_anchor()
 	_spotlight_world_target = passenger_anchor
+	# The camera glides first. Only after it arrives does the passenger spawn.
+	if _main.has_method(&"focus_tutorial_camera"):
+		var arrival_tween: Tween = _main.call(
+			&"focus_tutorial_camera",
+			passenger_anchor,
+			passenger_camera_move_seconds
+		) as Tween
+		if is_instance_valid(arrival_tween):
+			await arrival_tween.finished
+	if token != _passenger_reveal_token or not is_instance_valid(_tutorial_passenger):
+		return
 	var rest_position: Vector2 = _tutorial_passenger.position
 	var rest_scale: Vector2 = _tutorial_passenger.scale
 	_tutorial_passenger.position = rest_position + Vector2(0.0, passenger_spawn_jump_height * 0.65)
 	_tutorial_passenger.scale = rest_scale * Vector2(0.72, 0.22)
 	_tutorial_passenger.modulate.a = 0.0
 	_tutorial_passenger.show()
-	if _main.has_method(&"focus_tutorial_camera"):
-		_main.call(
-			&"focus_tutorial_camera",
-			passenger_anchor,
-			passenger_camera_zoom,
-			passenger_camera_move_seconds
-		)
 	var jump_duration: float = maxf(passenger_spawn_animation_seconds, 0.1)
 	var rise := create_tween().set_parallel(true)
 	rise.tween_property(
@@ -597,14 +620,6 @@ func _begin_passenger_reveal() -> void:
 		jump_duration * 0.44
 	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	await land.finished
-	if token != _passenger_reveal_token or _step != Step.PASSENGER_REVEAL or not is_inside_tree():
-		return
-	var remaining_camera_time: float = maxf(
-		0.0,
-		passenger_camera_move_seconds - passenger_spawn_animation_seconds
-	)
-	if remaining_camera_time > 0.0:
-		await get_tree().create_timer(remaining_camera_time).timeout
 	if token != _passenger_reveal_token or _step != Step.PASSENGER_REVEAL or not is_inside_tree():
 		return
 	_show_continue_step(
@@ -669,12 +684,150 @@ func _update_passenger_pointer(delta: float) -> void:
 	else:
 		_arrow_label.rotation = 0.0
 
+## Stamp exam: five souls board in front of the player, three ordinary and
+## two anomalies. Two minutes, then the exam restarts on failure.
+func _start_exam() -> void:
+	if _exam_passengers.is_empty():
+		var group: Array = []
+		if _main != null and _main.has_method(&"spawn_tutorial_exam_group"):
+			group = _main.call(&"spawn_tutorial_exam_group")
+		for passenger: Passenger in group:
+			if is_instance_valid(passenger):
+				_exam_passengers.append(passenger)
+	_restart_tutorial_exam()
+
+
+func _restart_tutorial_exam() -> void:
+	if _main != null and _main.has_method(&"_on_station_assignment_toggled"):
+		for passenger: Passenger in _exam_passengers:
+			if (
+				is_instance_valid(passenger)
+				and passenger.data != null
+				and not passenger.data.stamped_station.is_empty()
+			):
+				_main.call(
+					&"_on_station_assignment_toggled",
+					passenger.data.passenger_name,
+					false
+				)
+	_exam_time_remaining = exam_duration_seconds
+	_exam_running = false
+	_progress_label.hide()
+	_show_continue_step(
+		Step.EXAM_INTRO,
+		"The Inspector",
+		"Good. Now I will test how thorough you are. Five souls will board in front of you.",
+		""
+	)
+
+
+func _begin_exam_brief() -> void:
+	_exam_time_remaining = exam_duration_seconds
+	_exam_running = true
+	_show_wait_step(
+		Step.EXAM_BRIEF,
+		"Stamp Test",
+		"Stamp every passenger except the anomalies. Two of these five souls are not what they seem. You have 2 minutes.",
+		""
+	)
+	_progress_label.show()
+	_update_exam_timer_label()
+	_set_controls(true, true)
+
+
+func _update_exam_timer(delta: float) -> void:
+	if _step != Step.EXAM_BRIEF:
+		return
+	_exam_time_remaining = maxf(0.0, _exam_time_remaining - delta)
+	_update_exam_timer_label()
+	if _exam_time_remaining <= 0.0:
+		_restart_tutorial_exam()
+
+
+func _update_exam_timer_label() -> void:
+	if not is_instance_valid(_progress_label):
+		return
+	var total_seconds: int = maxi(0, int(ceil(_exam_time_remaining)))
+	_progress_label.text = "TIME LEFT %d:%02d" % [total_seconds / 60, total_seconds % 60]
+
+
+func _on_exam_stamp(payload: Variant) -> void:
+	if _step != Step.EXAM_BRIEF or not _exam_running:
+		return
+	var station: String = str((payload as Dictionary).get("station", "")) if payload is Dictionary else ""
+	var offender: Passenger = null
+	var correct_count: int = 0
+	for passenger: Passenger in _exam_passengers:
+		if not is_instance_valid(passenger) or passenger.data == null:
+			continue
+		if passenger.data.stamped_station.is_empty():
+			continue
+		if passenger.data.anomaly_type != "none":
+			offender = passenger
+			break
+		if passenger.data.stamped_station == passenger.data.destination_station:
+			correct_count += 1
+		else:
+			offender = passenger
+			break
+	if offender != null:
+		if _main != null and _main.has_method(&"shake_tutorial_camera"):
+			_main.call(&"shake_tutorial_camera")
+		_restart_tutorial_exam()
+		return
+	var ordinary_total: int = 0
+	for passenger: Passenger in _exam_passengers:
+		if (
+			is_instance_valid(passenger)
+			and passenger.data != null
+			and passenger.data.anomaly_type == "none"
+		):
+			ordinary_total += 1
+	if ordinary_total > 0 and correct_count >= ordinary_total:
+		_exam_running = false
+		_progress_label.hide()
+		_show_continue_step(
+			Step.EXAM_SUCCESS,
+			"Good Job",
+			"Perfect. You are 50 percent ready to run your internship.",
+			""
+		)
+
+
+func _enter_exam_sign() -> void:
+	if _main != null and _main.has_method(&"release_tutorial_modal"):
+		_main.call(&"release_tutorial_modal")
+	if is_instance_valid(_hud) and _hud.has_method(&"set_service_action_mode"):
+		_hud.call(&"set_service_action_mode", false, true)
+	var service_button := _hud.get_node_or_null("%ServiceActionButton") as Control if is_instance_valid(_hud) else null
+	if service_button != null:
+		service_button.visible = true
+		service_button.modulate.a = 0.0
+		var fade := create_tween()
+		fade.tween_property(service_button, ^"modulate:a", 1.0, 0.5)
+	_show_continue_step(
+		Step.EXAM_SIGN,
+		"Sign Service",
+		"I know many workers finish fast. So I prepared this. When you finish a route early with time to spare, press Sign Service to fast-forward to other work. Follow its pattern.",
+		""
+	)
+	_spotlight_service_button()
+
+
+func _spotlight_service_button() -> void:
+	if not is_instance_valid(_hud):
+		return
+	var service_button := _hud.get_node_or_null("%ServiceActionButton") as Control
+	if not is_instance_valid(service_button):
+		return
+	_animate_spotlight_to_control(service_button, exam_button_spotlight_radius, stamp_spotlight_zoom_seconds)
+
 ## Stamp lesson entry: ticket face-up plus a spotlight on Goat's correct stamp.
 func _enter_stamp_guide() -> void:
 	_show_wait_step(
 		Step.STAMP_GUIDE,
 		"Stamping",
-		"Drag the glowing stamp onto Goat's ticket. Flip to the ticket with Q if you only see the ID card.",
+		"Drag a correct stamp onto Goat's ticket.",
 		""
 	)
 	if _main != null and _main.has_method(&"show_tutorial_ticket"):
@@ -694,6 +847,20 @@ func _spotlight_tutorial_stamp() -> void:
 	if not is_instance_valid(button):
 		return
 	_animate_spotlight_to_control(button, stamp_button_spotlight_radius, stamp_spotlight_zoom_seconds)
+
+
+func _on_ticket_face_shown() -> void:
+	if _step != Step.PRESS_Q:
+		return
+	var overlay := _main.get_node_or_null("%DocumentOverlayUI") if _main != null else null
+	if overlay != null and overlay.has_method(&"set_tutorial_locks"):
+		overlay.call(&"set_tutorial_locks", true, true)
+	_show_continue_step(
+		Step.DOCUMENT_TICKET,
+		"Ticket",
+		"This is the ticket. Check the service date, the train code, and the destination. Goat must leave at the next stop.",
+		""
+	)
 
 
 func _validate_tutorial_stamp(payload: Variant) -> void:
@@ -723,7 +890,7 @@ func _validate_tutorial_stamp(payload: Variant) -> void:
 	_show_wait_step(
 		Step.STAMP_RETRY,
 		"Wrong Stamp",
-		"That is the wrong station. The stamp is removed. Read the destination again, then drag the glowing stamp.",
+		"That is the wrong station. The stamp is removed. Read the destination again, then drag a correct stamp onto Goat's ticket.",
 		""
 	)
 	_spotlight_tutorial_stamp()
@@ -948,7 +1115,11 @@ func _get_dialogue_marker_path_for_step(step: Step) -> NodePath:
 			return passenger_prompt_dialogue_marker_path
 		Step.PASSENGER:
 			return passenger_dialogue_marker_path
+		Step.EXAM_INTRO, Step.EXAM_BRIEF, Step.EXAM_SUCCESS:
+			return passenger_dialogue_marker_path
 		Step.DOCUMENTS, Step.STAMP_CLOSE:
+			return documents_dialogue_marker_path
+		Step.PRESS_Q:
 			return documents_dialogue_marker_path
 		Step.DOCUMENT_TICKET, Step.STAMP_GUIDE, Step.STAMP_RETRY, Step.NICE_WORK:
 			return documents_dialogue_marker_path
@@ -964,6 +1135,10 @@ func _get_dialogue_marker_path_for_step(step: Step) -> NodePath:
 			return newspaper_dialogue_marker_path
 		Step.SIGNATURE_PROMPT, Step.SIGNATURE:
 			return signature_dialogue_marker_path
+		Step.EXAM_SIGN:
+			return signature_dialogue_marker_path
+		Step.EXAM_TRAVEL, Step.PAYCHECK:
+			return day_service_dialogue_marker_path
 		Step.DAY_SERVICE:
 			return day_service_dialogue_marker_path
 		Step.NIGHT_MARKET:
@@ -1004,7 +1179,11 @@ func _dialogue_frame_name_for_step(step: Step) -> StringName:
 			return &"PassengerPrompt"
 		Step.PASSENGER:
 			return &"Passenger"
+		Step.EXAM_INTRO, Step.EXAM_BRIEF, Step.EXAM_SUCCESS:
+			return &"Passenger"
 		Step.DOCUMENTS, Step.STAMP_CLOSE:
+			return &"Documents"
+		Step.PRESS_Q:
 			return &"Documents"
 		Step.DOCUMENT_TICKET, Step.STAMP_GUIDE, Step.STAMP_RETRY, Step.NICE_WORK:
 			return &"Documents"
@@ -1020,7 +1199,13 @@ func _dialogue_frame_name_for_step(step: Step) -> StringName:
 			return &"Newspaper"
 		Step.SIGNATURE_PROMPT, Step.SIGNATURE:
 			return &"Signature"
+		Step.EXAM_SIGN:
+			return &"Signature"
 		Step.DAY_SERVICE:
+			return &"DayService"
+		Step.EXAM_TRAVEL:
+			return &"DayService"
+		Step.PAYCHECK:
 			return &"DayService"
 		Step.NIGHT_MARKET:
 			return &"NightMarket"
@@ -1039,23 +1224,18 @@ func _dialogue_frame_name_for_step(step: Step) -> StringName:
 func _place_dialogue_at_frame(step: Step, allow_marker_fallback: bool = true) -> void:
 	if not is_instance_valid(_dialogue_dock):
 		return
-	var marker_path: NodePath = _get_dialogue_marker_path_for_step(step)
-	var marker := get_node_or_null(marker_path) as Marker2D
-	if marker == null:
-		marker = get_node_or_null(default_dialogue_marker_path) as Marker2D
 	if is_instance_valid(_dialogue_frames):
 		var frame := _dialogue_frames.get_node_or_null(String(_dialogue_frame_name_for_step(step))) as Control
 		if frame != null:
-			# The marker owns placement. The optional frame only authors the
-			# bubble size plus the portrait and tail pose for this beat.
-			_dialogue_dock.size = frame.size
+			# The frame owns everything: position, size, scale, and the
+			# portrait/tail pose. Markers are only a fallback.
+			_dialogue_dock.offset_left = frame.offset_left
+			_dialogue_dock.offset_top = frame.offset_top
+			_dialogue_dock.offset_right = frame.offset_right
+			_dialogue_dock.offset_bottom = frame.offset_bottom
 			_dialogue_dock.scale = frame.scale
 			_dock_rest_scale = frame.scale
 			_pose_portrait_and_tail(frame)
-			if marker != null:
-				_dialogue_dock.global_position = marker.global_position
-			else:
-				_dialogue_dock.global_position = frame.global_position
 			return
 	if allow_marker_fallback:
 		_place_dialogue_at_frame_fallback(step)
@@ -1152,12 +1332,14 @@ func _step_copy(step: Step) -> Array:
 			return ["First Inspection", passenger_prompt, ""]
 		Step.DOCUMENTS:
 			return ["Identity Card", "This is Goat's ID card. Look at the portrait, the name, and the CID number. The face on the card must match the passenger.", ""]
+		Step.PRESS_Q:
+			return ["Your Turn", "Now press Q to flip to the ticket.", ""]
 		Step.DOCUMENT_TICKET:
 			return ["Ticket", "This is the ticket. Check the service date, the train code, and the destination. Goat must leave at the next stop.", ""]
 		Step.STAMP_GUIDE:
-			return ["Stamping", "Drag the glowing stamp onto Goat's ticket. Flip to the ticket with Q if you only see the ID card.", ""]
+			return ["Stamping", "Drag a correct stamp onto Goat's ticket.", ""]
 		Step.STAMP_RETRY:
-			return ["Wrong Stamp", "That is the wrong station. The stamp is removed. Read the destination again, then drag the glowing stamp.", ""]
+			return ["Wrong Stamp", "That is the wrong station. The stamp is removed. Read the destination again, then drag a correct stamp onto Goat's ticket.", ""]
 		Step.NICE_WORK:
 			return ["Nice Work", "Correct stamp. Goat leaves at the right stop. Watch closely...", ""]
 		Step.ANOMALY_INTRO:
@@ -1185,7 +1367,7 @@ func _step_copy(step: Step) -> Array:
 		Step.DAY_SERVICE:
 			return ["Clean Coach", clean_coach_prompt, "Click Continue to finish this clean-start tutorial."]
 		Step.NIGHT_MARKET:
-			return ["Night Market", "Spend saved Blessings on Veil Note, Radar, or Swiftstep. Each item has limited stock.", "Click Begin when ready."]
+			return ["Night Market", "This is the Night Market. Tools here make your internship easier. Tonight you cannot buy anything, so just look around.", "Click Begin when ready."]
 		Step.NIGHT_WALK:
 			return ["Night Service", night_prompt, "Inspect each remaining soul. Read carefully and click the one sentence that belongs in the ledger."]
 		Step.NIGHT_RECORD:
@@ -1194,6 +1376,18 @@ func _step_copy(step: Step) -> Array:
 			return ["Night Paycheck", "Each released soul pays +100 Blessings. The first attempt is free; every retry costs −100, with a minimum reward of 0.", ""]
 		Step.NIGHT_MAP:
 			return ["Station Path", "This is the night station path. Use the exact statements in the ledger to place each soul; station pins appear only after you assign someone.", "Complete the assignment to finish the tutorial. Correct souls release Blessings; retries cut the payout after the first attempt."]
+		Step.EXAM_INTRO:
+			return ["The Inspector", "Good. Now I will test how thorough you are. Five souls will board in front of you.", ""]
+		Step.EXAM_BRIEF:
+			return ["Stamp Test", "Stamp every passenger except the anomalies. Two of these five souls are not what they seem. You have 2 minutes.", ""]
+		Step.EXAM_SUCCESS:
+			return ["Good Job", "Perfect. You are 50 percent ready to run your internship.", ""]
+		Step.EXAM_SIGN:
+			return ["Sign Service", "I know many workers finish fast. So I prepared this. When you finish a route early with time to spare, press Sign Service to fast-forward to other work. Follow its pattern.", ""]
+		Step.EXAM_TRAVEL:
+			return ["The Inspector", "Hold on while the train moves.", ""]
+		Step.PAYCHECK:
+			return ["Paycheck", "This is your paycheck. You earn Blessings for correct work. Blessings buy tools for harder shifts.", ""]
 	return ["The Inspector", "Hello. I am the Inspector assigned to this train.", ""]
 
 
@@ -1358,14 +1552,21 @@ func _advance_from_continue() -> void:
 			)
 		Step.PASSENGER_PROMPT:
 			_begin_passenger_inspection_task()
+		Step.EXAM_INTRO:
+			_begin_exam_brief()
+		Step.EXAM_SUCCESS:
+			_enter_exam_sign()
 		Step.ANOMALY:
 			_set_controls(true, true)
 			_show_wait_step(Step.GUIDEBOOK_PROMPT, "Guidebook", guidebook_prompt, "Click the Guidebook or press Tab.")
 		Step.DOCUMENTS:
-			_show_continue_step(
-				Step.DOCUMENT_TICKET,
-				"Ticket",
-				"This is the ticket. Check the service date, the train code, and the destination. Goat must leave at the next stop.",
+			var overlay := _main.get_node_or_null("%DocumentOverlayUI") if _main != null else null
+			if overlay != null and overlay.has_method(&"set_tutorial_locks"):
+				overlay.call(&"set_tutorial_locks", true, true, true)
+			_show_wait_step(
+				Step.PRESS_Q,
+				"Your Turn",
+				"Now press Q to flip to the ticket.",
 				""
 			)
 		Step.DOCUMENT_TICKET:
@@ -1395,6 +1596,9 @@ func _advance_from_continue() -> void:
 			)
 		Step.DAY_SERVICE:
 			finish_tutorial()
+		Step.PAYCHECK:
+			_step = Step.DAY_SERVICE
+			_hide_dialogue_for_task()
 		Step.NIGHT_MAP:
 			finish_tutorial()
 		_:
@@ -1409,10 +1613,15 @@ func _on_main_tutorial_event(event_name: StringName, payload: Variant = null) ->
 			if _step == Step.PASSENGER:
 				_passenger_pointer_target = null
 				_arrow_label.hide()
+				var overlay := _main.get_node_or_null("%DocumentOverlayUI") if _main != null else null
+				if overlay != null and overlay.has_method(&"set_tutorial_locks"):
+					overlay.call(&"set_tutorial_locks", true, true)
 				_show_continue_step(Step.DOCUMENTS, "Identity Card", "This is Goat's ID card. Look at the portrait, the name, and the CID number. The face on the card must match the passenger.", "")
 		&"ticket_stamped":
 			if _step in [Step.DOCUMENTS, Step.DOCUMENT_TICKET, Step.STAMP_GUIDE, Step.STAMP_RETRY]:
 				_validate_tutorial_stamp(payload)
+			elif _step == Step.EXAM_BRIEF:
+				_on_exam_stamp(payload)
 		&"document_closed":
 			if _step == Step.STAMP_CLOSE:
 				_show_continue_step(Step.ANOMALY, "Keep Aboard", "Some passengers are already dead, so never stamp them. Keep them aboard until Night Service can guide them.", "")
@@ -1429,8 +1638,7 @@ func _on_main_tutorial_event(event_name: StringName, payload: Variant = null) ->
 				_set_controls(true, true)
 				_show_wait_step(Step.NEWSPAPER_PROMPT, "Newspaper", newspaper_prompt, "Find the newspaper interactable in the carriage.")
 			elif _step == Step.GUIDEBOOK_ANOMALY:
-				_set_controls(true, true)
-				_show_wait_step(Step.NEWSPAPER_PROMPT, "Newspaper", newspaper_prompt, "Find the newspaper interactable in the carriage.")
+				_start_exam()
 		&"newspaper_opened":
 			if _step in [Step.NEWSPAPER_PROMPT, Step.GUIDEBOOK, Step.GUIDEBOOK_PROMPT]:
 				_show_continue_step(Step.NEWSPAPER, "Morning Paper", "The paper can confirm whether a passenger died before this route. If it names someone aboard as a death case, do not stamp them; keep that soul for Night Service.", "Close the newspaper after reading.")
@@ -1440,10 +1648,24 @@ func _on_main_tutorial_event(event_name: StringName, payload: Variant = null) ->
 		&"service_signed":
 			if _main != null and _main.has_method(&"set_tutorial_route_time_paused"):
 				_main.call(&"set_tutorial_route_time_paused", false)
-			if _step in [Step.SIGNATURE_PROMPT, Step.SIGNATURE]:
+			if _step == Step.EXAM_SIGN:
+				_step = Step.EXAM_TRAVEL
+				_hide_dialogue_for_task()
+			elif _step in [Step.SIGNATURE_PROMPT, Step.SIGNATURE]:
 				_show_wait_step(Step.DAY_SERVICE, "Route Continues", "The train will move to the next station. Keep checking passengers, documents, and evidence until the final station ends daylight service.", "The tutorial will return for Night Market and Night Service.")
+		&"station_arrival_finished":
+			if _step == Step.EXAM_TRAVEL:
+				if _main != null and _main.has_method(&"advance_tutorial_to_terminal_arrival"):
+					_main.call(&"advance_tutorial_to_terminal_arrival")
+		&"shift_report_opened":
+			_show_continue_step(
+				Step.PAYCHECK,
+				"Paycheck",
+				"This is your paycheck. You earn Blessings for correct work. Blessings buy tools for harder shifts.",
+				""
+			)
 		&"night_market_opened":
-			_show_continue_step(Step.NIGHT_MARKET, "Night Market", "Spend saved Blessings on Veil Note, Radar, or Swiftstep. Each item has limited stock.", "Click Begin when ready.")
+			_show_continue_step(Step.NIGHT_MARKET, "Night Market", "This is the Night Market. Tools here make your internship easier. Tonight you cannot buy anything, so just look around.", "Click Begin when ready.")
 		&"night_started":
 			if _step in [Step.DAY_SERVICE, Step.NIGHT_MARKET, Step.NIGHT_WALK]:
 				_show_wait_step(Step.NIGHT_WALK, "Night Service", night_prompt, "Inspect each remaining soul. Read carefully and click the one sentence that belongs in the ledger.")

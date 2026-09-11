@@ -542,6 +542,7 @@ flip_h = true
 
 [node name="TutorialButton" type="Button" parent="UI/MenuPanel/MenuContent/ButtonStack" unique_id=1138320554]
 unique_name_in_owner = true
+visible = false
 custom_minimum_size = Vector2(310, 64)
 layout_mode = 0
 offset_top = 134.0
@@ -568,9 +569,9 @@ script = ExtResource("18_hover")
 unique_name_in_owner = true
 custom_minimum_size = Vector2(310, 64)
 layout_mode = 0
-offset_top = 201.0
+offset_top = 137.0
 offset_right = 310.0
-offset_bottom = 265.0
+offset_bottom = 201.0
 pivot_offset = Vector2(155, 32)
 theme_override_colors/font_color = Color(0.06, 0.045, 0.06, 1)
 theme_override_colors/font_focus_color = Color(0.06, 0.045, 0.06, 1)
@@ -617,6 +618,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -64.0
+offset_bottom = -64.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -624,10 +627,6 @@ texture = ExtResource("10_button")
 expand_mode = 1
 stretch_mode = 5
 flip_h = true
-
-[node name="SettingsUI" parent="UI" unique_id=1427181937 instance=ExtResource("16_settings_ui")]
-unique_name_in_owner = true
-layout_mode = 1
 
 [node name="LoadingScreenUI" parent="." unique_id=723568613 instance=ExtResource("3")]
 unique_name_in_owner = true
@@ -639,10 +638,16 @@ layout_mode = 1
 unique_name_in_owner = true
 libraries/ = SubResource("AnimationLibrary_loading_transition")
 
+[node name="SettingsLayer" type="CanvasLayer" parent="." unique_id=864528912]
+layer = 300
+
+[node name="SettingsUI" parent="SettingsLayer" unique_id=1427181937 instance=ExtResource("16_settings_ui")]
+unique_name_in_owner = true
+
 [connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/StartButton" to="." method="_start_game"]
 [connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/ContinueButton" to="." method="_continue_game"]
 [connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/TutorialButton" to="." method="_start_tutorial"]
 [connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/SettingsButton" to="." method="_show_settings"]
 [connection signal="pressed" from="UI/MenuPanel/MenuContent/ButtonStack/QuitButton" to="." method="_quit_game"]
-[connection signal="main_menu_requested" from="UI/SettingsUI" to="." method="_close_settings"]
-[connection signal="resume_requested" from="UI/SettingsUI" to="." method="_close_settings"]
+[connection signal="main_menu_requested" from="SettingsLayer/SettingsUI" to="." method="_close_settings"]
+[connection signal="resume_requested" from="SettingsLayer/SettingsUI" to="." method="_close_settings"]

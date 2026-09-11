@@ -91,6 +91,15 @@ func _run() -> void:
 	})
 	game._on_market_tool_requested(&"veil_note")
 	_check(game._market_tool_state.veil_notes == 1, "Veil Note activation must be rejected during Day Shift.")
+	_check(
+		game._hud._notification_label.get_theme_color(&"font_color").is_equal_approx(Color.WHITE),
+		"The daytime-only Veil Note notification must render in white."
+	)
+	game._hud.notify("Default notification", 0.01)
+	_check(
+		game._hud._notification_label.get_theme_color(&"font_color").is_equal_approx(Color.BLACK),
+		"Other HUD notifications must retain the default black text."
+	)
 
 	game._jump_directly_to_debug_night()
 	var puzzle: DeparturePuzzleData = game._get_departure_puzzle()

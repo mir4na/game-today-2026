@@ -50,11 +50,6 @@ mouse_filter = 2
 theme = ExtResource("2_theme")
 script = ExtResource("1_script")
 intro_dialogue_pages = PackedStringArray("Hello. I am the Inspector assigned to this train.", "You died before reaching your job interview. The railway is offering you a second chance.", "You will work here as an intern conductor. During the day, inspect passengers and decide who should leave at each station.", "At night, guide the souls who remain to the station where they belong. Do your work well, and this second chance is yours to keep.")
-stamp_button_spotlight_radius = null
-stamp_spotlight_zoom_seconds = null
-guidebook_section_spotlight_radius = null
-vanish_jump_height_pixels = null
-vanish_duration_seconds = null
 tutorial_passenger_profile = ExtResource("8_tutorial_passenger")
 
 [node name="Shade" type="ColorRect" parent="." unique_id=1115400475]
@@ -135,7 +130,7 @@ position = Vector2(82, 34)
 
 [node name="Blessings" type="Marker2D" parent="DialogueMarkers" unique_id=77200140]
 editor_description = "Day Blessings target and scoring dialogue origin."
-position = Vector2(82, 120)
+position = Vector2(82, 256)
 
 [node name="PassengerIntro" type="Marker2D" parent="DialogueMarkers" unique_id=77200190]
 editor_description = "Dialogue shown while the camera remains focused on the newly spawned passenger."
@@ -453,7 +448,6 @@ stretch_mode = 5
 
 [node name="Blessings" type="ColorRect" parent="DialogueFrames" unique_id=77200143]
 editor_description = "Day Blessings target bubble rect."
-visible = false
 layout_mode = 0
 offset_left = 152.0
 offset_top = 457.0
@@ -593,22 +587,21 @@ stretch_mode = 5
 
 [node name="Documents" type="ColorRect" parent="DialogueFrames" unique_id=77200111]
 editor_description = "Document comparison bubble rect."
-visible = false
 layout_mode = 0
-offset_left = 409.0
-offset_top = 34.0
+offset_left = 177.0
+offset_top = 562.0
 offset_right = 946.0
-offset_bottom = 181.0
+offset_bottom = 695.0
 mouse_filter = 2
 color = Color(1, 0.81, 0.27, 0.1)
 
 [node name="PortraitSpot" type="Panel" parent="DialogueFrames/Documents" unique_id=77200160]
 editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
 layout_mode = 0
-offset_left = 599.0
-offset_top = 13.0
-offset_right = 773.0
-offset_bottom = 187.0
+offset_left = 839.0
+offset_top = 7.0000005
+offset_right = 1013.0
+offset_bottom = 181.0
 scale = Vector2(0.8, 0.8)
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
@@ -617,10 +610,10 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
 editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
 modulate = Color(1, 1, 1, 0.65)
 layout_mode = 0
-offset_left = 501.0
-offset_top = 110.0
-offset_right = 584.0
-offset_bottom = 181.0
+offset_left = 743.0
+offset_top = 102.0
+offset_right = 826.0
+offset_bottom = 173.0
 rotation = 4.860446
 mouse_filter = 2
 texture = ExtResource("5_dialogue_pointer")
@@ -629,23 +622,21 @@ stretch_mode = 5
 
 [node name="Anomaly" type="ColorRect" parent="DialogueFrames" unique_id=77200145]
 editor_description = "Keep-aboard bubble rect."
-visible = false
 layout_mode = 0
-offset_left = 304.0
+offset_left = 196.0
 offset_top = 59.0
-offset_right = 1406.0
-offset_bottom = 271.0
-scale = Vector2(0.7, 0.7)
+offset_right = 1065.0
+offset_bottom = 233.0
 mouse_filter = 2
 color = Color(1, 0.81, 0.27, 0.1)
 
 [node name="PortraitSpot" type="Panel" parent="DialogueFrames/Anomaly" unique_id=77200182]
 editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
 layout_mode = 0
-offset_left = 1152.8573
-offset_top = 37.142857
-offset_right = 1326.8573
-offset_bottom = 211.14285
+offset_left = 888.0
+offset_top = 71.0
+offset_right = 1062.0
+offset_bottom = 245.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
 
@@ -653,10 +644,10 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
 editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
 modulate = Color(1, 1, 1, 0.65)
 layout_mode = 0
-offset_left = 1084.2859
-offset_top = 48.57144
-offset_right = 1167.2859
-offset_bottom = 119.57144
+offset_left = 847.0
+offset_top = 22.99997
+offset_right = 930.0
+offset_bottom = 93.99997
 rotation = 0.82319385
 mouse_filter = 2
 texture = ExtResource("5_dialogue_pointer")
@@ -701,6 +692,7 @@ stretch_mode = 5
 
 [node name="Newspaper" type="ColorRect" parent="DialogueFrames" unique_id=77200115]
 editor_description = "Newspaper prompt bubble rect."
+visible = false
 layout_mode = 0
 offset_left = 194.0
 offset_top = 67.0
@@ -808,10 +800,10 @@ stretch_mode = 5
 editor_description = "Night Market bubble rect."
 visible = false
 layout_mode = 0
-offset_left = 82.0
-offset_top = 482.0
-offset_right = 1184.0
-offset_bottom = 694.0
+offset_left = 29.0
+offset_top = 38.0
+offset_right = 468.0
+offset_bottom = 232.0
 mouse_filter = 2
 color = Color(1, 0.81, 0.27, 0.1)
 
@@ -829,11 +821,11 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
 editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
 modulate = Color(1, 1, 1, 0.65)
 layout_mode = 0
-offset_left = 921.0
-offset_top = -133.0
-offset_right = 1004.0
-offset_bottom = -62.0
-rotation = 1.8027644
+offset_left = 482.0
+offset_top = 120.0
+offset_right = 565.0
+offset_bottom = 191.0
+rotation = 2.6294124
 mouse_filter = 2
 texture = ExtResource("5_dialogue_pointer")
 expand_mode = 1
@@ -876,22 +868,22 @@ stretch_mode = 5
 
 [node name="NightRecord" type="ColorRect" parent="DialogueFrames" unique_id=77200125]
 editor_description = "Hidden statement bubble rect."
-visible = false
 layout_mode = 0
-offset_left = 82.0
-offset_top = 34.0
-offset_right = 1184.0
-offset_bottom = 246.0
+offset_left = 330.0
+offset_top = 28.0
+offset_right = 1004.0
+offset_bottom = 173.0
 mouse_filter = 2
 color = Color(1, 0.81, 0.27, 0.1)
 
 [node name="PortraitSpot" type="Panel" parent="DialogueFrames/NightRecord" unique_id=77200174]
 editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
 layout_mode = 0
-offset_left = 992.0
-offset_top = -220.0
-offset_right = 1166.0
-offset_bottom = -46.0
+offset_left = -227.0
+offset_top = 18.0
+offset_right = -53.0
+offset_bottom = 192.0
+scale = Vector2(0.9, 0.9)
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
 
@@ -899,11 +891,11 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
 editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
 modulate = Color(1, 1, 1, 0.65)
 layout_mode = 0
-offset_left = 921.0
-offset_top = -133.0
-offset_right = 1004.0
-offset_bottom = -62.0
-rotation = 1.8027644
+offset_left = 17.0
+offset_top = 55.0
+offset_right = 100.0
+offset_bottom = 126.0
+rotation = 1.5259299
 mouse_filter = 2
 texture = ExtResource("5_dialogue_pointer")
 expand_mode = 1
@@ -913,20 +905,21 @@ stretch_mode = 5
 editor_description = "Night paycheck math bubble rect."
 visible = false
 layout_mode = 0
-offset_left = 82.0
-offset_top = 482.0
-offset_right = 1184.0
-offset_bottom = 694.0
+offset_left = 266.0
+offset_top = 41.0
+offset_right = 1011.0
+offset_bottom = 196.0
 mouse_filter = 2
 color = Color(1, 0.81, 0.27, 0.1)
 
 [node name="PortraitSpot" type="Panel" parent="DialogueFrames/NightPayout" unique_id=77200184]
 editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
 layout_mode = 0
-offset_left = 992.0
-offset_top = -220.0
-offset_right = 1166.0
-offset_bottom = -46.0
+offset_left = 797.0
+offset_top = -19.0
+offset_right = 971.0
+offset_bottom = 155.0
+scale = Vector2(0.8, 0.8)
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
 
@@ -934,11 +927,11 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
 editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
 modulate = Color(1, 1, 1, 0.65)
 layout_mode = 0
-offset_left = 921.0
-offset_top = -133.0
-offset_right = 1004.0
-offset_bottom = -62.0
-rotation = 1.8027644
+offset_left = 779.0
+offset_top = 58.999985
+offset_right = 862.0
+offset_bottom = 129.99998
+rotation = 2.107369
 mouse_filter = 2
 texture = ExtResource("5_dialogue_pointer")
 expand_mode = 1
@@ -946,22 +939,22 @@ stretch_mode = 5
 
 [node name="NightMap" type="ColorRect" parent="DialogueFrames" unique_id=77200127]
 editor_description = "Station path bubble rect."
-visible = false
 layout_mode = 0
-offset_left = 82.0
-offset_top = 482.0
-offset_right = 1184.0
-offset_bottom = 694.0
+offset_left = 523.0
+offset_top = 537.0
+offset_right = 1231.0
+offset_bottom = 700.0
 mouse_filter = 2
 color = Color(1, 0.81, 0.27, 0.1)
 
 [node name="PortraitSpot" type="Panel" parent="DialogueFrames/NightMap" unique_id=77200176]
 editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
 layout_mode = 0
-offset_left = 992.0
-offset_top = -220.0
-offset_right = 1166.0
-offset_bottom = -46.0
+offset_left = 600.0
+offset_top = -187.0
+offset_right = 774.0
+offset_bottom = -13.0
+scale = Vector2(0.8, 0.8)
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
 
@@ -969,11 +962,11 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
 editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
 modulate = Color(1, 1, 1, 0.65)
 layout_mode = 0
-offset_left = 921.0
-offset_top = -133.0
-offset_right = 1004.0
-offset_bottom = -62.0
-rotation = 1.8027644
+offset_left = 680.0
+offset_top = -40.0
+offset_right = 763.0
+offset_bottom = 31.0
+rotation = 1.4212126
 mouse_filter = 2
 texture = ExtResource("5_dialogue_pointer")
 expand_mode = 1
@@ -1089,14 +1082,13 @@ stretch_mode = 5
 
 [node name="Panel" type="NinePatchRect" parent="DialogueDock" unique_id=1354808889]
 unique_name_in_owner = true
-editor_description = "Dialogue bubble filling the active step frame. Resize the step frame, not this node; script does not force layout."
+editor_description = "Dialogue bubble filling the active step frame. Resize the step frame, not this node; script does not force layout. Click-through so world input (stamp drag) works beneath the bubble; only ContinueButton stays clickable."
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 texture = ExtResource("4_dialogue_bubble")
 patch_margin_left = 24
 patch_margin_top = 20
@@ -1114,6 +1106,7 @@ offset_right = -36.0
 offset_bottom = -22.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 theme_override_constants/separation = 7
 
 [node name="SpeakerLabel" type="Label" parent="DialogueDock/Panel/Content" unique_id=2101759467]
@@ -1165,6 +1158,7 @@ horizontal_alignment = 1
 [node name="ContinueRow" type="HBoxContainer" parent="DialogueDock/Panel/Content" unique_id=1900415008]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 8
 alignment = 2
 

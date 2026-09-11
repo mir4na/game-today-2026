@@ -12,8 +12,11 @@ signal exterior_fade_completed
 signal sequence_timeline_changed(elapsed: float)
 signal sequence_finished
 
+const RUSH_SFX_CHANNEL: StringName = &"night_transition_rush"
+
 @export var transition_animation: StringName = &"transition"
 @export_range(0.0, 30.0, 0.05) var veil_crossing_time: float = 5.25
+@export_range(1.0, 3.0, 0.05) var pre_market_duration_multiplier: float = 1.65
 @export_category("Market Whiteout")
 @export_range(0.0, 5.0, 0.05) var pre_market_white_hold_seconds: float = 1.0
 @export_range(0.0, 5.0, 0.05) var white_screen_hold_seconds: float = 1.0
@@ -31,16 +34,26 @@ signal sequence_finished
 @export_range(0.0, 1.0, 0.01) var veil_departure_progress: float = 0.58
 @export_range(0.0, 10.0, 0.05) var departure_end_time: float = 8.35
 @export_range(0.0, 10.0, 0.05) var camera_return_time: float = 8.55
+@export_category("Cinematic Rush")
+@export_range(0.0, 5.0, 0.05) var rush_start_time: float = 0.65
+@export_range(1.0, 6.0, 0.1) var maximum_speed_multiplier: float = 5.0
+@export_range(0.0, 1.0, 0.01) var maximum_motion_blur_alpha: float = 0.76
+@export_range(0.0, 1.0, 0.01) var maximum_streak_alpha: float = 0.9
+@export_range(0.0, 1.0, 0.01) var maximum_rain_alpha: float = 0.88
 
 @onready var _animation_player: AnimationPlayer = %TransitionAnimation
 @onready var _backdrop_tint: ColorRect = $BackdropTint
 @onready var _fog_back: ColorRect = $FogBack
 @onready var _fog_front: ColorRect = $FogFront
+@onready var _motion_blur: ColorRect = $MotionBlur
+@onready var _speed_streaks: ColorRect = $SpeedStreaks
+@onready var _transition_rain: ColorRect = $TransitionRain
 @onready var _veil_flash: ColorRect = $VeilFlash
 @onready var _top_bar: ColorRect = $TopBar
 @onready var _bottom_bar: ColorRect = $BottomBar
 
 var _elapsed: float = 0.0
+var _real_elapsed: float = 0.0
 var _veil_crossed: bool = false
 var _departure_follow_requested: bool = false
 var _camera_return_requested: bool = false
@@ -59,6 +72,7 @@ func _ready() -> void:
 
 func play_transition() -> void:
 	_elapsed = 0.0
+	_real_elapsed = 0.0
 	_veil_crossed = false
 	_departure_follow_requested = false
 	_camera_return_requested = false
@@ -74,12 +88,22 @@ func play_transition() -> void:
 	set_process(true)
 	_animation_player.play(&"RESET")
 	_animation_player.advance(0.0)
-	_animation_player.play(transition_animation)
+	_motion_blur.self_modulate.a = 0.0
+	_speed_streaks.self_modulate.a = 0.0
+	_transition_rain.self_modulate.a = 0.0
+	_animation_player.play(
+		transition_animation,
+		-1.0,
+		1.0 / maxf(pre_market_duration_multiplier, 1.0)
+	)
+	GameSFX.start_loop(RUSH_SFX_CHANNEL, &"speed_woosh", -12.0, 0.88)
 	sequence_timeline_changed.emit(_elapsed)
 
 
 func _process(delta: float) -> void:
-	_elapsed += delta
+	_real_elapsed += delta
+	_elapsed += delta / maxf(pre_market_duration_multiplier, 1.0)
+	_update_cinematic_rush()
 	sequence_timeline_changed.emit(_elapsed)
 	if not _departure_follow_requested and _elapsed >= departure_follow_time:
 		_emit_departure_follow_requested()
@@ -88,7 +112,7 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not visible or _elapsed < skip_unlock_seconds:
+	if not visible or _real_elapsed < skip_unlock_seconds:
 		return
 	if event.is_action_pressed(&"ui_cancel"):
 		skip_sequence()
@@ -101,6 +125,7 @@ func skip_sequence() -> void:
 	_animation_player.stop()
 	_elapsed = maxf(_elapsed, veil_crossing_time)
 	_animation_player.seek(veil_crossing_time, true)
+	_update_cinematic_rush()
 	sequence_timeline_changed.emit(_elapsed)
 	_emit_departure_follow_requested()
 	_hold_at_market_whiteout()
@@ -123,6 +148,9 @@ func resume_after_market() -> void:
 	reveal.tween_property(_fog_back, ^"self_modulate:a", 0.0, post_market_fade_seconds).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	reveal.tween_property(_fog_front, ^"self_modulate:a", 0.0, post_market_fade_seconds).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	reveal.tween_property(_backdrop_tint, ^"self_modulate:a", 0.0, post_market_fade_seconds).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	reveal.tween_property(_motion_blur, ^"self_modulate:a", 0.0, post_market_fade_seconds).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	reveal.tween_property(_speed_streaks, ^"self_modulate:a", 0.0, post_market_fade_seconds).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	reveal.tween_property(_transition_rain, ^"self_modulate:a", 0.0, post_market_fade_seconds).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	await reveal.finished
 	# Let the night carriage settle in its normal framing before the camera moves
 	# toward the player. The exterior remains onscreen for the full handoff.
@@ -200,6 +228,7 @@ func _hold_at_market_whiteout() -> void:
 	_market_whiteout_active = true
 	_elapsed = maxf(_elapsed, veil_crossing_time)
 	_animation_player.pause()
+	GameSFX.stop_loop(RUSH_SFX_CHANNEL, 1.0)
 	# The market sits behind a true full-screen whiteout. The cinematic bars
 	# ease out instead of snapping away, like a cutscene ending.
 	_fade_bars(0.0, market_bar_fade_seconds)
@@ -268,6 +297,37 @@ func get_station_environment_alpha() -> float:
 	return 1.0 - _ease_in_out_sine(progress)
 
 
+func get_cinematic_speed_multiplier() -> float:
+	if _market_whiteout_active:
+		return 1.0
+	var ramp_end: float = maxf(veil_crossing_time, rush_start_time + 0.01)
+	var progress: float = clampf(
+		inverse_lerp(rush_start_time, ramp_end, _elapsed),
+		0.0,
+		1.0
+	)
+	var accelerated: float = progress * progress * (3.0 - 2.0 * progress)
+	return lerpf(1.0, maximum_speed_multiplier, accelerated)
+
+
+func _update_cinematic_rush() -> void:
+	var maximum_multiplier: float = maxf(maximum_speed_multiplier, 1.001)
+	var normalized_speed: float = clampf(
+		(get_cinematic_speed_multiplier() - 1.0) / (maximum_multiplier - 1.0),
+		0.0,
+		1.0
+	)
+	_motion_blur.self_modulate.a = smoothstep(0.08, 0.72, normalized_speed) * maximum_motion_blur_alpha
+	_speed_streaks.self_modulate.a = smoothstep(0.16, 0.8, normalized_speed) * maximum_streak_alpha
+	_transition_rain.self_modulate.a = smoothstep(0.24, 0.84, normalized_speed) * maximum_rain_alpha
+	var rain_material := _transition_rain.material as ShaderMaterial
+	if rain_material != null:
+		rain_material.set_shader_parameter(
+			&"motion_boost",
+			lerpf(1.35, 4.5, normalized_speed)
+		)
+
+
 func _finish_sequence() -> void:
 	if _finished:
 		return
@@ -277,6 +337,7 @@ func _finish_sequence() -> void:
 	_emit_departure_follow_requested()
 	_emit_veil_crossed()
 	_emit_camera_return_requested()
+	GameSFX.stop_loop(RUSH_SFX_CHANNEL, 0.45)
 	set_process(false)
 	hide()
 	sequence_finished.emit()

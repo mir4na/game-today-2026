@@ -82,7 +82,7 @@ func _run() -> void:
 	var intro_portrait_spot := intro_frame.get_node("PortraitSpot") as Control
 	var intro_tail_spot := intro_frame.get_node("TailSpot") as Control
 	var bubble_tail := tutorial.get_node("%BubbleTail") as Control
-	_check(dialogue_dock.position.is_equal_approx(intro_marker.position), "Intro dialogue must initialize at its scene marker.")
+	_check(dialogue_dock.position.is_equal_approx(intro_frame.position), "Intro dialogue must initialize at its scene frame.")
 	_check(dialogue_dock.scale.is_equal_approx(intro_frame.scale), "Bubble animation must not alter the DialogueFrames-authored dock scale.")
 	_check(
 		angel_portrait_frame.scale.is_equal_approx(tutorial._portrait_base_scale * intro_portrait_spot.scale),
@@ -153,8 +153,8 @@ func _run() -> void:
 	_check(tutorial._hud._clock_panel.visible, "Clock must become visible after its reveal hold.")
 	_check(tutorial._spotlight_control == tutorial._hud.get_tutorial_clock_focus_control(), "Spotlight must settle on the clock.")
 	_check((tutorial.get_node("%BodyLabel") as Label).text.contains("one full turn"), "Clock dialogue must explain the route time limit.")
-	var clock_marker := tutorial.get_node("%DialogueMarkers/HudClock") as Marker2D
-	_check(dialogue_dock.position.is_equal_approx(clock_marker.position), "HUD clock guidance must move to its own scene marker.")
+	var clock_frame := tutorial.get_node("%DialogueFrames/HudClock") as Control
+	_check(dialogue_dock.position.is_equal_approx(clock_frame.position), "HUD clock guidance must move to its own scene frame.")
 	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
 	await create_timer(0.2).timeout
@@ -179,10 +179,10 @@ func _run() -> void:
 		_check(tutorial_passenger.data.identity_profile == tutorial.tutorial_passenger_profile, "Tutorial must use the NPC 12 identity profile configured in the scene.")
 		_check(tutorial_passenger.get_runtime_carriage() == 2, "Tutorial passenger must spawn in the second carriage.")
 		_check(tutorial_passenger.visible and tutorial_passenger.enabled, "Tutorial passenger must become visible and interactable after landing.")
-	_check(game._gameplay_camera.zoom.is_equal_approx(tutorial.passenger_camera_zoom), "Passenger reveal must zoom the gameplay camera to its scene-configured value.")
+	_check(game._gameplay_camera.zoom.is_equal_approx(game._tutorial_camera_rest_zoom), "Passenger reveal must slide on X without changing the camera zoom.")
 	_check((tutorial.get_node("%BodyLabel") as Label).text.contains("seen this person"), "Passenger introduction must mention the Inspector's sense of recognition.")
-	var passenger_intro_marker := tutorial.get_node("%DialogueMarkers/PassengerIntro") as Marker2D
-	_check(dialogue_dock.position.is_equal_approx(passenger_intro_marker.position), "Passenger introduction must use its scene-authored marker.")
+	var passenger_intro_frame := tutorial.get_node("%DialogueFrames/PassengerIntro") as Control
+	_check(dialogue_dock.position.is_equal_approx(passenger_intro_frame.position), "Passenger introduction must use its scene-authored frame.")
 	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
 	_check(tutorial._step == TutorialDirector.Step.PASSENGER_PROMPT, "Passenger introduction must lead into the inspect instruction.")

@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 GameSFXRuntime="*res://scripts/systems/game_sfx.gd"
+CustomCursor="*res://scripts/systems/custom_cursor_manager.gd"
 RunContext="*res://scripts/systems/run_context.gd"
 
 [display]

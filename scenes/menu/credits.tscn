@@ -1,0 +1,245 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/menu/credits.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/MainMenu/Background.png" id="2_background"]
+[ext_resource type="Texture2D" path="res://assets/MainMenu/HandGrip.png" id="3_handgrip"]
+[ext_resource type="Texture2D" path="res://assets/MainMenu/Character.png" id="4_character"]
+[ext_resource type="Texture2D" path="res://assets/MainMenu/Title.png" id="5_title"]
+[ext_resource type="Shader" path="res://shaders/main_menu_window_travel.gdshader" id="6_window_shader"]
+[ext_resource type="Material" path="res://resources/materials/screen_bloom.tres" id="7_bloom"]
+[ext_resource type="FontFile" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="8_heading"]
+[ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="9_body"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_window"]
+shader = ExtResource("6_window_shader")
+shader_parameter/cloud_color = Color(1, 0.91, 0.92, 0.18)
+shader_parameter/distant_color = Color(0.45, 0.35, 0.46, 0.2)
+shader_parameter/near_color = Color(0.18, 0.22, 0.29, 0.32)
+shader_parameter/glint_color = Color(1, 0.86, 0.78, 0.2)
+shader_parameter/cloud_speed = 0.012
+shader_parameter/distant_speed = 0.055
+shader_parameter/near_speed = 0.48
+shader_parameter/effect_strength = 0.85
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_credits"]
+bg_color = Color(0.075, 0.035, 0.085, 0.86)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.94, 0.67, 0.82, 0.62)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0.04, 0.01, 0.05, 0.56)
+shadow_size = 18
+
+[node name="Credits" type="Control"]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_background")
+expand_mode = 1
+
+[node name="WindowTravelVFX" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_window")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="HandGrip" type="TextureRect" parent="."]
+offset_left = 1056.0
+offset_top = -27.0
+offset_right = 1207.0
+offset_bottom = 159.0
+pivot_offset = Vector2(140, 0)
+mouse_filter = 2
+texture = ExtResource("3_handgrip")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MC" type="TextureRect" parent="."]
+modulate = Color(1, 1, 1, 0.74)
+layout_mode = 1
+anchor_left = 0.58
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 24.0
+offset_right = 12.0
+offset_bottom = 18.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4_character")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BloomScreenCopy" type="BackBufferCopy" parent="."]
+copy_mode = 2
+
+[node name="BloomOverlay" type="ColorRect" parent="."]
+material = ExtResource("7_bloom")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Logo" type="TextureRect" parent="."]
+self_modulate = Color(1, 0.984, 0.945, 1)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 38.0
+offset_top = 28.0
+offset_right = -862.0
+offset_bottom = 238.0
+grow_horizontal = 2
+mouse_filter = 2
+texture = ExtResource("5_title")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CreditsBlock" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 275.0
+offset_top = -620.0
+offset_right = 1005.0
+offset_bottom = -20.0
+theme_override_constants/separation = 21
+alignment = 1
+
+[node name="Panel" type="PanelContainer" parent="CreditsBlock"]
+custom_minimum_size = Vector2(730, 560)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBox_credits")
+
+[node name="Margin" type="MarginContainer" parent="CreditsBlock/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 54
+theme_override_constants/margin_top = 42
+theme_override_constants/margin_right = 54
+theme_override_constants/margin_bottom = 42
+
+[node name="Content" type="VBoxContainer" parent="CreditsBlock/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 17
+alignment = 1
+
+[node name="Heading" type="Label" parent="CreditsBlock/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.83, 0.93, 1)
+theme_override_colors/font_shadow_color = Color(0.13, 0.02, 0.12, 0.9)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 4
+theme_override_fonts/font = ExtResource("8_heading")
+theme_override_font_sizes/font_size = 56
+text = "CREDITS"
+horizontal_alignment = 1
+
+[node name="Thanks" type="Label" parent="CreditsBlock/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94, 0.87, 0.91, 1)
+theme_override_fonts/font = ExtResource("9_body")
+theme_override_font_sizes/font_size = 18
+text = "Thank you for riding beyond the final station."
+horizontal_alignment = 1
+
+[node name="SpacerTop" type="Control" parent="CreditsBlock/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 18)
+layout_mode = 2
+
+[node name="ProgrammerLabel" type="Label" parent="CreditsBlock/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.55, 0.78, 1)
+theme_override_fonts/font = ExtResource("8_heading")
+theme_override_font_sizes/font_size = 30
+text = "PROGRAMMER"
+horizontal_alignment = 1
+
+[node name="Programmers" type="Label" parent="CreditsBlock/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.96, 0.9, 1)
+theme_override_fonts/font = ExtResource("9_body")
+theme_override_font_sizes/font_size = 25
+text = "Ame  •  Ammar"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="CreditsBlock/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 17)
+layout_mode = 2
+
+[node name="ArtistLabel" type="Label" parent="CreditsBlock/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.44, 0.84, 0.9, 1)
+theme_override_fonts/font = ExtResource("8_heading")
+theme_override_font_sizes/font_size = 30
+text = "ARTIST"
+horizontal_alignment = 1
+
+[node name="Artists" type="Label" parent="CreditsBlock/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.96, 0.9, 1)
+theme_override_fonts/font = ExtResource("9_body")
+theme_override_font_sizes/font_size = 25
+text = "Yasmin  •  Mahi  •  Rheina"
+horizontal_alignment = 1
+
+[node name="Farewell" type="Label" parent="CreditsBlock/Panel/Margin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.85, 0.78, 0.84, 1)
+theme_override_fonts/font = ExtResource("9_body")
+theme_override_font_sizes/font_size = 16
+text = "AFTER THE END"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="SkipHint" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -42.0
+offset_bottom = -15.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 0.58)
+theme_override_fonts/font = ExtResource("9_body")
+theme_override_font_sizes/font_size = 14
+text = "PRESS ANY KEY TO RETURN"
+horizontal_alignment = 1
+
+[node name="Fade" type="ColorRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)

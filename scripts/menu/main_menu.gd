@@ -4,6 +4,9 @@ extends Control
 
 const ShiftProgress = preload("res://scripts/systems/shift_progress.gd")
 const DEFAULT_MANIFEST: DailyManifestConfig = preload("res://data/daily_manifest_config.tres")
+const INTRO_SCENE_PATH := "res://scenes/ui/intro_cutscene.tscn"
+const GAME_SCENE_PATH := "res://scenes/main/main.tscn"
+const INTRO_TRANSITION_DURATION_SCALE: float = 3.0
 
 @export_category("Hand Grip Motion")
 @export_range(0.0, 4.0, 0.05) var hand_grip_sway_degrees: float = 1.15
@@ -61,7 +64,6 @@ func _ready() -> void:
 	_setup_mirrored_button_art(_quit_button)
 	_start_train_sfx()
 	_settings_ui.configure_menu_settings_mode(true)
-	_settings_ui.set_night_mode(false)
 	_settings_ui.configure_service_info(DEFAULT_MANIFEST.service_train_number, DEFAULT_MANIFEST.service_date_text)
 	var checkpoint: Dictionary = ShiftProgress.load_checkpoint()
 	var can_continue: bool = not checkpoint.is_empty() and not bool(checkpoint.get("completed", false))
@@ -168,7 +170,7 @@ func _start_game() -> void:
 	if ShiftProgress.start_new_run().is_empty():
 		push_error("A new run could not be saved. Please try again.")
 		return
-	_open_game()
+	_open_game(INTRO_SCENE_PATH, INTRO_TRANSITION_DURATION_SCALE)
 
 
 func _start_tutorial() -> void:
@@ -191,9 +193,12 @@ func _continue_game() -> void:
 	var checkpoint: Dictionary = ShiftProgress.load_checkpoint()
 	if checkpoint.is_empty() or bool(checkpoint.get("completed", false)):
 		return
-	_open_game()
+	_open_game(GAME_SCENE_PATH)
 
-func _open_game() -> void:
+func _open_game(
+	target_scene_path: String = GAME_SCENE_PATH,
+	transition_duration_scale: float = 1.0
+) -> void:
 	if not is_instance_valid(_loading_screen):
 		push_error("MainMenu/LoadingScreenUI scene instance is missing.")
 		return
@@ -206,8 +211,9 @@ func _open_game() -> void:
 	_title_reaction.scale = Vector2.ONE
 	_title_reaction.rotation = 0.0
 	_set_menu_buttons_disabled(true)
-	_loading_screen.begin_loading()
+	_loading_screen.begin_loading(target_scene_path, transition_duration_scale)
 	if _loading_transition_animation.has_animation(&"loading_transition"):
+		_loading_transition_animation.speed_scale = 1.0 / maxf(transition_duration_scale, 0.01)
 		_loading_transition_animation.play(&"loading_transition")
 
 func _quit_game() -> void:

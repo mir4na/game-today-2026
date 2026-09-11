@@ -54,7 +54,10 @@
 [ext_resource type="PackedScene" uid="uid://cmaixkslqrorg" path="res://scenes/ui/veil_note_reveal_ui.tscn" id="48_veil_note_reveal"]
 [ext_resource type="PackedScene" path="res://scenes/ui/service_signature_ui.tscn" id="50_signature_ui"]
 [ext_resource type="PackedScene" uid="uid://dl1hatq1cq2qy" path="res://scenes/ui/hint.tscn" id="51_hint_ui"]
+[ext_resource type="PackedScene" uid="uid://j5aa62op4yf5" path="res://scenes/ui/loading_screen_ui.tscn" id="52_loading"]
 [ext_resource type="PackedScene" path="res://scenes/tutorial/tutorial_director.tscn" id="52_tutorial"]
+[ext_resource type="PackedScene" path="res://scenes/ui/heaven_ending_ui.tscn" id="53_heaven"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hell_ending_ui.tscn" id="54_hell"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_day_cycle_sky"]
 shader = ExtResource("39")
@@ -243,8 +246,8 @@ passenger_identity_profiles = Array[ExtResource("2_08tbl")]([ExtResource("11"), 
 puzzle_resource = ExtResource("17")
 passenger_scene = ExtResource("34")
 manifest_config = ExtResource("37")
-day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere")
-station_travel_durations_seconds = PackedFloat32Array(120, 120, 120)
+day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere", "Eastmere")
+station_travel_durations_seconds = PackedFloat32Array(120, 120, 120, 120)
 debug_print_anomaly_roster = true
 
 [node name="MarketToolState" parent="." unique_id=1541596097 instance=ExtResource("40_market_state")]
@@ -539,10 +542,26 @@ unique_name_in_owner = true
 layout_mode = 1
 use_empty_coach_flow = false
 
+[node name="EndingLayer" type="CanvasLayer" parent="."]
+editor_description = "Ending artwork renders above gameplay bloom and every normal HUD/modal, keeping all ending text crisp."
+layer = 150
+
+[node name="HeavenEndingUI" parent="EndingLayer" instance=ExtResource("53_heaven")]
+unique_name_in_owner = true
+
+[node name="HellEndingUI" parent="EndingLayer" instance=ExtResource("54_hell")]
+unique_name_in_owner = true
+
 [node name="PauseLayer" type="CanvasLayer" parent="." unique_id=1162735996]
-layer = 100
+layer = 300
 
 [node name="PauseUI" parent="PauseLayer" unique_id=680489697 instance=ExtResource("10")]
+unique_name_in_owner = true
+
+[node name="LoadingLayer" type="CanvasLayer" parent="."]
+layer = 200
+
+[node name="LoadingScreenUI" parent="LoadingLayer" instance=ExtResource("52_loading")]
 unique_name_in_owner = true
 
 [connection signal="inventory_changed" from="MarketToolState" to="." method="_on_market_inventory_changed"]
@@ -554,7 +573,6 @@ unique_name_in_owner = true
 [connection signal="newspaper_read" from="GameplayWorld/Train/Cars/PassengerCoach4/Newspaper" to="." method="_on_newspaper_read"]
 [connection signal="timeout" from="MaintenanceTimers/BlockedAisleTimer" to="." method="_on_blocked_aisle_timer_timeout"]
 [connection signal="timeout" from="MaintenanceTimers/DirtySeatTimer" to="." method="_on_dirty_seat_timer_timeout"]
-[connection signal="debug_next_station_requested" from="HUD" to="." method="_on_debug_next_station_requested"]
 [connection signal="debug_night_requested" from="HUD" to="." method="_on_debug_night_requested"]
 [connection signal="guidebook_requested" from="HUD" to="." method="_on_guidebook_requested"]
 [connection signal="service_action_requested" from="HUD" to="." method="_on_service_action_requested"]
@@ -588,6 +606,8 @@ unique_name_in_owner = true
 [connection signal="departures_confirmed" from="ModalLayer/NightPuzzleUI" to="." method="_on_departures_confirmed"]
 [connection signal="validation_finished" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_validation_finished"]
 [connection signal="validation_impact_requested" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_validation_impact_requested"]
+[connection signal="day_restart_requested" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_puzzle_day_restart"]
+[connection signal="night_restart_requested" from="ModalLayer/NightPuzzleUI" to="." method="_on_night_puzzle_night_restart"]
 [connection signal="closed" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signature_closed"]
 [connection signal="service_signed" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signed"]
 [connection signal="signature_rejected" from="ModalLayer/ServiceSignatureUI" to="." method="_on_service_signature_rejected"]
@@ -597,6 +617,9 @@ unique_name_in_owner = true
 [connection signal="closed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_closed"]
 [connection signal="completed" from="ModalLayer/CleanSeatUI" to="." method="_on_maintenance_minigame_completed"]
 [connection signal="dismissed" from="ModalLayer/HintUI" to="." method="_on_level_start_hint_dismissed"]
+[connection signal="credits_requested" from="EndingLayer/HeavenEndingUI" to="." method="_on_heaven_credits_requested"]
+[connection signal="main_menu_requested" from="EndingLayer/HellEndingUI" to="." method="_return_to_main_menu"]
+[connection signal="retry_requested" from="EndingLayer/HellEndingUI" to="." method="_on_hell_retry_requested"]
 [connection signal="main_menu_requested" from="PauseLayer/PauseUI" to="." method="_return_to_main_menu"]
 [connection signal="restart_requested" from="PauseLayer/PauseUI" to="." method="_restart_game"]
 [connection signal="resume_requested" from="PauseLayer/PauseUI" to="." method="_resume_from_pause"]

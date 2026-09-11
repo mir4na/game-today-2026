@@ -48,6 +48,13 @@ func _run() -> void:
 	await process_frame
 	_check(signature.visible, "Pressing the daytime service button must open service sign-off.")
 	_check(game._active_modal == signature, "Service sign-off must own gameplay input while open.")
+	var not_yet_label := signature.get_node(
+		"Panel/QuestionStage/QuestionActions/NotYetButton/Instruction"
+	) as Label
+	_check(
+		not_yet_label.get_theme_color(&"font_color").is_equal_approx(Color.WHITE),
+		"The Not Yet button label must remain white."
+	)
 	var close_hint := signature.get_node("%CloseHint") as Label
 	_check(close_hint.text.contains("E"), "The sign-off panel directs the player to close with E.")
 	signature.request_close()

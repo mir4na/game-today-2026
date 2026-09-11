@@ -44,6 +44,11 @@ func set_passenger(data: PassengerData) -> void:
 func set_stamp_locked(value: bool) -> void:
 	_stamp_locked = value
 	_passenger_ticket.set_stamp_locked(value)
+
+
+func set_instruction_visible(value: bool) -> void:
+	if is_instance_valid(_instruction_label):
+		_instruction_label.visible = value
 	_passenger_ticket.set_stamp_interaction_enabled(is_ticket_active() and not _stamp_locked)
 	_update_instruction()
 

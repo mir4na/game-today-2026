@@ -1,0 +1,326 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/heaven_ending_ui.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/Cutscene/Heaven_Godrays_Back.png" id="2_back_rays"]
+[ext_resource type="Texture2D" path="res://assets/Cutscene/Heaven_Godrays_Front.png" id="3_front_rays"]
+[ext_resource type="Texture2D" path="res://assets/Cutscene/Heaven_Stair.png" id="4_stair"]
+[ext_resource type="Texture2D" path="res://assets/Cutscene/MC_Heaven.png" id="5_mc"]
+[ext_resource type="Shader" path="res://shaders/ending_godray.gdshader" id="6_ray_shader"]
+[ext_resource type="Shader" path="res://shaders/ending_fog.gdshader" id="7_fog_shader"]
+[ext_resource type="FontFile" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="8_heading"]
+[ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="9_body"]
+
+[sub_resource type="Gradient" id="Gradient_heaven"]
+colors = PackedColorArray(0.19, 0.43, 0.68, 1, 0.36, 0.67, 0.84, 1, 0.76, 0.91, 0.94, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture_heaven"]
+gradient = SubResource("Gradient_heaven")
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_back_rays"]
+shader = ExtResource("6_ray_shader")
+shader_parameter/ray_tint = Color(0.78, 0.96, 1, 0.46)
+shader_parameter/pulse_speed = 0.58
+shader_parameter/pulse_amount = 0.22
+shader_parameter/drift_amount = 0.006
+shader_parameter/phase = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_front_rays"]
+shader = ExtResource("6_ray_shader")
+shader_parameter/ray_tint = Color(1, 1, 0.91, 0.5)
+shader_parameter/pulse_speed = 0.76
+shader_parameter/pulse_amount = 0.16
+shader_parameter/drift_amount = 0.004
+shader_parameter/phase = 2.1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fog_back"]
+shader = ExtResource("7_fog_shader")
+shader_parameter/fog_color = Color(0.83, 0.94, 1, 0.52)
+shader_parameter/flow = Vector2(0.035, -0.005)
+shader_parameter/scale = 4.0
+shader_parameter/density = 0.72
+shader_parameter/edge_fade = 0.13
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fog_front"]
+shader = ExtResource("7_fog_shader")
+shader_parameter/fog_color = Color(0.95, 0.98, 1, 0.42)
+shader_parameter/flow = Vector2(-0.023, 0.004)
+shader_parameter/scale = 5.5
+shader_parameter/density = 0.64
+shader_parameter/edge_fade = 0.1
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_receipt"]
+bg_color = Color(0.96, 0.945, 0.86, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.22, 0.34, 0.45, 0.78)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0.05, 0.18, 0.28, 0.35)
+shadow_size = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_button"]
+bg_color = Color(0.23, 0.43, 0.59, 1)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_button_hover"]
+bg_color = Color(0.34, 0.59, 0.73, 1)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[node name="HeavenEndingUI" type="Control"]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("1_script")
+
+[node name="SceneRoot" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Background" type="TextureRect" parent="SceneRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("GradientTexture_heaven")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="BackRays" type="TextureRect" parent="SceneRoot"]
+material = SubResource("ShaderMaterial_back_rays")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_back_rays")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="FogBack" type="ColorRect" parent="SceneRoot"]
+material = SubResource("ShaderMaterial_fog_back")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 1)
+
+[node name="Stair" type="TextureRect" parent="SceneRoot"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -455.0
+offset_bottom = 8.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+texture = ExtResource("4_stair")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CharacterFlight" type="Control" parent="SceneRoot"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -140.0
+offset_top = -235.0
+offset_right = 140.0
+offset_bottom = 45.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CharacterBob" type="Control" parent="SceneRoot/CharacterFlight"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+pivot_offset = Vector2(140, 140)
+
+[node name="Aura" type="TextureRect" parent="SceneRoot/CharacterFlight/CharacterBob"]
+modulate = Color(1, 0.98, 0.72, 0.18)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("5_mc")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MC" type="TextureRect" parent="SceneRoot/CharacterFlight/CharacterBob"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("5_mc")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FrontRays" type="TextureRect" parent="SceneRoot"]
+material = SubResource("ShaderMaterial_front_rays")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_front_rays")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="FogFront" type="ColorRect" parent="SceneRoot"]
+material = SubResource("ShaderMaterial_fog_front")
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -310.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(1, 1, 1, 1)
+
+[node name="EndingTitle" type="Label" parent="SceneRoot"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 24.0
+offset_bottom = 82.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.97, 0.99, 1, 0.92)
+theme_override_colors/font_shadow_color = Color(0.1, 0.28, 0.42, 0.6)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 4
+theme_override_fonts/font = ExtResource("8_heading")
+theme_override_font_sizes/font_size = 44
+text = "THE LAST PLATFORM"
+horizontal_alignment = 1
+
+[node name="PaycheckPanel" type="PanelContainer" parent="SceneRoot"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -248.0
+offset_right = -36.0
+offset_bottom = 248.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBox_receipt")
+
+[node name="Margin" type="MarginContainer" parent="SceneRoot/PaycheckPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="Content" type="VBoxContainer" parent="SceneRoot/PaycheckPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 13
+
+[node name="ReceiptTitle" type="Label" parent="SceneRoot/PaycheckPanel/Margin/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.15, 0.26, 0.34, 1)
+theme_override_fonts/font = ExtResource("8_heading")
+theme_override_font_sizes/font_size = 31
+text = "FINAL PAYCHECK"
+horizontal_alignment = 1
+
+[node name="Rule" type="HSeparator" parent="SceneRoot/PaycheckPanel/Margin/Content"]
+layout_mode = 2
+
+[node name="Summary" type="Label" parent="SceneRoot/PaycheckPanel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.13, 0.2, 0.25, 1)
+theme_override_constants/line_spacing = 5
+theme_override_fonts/font = ExtResource("9_body")
+theme_override_font_sizes/font_size = 18
+text = "DAYS COMPLETED     5 / 5\nSOULS DELIVERED    0\nSOULS MISROUTED    0\nANOMALIES HELD     0\nNIGHT SOULS FREED  0\n\nBLESSINGS EARNED   0\nFINAL BALANCE      0"
+vertical_alignment = 1
+
+[node name="ContinueButton" type="Button" parent="SceneRoot/PaycheckPanel/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+focus_neighbor_top = NodePath(".")
+focus_neighbor_bottom = NodePath(".")
+theme_override_colors/font_color = Color(0.97, 0.99, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("9_body")
+theme_override_font_sizes/font_size = 19
+theme_override_styles/normal = SubResource("StyleBox_button")
+theme_override_styles/hover = SubResource("StyleBox_button_hover")
+theme_override_styles/pressed = SubResource("StyleBox_button_hover")
+text = "CONTINUE TO CREDITS"
+
+[node name="Fade" type="ColorRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[connection signal="pressed" from="SceneRoot/PaycheckPanel/Margin/Content/ContinueButton" to="." method="_on_continue_pressed"]

@@ -84,14 +84,14 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	}
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if not is_instance_valid(_drag_ghost):
 		_drag_ghost = null
 		return
 	if not get_viewport().gui_is_dragging():
 		_free_drag_ghost()
 		return
-	_update_drag_ghost()
+	_update_drag_ghost(delta)
 
 
 func _notification(what: int) -> void:
@@ -120,7 +120,7 @@ func _spawn_drag_ghost() -> void:
 	ghost.z_as_relative = false
 	_drag_ghost_host().add_child(ghost)
 	_drag_ghost = ghost
-	_update_drag_ghost()
+	_update_drag_ghost(0.0)
 
 
 func _drag_ghost_host() -> Node:
@@ -134,10 +134,10 @@ func _drag_ghost_host() -> Node:
 	return self
 
 
-func _update_drag_ghost() -> void:
+func _update_drag_ghost(delta: float) -> void:
 	if not is_instance_valid(_drag_ghost):
 		return
-	_drag_ghost.global_position = get_global_mouse_position() - _drag_ghost.preview_center
+	_drag_ghost.update_drag_position(get_global_mouse_position(), delta)
 
 
 func _free_drag_ghost() -> void:

@@ -37,42 +37,6 @@ shader_parameter/progress = 0.0
 shader_parameter/edge_softness = 0.003
 shader_parameter/fill_origin = Vector2(0.477, 1)
 
-[sub_resource type="StyleBoxFlat" id="DebugSkipNormal"]
-bg_color = Color(0.52549, 0.45098, 0.356863, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.239216, 0.2, 0.184314, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="DebugSkipPressed"]
-bg_color = Color(0.431373, 0.360784, 0.278431, 1)
-border_width_left = 3
-border_width_top = 4
-border_width_right = 3
-border_width_bottom = 2
-border_color = Color(0.176471, 0.145098, 0.137255, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="DebugSkipHover"]
-bg_color = Color(0.615686, 0.52549, 0.411765, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.239216, 0.2, 0.184314, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
 [sub_resource type="StyleBoxEmpty" id="GuidebookButtonTransparent"]
 
 [sub_resource type="StyleBoxEmpty" id="NotificationTextOnlyStyle"]
@@ -136,6 +100,7 @@ text = "BLESSINGS 0"
 [node name="DebugNightButton" type="Button" parent="Root" unique_id=2040065380]
 unique_name_in_owner = true
 editor_description = "Temporary scene-authored shortcut for testing Night Shift. Hide or remove this node when the debug shortcut is no longer needed."
+visible = false
 layout_mode = 1
 offset_left = 10.0
 offset_top = 146.0
@@ -487,41 +452,13 @@ expand_mode = 1
 
 [node name="ClockHoverArea" type="Control" parent="Root/ClockPanel" unique_id=1282893736]
 unique_name_in_owner = true
-editor_description = "Hover hitbox for the dial, revealed destination sign, and attached debug skip sign."
+editor_description = "Hover hitbox for the dial and revealed destination sign."
 anchors_preset = 0
 offset_left = -18.0
 offset_top = -12.0
-offset_right = 512.0
+offset_right = 368.0
 offset_bottom = 480.0
 mouse_default_cursor_shape = 2
-
-[node name="DebugNextStationButton" type="Button" parent="Root/ClockPanel" unique_id=2012593223]
-unique_name_in_owner = true
-editor_description = "Debug-only station skip attached to the right edge of the Next Stop sign. The flat box samples Clock_Sign's #86735B panel color."
-visible = false
-z_index = 40
-layout_mode = 0
-offset_left = 338.0
-offset_top = 196.0
-offset_right = 494.0
-offset_bottom = 251.0
-pivot_offset = Vector2(78, 30.5)
-tooltip_text = "Debug only: trigger the normal arrival flow"
-focus_mode = 0
-mouse_default_cursor_shape = 2
-theme_override_colors/font_color = Color(0.94, 0.94, 0.94, 1)
-theme_override_colors/font_pressed_color = Color(0.901961, 0.847059, 0.741176, 1)
-theme_override_colors/font_hover_color = Color(1, 0.968627, 0.870588, 1)
-theme_override_colors/font_outline_color = Color(0.22, 0.18, 0.17, 0.28)
-theme_override_constants/outline_size = 2
-theme_override_fonts/font = ExtResource("17_clock_font")
-theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("DebugSkipNormal")
-theme_override_styles/pressed = SubResource("DebugSkipPressed")
-theme_override_styles/hover = SubResource("DebugSkipHover")
-text = "SKIP STOP"
-script = ExtResource("24_hover")
-hover_scale = 1.06
 
 [node name="GuidebookButton" type="Button" parent="Root" unique_id=1411831653]
 unique_name_in_owner = true
@@ -888,7 +825,6 @@ texture = ExtResource("28_t0png")
 expand_mode = 1
 
 [connection signal="pressed" from="Root/DebugNightButton" to="." method="_on_debug_night_button_pressed"]
-[connection signal="pressed" from="Root/ClockPanel/DebugNextStationButton" to="." method="_on_debug_next_station_button_pressed"]
 [connection signal="pressed" from="Root/GuidebookButton" to="." method="_on_guidebook_button_pressed"]
 [connection signal="pressed" from="Root/ServiceActionButton" to="." method="_on_service_action_button_pressed"]
 [connection signal="tool_requested" from="Root/MarketItemBar/RadarSlot" to="." method="_on_market_item_requested"]

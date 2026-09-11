@@ -67,6 +67,10 @@ func _run() -> void:
 	_check(not game._debug_day_pass_override, "The debug pass override must clear once the transition begins.")
 
 	var transition := game._night_transition_ui as NightTransitionCutsceneUI
+	_check(
+		transition.pre_market_duration_multiplier >= 1.5,
+		"The daylight-to-market cinematic must run substantially longer than its authored timeline."
+	)
 	_check(transition.get_node_or_null("NightTitle") == null, "The veil transition must not show a Night Service title.")
 	_check(transition.get_node_or_null("VeilSymbol") == null, "The veil transition must not show the old diamond logo.")
 	_check(
@@ -75,24 +79,48 @@ func _run() -> void:
 		"Night reveal and post-zoom exterior holds must each default to one second."
 	)
 	_check(
-		transition.station_fade_end_time <= transition.departure_start_time + 3.0,
-		"The terminal station must clear before fog starts three seconds after departure."
+		(transition.get_node("TopBar") as ColorRect).size.y >= 72.0
+		and (transition.get_node("BottomBar") as ColorRect).size.y >= 72.0,
+		"The night transition must use substantial cinematic letterbox bars."
+	)
+	_check(
+		transition.get_node_or_null("MotionBlur") != null
+		and transition.get_node_or_null("SpeedStreaks") != null
+		and transition.get_node_or_null("TransitionRain") != null,
+		"The night transition must include motion blur, speed streaks, and rain overlays."
 	)
 	var transition_animation := transition.get_node("%TransitionAnimation") as AnimationPlayer
-	transition_animation.seek(transition.departure_start_time + 3.0 - 0.01, true)
-	_check(
-		(transition.get_node("FogBack") as ColorRect).self_modulate.a < 0.01
-		and (transition.get_node("FogFront") as ColorRect).self_modulate.a < 0.01,
-		"Fog must remain absent during the first three seconds of train departure."
-	)
-	transition_animation.seek(transition.departure_start_time + 3.5, true)
+	transition_animation.seek(transition.departure_start_time + 1.8, true)
 	_check(
 		(transition.get_node("FogBack") as ColorRect).self_modulate.a > 0.05
 		and (transition.get_node("FogFront") as ColorRect).self_modulate.a > 0.05,
-		"Both fog layers must arrive after the train has left the station."
+		"Both fog layers must already gather while the train accelerates."
+	)
+	var saved_elapsed: float = transition._elapsed
+	transition._elapsed = transition.veil_crossing_time
+	transition._update_cinematic_rush()
+	_check(
+		transition.get_cinematic_speed_multiplier() >= 4.9
+		and (transition.get_node("MotionBlur") as ColorRect).self_modulate.a > 0.5
+		and (transition.get_node("SpeedStreaks") as ColorRect).self_modulate.a > 0.5
+		and (transition.get_node("TransitionRain") as ColorRect).self_modulate.a > 0.5,
+		"The rush must reach high speed with strong cinematic effects before the veil."
+	)
+	transition._elapsed = saved_elapsed
+	transition_animation.seek(saved_elapsed, true)
+	transition._update_cinematic_rush()
+	_check(
+		game._travel_background.daytime_rain_chance > 0.0
+		and game._travel_background.daytime_rain_chance < 1.0
+		and game._travel_background.night_rain_chance > 0.0
+		and game._travel_background.night_rain_chance < 1.0
+		and game._travel_background.get_node_or_null("%WeatherRain") != null,
+		"Travel rain must remain a per-leg possibility in both day and Night Service."
 	)
 
-	transition._process(transition.departure_follow_time + 0.01)
+	transition._process(
+		(transition.departure_follow_time + 0.01) * transition.pre_market_duration_multiplier
+	)
 	_check(game._station_cinematic_view._departure_following, "The wide camera must begin following the departing train before the veil appears.")
 	var wide_zoom: Vector2 = game._station_cinematic_view._station_camera.zoom
 	game._station_cinematic_view._update_departure_follow(1.0)
@@ -100,7 +128,10 @@ func _run() -> void:
 		game._station_cinematic_view._station_camera.zoom.is_equal_approx(wide_zoom),
 		"Following the departing train must preserve the station shot's wide zoom."
 	)
-	transition._process(transition.veil_crossing_time - transition._elapsed + 0.01)
+	transition._process(
+		(transition.veil_crossing_time - transition._elapsed + 0.01)
+		* transition.pre_market_duration_multiplier
+	)
 	_check(game.state == AfterTheEndGame.GameState.NIGHT_TRANSITION, "The full whiteout must hold before opening the Night Market.")
 	await create_timer(transition.pre_market_white_hold_seconds + 0.05).timeout
 	_check(game.state == AfterTheEndGame.GameState.MARKET, "The held whiteout must open the Night Market after one second.")

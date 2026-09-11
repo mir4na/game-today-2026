@@ -106,14 +106,17 @@ func _run() -> void:
 	)
 
 	var skip_prompt := station_ui.get_node("CinematicBorderLayer/SkipHint/SkipPromptLabel") as Label
-	var skip_button := station_ui.get_node("CinematicBorderLayer/SkipHint/SkipButton") as Button
+	var skip_word := station_ui.get_node("CinematicBorderLayer/SkipHint/SkipWordLabel") as Label
 	assert(skip_prompt != null and skip_prompt.mouse_filter == Control.MOUSE_FILTER_IGNORE, "The non-interactive skip copy must not capture clicks.")
-	assert(skip_button != null and skip_button.flat, "The station skip prompt must be a text-only clickable button.")
-	assert(skip_button.text == "SKIP", "Only the colored SKIP word may act as the cutscene button.")
-	assert(not skip_button.disabled, "The skip button must unlock after the opening screen fade.")
+	assert(skip_word != null and skip_word.mouse_filter == Control.MOUSE_FILTER_IGNORE, "The colored SKIP word must be a non-interactive label.")
+	assert(skip_word.text == "SKIP", "The cutscene must retain its colored SKIP copy.")
 	var skip_requests: Array[int] = [0]
 	station_ui.sequence_skip_requested.connect(func() -> void: skip_requests[0] += 1)
-	skip_button.pressed.emit()
-	assert(skip_requests[0] == 1, "Clicking the skip prompt must request the same cutscene skip as Space.")
+	var anywhere_click := InputEventMouseButton.new()
+	anywhere_click.button_index = MOUSE_BUTTON_LEFT
+	anywhere_click.pressed = true
+	anywhere_click.position = Vector2(37.0, 81.0)
+	station_ui._gui_input(anywhere_click)
+	assert(skip_requests[0] == 1, "Clicking anywhere on the cutscene must request the skip.")
 	print("PASS: station crowd enters naturally, stays grounded, and remains bound to the station world.")
 	quit()
