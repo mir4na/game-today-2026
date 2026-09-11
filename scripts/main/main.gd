@@ -1503,8 +1503,13 @@ func _on_night_statement_feedback_requested(succeeded: bool) -> void:
 	_night_soul_record_misses[passenger_name] = miss_count
 	if miss_count < 3 or _night_soul_record_repulsed.has(passenger_name):
 		return
+	var repelled_passenger: Passenger = _inspected_passenger
+	if not repelled_passenger.fly_away_from(_player.global_position):
+		return
 	_night_soul_record_repulsed[passenger_name] = true
-	_inspected_passenger.fly_away_from(_player.global_position)
+	# The player loses the record together with the soul and must locate its new
+	# carriage before another attempt can be made.
+	_night_soul_record_ui.call(&"request_close")
 
 
 func _on_night_validation_impact_requested(succeeded: bool) -> void:

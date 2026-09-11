@@ -78,6 +78,8 @@ var _night_repel_direction: float = 1.0
 var _night_repel_lift_offset: float = 0.0
 var _night_repel_rotation: float = 0.0
 var _night_repel_airborne: float = 0.0
+var _night_repel_visibility: float = 1.0
+var _night_repel_arrival_start_position: Vector2
 
 const PASSENGER_WALK_SPEED: float = 92.0
 
@@ -212,18 +214,54 @@ func fly_away_from(threat_world_position: Vector2) -> bool:
 	_inspection_resume_walking = false
 	_ai_walking = false
 	_ai_target_position = position
+	enabled = false
+	set_interaction_focus(false)
+	_night_repel_visibility = 1.0
 	_night_repel_tween = create_tween()
 	_night_repel_tween.tween_method(
-		_set_night_repel_progress,
+		_set_night_repel_departure_progress,
 		0.0,
 		1.0,
-		night_repel_duration_seconds
+		night_repel_duration_seconds * 0.46
+	).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+	_night_repel_tween.tween_callback(_teleport_night_repel)
+	_night_repel_tween.tween_method(
+		_set_night_repel_arrival_progress,
+		0.0,
+		1.0,
+		night_repel_duration_seconds * 0.54
 	).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
 	_night_repel_tween.tween_callback(_finish_night_repel)
 	return true
 
 
 func _find_night_repel_target(threat_position: Vector2) -> Vector2:
+	var current_carriage: int = _carriage_from_world_x(position.x)
+	var other_carriages: Array[int] = []
+	for carriage: int in _get_configured_carriages():
+		if carriage != current_carriage:
+			other_carriages.append(carriage)
+	if not other_carriages.is_empty():
+		var target_carriage: int = other_carriages[_rng.randi_range(0, other_carriages.size() - 1)]
+		var activity_candidates: PackedVector2Array = _available_activity_points(target_carriage)
+		if not activity_candidates.is_empty():
+			return activity_candidates[_rng.randi_range(0, activity_candidates.size() - 1)]
+		var carriage_range: Vector2 = _carriage_ranges.get(
+			target_carriage,
+			Vector2(position.x - night_repel_distance, position.x + night_repel_distance)
+		)
+		var range_left: float = minf(carriage_range.x, carriage_range.y) + night_repel_edge_margin
+		var range_right: float = maxf(carriage_range.x, carriage_range.y) - night_repel_edge_margin
+		if range_left > range_right:
+			var range_middle: float = (carriage_range.x + carriage_range.y) * 0.5
+			range_left = range_middle
+			range_right = range_middle
+		for attempt: int in 8:
+			var candidate := Vector2(_rng.randf_range(range_left, range_right), position.y)
+			if _is_stop_position_available(candidate):
+				return candidate
+		return Vector2((range_left + range_right) * 0.5, position.y)
+	# Single-carriage fallback preserves the older flee-away behavior.
 	var train_range := Vector2(position.x - night_repel_distance, position.x + night_repel_distance)
 	if not _carriage_ranges.is_empty():
 		train_range = Vector2(INF, -INF)
@@ -273,13 +311,48 @@ func _find_night_repel_target(threat_position: Vector2) -> Vector2:
 	return desired
 
 
-func _set_night_repel_progress(progress: float) -> void:
+func _set_night_repel_departure_progress(progress: float) -> void:
 	var clamped_progress: float = clampf(progress, 0.0, 1.0)
-	var arc: float = sin(clamped_progress * PI)
-	position = _night_repel_start_position.lerp(_night_repel_target_position, clamped_progress)
-	_night_repel_lift_offset = -night_repel_arc_height * arc
-	_night_repel_rotation = deg_to_rad(8.0) * arc * _night_repel_direction
-	_night_repel_airborne = arc
+	var departure_distance: float = minf(
+		120.0,
+		absf(_night_repel_target_position.x - _night_repel_start_position.x) * 0.24
+	)
+	var departure_target := _night_repel_start_position + Vector2(
+		_night_repel_direction * departure_distance,
+		0.0
+	)
+	position = _night_repel_start_position.lerp(departure_target, clamped_progress)
+	_night_repel_lift_offset = -night_repel_arc_height * clamped_progress
+	_night_repel_rotation = deg_to_rad(9.0) * clamped_progress * _night_repel_direction
+	_night_repel_airborne = clamped_progress
+	_night_repel_visibility = 1.0 - smoothstep(0.08, 0.92, clamped_progress)
+	_update_visual()
+
+
+func _teleport_night_repel() -> void:
+	var arrival_distance: float = minf(
+		105.0,
+		absf(_night_repel_target_position.x - _night_repel_start_position.x) * 0.2
+	)
+	_night_repel_arrival_start_position = _night_repel_target_position - Vector2(
+		_night_repel_direction * arrival_distance,
+		0.0
+	)
+	position = _night_repel_arrival_start_position
+	_night_repel_visibility = 0.0
+	_update_visual()
+
+
+func _set_night_repel_arrival_progress(progress: float) -> void:
+	var clamped_progress: float = clampf(progress, 0.0, 1.0)
+	position = _night_repel_arrival_start_position.lerp(
+		_night_repel_target_position,
+		clamped_progress
+	)
+	_night_repel_lift_offset = -night_repel_arc_height * (1.0 - clamped_progress)
+	_night_repel_rotation = deg_to_rad(9.0) * (1.0 - clamped_progress) * _night_repel_direction
+	_night_repel_airborne = 1.0 - clamped_progress
+	_night_repel_visibility = smoothstep(0.08, 0.78, clamped_progress)
 	_update_visual()
 
 
@@ -287,9 +360,13 @@ func _finish_night_repel() -> void:
 	position = _night_repel_target_position
 	_ai_target_position = position
 	runtime_carriage = _carriage_from_world_x(position.x)
+	if data != null:
+		data.current_carriage = runtime_carriage
 	_night_repel_lift_offset = 0.0
 	_night_repel_rotation = 0.0
 	_night_repel_airborne = 0.0
+	_night_repel_visibility = 1.0
+	enabled = not departed
 	_night_repel_tween = null
 	_update_visual()
 
@@ -301,6 +378,7 @@ func depart_train() -> void:
 	_night_repel_lift_offset = 0.0
 	_night_repel_rotation = 0.0
 	_night_repel_airborne = 0.0
+	_night_repel_visibility = 1.0
 	departed = true
 	boarding_staged = false
 	_inspection_paused = false
@@ -781,7 +859,7 @@ func _update_visual() -> void:
 	body_tint.a = 1.0
 	if is_instance_valid(_body_tint):
 		_body_tint.modulate = body_tint
-	ghost_alpha *= lerpf(1.0, 0.78, _night_repel_airborne)
+	ghost_alpha *= lerpf(1.0, 0.78, _night_repel_airborne) * _night_repel_visibility
 	_passenger_visual.modulate = Color(1.0, 1.0, 1.0, ghost_alpha)
 	# The authored NPC sprites face left by default; the procedural fallback faces right.
 	var faces_left: bool = artwork_faces_left if animated_artwork_active else uses_authored_character_artwork
@@ -809,6 +887,7 @@ func _update_visual() -> void:
 	_shadow.modulate.a = (
 		(dead_shadow_alpha if dead_visual_active else 0.52)
 		* lerpf(1.0, 0.12, _night_repel_airborne)
+		* _night_repel_visibility
 	)
 	if is_instance_valid(_focus_material):
 		_focus_material.set_shader_parameter(
