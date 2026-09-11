@@ -125,8 +125,8 @@ enum Step {
 @export var passenger_intro_prompt: String = "This is a passenger. Hmm, I feel like I have seen this person before."
 @export var passenger_inspect_prompt: String = "Walk over and press E to inspect this passenger. Start with their face, then check their papers."
 @export var anomaly_intro_dialogue_pages: PackedStringArray = PackedStringArray([
-	"Not every passenger on this train is alive. Some of them died before they boarded — yet here they stand, riding alongside the living.",
-	"Your job is not just to stamp tickets. **Identify** anyone who does not belong. If something feels wrong — the shadow, the face, the date — do not stamp them. Keep them aboard for Night Service.",
+	"Not every passenger on this train is alive. Some of them died before they boarded, yet here they stand, riding alongside the living.",
+	"Your job is not just to stamp tickets. Identify anyone who does not belong. If something feels wrong, such as the shadow, the face, or the date, do not stamp them. Keep them aboard for Night Service.",
 ])
 @export_range(0.0, 24.0, 0.5) var inspect_pointer_bob_distance: float = 7.0
 @export_range(0.5, 5.0, 0.1) var inspect_pointer_bob_speed: float = 2.5
@@ -900,7 +900,7 @@ func _begin_exam_brief() -> void:
 	_show_continue_step(
 		Step.EXAM_BRIEF,
 		"Stamp Test",
-		"Stamp every passenger except the anomalies; two of these five souls are not what they seem. You have 2 minutes—one full clock turn.",
+		"Stamp every passenger except the anomalies; two of these five souls are not what they seem. You have 2 minutes, or one full clock turn.",
 		""
 	)
 
@@ -970,6 +970,11 @@ func _on_exam_stamp(payload: Variant) -> void:
 	if ordinary_total > 0 and correct_count >= ordinary_total:
 		_exam_running = false
 		_progress_label.hide()
+		var overlay := _main.get_node_or_null("%DocumentOverlayUI") if _main != null else null
+		if overlay != null and overlay.has_method(&"request_close"):
+			overlay.call(&"request_close")
+		if _main != null and _main.has_method(&"release_tutorial_modal"):
+			_main.call(&"release_tutorial_modal")
 		_show_continue_step(
 			Step.EXAM_SUCCESS,
 			"The Inspector",
@@ -979,6 +984,10 @@ func _on_exam_stamp(payload: Variant) -> void:
 
 
 func _enter_exam_sign_intro() -> void:
+	# Close any open document overlay (ticket/ID view) before revealing the service button.
+	var overlay := _main.get_node_or_null("%DocumentOverlayUI") if _main != null else null
+	if overlay != null and overlay.has_method(&"request_close"):
+		overlay.call(&"request_close")
 	if _main != null and _main.has_method(&"release_tutorial_modal"):
 		_main.call(&"release_tutorial_modal")
 	if is_instance_valid(_hud) and _hud.has_method(&"set_service_action_mode"):
@@ -1080,6 +1089,11 @@ func _validate_tutorial_stamp(payload: Variant) -> void:
 			_tutorial_passenger.data.passenger_name,
 			false
 		)
+	var overlay := _main.get_node_or_null("%DocumentOverlayUI") if _main != null else null
+	if overlay != null:
+		var tray := overlay.get_node_or_null("StampTrayUI")
+		if tray != null and tray.has_method(&"reset_commit"):
+			tray.call(&"reset_commit")
 	_show_wait_step(
 		Step.STAMP_RETRY,
 		"Wrong Stamp",
@@ -1122,7 +1136,7 @@ func _vanish_tutorial_passenger() -> void:
 
 
 func _show_anomaly_intro_page() -> void:
-	var body: String = "Not every passenger on this train is alive. Some of them died before they boarded — yet here they stand, riding alongside the living."
+	var body: String = "Not every passenger on this train is alive. Some of them died before they boarded, yet here they stand, riding alongside the living."
 	if not anomaly_intro_dialogue_pages.is_empty():
 		_anomaly_intro_page_index = clampi(_anomaly_intro_page_index, 0, anomaly_intro_dialogue_pages.size() - 1)
 		body = anomaly_intro_dialogue_pages[_anomaly_intro_page_index]
@@ -1154,7 +1168,7 @@ func _begin_guidebook_button_reveal() -> void:
 	_show_wait_step(
 		Step.GUIDEBOOK_PROMPT,
 		"Guidebook",
-		"This is your Guidebook. **Press Tab** or **click the Guidebook button** to open it. Start with the Anomaly Signs — they tell you what to look for.",
+		"This is your Guidebook. Press Tab or click the Guidebook button to open it. Start with the Anomaly Signs; they tell you what to look for.",
 		""
 	)
 	_set_controls(true, true)
@@ -1621,7 +1635,7 @@ func _step_copy(step: Step) -> Array:
 		Step.EXAM_INTRO:
 			return ["The Inspector", "Good. Now I will test how thorough you are. Five souls will board in front of you.", ""]
 		Step.EXAM_BRIEF:
-			return ["Stamp Test", "Stamp every passenger except the anomalies; two of these five souls are not what they seem. You have 2 minutes—one full clock turn.", ""]
+			return ["Stamp Test", "Stamp every passenger except the anomalies; two of these five souls are not what they seem. You have 2 minutes, or one full clock turn.", ""]
 		Step.EXAM_ACTIVE:
 			return ["Stamp Test", "Stamp Reff, Ratta, and Denta before one clock turn ends. Leave Abby and Mecca unstamped.", ""]
 		Step.EXAM_SUCCESS:
@@ -1883,7 +1897,7 @@ func _advance_from_continue() -> void:
 				_main.call(&"set_tutorial_night_record_guidance", false, true)
 		Step.NIGHT_LEDGER_SAVED:
 			_begin_night_ledger_prompt()
-		Step.NIGHT_MAP_INTRO, Step.NIGHT_MAP_RETRY:
+		Step.NIGHT_MAP_INTRO:
 			_set_night_map_input_blocked(true)
 			_show_continue_step(
 				Step.NIGHT_MAP_ASSIGN,
@@ -1891,6 +1905,14 @@ func _advance_from_continue() -> void:
 				"Drag each soul to its correct station, then press Finalize Assignments.",
 				""
 			)
+		Step.NIGHT_MAP_RETRY:
+			# A rejected submission already explained the error. One Continue press
+			# should immediately reopen the board instead of presenting a second
+			# blocking assignment prompt.
+			_step = Step.NIGHT_MAP_ASSIGN
+			_set_night_map_input_blocked(false)
+			_hide_dialogue_for_task()
+			_set_spotlight_shade(0.0)
 		Step.NIGHT_MAP_ASSIGN:
 			_set_night_map_input_blocked(false)
 			_hide_dialogue_for_task()
@@ -2084,8 +2106,6 @@ func _on_main_tutorial_event(event_name: StringName, payload: Variant = null) ->
 		&"night_assignment_failed":
 			if _step == Step.NIGHT_MAP_ASSIGN:
 				_set_night_map_input_blocked(true)
-				if _main != null and _main.has_method(&"retry_tutorial_night_assignment"):
-					_main.call(&"retry_tutorial_night_assignment")
 				_show_continue_step(
 					Step.NIGHT_MAP_RETRY,
 					"Ledger Checkpoint",

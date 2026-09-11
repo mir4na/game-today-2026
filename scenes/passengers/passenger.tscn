@@ -24,7 +24,7 @@ animations = [{
 }]
 
 [node name="Passenger" type="Area2D"]
-z_index = 2
+z_index = 3
 script = ExtResource("1")
 collision_layer = 0
 collision_mask = 0
@@ -33,7 +33,7 @@ interaction_distance = 105.0
 passenger_idle_collision_path = NodePath("InteractionShape")
 prompt_anchor_path = NodePath("CharacterScale/PassengerVisual/InteractionPromptAnchor")
 focus_visual_path = NodePath("CharacterScale")
-focus_z_index = 2
+focus_z_index = 3
 initial_seated_chance = 0.25
 initial_idle_at_activity_chance = 0.35
 minimum_roaming_source_population = 2

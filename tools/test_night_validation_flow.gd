@@ -27,7 +27,7 @@ func _run() -> void:
 	await process_frame
 	game._active_modal = null
 	game.state = AfterTheEndGame.GameState.DAY
-	game._jump_directly_to_debug_night()
+	game._enter_night(false, false)
 	var puzzle: DeparturePuzzleData = game._get_departure_puzzle()
 	for data: PassengerData in game._get_dead_passenger_data():
 		game._collected_departure_statements[data.short_name] = puzzle.get_statement_for_passenger(data.short_name)
@@ -62,25 +62,31 @@ func _run() -> void:
 	board._assign_passenger_to_station(wrong_station, first_name)
 	board._confirm()
 	var failed_result: Array = await board.validation_finished
+	# Resume after every validation listener has returned; freeing the fixture
+	# from inside the signal emission produces a false-positive engine warning.
+	await process_frame
 	_check(not bool(failed_result[0]), "Any wrong station must reject the whole night attempt.")
 	_check(int(failed_result[1]) == 1, "The first rejected submission must count as attempt one.")
-	_check(game.state == AfterTheEndGame.GameState.NIGHT_PUZZLE, "A rejected station path must keep the ledger open for a retry decision.")
-	_check(board.visible, "The ledger must stay open behind its retry panel.")
-	_check((board.get_node("%FailPanel") as Control).visible, "A rejected route must offer retry and day-restart choices.")
+	_check(game.state == AfterTheEndGame.GameState.HELL_ENDING, "A wrong gameplay assignment must enter the Hell ending.")
+	_check(not board.visible, "Hell Ending UI must replace the map failure panel.")
+	_check(game._hell_ending_ui.visible, "A wrong gameplay assignment must show Hell Ending UI.")
+	_check("NIGHT ASSIGNMENTS INCORRECT" in game._hell_ending_ui.get_node("%Reason").text, "Hell Ending UI must explain the wrong assignment.")
 	_check(
 		game._collected_departure_statements.size() == puzzle.get_assignment_count(),
 		"A rejected route must preserve every Soul Record already found."
 	)
 	_check(game._night_service_elapsed_seconds >= 75.0, "A rejected route must never reset the five-minute timer.")
-	_check(board._assigned_passenger_count() == 0, "A failed submission may clear its board placements for another try.")
-
-	(board.get_node("%RetryNightButton") as Button).pressed.emit()
+	_check(board._assigned_passenger_count() == 0, "A failed submission must clear every soul placement for another try.")
+	_check(game._night_world_prepared, "A wrong Finalize must preserve the current Night Service world.")
+	_check(game._runtime_puzzle == puzzle, "A wrong Finalize must preserve the same puzzle and collected clues.")
+	game._on_hell_retry_requested()
 	await process_frame
-	_check(not (board.get_node("%FailPanel") as Control).visible, "Retrying must dismiss the fail panel.")
-	_check(not board.visible, "Retrying must close the ledger for the cutscene replay.")
-	_check(game.state == AfterTheEndGame.GameState.NIGHT_TRANSITION, "Retrying must replay the night-entry cutscene.")
-	_check(not game._night_world_prepared, "Retrying must rebuild the night world before the replay.")
-	_check(game._runtime_puzzle == null, "Retrying must drop the failed puzzle before the replay.")
+	_check(game.state == AfterTheEndGame.GameState.NIGHT, "REPEAT SHIFT must return directly to Night Shift gameplay.")
+	_check(not game._hell_ending_ui.visible, "Hell Ending UI must close before Night Shift gameplay resumes.")
+	_check(not game._scene_transitioning, "Night-only retry must not reload the gameplay scene.")
+	_check(game._night_world_prepared and game._runtime_puzzle != null, "Night-only retry must rebuild a fresh night puzzle.")
+	_check(game._night_assignment_attempts == 0, "Night-only retry must reset the assignment attempt counter.")
+	_check(game._collected_departure_statements.is_empty(), "Night-only retry must restart Soul Record collection.")
 	var floor_test := MarketToolState.new()
 	floor_test.blessings_per_correct_night_dropoff = 100
 	floor_test.blessings_per_night_statement = 50
@@ -90,5 +96,5 @@ func _run() -> void:
 
 	game.free()
 	if _failures == 0:
-		print("PASS: night validation preserves time and records, then restarts from the night-entry cutscene.")
+		print("PASS: wrong gameplay assignment opens Hell UI and REPEAT SHIFT resumes fresh Night gameplay.")
 	quit(1 if _failures > 0 else 0)

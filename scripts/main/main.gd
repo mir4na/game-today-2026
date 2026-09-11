@@ -121,6 +121,7 @@ var _train_occupants_station_rest_position: Vector2
 var _inspected_passenger: Passenger
 var _night_statement_active: bool = false
 var _tutorial_night_inspection_target_name: String = ""
+var _hell_retry_night_shift_only: bool = false
 var _night_record_camera_rest_offset: Vector2
 var _night_record_camera_target_offset: Vector2
 var _night_record_camera_tween: Tween
@@ -272,6 +273,17 @@ func _ready() -> void:
 func _prepare_tutorial_clean_start() -> void:
 	if tutorial_day_route.size() >= 2:
 		day_route = tutorial_day_route.duplicate()
+	# Tutorial always demonstrates an untouched first shift. Reset through the
+	# scene-owned MarketToolState so its authored starting inventory remains the
+	# single source of truth, then persist that clean checkpoint for Day 1.
+	_market_tool_state.call(&"reset_inventory")
+	_shift_checkpoint = ShiftProgress.make_checkpoint(
+		1,
+		_market_tool_state.call(&"get_snapshot"),
+		_daily_seed,
+		{}
+	)
+	ShiftProgress.save_checkpoint(_shift_checkpoint)
 	state = GameState.DAY
 	_interactables.clear()
 	_daily_manifest.clear()
@@ -951,13 +963,9 @@ func spawn_tutorial_exam_group(
 				data.id_photo_owner = "Reff"
 		elif anomaly_names.has(exam_name) and exam_name == "Mecca":
 			data.is_dead = true
-			data.anomaly_type = "time_invalid_ticket"
+			data.anomaly_type = "shadowless"
 			data.destination_station = far_stop
 			data.required_dropoff_station = far_stop
-			if not DailyManifestGenerator._assign_invalid_ticket_date(data, manifest_config, _daily_rng):
-				data.anomaly_type = "none"
-				data.destination_station = next_stop
-				data.required_dropoff_station = next_stop
 		var passenger: Passenger = _spawn_passenger(data, seat_slot)
 		if passenger == null:
 			continue
@@ -1812,8 +1820,13 @@ func _on_night_statement_feedback_requested(succeeded: bool) -> void:
 	_night_soul_record_misses[passenger_name] = miss_count
 	if miss_count < 3 or _night_soul_record_repulsed.has(passenger_name):
 		return
+	var repelled_passenger: Passenger = _inspected_passenger
+	if not repelled_passenger.fly_away_from(_player.global_position):
+		return
 	_night_soul_record_repulsed[passenger_name] = true
-	_inspected_passenger.fly_away_from(_player.global_position)
+	# The player loses the record together with the soul and must locate its new
+	# carriage before another attempt can be made.
+	_night_soul_record_ui.call(&"request_close")
 
 
 func _on_night_validation_impact_requested(succeeded: bool) -> void:
@@ -2691,7 +2704,14 @@ func _get_day_pass_target() -> int:
 
 func _on_shift_report_continue() -> void:
 	if state == GameState.COMPLETE:
-		# Night paycheck only shows for a successful night; just continue.
+		if _night_paycheck_failed:
+			_shift_report_ui.hide()
+			_show_hell_ending(
+				"NIGHT PAYCHECK BELOW QUOTA",
+				int(_night_blessing_award.get("earned", 0)),
+				int(_night_blessing_award.get("pass_target", 0))
+			)
+			return
 		_continue_after_night_paycheck()
 		return
 	if state != GameState.SHIFT_REPORT:
@@ -3001,7 +3021,7 @@ func _enter_night(enable_controls: bool = true, show_instruction: bool = true) -
 	_resume_train_for_night()
 	_hud.set_next_stop("The End")
 	_hud.set_night_walk_mode()
-	# Night Service starts a fresh five-minute dial and fills the complete
+	# Night Service starts a fresh ten-minute dial and fills the complete
 	# 180-degree arc, independent from the completed daylight route.
 	_hud.set_clock_progress(_night_service_clock_progress())
 	if show_instruction and not night_shift_instruction.strip_edges().is_empty():
@@ -3158,8 +3178,20 @@ func _on_night_validation_finished(succeeded: bool, attempt_count: int) -> void:
 	if state != GameState.NIGHT_PUZZLE:
 		return
 	if not succeeded:
-		# The board stays open behind its own retry/day-restart panel.
-		_emit_tutorial_event(&"night_assignment_failed", attempt_count)
+		if is_tutorial_mode:
+			retry_tutorial_night_assignment()
+			_emit_tutorial_event(&"night_assignment_failed", attempt_count)
+			return
+		# Gameplay mistakes fail the shift through the full ending presentation;
+		# the small failure panel belongs only to the board's internal animation.
+		var puzzle: DeparturePuzzleData = _get_departure_puzzle()
+		var soul_count: int = puzzle.get_assignment_count() if puzzle != null else 0
+		var required: int = soul_count * (
+			int(_market_tool_state.get("blessings_per_correct_night_dropoff"))
+			+ int(_market_tool_state.get("blessings_per_night_statement"))
+		)
+		_night_puzzle_ui.hide()
+		_show_hell_ending("NIGHT ASSIGNMENTS INCORRECT", 0, required, true)
 		return
 	if is_tutorial_mode:
 		_emit_tutorial_event(&"night_assignment_succeeded", attempt_count)
@@ -3251,15 +3283,6 @@ func _complete_night_service(assignments: Dictionary) -> void:
 	_night_paycheck_failed = not night_paycheck_passed
 	_hud.set_service_action_mode(true, false)
 	_dismiss_night_modal_for_paycheck()
-	# Failed assignments → straight to hell; no paycheck screen shown.
-	if not night_paycheck_passed:
-		state = GameState.COMPLETE
-		_show_hell_ending(
-			"NIGHT ASSIGNMENTS INCORRECT",
-			int(_night_blessing_award.get("earned", 0)),
-			night_pass_target
-		)
-		return
 	_active_modal = _shift_report_ui
 	state = GameState.COMPLETE
 	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
@@ -3589,7 +3612,13 @@ func _show_heaven_ending() -> void:
 	_heaven_ending_ui.play_ending(_campaign_summary_with_current_day())
 
 
-func _show_hell_ending(reason: String, paycheck: int, required: int) -> void:
+func _show_hell_ending(
+	reason: String,
+	paycheck: int,
+	required: int,
+	retry_night_shift_only: bool = false
+) -> void:
+	_hell_retry_night_shift_only = retry_night_shift_only
 	_pause_ui.hide()
 	state = GameState.HELL_ENDING
 	_active_modal = _hell_ending_ui
@@ -3608,6 +3637,12 @@ func _on_heaven_credits_requested() -> void:
 
 
 func _on_hell_retry_requested() -> void:
+	if _hell_retry_night_shift_only:
+		_hell_retry_night_shift_only = false
+		_hell_ending_ui.hide()
+		_hud.set_cutscene_hidden(false)
+		_restart_night_shift()
+		return
 	_restart_game()
 
 

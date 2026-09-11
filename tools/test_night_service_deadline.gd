@@ -43,10 +43,10 @@ func _run() -> void:
 		found_passenger.short_name
 	)
 
-	game._night_service_elapsed_seconds = 299.0
+	game._night_service_elapsed_seconds = game.night_service_duration_seconds - 1.0
 	game._update_night_service(1.0, true)
 	await process_frame
-	_check(game.state == AfterTheEndGame.GameState.COMPLETE, "Five minutes must end Night Service even while the ledger is open.")
+	_check(game.state == AfterTheEndGame.GameState.COMPLETE, "Ten minutes must end Night Service even while the ledger is open.")
 	_check(game._shift_report_ui.visible, "The timeout must immediately present the final paycheck.")
 	_check(not board.visible, "The open ledger must close when the deadline arrives.")
 	_check(is_equal_approx(game._night_service_clock_progress(), 1.0), "The timeout must fill the clock to 180 degrees.")

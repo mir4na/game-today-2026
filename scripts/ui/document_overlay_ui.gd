@@ -344,7 +344,9 @@ func _on_stamp_dropped(station_name: String, ticket_position: Vector2) -> void:
 	station_stamp_applied.emit(_data.passenger_name, station_name, ticket_position)
 	# The main game handles authoritative validation synchronously. Only reveal
 	# ink after it has accepted and persisted this exact station choice.
-	if _data.stamped_station == station_name:
+	var accepted: bool = _data.stamped_station == station_name
+	_stamp_tray.resolve_current_drop(accepted)
+	if accepted:
 		_documents.set_station_stamp(station_name, ticket_position, true)
 
 

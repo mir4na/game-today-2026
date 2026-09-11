@@ -257,6 +257,34 @@ func request_close() -> void:
 	closed.emit()
 
 
+## Restores the checkpoint created when this case was opened: every discovered
+## Soul Record remains in the ledger, while placements and validation effects
+## return to their scene-authored, unassigned presentation.
+func restore_assignment_checkpoint() -> void:
+	_assignments.clear()
+	_selected_passenger = ""
+	_validating = false
+	_confirm_button.disabled = false
+	_error_label.text = ""
+	_selection_label.text = _current_instruction
+	if is_instance_valid(_fail_shade):
+		_fail_shade.hide()
+	if is_instance_valid(_fail_panel):
+		_fail_panel.hide()
+	_reset_validation_presentation()
+	for target: NightStationTarget in _station_targets:
+		target.reset_validation_visual()
+	_refresh_ledger_cards()
+	_update_assignment_visuals()
+	_update_counts()
+
+
+## Compatibility entry point for callers/tests that predate the explicit
+## assignment checkpoint name.
+func reset_board() -> void:
+	restore_assignment_checkpoint()
+
+
 func show_error(message: String) -> void:
 	_validating = false
 	_error_label.text = message
@@ -423,24 +451,21 @@ func _show_fail_panel() -> void:
 ## Tutorial retries keep the authored ledger and station path on screen. The
 ## Director supplies the explanation layer, then hands input back to this board.
 func retry_tutorial_assignment_in_place() -> void:
-	_fail_shade.hide()
-	_fail_panel.hide()
-	_validating = false
-	_confirm_button.disabled = false
-	_error_label.text = ""
-	_selection_label.text = _current_instruction
+	restore_assignment_checkpoint()
 
 
 func _on_retry_night_pressed() -> void:
 	if not _validating or not _fail_panel.visible:
 		return
-	# Retry in-place: no cutscene replay, no penalty — just reset the board.
+	# Normal Night Service keeps its existing retry presentation. The stronger
+	# scene-authored checkpoint restoration is reserved for TutorialDirector.
 	_fail_shade.hide()
 	_fail_panel.hide()
 	_validating = false
 	_confirm_button.disabled = false
 	_error_label.text = ""
 	_selection_label.text = _current_instruction
+	_update_counts()
 
 
 func _on_restart_day_pressed() -> void:

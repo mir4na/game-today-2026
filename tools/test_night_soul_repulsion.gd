@@ -2,6 +2,7 @@ extends SceneTree
 ## Verifies per-soul miss tracking and the third-miss flight response.
 
 const MainScene = preload("res://scenes/main/main.tscn")
+const Progress = preload("res://scripts/systems/shift_progress.gd")
 
 var _failures: int = 0
 
@@ -18,8 +19,9 @@ func _check(condition: bool, message: String) -> void:
 
 
 func _run() -> void:
-	if not OS.get_environment("XDG_DATA_HOME").begins_with("/tmp/"):
-		push_error("Use an isolated /tmp XDG_DATA_HOME for this test.")
+	var isolated_save_path: String = OS.get_environment(Progress.TEST_SAVE_PATH_ENV).replace("\\", "/")
+	if "where-do-you-belong-tests" not in isolated_save_path:
+		push_error("Set WHERE_DO_YOU_BELONG_TEST_SAVE to an isolated where-do-you-belong-tests path.")
 		quit(1)
 		return
 	var game := MainScene.instantiate() as AfterTheEndGame
@@ -52,8 +54,7 @@ func _run() -> void:
 	_check(incorrect_sentence_index >= 0, "The Soul Record must contain a decoy sentence.")
 	_check(correct_sentence_index >= 0, "The Soul Record must contain its correct sentence.")
 
-	var player_position: Vector2 = passenger.get_parent().to_local(game._player.global_position)
-	var initial_player_distance: float = absf(passenger.position.x - player_position.x)
+	var initial_carriage: int = passenger.get_runtime_carriage()
 	passenger.night_repel_duration_seconds = 0.12
 	for attempt: int in 3:
 		reader._on_sentence_clicked(incorrect_sentence_index)
@@ -62,7 +63,8 @@ func _run() -> void:
 				not game._night_soul_record_repulsed.has(passenger_name),
 				"The soul must not fly away before its third wrong guess."
 			)
-	await create_timer(0.18).timeout
+	_check(reader._closing, "The third wrong guess must force the Soul Record to close.")
+	await create_timer(0.3).timeout
 
 	_check(
 		int(game._night_soul_record_misses.get(passenger_name, 0)) == 3,
@@ -72,9 +74,10 @@ func _run() -> void:
 		game._night_soul_record_repulsed.has(passenger_name),
 		"The third wrong guess must trigger the soul's flight response."
 	)
+	_check(not reader.visible and not game._night_statement_active, "The Soul Record must be fully dismissed after repulsion.")
 	_check(
-		absf(passenger.position.x - player_position.x) > initial_player_distance + 1.0,
-		"The soul must land farther away from the player."
+		passenger.get_runtime_carriage() != initial_carriage,
+		"The repulsed soul must reappear in a different random carriage."
 	)
 	var minimum_train_x: float = INF
 	var maximum_train_x: float = -INF
@@ -89,6 +92,9 @@ func _run() -> void:
 	)
 
 	var first_landing_position: Vector2 = passenger.position
+	game._on_night_passenger_interacted(passenger)
+	await process_frame
+	_check(reader.visible, "The relocated soul's record must require a new interaction.")
 	reader._on_sentence_clicked(incorrect_sentence_index)
 	await create_timer(0.16).timeout
 	_check(
@@ -106,6 +112,7 @@ func _run() -> void:
 	)
 
 	game.free()
+	DirAccess.remove_absolute(isolated_save_path)
 	if _failures == 0:
-		print("PASS: per-soul misses, third-miss repulsion, train bounds, and post-flight success.")
+		print("PASS: forced close, cross-carriage fade relocation, per-soul misses, and post-flight success.")
 	quit(1 if _failures > 0 else 0)

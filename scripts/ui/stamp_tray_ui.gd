@@ -37,6 +37,7 @@ var _expanded: bool = false
 var _dragging: bool = false
 var _selected_station: String = ""
 var _selected_choice: Control
+var _current_drop_accepted: bool = false
 var _collapse_remaining: float = 0.0
 var _drawer_tween: Tween
 var _drag_tween: Tween
@@ -122,7 +123,13 @@ func reset_commit() -> void:
 		_selected_choice.self_modulate = Color.WHITE
 	_selected_choice = null
 	_selected_station = ""
-	_refresh_availability(true)
+	_current_drop_accepted = false
+	_ticket_is_visible = true
+	show()
+	self_modulate.a = 1.0
+	_set_drawer_x(expanded_x)
+	_expanded = true
+	_animate_choices_in()
 
 
 func cancel_drag() -> void:
@@ -156,9 +163,19 @@ func _input(event: InputEvent) -> void:
 		var local_drop_position := _ticket_local_position(mouse_event.position)
 		var valid_drop: bool = _ticket_target != null and Rect2(Vector2.ZERO, _ticket_target.size).has_point(local_drop_position)
 		if valid_drop:
+			# The ticket area only identifies a candidate drop. DocumentOverlayUI
+			# resolves it synchronously after Main/tutorial validation has run.
+			_current_drop_accepted = false
 			stamp_dropped.emit(_selected_station, local_drop_position)
-		_finish_drag(valid_drop)
+		_finish_drag(valid_drop and _current_drop_accepted)
 		get_viewport().set_input_as_handled()
+
+
+## Called synchronously by DocumentOverlayUI after authoritative validation.
+## A rejected tutorial choice returns to its authored tray slot instead of
+## running the committed slide-out animation.
+func resolve_current_drop(accepted: bool) -> void:
+	_current_drop_accepted = accepted
 
 
 func _on_choice_gui_input(event: InputEvent, station_name: String, choice: Control) -> void:
@@ -177,6 +194,7 @@ func _begin_drag(station_name: String, choice: Control) -> void:
 	_dragging = true
 	_selected_station = station_name
 	_selected_choice = choice
+	_current_drop_accepted = false
 	_expanded = true
 	_drag_preview.texture = preload("res://assets/ui/Stamp/Stamp_TopView.png")
 	_drag_seal_hint.texture = RESULT_TEXTURES.get(station_name) as Texture2D
@@ -221,6 +239,7 @@ func _complete_drag_return(was_committed: bool) -> void:
 		_selected_choice.self_modulate = Color.WHITE
 	_selected_choice = null
 	_selected_station = ""
+	_current_drop_accepted = false
 	if was_committed:
 		mark_committed()
 

@@ -319,12 +319,39 @@ func _run() -> void:
 	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
 	_check(not tutorial.get_node("%DialogueDock").visible, "Station assignment task must leave the map unobstructed.")
-	tutorial._on_main_tutorial_event(&"night_assignment_failed", 2)
-	_check(tutorial._step == TutorialDirector.Step.NIGHT_MAP_RETRY, "Wrong Finalize must return to the open-map ledger checkpoint.")
-	_check(game._night_puzzle_ui.visible, "Wrong Finalize must keep the Night Puzzle UI open.")
+	var tutorial_board := game._night_puzzle_ui as NightPuzzleUI
+	var tutorial_puzzle: DeparturePuzzleData = game._get_departure_puzzle()
+	for passenger_value: Variant in tutorial_puzzle.correct_station_by_passenger.keys():
+		var passenger_name: String = str(passenger_value)
+		tutorial_board._assign_passenger_to_station(
+			str(tutorial_puzzle.correct_station_by_passenger[passenger_value]),
+			passenger_name
+		)
+	# Reproduce the focused validation presentation so the retry assertion also
+	# protects the scene-authored layout, not only the assignment dictionary.
+	tutorial_board._ledger_anchor.position += Vector2(-220.0, 0.0)
+	tutorial_board._station_path_anchor.position += Vector2(90.0, -45.0)
+	tutorial_board._station_path_anchor.scale *= Vector2(1.12, 1.12)
+	tutorial_board._validating = true
+	tutorial_board._show_fail_panel()
+	game._on_night_validation_finished(false, 2)
+	_check(game.state == AfterTheEndGame.GameState.NIGHT_PUZZLE, "Wrong tutorial Finalize must remain in the map lesson.")
+	_check(not game._hell_ending_ui.visible, "Tutorial assignment mistakes must not open Hell Ending UI.")
+	_check(tutorial._step == TutorialDirector.Step.NIGHT_MAP_RETRY, "Wrong tutorial Finalize must return directly to the open-map ledger checkpoint.")
+	_check(tutorial_board.visible, "Wrong Finalize must keep the Night Puzzle UI open.")
+	_check(not tutorial_board._validating, "Wrong tutorial Finalize must unlock a fresh assignment attempt.")
+	_check(tutorial_board._assigned_passenger_count() == 0, "Wrong tutorial Finalize must clear every soul placement.")
+	_check(tutorial_board._confirm_button.disabled, "Tutorial Finalize must remain disabled until every soul is assigned again.")
+	_check(tutorial_board._ledger_anchor.position.is_equal_approx(tutorial_board._ledger_rest_position), "Tutorial ledger must return to its map-open position.")
+	_check(tutorial_board._station_path_anchor.position.is_equal_approx(tutorial_board._station_path_authored_position), "Tutorial constellation must return to its scene-authored position.")
+	_check(tutorial_board._station_path_anchor.scale.is_equal_approx(tutorial_board._station_path_authored_scale), "Tutorial constellation must return to its scene-authored scale.")
+	_check(game._collected_departure_statements.size() == 2, "Tutorial retry must preserve the full statement ledger.")
+	_check(not tutorial_board.get_node("%FailPanel").visible, "Tutorial retry guidance must replace the normal fail panel.")
 	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
 	_check(tutorial._step == TutorialDirector.Step.NIGHT_MAP_ASSIGN, "Ledger checkpoint must re-enter the map assignment instruction.")
+	_check(not tutorial.get_node("%DialogueDock").visible, "One retry Continue press must immediately return control to the Night Puzzle.")
+	_check(tutorial.get_node("%Shade").mouse_filter == Control.MOUSE_FILTER_IGNORE, "Retry must unblock Night Puzzle input.")
 	for tween: Tween in get_processed_tweens():
 		tween.kill()
 	game.free()

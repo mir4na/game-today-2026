@@ -1,16 +1,17 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene format=3 uid="uid://chcw2ygcyvxj7"]
 
-[ext_resource type="Script" path="res://scripts/ui/hell_ending_ui.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/Cutscene/Heaven_Godrays_Back.png" id="2_rays"]
-[ext_resource type="Texture2D" path="res://assets/Cutscene/Hell_Fire.png" id="3_fire"]
-[ext_resource type="Texture2D" path="res://assets/Cutscene/MC_Hell.png" id="4_mc"]
-[ext_resource type="Shader" path="res://shaders/ending_godray.gdshader" id="5_ray_shader"]
-[ext_resource type="Shader" path="res://shaders/ending_fire.gdshader" id="6_fire_shader"]
-[ext_resource type="Shader" path="res://shaders/ending_fog.gdshader" id="7_fog_shader"]
-[ext_resource type="FontFile" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="8_heading"]
-[ext_resource type="FontFile" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="9_body"]
+[ext_resource type="Script" uid="uid://b6vj6s8htfb0e" path="res://scripts/ui/hell_ending_ui.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://cvb7afb146rb2" path="res://assets/Cutscene/Heaven_Godrays_Back.png" id="2_rays"]
+[ext_resource type="Texture2D" uid="uid://dpql3cho5rajj" path="res://assets/Cutscene/Hell_Fire.png" id="3_fire"]
+[ext_resource type="Texture2D" uid="uid://cci6bdykcvcna" path="res://assets/Cutscene/MC_Hell.png" id="4_mc"]
+[ext_resource type="Shader" uid="uid://d0ervsusgdbyd" path="res://shaders/ending_godray.gdshader" id="5_ray_shader"]
+[ext_resource type="Shader" uid="uid://denmtti58lbse" path="res://shaders/ending_fire.gdshader" id="6_fire_shader"]
+[ext_resource type="Shader" uid="uid://bhpipnhdqf6xm" path="res://shaders/ending_fog.gdshader" id="7_fog_shader"]
+[ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="8_heading"]
+[ext_resource type="FontFile" uid="uid://craxrru2e25h4" path="res://fonts/Josefin_Sans/static/JosefinSans-Bold.ttf" id="9_body"]
 
 [sub_resource type="Gradient" id="Gradient_hell"]
+offsets = PackedFloat32Array(0, 0, 1)
 colors = PackedColorArray(0.015, 0.002, 0.004, 1, 0.16, 0.008, 0.012, 1, 0.31, 0.025, 0.018, 1)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture_hell"]
@@ -25,6 +26,14 @@ shader_parameter/pulse_speed = 1.0
 shader_parameter/pulse_amount = 0.28
 shader_parameter/drift_amount = 0.007
 shader_parameter/phase = 1.3
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_smoke"]
+shader = ExtResource("7_fog_shader")
+shader_parameter/fog_color = Color(0.31, 0.035, 0.025, 0.58)
+shader_parameter/flow = Vector2(-0.018, -0.025)
+shader_parameter/scale = 5.0
+shader_parameter/density = 0.74
+shader_parameter/edge_fade = 0.12
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_fire_back"]
 shader = ExtResource("6_fire_shader")
@@ -41,14 +50,6 @@ shader_parameter/wobble = 0.01
 shader_parameter/pulse_amount = 0.18
 shader_parameter/phase = 0.0
 shader_parameter/fire_tint = Color(1, 0.84, 0.56, 1)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_smoke"]
-shader = ExtResource("7_fog_shader")
-shader_parameter/fog_color = Color(0.31, 0.035, 0.025, 0.58)
-shader_parameter/flow = Vector2(-0.018, -0.025)
-shader_parameter/scale = 5.0
-shader_parameter/density = 0.74
-shader_parameter/edge_fade = 0.12
 
 [sub_resource type="StyleBoxFlat" id="StyleBox_choice"]
 bg_color = Color(0.055, 0.012, 0.014, 0.94)
@@ -78,7 +79,7 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
-[node name="HellEndingUI" type="Control"]
+[node name="HellEndingUI" type="Control" unique_id=1428123054]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -86,12 +87,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
 script = ExtResource("1_script")
-music_track = &"ending_bad"
-music_loops = false
 
-[node name="SceneRoot" type="Control" parent="."]
+[node name="SceneRoot" type="Control" parent="." unique_id=1219070895]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -101,7 +99,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Background" type="TextureRect" parent="SceneRoot"]
+[node name="Background" type="TextureRect" parent="SceneRoot" unique_id=225060730]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -113,7 +111,7 @@ texture = SubResource("GradientTexture_hell")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="Godrays" type="TextureRect" parent="SceneRoot"]
+[node name="Godrays" type="TextureRect" parent="SceneRoot" unique_id=825809727]
 material = SubResource("ShaderMaterial_rays")
 layout_mode = 1
 anchors_preset = 15
@@ -126,7 +124,7 @@ texture = ExtResource("2_rays")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="Smoke" type="ColorRect" parent="SceneRoot"]
+[node name="Smoke" type="ColorRect" parent="SceneRoot" unique_id=393418973]
 material = SubResource("ShaderMaterial_smoke")
 layout_mode = 1
 anchors_preset = 15
@@ -135,9 +133,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(1, 1, 1, 1)
 
-[node name="BackFire" type="TextureRect" parent="SceneRoot"]
+[node name="BackFire" type="TextureRect" parent="SceneRoot" unique_id=1326462896]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0.78)
 material = SubResource("ShaderMaterial_fire_back")
@@ -155,7 +152,7 @@ texture = ExtResource("3_fire")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="CharacterFall" type="Control" parent="SceneRoot"]
+[node name="CharacterFall" type="Control" parent="SceneRoot" unique_id=1145489074]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 8
@@ -169,10 +166,10 @@ offset_right = 195.0
 offset_bottom = 150.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 pivot_offset = Vector2(195, 195)
+mouse_filter = 2
 
-[node name="CharacterBob" type="Control" parent="SceneRoot/CharacterFall"]
+[node name="CharacterBob" type="Control" parent="SceneRoot/CharacterFall" unique_id=309289907]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -180,10 +177,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 pivot_offset = Vector2(195, 195)
+mouse_filter = 2
 
-[node name="Aura" type="TextureRect" parent="SceneRoot/CharacterFall/CharacterBob"]
+[node name="Aura" type="TextureRect" parent="SceneRoot/CharacterFall/CharacterBob" unique_id=1844577744]
 modulate = Color(1, 0.08, 0.04, 0.12)
 layout_mode = 1
 anchors_preset = 15
@@ -200,7 +197,7 @@ texture = ExtResource("4_mc")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="MC" type="TextureRect" parent="SceneRoot/CharacterFall/CharacterBob"]
+[node name="MC" type="TextureRect" parent="SceneRoot/CharacterFall/CharacterBob" unique_id=269718819]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -212,7 +209,7 @@ texture = ExtResource("4_mc")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="FrontFire" type="TextureRect" parent="SceneRoot"]
+[node name="FrontFire" type="TextureRect" parent="SceneRoot" unique_id=1741016926]
 unique_name_in_owner = true
 material = SubResource("ShaderMaterial_fire_front")
 layout_mode = 1
@@ -229,7 +226,7 @@ texture = ExtResource("3_fire")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="Darkness" type="ColorRect" parent="SceneRoot"]
+[node name="Darkness" type="ColorRect" parent="SceneRoot" unique_id=1907844280]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -240,7 +237,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0)
 
-[node name="ChoicePanel" type="PanelContainer" parent="SceneRoot"]
+[node name="ChoicePanel" type="PanelContainer" parent="SceneRoot" unique_id=1243007265]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 8
@@ -256,18 +253,18 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBox_choice")
 
-[node name="Margin" type="MarginContainer" parent="SceneRoot/ChoicePanel"]
+[node name="Margin" type="MarginContainer" parent="SceneRoot/ChoicePanel" unique_id=645878085]
 layout_mode = 2
 theme_override_constants/margin_left = 30
 theme_override_constants/margin_top = 22
 theme_override_constants/margin_right = 30
 theme_override_constants/margin_bottom = 22
 
-[node name="Content" type="VBoxContainer" parent="SceneRoot/ChoicePanel/Margin"]
+[node name="Content" type="VBoxContainer" parent="SceneRoot/ChoicePanel/Margin" unique_id=1211422648]
 layout_mode = 2
 theme_override_constants/separation = 13
 
-[node name="Title" type="Label" parent="SceneRoot/ChoicePanel/Margin/Content"]
+[node name="Title" type="Label" parent="SceneRoot/ChoicePanel/Margin/Content" unique_id=1358180453]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.38, 0.16, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
@@ -278,7 +275,7 @@ theme_override_font_sizes/font_size = 35
 text = "THE VEIL REJECTS YOUR PAYCHECK"
 horizontal_alignment = 1
 
-[node name="Reason" type="Label" parent="SceneRoot/ChoicePanel/Margin/Content"]
+[node name="Reason" type="Label" parent="SceneRoot/ChoicePanel/Margin/Content" unique_id=1669428665]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.96, 0.83, 0.73, 1)
@@ -287,7 +284,7 @@ theme_override_font_sizes/font_size = 17
 text = "DAYLIGHT PAYCHECK BELOW QUOTA"
 horizontal_alignment = 1
 
-[node name="Question" type="Label" parent="SceneRoot/ChoicePanel/Margin/Content"]
+[node name="Question" type="Label" parent="SceneRoot/ChoicePanel/Margin/Content" unique_id=795332721]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.86, 0.78, 0.73, 1)
 theme_override_fonts/font = ExtResource("9_body")
@@ -295,12 +292,12 @@ theme_override_font_sizes/font_size = 16
 text = "Will you face the shift again?"
 horizontal_alignment = 1
 
-[node name="Buttons" type="HBoxContainer" parent="SceneRoot/ChoicePanel/Margin/Content"]
+[node name="Buttons" type="HBoxContainer" parent="SceneRoot/ChoicePanel/Margin/Content" unique_id=1195094209]
 layout_mode = 2
 theme_override_constants/separation = 14
 alignment = 1
 
-[node name="RetryButton" type="Button" parent="SceneRoot/ChoicePanel/Margin/Content/Buttons"]
+[node name="RetryButton" type="Button" parent="SceneRoot/ChoicePanel/Margin/Content/Buttons" unique_id=1876586507]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(220, 48)
 layout_mode = 2
@@ -308,11 +305,11 @@ theme_override_colors/font_color = Color(1, 0.93, 0.84, 1)
 theme_override_fonts/font = ExtResource("9_body")
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBox_retry")
-theme_override_styles/hover = SubResource("StyleBox_retry_hover")
 theme_override_styles/pressed = SubResource("StyleBox_retry_hover")
+theme_override_styles/hover = SubResource("StyleBox_retry_hover")
 text = "REPEAT SHIFT"
 
-[node name="MenuButton" type="Button" parent="SceneRoot/ChoicePanel/Margin/Content/Buttons"]
+[node name="MenuButton" type="Button" parent="SceneRoot/ChoicePanel/Margin/Content/Buttons" unique_id=950875177]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(220, 48)
 layout_mode = 2
@@ -320,11 +317,11 @@ theme_override_colors/font_color = Color(1, 0.93, 0.84, 1)
 theme_override_fonts/font = ExtResource("9_body")
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBox_retry")
-theme_override_styles/hover = SubResource("StyleBox_retry_hover")
 theme_override_styles/pressed = SubResource("StyleBox_retry_hover")
+theme_override_styles/hover = SubResource("StyleBox_retry_hover")
 text = "MAIN MENU"
 
-[node name="Fade" type="ColorRect" parent="."]
+[node name="Fade" type="ColorRect" parent="." unique_id=858342423]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15

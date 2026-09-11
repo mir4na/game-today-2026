@@ -1,6 +1,6 @@
 extends SceneTree
 ## Verifies one full dial sweep per day leg (two minutes) and per Night Service
-## (five minutes).
+## (ten minutes).
 
 
 func _initialize() -> void:
@@ -50,12 +50,12 @@ func _run() -> void:
 	game._route_index = 1
 	assert(is_equal_approx(game._day_leg_clock_progress(), 0.0), "The next leg must restart the dial.")
 	assert(leg_count >= 1, "The route must contain at least one leg.")
-	assert(is_equal_approx(game.night_service_duration_seconds, 300.0), "Night Service must last five minutes.")
+	assert(is_equal_approx(game.night_service_duration_seconds, 600.0), "Night Service must last ten minutes.")
 	game._night_service_elapsed_seconds = 0.0
 	assert(is_equal_approx(game._night_service_clock_progress(), 0.0), "Night Service must reset the clock to zero degrees.")
-	game._night_service_elapsed_seconds = 150.0
-	assert(is_equal_approx(game._night_service_clock_progress(), 0.5), "Half of Night Service must place the clock at 90 degrees.")
 	game._night_service_elapsed_seconds = 300.0
+	assert(is_equal_approx(game._night_service_clock_progress(), 0.5), "Half of Night Service must place the clock at 90 degrees.")
+	game._night_service_elapsed_seconds = 600.0
 	assert(is_equal_approx(game._night_service_clock_progress(), 1.0), "Night Service must finish at 180 degrees.")
 	game.free()
 	hud.free()
