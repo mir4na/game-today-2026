@@ -10,6 +10,9 @@ signal market_tool_requested(tool_id: StringName)
 @export var clock_template: String = "%02d:%02d %s"
 @export var tool_status_template: String = "BLESSINGS %d"
 @export var day_template: String = "Day %d"
+@export_category("Service Action Icons")
+@export var service_day_icon: Texture2D
+@export var service_night_icon: Texture2D
 @export_category("Day Blessing Progress")
 @export_range(0.1, 1.0, 0.05) var blessing_near_threshold_ratio: float = 0.7
 @export var blessing_far_color: Color = Color(0.96, 0.95, 0.92, 1.0)
@@ -84,6 +87,7 @@ signal market_tool_requested(tool_id: StringName)
 @onready var _blessing_target_label: Label = %BlessingTargetLabel
 @onready var _guidebook_button: Button = %GuidebookButton
 @onready var _service_action_button: Button = %ServiceActionButton
+@onready var _service_action_outline: TextureRect = $Root/ServiceActionButton/ServiceActionOutline
 @onready var _market_item_bar: HBoxContainer = %MarketItemBar
 @onready var _veil_note_slot: Control = %VeilNoteSlot
 @onready var _radar_slot: Control = %RadarSlot
@@ -652,8 +656,13 @@ func get_night_ledger_button_center() -> Vector2:
 
 func set_service_action_mode(is_night: bool, available: bool = true) -> void:
 	_service_action_button.visible = available
-	_service_action_button.tooltip_text = ""
+	_service_action_button.tooltip_text = "Open night ledger" if is_night else "Sign service"
 	_service_action_button.set_meta(&"service_action_mode", &"night" if is_night else &"day")
+	var active_icon: Texture2D = service_night_icon if is_night else service_day_icon
+	if active_icon != null:
+		_service_action_button.icon = active_icon
+		if is_instance_valid(_service_action_outline):
+			_service_action_outline.texture = active_icon
 
 
 func _on_service_action_button_pressed() -> void:

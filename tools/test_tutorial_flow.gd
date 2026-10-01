@@ -214,8 +214,14 @@ func _run() -> void:
 	_check(not (tutorial.get_node("%ArrowLabel") as Label).visible, "Inspect pointer must disappear once the passenger documents open.")
 	game._document_overlay.hide()
 	game._active_modal = game._tutorial_director
+	tutorial.exam_spawn_delay_seconds = 0.05
+	tutorial.exam_spawn_stagger_seconds = 0.02
 	tutorial._start_exam()
 	_check(tutorial._exam_passengers.size() == 5, "Stamp test must spawn five scene-configured passengers.")
+	_check(tutorial._step == TutorialDirector.Step.EXAM_SPAWN, "Exam must hold on its staged spawn before the test dialogue.")
+	_check(not tutorial.get_node("%DialogueDock").visible, "Staged exam reveal must keep the dialogue hidden until all five souls appear.")
+	await create_timer(0.5).timeout
+	_check(tutorial._step == TutorialDirector.Step.EXAM_INTRO, "Staged exam reveal must end on the test dialogue once the group is visible.")
 	var exam_names := PackedStringArray()
 	var anomaly_names := PackedStringArray()
 	for passenger: Passenger in tutorial._exam_passengers:
@@ -233,9 +239,25 @@ func _run() -> void:
 	tutorial._step = TutorialDirector.Step.EXAM_ACTIVE
 	tutorial._exam_running = true
 	tutorial._on_exam_stamp({"passenger": "Abby", "station": game._next_day_station()})
-	_check(tutorial._step == TutorialDirector.Step.EXAM_INTRO, "Stamping an anomaly must restart from the Inspector's test dialogue.")
+	_check(tutorial._step == TutorialDirector.Step.EXAM_WRONG_SOUL, "Stamping a dead soul must name the mistake.")
+	_check((tutorial.get_node("%BodyLabel") as Label).text.contains("already dead"), "Dead-soul feedback must tell the player the passenger is dead.")
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	_check(tutorial._step == TutorialDirector.Step.EXAM_BRIEF, "Dead-soul retry must re-enter at the task brief, not the intro.")
 	_check(abby.data.stamped_station.is_empty() and not game._incorrectly_stamped_anomalies.has("Abby"), "A restarted stamp test must clear its temporary stamp and penalty.")
-	tutorial._begin_exam_brief()
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	_check(tutorial._step == TutorialDirector.Step.EXAM_ACTIVE and not tutorial.get_node("%DialogueDock").visible, "Stamp test dialogue must close while the timed task is active.")
+	var reff: Passenger = tutorial._exam_passengers[1]
+	reff.data.stamped_station = "Alderwick"
+	tutorial._on_exam_stamp({"passenger": "Reff", "station": "Alderwick"})
+	_check(tutorial._step == TutorialDirector.Step.EXAM_WRONG_STATION, "Stamping the wrong station must name the expected destination.")
+	_check((tutorial.get_node("%BodyLabel") as Label).text.contains("bound for"), "Wrong-station feedback must point back at the ticket destination.")
+	_check((tutorial.get_node("%BodyLabel") as Label).text.contains("no second chance"), "Wrong-station feedback must warn that a wrong stamp cannot be undone.")
+	tutorial._complete_typewriter()
+	tutorial._advance_from_continue()
+	_check(tutorial._step == TutorialDirector.Step.EXAM_BRIEF, "Wrong-station retry must re-enter at the task brief, not the intro.")
+	_check(reff.data.stamped_station.is_empty(), "A restarted stamp test must clear the wrong station stamp.")
 	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
 	_check(tutorial._step == TutorialDirector.Step.EXAM_ACTIVE and not tutorial.get_node("%DialogueDock").visible, "Stamp test dialogue must close while the timed task is active.")

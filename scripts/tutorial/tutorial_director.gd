@@ -54,10 +54,13 @@ enum Step {
 	NIGHT_MAP_ASSIGN,
 	NIGHT_MAP_RETRY,
 	NIGHT_COMPLETE,
+	EXAM_SPAWN,
 	EXAM_INTRO,
 	EXAM_BRIEF,
 	EXAM_ACTIVE,
 	EXAM_SUCCESS,
+	EXAM_WRONG_SOUL,
+	EXAM_WRONG_STATION,
 	EXAM_SIGN_INTRO,
 	EXAM_SIGN,
 	EXAM_TRAVEL,
@@ -100,11 +103,12 @@ enum Step {
 @export_range(0.05, 0.5, 0.01) var blessings_spotlight_radius: float = 0.18
 @export_range(0.05, 0.5, 0.01) var stamp_button_spotlight_radius: float = 0.12
 @export_range(0.1, 1.0, 0.05) var stamp_spotlight_zoom_seconds: float = 0.5
-@export_range(0.1, 0.6, 0.01) var guidebook_section_spotlight_radius: float = 0.35
 @export_range(8.0, 320.0, 1.0) var vanish_jump_height_pixels: float = 120.0
 @export_range(0.2, 1.5, 0.05) var vanish_duration_seconds: float = 0.6
 @export_category("Stamp Exam")
 @export_range(30.0, 300.0, 5.0) var exam_duration_seconds: float = 120.0
+@export_range(0.0, 3.0, 0.05) var exam_spawn_delay_seconds: float = 0.7
+@export_range(0.05, 1.5, 0.05) var exam_spawn_stagger_seconds: float = 0.3
 @export_range(0.05, 0.5, 0.01) var exam_button_spotlight_radius: float = 0.14
 @export var exam_passenger_names: PackedStringArray = PackedStringArray([
 	"Abby", "Reff", "Ratta", "Denta", "Mecca",
@@ -145,6 +149,9 @@ enum Step {
 @export_range(0.001, 0.5, 0.005) var spotlight_softness: float = 0.115
 @export_range(-240.0, 240.0, 1.0) var spotlight_player_vertical_offset: float = -72.0
 @export_range(0.0, 0.4, 0.01) var spotlight_inner_alpha: float = 0.0
+@export_category("Spotlight Release")
+@export_range(0.2, 2.5, 0.05) var spotlight_release_seconds: float = 0.9
+@export_range(0.8, 1.6, 0.05) var spotlight_release_radius: float = 1.25
 @export_range(0.0, 1.0, 0.01) var continue_step_dim_alpha: float = 0.62
 @export_range(0.0, 1.0, 0.01) var wait_step_dim_alpha: float = 0.52
 @export_range(0.0, 1.0, 0.01) var movement_step_dim_alpha: float = 0.42
@@ -691,10 +698,10 @@ func _begin_passenger_reveal() -> void:
 	_step = Step.PASSENGER_REVEAL
 	_hide_dialogue_for_task()
 	_set_controls(false, false)
-	_spotlight_control = null
-	_spotlight_world_target = null
-	_current_spotlight_radius = spotlight_radius
-	_set_spotlight_shade(continue_step_dim_alpha)
+	# Bloom the spotlight open from the HUD threshold point the moment its
+	# dialogue closes, so the expansion plays out while the passenger spawns
+	# and the camera glides. Stays bright until the player inspects.
+	_animate_spotlight_release(token)
 	if passenger_spawn_hold_seconds > 0.0:
 		await get_tree().create_timer(passenger_spawn_hold_seconds).timeout
 	if token != _passenger_reveal_token or _step != Step.PASSENGER_REVEAL or not is_inside_tree():
@@ -718,7 +725,9 @@ func _begin_passenger_reveal() -> void:
 	_tutorial_passenger.set_ai_enabled(false)
 	_tutorial_passenger.enabled = true
 	var passenger_anchor: Node2D = _tutorial_passenger.get_dialogue_anchor()
-	_spotlight_world_target = passenger_anchor
+	# No spotlight here: the release above already opened the screen fully and
+	# it stays bright (wide radius) until the player inspects, then contracts
+	# back in for the stamp lesson.
 	# The camera glides first. Only after it arrives does the passenger spawn.
 	if _main.has_method(&"focus_tutorial_camera"):
 		var arrival_tween: Tween = _main.call(
@@ -776,6 +785,9 @@ func _begin_passenger_reveal() -> void:
 		passenger_intro_prompt,
 		""
 	)
+	# Bright beat: keep the released full screen instead of re-dimming.
+	# Radius stays wide so the stamp lesson later contracts back in.
+	_set_spotlight_shade(0.0)
 
 
 func _begin_passenger_inspection_task() -> void:
@@ -784,8 +796,12 @@ func _begin_passenger_inspection_task() -> void:
 	_step = Step.PASSENGER
 	_hide_dialogue_for_task()
 	_set_controls(false, false)
+	# Release already bloomed open during the reveal (before the camera pan),
+	# so just confirm the bright state here. Wide radius is preserved on
+	# purpose: the stamp lesson re-spotlights from it and visibly contracts.
 	_spotlight_control = null
 	_spotlight_world_target = null
+	_spotlight_override_active = false
 	_set_spotlight_shade(0.0)
 	_passenger_pointer_target = (
 		_tutorial_passenger.get_dialogue_anchor()
@@ -834,23 +850,81 @@ func _update_passenger_pointer(delta: float) -> void:
 
 ## Stamp exam: five souls board in front of the player, three ordinary and
 ## two anomalies. Two minutes, then the exam restarts on failure.
+## First call spawns the group hidden, reveals them one by one after a short
+## beat, and only then presents the test dialogue. Later calls (fail retry
+## paths use _restart_tutorial_exam directly) never replay the entrance.
 func _start_exam() -> void:
-	if _exam_passengers.is_empty():
-		var group: Array = []
-		if _main != null and _main.has_method(&"spawn_tutorial_exam_group"):
-			group = _main.call(
-				&"spawn_tutorial_exam_group",
-				exam_passenger_names,
-				exam_anomaly_names
-			)
-		for passenger: Passenger in group:
-			if is_instance_valid(passenger):
-				_exam_passengers.append(passenger)
-		_animate_exam_group_spawn()
+	if not _exam_passengers.is_empty():
+		_restart_tutorial_exam()
+		return
+	var group: Array = []
+	if _main != null and _main.has_method(&"spawn_tutorial_exam_group"):
+		group = _main.call(
+			&"spawn_tutorial_exam_group",
+			exam_passenger_names,
+			exam_anomaly_names
+		)
+	for passenger: Passenger in group:
+		if is_instance_valid(passenger):
+			passenger.hide()
+			_exam_passengers.append(passenger)
+	_begin_exam_spawn_sequence()
+
+
+## Guidebook just closed: hold a beat, pop each exam soul in one by one,
+## then hand over to the test dialogue once the full group is visible.
+func _begin_exam_spawn_sequence() -> void:
+	_passenger_reveal_token += 1
+	var token: int = _passenger_reveal_token
+	_step = Step.EXAM_SPAWN
+	_hide_dialogue_for_task()
+	_set_controls(false, false)
+	if exam_spawn_delay_seconds > 0.0:
+		await get_tree().create_timer(exam_spawn_delay_seconds).timeout
+	if token != _passenger_reveal_token or not is_inside_tree():
+		return
+	for passenger: Passenger in _exam_passengers:
+		if not is_instance_valid(passenger):
+			continue
+		_pop_exam_passenger(passenger)
+		if exam_spawn_stagger_seconds > 0.0:
+			await get_tree().create_timer(exam_spawn_stagger_seconds).timeout
+		if token != _passenger_reveal_token or not is_inside_tree():
+			return
 	_restart_tutorial_exam()
 
 
+func _pop_exam_passenger(passenger: Passenger) -> void:
+	var rest_position: Vector2 = passenger.position
+	var rest_scale: Vector2 = passenger.scale
+	passenger.position = rest_position + Vector2(0.0, 34.0)
+	passenger.scale = rest_scale * Vector2(0.72, 0.18)
+	passenger.modulate.a = 0.0
+	passenger.show()
+	var pop := create_tween().set_parallel(true)
+	pop.tween_property(passenger, ^"position", rest_position, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	pop.tween_property(passenger, ^"scale", rest_scale, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	pop.tween_property(passenger, ^"modulate:a", 1.0, 0.18)
+
+
 func _restart_tutorial_exam() -> void:
+	_reset_exam_attempt()
+	_show_continue_step(
+		Step.EXAM_INTRO,
+		"The Inspector",
+		"Good. Now I will test how thorough you are. Five souls will board in front of you.",
+		""
+	)
+
+
+## Wrong-stamp recovery: same clean slate, but re-enter straight at the task
+## brief instead of replaying the intro.
+func _retry_exam_brief() -> void:
+	_reset_exam_attempt()
+	_begin_exam_brief()
+
+
+func _reset_exam_attempt() -> void:
 	if _main != null and _main.has_method(&"reset_tutorial_exam_group"):
 		_main.call(&"reset_tutorial_exam_group", _exam_passengers)
 	elif _main != null and _main.has_method(&"_on_station_assignment_toggled"):
@@ -870,29 +944,6 @@ func _restart_tutorial_exam() -> void:
 	if is_instance_valid(_hud) and _hud.has_method(&"set_clock_progress"):
 		_hud.call(&"set_clock_progress", 0.0)
 	_progress_label.hide()
-	_show_continue_step(
-		Step.EXAM_INTRO,
-		"The Inspector",
-		"Good. Now I will test how thorough you are. Five souls will board in front of you.",
-		""
-	)
-
-
-func _animate_exam_group_spawn() -> void:
-	for index: int in range(_exam_passengers.size()):
-		var passenger: Passenger = _exam_passengers[index]
-		if not is_instance_valid(passenger):
-			continue
-		var rest_position: Vector2 = passenger.position
-		var rest_scale: Vector2 = passenger.scale
-		passenger.position = rest_position + Vector2(0.0, 34.0)
-		passenger.scale = rest_scale * Vector2(0.72, 0.18)
-		passenger.modulate.a = 0.0
-		var delay: float = float(index) * 0.07
-		var pop := create_tween().set_parallel(true)
-		pop.tween_property(passenger, ^"position", rest_position, 0.45).set_delay(delay).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		pop.tween_property(passenger, ^"scale", rest_scale, 0.45).set_delay(delay).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		pop.tween_property(passenger, ^"modulate:a", 1.0, 0.18).set_delay(delay)
 
 
 func _begin_exam_brief() -> void:
@@ -903,6 +954,8 @@ func _begin_exam_brief() -> void:
 		"Stamp every passenger except the anomalies; two of these five souls are not what they seem. You have 2 minutes, or one full clock turn.",
 		""
 	)
+	# The test runs with no spotlight: full bright for the brief and the task.
+	_clear_spotlight_for_reading()
 
 
 func _begin_exam_task() -> void:
@@ -935,6 +988,13 @@ func _update_exam_timer_label() -> void:
 	_progress_label.text = "TIME LEFT %d:%02d" % [total_seconds / 60, total_seconds % 60]
 
 
+## Red HUD strike for an exam mistake: the camera already shakes, this paints
+## the HUD announcement red so the failure reads instantly.
+func _flash_exam_error(message: String) -> void:
+	if is_instance_valid(_hud) and _hud.has_method(&"notify"):
+		_hud.call(&"notify", message, 2.5, Color(1.0, 0.32, 0.27))
+
+
 func _on_exam_stamp(payload: Variant) -> void:
 	if _step != Step.EXAM_ACTIVE or not _exam_running:
 		return
@@ -955,9 +1015,31 @@ func _on_exam_stamp(payload: Variant) -> void:
 			offender = passenger
 			break
 	if offender != null:
+		_exam_running = false
 		if _main != null and _main.has_method(&"shake_tutorial_camera"):
 			_main.call(&"shake_tutorial_camera")
-		_restart_tutorial_exam()
+		if offender.data.anomaly_type != "none":
+			_flash_exam_error("You stamped a soul that is already dead.")
+			_show_continue_step(
+				Step.EXAM_WRONG_SOUL,
+				"Wrong Soul",
+				"That passenger is already dead. Never stamp the dead — keep them aboard for Night Service. Re-read the Guidebook's Anomaly Signs, then try again.",
+				""
+			)
+			_clear_spotlight_for_reading()
+		else:
+			_flash_exam_error("Wrong station stamp.")
+			_show_continue_step(
+				Step.EXAM_WRONG_STATION,
+				"Wrong Station",
+				"%s is bound for %s, not %s. Always check the ticket before stamping. As an intern there is no second chance — a wrong stamp cannot be undone. Try again." % [
+					offender.data.passenger_name,
+					offender.data.destination_station,
+					offender.data.stamped_station,
+				],
+				""
+			)
+			_clear_spotlight_for_reading()
 		return
 	var ordinary_total: int = 0
 	for passenger: Passenger in _exam_passengers:
@@ -1077,9 +1159,12 @@ func _validate_tutorial_stamp(payload: Variant) -> void:
 		_show_continue_step(
 			Step.NICE_WORK,
 			"Nice Work",
-			"Correct stamp. Goat leaves at the right stop. Watch closely...",
+			"Good. You stamped the correct station.",
 			""
 		)
+		# Correct stamp: bloom the spotlight open again with the same release
+		# transition while the player reads this beat.
+		_animate_spotlight_release(_passenger_reveal_token)
 		return
 	if _main != null and _main.has_method(&"shake_tutorial_camera"):
 		_main.call(&"shake_tutorial_camera")
@@ -1194,16 +1279,15 @@ func _set_guidebook_tabs_locked(locked: bool) -> void:
 		guidebook.call(&"set_tabs_locked", locked)
 
 
-func _spotlight_guidebook_section(section_node_name: String) -> void:
-	if _main == null:
-		return
-	var guidebook := _main.get_node_or_null("%GuidebookUI") as Control
-	if guidebook == null:
-		return
-	var section := guidebook.get_node_or_null("%" + section_node_name) as Control
-	if not is_instance_valid(section):
-		return
-	_animate_spotlight_to_control(section, guidebook_section_spotlight_radius, stamp_spotlight_zoom_seconds)
+## Reading beats while a modal (guidebook) is open: no dim, no spotlight.
+## The modal UI itself is the focus; Shade stays fully transparent until the
+## next spotlight beat reclaims it.
+func _clear_spotlight_for_reading() -> void:
+	_spotlight_control = null
+	_spotlight_world_target = null
+	_spotlight_override_active = false
+	_current_spotlight_radius = spotlight_radius
+	_set_spotlight_shade(0.0)
 
 
 func _show_guidebook_today() -> void:
@@ -1213,7 +1297,7 @@ func _show_guidebook_today() -> void:
 		"This is the Guidebook. Check the Today page every day. It shows your route, your target, and your progress.",
 		""
 	)
-	_spotlight_guidebook_section("TodayLayout")
+	_clear_spotlight_for_reading()
 
 
 func _show_guidebook_rules() -> void:
@@ -1223,7 +1307,7 @@ func _show_guidebook_rules() -> void:
 		"Confused about what to do? Read the Rules. It tells you exactly how scoring and penalties work.",
 		""
 	)
-	_spotlight_guidebook_section("RulesLayout")
+	_clear_spotlight_for_reading()
 
 
 func _show_guidebook_anomaly() -> void:
@@ -1233,7 +1317,7 @@ func _show_guidebook_anomaly() -> void:
 		"This is the important part. IDENTIFY every passenger. If anyone matches one of these signs, do NOT stamp them. Close the book when you are done.",
 		""
 	)
-	_spotlight_guidebook_section("AnomalyList")
+	_clear_spotlight_for_reading()
 
 
 func _on_guidebook_section_shown(_section: int) -> void:
@@ -1272,6 +1356,46 @@ func _animate_spotlight_to_control(target: Control, target_radius: float, durati
 	_spotlight_override_active = false
 	_current_spotlight_radius = target_radius
 	_update_spotlight()
+
+
+## Expands the bright circle from its current spotlight point until the whole
+## screen is revealed, then leaves the game fully bright. The next
+## _animate_spotlight_to_control call contracts back from this wide radius,
+## which is exactly the re-spotlight beat for the stamp lesson.
+func _animate_spotlight_release(token: int) -> void:
+	if _shade_material == null:
+		_set_spotlight_shade(0.0)
+		return
+	_update_spotlight()
+	var start_center: Vector2 = _shade_material.get_shader_parameter(&"spotlight_center")
+	var start_radius: float = _current_spotlight_radius
+	var start_alpha: float = _shade_alpha
+	# Freeze the center so the circle blooms from the last spotlight point
+	# instead of tracking the player while it opens.
+	_spotlight_override_center = start_center
+	_spotlight_override_active = true
+	_spotlight_control = null
+	_spotlight_world_target = null
+	var duration: float = maxf(spotlight_release_seconds, 0.05)
+	var release_tween := create_tween().set_parallel(true)
+	release_tween.tween_method(
+		func(value: float) -> void: _current_spotlight_radius = value,
+		start_radius,
+		spotlight_release_radius,
+		duration
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	release_tween.tween_method(
+		func(value: float) -> void: _shade_alpha = value,
+		start_alpha,
+		0.0,
+		duration
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	await release_tween.finished
+	if token != _passenger_reveal_token or not is_inside_tree():
+		return
+	_spotlight_override_active = false
+	_current_spotlight_radius = spotlight_release_radius
+	_set_spotlight_shade(0.0)
 
 
 func _prepare_spotlight_material() -> void:
@@ -1363,7 +1487,7 @@ func _get_dialogue_marker_path_for_step(step: Step) -> NodePath:
 			return passenger_prompt_dialogue_marker_path
 		Step.PASSENGER:
 			return passenger_dialogue_marker_path
-		Step.EXAM_INTRO, Step.EXAM_BRIEF, Step.EXAM_ACTIVE, Step.EXAM_SUCCESS:
+		Step.EXAM_SPAWN, Step.EXAM_INTRO, Step.EXAM_BRIEF, Step.EXAM_ACTIVE, Step.EXAM_SUCCESS, Step.EXAM_WRONG_SOUL, Step.EXAM_WRONG_STATION:
 			return passenger_dialogue_marker_path
 		Step.DOCUMENTS, Step.STAMP_CLOSE:
 			return documents_dialogue_marker_path
@@ -1427,7 +1551,7 @@ func _dialogue_frame_name_for_step(step: Step) -> StringName:
 			return &"PassengerPrompt"
 		Step.PASSENGER:
 			return &"Passenger"
-		Step.EXAM_INTRO, Step.EXAM_BRIEF, Step.EXAM_ACTIVE, Step.EXAM_SUCCESS:
+		Step.EXAM_SPAWN, Step.EXAM_INTRO, Step.EXAM_BRIEF, Step.EXAM_ACTIVE, Step.EXAM_SUCCESS, Step.EXAM_WRONG_SOUL, Step.EXAM_WRONG_STATION:
 			return &"Passenger"
 		Step.DOCUMENTS, Step.STAMP_CLOSE:
 			return &"Documents"
@@ -1589,7 +1713,7 @@ func _step_copy(step: Step) -> Array:
 		Step.STAMP_RETRY:
 			return ["Wrong Stamp", "That is the wrong station. The stamp is removed. Read the destination again, then drag a correct stamp onto Goat's ticket.", ""]
 		Step.NICE_WORK:
-			return ["Nice Work", "Correct stamp. Goat leaves at the right stop. Watch closely...", ""]
+			return ["Nice Work", "Good. You stamped the correct station.", ""]
 		Step.ANOMALY_INTRO:
 			return ["Be Careful", "Not every passenger on this train is human. Look closely at everyone you inspect. Some hide in plain sight.", ""]
 		Step.STAMP_CLOSE:
@@ -1632,6 +1756,8 @@ func _step_copy(step: Step) -> Array:
 			return ["Your Turn", "Drag each soul to its correct station, then press Finalize Assignments.", ""]
 		Step.NIGHT_COMPLETE:
 			return ["The Inspector", "Correct. You are ready to begin your internship.", ""]
+		Step.EXAM_SPAWN:
+			return ["The Inspector", "Five souls will board in front of you.", ""]
 		Step.EXAM_INTRO:
 			return ["The Inspector", "Good. Now I will test how thorough you are. Five souls will board in front of you.", ""]
 		Step.EXAM_BRIEF:
@@ -1640,6 +1766,10 @@ func _step_copy(step: Step) -> Array:
 			return ["Stamp Test", "Stamp Reff, Ratta, and Denta before one clock turn ends. Leave Abby and Mecca unstamped.", ""]
 		Step.EXAM_SUCCESS:
 			return ["The Inspector", "Good job. You are now 50 percent ready to begin your internship.", ""]
+		Step.EXAM_WRONG_SOUL:
+			return ["Wrong Soul", "That passenger is already dead. Never stamp the dead — keep them aboard for Night Service. Re-read the Guidebook's Anomaly Signs, then try again.", ""]
+		Step.EXAM_WRONG_STATION:
+			return ["Wrong Station", "Always check the ticket before stamping. As an intern there is no second chance — a wrong stamp cannot be undone. Try again.", ""]
 		Step.EXAM_SIGN_INTRO:
 			return ["Sign Service", "I know many workers finish their assignments early, so I prepared this for you.", ""]
 		Step.EXAM_SIGN:
@@ -1810,6 +1940,8 @@ func _advance_from_continue() -> void:
 				passenger_inspect_prompt,
 				""
 			)
+			# Still bright until the player inspects; wide radius preserved.
+			_set_spotlight_shade(0.0)
 		Step.PASSENGER_PROMPT:
 			_begin_passenger_inspection_task()
 		Step.EXAM_INTRO:
@@ -1818,6 +1950,8 @@ func _advance_from_continue() -> void:
 			_begin_exam_task()
 		Step.EXAM_SUCCESS:
 			_enter_exam_sign_intro()
+		Step.EXAM_WRONG_SOUL, Step.EXAM_WRONG_STATION:
+			_retry_exam_brief()
 		Step.EXAM_SIGN_INTRO:
 			_enter_exam_sign()
 		Step.EXAM_SIGN:
@@ -2036,11 +2170,9 @@ func _on_main_tutorial_event(event_name: StringName, payload: Variant = null) ->
 				_show_wait_step(Step.SIGNATURE_PROMPT, "Sign Off", signature_prompt, "Use the service button below the Guidebook.")
 		&"guidebook_opened":
 			if _step == Step.GUIDEBOOK_PROMPT:
-				_spotlight_control = null
-				_spotlight_override_active = false
-				_set_spotlight_shade(0.0)
 				_set_guidebook_tabs_locked(true)
 				_show_continue_step(Step.GUIDEBOOK, "Guidebook", "Today’s Service shows the target and route totals. Rules explains scoring, while Anomaly Signs shows suspicious evidence.", "Close the Guidebook after reading.")
+				_clear_spotlight_for_reading()
 		&"guidebook_closed":
 			if _step == Step.GUIDEBOOK:
 				_set_controls(true, true)

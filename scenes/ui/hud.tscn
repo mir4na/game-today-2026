@@ -26,6 +26,7 @@
 [ext_resource type="Script" uid="uid://fgch1jgxeocf" path="res://scripts/ui/hover_scale_button.gd" id="24_hover"]
 [ext_resource type="Texture2D" uid="uid://bgnv4augyfqgi" path="res://assets/ui/Group 189.png" id="25_d5po8"]
 [ext_resource type="Texture2D" uid="uid://c5h8v2fd1x4ld" path="res://assets/ui/Group 176.png" id="25_service_action"]
+[ext_resource type="Texture2D" uid="uid://dms158358rgjt" path="res://assets/ui/sign_button.png" id="25_service_day"]
 [ext_resource type="Texture2D" uid="uid://bq4haoh2g5ewe" path="res://assets/ui/Group 188 (1).png" id="26_7yoph"]
 [ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="26_qmm8d"]
 [ext_resource type="Texture2D" uid="uid://dluipv7wt56w1" path="res://assets/ui/Group 43.png" id="28_t0png"]
@@ -44,6 +45,8 @@ shader_parameter/fill_origin = Vector2(0.477, 1)
 [node name="HUD" type="CanvasLayer" unique_id=83627724]
 layer = 10
 script = ExtResource("1")
+service_day_icon = ExtResource("25_service_day")
+service_night_icon = ExtResource("25_service_action")
 
 [node name="Root" type="Control" parent="." unique_id=664657133]
 unique_name_in_owner = true
