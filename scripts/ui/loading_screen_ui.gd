@@ -12,6 +12,7 @@ extends Control
 @export_category("Scene Animation")
 @export var fade_to_black_animation: StringName = &"fade_to_black"
 @export var fade_from_black_animation: StringName = &"fade_from_black"
+@export_range(0.05, 1.0, 0.01) var content_fade_in_seconds: float = 0.18
 
 var _started: bool = false
 var _elapsed: float = 0.0
@@ -59,6 +60,7 @@ func begin_loading(
 	if _fade_to_black_before_loading:
 		_reveal_loading_after_black_cover()
 		return
+	_reveal_loading_content()
 	_request_threaded_load()
 
 
@@ -66,8 +68,18 @@ func _reveal_loading_after_black_cover() -> void:
 	await _play_transition(fade_to_black_animation)
 	if not is_inside_tree() or not _started:
 		return
-	_loading_content.show()
+	_reveal_loading_content()
 	_request_threaded_load()
+
+
+## The widget fades in instead of popping over the previous scene.
+func _reveal_loading_content() -> void:
+	_loading_content.show()
+	_loading_content.modulate.a = 0.0
+	var fade_in := create_tween()
+	fade_in.tween_property(
+		_loading_content, ^"modulate:a", 1.0, maxf(content_fade_in_seconds, 0.01)
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 
 func _request_threaded_load() -> void:
@@ -151,6 +163,10 @@ func _open_loaded_scene() -> void:
 		return
 	if not _fade_to_black_before_loading:
 		await _play_transition(fade_to_black_animation)
+	# The cover is fully opaque here, so retire the loading widget now.
+	# Otherwise it lingers over the new scene during the reveal and pops out.
+	_loading_content.hide()
+	_mc_walk.stop()
 	var tree := get_tree()
 	var previous_scene: Node = tree.current_scene
 	if previous_scene == null:
@@ -166,6 +182,9 @@ func _open_loaded_scene() -> void:
 	tree.current_scene = next_scene
 	if is_instance_valid(previous_scene):
 		previous_scene.queue_free()
+	# Settle two frames under the opaque cover so first-frame pops in the new
+	# scene (layout, modulate, HUD visibility) never leak into the reveal.
+	await tree.process_frame
 	await tree.process_frame
 	await _play_transition(fade_from_black_animation)
 	tree.paused = false

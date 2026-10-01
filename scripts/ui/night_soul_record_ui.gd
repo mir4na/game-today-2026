@@ -47,9 +47,15 @@ var _record_rest_position: Vector2
 var _closing: bool = false
 var _tutorial_interaction_locked: bool = false
 var _tutorial_highlight_statement: bool = false
+## Wrong-guess glass crack state (see night_soul_crack.gdshader).
+var _crack_material: ShaderMaterial
+var _crack_level: int = 0
+var _impact_points: Array[Vector2] = []
+var _crack_tween: Tween
 
 @onready var _shade: ColorRect = %Shade
 @onready var _error_flash: ColorRect = %ErrorFlash
+@onready var _crack_overlay: ColorRect = %CrackOverlay
 @onready var _record_anchor: Control = %RecordAnchor
 @onready var _title_label: Label = %RecordTitle
 @onready var _portrait: NightCharacterPortrait = %Portrait
@@ -71,6 +77,12 @@ func _ready() -> void:
 		_error_flash_material.resource_local_to_scene = true
 		_error_flash.material = _error_flash_material
 		_set_error_flash_strength(0.0)
+	_crack_material = _crack_overlay.material as ShaderMaterial
+	if is_instance_valid(_crack_material):
+		_crack_material = _crack_material.duplicate() as ShaderMaterial
+		_crack_material.resource_local_to_scene = true
+		_crack_overlay.material = _crack_material
+	_refresh_crack_params(0.0)
 	_record_rest_position = _record_anchor.position
 	resized.connect(_refresh_record_scale)
 	_refresh_record_scale()
@@ -94,6 +106,9 @@ func open_record(data: PassengerData, puzzle: DeparturePuzzleData, already_recor
 	_extracted_sentence_index = -1
 	_clear_flying_letters()
 	_set_error_flash_strength(0.0)
+	_crack_level = 0
+	_impact_points.clear()
+	_refresh_crack_params(0.0)
 	_build_biography(puzzle.get_biography_for_passenger(_passenger_name))
 	show()
 	_present_record()
@@ -200,6 +215,8 @@ func _on_sentence_clicked(meta: Variant) -> void:
 		return
 	var selected_sentence: String = str(_sentence_by_index[index])
 	if selected_sentence != _correct_statement:
+		# Remember where the player struck so the crack blooms from there.
+		_capture_crack_impact()
 		statement_feedback_requested.emit(false)
 		_play_incorrect_feedback()
 		return
@@ -335,6 +352,69 @@ func _play_feedback_flash(flash_color: Color, duration: float) -> void:
 func _set_error_flash_strength(value: float) -> void:
 	if is_instance_valid(_error_flash_material):
 		_error_flash_material.set_shader_parameter(&"strength", clampf(value, 0.0, 1.0))
+
+
+## Public: Main drives the streak so persistence and the crack stay aligned.
+## Level 1 = hairline, 2 = spreading; the third strike uses play_shatter_and_close.
+func set_identity_miss_streak(count: int, immediate: bool = false) -> void:
+	if not is_instance_valid(_crack_material):
+		return
+	_crack_level = clampi(count, 0, 3)
+	if immediate:
+		_refresh_crack_params(0.9 if _crack_level > 0 else 0.0)
+	else:
+		_play_crack_pulse()
+
+
+## Public: third strike. Fracture the whole pane, then close the record so the
+## soul — already fleeing in Main — escapes.
+func play_shatter_and_close() -> void:
+	if not is_instance_valid(_crack_material) or _closing:
+		return
+	_crack_level = 3
+	if is_instance_valid(_crack_tween):
+		_crack_tween.kill()
+	_refresh_crack_params(0.0)
+	_crack_tween = create_tween()
+	_crack_tween.tween_method(_refresh_crack_params, 0.0, 1.0, 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_crack_tween.tween_interval(0.16)
+	await _crack_tween.finished
+	if not is_inside_tree():
+		return
+	request_close()
+
+
+func _capture_crack_impact() -> void:
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		return
+	_impact_points.append(get_viewport().get_mouse_position() / viewport_size)
+	while _impact_points.size() > 3:
+		_impact_points.pop_front()
+
+
+func _play_crack_pulse() -> void:
+	if is_instance_valid(_crack_tween):
+		_crack_tween.kill()
+	var resting_alpha: float = 0.5 + 0.14 * float(_crack_level)
+	_refresh_crack_params(0.0)
+	_crack_tween = create_tween()
+	_crack_tween.tween_method(_refresh_crack_params, 0.0, 0.95, 0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_crack_tween.tween_method(_refresh_crack_params, 0.95, resting_alpha, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+func _refresh_crack_params(value: float) -> void:
+	if not is_instance_valid(_crack_material):
+		return
+	var points := PackedVector2Array()
+	for index: int in range(3):
+		points.append(_impact_points[index] if index < _impact_points.size() else Vector2(-10.0, -10.0))
+	_crack_material.set_shader_parameter(&"crack_level", float(_crack_level))
+	_crack_material.set_shader_parameter(&"impact_points", points)
+	_crack_material.set_shader_parameter(&"line_alpha", clampf(value, 0.0, 1.0))
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	if viewport_size.y > 0.0:
+		_crack_material.set_shader_parameter(&"aspect", viewport_size.x / viewport_size.y)
 
 
 func _present_record() -> void:

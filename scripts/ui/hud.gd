@@ -335,6 +335,15 @@ func set_maintenance_targets(target_entries: Array[Dictionary]) -> void:
 		var tracker_icon := entry.get("icon") as Texture2D
 		tracker.call(&"set_target", target, tracker_icon)
 
+## Global rect of the floating interact prompt, or an empty rect while hidden.
+## The tutorial stacks its pointer above this so the two never overlap.
+func get_prompt_rect() -> Rect2:
+	if not is_instance_valid(_floating_prompt) or not _floating_prompt.visible:
+		return Rect2()
+	if not is_instance_valid(_prompt_label) or _prompt_label.text.is_empty():
+		return Rect2()
+	return _floating_prompt.get_global_rect()
+
 func set_prompt(text: String, target: Node2D = null) -> void:
 	if text.is_empty():
 		_hide_prompt_animated()

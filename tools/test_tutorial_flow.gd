@@ -110,32 +110,32 @@ func _run() -> void:
 		var sentence_count: int = page.count(".") + page.count("!") + page.count("?")
 		_check(sentence_count <= 2, "Each Inspector intro bubble must contain at most two sentences.")
 	_check((tutorial.get_node("%SpeakerLabel") as Label).text == "The Inspector", "Intro speaker must identify the character as the Inspector.")
-	_check((tutorial.get_node("%BodyLabel") as Label).text == tutorial.intro_dialogue_pages[0], "Intro must begin with the short Inspector greeting.")
+	_check((tutorial.get_node("%BodyLabel") as RichTextLabel).text == tutorial.intro_dialogue_pages[0], "Intro must begin with the short Inspector greeting.")
 	for page_index: int in range(1, tutorial.intro_dialogue_pages.size()):
 		tutorial._complete_typewriter()
 		tutorial._advance_from_continue()
-		_check((tutorial.get_node("%BodyLabel") as Label).text == tutorial.intro_dialogue_pages[page_index], "Intro Continue must reveal dialogue page %d." % (page_index + 1))
+		_check((tutorial.get_node("%BodyLabel") as RichTextLabel).text == tutorial.intro_dialogue_pages[page_index], "Intro Continue must reveal dialogue page %d." % (page_index + 1))
 	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
 	_check(tutorial._step == TutorialDirector.Step.MOVEMENT_INTRO, "Intro must lead into a short movement briefing.")
 	_check(not game._player.movement_enabled, "Movement briefing must wait for Continue before enabling movement.")
-	_check((tutorial.get_node("%BodyLabel") as Label).text == tutorial.movement_intro_prompt, "Movement briefing must use its scene-configured copy.")
+	_check((tutorial.get_node("%BodyLabel") as RichTextLabel).text == tutorial.movement_intro_prompt, "Movement briefing must use its scene-configured copy.")
 	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
 	_check(game._player.movement_enabled and not game._player.interaction_enabled, "Movement step must allow walking while keeping interaction locked.")
 	_check(not tutorial._hud.visible, "A/D movement training must keep the gameplay HUD hidden.")
 	_check(dialogue_dock.visible, "Movement instruction bubble stays readable while walking.")
-	_check((tutorial.get_node("%BodyLabel") as Label).text.contains("Keep moving"), "Walk bubble must carry the movement instruction.")
+	_check((tutorial.get_node("%BodyLabel") as RichTextLabel).get_parsed_text().to_upper().contains("KEEP MOVING"), "Walk bubble must carry the movement instruction.")
 	tutorial._walk_time = tutorial.movement_required_seconds
 	tutorial._process(0.0)
 	_check(tutorial._step == TutorialDirector.Step.MOVEMENT_SUCCESS, "Completing movement must show the Inspector's success response.")
-	_check((tutorial.get_node("%BodyLabel") as Label).text == tutorial.movement_success_prompt, "Movement success must use its scene-configured copy.")
+	_check((tutorial.get_node("%BodyLabel") as RichTextLabel).text == tutorial.movement_success_prompt, "Movement success must use its scene-configured copy.")
 	_check(not tutorial._hud.visible, "Movement success response must keep the gameplay HUD hidden.")
 	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
 	_check(tutorial._step == TutorialDirector.Step.HUD_INTRO, "Movement success must lead into the HUD introduction.")
 	_check(not tutorial._hud.visible, "HUD introduction must keep the HUD hidden until its reveal beat.")
-	_check((tutorial.get_node("%BodyLabel") as Label).text == "Now, let me explain the tools you will use on this train.", "HUD introduction must announce the feature explanation.")
+	_check((tutorial.get_node("%BodyLabel") as RichTextLabel).get_parsed_text() == "Now, let me explain the TOOLS you will use on this train.", "HUD introduction must announce the feature explanation.")
 	tutorial.hud_intro_hold_seconds = 0.05
 	tutorial.minimap_reveal_hold_seconds = 0.05
 	tutorial.minimap_spotlight_zoom_seconds = 0.1
@@ -161,7 +161,7 @@ func _run() -> void:
 	_check(tutorial._step == TutorialDirector.Step.HUD_CLOCK, "Clock must receive its own staged reveal before its explanation.")
 	_check(tutorial._hud._clock_panel.visible, "Clock must become visible after its reveal hold.")
 	_check(tutorial._spotlight_control == tutorial._hud.get_tutorial_clock_focus_control(), "Spotlight must settle on the clock.")
-	_check((tutorial.get_node("%BodyLabel") as Label).text.contains("one full turn"), "Clock dialogue must explain the route time limit.")
+	_check((tutorial.get_node("%BodyLabel") as RichTextLabel).get_parsed_text().to_upper().contains("ONE FULL TURN"), "Clock dialogue must explain the route time limit.")
 	var clock_frame := tutorial.get_node("%DialogueFrames/HudClock") as Control
 	_check(dialogue_dock.position.is_equal_approx(clock_frame.position), "HUD clock guidance must move to its own scene frame.")
 	tutorial._complete_typewriter()
@@ -170,7 +170,7 @@ func _run() -> void:
 	_check(tutorial._step == TutorialDirector.Step.BLESSINGS, "Clock guidance must continue into day Blessings scoring.")
 	_check(tutorial._hud._blessing_summary.visible, "Blessings summary must become visible after its reveal hold.")
 	_check(tutorial._spotlight_control == tutorial._hud.get_tutorial_blessings_focus_control(), "Spotlight must settle on the Blessings summary.")
-	_check((tutorial.get_node("%BodyLabel") as Label).text.contains("left number"), "Blessings dialogue must explain earned Blessings and the target.")
+	_check((tutorial.get_node("%BodyLabel") as RichTextLabel).get_parsed_text().contains("left number"), "Blessings dialogue must explain earned Blessings and the target.")
 	tutorial.passenger_spawn_hold_seconds = 0.05
 	tutorial.passenger_camera_move_seconds = 0.1
 	tutorial.passenger_spawn_animation_seconds = 0.1
@@ -189,13 +189,13 @@ func _run() -> void:
 		_check(tutorial_passenger.get_runtime_carriage() == 2, "Tutorial passenger must spawn in the second carriage.")
 		_check(tutorial_passenger.visible and tutorial_passenger.enabled, "Tutorial passenger must become visible and interactable after landing.")
 	_check(game._gameplay_camera.zoom.is_equal_approx(game._tutorial_camera_rest_zoom), "Passenger reveal must slide on X without changing the camera zoom.")
-	_check((tutorial.get_node("%BodyLabel") as Label).text.contains("seen this person"), "Passenger introduction must mention the Inspector's sense of recognition.")
+	_check((tutorial.get_node("%BodyLabel") as RichTextLabel).get_parsed_text().to_upper().contains("SEEN THIS PERSON"), "Passenger introduction must mention the Inspector's sense of recognition.")
 	var passenger_intro_frame := tutorial.get_node("%DialogueFrames/PassengerIntro") as Control
 	_check(dialogue_dock.position.is_equal_approx(passenger_intro_frame.position), "Passenger introduction must use its scene-authored frame.")
 	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
 	_check(tutorial._step == TutorialDirector.Step.PASSENGER_PROMPT, "Passenger introduction must lead into the inspect instruction.")
-	_check((tutorial.get_node("%BodyLabel") as Label).text.contains("press E"), "Passenger prompt must explain how to inspect the NPC.")
+	_check((tutorial.get_node("%BodyLabel") as RichTextLabel).get_parsed_text().contains("press E"), "Passenger prompt must explain how to inspect the NPC.")
 	_check((tutorial.get_node("%ArrowLabel") as Control).visible, "Inspect pointer must appear with the passenger instruction.")
 	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
@@ -240,7 +240,7 @@ func _run() -> void:
 	tutorial._exam_running = true
 	tutorial._on_exam_stamp({"passenger": "Abby", "station": game._next_day_station()})
 	_check(tutorial._step == TutorialDirector.Step.EXAM_WRONG_SOUL, "Stamping a dead soul must name the mistake.")
-	_check((tutorial.get_node("%BodyLabel") as Label).text.contains("already dead"), "Dead-soul feedback must tell the player the passenger is dead.")
+	_check((tutorial.get_node("%BodyLabel") as RichTextLabel).get_parsed_text().to_upper().contains("ALREADY DEAD"), "Dead-soul feedback must tell the player the passenger is dead.")
 	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
 	_check(tutorial._step == TutorialDirector.Step.EXAM_BRIEF, "Dead-soul retry must re-enter at the task brief, not the intro.")
@@ -254,8 +254,8 @@ func _run() -> void:
 	game._on_station_stamp_applied("Reff", "Dunmere", Vector2(502.0, 152.0))
 	_check(reff.data.stamped_station == "Dunmere", "Lesson stamps must accept off-route stations instead of rejecting them silently.")
 	_check(tutorial._step == TutorialDirector.Step.EXAM_WRONG_STATION, "Stamping the wrong station must name the expected destination.")
-	_check((tutorial.get_node("%BodyLabel") as Label).text.contains("bound for"), "Wrong-station feedback must point back at the ticket destination.")
-	_check((tutorial.get_node("%BodyLabel") as Label).text.contains("no second chance"), "Wrong-station feedback must warn that a wrong stamp cannot be undone.")
+	_check((tutorial.get_node("%BodyLabel") as RichTextLabel).get_parsed_text().contains("bound for"), "Wrong-station feedback must point back at the ticket destination.")
+	_check((tutorial.get_node("%BodyLabel") as RichTextLabel).get_parsed_text().to_upper().contains("NO SECOND CHANCE"), "Wrong-station feedback must warn that a wrong stamp cannot be undone.")
 	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
 	_check(tutorial._step == TutorialDirector.Step.EXAM_BRIEF, "Wrong-station retry must re-enter at the task brief, not the intro.")
@@ -280,9 +280,13 @@ func _run() -> void:
 	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
 	_check(tutorial._step == TutorialDirector.Step.EXAM_SIGN, "Fast-forward explanation must lead to the Sign Service instruction.")
+	_check(tutorial.get_node("%DialogueDock").visible, "Sign Service instruction must stay up until the player presses the button.")
 	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
-	_check(not tutorial.get_node("%DialogueDock").visible, "Sign Service dialogue must close before the player traces the signature.")
+	_check(tutorial._step == TutorialDirector.Step.EXAM_SIGN, "Continue/Space must not skip the Sign Service instruction.")
+	_check(tutorial.get_node("%DialogueDock").visible, "Sign Service instruction must ignore Continue and wait for the button.")
+	tutorial._on_main_tutorial_event(&"service_signature_opened")
+	_check(not tutorial.get_node("%DialogueDock").visible, "Pressing Sign Service must close its instruction before tracing.")
 
 	# Compact Night Service lesson: Abby starts in the ledger and Mecca is the
 	# only soul the player must inspect before opening the station path.

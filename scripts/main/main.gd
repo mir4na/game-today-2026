@@ -30,6 +30,8 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 ## only exam souls, so the platform is filled with random commuter identities
 ## (never anyone aboard, boarding, or departing) like a normal shift.
 @export_range(0, 10, 1) var tutorial_cutscene_ambient_count: int = 4
+## Seat-index step between exam souls (2 = one empty seat between each).
+@export_range(1, 4, 1) var tutorial_exam_seat_step: int = 2
 @export_category("Bloom")
 @export_range(0.0, 1.5, 0.01) var morning_bloom_intensity: float = 0.11
 @export_range(0.0, 1.5, 0.01) var sunset_bloom_intensity: float = 0.27
@@ -643,7 +645,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if (
 		event.is_action_pressed(&"service_action")
 		and not _service_seal_active
-		and _active_modal == null
+		and (_active_modal == null or _is_tutorial_sign_action())
 		and state in [GameState.DAY, GameState.SUNSET, GameState.NIGHT]
 		and _hud.is_service_action_available()
 	):
@@ -919,20 +921,16 @@ func spawn_tutorial_exam_group(
 	var player_carriage: int = 1
 	if is_instance_valid(_player):
 		player_carriage = _train.get_nearest_carriage_number_at_world_x(_player.global_position.x)
+	var exam_seats: Array = _find_exam_pattern_seats(player_carriage)
+	if exam_seats.size() < 5:
+		push_warning("Tutorial exam could not stage five fixed-pattern seats; some souls were skipped.")
 	var next_stop: String = _next_day_station()
 	var far_stop: String = day_route[clampi(_route_index + 2, 0, day_route.size() - 1)]
 	for slot_index: int in range(5):
 		var profile: PassengerIdentityProfile = passenger_identity_profiles[slot_index]
-		var seat_slot: Marker2D
-		# Fill the player's carriage first, then the adjacent carriages. This keeps
-		# the group close while guaranteeing all five have a visible spawn point.
-		for carriage_offset: int in range(4):
-			var candidate_carriage: int = ((player_carriage - 1 + carriage_offset) % 4) + 1
-			seat_slot = _find_available_seat(candidate_carriage)
-			if seat_slot != null:
-				break
-		if seat_slot == null:
+		if slot_index >= exam_seats.size():
 			break
+		var seat_slot: Marker2D = exam_seats[slot_index]
 		var data := PassengerData.create_from_identity(profile)
 		if data == null:
 			continue
@@ -1114,6 +1112,81 @@ func _find_station_boarding_seat(preferred_carriage: int) -> Marker2D:
 		if fallback_seat != null:
 			return fallback_seat
 	return null
+
+
+## Fixed exam staging: five seats on the current screen in roster order,
+## spaced tutorial_exam_seat_step apart and centered on the player's seat.
+## Falls back to adjacent carriages, then to any free seat.
+func _find_exam_pattern_seats(player_carriage: int) -> Array[Marker2D]:
+	var claimed: Dictionary = {}
+	for carriage_offset: int in range(manifest_config.passenger_carriage_count):
+		var candidate_carriage: int = ((player_carriage - 1 + carriage_offset) % manifest_config.passenger_carriage_count) + 1
+		var pattern := _exam_pattern_in_carriage(_train.get_passenger_seat_slots(candidate_carriage), claimed)
+		if pattern.size() >= 5:
+			return pattern
+	var fallback: Array[Marker2D] = []
+	for carriage: int in range(1, manifest_config.passenger_carriage_count + 1):
+		for seat_slot: Marker2D in _train.get_passenger_seat_slots(carriage):
+			if claimed.has(seat_slot) or not _is_exam_seat_free(seat_slot):
+				continue
+			claimed[seat_slot] = true
+			fallback.append(seat_slot)
+			if fallback.size() >= 5:
+				return fallback
+	return fallback
+
+
+func _exam_pattern_in_carriage(seats: Array[Marker2D], claimed: Dictionary) -> Array[Marker2D]:
+	var pattern: Array[Marker2D] = []
+	if seats.size() < 5:
+		return pattern
+	var step: int = maxi(1, tutorial_exam_seat_step)
+	var center: int = 0
+	var best_distance: float = INF
+	if is_instance_valid(_player):
+		for index: int in range(seats.size()):
+			var seat_slot := seats[index] as Marker2D
+			if seat_slot == null:
+				continue
+			var distance: float = absf(seat_slot.global_position.x - _player.global_position.x)
+			if distance < best_distance:
+				best_distance = distance
+				center = index
+	var span_end: int = maxi(0, seats.size() - 1 - step * 4)
+	var start: int = clampi(center - step * 2, 0, span_end)
+	for slot: int in range(5):
+		var seat_slot := _nearest_free_exam_seat(seats, start + slot * step, claimed)
+		if seat_slot == null:
+			return []
+		claimed[seat_slot] = true
+		pattern.append(seat_slot)
+	return pattern
+
+
+func _nearest_free_exam_seat(seats: Array[Marker2D], wanted_index: int, claimed: Dictionary) -> Marker2D:
+	var clamped_wanted: int = clampi(wanted_index, 0, maxi(0, seats.size() - 1))
+	for distance: int in range(seats.size()):
+		var candidates: Array[int] = [
+			clampi(clamped_wanted - distance, 0, seats.size() - 1),
+			clampi(clamped_wanted + distance, 0, seats.size() - 1),
+		]
+		for candidate_index: int in candidates:
+			var seat_slot := seats[candidate_index] as Marker2D
+			if seat_slot != null and not claimed.has(seat_slot) and _is_exam_seat_free(seat_slot):
+				return seat_slot
+	return null
+
+
+func _is_exam_seat_free(seat_slot: Marker2D) -> bool:
+	if seat_slot == null or not is_instance_valid(seat_slot):
+		return false
+	if _is_seat_blocked_by_maintenance(seat_slot) or Passenger.is_stop_reserved_for_interaction(get_tree(), seat_slot.global_position):
+		return false
+	var occupant := _seat_occupant_by_slot.get(seat_slot) as Passenger
+	if not _is_active_passenger(occupant):
+		_seat_occupant_by_slot.erase(seat_slot)
+		return true
+	return false
 
 func _has_enough_space_from_occupied_seats(candidate: Marker2D) -> bool:
 	var candidate_position: Vector2 = _passenger_container.to_local(candidate.global_position)
@@ -1702,6 +1775,13 @@ func _on_night_passenger_interacted(passenger: Passenger) -> void:
 		_collected_departure_statements.has(passenger_name),
 		_hud.get_night_ledger_button_center()
 	)
+	# Restore any prior wrong-guess cracks for this soul.
+	if is_instance_valid(_night_soul_record_ui):
+		_night_soul_record_ui.call(
+			&"set_identity_miss_streak",
+			mini(int(_night_soul_record_misses.get(passenger_name, 0)), 3),
+			true
+		)
 
 func _close_night_statement_dialogue() -> void:
 	if not _night_statement_active:
@@ -1823,6 +1903,9 @@ func _on_night_statement_feedback_requested(succeeded: bool) -> void:
 	var passenger_name: String = _inspected_passenger.data.short_name
 	var miss_count: int = int(_night_soul_record_misses.get(passenger_name, 0)) + 1
 	_night_soul_record_misses[passenger_name] = miss_count
+	# 1st wrong guess: hairline. 2nd: spreading crack. 3rd: the whole pane.
+	if is_instance_valid(_night_soul_record_ui):
+		_night_soul_record_ui.call(&"set_identity_miss_streak", mini(miss_count, 3))
 	if miss_count < 3 or _night_soul_record_repulsed.has(passenger_name):
 		return
 	var repelled_passenger: Passenger = _inspected_passenger
@@ -1831,7 +1914,8 @@ func _on_night_statement_feedback_requested(succeeded: bool) -> void:
 	_night_soul_record_repulsed[passenger_name] = true
 	# The player loses the record together with the soul and must locate its new
 	# carriage before another attempt can be made.
-	_night_soul_record_ui.call(&"request_close")
+	if is_instance_valid(_night_soul_record_ui):
+		_night_soul_record_ui.call(&"play_shatter_and_close")
 
 
 func _on_night_validation_impact_requested(succeeded: bool) -> void:
@@ -2207,6 +2291,7 @@ func _start_station_stop_cutscene(station_name: String, departing_actors: Array[
 		station_name,
 		_cinematic_camera_anchor
 	)
+	_station_stop_ui.set_skip_allowed(not is_tutorial_mode)
 	_station_stop_ui.set_station_crowd_layout(_station_cinematic_view.get_station_crowd_layout())
 	if terminal_arrival:
 		_station_stop_ui.play_terminal(
@@ -2394,6 +2479,7 @@ func _on_day_intro_finished() -> void:
 	var opening_timeline: Vector3 = _station_stop_ui.get_opening_timeline()
 	_train.show_exterior_body(opening_timeline.x, opening_timeline.y, opening_timeline.z)
 	_station_cinematic_view.begin(_gameplay_camera, day_route[0], _cinematic_camera_anchor)
+	_station_stop_ui.set_skip_allowed(not is_tutorial_mode)
 	_station_stop_ui.set_station_crowd_layout(_station_cinematic_view.get_station_crowd_layout())
 	_station_stop_ui.play_opening(
 		day_route[0],
@@ -3157,7 +3243,11 @@ func _open_night_puzzle() -> void:
 
 
 func _on_service_action_requested() -> void:
-	if _active_modal != null or _service_seal_active:
+	if _service_seal_active:
+		return
+	# The tutorial sign-off lock borrows modal ownership so every other HUD
+	# shortcut goes quiet; the service button itself stays exempt.
+	if _active_modal != null and not _is_tutorial_sign_action():
 		return
 	if state == GameState.NIGHT:
 		_open_night_puzzle()
@@ -3189,6 +3279,7 @@ func _on_service_signature_closed() -> void:
 		return
 	_active_modal = null
 	_set_player_control_for_state()
+	_emit_tutorial_event(&"service_signature_closed")
 
 
 func _on_service_signature_rejected() -> void:
@@ -3563,6 +3654,24 @@ func _on_level_start_hint_dismissed() -> void:
 	if state in [GameState.DAY, GameState.SUNSET]:
 		_set_player_control_for_state()
 		_schedule_maintenance_events()
+
+
+func _is_tutorial_sign_action() -> bool:
+	if not is_tutorial_mode or _active_modal != _tutorial_director:
+		return false
+	var director: Variant = _tutorial_director
+	if director == null or not is_instance_valid(director) or not director.has_method(&"is_sign_action_expected"):
+		return false
+	return bool(director.call(&"is_sign_action_expected"))
+
+
+## Tutorial sign-off lock borrows modal ownership so every HUD shortcut
+## except the service button goes quiet. The service handler exempts it.
+func set_tutorial_modal(modal: Control) -> void:
+	if not is_tutorial_mode:
+		return
+	_active_modal = modal
+	_set_player_control_for_state()
 
 
 func _is_tutorial_lesson_stamp(passenger: Passenger) -> bool:

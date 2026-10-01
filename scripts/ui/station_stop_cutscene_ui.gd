@@ -24,6 +24,8 @@ signal sequence_skip_requested
 @export var terminal_status_template: String = "%d DISEMBARKING"
 @export var skip_hint_text: String = "CLICK TO"
 @export var skip_word_text: String = "SKIP"
+## Click-to-skip is disabled during the tutorial so the lesson beats land.
+@export var skip_allowed: bool = true
 @export_category("Scene Animation")
 @export var letterbox_in_animation: StringName = &"letterbox_in"
 @export var letterbox_out_animation: StringName = &"letterbox_out"
@@ -130,6 +132,14 @@ var _motion_rng := RandomNumberGenerator.new()
 @onready var _status_label: Label = %StatusLabel
 @onready var _skip_prompt_label: Label = %SkipPromptLabel
 @onready var _skip_word_label: Label = %SkipWordLabel
+@onready var _skip_hint: Control = %SkipPromptLabel.get_parent() as Control
+
+
+## Hides the click-to-skip hint and ignores skip input (tutorial stations).
+func set_skip_allowed(value: bool) -> void:
+	skip_allowed = value
+	if is_node_ready() and is_instance_valid(_skip_hint):
+		_skip_hint.visible = value
 @onready var _cinematic_title: Control = %CinematicTitle
 @onready var _screen_fade: ColorRect = %ScreenFade
 @onready var _station_actor_canvas: CanvasLayer = %StationActorCanvas
@@ -253,6 +263,8 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 	_update_scene_copy()
 	_skip_prompt_label.text = skip_hint_text
 	_skip_word_label.text = skip_word_text
+	if is_instance_valid(_skip_hint):
+		_skip_hint.visible = skip_allowed
 	show()
 	_station_actor_canvas.show()
 	_cinematic_border_layer.show()
@@ -268,6 +280,8 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 
 
 func skip_sequence() -> void:
+	if not skip_allowed:
+		return
 	if not visible or _camera_return_started or _elapsed < screen_fade_duration:
 		return
 	_skip_requested = true

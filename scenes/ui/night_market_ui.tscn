@@ -549,7 +549,7 @@ offset_top = 107.0
 offset_right = 1244.0
 offset_bottom = 160.0
 mouse_default_cursor_shape = 2
-text = "Begin night shift"
+text = "Begin shift"
 script = ExtResource("19_hover")
 
 [node name="BlessingTexture" type="TextureRect" parent="HeaderRoot" unique_id=1443285637]
@@ -623,6 +623,33 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0.764706, 0.803922, 0.839216, 1)
+
+[node name="MarketDescLabel" type="Label" parent="." unique_id=918273645]
+unique_name_in_owner = true
+editor_description = "Shared hover description. Shows the hovered or focused tool effect, hidden otherwise."
+visible = false
+z_index = 30
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -400.0
+offset_top = -112.0
+offset_right = 400.0
+offset_bottom = -52.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.952941, 0.847059, 0.427451, 1)
+theme_override_colors/font_outline_color = Color(0.2, 0.105882, 0.231373, 0.95)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 20
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
 
 [connection signal="pressed" from="MarketActors/VeilNoteEntrance/VeilNoteFloat/VeilNoteButton" to="." method="_on_veil_note_button_pressed"]
 [connection signal="pressed" from="MarketActors/RadarEntrance/RadarFloat/RadarButton" to="." method="_on_radar_button_pressed"]

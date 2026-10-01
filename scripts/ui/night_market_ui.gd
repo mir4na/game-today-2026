@@ -12,7 +12,11 @@ signal entrance_finished
 @export var blessings_template: String = "%d"
 @export var veil_note_stock_template: String = "%d / 1 owned  •  %d Blessings"
 @export var radar_stock_template: String = "%d / %d owned  •  %d Blessings"
-@export var swift_stock_template: String = "%d / %d owned  •  Speed ×3 for 10 seconds  •  %d Blessings"
+@export var swift_stock_template: String = "%d / %d owned  •  %d Blessings"
+@export_category("Item Descriptions")
+@export_multiline var veil_note_desc: String = "Reveals a hidden departure statement inside a Soul Record."
+@export_multiline var radar_desc: String = "Scans the area and lights up anomalies for a short time."
+@export_multiline var swift_desc: String = "Triples movement speed for 10 seconds."
 @export_category("Floating Motion")
 @export_range(0.0, 20.0, 0.5) var angel_float_height: float = 8.0
 @export_range(0.0, 5.0, 0.05) var angel_float_speed: float = 1.15
@@ -91,6 +95,7 @@ const RIGHT_WALL_CLOSED_SIZE := Vector2(300.0, 720.0)
 @onready var _header_root: Control = %HeaderRoot
 @onready var _blessings_label: Label = %BlessingsLabel
 @onready var _continue_button: Button = %ContinueButton
+@onready var _desc_label: Label = %MarketDescLabel
 @onready var _gate_layer: Control = $GateLayer
 @onready var _gate_motion: Node2D = %GateMotion
 @onready var _left_door: Sprite2D = %LeftDoor
@@ -171,6 +176,7 @@ func open_market(snapshot: Dictionary, _day_award: Dictionary) -> void:
 		highlight.modulate.a = 0.0
 		highlight.scale = (_highlight_scales[highlight] as Vector2) * 0.88
 		_item_floats[index].scale = Vector2.ONE
+	_update_desc_label()
 	_play_entrance_animation()
 
 
@@ -242,6 +248,27 @@ func _connect_item_feedback() -> void:
 		button.mouse_exited.connect(_on_item_hover_changed.bind(index, false))
 		button.focus_entered.connect(_refresh_item_highlights)
 		button.focus_exited.connect(_refresh_item_highlights)
+		button.focus_entered.connect(_update_desc_label)
+		button.focus_exited.connect(_update_desc_label)
+
+
+## Shared bottom line: hovered or focused tool effect, otherwise nothing.
+func _update_desc_label() -> void:
+	if not is_instance_valid(_desc_label):
+		return
+	var index: int = _hovered_item_index
+	if index < 0:
+		for candidate: int in range(_item_buttons.size()):
+			if _item_buttons[candidate].has_focus():
+				index = candidate
+				break
+	if index < 0:
+		_desc_label.text = ""
+		_desc_label.hide()
+		return
+	var descs := [veil_note_desc, radar_desc, swift_desc]
+	_desc_label.text = str(descs[clampi(index, 0, descs.size() - 1)])
+	_desc_label.show()
 
 
 func _focus_first_available_action() -> void:
@@ -257,6 +284,7 @@ func _on_item_hover_changed(index: int, hovered: bool) -> void:
 		_hovered_item_index = index
 	elif _hovered_item_index == index:
 		_hovered_item_index = -1
+	_update_desc_label()
 	_refresh_item_highlights()
 
 
