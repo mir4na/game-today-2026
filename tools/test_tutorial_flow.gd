@@ -196,13 +196,13 @@ func _run() -> void:
 	tutorial._advance_from_continue()
 	_check(tutorial._step == TutorialDirector.Step.PASSENGER_PROMPT, "Passenger introduction must lead into the inspect instruction.")
 	_check((tutorial.get_node("%BodyLabel") as Label).text.contains("press E"), "Passenger prompt must explain how to inspect the NPC.")
-	_check((tutorial.get_node("%ArrowLabel") as Label).visible, "Inspect pointer must appear with the passenger instruction.")
+	_check((tutorial.get_node("%ArrowLabel") as Control).visible, "Inspect pointer must appear with the passenger instruction.")
 	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
 	_check(tutorial._step == TutorialDirector.Step.PASSENGER, "Closing the inspect instruction must begin the passenger task.")
 	_check(not dialogue_dock.visible, "Passenger inspection task must hide the dialogue bubble.")
 	_check(not bubble_tail.visible, "Passenger inspection task must hide the dialogue tail.")
-	_check((tutorial.get_node("%ArrowLabel") as Label).visible, "Passenger inspection task must keep a pointer aimed at NPC 12.")
+	_check((tutorial.get_node("%ArrowLabel") as Control).visible, "Passenger inspection task must keep a pointer aimed at NPC 12.")
 	await create_timer(0.15).timeout
 	_check(game._player.movement_enabled and game._player.interaction_enabled, "Player must regain movement and interaction after the camera returns.")
 	_check(game._gameplay_camera.zoom.is_equal_approx(game._tutorial_camera_rest_zoom), "Passenger task must restore the gameplay camera zoom before player control returns.")
@@ -211,7 +211,7 @@ func _run() -> void:
 		await process_frame
 	_check(tutorial._step == TutorialDirector.Step.DOCUMENTS, "Inspecting NPC 12 must advance to the document lesson.")
 	_check(game._document_overlay.visible, "NPC 12 interaction must open the actual passenger document UI.")
-	_check(not (tutorial.get_node("%ArrowLabel") as Label).visible, "Inspect pointer must disappear once the passenger documents open.")
+	_check(not (tutorial.get_node("%ArrowLabel") as Control).visible, "Inspect pointer must disappear once the passenger documents open.")
 	game._document_overlay.hide()
 	game._active_modal = game._tutorial_director
 	tutorial.exam_spawn_delay_seconds = 0.05
@@ -249,8 +249,10 @@ func _run() -> void:
 	tutorial._advance_from_continue()
 	_check(tutorial._step == TutorialDirector.Step.EXAM_ACTIVE and not tutorial.get_node("%DialogueDock").visible, "Stamp test dialogue must close while the timed task is active.")
 	var reff: Passenger = tutorial._exam_passengers[1]
-	reff.data.stamped_station = "Alderwick"
-	tutorial._on_exam_stamp({"passenger": "Reff", "station": "Alderwick"})
+	# Off-route stations are rejected silently in normal play. During lessons
+	# they must apply and fail loudly, end to end through Main's pipeline.
+	game._on_station_stamp_applied("Reff", "Dunmere", Vector2(502.0, 152.0))
+	_check(reff.data.stamped_station == "Dunmere", "Lesson stamps must accept off-route stations instead of rejecting them silently.")
 	_check(tutorial._step == TutorialDirector.Step.EXAM_WRONG_STATION, "Stamping the wrong station must name the expected destination.")
 	_check((tutorial.get_node("%BodyLabel") as Label).text.contains("bound for"), "Wrong-station feedback must point back at the ticket destination.")
 	_check((tutorial.get_node("%BodyLabel") as Label).text.contains("no second chance"), "Wrong-station feedback must warn that a wrong stamp cannot be undone.")
@@ -301,7 +303,7 @@ func _run() -> void:
 	tutorial._advance_from_continue()
 	_check(tutorial._step == TutorialDirector.Step.NIGHT_INSPECT, "Night assignment briefing must close before the player inspects Mecca.")
 	_check(not tutorial.get_node("%DialogueDock").visible, "Night inspection task must hide the dialogue bubble.")
-	_check((tutorial.get_node("%ArrowLabel") as Label).visible, "Night inspection task must point to the one unrecorded soul.")
+	_check((tutorial.get_node("%ArrowLabel") as Control).visible, "Night inspection task must point to the one unrecorded soul.")
 
 	var mecca := night_lesson.get("inspection_target") as Passenger
 	_check(is_instance_valid(mecca), "Night tutorial inspection target must be a live Passenger node.")

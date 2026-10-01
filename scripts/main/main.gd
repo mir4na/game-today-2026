@@ -2054,7 +2054,10 @@ func _on_station_stamp_applied(passenger_name: String, station_name: String, tic
 	if passenger == null:
 		_hud.notify("This passenger is no longer aboard", 2.0)
 		return
-	if _is_dropoff_locked() or not day_route.has(station_name):
+	# Tutorial lessons accept off-route stamps so the mistake gets explicit
+	# feedback from the Inspector instead of a silent tray reject.
+	var lesson_stamp: bool = is_tutorial_mode and _is_tutorial_lesson_stamp(passenger)
+	if _is_dropoff_locked() or (not day_route.has(station_name) and not lesson_stamp):
 		_document_overlay.configure_stamp_lock(_is_dropoff_locked())
 		return
 	var canonical_name: String = passenger.data.passenger_name
@@ -2750,6 +2753,10 @@ func _get_day_pass_target() -> int:
 		return 100
 	return maxi(0, day_pass_targets[clampi(day_number - 1, 0, day_pass_targets.size() - 1)])
 
+func _on_shift_report_presentation_finished() -> void:
+	_emit_tutorial_event(&"shift_report_revealed")
+
+
 func _on_shift_report_continue() -> void:
 	if state == GameState.COMPLETE:
 		if _night_paycheck_failed:
@@ -2909,6 +2916,10 @@ func _on_market_purchase_requested(tool_id: StringName) -> void:
 		result,
 		_market_tool_state.call(&"get_snapshot")
 	)
+
+
+func _on_night_market_entrance_finished() -> void:
+	_emit_tutorial_event(&"night_market_settled")
 
 
 func _on_night_market_continue() -> void:
@@ -3552,6 +3563,15 @@ func _on_level_start_hint_dismissed() -> void:
 	if state in [GameState.DAY, GameState.SUNSET]:
 		_set_player_control_for_state()
 		_schedule_maintenance_events()
+
+
+func _is_tutorial_lesson_stamp(passenger: Passenger) -> bool:
+	if not is_tutorial_mode or passenger == null:
+		return false
+	var director: Variant = _tutorial_director
+	if director == null or not is_instance_valid(director) or not director.has_method(&"is_lesson_passenger"):
+		return false
+	return bool(director.call(&"is_lesson_passenger", passenger))
 
 
 func _is_dropoff_locked() -> bool:

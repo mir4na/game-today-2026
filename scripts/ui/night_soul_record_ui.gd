@@ -151,10 +151,13 @@ func _render_biography() -> void:
 		for sentence_index: int in paragraph_indices:
 			var sentence: String = str(_sentence_by_index.get(sentence_index, ""))
 			if _recorded and sentence == _correct_statement:
+				# The collected sentence leaves an invisible twin behind: the
+				# original text at zero alpha keeps identical metrics, so the
+				# surrounding biography never reflows.
 				rendered.append("[url=%d][color=#%s]%s[/color][/url]" % [
 					sentence_index,
-					Color(1.0, 1.0, 1.0, 0.0).to_html(false),
-					_blank_statement_text(sentence),
+					Color(1.0, 1.0, 1.0, 0.0).to_html(true),
+					sentence,
 				])
 				continue
 			var color: Color = sentence_color
@@ -231,16 +234,6 @@ func _finish_correct_statement_feedback() -> void:
 	_correct_reveal_characters = -1
 	_extracted_sentence_index = -1
 	_render_biography()
-
-
-func _blank_statement_text(statement: String) -> String:
-	var blank := PackedStringArray()
-	for character: String in statement:
-		if character == " ":
-			blank.append(" ")
-		else:
-			blank.append(" ")
-	return "".join(blank)
 
 
 func _estimate_sentence_source_rect(sentence_index: int) -> Rect2:

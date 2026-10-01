@@ -134,6 +134,8 @@ enum Step {
 ])
 @export_range(0.0, 24.0, 0.5) var inspect_pointer_bob_distance: float = 7.0
 @export_range(0.5, 5.0, 0.1) var inspect_pointer_bob_speed: float = 2.5
+@export_category("Night Inspect Pointer")
+@export_range(0.0, 260.0, 1.0) var night_pointer_extra_lift_pixels: float = 110.0
 @export_category("Typewriter")
 @export_range(20.0, 240.0, 5.0) var typewriter_characters_per_second: float = 90.0
 @export_category("Skip Tutorial")
@@ -207,6 +209,7 @@ var _exam_time_remaining: float = 0.0
 var _exam_running: bool = false
 var _passenger_pointer_target: Node2D
 var _passenger_pointer_time: float = 0.0
+var _passenger_pointer_lift: float = 0.0
 var _portrait_base_scale: Vector2 = Vector2.ONE
 var _portrait_rest_scale: Vector2 = Vector2.ONE
 var _tail_base_scale: Vector2 = Vector2(-0.9, -0.9)
@@ -235,7 +238,7 @@ var _night_target_name: String = ""
 @onready var _continue_row: Control = %ContinueRow
 @onready var _continue_button: Button = %ContinueButton
 @onready var _progress_label: Label = %ProgressLabel
-@onready var _arrow_label: Label = %ArrowLabel
+@onready var _arrow_label: Control = %ArrowLabel
 @onready var _dialogue_frames: Control = %DialogueFrames
 @onready var _passenger_pointer_offset: Marker2D = get_node_or_null(passenger_pointer_offset_path) as Marker2D
 @onready var _skip_prompt: Control = %SkipPrompt
@@ -462,6 +465,7 @@ func _reset_visuals() -> void:
 	_spotlight_control = null
 	_spotlight_world_target = null
 	_passenger_pointer_target = null
+	_passenger_pointer_lift = 0.0
 	_spotlight_searching = false
 	_spotlight_override_active = false
 	_current_spotlight_radius = spotlight_radius
@@ -809,6 +813,7 @@ func _begin_passenger_inspection_task() -> void:
 		else null
 	)
 	_passenger_pointer_time = 0.0
+	_passenger_pointer_lift = 0.0
 	_arrow_label.visible = is_instance_valid(_passenger_pointer_target)
 	if _main != null and _main.has_method(&"restore_tutorial_camera"):
 		_main.call(&"restore_tutorial_camera", passenger_camera_move_seconds)
@@ -833,7 +838,7 @@ func _update_passenger_pointer(delta: float) -> void:
 		else Vector2(0.0, -140.0)
 	)
 	var bob := Vector2(0.0, sin(_passenger_pointer_time * inspect_pointer_bob_speed * TAU) * inspect_pointer_bob_distance)
-	var desired_center: Vector2 = target_screen + authored_offset + bob
+	var desired_center: Vector2 = target_screen + authored_offset + bob - Vector2(0.0, _passenger_pointer_lift)
 	var margin := Vector2(
 		maxf(_arrow_label.size.x * 0.5 + 18.0, 48.0),
 		maxf(_arrow_label.size.y * 0.5 + 18.0, 48.0)
@@ -850,6 +855,15 @@ func _update_passenger_pointer(delta: float) -> void:
 
 ## Stamp exam: five souls board in front of the player, three ordinary and
 ## two anomalies. Two minutes, then the exam restarts on failure.
+## Off-route stamps are normally rejected silently by Main. During lessons
+## they are accepted so the mistake produces explicit feedback instead of
+## confusion; Main asks this helper before applying its route check.
+func is_lesson_passenger(passenger: Passenger) -> bool:
+	if passenger == null:
+		return false
+	if passenger == _tutorial_passenger:
+		return true
+	return _exam_passengers.has(passenger)
 ## First call spawns the group hidden, reveals them one by one after a short
 ## beat, and only then presents the test dialogue. Later calls (fail retry
 ## paths use _restart_tutorial_exam directly) never replay the entrance.
@@ -2101,6 +2115,9 @@ func _begin_night_inspection_task() -> void:
 	_set_spotlight_shade(0.0)
 	_set_controls(true, true)
 	_passenger_pointer_time = 0.0
+	# Night souls sit lower in frame than the day lesson, so the pointer gets
+	# its own extra lift and never hugs the bottom edge of the screen.
+	_passenger_pointer_lift = night_pointer_extra_lift_pixels
 	_arrow_label.visible = is_instance_valid(_passenger_pointer_target)
 
 
@@ -2210,13 +2227,20 @@ func _on_main_tutorial_event(event_name: StringName, payload: Variant = null) ->
 				if _main != null and _main.has_method(&"advance_tutorial_to_terminal_arrival"):
 					_main.call(&"advance_tutorial_to_terminal_arrival")
 		&"shift_report_opened":
-			_show_continue_step(
-				Step.PAYCHECK,
-				"Paycheck",
-				"This is your paycheck: correct work earns Blessings, which buy tools for harder shifts.",
-				""
-			)
+			# The Inspector waits until the receipt has revealed every line.
+			pass
+		&"shift_report_revealed":
+			if _step == Step.EXAM_TRAVEL:
+				_show_continue_step(
+					Step.PAYCHECK,
+					"Paycheck",
+					"This is your paycheck: correct work earns Blessings, which buy tools for harder shifts.",
+					""
+				)
 		&"night_market_opened":
+			# The Inspector waits until the market entrance has settled.
+			pass
+		&"night_market_settled":
 			_show_continue_step(Step.NIGHT_MARKET, "Night Market", "This is the Night Market, where tools can make your internship easier. Purchases are disabled during training; press Begin when you are ready.", "")
 		&"night_started":
 			if _step in [Step.DAY_SERVICE, Step.NIGHT_MARKET, Step.NIGHT_WELCOME]:

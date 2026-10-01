@@ -4,6 +4,9 @@ extends Control
 
 signal purchase_requested(tool_id: StringName)
 signal continue_requested
+## Emitted once the entrance settles (gate open, merchant and shelves in).
+## The tutorial waits for this before briefing.
+signal entrance_finished
 
 @export_category("Inspector Copy")
 @export var blessings_template: String = "%d"
@@ -390,6 +393,7 @@ func _play_entrance_animation() -> void:
 	_input_locked = false
 	set_snapshot(_snapshot)
 	_focus_first_available_action()
+	entrance_finished.emit()
 
 
 func _raise_entrance_fog() -> void:

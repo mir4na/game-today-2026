@@ -70,8 +70,9 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="ArrowLabel" type="Label" parent="." unique_id=1793955105]
+[node name="ArrowLabel" type="Control" parent="." unique_id=1793955105]
 unique_name_in_owner = true
+editor_description = "Scene-authored inspect pointer. Pure polygon chevrons, no font glyph, so it renders on every build target including web."
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -86,11 +87,23 @@ offset_bottom = -90.0
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(42, 45)
-theme_override_colors/font_color = Color(1, 0.81, 0.27, 1)
-theme_override_font_sizes/font_size = 72
-text = "↓"
-horizontal_alignment = 1
-vertical_alignment = 1
+mouse_filter = 2
+
+[node name="ChevronOutlineUpper" type="Polygon2D" parent="ArrowLabel" unique_id=1514611581]
+color = Color(0.02, 0.02, 0.03, 0.95)
+polygon = PackedVector2Array(10, 8, 42, 44, 74, 8, 74, 24, 42, 60, 10, 24)
+
+[node name="ChevronFaceUpper" type="Polygon2D" parent="ArrowLabel" unique_id=1793834056]
+color = Color(1, 0.81, 0.27, 1)
+polygon = PackedVector2Array(18, 11, 42, 39, 66, 11, 66, 22, 42, 50, 18, 22)
+
+[node name="ChevronOutlineLower" type="Polygon2D" parent="ArrowLabel" unique_id=1832178956]
+color = Color(0.02, 0.02, 0.03, 0.95)
+polygon = PackedVector2Array(10, 38, 42, 74, 74, 38, 74, 54, 42, 90, 10, 54)
+
+[node name="ChevronFaceLower" type="Polygon2D" parent="ArrowLabel" unique_id=1733262091]
+color = Color(1, 0.81, 0.27, 1)
+polygon = PackedVector2Array(18, 41, 42, 69, 66, 41, 66, 52, 42, 80, 18, 52)
 
 [node name="WorldPointerSettings" type="Node2D" parent="." unique_id=204072375]
 editor_description = "Scene-authored offsets for pointers that track world objects. Move each child marker to tune its pointer relative to the target."
@@ -818,20 +831,20 @@ stretch_mode = 5
 editor_description = "Post sign-off bubble rect."
 visible = false
 layout_mode = 0
-offset_left = 82.0
-offset_top = 482.0
-offset_right = 1184.0
-offset_bottom = 694.0
+offset_left = 81.0
+offset_top = 76.0
+offset_right = 1183.0
+offset_bottom = 202.0
 mouse_filter = 2
 color = Color(1, 0.81, 0.27, 0.1)
 
 [node name="PortraitSpot" type="Panel" parent="DialogueFrames/DayService" unique_id=77200168]
 editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
 layout_mode = 0
-offset_left = 992.0
-offset_top = -220.0
-offset_right = 1166.0
-offset_bottom = -46.0
+offset_left = 1016.0
+offset_top = 136.0
+offset_right = 1190.0
+offset_bottom = 310.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
 
@@ -839,11 +852,11 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
 editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
 modulate = Color(1, 1, 1, 0.65)
 layout_mode = 0
-offset_left = 921.0
-offset_top = -133.0
-offset_right = 1004.0
-offset_bottom = -62.0
-rotation = 1.8027644
+offset_left = 1025.0
+offset_top = 78.999985
+offset_right = 1108.0
+offset_bottom = 149.99998
+rotation = 1.5549332
 mouse_filter = 2
 texture = ExtResource("5_dialogue_pointer")
 expand_mode = 1

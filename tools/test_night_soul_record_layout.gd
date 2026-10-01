@@ -126,8 +126,8 @@ func _run() -> void:
 			reader._on_sentence_clicked(correct_sentence_index)
 			_check(reader._correct_reveal_characters >= 0, "A correct statement must begin its extraction animation.")
 			_check(
-				not biography_text.text.contains(puzzle.get_statement_for_passenger(inspected_name)),
-				"A correct statement must leave a blank space in the biography after extraction begins."
+				biography_text.text.contains("[url=%d][color=#ffffff00]" % correct_sentence_index),
+				"A correct statement must leave an invisible same-size placeholder in the biography after extraction begins."
 			)
 			_check(
 				reader._flying_letters.size() > 0,
@@ -169,8 +169,8 @@ func _run() -> void:
 			)
 			await create_timer(reader.statement_extract_seconds + reader.letter_stagger_seconds * float(reader._correct_statement.length()) + 0.1).timeout
 			_check(
-				not biography_text.text.contains(puzzle.get_statement_for_passenger(inspected_name)),
-				"The extracted statement must stay blank inside the biography."
+				biography_text.text.contains("[url=%d][color=#ffffff00]" % correct_sentence_index),
+				"The extracted statement must stay invisible inside the biography without moving the other sentences."
 			)
 		reader.request_close()
 		await create_timer(0.45).timeout

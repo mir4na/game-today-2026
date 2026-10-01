@@ -3,6 +3,9 @@ extends Control
 ## Day-end receipt and a retryable evaluation; no accumulated strikes.
 
 signal continue_requested
+## Emitted once every receipt line has been revealed (also when the player
+## fast-forwards the typewriter). The tutorial waits for this before briefing.
+signal presentation_finished
 
 @export_category("Receipt Copy")
 @export var subtitle_template: String
@@ -293,6 +296,7 @@ func _finish_typewriter() -> void:
 	_typewriter_pause_remaining = 0.0
 	_continue_hint.show()
 	_hint_animation.play(&"blink")
+	presentation_finished.emit()
 	set_process(_input_lock_remaining > 0.0)
 
 
