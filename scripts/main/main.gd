@@ -25,6 +25,11 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 ## Travel time per route leg, excluding station cutscenes and pauses.
 @export var station_travel_durations_seconds: PackedFloat32Array = PackedFloat32Array([120.0, 120.0, 120.0, 120.0])
 @export_range(0, 8, 1) var station_sign_blocked_carriage: int = 1
+@export_category("Tutorial Cutscene")
+## Platform extras for tutorial station cutscenes. The lesson manifest holds
+## only exam souls, so the platform is filled with random commuter identities
+## (never anyone aboard, boarding, or departing) like a normal shift.
+@export_range(0, 10, 1) var tutorial_cutscene_ambient_count: int = 4
 @export_category("Bloom")
 @export_range(0.0, 1.5, 0.01) var morning_bloom_intensity: float = 0.11
 @export_range(0.0, 1.5, 0.01) var sunset_bloom_intensity: float = 0.27
@@ -2240,7 +2245,50 @@ func _station_ambient_cutscene_actors(excluded_actors: Array = []) -> Array[Dict
 		var actor_data: Dictionary = _passenger_data_cutscene_actor(data)
 		if not actor_data.is_empty():
 			result.append(actor_data)
+	if is_tutorial_mode:
+		_supplement_tutorial_ambient_actors(result)
 	return result
+
+
+func _supplement_tutorial_ambient_actors(result: Array[Dictionary]) -> void:
+	var needed: int = maxi(0, tutorial_cutscene_ambient_count - result.size())
+	if needed <= 0 or passenger_identity_profiles.is_empty():
+		return
+	var taken_names: Dictionary = {}
+	for passenger: Passenger in _passengers:
+		if _is_active_passenger(passenger) and passenger.data != null:
+			taken_names[passenger.data.passenger_name] = true
+			taken_names[passenger.data.short_name] = true
+	for actor_data: Dictionary in result:
+		taken_names[String(actor_data.get("name", ""))] = true
+	var deck: Array[PassengerIdentityProfile] = []
+	for profile: PassengerIdentityProfile in passenger_identity_profiles:
+		if profile == null or not profile.is_valid_identity():
+			continue
+		if taken_names.has(profile.passenger_name) or taken_names.has(profile.short_name):
+			continue
+		deck.append(profile)
+	for index: int in range(deck.size() - 1, 0, -1):
+		var swap_index: int = _daily_rng.randi_range(0, index)
+		var held: PassengerIdentityProfile = deck[index]
+		deck[index] = deck[swap_index]
+		deck[swap_index] = held
+	var carriage_count: int = maxi(1, manifest_config.passenger_carriage_count)
+	var added: int = 0
+	for profile: PassengerIdentityProfile in deck:
+		if added >= needed:
+			break
+		var data := PassengerData.create_from_identity(profile)
+		if data == null:
+			continue
+		data.current_carriage = _daily_rng.randi_range(1, carriage_count)
+		var actor_data: Dictionary = _passenger_data_cutscene_actor(data)
+		if actor_data.is_empty():
+			continue
+		taken_names[data.passenger_name] = true
+		taken_names[data.short_name] = true
+		result.append(actor_data)
+		added += 1
 
 
 func _passenger_data_cutscene_actor(data: PassengerData) -> Dictionary:

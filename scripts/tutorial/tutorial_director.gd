@@ -1150,6 +1150,13 @@ func _on_ticket_face_shown() -> void:
 func _validate_tutorial_stamp(payload: Variant) -> void:
 	if not is_instance_valid(_tutorial_passenger) or _tutorial_passenger.data == null:
 		return
+	# Goat validation only ever handles Goat's own stamp. Any other passenger
+	# (e.g. exam souls) belongs to the exam handler, even if this arrives
+	# outside its usual step.
+	var stamped_name: String = str((payload as Dictionary).get("passenger", "")) if payload is Dictionary else ""
+	var goat_data := _tutorial_passenger.data
+	if stamped_name != goat_data.passenger_name and stamped_name != goat_data.short_name:
+		return
 	var expected: String = _tutorial_passenger.data.destination_station
 	var station: String = str((payload as Dictionary).get("station", "")) if payload is Dictionary else ""
 	if not station.is_empty() and station == expected:
@@ -2183,6 +2190,13 @@ func _on_main_tutorial_event(event_name: StringName, payload: Variant = null) ->
 		&"service_signature_opened":
 			if _step == Step.SIGNATURE_PROMPT:
 				_show_continue_step(Step.SIGNATURE, "Service Sign-Off", "Trace the mark to confirm this segment is complete. Accepted signatures move the train ahead, so inspect first.", "A failed trace shakes the screen; try again.")
+			elif _step in [Step.EXAM_SIGN_INTRO, Step.EXAM_SIGN]:
+				# Clicking the service button dismisses its own lesson dialogue;
+				# tracing the mark (service_signed) finishes the step as usual.
+				_step = Step.EXAM_SIGN
+				_hide_dialogue_for_task()
+				_set_spotlight_shade(0.0)
+				_set_controls(true, true)
 		&"service_signed":
 			if _main != null and _main.has_method(&"set_tutorial_route_time_paused"):
 				_main.call(&"set_tutorial_route_time_paused", false)

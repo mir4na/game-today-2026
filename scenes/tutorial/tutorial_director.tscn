@@ -102,7 +102,7 @@ position = Vector2(0, -42)
 [node name="SkipPrompt" type="MarginContainer" parent="." unique_id=1706201256]
 unique_name_in_owner = true
 visible = false
-z_index = 90
+z_index = 110
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -1065,7 +1065,7 @@ stretch_mode = 5
 unique_name_in_owner = true
 editor_description = "Runtime dialogue presentation. Its position comes from DialogueMarkers; its size and portrait/tail pose come from the matching DialogueFrames guide."
 visible = false
-z_index = 10
+z_index = 110
 layout_mode = 1
 anchors_preset = 0
 offset_left = 82.0
