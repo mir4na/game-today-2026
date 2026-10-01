@@ -5,7 +5,6 @@
 [ext_resource type="PackedScene" uid="uid://j5aa62op4yf5" path="res://scenes/ui/loading_screen_ui.tscn" id="3"]
 [ext_resource type="Texture2D" uid="uid://b6pdcpef2bsjy" path="res://assets/MainMenu/Background.png" id="4_background"]
 [ext_resource type="Texture2D" uid="uid://d4dwaetsv56u3" path="res://assets/MainMenu/HandGrip.png" id="5_handgrip"]
-[ext_resource type="Texture2D" uid="uid://c47i3vl54x2a6" path="res://assets/MainMenu/Character.png" id="7_character"]
 [ext_resource type="Texture2D" uid="uid://dhwhdqdjxiwcu" path="res://assets/MainMenu/Title.png" id="9_title"]
 [ext_resource type="Texture2D" uid="uid://bqlo0h1m0riej" path="res://assets/MainMenu/Button.png" id="10_button"]
 [ext_resource type="FontFile" uid="uid://btth4p4bkkt7h" path="res://fonts/Irish_Grover/IrishGrover-Regular.ttf" id="11_irish"]
@@ -17,6 +16,10 @@
 [ext_resource type="AudioStream" uid="uid://cvebdtih26t64" path="res://assets/sfx/Train Sfx.ogg" id="17_train_sfx"]
 [ext_resource type="Script" uid="uid://fgch1jgxeocf" path="res://scripts/ui/hover_scale_button.gd" id="18_hover"]
 [ext_resource type="Material" path="res://resources/materials/screen_bloom.tres" id="19_screen_bloom"]
+[ext_resource type="Texture2D" uid="uid://w4dy2lwdoo8e" path="res://assets/MainMenu/MainMenuCharExtractVersion/Main Menu/MainMenu_MC_Body.png" id="20_mc_body"]
+[ext_resource type="Texture2D" uid="uid://dd6nq06iw1cwh" path="res://assets/MainMenu/MainMenuCharExtractVersion/Main Menu/MainMenu_MC_Head.png" id="21_mc_head"]
+[ext_resource type="Texture2D" uid="uid://ywperaq2cauj" path="res://assets/MainMenu/MainMenuCharExtractVersion/Main Menu/MainMenu_MC_Bangs.png" id="22_mc_bangs"]
+[ext_resource type="Texture2D" uid="uid://cymeb00implpo" path="res://assets/MainMenu/MainMenuCharExtractVersion/Main Menu/MainMenu_NC_PigTails.png" id="23_mc_pigtails"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_window_travel"]
 resource_local_to_scene = true
@@ -241,7 +244,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2")
 script = ExtResource("1")
-music_track = &"main_menu"
 
 [node name="TrainSfx" type="AudioStreamPlayer" parent="." unique_id=1651061389]
 unique_name_in_owner = true
@@ -271,7 +273,74 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
+[node name="MC" type="Control" parent="." unique_id=1456681060]
+editor_description = "Layered MC rig. Body and Head are static; MCPigTails and MCBangs pivot on their hair roots and are animated by main_menu.gd. All layers are full 1920x1080 canvases so they stack in the same screen space as Background."
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 6.0
+offset_bottom = 6.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(860, 720)
+mouse_filter = 2
+
+[node name="Body" type="TextureRect" parent="MC" unique_id=1456681061]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("20_mc_body")
+expand_mode = 1
+
+[node name="MCPigTails" type="TextureRect" parent="MC" unique_id=1456681062]
+unique_name_in_owner = true
+editor_description = "Pigtails layer. Kept static: two tails in one layer cannot sway naturally from a single pivot."
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -1.0
+offset_top = -1.0
+offset_right = -1.0
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("23_mc_pigtails")
+expand_mode = 1
+
+[node name="Head" type="TextureRect" parent="MC" unique_id=1456681063]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("21_mc_head")
+expand_mode = 1
+
+[node name="MCBangs" type="TextureRect" parent="MC" unique_id=1456681064]
+unique_name_in_owner = true
+editor_description = "Front bangs layer. Pivot sits at the crown so rotating it moves only the fringe ends; animated by main_menu.gd."
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(790, 120)
+mouse_filter = 2
+texture = ExtResource("22_mc_bangs")
+expand_mode = 1
+
 [node name="HandGrip" type="TextureRect" parent="." unique_id=1873936630]
+editor_description = "Hand holding the strap. Drawn after MC so it stays in front of the body/head layers."
 layout_mode = 0
 offset_left = 1056.0
 offset_top = -27.0
@@ -280,23 +349,6 @@ offset_bottom = 159.0
 pivot_offset = Vector2(140, 0)
 mouse_filter = 2
 texture = ExtResource("5_handgrip")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="MC" type="TextureRect" parent="." unique_id=1456681060]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.464
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -1.0
-offset_right = 12.0
-offset_bottom = 18.0
-grow_horizontal = 0
-grow_vertical = 2
-pivot_offset = Vector2(343, 720)
-mouse_filter = 2
-texture = ExtResource("7_character")
 expand_mode = 1
 stretch_mode = 5
 

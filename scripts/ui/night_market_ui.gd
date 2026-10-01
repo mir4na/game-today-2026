@@ -95,7 +95,8 @@ const RIGHT_WALL_CLOSED_SIZE := Vector2(300.0, 720.0)
 @onready var _header_root: Control = %HeaderRoot
 @onready var _blessings_label: Label = %BlessingsLabel
 @onready var _continue_button: Button = %ContinueButton
-@onready var _desc_label: Label = %MarketDescLabel
+@onready var _desc_bubble: Control = %MarketDescBubble
+@onready var _desc_label: Label = %DescLabel
 @onready var _gate_layer: Control = $GateLayer
 @onready var _gate_motion: Node2D = %GateMotion
 @onready var _left_door: Sprite2D = %LeftDoor
@@ -252,9 +253,9 @@ func _connect_item_feedback() -> void:
 		button.focus_exited.connect(_update_desc_label)
 
 
-## Shared bottom line: hovered or focused tool effect, otherwise nothing.
+## Hover/focus shows a chat bubble with the tool effect, otherwise nothing.
 func _update_desc_label() -> void:
-	if not is_instance_valid(_desc_label):
+	if not is_instance_valid(_desc_bubble) or not is_instance_valid(_desc_label):
 		return
 	var index: int = _hovered_item_index
 	if index < 0:
@@ -263,12 +264,27 @@ func _update_desc_label() -> void:
 				index = candidate
 				break
 	if index < 0:
-		_desc_label.text = ""
-		_desc_label.hide()
+		_desc_bubble.hide()
 		return
 	var descs := [veil_note_desc, radar_desc, swift_desc]
 	_desc_label.text = str(descs[clampi(index, 0, descs.size() - 1)])
-	_desc_label.show()
+	_position_desc_bubble(index)
+	_desc_bubble.show()
+
+
+func _position_desc_bubble(index: int) -> void:
+	if index < 0 or index >= _item_buttons.size():
+		return
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var item_rect: Rect2 = _item_buttons[index].get_global_rect()
+	var bubble_size: Vector2 = _desc_bubble.size
+	if bubble_size.x <= 0.0 or bubble_size.y <= 0.0:
+		bubble_size = Vector2(360.0, 96.0)
+	var anchor := Vector2(item_rect.get_center().x, item_rect.position.y + 6.0)
+	var position := anchor - Vector2(bubble_size.x * 0.5, bubble_size.y)
+	position.x = clampf(position.x, 12.0, maxf(12.0, viewport_size.x - bubble_size.x - 12.0))
+	position.y = clampf(position.y, 12.0, maxf(12.0, viewport_size.y - bubble_size.y - 12.0))
+	_desc_bubble.global_position = position
 
 
 func _focus_first_available_action() -> void:

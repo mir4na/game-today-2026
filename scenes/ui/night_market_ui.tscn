@@ -21,6 +21,55 @@
 [ext_resource type="Shader" uid="uid://dq13hfpieecwx" path="res://shaders/night_atmosphere.gdshader" id="18_fog_shader"]
 [ext_resource type="Script" uid="uid://fgch1jgxeocf" path="res://scripts/ui/hover_scale_button.gd" id="19_hover"]
 [ext_resource type="Texture2D" uid="uid://dluipv7wt56w1" path="res://assets/ui/Group 43.png" id="20_n4jxj"]
+[ext_resource type="Texture2D" uid="uid://cm00awa5lejd5" path="res://assets/ui/dialogue_bubble.png" id="21_bubble"]
+[ext_resource type="Texture2D" uid="uid://c11bujcyfxqet" path="res://assets/ui/PauseMenu/Button.png" id="22_button_art"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_market_button_normal"]
+content_margin_left = 26.0
+content_margin_right = 26.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+texture = ExtResource("22_button_art")
+texture_margin_left = 20.0
+texture_margin_top = 14.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_market_button_hover"]
+content_margin_left = 26.0
+content_margin_right = 26.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+texture = ExtResource("22_button_art")
+texture_margin_left = 20.0
+texture_margin_top = 14.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+modulate_color = Color(1, 0.9, 0.72, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_market_button_pressed"]
+content_margin_left = 26.0
+content_margin_right = 26.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+texture = ExtResource("22_button_art")
+texture_margin_left = 20.0
+texture_margin_top = 14.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+modulate_color = Color(0.82, 0.72, 0.58, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_market_button_disabled"]
+content_margin_left = 26.0
+content_margin_right = 26.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+texture = ExtResource("22_button_art")
+texture_margin_left = 20.0
+texture_margin_top = 14.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+modulate_color = Color(0.55, 0.55, 0.6, 0.7)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_background"]
 shader = ExtResource("3_background_shader")
@@ -549,6 +598,13 @@ offset_top = 107.0
 offset_right = 1244.0
 offset_bottom = 160.0
 mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.952941, 0.847059, 0.427451, 1)
+theme_override_colors/font_hover_color = Color(1, 0.93, 0.72, 1)
+theme_override_colors/font_pressed_color = Color(0.85, 0.7, 0.42, 1)
+theme_override_styles/normal = SubResource("StyleBoxTexture_market_button_normal")
+theme_override_styles/hover = SubResource("StyleBoxTexture_market_button_hover")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_market_button_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_market_button_disabled")
 text = "Begin shift"
 script = ExtResource("19_hover")
 
@@ -624,28 +680,53 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.764706, 0.803922, 0.839216, 1)
 
-[node name="MarketDescLabel" type="Label" parent="." unique_id=918273645]
+[node name="MarketDescBubble" type="Control" parent="." unique_id=918273645]
 unique_name_in_owner = true
-editor_description = "Shared hover description. Shows the hovered or focused tool effect, hidden otherwise."
+editor_description = "Hover description bubble. Repositioned at runtime above the hovered tool; hidden otherwise."
 visible = false
-z_index = 30
+z_index = 40
 layout_mode = 1
-anchors_preset = 11
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -400.0
-offset_top = -112.0
-offset_right = 400.0
-offset_bottom = -52.0
-grow_horizontal = 2
-grow_vertical = 0
+anchors_preset = 0
+offset_right = 360.0
+offset_bottom = 96.0
 mouse_filter = 2
-theme_override_colors/font_color = Color(0.952941, 0.847059, 0.427451, 1)
-theme_override_colors/font_outline_color = Color(0.2, 0.105882, 0.231373, 0.95)
-theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 20
+
+[node name="Panel" type="NinePatchRect" parent="MarketDescBubble"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("21_bubble")
+patch_margin_left = 24
+patch_margin_top = 20
+patch_margin_right = 24
+patch_margin_bottom = 20
+
+[node name="Tail" type="Polygon2D" parent="MarketDescBubble"]
+position = Vector2(180, 96)
+polygon = PackedVector2Array(-11, -3, 11, -3, 0, 12)
+color = Color(0.2, 0.21, 0.26, 1)
+
+[node name="DescLabel" type="Label" parent="MarketDescBubble"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 16.0
+offset_right = -24.0
+offset_bottom = -18.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.960784, 0.945098, 0.878431, 1)
+theme_override_colors/font_outline_color = Color(0.13, 0.14, 0.18, 0.9)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 16
 text = ""
 horizontal_alignment = 1
 vertical_alignment = 1

@@ -3008,9 +3008,17 @@ func _on_night_market_entrance_finished() -> void:
 	_emit_tutorial_event(&"night_market_settled")
 
 
+## The tutorial spotlights this button so the player knows how to start night.
+func get_night_market_continue_button() -> Control:
+	if is_instance_valid(_night_market_ui):
+		return _night_market_ui.get_node_or_null("%ContinueButton") as Control
+	return null
+
+
 func _on_night_market_continue() -> void:
 	if state != GameState.MARKET:
 		return
+	_emit_tutorial_event(&"night_market_begin")
 	# Market fog clears back to the frozen white transition. Hold there briefly,
 	# then let the cutscene reveal the prepared night carriage and camera.
 	state = GameState.NIGHT_TRANSITION

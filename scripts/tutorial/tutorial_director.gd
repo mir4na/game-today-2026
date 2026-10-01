@@ -1158,6 +1158,14 @@ func _spotlight_service_button() -> void:
 	_animate_spotlight_to_control(service_button, exam_button_spotlight_radius, stamp_spotlight_zoom_seconds)
 
 
+func _spotlight_night_market_button() -> void:
+	if _main == null or not _main.has_method(&"get_night_market_continue_button"):
+		return
+	var button := _main.call(&"get_night_market_continue_button") as Control
+	if is_instance_valid(button):
+		_animate_spotlight_to_control(button, exam_button_spotlight_radius, stamp_spotlight_zoom_seconds)
+
+
 ## Stamp lesson entry: ticket face-up plus a spotlight on Goat's correct stamp.
 func _enter_stamp_guide() -> void:
 	_show_wait_step(
@@ -2287,7 +2295,10 @@ func _on_main_tutorial_event(event_name: StringName, payload: Variant = null) ->
 			# The Inspector waits until the market entrance has settled.
 			pass
 		&"night_market_settled":
-			_show_continue_step(Step.NIGHT_MARKET, "Night Market", "This is the [color=#ffd166]NIGHT MARKET[/color], where tools can make your internship easier. Purchases are disabled during training; press [color=#ffd166]BEGIN[/color] when you are ready.", "")
+			_show_wait_step(Step.NIGHT_MARKET, "Night Market", "This is the [color=#ffd166]NIGHT MARKET[/color], where tools can make your internship easier. Purchases are disabled during training. When you are ready, press [color=#ffd166]BEGIN SHIFT[/color].", "")
+			_spotlight_night_market_button()
+		&"night_market_begin":
+			_hide_dialogue_for_task()
 			_clear_spotlight_for_reading()
 		&"night_started":
 			if _step in [Step.DAY_SERVICE, Step.NIGHT_MARKET, Step.NIGHT_WELCOME]:
