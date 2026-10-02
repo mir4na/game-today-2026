@@ -25,8 +25,6 @@ var _resolution_index: int = 2
 var _master_volume: int = 80
 var _sfx_volume: int = 80
 var _music_volume: int = 70
-var _announcement_volume: int = 85
-var _ambience_volume: int = 70
 var _closing: bool = false
 var _ticket_rest_position: Vector2
 var _ticket_rest_scale: Vector2
@@ -47,8 +45,6 @@ var _menu_settings_mode: bool = false
 	&"master": %MasterVolumeOption,
 	&"sfx": %SfxVolumeOption,
 	&"music": %MusicVolumeOption,
-	&"announcement": %AnnouncementVolumeOption,
-	&"ambience": %AmbienceVolumeOption,
 }
 
 
@@ -119,10 +115,6 @@ func _on_option_step(direction: int, key: StringName) -> void:
 			_sfx_volume = clampi(_sfx_volume + direction * 10, 0, 100)
 		&"music":
 			_music_volume = clampi(_music_volume + direction * 10, 0, 100)
-		&"announcement":
-			_announcement_volume = clampi(_announcement_volume + direction * 10, 0, 100)
-		&"ambience":
-			_ambience_volume = clampi(_ambience_volume + direction * 10, 0, 100)
 	_apply_option(key)
 	_refresh_option_values()
 	_save_settings()
@@ -136,10 +128,6 @@ func _on_option_slider_changed(value: int, key: StringName) -> void:
 			_sfx_volume = value
 		&"music":
 			_music_volume = value
-		&"announcement":
-			_announcement_volume = value
-		&"ambience":
-			_ambience_volume = value
 		_:
 			return
 	_apply_option(key)
@@ -154,8 +142,6 @@ func _refresh_option_values() -> void:
 	_set_selector_slider(&"master", _master_volume)
 	_set_selector_slider(&"sfx", _sfx_volume)
 	_set_selector_slider(&"music", _music_volume)
-	_set_selector_slider(&"announcement", _announcement_volume)
-	_set_selector_slider(&"ambience", _ambience_volume)
 
 
 func _set_selector_value(key: StringName, value: String) -> void:
@@ -175,8 +161,6 @@ func _apply_all_settings() -> void:
 	_set_bus_volume(&"Master", _master_volume)
 	_set_bus_volume(&"SFX", _sfx_volume)
 	_set_bus_volume(&"Music", _music_volume)
-	_set_bus_volume(&"Announcement", _announcement_volume)
-	_set_bus_volume(&"Ambience", _ambience_volume)
 
 
 func _apply_option(key: StringName) -> void:
@@ -189,10 +173,6 @@ func _apply_option(key: StringName) -> void:
 			_set_bus_volume(&"SFX", _sfx_volume)
 		&"music":
 			_set_bus_volume(&"Music", _music_volume)
-		&"announcement":
-			_set_bus_volume(&"Announcement", _announcement_volume)
-		&"ambience":
-			_set_bus_volume(&"Ambience", _ambience_volume)
 
 
 func _apply_display_settings() -> void:
@@ -229,8 +209,6 @@ func _load_settings() -> void:
 	_master_volume = clampi(int(config.get_value("audio", "master_volume", _master_volume)), 0, 100)
 	_sfx_volume = clampi(int(config.get_value("audio", "sfx_volume", _sfx_volume)), 0, 100)
 	_music_volume = clampi(int(config.get_value("audio", "music_volume", _music_volume)), 0, 100)
-	_announcement_volume = clampi(int(config.get_value("audio", "announcement_volume", _announcement_volume)), 0, 100)
-	_ambience_volume = clampi(int(config.get_value("audio", "ambience_volume", _ambience_volume)), 0, 100)
 
 
 func _save_settings() -> void:
@@ -243,8 +221,6 @@ func _save_settings() -> void:
 	config.set_value("audio", "master_volume", _master_volume)
 	config.set_value("audio", "sfx_volume", _sfx_volume)
 	config.set_value("audio", "music_volume", _music_volume)
-	config.set_value("audio", "announcement_volume", _announcement_volume)
-	config.set_value("audio", "ambience_volume", _ambience_volume)
 	var error: Error = config.save(SETTINGS_PATH)
 	if error != OK:
 		push_warning("Could not save pause settings: %s" % error_string(error))

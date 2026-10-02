@@ -24,8 +24,8 @@ var _active_player: AudioStreamPlayer
 func _ready() -> void:
 	# Keep this node alive across all scene changes.
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_player_a.bus = &"Master"
-	_player_b.bus = &"Master"
+	_player_a.bus = &"Music"
+	_player_b.bus = &"Music"
 	_player_a.volume_db = _music_volume_db()
 	_player_b.volume_db = _music_volume_db()
 	_active_player = _player_a

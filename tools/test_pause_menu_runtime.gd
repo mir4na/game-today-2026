@@ -17,10 +17,10 @@ func _run() -> void:
 	for frame: int in range(30):
 		await process_frame
 	assert(pause_menu.visible, "Pause menu must be visible after open_pause().")
-	assert(pause_menu.get_node_or_null("Ticket/OptionGrid") != null, "Pause menu requires the 2x4 option grid.")
+	assert(pause_menu.get_node_or_null("Ticket/OptionGrid") != null, "Pause menu requires the 2x3 option grid.")
 	var option_grid := pause_menu.get_node("Ticket/OptionGrid") as GridContainer
-	assert(option_grid.columns == 2, "Pause menu options must use two columns and four rows.")
-	assert(option_grid.get_child_count() == 8, "Pause menu must expose exactly eight options.")
+	assert(option_grid.columns == 2, "Pause menu options must use two columns and three rows.")
+	assert(option_grid.get_child_count() == 6, "Pause menu must expose exactly six options.")
 	var resume_button := pause_menu.get_node("%ResumeButton") as Button
 	assert(resume_button.visible and resume_button.text == "Resume", "The in-game pause menu must show a Resume text button.")
 	var restart_button := pause_menu.get_node("%RestartButton") as Button
@@ -60,7 +60,7 @@ func _run() -> void:
 	var menu_settings_layer := menu.get_node("SettingsLayer") as CanvasLayer
 	assert(menu_settings.visible, "Main menu Settings must open the shared in-game settings UI.")
 	assert(menu_settings_layer.layer == 300, "Main-menu PauseUI must render on the frontmost UI layer.")
-	assert(menu_settings.get_node("Ticket/OptionGrid").get_child_count() == 8, "Main menu must expose the same eight options as in-game.")
+	assert(menu_settings.get_node("Ticket/OptionGrid").get_child_count() == 6, "Main menu must expose the same six options as in-game.")
 	assert(not (menu_settings.get_node("%ResumeButton") as Button).visible, "Resume must stay hidden in main-menu settings mode.")
 	assert(not (menu_settings.get_node("%RestartButton") as Button).visible, "Restart shift must stay hidden in main-menu settings mode.")
 	assert((menu_settings.get_node("%MainMenuButton") as Button).text == "Back", "The shared action must become Back in main-menu settings mode.")

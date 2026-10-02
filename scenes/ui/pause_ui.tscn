@@ -11,7 +11,6 @@
 
 [node name="PauseUI" type="Control" unique_id=931919145]
 process_mode = 3
-visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -95,9 +94,9 @@ stretch_mode = 5
 [node name="OptionGrid" type="GridContainer" parent="Ticket" unique_id=1851122647]
 layout_mode = 0
 offset_left = 451.0
-offset_top = 88.0
+offset_top = 106.604645
 offset_right = 1061.0
-offset_bottom = 281.0
+offset_bottom = 299.60464
 theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 7
 columns = 2
@@ -135,18 +134,6 @@ layout_mode = 2
 option_label = "Music"
 uses_slider = true
 
-[node name="AnnouncementVolumeOption" parent="Ticket/OptionGrid" unique_id=1516746708 instance=ExtResource("6_selector")]
-unique_name_in_owner = true
-layout_mode = 2
-option_label = "Announcement"
-uses_slider = true
-
-[node name="AmbienceVolumeOption" parent="Ticket/OptionGrid" unique_id=294858102 instance=ExtResource("6_selector")]
-unique_name_in_owner = true
-layout_mode = 2
-option_label = "Ambience"
-uses_slider = true
-
 [node name="Actions" type="HBoxContainer" parent="Ticket" unique_id=356072082]
 layout_mode = 0
 offset_left = 435.0
@@ -163,13 +150,13 @@ custom_minimum_size = Vector2(160, 52)
 layout_mode = 2
 focus_mode = 0
 theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
-theme_override_colors/font_hover_color = Color(1, 0.937255, 0.788235, 1)
-theme_override_colors/font_pressed_color = Color(1, 0.937255, 0.788235, 0.82)
 theme_override_colors/font_focus_color = Color(1, 0.937255, 0.788235, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.937255, 0.788235, 0.82)
+theme_override_colors/font_hover_color = Color(1, 0.937255, 0.788235, 1)
 theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("TextButtonStyle")
-theme_override_styles/hover = SubResource("TextButtonStyle")
 theme_override_styles/pressed = SubResource("TextButtonStyle")
+theme_override_styles/hover = SubResource("TextButtonStyle")
 theme_override_styles/focus = SubResource("TextButtonStyle")
 text = "Resume"
 script = ExtResource("8_hover")
@@ -181,9 +168,9 @@ custom_minimum_size = Vector2(160, 52)
 layout_mode = 2
 focus_mode = 0
 theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
-theme_override_colors/font_hover_color = Color(1, 0.937255, 0.788235, 1)
-theme_override_colors/font_pressed_color = Color(1, 0.937255, 0.788235, 0.82)
 theme_override_colors/font_focus_color = Color(1, 0.937255, 0.788235, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.937255, 0.788235, 0.82)
+theme_override_colors/font_hover_color = Color(1, 0.937255, 0.788235, 1)
 theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("TextButtonStyle")
 theme_override_styles/pressed = SubResource("TextButtonStyle")
@@ -199,9 +186,9 @@ custom_minimum_size = Vector2(160, 52)
 layout_mode = 2
 focus_mode = 0
 theme_override_colors/font_color = Color(0.207843, 0.207843, 0.25098, 1)
-theme_override_colors/font_hover_color = Color(1, 0.937255, 0.788235, 1)
-theme_override_colors/font_pressed_color = Color(1, 0.937255, 0.788235, 0.82)
 theme_override_colors/font_focus_color = Color(1, 0.937255, 0.788235, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.937255, 0.788235, 0.82)
+theme_override_colors/font_hover_color = Color(1, 0.937255, 0.788235, 1)
 theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("TextButtonStyle")
 theme_override_styles/pressed = SubResource("TextButtonStyle")

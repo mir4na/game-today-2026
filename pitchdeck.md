@@ -205,16 +205,44 @@ There's no freeplay. No sandbox. Every decision is made knowing exactly what's r
 
 ## Slide 6 — Core Loop
 
-```mermaid
-flowchart LR
-    A["🌅 DAY SHIFT\nInspect · Stamp · Detain"] --> B["📋 PAYCHECK\nHit the target?"]
-    B -->|"FAILED"| A
-    B -->|"PASSED"| C["🏪 NIGHT MARKET\nSpend Blessings"]
-    C --> D["🌌 NIGHT SHIFT\nRead · Deduce · Place"]
-    D -->|"WRONG PLACEMENT"| D
-    D -->|"ALL CORRECT"| E["☀️ NEXT DAY\nTarget climbs"]
-    E --> A
-```
+**🌅 DAY SHIFT**
+Walk the carriages. Inspect each passenger's ID card, train ticket, and the day's newspaper.
+Stamp the living and send them off at the right station.
+Spot the anomalies — the dead hiding among the living — and detain them on the train.
+
+↓
+
+**📋 PAYCHECK REPORT**
+At the end of the route, net Blessings are tallied against the daily target.
+Miss the target → the shift replays from the beginning.
+Hit the target → move on.
+
+↓
+
+**🏪 NIGHT MARKET**
+In the window between shifts, spend Blessings on tools for the night ahead —
+*Veil Note*, *Radar Charge*, or *Swiftstep*.
+
+↓
+
+**🌌 NIGHT SHIFT — SOUL LINE**
+The living are gone. Only the detained souls remain.
+Read each Soul Record. Find the clue buried in their story.
+Use tools to surface hints that aren't immediately visible.
+
+↓
+
+**🗺️ CONSTELLATION MAP**
+Drag each soul card to the afterlife station that fits who they were.
+Wrong placement → go back, re-read, try again.
+All souls correctly placed → the shift truly ends.
+
+↓
+
+**☀️ NEXT DAY**
+The daily target climbs. More passengers board.
+Anomalies get harder to catch. Repeat.
+
 
 | Day | Daily Target |
 |---|---|
