@@ -1,0 +1,169 @@
+[gd_scene format=3 uid="uid://dn5wo60ocseif"]
+
+[ext_resource type="Script" uid="uid://bfovk2iocgunn" path="res://scripts/passenger/passenger.gd" id="1_xmqyn"]
+[ext_resource type="Shader" uid="uid://dq5qi6bem7nkh" path="res://shaders/interactable_outline.gdshader" id="2_el0wn"]
+[ext_resource type="Texture2D" uid="uid://bvv25pc0ft01r" path="res://assets/characters/Group 34.png" id="3_xmqyn"]
+[ext_resource type="Texture2D" uid="uid://b1u26mtqmdgaa" path="res://assets/characters/Group 30.png" id="5_el0wn"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5isi7"]
+resource_local_to_scene = true
+shader = ExtResource("2_el0wn")
+shader_parameter/outline_enabled = false
+shader_parameter/outline_color = Color(0.96, 0.78, 0.32, 1)
+shader_parameter/outline_width = 4.0
+shader_parameter/dead_effect_strength = 0.0
+shader_parameter/dead_desaturation = 0.72
+shader_parameter/dead_tint = Color(0.3, 0.52, 0.66, 0.24)
+shader_parameter/interaction_lock_strength = 0.0
+shader_parameter/radar_detection_strength = 0.0
+shader_parameter/radar_detection_color = Color(1, 0.08, 0.035, 0.95)
+shader_parameter/radar_outline_width = 8.0
+shader_parameter/radar_inner_tint = 0.12
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_788hs"]
+atlas = ExtResource("3_xmqyn")
+region = Rect2(0, 0, 720, 900)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ugpbv"]
+atlas = ExtResource("3_xmqyn")
+region = Rect2(720, 0, 720, 900)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r3qsv"]
+atlas = ExtResource("3_xmqyn")
+region = Rect2(1440, 0, 720, 900)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5isi7"]
+atlas = ExtResource("3_xmqyn")
+region = Rect2(0, 900, 720, 900)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cpj3r"]
+atlas = ExtResource("3_xmqyn")
+region = Rect2(720, 900, 720, 900)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fibfk"]
+atlas = ExtResource("3_xmqyn")
+region = Rect2(1440, 900, 720, 900)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2hk4t"]
+atlas = ExtResource("3_xmqyn")
+region = Rect2(0, 1800, 720, 900)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x2hnq"]
+atlas = ExtResource("3_xmqyn")
+region = Rect2(720, 1800, 720, 900)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c4bkw"]
+atlas = ExtResource("3_xmqyn")
+region = Rect2(1440, 1800, 720, 900)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_cpj3r"]
+resource_local_to_scene = true
+animations = [{
+"frames": [],
+"loop": 1,
+"name": &"idle",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_788hs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ugpbv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r3qsv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5isi7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cpj3r")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fibfk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2hk4t")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x2hnq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c4bkw")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 10.0
+}]
+
+[sub_resource type="RectangleShape2D" id="InteractionShape"]
+size = Vector2(110, 170)
+
+[sub_resource type="CircleShape2D" id="NpcNavigationProbeShape"]
+radius = 44.0
+
+[node name="npc_20" type="Area2D" unique_id=444701087]
+z_index = 3
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("1_xmqyn")
+navigation_probe_path = NodePath("NpcNavigationProbe")
+navigation_probe_collision_path = NodePath("NpcNavigationProbe/ProbeCollision")
+uses_authored_character_artwork = true
+prompt_text = "Inspect passenger"
+interaction_distance = 105.0
+passenger_idle_collision_path = NodePath("InteractionShape")
+prompt_anchor_path = NodePath("CharacterScale/PassengerVisual/InteractionPromptAnchor")
+focus_visual_path = NodePath("CharacterScale")
+focus_z_index = 3
+
+[node name="Shadow" type="Polygon2D" parent="." unique_id=265643084]
+unique_name_in_owner = true
+editor_description = "Scene-authored ground shadow aligned to the same foot baseline as the player. Adjust this node here to update every NPC variant."
+position = Vector2(0, 67)
+color = Color(0.05, 0.05, 0.06, 0.8)
+polygon = PackedVector2Array(-48, 0, -44.346, -3.061, -33.941, -5.657, -18.369, -7.391, 0, -8, 18.369, -7.391, 33.941, -5.657, 44.346, -3.061, 48, 0, 44.346, 3.061, 33.941, 5.657, 18.369, 7.391, 0, 8, -18.369, 7.391, -33.941, 5.657, -44.346, 3.061)
+
+[node name="CharacterScale" type="CanvasGroup" parent="." unique_id=23425030]
+editor_description = "NPC artwork composite. Its scene-authored material controls interaction outlines and sealed grayscale."
+material = SubResource("ShaderMaterial_5isi7")
+position = Vector2(0, 35.25)
+scale = Vector2(0.9, 0.9)
+fit_margin = 8.0
+clear_margin = 8.0
+
+[node name="PassengerVisual" type="Node2D" parent="CharacterScale" unique_id=889831749]
+unique_name_in_owner = true
+
+[node name="InteractionPromptAnchor" type="Marker2D" parent="CharacterScale/PassengerVisual" unique_id=448928337]
+editor_description = "Bubble pointer tip, just above the visible head. Override this marker in each NPC scene; it follows the visual animation and is never repositioned by script."
+position = Vector2(-2.265, -122.671)
+
+[node name="NPCVisual" type="AnimatedSprite2D" parent="CharacterScale/PassengerVisual" unique_id=1569217707]
+unique_name_in_owner = true
+editor_description = "Assign idle and walk frames here, as with the player's MCVisual. Empty animations use the existing character artwork. Adjust Position and Scale for your frame size; transparent spritesheets need no cutout material."
+visible = false
+position = Vector2(4.266, -51.099)
+scale = Vector2(0.21875, 0.21875)
+sprite_frames = SubResource("SpriteFrames_cpj3r")
+animation = &"idle"
+
+[node name="CharacterArtwork" type="Sprite2D" parent="CharacterScale/PassengerVisual" unique_id=210164892]
+position = Vector2(0.127, -40.726)
+scale = Vector2(0.25491, 0.25491)
+texture = ExtResource("5_el0wn")
+
+[node name="InteractionShape" type="CollisionShape2D" parent="." unique_id=530320988]
+shape = SubResource("InteractionShape")
+
+[node name="NpcNavigationProbe" type="Area2D" parent="." unique_id=89887787]
+editor_description = "Scene-authored NPC clearance probe. Its shape is queried before AI movement so passengers do not overlap active maintenance events."
+collision_layer = 0
+collision_mask = 4
+monitoring = false
+monitorable = false
+
+[node name="ProbeCollision" type="CollisionShape2D" parent="NpcNavigationProbe" unique_id=418727084]
+editor_description = "Adjust this radius in the Inspector to control NPC clearance around maintenance objects."
+shape = SubResource("NpcNavigationProbeShape")

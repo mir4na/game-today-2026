@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/Where Do You Belong_/NPC10.png" id="1_00rqa"]
+[ext_resource type="PackedScene" path="res://scenes/passengers/npc_19.tscn" id="2_w422g"]
+[ext_resource type="Script" path="res://scripts/passenger/passenger_identity_profile.gd" id="3_lswlm"]
+
+[resource]
+script = ExtResource("3_lswlm")
+gender = 1
+passenger_name = "Georgios"
+short_name = "Georgios"
+age = 36
+occupation = "Harbormaster"
+body_color = Color(0.32, 0.5, 0.66, 1)
+passenger_scene = ExtResource("2_w422g")
+id_photo = ExtResource("1_00rqa")
+identity_number = "CID-0019"
+birth_place = "Bellhaven"
+date_of_birth = "09 JAN 1990"

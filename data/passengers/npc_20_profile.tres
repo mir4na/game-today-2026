@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/Where Do You Belong_/NPC16 - Depe.png" id="1_qinc6"]
+[ext_resource type="PackedScene" path="res://scenes/passengers/npc_20.tscn" id="2_jm736"]
+[ext_resource type="Script" path="res://scripts/passenger/passenger_identity_profile.gd" id="3_8hg6r"]
+
+[resource]
+script = ExtResource("3_8hg6r")
+gender = 1
+passenger_name = "Ioannis"
+short_name = "Ioannis"
+age = 52
+occupation = "Archivist"
+body_color = Color(0.6, 0.36, 0.4, 1)
+passenger_scene = ExtResource("2_jm736")
+id_photo = ExtResource("1_qinc6")
+identity_number = "CID-0020"
+birth_place = "Vesperwick"
+date_of_birth = "03 NOV 1974"

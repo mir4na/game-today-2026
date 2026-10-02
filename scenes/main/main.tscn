@@ -30,6 +30,10 @@
 [ext_resource type="Resource" uid="uid://cj3r8yb3lqr2s" path="res://data/passengers/npc_14_profile.tres" id="29"]
 [ext_resource type="Resource" uid="uid://diyhq8nh7l86r" path="res://data/passengers/npc_15_profile.tres" id="30"]
 [ext_resource type="Resource" uid="uid://58rs41etoeoh" path="res://data/passengers/npc_16_profile.tres" id="31"]
+[ext_resource type="Resource" path="res://data/passengers/npc_17_profile.tres" id="npc17"]
+[ext_resource type="Resource" path="res://data/passengers/npc_18_profile.tres" id="npc18"]
+[ext_resource type="Resource" path="res://data/passengers/npc_19_profile.tres" id="npc19"]
+[ext_resource type="Resource" path="res://data/passengers/npc_20_profile.tres" id="npc20"]
 [ext_resource type="Shader" uid="uid://dmt6cangn2bap" path="res://shaders/blocked_carriage_grayscale.gdshader" id="31_6miv3"]
 [ext_resource type="Shader" uid="uid://df3d6yvnee1ie" path="res://shaders/radar_carriage_scan.gdshader" id="32_yisfj"]
 [ext_resource type="PackedScene" path="res://scenes/passengers/passenger_placeholder.tscn" id="34"]
@@ -242,7 +246,7 @@ shader_parameter/outline_size = 9.0
 
 [node name="Main" type="Node2D" unique_id=604105226]
 script = ExtResource("1")
-passenger_identity_profiles = Array[ExtResource("2_08tbl")]([ExtResource("11"), ExtResource("12"), ExtResource("13"), ExtResource("14"), ExtResource("15"), ExtResource("16"), ExtResource("19"), ExtResource("20"), ExtResource("21"), ExtResource("22"), ExtResource("23"), ExtResource("24"), ExtResource("28"), ExtResource("29"), ExtResource("30"), ExtResource("31")])
+passenger_identity_profiles = Array[ExtResource("2_08tbl")]([ExtResource("11"), ExtResource("12"), ExtResource("13"), ExtResource("14"), ExtResource("15"), ExtResource("16"), ExtResource("19"), ExtResource("20"), ExtResource("21"), ExtResource("22"), ExtResource("23"), ExtResource("24"), ExtResource("28"), ExtResource("29"), ExtResource("30"), ExtResource("31"), ExtResource("npc17"), ExtResource("npc18"), ExtResource("npc19"), ExtResource("npc20")])
 puzzle_resource = ExtResource("17")
 passenger_scene = ExtResource("34")
 manifest_config = ExtResource("37")

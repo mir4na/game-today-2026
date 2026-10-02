@@ -82,7 +82,7 @@ A small team built around one shared belief: the best games ask questions they d
 
 ### The End of the Line Is Not the End
 
-*Where Do You Belong?* is a **2D side-view deductive puzzle game** built around a simple but loaded idea: the day shift ends, but the work doesn't.
+*Where Do You Belong?* is a **deduction game where you walk a supernatural train, cross-check documents, and catch the dead hiding among the living — then decide where each soul truly belongs.**
 
 You are a newly dead intern conductor on a train that runs between the human world and the realm of the dead. During the day, you check passenger documents, issue stamps, and keep things moving — just like any regular conductor.
 
@@ -157,21 +157,18 @@ When the route ends and the living step off, the real work starts. Each detained
 
 ---
 
-**③ Hit the Paycheck — Or Do It All Over Again**
+**③ The Shift Doesn't Always Go as Planned**
 
-At the end of every day shift, the player faces a **Paycheck Report**: net Blessings earned vs. the daily target. Every correct stamp adds up. Every wrong call cuts into it.
+Mid-inspection, things go wrong. A pile of luggage has fallen and is blocking the door between carriages — nobody can pass until it's sorted. Or a passenger refuses to let you check their ticket until you deal with the filth on their seat first.
 
-Miss the target — the shift replays from the beginning.
-Clear it — Blessings carry over to the Night Market, where tools for the night puzzle can be purchased.
+These aren't just flavor. They interrupt the clock, eat into inspection time, and force the player to context-switch mid-shift.
 
-The pressure isn't just moral. It's financial. And it resets every day.
-
-| Action | Blessings |
+| Disruption | What Happens |
 |---|---|
-| ✅ Correct passenger drop-off | **+30** |
-| ❌ Wrong drop-off | **−20** |
-| ❌ Anomaly incorrectly stamped | **−40** |
-| ✅ Night — correct soul placement | **+100** per soul |
+| **Blocked Aisle** | Luggage has spilled across the carriage door. Solve the packing puzzle to clear the path. |
+| **Dirty Seat** | A passenger won't cooperate until the seat is cleaned. Wipe it down to proceed. |
+
+Miss the window to deal with them — the carriage stays blocked, the passenger stays uncooperative, and time keeps moving.
 
 ---
 
