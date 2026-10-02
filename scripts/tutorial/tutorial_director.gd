@@ -5,6 +5,14 @@ extends Control
 
 const ShiftProgress = preload("res://scripts/systems/shift_progress.gd")
 const GAME_SCENE_PATH := "res://scenes/main/main.tscn"
+## Meaning of each final station shown in the Night constellation. Edit these to
+## change the tutorial's station explanation.
+const NIGHT_STATION_MEANINGS := {
+	"Vesperwick": "rest for the restless who still cling to the living",
+	"Hollowcross": "peace for those who are forgiven",
+	"Bellhaven": "rebirth for souls granted a second chance",
+	"Morrowfield": "eternal rest for the peaceful",
+}
 
 signal tutorial_finished
 
@@ -55,6 +63,7 @@ enum Step {
 	NIGHT_LEDGER_SAVED,
 	NIGHT_LEDGER_PROMPT,
 	NIGHT_MAP_INTRO,
+	NIGHT_MAP_STATIONS,
 	NIGHT_MAP_ASSIGN,
 	NIGHT_MAP_RETRY,
 	NIGHT_COMPLETE,
@@ -1231,6 +1240,57 @@ func _spotlight_night_puzzle_veil() -> void:
 		_animate_spotlight_to_control(control, exam_button_spotlight_radius, stamp_spotlight_zoom_seconds)
 
 
+## Explains each final station, then cycles the spotlight across the stars.
+func _enter_night_map_stations() -> void:
+	_set_night_map_input_blocked(true)
+	_show_continue_step(
+		Step.NIGHT_MAP_STATIONS,
+		"Stations",
+		_night_station_explanation_text(),
+		""
+	)
+	_cycle_station_spotlights()
+
+
+func _night_station_explanation_text() -> String:
+	var lines := PackedStringArray()
+	lines.append("Each star is a final station. Send every soul where its story belongs:")
+	for station_name: String in _night_station_names():
+		var meaning: String = str(NIGHT_STATION_MEANINGS.get(
+			station_name,
+			"souls whose story leads here"
+		))
+		lines.append("• [color=#ffd166]%s[/color] — %s" % [station_name.to_upper(), meaning])
+	return "\n".join(lines)
+
+
+func _night_station_names() -> PackedStringArray:
+	if _main != null and _main.has_method(&"get_night_station_names"):
+		var value: Variant = _main.call(&"get_night_station_names")
+		if value is PackedStringArray and not (value as PackedStringArray).is_empty():
+			return value
+	return PackedStringArray(NIGHT_STATION_MEANINGS.keys())
+
+
+func _cycle_station_spotlights() -> void:
+	var token: int = _night_lesson_token
+	while _step == Step.NIGHT_MAP_STATIONS and token == _night_lesson_token and is_inside_tree():
+		var cycled: bool = false
+		for station_name: String in _night_station_names():
+			if _step != Step.NIGHT_MAP_STATIONS or token != _night_lesson_token or not is_inside_tree():
+				return
+			if _main == null or not _main.has_method(&"get_night_puzzle_station_target"):
+				return
+			var target := _main.call(&"get_night_puzzle_station_target", station_name) as Control
+			if not is_instance_valid(target):
+				continue
+			cycled = true
+			await _animate_spotlight_to_control(target, 0.2, 0.45)
+			await get_tree().create_timer(0.5).timeout
+		if not cycled:
+			return
+
+
 ## Stamp lesson entry: ticket face-up plus a spotlight on Goat's correct stamp.
 func _enter_stamp_guide() -> void:
 	_show_wait_step(
@@ -1653,7 +1713,7 @@ func _get_dialogue_marker_path_for_step(step: Step) -> NodePath:
 			return night_record_dialogue_marker_path
 		Step.NIGHT_LEDGER_SAVED, Step.NIGHT_LEDGER_PROMPT:
 			return night_ledger_dialogue_marker_path
-		Step.NIGHT_MAP_INTRO, Step.NIGHT_MAP_ASSIGN, Step.NIGHT_MAP_RETRY, Step.NIGHT_COMPLETE:
+		Step.NIGHT_MAP_INTRO, Step.NIGHT_MAP_STATIONS, Step.NIGHT_MAP_ASSIGN, Step.NIGHT_MAP_RETRY, Step.NIGHT_COMPLETE:
 			return night_map_dialogue_marker_path
 		_:
 			return default_dialogue_marker_path
@@ -1719,7 +1779,7 @@ func _dialogue_frame_name_for_step(step: Step) -> StringName:
 			return &"NightRecord"
 		Step.NIGHT_LEDGER_SAVED, Step.NIGHT_LEDGER_PROMPT:
 			return &"NightLedger"
-		Step.NIGHT_MAP_INTRO, Step.NIGHT_MAP_ASSIGN, Step.NIGHT_MAP_RETRY, Step.NIGHT_COMPLETE:
+		Step.NIGHT_MAP_INTRO, Step.NIGHT_MAP_STATIONS, Step.NIGHT_MAP_ASSIGN, Step.NIGHT_MAP_RETRY, Step.NIGHT_COMPLETE:
 			return &"NightMap"
 		_:
 			return &"Default"
@@ -1888,7 +1948,7 @@ func _step_copy(step: Step) -> Array:
 			return ["Veil Note", "One more clue hides in this night. Use your [color=#ffd166]VEIL NOTE[/color] — click it in the toolbar, or press [color=#ffd166]3[/color].", ""]
 		Step.NIGHT_LEDGER_SAVED, Step.NIGHT_LEDGER_PROMPT:
 			return ["Ledger", "The statement is now stored in your [color=#ffd166]LEDGER[/color]. Open the [color=#ffd166]LEDGER[/color] button to view the [color=#ffd166]STATION PATH[/color].", ""]
-		Step.NIGHT_MAP_INTRO, Step.NIGHT_MAP_RETRY:
+		Step.NIGHT_MAP_INTRO, Step.NIGHT_MAP_STATIONS, Step.NIGHT_MAP_RETRY:
 			return ["Station Path", "This map shows the souls and their possible stations. Use both [color=#ffd166]LEDGER[/color] clues to decide where each soul belongs.", ""]
 		Step.NIGHT_MAP_ASSIGN:
 			return ["Your Turn", "Drag each soul to its correct station, then press [color=#ffd166]FINALIZE ASSIGNMENTS[/color].", ""]
@@ -2173,6 +2233,8 @@ func _advance_from_continue() -> void:
 		Step.NIGHT_LEDGER_SAVED:
 			_begin_night_ledger_prompt()
 		Step.NIGHT_MAP_INTRO:
+			_enter_night_map_stations()
+		Step.NIGHT_MAP_STATIONS:
 			_set_night_map_input_blocked(true)
 			_show_continue_step(
 				Step.NIGHT_MAP_ASSIGN,

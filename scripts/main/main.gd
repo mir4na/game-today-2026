@@ -3187,6 +3187,19 @@ func get_night_puzzle_veil_control() -> Control:
 	return null
 
 
+func get_night_station_names() -> PackedStringArray:
+	var puzzle: DeparturePuzzleData = _get_departure_puzzle()
+	if puzzle == null:
+		return PackedStringArray()
+	return puzzle.night_stations
+
+
+func get_night_puzzle_station_target(station_name: String) -> Control:
+	if is_instance_valid(_night_puzzle_ui) and _night_puzzle_ui.has_method(&"get_station_target_control"):
+		return _night_puzzle_ui.call(&"get_station_target_control", station_name) as Control
+	return null
+
+
 func _use_swiftstep() -> void:
 	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
 	var swift_charges: int = int(snapshot.get("swift_charges", 0))

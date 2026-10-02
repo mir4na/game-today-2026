@@ -242,6 +242,14 @@ func get_veil_note_control() -> Control:
 	return _veil_note_panel
 
 
+## Tutorial spotlight target for one station star.
+func get_station_target_control(station_name: String) -> Control:
+	for target: NightStationTarget in _station_targets:
+		if target.station_name == station_name:
+			return target
+	return null
+
+
 func refresh_collected_statements(collected_statements: Dictionary) -> void:
 	_collected_statements = collected_statements.duplicate(true)
 	if not visible or _puzzle == null:

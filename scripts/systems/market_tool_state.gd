@@ -24,7 +24,7 @@ const TOOL_SWIFTSTEP: StringName = &"swiftstep"
 @export_range(0, 100, 1) var blessings_per_correct_dropoff: int = 30
 @export_range(0, 100, 1) var blessings_per_wrong_dropoff: int = 20
 @export_range(0, 100, 1) var blessings_per_incorrect_anomaly: int = 40
-@export_range(0, 100, 1) var blessings_per_retained_anomaly: int = 50
+@export_range(0, 100, 1) var blessings_per_retained_anomaly: int = 30
 @export_range(0, 500, 1) var blessings_per_correct_night_dropoff: int = 100
 @export_range(0, 500, 1) var blessings_per_night_statement: int = 50
 

@@ -205,35 +205,24 @@ There's no freeplay. No sandbox. Every decision is made knowing exactly what's r
 
 ## Slide 6 — Core Loop
 
-The loop is designed so that neither phase feels complete on its own.
-The day shift collects the problem. The night shift solves it. Together, they make one full workday.
-
 ```mermaid
-flowchart TD
-    A["🌅 DAY SHIFT\nWalk the carriages · Inspect ID, Ticket, Newspaper\nStamp the living · Detain anomalies\n(they stay on the train)"] --> B["✍️ ROUTE SIGNATURE\nTrace the conductor's mark\nto close this leg of the line\nand advance to the next station"]
-    B --> C{"All route\nsegments done?"}
-    C -->|Not yet| A
-    C -->|"Yes — end of the line"| D["📋 PAYCHECK REPORT\nNet Blessings vs. Daily Target\nPASSED or FAILED"]
-    D --> E{"Target\nmet?"}
-    E -->|"FAILED — replay"| A
-    E -->|PASSED| F["🏪 NIGHT MARKET\nThe liminal window between shifts\nSpend Blessings on tools\nVeil Note · Radar · Swiftstep"]
-    F --> G["🌌 NIGHT SHIFT — SOUL LINE\nThe living are gone\nRead each Soul Record\nCollect clue statements · Use tools"]
-    G --> H["🗺️ CONSTELLATION MAP\nDrag each soul card to their\ncorrect afterlife station"]
-    H --> I{"All souls\ncorrectly placed?"}
-    I -->|Try again| G
-    I -->|"Yes ✅ — shift truly ends"| J["☀️ NEXT DAY\nHigher Blessings target\nMore passengers · Harder anomalies"]
-    J --> A
+flowchart LR
+    A["🌅 DAY SHIFT\nInspect · Stamp · Detain"] --> B["📋 PAYCHECK\nHit the target?"]
+    B -->|"FAILED"| A
+    B -->|"PASSED"| C["🏪 NIGHT MARKET\nSpend Blessings"]
+    C --> D["🌌 NIGHT SHIFT\nRead · Deduce · Place"]
+    D -->|"WRONG PLACEMENT"| D
+    D -->|"ALL CORRECT"| E["☀️ NEXT DAY\nTarget climbs"]
+    E --> A
 ```
 
-**Daily Targets — Rising Each Day:**
-
-| Day | Blessings Required |
+| Day | Daily Target |
 |---|---|
-| Day 1 | 250 |
-| Day 2 | 300 |
-| Day 3 | 350 |
-| Day 4 | 400 |
-| Day 5 | 400 + Final Judgment |
+| Day 1 | 250 Blessings |
+| Day 2 | 300 Blessings |
+| Day 3 | 350 Blessings |
+| Day 4 | 400 Blessings |
+| Day 5 | 400 Blessings + Final Judgment |
 
 ---
 
