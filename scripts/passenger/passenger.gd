@@ -34,7 +34,7 @@ signal documents_requested(passenger: Passenger)
 @export var dead_twitch_interval_seconds: Vector2 = Vector2(4.0, 8.0)
 @export_category("Night Repulsion")
 @export_range(120.0, 720.0, 10.0) var night_repel_distance: float = 420.0
-@export_range(0.2, 1.5, 0.05) var night_repel_duration_seconds: float = 0.72
+@export_range(0.2, 3.0, 0.05) var night_repel_duration_seconds: float = 1.44
 @export_range(10.0, 120.0, 2.0) var night_repel_arc_height: float = 58.0
 @export_range(20.0, 140.0, 5.0) var night_repel_edge_margin: float = 80.0
 var documents_checked: bool = false

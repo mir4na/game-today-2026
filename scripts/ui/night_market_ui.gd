@@ -53,6 +53,11 @@ var _snapshot: Dictionary = {}
 var _continue_sent: bool = false
 var _input_locked: bool = false
 var _purchases_enabled: bool = true
+## When false the Begin Shift button is locked (tutorial gate).
+var _continue_allowed: bool = true
+## When non-empty, only these tool ids may be bought (tutorial lesson).
+var _purchase_allowlist: Array[StringName] = []
+const ITEM_TOOL_IDS: Array[StringName] = [&"veil_note", &"radar_charge", &"swiftstep"]
 var _motion_time: float = 0.0
 var _market_tween: Tween
 var _highlight_tweens: Dictionary = {}
@@ -217,10 +222,10 @@ func set_snapshot(snapshot: Dictionary) -> void:
 	_item_info_labels[0].text = veil_note_stock_template % [veil_note_count, veil_note_cost]
 	_item_info_labels[1].text = radar_stock_template % [radar_count, radar_maximum, radar_cost]
 	_item_info_labels[2].text = swift_stock_template % [swift_count, swift_maximum, swift_cost]
-	_item_buttons[0].disabled = not _purchases_enabled or _input_locked or veil_note_count >= 1 or blessings < veil_note_cost
-	_item_buttons[1].disabled = not _purchases_enabled or _input_locked or radar_count >= radar_maximum or blessings < radar_cost
-	_item_buttons[2].disabled = not _purchases_enabled or _input_locked or swift_count >= swift_maximum or blessings < swift_cost
-	_continue_button.disabled = _input_locked
+	_item_buttons[0].disabled = not _purchases_enabled or _input_locked or not _is_item_allowed(0) or veil_note_count >= 1 or blessings < veil_note_cost
+	_item_buttons[1].disabled = not _purchases_enabled or _input_locked or not _is_item_allowed(1) or radar_count >= radar_maximum or blessings < radar_cost
+	_item_buttons[2].disabled = not _purchases_enabled or _input_locked or not _is_item_allowed(2) or swift_count >= swift_maximum or blessings < swift_cost
+	_continue_button.disabled = _input_locked or not _continue_allowed
 	for index: int in range(_item_buttons.size()):
 		_item_entrances[index].self_modulate = Color(0.62, 0.62, 0.68, 1.0) if _item_buttons[index].disabled else Color.WHITE
 		if _item_buttons[index].disabled:
@@ -231,6 +236,29 @@ func set_purchases_enabled(value: bool) -> void:
 	_purchases_enabled = value
 	if not _snapshot.is_empty():
 		set_snapshot(_snapshot)
+
+
+## Locks/unlocks the Begin Shift button (tutorial gates it behind the purchase).
+func set_continue_enabled(value: bool) -> void:
+	_continue_allowed = value
+	if is_instance_valid(_continue_button):
+		_continue_button.disabled = _input_locked or not _continue_allowed
+
+
+## Empty list = every item is buyable. Non-empty restricts purchases to the
+## listed tool ids (used by the tutorial to sell only the Veil Note).
+func set_purchase_allowlist(ids: Array) -> void:
+	_purchase_allowlist.clear()
+	for value: Variant in ids:
+		_purchase_allowlist.append(StringName(value))
+	if not _snapshot.is_empty():
+		set_snapshot(_snapshot)
+
+
+func _is_item_allowed(index: int) -> bool:
+	if _purchase_allowlist.is_empty():
+		return true
+	return _purchase_allowlist.has(ITEM_TOOL_IDS[clampi(index, 0, ITEM_TOOL_IDS.size() - 1)])
 
 
 func show_purchase_result(result: Dictionary, snapshot: Dictionary) -> void:

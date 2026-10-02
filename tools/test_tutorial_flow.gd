@@ -331,8 +331,10 @@ func _run() -> void:
 	var mecca_statement: String = game._get_departure_puzzle().get_statement_for_passenger("Mecca")
 	game._on_night_statement_recorded("Mecca", mecca_statement)
 	await create_timer(0.03).timeout
-	_check(tutorial._step == TutorialDirector.Step.NIGHT_LEDGER_SAVED, "Collecting Mecca's statement must explain that it was stored.")
+	_check(tutorial._step == TutorialDirector.Step.NIGHT_USE_VEIL, "Collecting Mecca's statement must lead into the veil-use step.")
 	_check(game._collected_departure_statements.size() == 2, "Both tutorial soul statements must be present before the map opens.")
+	tutorial._on_main_tutorial_event(&"tutorial_veil_revealed")
+	_check(tutorial._step == TutorialDirector.Step.NIGHT_LEDGER_SAVED, "Using the veil must explain the ledger.")
 	tutorial._complete_typewriter()
 	tutorial._advance_from_continue()
 	_check(tutorial._step == TutorialDirector.Step.NIGHT_LEDGER_PROMPT, "Stored statement explanation must checkpoint at the ledger button.")

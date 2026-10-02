@@ -24,53 +24,6 @@
 [ext_resource type="Texture2D" uid="uid://cm00awa5lejd5" path="res://assets/ui/dialogue_bubble.png" id="21_bubble"]
 [ext_resource type="Texture2D" uid="uid://c11bujcyfxqet" path="res://assets/ui/PauseMenu/Button.png" id="22_button_art"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_market_button_normal"]
-content_margin_left = 26.0
-content_margin_right = 26.0
-content_margin_top = 8.0
-content_margin_bottom = 8.0
-texture = ExtResource("22_button_art")
-texture_margin_left = 20.0
-texture_margin_top = 14.0
-texture_margin_right = 20.0
-texture_margin_bottom = 16.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_market_button_hover"]
-content_margin_left = 26.0
-content_margin_right = 26.0
-content_margin_top = 8.0
-content_margin_bottom = 8.0
-texture = ExtResource("22_button_art")
-texture_margin_left = 20.0
-texture_margin_top = 14.0
-texture_margin_right = 20.0
-texture_margin_bottom = 16.0
-modulate_color = Color(1, 0.9, 0.72, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_market_button_pressed"]
-content_margin_left = 26.0
-content_margin_right = 26.0
-content_margin_top = 8.0
-content_margin_bottom = 8.0
-texture = ExtResource("22_button_art")
-texture_margin_left = 20.0
-texture_margin_top = 14.0
-texture_margin_right = 20.0
-texture_margin_bottom = 16.0
-modulate_color = Color(0.82, 0.72, 0.58, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_market_button_disabled"]
-content_margin_left = 26.0
-content_margin_right = 26.0
-content_margin_top = 8.0
-content_margin_bottom = 8.0
-texture = ExtResource("22_button_art")
-texture_margin_left = 20.0
-texture_margin_top = 14.0
-texture_margin_right = 20.0
-texture_margin_bottom = 16.0
-modulate_color = Color(0.55, 0.55, 0.6, 0.7)
-
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_background"]
 shader = ExtResource("3_background_shader")
 shader_parameter/top_color = Color(0.207843, 0.207843, 0.25098, 1)
@@ -99,6 +52,53 @@ fill_to = Vector2(1, 0.5)
 [sub_resource type="Gradient" id="Gradient_dust_haze"]
 offsets = PackedFloat32Array(0, 0.4, 1)
 colors = PackedColorArray(0.933333, 0.854902, 0.737255, 0.38, 0.768627, 0.67451, 0.670588, 0.24, 0.509804, 0.423529, 0.541176, 0)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_market_button_normal"]
+content_margin_left = 26.0
+content_margin_top = 8.0
+content_margin_right = 26.0
+content_margin_bottom = 8.0
+texture = ExtResource("22_button_art")
+texture_margin_left = 20.0
+texture_margin_top = 14.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_market_button_pressed"]
+content_margin_left = 26.0
+content_margin_top = 8.0
+content_margin_right = 26.0
+content_margin_bottom = 8.0
+texture = ExtResource("22_button_art")
+texture_margin_left = 20.0
+texture_margin_top = 14.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+modulate_color = Color(0.82, 0.72, 0.58, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_market_button_hover"]
+content_margin_left = 26.0
+content_margin_top = 8.0
+content_margin_right = 26.0
+content_margin_bottom = 8.0
+texture = ExtResource("22_button_art")
+texture_margin_left = 20.0
+texture_margin_top = 14.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+modulate_color = Color(1, 0.9, 0.72, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_market_button_disabled"]
+content_margin_left = 26.0
+content_margin_top = 8.0
+content_margin_right = 26.0
+content_margin_bottom = 8.0
+texture = ExtResource("22_button_art")
+texture_margin_left = 20.0
+texture_margin_top = 14.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+modulate_color = Color(0.55, 0.55, 0.6, 0.7)
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_transition_back"]
 frequency = 0.0035
@@ -154,7 +154,6 @@ shader_parameter/speed = Vector2(0.09, 0.02)
 shader_parameter/fog_scale = Vector2(0.52, 0.38)
 
 [node name="NightMarketUI" type="Control" unique_id=1853983014]
-visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -599,11 +598,11 @@ offset_right = 1244.0
 offset_bottom = 160.0
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.952941, 0.847059, 0.427451, 1)
-theme_override_colors/font_hover_color = Color(1, 0.93, 0.72, 1)
 theme_override_colors/font_pressed_color = Color(0.85, 0.7, 0.42, 1)
+theme_override_colors/font_hover_color = Color(1, 0.93, 0.72, 1)
 theme_override_styles/normal = SubResource("StyleBoxTexture_market_button_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_market_button_hover")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_market_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_market_button_hover")
 theme_override_styles/disabled = SubResource("StyleBoxTexture_market_button_disabled")
 text = "Begin shift"
 script = ExtResource("19_hover")
@@ -691,26 +690,25 @@ offset_right = 360.0
 offset_bottom = 96.0
 mouse_filter = 2
 
-[node name="Panel" type="NinePatchRect" parent="MarketDescBubble"]
+[node name="Panel" type="NinePatchRect" parent="MarketDescBubble" unique_id=745994803]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 texture = ExtResource("21_bubble")
 patch_margin_left = 24
 patch_margin_top = 20
 patch_margin_right = 24
 patch_margin_bottom = 20
 
-[node name="Tail" type="Polygon2D" parent="MarketDescBubble"]
+[node name="Tail" type="Polygon2D" parent="MarketDescBubble" unique_id=1793602430]
 position = Vector2(180, 96)
-polygon = PackedVector2Array(-11, -3, 11, -3, 0, 12)
 color = Color(0.2, 0.21, 0.26, 1)
+polygon = PackedVector2Array(-11, -3, 11, -3, 0, 12)
 
-[node name="DescLabel" type="Label" parent="MarketDescBubble"]
+[node name="DescLabel" type="Label" parent="MarketDescBubble" unique_id=2050025571]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -722,12 +720,10 @@ offset_right = -24.0
 offset_bottom = -18.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.960784, 0.945098, 0.878431, 1)
 theme_override_colors/font_outline_color = Color(0.13, 0.14, 0.18, 0.9)
 theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 16
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2

@@ -42,12 +42,16 @@ enum Step {
 	SIGNATURE,
 	DAY_SERVICE,
 	NIGHT_MARKET,
+	NIGHT_MARKET_WELCOME,
+	NIGHT_MARKET_BUY,
+	NIGHT_MARKET_BEGIN,
 	NIGHT_WELCOME,
 	NIGHT_TASK,
 	NIGHT_INSPECT,
 	NIGHT_RECORD_INTRO,
 	NIGHT_RECORD_FIND,
 	NIGHT_RECORD_CLICK,
+	NIGHT_USE_VEIL,
 	NIGHT_LEDGER_SAVED,
 	NIGHT_LEDGER_PROMPT,
 	NIGHT_MAP_INTRO,
@@ -734,6 +738,9 @@ func _begin_passenger_reveal() -> void:
 	# The tutorial passenger is always Goat, whatever identity was staged.
 	_tutorial_passenger.data.passenger_name = "Goat"
 	_tutorial_passenger.data.short_name = "Goat"
+	# The ticket prints the owner name; keep it in sync so Goat's ID and ticket
+	# agree (the identity profile's original name must not leak onto the ticket).
+	_tutorial_passenger.data.ticket_owner = "Goat"
 	_tutorial_passenger.name = "Goat"
 	_tutorial_passenger.set_ai_enabled(false)
 	_tutorial_passenger.enabled = true
@@ -1166,6 +1173,57 @@ func _spotlight_night_market_button() -> void:
 		_animate_spotlight_to_control(button, exam_button_spotlight_radius, stamp_spotlight_zoom_seconds)
 
 
+func _enter_night_market_buy() -> void:
+	_set_night_market_continue(false)
+	_show_wait_step(
+		Step.NIGHT_MARKET_BUY,
+		"Night Market",
+		"You can buy items here to help you survive the night. Start with the [color=#ffd166]VEIL NOTE[/color] — it reveals a hidden clue. Click it to buy.",
+		""
+	)
+	_spotlight_night_market_veil()
+
+
+func _enter_night_market_begin() -> void:
+	_set_night_market_continue(true)
+	_show_wait_step(
+		Step.NIGHT_MARKET_BEGIN,
+		"Night Market",
+		"Tool secured. Now press [color=#ffd166]BEGIN SHIFT[/color] to start the night.",
+		""
+	)
+	_spotlight_night_market_button()
+
+
+func _set_night_market_continue(value: bool) -> void:
+	if _main != null and _main.has_method(&"set_night_market_continue_enabled"):
+		_main.call(&"set_night_market_continue_enabled", value)
+
+
+func _spotlight_night_market_veil() -> void:
+	if _main == null or not _main.has_method(&"get_night_market_veil_button"):
+		return
+	var button := _main.call(&"get_night_market_veil_button") as Control
+	if is_instance_valid(button):
+		_animate_spotlight_to_control(button, exam_button_spotlight_radius, stamp_spotlight_zoom_seconds)
+
+
+func _spotlight_tutorial_veil_slot() -> void:
+	if _main == null or not _main.has_method(&"get_tutorial_veil_slot_control"):
+		return
+	var control := _main.call(&"get_tutorial_veil_slot_control") as Control
+	if is_instance_valid(control):
+		_animate_spotlight_to_control(control, exam_button_spotlight_radius, stamp_spotlight_zoom_seconds)
+
+
+func _spotlight_night_puzzle_veil() -> void:
+	if _main == null or not _main.has_method(&"get_night_puzzle_veil_control"):
+		return
+	var control := _main.call(&"get_night_puzzle_veil_control") as Control
+	if is_instance_valid(control) and control.is_visible_in_tree():
+		_animate_spotlight_to_control(control, exam_button_spotlight_radius, stamp_spotlight_zoom_seconds)
+
+
 ## Stamp lesson entry: ticket face-up plus a spotlight on Goat's correct stamp.
 func _enter_stamp_guide() -> void:
 	_show_wait_step(
@@ -1580,9 +1638,9 @@ func _get_dialogue_marker_path_for_step(step: Step) -> NodePath:
 			return day_service_dialogue_marker_path
 		Step.DAY_SERVICE:
 			return day_service_dialogue_marker_path
-		Step.NIGHT_MARKET:
+		Step.NIGHT_MARKET, Step.NIGHT_MARKET_WELCOME, Step.NIGHT_MARKET_BUY, Step.NIGHT_MARKET_BEGIN:
 			return night_market_dialogue_marker_path
-		Step.NIGHT_WELCOME, Step.NIGHT_TASK, Step.NIGHT_INSPECT:
+		Step.NIGHT_WELCOME, Step.NIGHT_TASK, Step.NIGHT_INSPECT, Step.NIGHT_USE_VEIL:
 			return night_walk_dialogue_marker_path
 		Step.NIGHT_RECORD_INTRO, Step.NIGHT_RECORD_FIND, Step.NIGHT_RECORD_CLICK:
 			return night_record_dialogue_marker_path
@@ -1646,9 +1704,9 @@ func _dialogue_frame_name_for_step(step: Step) -> StringName:
 			return &"DayService"
 		Step.PAYCHECK:
 			return &"DayService"
-		Step.NIGHT_MARKET:
+		Step.NIGHT_MARKET, Step.NIGHT_MARKET_WELCOME, Step.NIGHT_MARKET_BUY, Step.NIGHT_MARKET_BEGIN:
 			return &"NightMarket"
-		Step.NIGHT_WELCOME, Step.NIGHT_TASK, Step.NIGHT_INSPECT:
+		Step.NIGHT_WELCOME, Step.NIGHT_TASK, Step.NIGHT_INSPECT, Step.NIGHT_USE_VEIL:
 			return &"NightWalk"
 		Step.NIGHT_RECORD_INTRO, Step.NIGHT_RECORD_FIND, Step.NIGHT_RECORD_CLICK:
 			return &"NightRecord"
@@ -1805,8 +1863,12 @@ func _step_copy(step: Step) -> Array:
 			return ["Service Sign-Off", "Trace the mark to confirm this segment is complete. Accepted signatures move the train ahead, so inspect first.", "A failed trace shakes the screen; try again."]
 		Step.DAY_SERVICE:
 			return ["Clean Coach", clean_coach_prompt, "Click Continue to finish this clean-start tutorial."]
-		Step.NIGHT_MARKET:
-			return ["Night Market", "This is the [color=#ffd166]NIGHT MARKET[/color], where tools can make your internship easier. Purchases are disabled during training; press [color=#ffd166]BEGIN[/color] when you are ready.", ""]
+		Step.NIGHT_MARKET, Step.NIGHT_MARKET_WELCOME:
+			return ["Night Market", "[color=#ffd166]WELCOME[/color] to the Night Market — a market between worlds that opens only once the day shift ends.", ""]
+		Step.NIGHT_MARKET_BUY:
+			return ["Night Market", "You can buy items here to help you survive the night. Start with the [color=#ffd166]VEIL NOTE[/color] — it reveals a hidden clue. Click it to buy.", ""]
+		Step.NIGHT_MARKET_BEGIN:
+			return ["Night Market", "Tool secured. Now press [color=#ffd166]BEGIN SHIFT[/color] to start the night.", ""]
 		Step.NIGHT_WELCOME:
 			return ["Night", "Welcome to the [color=#ffd166]NIGHT[/color]. The passengers left aboard are [color=#ffd166]SOULS[/color] waiting for their final station.", ""]
 		Step.NIGHT_TASK, Step.NIGHT_INSPECT:
@@ -1815,6 +1877,8 @@ func _step_copy(step: Step) -> Array:
 			return ["Soul Record", "This is a [color=#ffd166]SOUL RECORD[/color]. Its biography hides one [color=#ffd166]DEPARTURE STATEMENT[/color].", ""]
 		Step.NIGHT_RECORD_FIND, Step.NIGHT_RECORD_CLICK:
 			return ["Hidden Statement", "The hidden statement is marked [color=#ff7a6b]RED[/color] for this lesson. Click that sentence to collect it. A wrong pick [color=#ff7a6b]CRACKS[/color] the record; three cracks shatter it and the soul flees.", ""]
+		Step.NIGHT_USE_VEIL:
+			return ["Veil Note", "One more clue hides in this night. Use your [color=#ffd166]VEIL NOTE[/color] — click it in the toolbar, or press [color=#ffd166]3[/color].", ""]
 		Step.NIGHT_LEDGER_SAVED, Step.NIGHT_LEDGER_PROMPT:
 			return ["Ledger", "The statement is now stored in your [color=#ffd166]LEDGER[/color]. Open the [color=#ffd166]LEDGER[/color] button to view the [color=#ffd166]STATION PATH[/color].", ""]
 		Step.NIGHT_MAP_INTRO, Step.NIGHT_MAP_RETRY:
@@ -2064,6 +2128,8 @@ func _advance_from_continue() -> void:
 			_show_wait_step(Step.NEWSPAPER, "Morning Paper", "Close the [color=#ffd166]NEWSPAPER[/color] when you are ready. If the paper proves a passenger is [color=#ff7a6b]ANOMALOUS[/color], leave them unstamped and keep them aboard.", "Use the X button or Esc to close it.")
 		Step.SIGNATURE:
 			_show_wait_step(Step.SIGNATURE, "Service Sign-Off", "Now trace the mark. A valid signature confirms this route segment and fast-forwards to the [color=#ffd166]NEXT STATION[/color].", "A failed trace shakes the screen; try again.")
+		Step.NIGHT_MARKET_WELCOME:
+			_enter_night_market_buy()
 		Step.NIGHT_MARKET:
 			_hide_dialogue_for_task()
 			_set_spotlight_shade(0.0)
@@ -2180,12 +2246,21 @@ func _finish_night_statement_lesson() -> void:
 		return
 	if _main != null and _main.has_method(&"close_tutorial_night_record"):
 		_main.call(&"close_tutorial_night_record")
-	_show_continue_step(
-		Step.NIGHT_LEDGER_SAVED,
-		"Ledger",
-		"The statement is now stored in your [color=#ffd166]LEDGER[/color]. One other soul was already recorded for this lesson.",
+	# Before opening the ledger, spend the Veil Note the market sold.
+	_enter_night_use_veil()
+
+
+func _enter_night_use_veil() -> void:
+	# Free modal ownership so the HUD veil slot accepts input.
+	if _main != null and _main.has_method(&"set_tutorial_modal"):
+		_main.call(&"set_tutorial_modal", null)
+	_show_wait_step(
+		Step.NIGHT_USE_VEIL,
+		"Veil Note",
+		"One more clue hides in this night. Use your [color=#ffd166]VEIL NOTE[/color] — click it in the toolbar, or press [color=#ffd166]3[/color].",
 		""
 	)
+	_spotlight_tutorial_veil_slot()
 
 
 func _begin_night_ledger_prompt() -> void:
@@ -2295,13 +2370,21 @@ func _on_main_tutorial_event(event_name: StringName, payload: Variant = null) ->
 			# The Inspector waits until the market entrance has settled.
 			pass
 		&"night_market_settled":
-			_show_wait_step(Step.NIGHT_MARKET, "Night Market", "This is the [color=#ffd166]NIGHT MARKET[/color], where tools can make your internship easier. Purchases are disabled during training. When you are ready, press [color=#ffd166]BEGIN SHIFT[/color].", "")
-			_spotlight_night_market_button()
+			_show_continue_step(Step.NIGHT_MARKET_WELCOME, "Night Market", "[color=#ffd166]WELCOME[/color] to the Night Market — a market between worlds that opens only once the day shift ends.", "")
+			_set_night_market_continue(false)
+		&"tutorial_veil_purchased":
+			if _step == Step.NIGHT_MARKET_BUY:
+				_enter_night_market_begin()
 		&"night_market_begin":
 			_hide_dialogue_for_task()
 			_clear_spotlight_for_reading()
+		&"tutorial_veil_revealed":
+			if _step == Step.NIGHT_USE_VEIL:
+				_hide_dialogue_for_task()
+				_clear_spotlight_for_reading()
+				_show_continue_step(Step.NIGHT_LEDGER_SAVED, "Ledger", "The veil revealed another statement. Both clues are now stored in your [color=#ffd166]LEDGER[/color].", "")
 		&"night_started":
-			if _step in [Step.DAY_SERVICE, Step.NIGHT_MARKET, Step.NIGHT_WELCOME]:
+			if _step in [Step.DAY_SERVICE, Step.NIGHT_MARKET, Step.NIGHT_MARKET_WELCOME, Step.NIGHT_MARKET_BUY, Step.NIGHT_MARKET_BEGIN, Step.NIGHT_WELCOME]:
 				_begin_night_lesson()
 		&"night_record_opened":
 			if _step == Step.NIGHT_INSPECT:
@@ -2331,6 +2414,8 @@ func _on_main_tutorial_event(event_name: StringName, payload: Variant = null) ->
 					"This map shows the souls and their possible stations. Use both [color=#ffd166]LEDGER[/color] clues to decide where each soul belongs.",
 					""
 				)
+				# Point out where the veil note's revealed clue landed.
+				_spotlight_night_puzzle_veil()
 		&"night_assignment_failed":
 			if _step == Step.NIGHT_MAP_ASSIGN:
 				_set_night_map_input_blocked(true)

@@ -34,16 +34,16 @@
 [ext_resource type="Texture2D" uid="uid://4ku3hrxxjh3u" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 14-43-35-1.png" id="29_qvavt"]
 [ext_resource type="Texture2D" uid="uid://bg5km7i8p8o1r" path="res://assets/ui/guidebook/paycheck 1 (1).png" id="30_paycheck_art"]
 [ext_resource type="Texture2D" uid="uid://das3t3h8hbe6c" path="res://assets/ui/guidebook/night 1 (1).png" id="31_night_art"]
-[ext_resource type="Texture2D" uid="uid://cayo8tkkmtvq8" path="res://assets/characters/Where Do You Belong_/NPC9.png" id="33_qvavt"]
+[ext_resource type="Texture2D" uid="uid://c0wxp7pf8kf2k" path="res://assets/characters/Where Do You Belong_/NPC15.png" id="33_i0jqt"]
 [ext_resource type="Texture2D" uid="uid://cu0rsf2u3vtsp" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 11-22-24.png" id="33_wdqcv"]
 [ext_resource type="Texture2D" uid="uid://du1umrmwigf0k" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 12-04-23-1.png" id="35_jbx2b"]
 [ext_resource type="Texture2D" uid="uid://fi8341eivf3m" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 12-04-43.png" id="36_qvavt"]
+[ext_resource type="Texture2D" uid="uid://lkud6gnp6bf3" path="res://assets/ui/passenger_ticket.png" id="37_ticket"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_button"]
 
 [node name="GuidebookUI" type="Control" unique_id=29174819]
 process_mode = 3
-visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -1314,7 +1314,7 @@ editor_description = "Second static photo for two-image evidence. Pick a texture
 texture_filter = 1
 position = Vector2(-210.16403, 166.87128)
 scale = Vector2(-1, 1)
-texture = ExtResource("33_qvavt")
+texture = ExtResource("33_i0jqt")
 
 [node name="Photo" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/PhotoFrame/PhotoClip/PhotoContent" index="1" unique_id=328331925]
 position = Vector2(150.60617, 69.03522)
@@ -1449,6 +1449,45 @@ position = Vector2(-28.366348, 303.5008)
 scale = Vector2(1.5, 1.5)
 texture = ExtResource("36_qvavt")
 
+[node name="TicketNameMismatch" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries" unique_id=216565997 instance=ExtResource("3_entry")]
+editor_description = "Free-positioned anomaly section. The ticket owner name disagrees with the ID name."
+custom_minimum_size = Vector2(364, 104)
+layout_mode = 0
+offset_top = 291.0
+offset_right = 364.0
+offset_bottom = 395.0
+description = "The ticket name does not match the passenger's ID."
+photo = ExtResource("37_ticket")
+photo_frame_size = Vector2(150, 90)
+
+[node name="PhotoFrame" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TicketNameMismatch" index="0" unique_id=2049561371]
+custom_minimum_size = Vector2(150, 90)
+
+[node name="PhotoClip" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TicketNameMismatch/PhotoFrame" index="0" unique_id=1527806403]
+custom_minimum_size = Vector2(138, 78)
+
+[node name="PhotoContent" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TicketNameMismatch/PhotoFrame/PhotoClip" index="0" unique_id=943558789]
+position = Vector2(69, 39)
+scale = Vector2(0.0942029, 0.0942029)
+
+[node name="Photo" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TicketNameMismatch/PhotoFrame/PhotoClip/PhotoContent" index="0" unique_id=328331925]
+position = Vector2(0, 0)
+scale = Vector2(1.4, 1.4)
+texture = ExtResource("37_ticket")
+
+[node name="Heading2" type="Label" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TicketNameMismatch/Text" parent_id_path=PackedInt32Array(216565997, 242403726) index="0" unique_id=1091116955]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "TICKET NAME MISMATCH"
+
+[node name="Description2" type="Label" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TicketNameMismatch/Text" parent_id_path=PackedInt32Array(216565997, 242403726) index="1" unique_id=1199178316]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "The ticket name does not match the passenger's ID."
+
+[node name="Description" parent="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TicketNameMismatch/Text" parent_id_path=PackedInt32Array(216565997, 242403726) index="3" unique_id=1199178315]
+text = "The ticket name does not match the passenger's ID."
+
 [node name="Clip" type="TextureRect" parent="Center/BookStage" unique_id=1818967348]
 unique_name_in_owner = true
 editor_description = "Metal clip layered above the open book."
@@ -1474,3 +1513,4 @@ stretch_mode = 5
 [editable path="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/NewspaperDeath"]
 [editable path="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/UnlistedDestination"]
 [editable path="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TimeInvalidTicket"]
+[editable path="Center/BookStage/Page/AnomalyList/Entries/RightPageEntries/TicketNameMismatch"]

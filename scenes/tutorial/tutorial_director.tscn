@@ -653,21 +653,22 @@ stretch_mode = 5
 
 [node name="Documents" type="ColorRect" parent="DialogueFrames" unique_id=77200111]
 editor_description = "Document comparison bubble rect."
+visible = false
 layout_mode = 0
-offset_left = 177.0
-offset_top = 562.0
-offset_right = 946.0
-offset_bottom = 695.0
+offset_left = 260.0
+offset_top = 38.0
+offset_right = 1029.0
+offset_bottom = 171.0
 mouse_filter = 2
 color = Color(1, 0.81, 0.27, 0.1)
 
 [node name="PortraitSpot" type="Panel" parent="DialogueFrames/Documents" unique_id=77200160]
 editor_description = "Angel head placement for this step. Move/resize to pose the portrait; script copies this rect."
 layout_mode = 0
-offset_left = 770.0
-offset_top = -161.99998
-offset_right = 944.0
-offset_bottom = 12.000015
+offset_left = 827.0
+offset_top = 44.0
+offset_right = 1001.0
+offset_bottom = 218.0
 scale = Vector2(0.8, 0.8)
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
@@ -676,11 +677,11 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
 editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
 modulate = Color(1, 1, 1, 0.65)
 layout_mode = 0
-offset_left = 759.0
-offset_top = 62.0
-offset_right = 842.0
-offset_bottom = 133.0
-rotation = 4.024108
+offset_left = 740.0
+offset_top = 126.00003
+offset_right = 823.0
+offset_bottom = 197.00003
+rotation = 4.949279
 mouse_filter = 2
 texture = ExtResource("5_dialogue_pointer")
 expand_mode = 1
@@ -723,6 +724,7 @@ stretch_mode = 5
 
 [node name="Guidebook" type="ColorRect" parent="DialogueFrames" unique_id=77200113]
 editor_description = "Guidebook prompt bubble rect."
+visible = false
 layout_mode = 0
 offset_left = 222.0
 offset_top = 562.0
@@ -794,6 +796,7 @@ stretch_mode = 5
 
 [node name="Signature" type="ColorRect" parent="DialogueFrames" unique_id=77200117]
 editor_description = "Service sign-off bubble rect."
+visible = false
 layout_mode = 0
 offset_left = 208.0
 offset_top = 34.0
@@ -865,10 +868,10 @@ stretch_mode = 5
 [node name="NightMarket" type="ColorRect" parent="DialogueFrames" unique_id=77200121]
 editor_description = "Night Market bubble rect."
 layout_mode = 0
-offset_left = 27.0
-offset_top = 155.0
-offset_right = 496.0
-offset_bottom = 349.0
+offset_left = 355.0
+offset_top = 4.0
+offset_right = 979.0
+offset_bottom = 142.0
 mouse_filter = 2
 color = Color(1, 0.81, 0.27, 0.1)
 
@@ -886,11 +889,11 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_portrait")
 editor_description = "Bubble tail placement for this step. Move/resize/rotate; script copies rect and rotation."
 modulate = Color(1, 1, 1, 0.65)
 layout_mode = 0
-offset_left = 457.99988
-offset_top = 72.0
-offset_right = 540.9999
-offset_bottom = 143.0
-rotation = 4.118153
+offset_left = 544.0
+offset_top = 169.0
+offset_right = 627.0
+offset_bottom = 240.0
+rotation = 4.369111
 mouse_filter = 2
 texture = ExtResource("5_dialogue_pointer")
 expand_mode = 1
@@ -898,6 +901,7 @@ stretch_mode = 5
 
 [node name="NightWalk" type="ColorRect" parent="DialogueFrames" unique_id=77200123]
 editor_description = "Night Service bubble rect."
+visible = false
 layout_mode = 0
 offset_left = 258.0
 offset_top = 66.0
@@ -1200,7 +1204,6 @@ theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/normal_font_size = 21
 bbcode_enabled = true
 text = "Tutorial copy."
-autowrap_mode = 3
 fit_content = true
 scroll_active = false
 

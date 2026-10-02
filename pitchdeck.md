@@ -6,21 +6,30 @@
 
 ## Slide 1 — The Hook
 
-> **What if the only way to get into heaven was to become a dead bureaucrat on a ghost train?**
+> **What happens After the End of the line — when the shift is over, but the souls are still on the train?**
 
-You died on your way to a job interview.
-Not your fault — an angel made a clerical error.
+---
 
-The bad news: your sins outweigh your good deeds.
-There's no express lane. No appeal.
+The day shift is over. The last station has been reached.
+Every passenger stamped, checked, sent off.
 
-**But there's one offer on the table.**
+Except not all of them.
 
-Work five days as an intern conductor on a train that runs between the living world and the realm of the dead.
-Check documents. Catch the dead who are pretending to be alive.
-Send every soul to exactly where they belong.
+Some of the people on this train were never really alive to begin with.
+They're still here. Still in their seats. Still waiting.
+And they have no idea where they belong.
 
-*Succeed → Heaven. Fail → Hell.*
+That's where you come in.
+
+*You died on the way to your job interview. An angel made a clerical error.*
+*Your sins outweigh your good deeds. There's no express lane.*
+
+But there's one offer on the table:
+work five days as an intern conductor on a train between the living world and the dead —
+catch the souls disguising themselves as passengers,
+and when the line ends, assign every one of them to where they truly belong.
+
+**Succeed → Heaven. Fail → Hell.**
 
 ---
 
@@ -42,7 +51,7 @@ Send every soul to exactly where they belong.
 ╚══════════════════════════════════════════════╝
 ```
 
-> **[KEY ART PLACEHOLDER]** — A dimly lit train carriage split between warm sepia daylight on the left and cold blue-purple spirit-realm darkness on the right. A lone conductor silhouette stands in the middle.
+> **[KEY ART PLACEHOLDER]** — A dimly lit train carriage split down the middle: warm Victorian sepia on the left (the living world, the day shift), cold blue-purple constellation darkness on the right (the soul line, after the end of the line). A lone conductor silhouette stands at the divide — facing right.
 
 ---
 
@@ -50,7 +59,7 @@ Send every soul to exactly where they belong.
 
 ### *tim yang serius* — A Studio That Means Business
 
-A small team built around one shared belief: the best games are born from questions that are hard to answer.
+A small team built around one shared belief: the best games ask questions they don't immediately answer.
 
 | Name | Role |
 |---|---|
@@ -63,7 +72,7 @@ A small team built around one shared belief: the best games are born from questi
 - ✅ Playable vertical slice — Day 1 fully implemented
 - ✅ Full document inspection system + 5 anomaly types
 - ✅ Day/Night dual-phase loop — both phases functional
-- ✅ Signature mechanic, Night Market, Constellation Map puzzle — all in-engine
+- ✅ Signature mechanic, Night Market, Constellation Map — all in-engine
 
 > We ship. We can show you the build today.
 
@@ -71,27 +80,40 @@ A small team built around one shared belief: the best games are born from questi
 
 ## Slide 4 — Game Overview
 
-### A Two-World Train Journey
+### The End of the Line Is Not the End
 
-*Where Do You Belong?* is a **2D side-view deductive puzzle game** set aboard a train that travels between the human world and the spirit realm.
+*Where Do You Belong?* is a **2D side-view deductive puzzle game** built around a simple but loaded idea: the day shift ends, but the work doesn't.
 
-You play as a newly dead intern conductor. Your job: inspect passenger documents, identify souls masquerading as the living, and guide anomalies to their correct afterlife station — before your 5-day contract ends.
+You are a newly dead intern conductor on a train that runs between the human world and the realm of the dead. During the day, you check passenger documents, issue stamps, and keep things moving — just like any regular conductor.
+
+But when the train reaches the end of its daytime route, the real shift begins.
+
+The living passengers step off. What remains are the **anomalies** — souls who disguised themselves as the living, who passed through your inspection, who you chose to hold back. Now, in the dark, you have to figure out where each one of them actually belongs.
+
+The theme is "After the End" — and it operates on three levels simultaneously:
+
+| Layer | What Ends | What Comes After |
+|---|---|---|
+| **The Protagonist** | Their life — cut short by an angel's mistake | Five days of work to earn their place in the afterlife |
+| **The Day Shift** | The route reaches its last stop. Stamps are done. | The souls are still there. The night puzzle begins. |
+| **Each Anomaly** | Their life in the human world | They don't know where they belong — the player decides |
 
 ### The World
 
-The train runs a fixed route:
+The train runs a fixed daytime route:
 **Alderwick → Brambleford → Cinderfield → Dunmere**
 
-- **Daytime** — Warm sepia lighting. Victorian formality. Ordinary passengers with documents to check, stamps to issue, and a timetable to keep.
-- **Night / Soul Line** — The living vanish. Cold blue-purple fills the carriages. Only the detained souls remain, waiting for judgment.
+- **Day / Mortal Realm** — Warm sepia. Victorian formality. Passengers with ID cards, train tickets, and daily newspapers. The air smells like tea and bureaucracy.
+- **Night / Soul Line** — The living step off. Cold blue-purple fills the carriages. Constellation particles drift past the windows. The only ones left are the ones you kept.
 
 ### What Does It Feel Like?
 
 | | Day Shift | Night Shift |
 |---|---|---|
-| **Mood** | Busy, bureaucratic, under pressure | Quiet, investigative, contemplative |
-| **Player Action** | Inspect documents, stamp tickets, catch anomalies | Read soul biographies, gather clues, place souls on the Constellation Map |
-| **Stakes** | Instant penalty per mistake | All-or-nothing reward at the end |
+| **Mood** | Busy, bureaucratic, under time pressure | Quiet, investigative, contemplative |
+| **Player Action** | Inspect ID · Ticket · Newspaper. Stamp the living. Hold the anomalies back. | Read Soul Records. Collect clue statements. Place each soul on the Constellation Map. |
+| **Stakes** | Instant penalty per wrong call | All-or-nothing reward — correct placement for all souls, or nothing |
+| **What ends here** | The route. The stamps. The living world. | The shift — only when every soul has a place. |
 
 ---
 
@@ -99,41 +121,59 @@ The train runs a fixed route:
 
 ### What Makes This Game Different?
 
-**① Two-Phase Duality — One Decision, Two Consequences**
-Every anomaly you catch (or miss) in the day becomes a puzzle you have to solve at night. The two phases are inseparable — your daytime accuracy sets the ceiling for your nighttime reward. No other document-inspection game does this.
+---
+
+**① Two-Phase Duality — The End of the Line Is the Beginning**
+
+Every anomaly you catch during the day shift is a soul you have to solve at night. The day shift ends — but the work doesn't. Your accuracy in the first phase directly sets up the puzzle in the second.
+
+No other document-inspection game links its phases this tightly. In *Papers, Please*, each day resets independently. Here, your daytime decisions *become* the nighttime problem.
+
+```
+  DAY SHIFT ends at the last station stop
+       ↓
+  The living leave. The retained souls remain.
+       ↓
+  NIGHT SHIFT: now place every one of them correctly.
+       ↓
+  Only then does the day truly end.
+```
 
 ---
 
-**② The Signature Mechanic — Authority Has Weight**
-To move the train between stations, the player physically traces a conductor's signature on screen. It's not a "confirm" button. It's a declaration. Fail the trace and the train doesn't move. It makes every departure feel earned.
+**② The Signature Mechanic — Closing the Line**
+
+Between each station leg, the player physically traces the conductor's signature on screen to confirm the segment is done. It's not a "next" button. It's a formal declaration: *this segment of the line is closed.*
+
+Fail the trace — the train doesn't move. The line isn't closed yet.
 
 ---
 
-**③ The Blessings Economy — Choose Your Tools**
-Your daytime earnings buy tools in the **Night Market** before the shift turns dark:
+**③ The Blessings Economy — Carried Over, Not Reset**
+
+Earnings from the day shift fund tools in the **Night Market**, purchased in the liminal window between the two shifts. Tools carry forward to the next day if unused. Miss the daily target — all purchases cancelled — the shift replays from the beginning.
 
 | Tool | Cost | Effect |
 |---|---|---|
 | Veil Note | 200 Blessings | Unlocks hidden clue in a soul's biography |
-| Radar Charge | 150 Blessings | Highlights hard-to-spot anomalies |
+| Radar Charge | 150 Blessings | Highlights anomalies that are hard to spot visually |
 | Swiftstep | 75 Blessings | Movement speed boost for 10 seconds |
 
-Miss the daily target → all purchases cancelled → replay from the start.
+---
+
+**④ No Cutscenes. All Discovery.**
+
+The world is built entirely through ID cards, train tickets, newspaper obituaries, and soul biographies. Players encounter lore the same way a conductor would — one document at a time. Nothing is narrated. Everything is found.
 
 ---
 
-**④ No Cutscenes. All Story.**
-The world is built entirely through documents, newspapers, soul records, and angel dialogue. Players discover the lore themselves. Nothing is handed to them.
-
----
-
-**⑤ Five Anomaly Types — Each Requires a Different Eye**
+**⑤ Five Anomaly Types — Each Requires a Different Kind of Attention**
 
 | Anomaly | How to Spot It |
 |---|---|
 | **Shadowless** | No shadow on the floor |
-| **Portrait Mismatch** | ID photo doesn't match the passenger's face |
-| **Newspaper Death** | Passenger's name appears in the obituary column |
+| **Portrait Mismatch** | ID photo doesn't match the face in front of you |
+| **Newspaper Death** | Passenger's name is in the obituary column |
 | **Unlisted Destination** | Ticket destination isn't on the active route |
 | **Time-Invalid Ticket** | Travel date is impossible or expired |
 
@@ -141,24 +181,28 @@ The world is built entirely through documents, newspapers, soul records, and ang
 
 ## Slide 6 — Core Loop
 
+The loop is designed so that neither phase feels complete on its own.
+The day shift collects the problem. The night shift solves it. Together, they make one full workday.
+
 ```mermaid
 flowchart TD
-    A["🌅 DAY SHIFT\nWalk the carriages\nInspect ID · Ticket · Newspaper\nStamp the living · Detain anomalies"] --> B["✍️ ROUTE SIGNATURE\nTrace the conductor's mark\nto advance to the next station"]
+    A["🌅 DAY SHIFT\nWalk the carriages · Inspect ID, Ticket, Newspaper\nStamp the living · Detain anomalies\n(they stay on the train)"] --> B["✍️ ROUTE SIGNATURE\nTrace the conductor's mark\nto close this leg of the line\nand advance to the next station"]
     B --> C{"All route\nsegments done?"}
-    C -->|No| A
-    C -->|Yes| D["📋 PAYCHECK REPORT\nNet Blessings vs. Daily Target\nPASSED or FAILED"]
+    C -->|Not yet| A
+    C -->|"Yes — end of the line"| D["📋 PAYCHECK REPORT\nNet Blessings vs. Daily Target\nPASSED or FAILED"]
     D --> E{"Target\nmet?"}
-    E -->|FAILED| A
-    E -->|PASSED| F["🏪 NIGHT MARKET\nSpend Blessings on tools\nVeil Note · Radar · Swiftstep"]
-    F --> G["🌌 NIGHT SHIFT — SOUL LINE\nRead Soul Records\nCollect clue statements\nUse tools to unlock hints"]
-    G --> H["🗺️ CONSTELLATION MAP\nDrag each soul card\nto their correct afterlife station"]
+    E -->|"FAILED — replay"| A
+    E -->|PASSED| F["🏪 NIGHT MARKET\nThe liminal window between shifts\nSpend Blessings on tools\nVeil Note · Radar · Swiftstep"]
+    F --> G["🌌 NIGHT SHIFT — SOUL LINE\nThe living are gone\nRead each Soul Record\nCollect clue statements · Use tools"]
+    G --> H["🗺️ CONSTELLATION MAP\nDrag each soul card to their\ncorrect afterlife station"]
     H --> I{"All souls\ncorrectly placed?"}
     I -->|Try again| G
-    I -->|Yes ✅| J["☀️ NEXT DAY\nHigher target\nMore passengers\nHarder anomalies"]
+    I -->|"Yes ✅ — shift truly ends"| J["☀️ NEXT DAY\nHigher Blessings target\nMore passengers · Harder anomalies"]
     J --> A
 ```
 
-**Daily Targets:**
+**Daily Targets — Rising Each Day:**
+
 | Day | Blessings Required |
 |---|---|
 | Day 1 | 250 |
@@ -182,46 +226,49 @@ flowchart TD
 - **Age:** 18–30
 - **Plays:** Papers, Please · Obra Dinn · Baba Is You · Suzerain
 - **Platform:** PC / Steam
-- **Motivation:** Satisfaction of deduction, not reflex. Wants to earn the answer.
-- **Frustration:** Puzzles with no internal logic, or narrative that feels disconnected from mechanics.
+- **Motivation:** The satisfaction of reaching a correct answer through evidence, not guessing.
+- **Frustration:** Puzzles that are arbitrary; narratives that feel disconnected from mechanics.
+- **Why this game:** Two-phase structure means every deduction has a consequence they can trace back to their own choices.
 
 ---
 
 **Persona B — The Story-First Gamer** *(Secondary Audience)*
 
-> *"If the world feels real, I'll play for hours just reading documents."*
+> *"If the world feels real, I'll spend an hour just reading documents."*
 
 - **Age:** 20–35
 - **Plays:** Disco Elysium · Heaven's Vault · 80 Days · Pentiment
 - **Platform:** PC / occasionally console
-- **Motivation:** Atmosphere, character, and a world that rewards curiosity.
-- **Frustration:** Games with great lore locked behind skill walls, or puzzles that interrupt the story.
+- **Motivation:** Atmosphere, world-building, and a setting that rewards genuine curiosity.
+- **Frustration:** Great lore locked behind steep skill walls; puzzle games that interrupt the story.
+- **Why this game:** The world is told entirely through documents — no cutscenes, no hand-holding. Lore is found, not delivered.
 
 ---
 
 **Persona C — The Indie Explorer** *(Reach Audience)*
 
-> *"I found my last five favorite games on Itch.io for free."*
+> *"My last five favorite games all came from Itch.io."*
 
 - **Age:** 16–25
-- **Plays:** Unpacking · Stardew Valley · game jam titles
-- **Platform:** Itch.io, then Steam
-- **Motivation:** Unique aesthetic, short-to-medium play sessions, emotional payoff.
-- **Frustration:** Games that are too long, too punishing, or require too much setup.
+- **Plays:** Unpacking · Stardew Valley · game jam titles · short narrative games
+- **Platform:** Itch.io → Steam
+- **Motivation:** Distinctive aesthetic, manageable session length, emotional payoff.
+- **Frustration:** Games that are too long, too punishing, or require extensive setup before anything interesting happens.
+- **Why this game:** The vertical slice is completable in one session. The afterlife hook is immediately legible. The visual split between day and night is striking at a glance.
 
 ---
 
 ### Benchmark — Proof of Market
 
-| Title | Est. Copies Sold | Steam Rating | Price |
+| Title | Est. Copies Sold | Steam Rating | Price Point |
 |---|---|---|---|
 | *Papers, Please* (2013) | **2M – 4.9M** | 97% Positive | $9.99 |
 | *Return of the Obra Dinn* (2018) | **300K – 1.5M** | 97% Positive | $19.99 |
 | *Disco Elysium* (2019) | ~1M | 97% Positive | $39.99 |
 
-> **The "97% club" is real.** Document-inspection and deductive games consistently reach the top of their genre because their audiences are deeply invested. These aren't impulse purchases — they're word-of-mouth titles with long commercial tails.
+> **The "97% club" is not a coincidence.** Document-inspection and deductive games build audiences that are deeply committed — these are not impulse purchases. They generate long-tail word-of-mouth revenue years after release (*Papers, Please* still sells over a decade later).
 >
-> Indie games now represent ~48% of Steam's total game revenue. *Where Do You Belong?* targets the premium single-player narrative segment — low competition volume, high loyalty.
+> Indie titles now account for ~48% of Steam's total game revenue. The premium single-player narrative segment has low competition volume and exceptionally high audience loyalty.
 
 ---
 
@@ -231,32 +278,32 @@ flowchart TD
 |---|:---:|:---:|:---:|:---:|
 | Document Inspection | ✅ | ✅ | ✅ | ❌ |
 | Deductive Logic Puzzle | ✅ | ⚠️ Rule-based | ✅ | ⚠️ Skill checks |
-| Two-Phase Gameplay Loop | ✅ | ❌ | ❌ | ❌ |
-| Narrative via Documents | ✅ | ⚠️ Minimal | ✅ | ✅ |
+| **Linked Two-Phase Loop** | ✅ | ❌ | ❌ | ❌ |
+| Narrative via Documents Only | ✅ | ⚠️ Minimal | ✅ | ✅ |
 | In-game Economy System | ✅ Blessings | ✅ Peso | ❌ | ❌ |
 | Supernatural / Afterlife Setting | ✅ | ❌ | ⚠️ | ❌ |
 | Physical Gesture Mechanic | ✅ Signature trace | ❌ | ❌ | ❌ |
-| Accessible Entry Point | ✅ | ⚠️ Steep curve | ⚠️ Steep | ❌ Very slow |
+| Accessible Entry Point | ✅ | ⚠️ Steep | ⚠️ Steep | ❌ Very slow |
 
-> *Where Do You Belong?* is the only game in this tier with a **linked dual-phase structure** — where your choices in one phase directly shape the rules of the next.
+> *Where Do You Belong?* is the only title in this tier where **the end of one phase is the literal starting condition of the next.** Your day-shift calls are not evaluated and discarded — they become the night-shift puzzle.
 
 ---
 
 ## Slide 8 — Why Now?
 
-### The Moment Is Right
+### The Timing Is Right
 
-**① The "document game" genre has proven demand — but no supernatural entry.**
-*Papers, Please* redefined the genre in 2013. *Obra Dinn* deepened it in 2018. Both achieved 97%+ ratings and long-tail commercial success. No major entry has brought an afterlife/supernatural angle to this formula — that gap is open.
+**① The "document inspection" genre is proven — but its supernatural lane is empty.**
+*Papers, Please* established the formula in 2013. *Obra Dinn* evolved it in 2018. Both hit 97%+ ratings. Both have long commercial tails. No significant entry has taken the formula into an afterlife / supernatural context. That gap has been open for years.
 
-**② Short-form premium indie games are having a moment.**
-Titles like *Unpacking*, *Norco*, and *A Short Hike* have demonstrated that games with strong thematic identity and 3–6 hour runtimes outperform expectations on Steam. Players are hungry for focused, complete experiences.
+**② Short, focused premium indie games are outperforming expectations.**
+*Unpacking*, *Norco*, *A Short Hike*, *Venba* — games with a clear thematic identity and a 2–6 hour runtime are consistently exceeding their commercial projections on Steam. Players are actively seeking focused, complete experiences over bloated open worlds.
 
-**③ Godot 4.x is now a credible shipping engine.**
-Recent titles shipped on Godot 4 have proven the toolchain is production-ready. Our team has built all core systems — document inspection, anomaly detection, night puzzle, market economy — from scratch in Godot 4.7.
+**③ "After the End" is a theme that lands right now.**
+The cultural appetite for stories about accountability, consequence, and what-comes-next is not going away. We're not pitching a game about death. We're pitching a game about **whether the work you do after everything ends still means something** — and that question resonates regardless of context.
 
-**④ The "After the End" theme is universally resonant.**
-Everyone has thought about what comes next. We're not making a game about death — we're making a game about *accountability*. That hits differently.
+**④ Godot 4.x is now a credible shipping engine.**
+Our full system — document inspection, anomaly detection, night puzzle, market economy, tutorial — is built and running in Godot 4.7. We are not at prototype stage. We have a vertical slice.
 
 ---
 
@@ -283,42 +330,33 @@ flowchart LR
 
 ---
 
-## Slide 10 — The Ask & Close
+## Slide 10 — Close
 
-### What We Need
+### The Shift Doesn't End When the Route Does
 
-| Support Type | Details |
-|---|---|
-| **Competition Recognition** | Validation to carry the project forward to full release |
-| **Mentorship / Network** | Access to industry contacts for playtesting and publishing conversations |
-| **Visibility** | Itch.io / Steam featuring, gaming press introduction |
+Most games about death ask you to feel something about it.
 
-We are not asking you to take a risk on an idea.
-**We're showing you a working game.** The systems are built. The loop is playable. The story is in motion.
+*Where Do You Belong?* asks you to do something about it.
 
----
+The day shift ends. The last station is reached. The living passengers step off.
+But the work isn't done — because a few of them weren't really alive.
+They're still on the train. Still waiting. And they need to go somewhere.
 
-### Why This Game Deserves to Exist
+That's what "After the End" means here.
+Not just that the protagonist died.
+Not just that each soul's life is over.
+But that **the end of one thing** — the route, the shift, the life — **is always the beginning of something that still has to be finished.**
 
-We all carry some version of that question.
-*"Am I doing enough?"*
-*"Do I belong here?"*
+Every soul correctly placed is a life that finally has somewhere to go.
+Every document carefully read is an act of attention that changes someone's eternity.
 
-*Where Do You Belong?* turns that anxiety into a mechanic.
-Not by answering the question for the player — but by asking them to answer it for everyone else first.
+**The shift ends when every soul belongs somewhere.**
 
-Every soul you place correctly.
-Every document you read carefully.
-Every anomaly you catch before the train moves on.
-
-It all adds up to the same thing:
-**You were present. You paid attention. You did the work.**
-
-Maybe that's enough.
+*So do you.*
 
 ---
 
-> *"A game about finding the right place for everyone else — so you can finally find yours."*
+> *"Where Do You Belong? — The shift isn't over until every soul has a place."*
 
 ---
 
@@ -329,19 +367,8 @@ Maybe that's enough.
 | **Itch.io / Demo Build** | *(link)* |
 | **Email** | *(email)* |
 | **Social** | *(handle)* |
-| **Press Kit** | *(link to folder with build + screenshots + trailer)* |
+| **Press Kit** | *(folder: build · screenshots · trailer)* |
 
 ---
 
 *Thank you — GameToday 2026*
-
----
-
-> **Best Practices Applied:**
-> - Hook-first structure (emotional before technical)
-> - "X meets Y" descriptor on title slide
-> - Player actions described, not features listed
-> - Real market data with source context (SteamSpy / Gamalytic estimates)
-> - Clear "The Ask" slide with specific, realistic requests
-> - Deck closes with emotional resonance matching game theme
-> - Max ~10 slides — concise enough for a 5–7 minute read

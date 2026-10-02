@@ -135,15 +135,16 @@ func _run() -> void:
 	var entries_by_name: Dictionary = {}
 	for child: Node in anomaly_entries:
 		entries_by_name[child.name] = child
-	_check(anomaly_entries.size() == 5, "Only passenger anomalies appear in the anomaly guidebook page.")
+	_check(anomaly_entries.size() == 6, "Only passenger anomalies appear in the anomaly guidebook page.")
 	_check(not entries_by_name.has("BlockedConnector"), "Blocked connectors are not listed as passenger anomalies.")
-	for expected_entry: String in ["Shadowless", "UnlistedDestination", "PortraitMismatch", "TimeInvalidTicket", "NewspaperDeath"]:
+	for expected_entry: String in ["Shadowless", "UnlistedDestination", "PortraitMismatch", "TimeInvalidTicket", "TicketNameMismatch", "NewspaperDeath"]:
 		_check(entries_by_name.has(expected_entry), "The guidebook includes %s." % expected_entry)
 	var expected_photos: Dictionary = {
 		"Shadowless": "res://assets/ui/guidebook/shadowless.png",
 		"UnlistedDestination": "res://assets/ui/guidebook/unlisted_destination.png",
 		"PortraitMismatch": "res://assets/ui/id_card.png",
 		"TimeInvalidTicket": "res://assets/ui/passenger_ticket.png",
+		"TicketNameMismatch": "res://assets/ui/passenger_ticket.png",
 		"NewspaperDeath": "res://assets/ui/guidebook/newspaper.png",
 	}
 	var expected_photo_sides: Dictionary = {
@@ -151,6 +152,7 @@ func _run() -> void:
 		"UnlistedDestination": 0,
 		"PortraitMismatch": 1,
 		"TimeInvalidTicket": 1,
+		"TicketNameMismatch": 0,
 		"NewspaperDeath": 0,
 	}
 	for entry: Node in anomaly_entries:

@@ -613,6 +613,10 @@ func get_tutorial_service_action_focus_control() -> Control:
 	return _service_action_button
 
 
+func get_tutorial_veil_slot_focus_control() -> Control:
+	return _veil_note_slot
+
+
 func show_route_briefing() -> void:
 	if not route_briefing_enabled:
 		_hide_route_briefing(true)

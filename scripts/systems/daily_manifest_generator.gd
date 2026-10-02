@@ -317,6 +317,9 @@ static func _assign_deceased_anomalies(
 			"portrait_mismatch":
 				if not _assign_mismatched_portrait(data, passengers, scheduled_count, rng):
 					return false
+			"ticket_name_mismatch":
+				if not _assign_mismatched_ticket_owner(data, passengers, scheduled_count, rng):
+					return false
 			"time_invalid_ticket":
 				if not _assign_invalid_ticket_date(data, config, rng):
 					return false
@@ -344,6 +347,31 @@ static func _assign_mismatched_portrait(
 	var portrait_owner: PassengerData = candidates[rng.randi_range(0, candidates.size() - 1)]
 	data.id_photo = portrait_owner.identity_profile.id_photo
 	data.id_photo_owner = portrait_owner.passenger_name
+	return true
+
+
+## The ID keeps the passenger's name while the ticket prints someone else's, so
+## the two documents disagree on the ticket owner.
+static func _assign_mismatched_ticket_owner(
+	data: PassengerData,
+	passengers: Array[PassengerData],
+	scheduled_count: int,
+	rng: RandomNumberGenerator
+) -> bool:
+	var candidates: Array[String] = []
+	for index: int in range(scheduled_count):
+		var candidate: PassengerData = passengers[index]
+		if candidate == data:
+			continue
+		var candidate_name: String = candidate.passenger_name.strip_edges()
+		if candidate_name.is_empty() or candidate_name == data.passenger_name:
+			continue
+		if not candidates.has(candidate_name):
+			candidates.append(candidate_name)
+	if candidates.is_empty():
+		push_error("Ticket-name-mismatch anomalies require another passenger with a distinct name.")
+		return false
+	data.ticket_owner = candidates[rng.randi_range(0, candidates.size() - 1)]
 	return true
 
 

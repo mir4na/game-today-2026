@@ -237,6 +237,11 @@ func set_veil_note_statement(statement: String) -> void:
 	_veil_note_panel.visible = not _veil_note_statement.is_empty()
 
 
+## Tutorial spotlight target for the veil note's revealed clue.
+func get_veil_note_control() -> Control:
+	return _veil_note_panel
+
+
 func refresh_collected_statements(collected_statements: Dictionary) -> void:
 	_collected_statements = collected_statements.duplicate(true)
 	if not visible or _puzzle == null:
