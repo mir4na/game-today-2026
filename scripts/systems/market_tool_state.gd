@@ -110,7 +110,7 @@ func award_day_blessings(
 		pass_target,
 		retained_anomalies
 	)
-	blessings += int(_last_day_award.earned)
+	blessings = maxi(0, blessings + int(_last_day_award.earned))
 	_emit_inventory_changed()
 	return _last_day_award.duplicate(true)
 
@@ -155,7 +155,7 @@ func award_night_blessings(
 	var assignment_reward: int = correct_count * blessings_per_correct_night_dropoff
 	var information_reward: int = found_count * blessings_per_night_statement
 	var earned: int = assignment_reward + information_reward
-	blessings += earned
+	blessings = maxi(0, blessings + earned)
 	_last_night_award = {
 		"earned": earned,
 		"base_reward": earned,
@@ -211,7 +211,7 @@ func consume_swift_charge() -> bool:
 
 func get_snapshot() -> Dictionary:
 	return {
-		"blessings": blessings,
+		"blessings": maxi(0, blessings),
 		"veil_notes": veil_notes,
 		"radar_charges": radar_charges,
 		"radar_max_charges": maximum_radar_charges,
@@ -256,7 +256,7 @@ func _purchase_swift_charge() -> Dictionary:
 func _try_spend(cost: int) -> bool:
 	if blessings < cost:
 		return false
-	blessings -= cost
+	blessings = maxi(0, blessings - cost)
 	return true
 
 

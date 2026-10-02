@@ -7,7 +7,7 @@ const VERSION: int = 4
 const LEGACY_STARTER_RADAR_VERSION: int = 1
 const AUDIT_SLIP_VERSION: int = 2
 const SWIFT_STOCK_VERSION: int = 3
-const DAY_COUNT: int = 5
+const DAY_COUNT: int = 2
 const RADAR_CARRY_LIMIT: int = 3
 const SWIFT_CARRY_LIMIT: int = 5
 

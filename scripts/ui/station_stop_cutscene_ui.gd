@@ -113,6 +113,10 @@ var _departure_blocked: bool = false
 var _entered_boarding_actor_indices: Dictionary = {}
 var _ambient_elapsed: float = 0.0
 var _ambient_platform_y_cache: float = NAN
+## Actor clock that keeps advancing while the train is held for the departure
+## announcement, so passengers already on the platform keep walking instead of
+## animating in place during the freeze.
+var _actor_elapsed: float = 0.0
 var _world_camera_scale: float = 1.0
 var _station_environment_alpha: float = 1.0
 var _crowd_footstep_timer: float = 0.0
@@ -249,6 +253,7 @@ func _begin_sequence(station_name: String, departing_actors: Array[Dictionary], 
 	_ambient_elapsed = 0.0
 	_crowd_footstep_timer = 0.15
 	_ambient_platform_y_cache = NAN
+	_actor_elapsed = 0.0
 	_finished = false
 	_timeline_completed = false
 	_departure_blocked = false
@@ -310,6 +315,7 @@ func _process(delta: float) -> void:
 	# Platform pedestrians belong to the station, not to the train timeline. They
 	# must keep walking while departure waits for the announcement to finish.
 	_ambient_elapsed += delta
+	_actor_elapsed += delta
 	_update_crowd_footsteps(delta)
 	var next_elapsed: float = minf(_elapsed + delta, _duration)
 	if _departure_blocked:
@@ -634,12 +640,16 @@ func _update_exchange_actors() -> void:
 	for actor_index: int in range(_departing_actors.size()):
 		if actor_index >= _departing_motion_profiles.size():
 			continue
+		# Normal play follows the timeline; while the train is held for the
+		# departure announcement the actor clock runs ahead so people already on
+		# the platform keep walking instead of animating in place.
+		var actor_time: float = maxf(_elapsed, _actor_elapsed)
 		var profile: Dictionary = _departing_motion_profiles[actor_index]
 		var start_time: float = float(profile["start_time"])
-		if _elapsed < start_time:
+		if actor_time < start_time:
 			continue
 		var walk_duration: float = float(profile["walk_duration"])
-		var progress: float = clampf((_elapsed - start_time) / walk_duration, 0.0, 1.0)
+		var progress: float = clampf((actor_time - start_time) / walk_duration, 0.0, 1.0)
 		var door_position: Vector2 = _motion_profile_door_position(
 			_departing_motion_profiles,
 			actor_index,
@@ -649,16 +659,14 @@ func _update_exchange_actors() -> void:
 		var platform_position: Vector2 = _profile_platform_position(door_position, profile)
 		var actor_position: Vector2 = _station_walk_position(door_position, platform_position, progress, profile, false)
 		# A passenger who has left the carriage becomes part of the platform flow.
-		# Do not leave the walk animation playing at a fixed destination while the
-		# train is still in the station shot.
 		if progress >= 1.0:
-			var time_since_exit: float = maxf(_elapsed - start_time - walk_duration, 0.0)
+			var time_since_exit: float = maxf(actor_time - start_time - walk_duration, 0.0)
 			actor_position = _departing_platform_flow_position(platform_position, time_since_exit, profile)
 		_set_actor_slot(
 			actor_index,
 			_departing_actors[actor_index],
 			actor_position,
-			_walk_rotation(progress + maxf(_elapsed - start_time - walk_duration, 0.0), profile),
+			_walk_rotation(progress + maxf(actor_time - start_time - walk_duration, 0.0), profile),
 			float(profile["side"]),
 			_smoothstep(0.08, doorway_step_ratio, progress) * _station_environment_alpha,
 			1.0,

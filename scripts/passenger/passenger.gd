@@ -687,6 +687,11 @@ func _retarget_to_safe_stop(continue_forward: bool = false) -> void:
 			if not candidates.is_empty():
 				break
 	if candidates.is_empty():
+		# No valid stop exists: stop walking so the NPC does not animate in
+		# place forever (procedural walk bob / walk cycle).
+		_ai_walking = false
+		_boarding_handoff_active = false
+		_ai_timer = _next_ai_wait()
 		return
 	_ai_target_position = _find_closest_activity_point(candidates)
 	_ai_walking = position.distance_to(_ai_target_position) > 1.0

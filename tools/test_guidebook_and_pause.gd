@@ -118,7 +118,7 @@ func _run() -> void:
 	_check(game._day_minutes > before, "Guidebook does not pause the shift clock.")
 	_check(game._passengers[0].ai_enabled, "NPC activity continues while guidebook is open.")
 	guide._show_procedure()
-	var rules_rewards := guide.get_node("Center/BookStage/Page/RulesLayout/RulesRightText") as Label
+	var rules_rewards := guide.get_node("Center/BookStage/Page/RulesLayout/RulesRightText2") as Label
 	_check(rules_rewards.text.contains("+30") and rules_rewards.text.contains("−40"), "Rules include the current paycheck scoring.")
 	guide._show_anomalies()
 	_check(guide._anomaly_list.visible, "Anomaly section uses its scene-authored page.")
@@ -143,8 +143,8 @@ func _run() -> void:
 		"Shadowless": "res://assets/ui/guidebook/shadowless.png",
 		"UnlistedDestination": "res://assets/ui/guidebook/unlisted_destination.png",
 		"PortraitMismatch": "res://assets/ui/id_card.png",
-		"TimeInvalidTicket": "res://assets/ui/passenger_ticket.png",
-		"TicketNameMismatch": "res://assets/ui/passenger_ticket.png",
+		"TimeInvalidTicket": "res://assets/ui/guidebook/Screenshot From 2026-09-11 12-04-23-1.png",
+		"TicketNameMismatch": "res://assets/ui/guidebook/ticket_name.png",
 		"NewspaperDeath": "res://assets/ui/guidebook/newspaper.png",
 	}
 	var expected_photo_sides: Dictionary = {

@@ -18,7 +18,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export var night_music_track: StringName = &"gameplay_night"
 @export_category("Day Progression")
 @export_range(1, 5, 1) var day_number: int = 1
-@export var day_pass_targets: PackedInt32Array = PackedInt32Array([250, 300, 350, 400, 400])
+@export var day_pass_targets: PackedInt32Array = PackedInt32Array([350, 450])
 @export_category("Day Route")
 @export var day_route: PackedStringArray
 @export_category("Station Service")
@@ -165,6 +165,7 @@ var _tutorial_route_time_paused: bool = false
 var _tutorial_started: bool = false
 
 @onready var _train: TrainWorld = %Train
+@onready var _maintenance_events_root: Node2D = _train.get_node_or_null(^"Cars/CarConnections/MaintenanceEvents")
 @onready var _player: ConductorPlayer = %Player
 @onready var _passenger_container: Node2D = %Passengers
 @onready var _hud: GameHUD = %HUD
@@ -231,8 +232,6 @@ func _ready() -> void:
 		_shift_checkpoint = {}
 	_configure_daily_rng()
 	_travel_background.configure_weather_seed(_daily_seed)
-	if _is_demo_build():
-		_apply_demo_manifest_overrides()
 	manifest_config = manifest_config.create_daily_service(day_number, _daily_seed)
 	_shift_checkpoint = ShiftProgress.make_checkpoint(
 		day_number,
@@ -1418,6 +1417,11 @@ func _configure_maintenance_events() -> void:
 
 
 func _schedule_maintenance_events() -> void:
+	# Maintenance distractions are a day-shift system; never arm them at night.
+	if state not in [GameState.DAY, GameState.SUNSET]:
+		_blocked_aisle_timer.stop()
+		_dirty_seat_timer.stop()
+		return
 	_sync_maintenance_schedule_route()
 	if not _blocked_aisle_enabled_for_level():
 		_blocked_aisle_timer.stop()
@@ -1509,7 +1513,6 @@ func _on_blocked_aisle_timer_timeout() -> void:
 	_blocked_aisle_spawn_count += 1
 	if _blocked_aisle_difficulty_day():
 		_blocked_aisle_timer.start(level_two_blocked_repeat_delay_seconds)
-	_hud.notify("Luggage is blocking a coach connector", 3.5)
 	_refresh_player_interactables()
 	_refresh_maintenance_trackers()
 
@@ -1550,7 +1553,6 @@ func _on_dirty_seat_timer_timeout() -> void:
 	_dirty_seat_spawns_this_route += 1
 	if _clean_seat_difficulty_day() and _route_index == 0 and _dirty_seat_spawns_this_route == 1:
 		_dirty_seat_timer.start(level_three_clean_second_delay_seconds)
-	_hud.notify("A passenger seat needs cleaning", 3.5)
 	_clear_dropoff_assignments_for_dirty_seat()
 	_set_service_sealed(true)
 	_refresh_maintenance_trackers()
@@ -1611,6 +1613,29 @@ func _on_maintenance_minigame_completed(event: Node) -> void:
 	_active_modal = null
 	_set_player_control_for_state()
 	_schedule_maintenance_events()
+
+
+## Night shift has no luggage or dirty-seat distractions. Clear the active
+## event (if any) and restore the interactions it had locked.
+func _clear_maintenance_for_night() -> void:
+	_blocked_aisle_timer.stop()
+	_dirty_seat_timer.stop()
+	if is_instance_valid(_active_blocked_aisle_event):
+		if _active_blocked_aisle_event.has_method(&"set_event_active"):
+			_active_blocked_aisle_event.call(&"set_event_active", false)
+		_active_blocked_aisle_event = null
+	if is_instance_valid(_active_dirty_seat_event):
+		if _active_dirty_seat_event.has_method(&"set_event_active"):
+			_active_dirty_seat_event.call(&"set_event_active", false)
+		_active_dirty_seat_event = null
+	_train.clear_blocked_connector_effect(true)
+	_blocked_aisle_activated = false
+	_dirty_seat_activated = false
+	if is_instance_valid(_document_overlay):
+		_document_overlay.configure_stamp_lock(false)
+	_set_service_sealed(false)
+	_refresh_player_interactables(true)
+	_refresh_maintenance_trackers()
 
 
 func _refresh_maintenance_trackers() -> void:
@@ -2426,6 +2451,10 @@ func _hide_gameplay_actors_for_station_cutscene() -> void:
 	# become visible one by one at the doorway and continue walking inside the
 	# coach, while passengers already aboard remain visible through its openings.
 	_passenger_container.show()
+	# Blocked luggage sits below the exterior train: hide it while the exterior
+	# body is revealed for the station cinematic.
+	if is_instance_valid(_maintenance_events_root):
+		_maintenance_events_root.hide()
 	_station_gameplay_actors_hidden = true
 
 
@@ -2444,6 +2473,8 @@ func _set_station_foreground_hidden(value: bool) -> void:
 func _restore_gameplay_actors_after_station_cutscene() -> void:
 	# Normal gameplay always owns these visuals after a station sequence. Do not
 	# restore a stale pre-cutscene flag, which could leave the MC hidden forever.
+	if is_instance_valid(_maintenance_events_root):
+		_maintenance_events_root.show()
 	if not _station_gameplay_actors_hidden:
 		_player.show()
 		_passenger_container.show()
@@ -2836,24 +2867,6 @@ func _get_day_pass_target() -> int:
 		return 100
 	return maxi(0, day_pass_targets[clampi(day_number - 1, 0, day_pass_targets.size() - 1)])
 
-
-## Demo build (custom feature "demo") runs a two-day vertical slice. Day 1 pulls
-## the level-4 anomaly quota with the luggage event; day 2 the level-5 quota
-## with the dirty-seat event.
-func _is_demo_build() -> bool:
-	return OS.has_feature(&"demo")
-
-
-func _day_count() -> int:
-	return 2 if _is_demo_build() else ShiftProgress.DAY_COUNT
-
-
-func _apply_demo_manifest_overrides() -> void:
-	manifest_config = manifest_config.duplicate(true) as DailyManifestConfig
-	manifest_config.night_anomaly_count_by_level = PackedInt32Array([4, 5])
-	manifest_config.maximum_onboard_passenger_count_by_day = PackedInt32Array([16, 16])
-	manifest_config.guaranteed_newspaper_anomaly_level = 2
-
 func _on_shift_report_presentation_finished() -> void:
 	_emit_tutorial_event(&"shift_report_revealed")
 
@@ -3054,6 +3067,13 @@ func set_night_market_continue_enabled(value: bool) -> void:
 		_night_market_ui.call(&"set_continue_enabled", value)
 
 
+## Tutorial gate: keep item buttons from grabbing keyboard focus so Space only
+## advances dialogue instead of buying the focused item.
+func set_night_market_focus_suppressed(value: bool) -> void:
+	if is_instance_valid(_night_market_ui) and _night_market_ui.has_method(&"set_focus_suppressed"):
+		_night_market_ui.call(&"set_focus_suppressed", value)
+
+
 func _on_night_market_continue() -> void:
 	if state != GameState.MARKET:
 		return
@@ -3245,6 +3265,16 @@ func _enter_night(enable_controls: bool = true, show_instruction: bool = true) -
 		_player.interaction_enabled = false
 
 
+## The two-day slice reuses the former day-4 and day-5 night constellations.
+## The tutorial always teaches on the simple level-1 constellation.
+func _night_service_level_for_day(day: int) -> int:
+	if is_tutorial_mode:
+		return 1
+	if day <= 1:
+		return 4
+	return 5
+
+
 func _prepare_night_world() -> void:
 	if _night_world_prepared:
 		return
@@ -3256,10 +3286,12 @@ func _prepare_night_world() -> void:
 	_night_assignment_attempts = 0
 	_night_soul_record_misses.clear()
 	_night_soul_record_repulsed.clear()
+	# Blocked luggage and dirty seats belong to the day shift only.
+	_clear_maintenance_for_night()
 	_runtime_puzzle = puzzle_template.create_runtime(
 		_get_dead_passenger_data(),
 		_daily_rng,
-		day_number
+		_night_service_level_for_day(day_number)
 	)
 	_collected_departure_statements.clear()
 	_collected_veil_note_statement = ""
@@ -3273,6 +3305,8 @@ func _prepare_night_world() -> void:
 	for passenger: Passenger in _passengers:
 		if _is_active_passenger(passenger):
 			passenger.set_night_mode(true)
+			# A restarted night clears every soul's revealed color with the ledger.
+			passenger.set_night_identity_revealed(false)
 
 func _set_train_stopped_for_night_transition() -> void:
 	_station_cutscene_motion_strength = 0.0
@@ -3503,7 +3537,7 @@ func _complete_night_service(assignments: Dictionary) -> void:
 	_active_modal = _shift_report_ui
 	state = GameState.COMPLETE
 	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
-	if day_number >= _day_count() and not is_tutorial_mode:
+	if day_number >= ShiftProgress.DAY_COUNT and not is_tutorial_mode:
 		_save_night_completion()
 		if _progress_advanced:
 			_show_heaven_ending()
@@ -3686,36 +3720,23 @@ func _maintenance_minigames_enabled() -> bool:
 
 
 func _blocked_aisle_enabled_for_level() -> bool:
-	# Level 2 introduces luggage repacking. It returns alongside cleaning from
-	# level 4 onward, after each task has had a turn to be learned on its own.
-	# The two-day demo introduces it on day 1 instead.
-	if _is_demo_build():
-		return day_number == 1
-	return day_number == 2 or day_number >= 4
+	# Day 1 teaches luggage repacking.
+	return day_number == 1
 
 
 func _clean_seat_enabled_for_level() -> bool:
-	# Cleaning is introduced alone in level 3, then combines with repacking.
-	# The two-day demo debuts it on day 2 with luggage already taught.
-	if _is_demo_build():
-		return day_number == 2
-	return day_number >= 3
-
-
-## True on the day that should reuse the guided luggage timing/reset behavior:
-## level 2 normally, day 1 in the demo.
-func _blocked_aisle_difficulty_day() -> bool:
-	if _is_demo_build():
-		return day_number == 1
+	# Day 2 introduces cleaning.
 	return day_number == 2
 
 
-## True on the day that should reuse the guided cleaning timing/reset behavior:
-## level 3 normally, day 2 in the demo.
+## Day 1 uses the guided luggage timing/reset behavior.
+func _blocked_aisle_difficulty_day() -> bool:
+	return day_number == 1
+
+
+## Day 2 uses the guided cleaning timing/reset behavior.
 func _clean_seat_difficulty_day() -> bool:
-	if _is_demo_build():
-		return day_number == 2
-	return day_number == 3
+	return day_number == 2
 
 
 func _show_level_start_hint_if_needed() -> bool:
@@ -3830,12 +3851,12 @@ func _save_night_completion() -> void:
 	if state != GameState.COMPLETE or _progress_advanced:
 		return
 	var next_checkpoint: Dictionary = ShiftProgress.make_checkpoint(
-		mini(day_number + 1, _day_count()),
+		mini(day_number + 1, ShiftProgress.DAY_COUNT),
 		_market_tool_state.call(&"get_snapshot"),
 		ShiftProgress.new_seed(),
 		_campaign_summary_with_current_day()
 	)
-	next_checkpoint.completed = day_number >= _day_count()
+	next_checkpoint.completed = day_number >= ShiftProgress.DAY_COUNT
 	_progress_advanced = ShiftProgress.save_checkpoint(next_checkpoint)
 
 
@@ -3844,7 +3865,7 @@ func _continue_after_night_paycheck() -> void:
 		_save_night_completion()
 		if not _progress_advanced:
 			return
-	if day_number >= _day_count():
+	if day_number >= ShiftProgress.DAY_COUNT:
 		_show_heaven_ending()
 	else:
 		_begin_scene_loading(MAIN_SCENE_PATH)

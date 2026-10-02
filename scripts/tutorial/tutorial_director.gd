@@ -135,7 +135,7 @@ enum Step {
 @export var anomaly_intro_dialogue_pages: PackedStringArray = PackedStringArray([
 	"Not every passenger on this train is [color=#ff7a6b]ALIVE[/color]. Some of them [color=#ff7a6b]DIED[/color] before they boarded, yet here they stand, riding alongside the living.",
 	"Your job is not just to [color=#ffd166]STAMP[/color] tickets. [color=#ffd166]IDENTIFY[/color] anyone who does not belong. If something feels wrong, such as the [color=#ffd166]SHADOW[/color], the [color=#ffd166]FACE[/color], or the [color=#ffd166]DATE[/color], [color=#ff7a6b]DO NOT STAMP[/color] them. Keep them aboard until the [color=#ffd166]DAY SHIFT[/color] ends.",
-	"You are here because an angel filed your death before your time, yet your scales tipped toward sin. Serve [color=#ffd166]FIVE DAYS[/color] as [color=#ffd166]INTERN CONDUCTOR[/color] and earn your [color=#ffd166]SECOND CHANCE[/color].",
+	"You are here because an angel filed your death before your time, yet your scales tipped toward sin. Complete your [color=#ffd166]INTERNSHIP[/color] as an [color=#ffd166]INTERN CONDUCTOR[/color] and earn your [color=#ffd166]SECOND CHANCE[/color].",
 	"The anomalies are [color=#ffd166]RESTLESS SOULS[/color] who do not know they are dead. Left unguided, they [color=#ff7a6b]DISTURB THE LIVING[/color]. Keep them aboard until the [color=#ffd166]DAY SHIFT[/color] ends.",
 ])
 @export_range(0.0, 24.0, 0.5) var inspect_pointer_bob_distance: float = 7.0
@@ -1175,6 +1175,7 @@ func _spotlight_night_market_button() -> void:
 
 func _enter_night_market_buy() -> void:
 	_set_night_market_continue(false)
+	_set_night_market_focus_suppressed(true)
 	_show_wait_step(
 		Step.NIGHT_MARKET_BUY,
 		"Night Market",
@@ -1186,6 +1187,7 @@ func _enter_night_market_buy() -> void:
 
 func _enter_night_market_begin() -> void:
 	_set_night_market_continue(true)
+	_set_night_market_focus_suppressed(false)
 	_show_wait_step(
 		Step.NIGHT_MARKET_BEGIN,
 		"Night Market",
@@ -1198,6 +1200,11 @@ func _enter_night_market_begin() -> void:
 func _set_night_market_continue(value: bool) -> void:
 	if _main != null and _main.has_method(&"set_night_market_continue_enabled"):
 		_main.call(&"set_night_market_continue_enabled", value)
+
+
+func _set_night_market_focus_suppressed(value: bool) -> void:
+	if _main != null and _main.has_method(&"set_night_market_focus_suppressed"):
+		_main.call(&"set_night_market_focus_suppressed", value)
 
 
 func _spotlight_night_market_veil() -> void:
@@ -2372,6 +2379,7 @@ func _on_main_tutorial_event(event_name: StringName, payload: Variant = null) ->
 		&"night_market_settled":
 			_show_continue_step(Step.NIGHT_MARKET_WELCOME, "Night Market", "[color=#ffd166]WELCOME[/color] to the Night Market — a market between worlds that opens only once the day shift ends.", "")
 			_set_night_market_continue(false)
+			_set_night_market_focus_suppressed(true)
 		&"tutorial_veil_purchased":
 			if _step == Step.NIGHT_MARKET_BUY:
 				_enter_night_market_begin()

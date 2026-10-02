@@ -6,7 +6,7 @@
 
 ## Slide 1 — The Hook
 
-> **What happens After the End of the line — when the shift is over, but the souls are still on the train?**
+> **What if, After the End of the line, your real work has only just begun?**
 
 ---
 

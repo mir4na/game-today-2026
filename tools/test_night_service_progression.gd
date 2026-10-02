@@ -4,7 +4,7 @@ extends SceneTree
 const MainScene = preload("res://scenes/main/main.tscn")
 const NightPuzzleScene = preload("res://scenes/ui/night_puzzle_ui.tscn")
 
-const EXPECTED_ANOMALY_COUNTS := [3, 3, 4, 4, 5]
+const EXPECTED_ANOMALY_COUNTS := [4, 5, 5, 5, 5]
 const EXPECTED_ROUTE_EDGE_COUNTS := [3, 3, 4, 5, 6]
 const EXPECTED_PATH_SEGMENT_COUNTS := [6, 9, 9, 11, 20]
 

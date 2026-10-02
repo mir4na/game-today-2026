@@ -57,6 +57,9 @@ var _purchases_enabled: bool = true
 var _continue_allowed: bool = true
 ## When non-empty, only these tool ids may be bought (tutorial lesson).
 var _purchase_allowlist: Array[StringName] = []
+## Suppresses auto-focus on item buttons (tutorial): prevents Space/Enter from
+## accidentally activating a focused item while the player advances dialogue.
+var _focus_suppressed: bool = false
 const ITEM_TOOL_IDS: Array[StringName] = [&"veil_note", &"radar_charge", &"swiftstep"]
 var _motion_time: float = 0.0
 var _market_tween: Tween
@@ -261,6 +264,20 @@ func _is_item_allowed(index: int) -> bool:
 	return _purchase_allowlist.has(ITEM_TOOL_IDS[clampi(index, 0, ITEM_TOOL_IDS.size() - 1)])
 
 
+## Suppresses item auto-focus so keyboard dialogue input cannot buy items.
+func set_focus_suppressed(value: bool) -> void:
+	_focus_suppressed = value
+	if value:
+		release_item_focus()
+
+
+func release_item_focus() -> void:
+	if is_instance_valid(_continue_button):
+		_continue_button.release_focus()
+	for button: Button in _item_buttons:
+		button.release_focus()
+
+
 func show_purchase_result(result: Dictionary, snapshot: Dictionary) -> void:
 	if bool(result.get("success", false)):
 		GameSFX.play(&"success", -5.0, 1.08, 0.02, 0.16)
@@ -316,6 +333,8 @@ func _position_desc_bubble(index: int) -> void:
 
 
 func _focus_first_available_action() -> void:
+	if _focus_suppressed:
+		return
 	for button: Button in _item_buttons:
 		if not button.disabled:
 			button.grab_focus()
