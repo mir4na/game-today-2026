@@ -17,10 +17,11 @@ func _run() -> void:
 	for frame: int in range(30):
 		await process_frame
 	assert(pause_menu.visible, "Pause menu must be visible after open_pause().")
-	assert(pause_menu.get_node_or_null("Ticket/OptionGrid") != null, "Pause menu requires the 2x3 option grid.")
-	var option_grid := pause_menu.get_node("Ticket/OptionGrid") as GridContainer
-	assert(option_grid.columns == 2, "Pause menu options must use two columns and three rows.")
-	assert(option_grid.get_child_count() == 6, "Pause menu must expose exactly six options.")
+	assert(pause_menu.get_node_or_null("Ticket/OptionGrid") != null, "Pause menu requires the option list.")
+	var option_grid := pause_menu.get_node("Ticket/OptionGrid") as VBoxContainer
+	assert(option_grid != null, "Pause menu options must use a vertical stack.")
+	assert(option_grid.get_node("TopRow").get_child_count() == 2, "Display and VSync must share one row.")
+	assert(option_grid.get_child_count() == 4, "Volumes must each occupy their own full-width row.")
 	var resume_button := pause_menu.get_node("%ResumeButton") as Button
 	assert(resume_button.visible and resume_button.text == "Resume", "The in-game pause menu must show a Resume text button.")
 	var restart_button := pause_menu.get_node("%RestartButton") as Button
@@ -35,7 +36,7 @@ func _run() -> void:
 	assert(artwork.material == null, "Pause artwork must always render with its default texture colors.")
 	var options_title := pause_menu.get_node("Ticket/OptionsTitle") as TextureRect
 	assert(options_title.material == null, "Pause title must not use a time-dependent palette shader.")
-	var display_option := pause_menu.get_node("Ticket/OptionGrid/DisplayModeOption") as PauseOptionSelector
+	var display_option := pause_menu.get_node("Ticket/OptionGrid/TopRow/DisplayModeOption") as PauseOptionSelector
 	var display_label := display_option.get_node("Content/OptionLabel") as Label
 	assert(display_label.get_theme_color(&"font_color").is_equal_approx(Color("353540")), "Pause labels must always retain the default ink color.")
 	var resume_events: Array[bool] = [false]
@@ -60,7 +61,7 @@ func _run() -> void:
 	var menu_settings_layer := menu.get_node("SettingsLayer") as CanvasLayer
 	assert(menu_settings.visible, "Main menu Settings must open the shared in-game settings UI.")
 	assert(menu_settings_layer.layer == 300, "Main-menu PauseUI must render on the frontmost UI layer.")
-	assert(menu_settings.get_node("Ticket/OptionGrid").get_child_count() == 6, "Main menu must expose the same six options as in-game.")
+	assert(menu_settings.get_node("Ticket/OptionGrid").get_child_count() == 4, "Main menu must expose the same option rows as in-game.")
 	assert(not (menu_settings.get_node("%ResumeButton") as Button).visible, "Resume must stay hidden in main-menu settings mode.")
 	assert(not (menu_settings.get_node("%RestartButton") as Button).visible, "Restart shift must stay hidden in main-menu settings mode.")
 	assert((menu_settings.get_node("%MainMenuButton") as Button).text == "Back", "The shared action must become Back in main-menu settings mode.")

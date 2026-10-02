@@ -11,6 +11,7 @@
 
 [node name="PauseUI" type="Control" unique_id=931919145]
 process_mode = 3
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -91,29 +92,28 @@ texture = ExtResource("4_options")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="OptionGrid" type="GridContainer" parent="Ticket" unique_id=1851122647]
+[node name="OptionGrid" type="VBoxContainer" parent="Ticket" unique_id=1851122647]
 layout_mode = 0
 offset_left = 451.0
-offset_top = 106.604645
+offset_top = 96.0
 offset_right = 1061.0
-offset_bottom = 299.60464
-theme_override_constants/h_separation = 8
-theme_override_constants/v_separation = 7
-columns = 2
+offset_bottom = 289.0
+theme_override_constants/separation = 7
 
-[node name="DisplayModeOption" parent="Ticket/OptionGrid" unique_id=354321011 instance=ExtResource("6_selector")]
+[node name="TopRow" type="HBoxContainer" parent="Ticket/OptionGrid" unique_id=901122001]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DisplayModeOption" parent="Ticket/OptionGrid/TopRow" unique_id=354321011 instance=ExtResource("6_selector")]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 option_label = "Display"
 
-[node name="ResolutionOption" parent="Ticket/OptionGrid" unique_id=1273984289 instance=ExtResource("6_selector")]
+[node name="VsyncOption" parent="Ticket/OptionGrid/TopRow" unique_id=1307087419 instance=ExtResource("6_selector")]
 unique_name_in_owner = true
 layout_mode = 2
-option_label = "Resolution"
-
-[node name="VsyncOption" parent="Ticket/OptionGrid" unique_id=1307087419 instance=ExtResource("6_selector")]
-unique_name_in_owner = true
-layout_mode = 2
+size_flags_horizontal = 3
 option_label = "VSync"
 
 [node name="MasterVolumeOption" parent="Ticket/OptionGrid" unique_id=203468228 instance=ExtResource("6_selector")]
@@ -137,9 +137,9 @@ uses_slider = true
 [node name="Actions" type="HBoxContainer" parent="Ticket" unique_id=356072082]
 layout_mode = 0
 offset_left = 435.0
-offset_top = 331.0
+offset_top = 312.0
 offset_right = 954.0
-offset_bottom = 383.0
+offset_bottom = 364.0
 theme_override_constants/separation = 10
 alignment = 2
 

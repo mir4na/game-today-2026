@@ -40,7 +40,6 @@ var _menu_settings_mode: bool = false
 @onready var _main_menu_button: Button = %MainMenuButton
 @onready var _selectors: Dictionary = {
 	&"display": %DisplayModeOption,
-	&"resolution": %ResolutionOption,
 	&"vsync": %VsyncOption,
 	&"master": %MasterVolumeOption,
 	&"sfx": %SfxVolumeOption,
@@ -105,8 +104,6 @@ func _on_option_step(direction: int, key: StringName) -> void:
 	match key:
 		&"display":
 			_fullscreen = not _fullscreen
-		&"resolution":
-			_resolution_index = wrapi(_resolution_index + direction, 0, RESOLUTIONS.size())
 		&"vsync":
 			_vsync = not _vsync
 		&"master":
@@ -136,8 +133,6 @@ func _on_option_slider_changed(value: int, key: StringName) -> void:
 
 func _refresh_option_values() -> void:
 	_set_selector_value(&"display", "Fullscreen" if _fullscreen else "Windowed")
-	var resolution: Vector2i = RESOLUTIONS[_resolution_index]
-	_set_selector_value(&"resolution", "%d × %d" % [resolution.x, resolution.y])
 	_set_selector_value(&"vsync", "On" if _vsync else "Off")
 	_set_selector_slider(&"master", _master_volume)
 	_set_selector_slider(&"sfx", _sfx_volume)

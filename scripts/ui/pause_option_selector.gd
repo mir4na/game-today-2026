@@ -50,15 +50,19 @@ func pulse(direction: int) -> void:
 	pivot_offset = size * 0.5
 	scale = Vector2.ONE
 	rotation = 0.0
+	# Never move the value label's position: its parent HBoxContainer owns that,
+	# and animating position.x to 0 would knock it out of its centered slot.
+	_value.pivot_offset = _value.size * 0.5
+	_value.scale = Vector2.ONE
 	_value.modulate.a = 0.55
-	_value.position.x = float(direction) * 5.0
 	_pulse_tween = create_tween().set_parallel(true)
 	_pulse_tween.tween_property(self, ^"scale", Vector2.ONE * 1.045, 0.09).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	_pulse_tween.tween_property(self, ^"rotation", float(direction) * 0.012, 0.09).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	_pulse_tween.tween_property(_value, ^"modulate:a", 1.0, 0.16).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	_pulse_tween.tween_property(_value, ^"position:x", 0.0, 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_pulse_tween.tween_property(_value, ^"scale", Vector2.ONE * 1.12, 0.09).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_pulse_tween.chain().tween_property(self, ^"scale", Vector2.ONE, 0.13).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_pulse_tween.parallel().tween_property(self, ^"rotation", 0.0, 0.13).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_pulse_tween.parallel().tween_property(_value, ^"scale", Vector2.ONE, 0.13).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 
 func _request_step(direction: int) -> void:
