@@ -1,5 +1,5 @@
 extends SceneTree
-## Verifies one full dial sweep per day leg (two minutes) and per Night Service
+## Verifies one full dial sweep per day leg (three minutes) and per Night Service
 ## (ten minutes).
 
 
@@ -39,13 +39,13 @@ func _run() -> void:
 
 	var game := load("res://scenes/main/main.tscn").instantiate() as AfterTheEndGame
 	var leg_count: int = maxi(game.day_route.size() - 1, 1)
-	assert(is_equal_approx(game._get_station_travel_seconds(0), 120.0), "Each day leg must last two minutes.")
+	assert(is_equal_approx(game._get_station_travel_seconds(0), 180.0), "Each day leg must last three minutes.")
 	game._route_index = 0
 	game._day_minutes = AfterTheEndGame.START_MINUTES
 	assert(is_equal_approx(game._day_leg_clock_progress(), 0.0), "A leg must start the dial at zero.")
-	game._day_minutes = AfterTheEndGame.START_MINUTES + 60.0
+	game._day_minutes = AfterTheEndGame.START_MINUTES + 90.0
 	assert(is_equal_approx(game._day_leg_clock_progress(), 0.5), "Half a leg must place the dial halfway.")
-	game._day_minutes = AfterTheEndGame.START_MINUTES + 120.0
+	game._day_minutes = AfterTheEndGame.START_MINUTES + 180.0
 	assert(is_equal_approx(game._day_leg_clock_progress(), 1.0), "Arrival must complete the dial sweep.")
 	game._route_index = 1
 	assert(is_equal_approx(game._day_leg_clock_progress(), 0.0), "The next leg must restart the dial.")

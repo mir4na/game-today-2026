@@ -23,7 +23,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export var day_route: PackedStringArray
 @export_category("Station Service")
 ## Travel time per route leg, excluding station cutscenes and pauses.
-@export var station_travel_durations_seconds: PackedFloat32Array = PackedFloat32Array([120.0, 120.0, 120.0, 120.0])
+@export var station_travel_durations_seconds: PackedFloat32Array = PackedFloat32Array([180.0, 180.0, 180.0, 180.0])
 @export_range(0, 8, 1) var station_sign_blocked_carriage: int = 1
 @export_category("Tutorial Cutscene")
 ## Platform extras for tutorial station cutscenes. The lesson manifest holds
@@ -2224,6 +2224,28 @@ func _process_station_arrival() -> void:
 				and not departing.has(assigned_passenger)
 			):
 				departing.append(assigned_passenger)
+		# Overdue passengers: a stamped passenger whose stop is already behind the
+		# train is put off at this station regardless of which station was stamped.
+		# Unstamped passengers stay aboard. Either way it is a wrong drop-off.
+		if not _is_dropoff_locked():
+			for assigned_name: String in _station_assignment:
+				var overdue_passenger: Passenger = _find_active_passenger_by_name(assigned_name)
+				if (
+					overdue_passenger == null
+					or overdue_passenger.data.is_dead
+					or departing.has(overdue_passenger)
+				):
+					continue
+				var required_index: int = day_route.find(
+					overdue_passenger.data.get_required_day_dropoff_station()
+				)
+				if required_index >= 0 and required_index < _route_index + 1:
+					departing.append(overdue_passenger)
+	# Hard rule: anomalies never leave during daylight, stamped or not. They stay
+	# aboard for Night Service; a stamped anomaly only scores as a wrong stamp.
+	for index: int in range(departing.size() - 1, -1, -1):
+		if departing[index].data != null and departing[index].data.is_dead:
+			departing.remove_at(index)
 
 	var available_boarders: Array[PassengerData] = []
 	if not is_terminal_arrival:

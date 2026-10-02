@@ -249,7 +249,7 @@ manifest_config = ExtResource("37")
 day_music_track = &"gameplay_day"
 night_music_track = &"gameplay_night"
 day_route = PackedStringArray("Alderwick", "Brambleford", "Cinderfield", "Dunmere")
-station_travel_durations_seconds = PackedFloat32Array(120, 120, 120)
+station_travel_durations_seconds = PackedFloat32Array(180, 180, 180)
 debug_print_anomaly_roster = true
 tutorial_day_route = PackedStringArray("Alderwick", "Brambleford")
 

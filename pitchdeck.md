@@ -6,7 +6,7 @@
 
 ## Slide 1 — The Hook
 
-> **What if, After the End of the line, your real work has only just begun?**
+> **What if, After the End of the shift, your real work has only just begun?**
 
 ---
 
@@ -123,51 +123,61 @@ The train runs a fixed daytime route:
 
 ---
 
-**① Two-Phase Duality — The End of the Line Is the Beginning**
+**① Document Inspection — Every Passenger Is a Case to Crack**
 
-Every anomaly you catch during the day shift is a soul you have to solve at night. The day shift ends — but the work doesn't. Your accuracy in the first phase directly sets up the puzzle in the second.
+Players walk the carriages, pull out ID cards, cross-check tickets, and skim newspaper obituaries — all in real time. Each document is a clue. Each inconsistency is a decision. Stamp the wrong person and you pay for it. Miss an anomaly and you'll face it again at night.
 
-No other document-inspection game links its phases this tightly. In *Papers, Please*, each day resets independently. Here, your daytime decisions *become* the nighttime problem.
+The core loop isn't just "check papers." It's *reading between the lines under pressure.*
+
+| Document | What to Look For |
+|---|---|
+| **Identity Card** | Name, face, ID number, date of birth |
+| **Train Ticket** | Destination, travel date, route validity |
+| **Newspaper** | Obituary column — is this passenger already dead? |
+
+---
+
+**② Send Them Where They Belong**
+
+The dead don't disappear at the end of the line. They stay on the train — because you kept them there.
+
+During the day shift, the player's job is to **stay aware**: spot the souls hiding among the living before the train moves on. Miss one and they slip through. Catch them and they're yours to deal with at night.
+
+When the route ends and the living step off, the real work starts. Each detained soul needs to go somewhere — and it's the player's job to figure out where that is. Read their story. Find the truth in it. Send them where they actually belong.
 
 ```
-  DAY SHIFT ends at the last station stop
+  STAY AWARE   →  notice the anomalies among the living
        ↓
-  The living leave. The retained souls remain.
+  DETAIN THEM  →  keep them on the train past the last stop
        ↓
-  NIGHT SHIFT: now place every one of them correctly.
+  FOLLOW THROUGH  →  read their story, find where they belong
        ↓
-  Only then does the day truly end.
+  SEND THEM HOME  →  place each soul at the right destination
 ```
 
 ---
 
-**② The Signature Mechanic — Closing the Line**
+**③ Hit the Paycheck — Or Do It All Over Again**
 
-Between each station leg, the player physically traces the conductor's signature on screen to confirm the segment is done. It's not a "next" button. It's a formal declaration: *this segment of the line is closed.*
+At the end of every day shift, the player faces a **Paycheck Report**: net Blessings earned vs. the daily target. Every correct stamp adds up. Every wrong call cuts into it.
 
-Fail the trace — the train doesn't move. The line isn't closed yet.
+Miss the target — the shift replays from the beginning.
+Clear it — Blessings carry over to the Night Market, where tools for the night puzzle can be purchased.
 
----
+The pressure isn't just moral. It's financial. And it resets every day.
 
-**③ The Blessings Economy — Carried Over, Not Reset**
-
-Earnings from the day shift fund tools in the **Night Market**, purchased in the liminal window between the two shifts. Tools carry forward to the next day if unused. Miss the daily target — all purchases cancelled — the shift replays from the beginning.
-
-| Tool | Cost | Effect |
-|---|---|---|
-| Veil Note | 200 Blessings | Unlocks hidden clue in a soul's biography |
-| Radar Charge | 150 Blessings | Highlights anomalies that are hard to spot visually |
-| Swiftstep | 75 Blessings | Movement speed boost for 10 seconds |
+| Action | Blessings |
+|---|---|
+| ✅ Correct passenger drop-off | **+30** |
+| ❌ Wrong drop-off | **−20** |
+| ❌ Anomaly incorrectly stamped | **−40** |
+| ✅ Night — correct soul placement | **+100** per soul |
 
 ---
 
-**④ No Cutscenes. All Discovery.**
+**④ Five Anomaly Types — Each Needs a Different Eye**
 
-The world is built entirely through ID cards, train tickets, newspaper obituaries, and soul biographies. Players encounter lore the same way a conductor would — one document at a time. Nothing is narrated. Everything is found.
-
----
-
-**⑤ Five Anomaly Types — Each Requires a Different Kind of Attention**
+Anomalies don't announce themselves. Players have to notice. Each of the five types requires a different kind of attention — visual, documentary, logical.
 
 | Anomaly | How to Spot It |
 |---|---|
@@ -178,6 +188,20 @@ The world is built entirely through ID cards, train tickets, newspaper obituarie
 | **Time-Invalid Ticket** | Travel date is impossible or expired |
 
 ---
+
+**⑤ Work Toward the Good Ending — Five Days, One Shot**
+
+The player has exactly five days to prove they deserve to go to Heaven.
+Every day, the target climbs. Every day, the anomalies get harder to catch.
+
+Clear all five days → **Heaven Ending.**
+Fail to meet the target → the shift replays.
+Fail too many times → **Hell Ending.**
+
+There's no freeplay. No sandbox. Every decision is made knowing exactly what's riding on it.
+
+---
+
 
 ## Slide 6 — Core Loop
 
@@ -282,7 +306,6 @@ flowchart TD
 | Narrative via Documents Only | ✅ | ⚠️ Minimal | ✅ | ✅ |
 | In-game Economy System | ✅ Blessings | ✅ Peso | ❌ | ❌ |
 | Supernatural / Afterlife Setting | ✅ | ❌ | ⚠️ | ❌ |
-| Physical Gesture Mechanic | ✅ Signature trace | ❌ | ❌ | ❌ |
 | Accessible Entry Point | ✅ | ⚠️ Steep | ⚠️ Steep | ❌ Very slow |
 
 > *Where Do You Belong?* is the only title in this tier where **the end of one phase is the literal starting condition of the next.** Your day-shift calls are not evaluated and discarded — they become the night-shift puzzle.
