@@ -82,38 +82,34 @@ A small team built around one shared belief: the best games ask questions they d
 
 ### The End of the Line Is Not the End
 
-*Where Do You Belong?* is a **deduction game where you walk a supernatural train, cross-check documents, and catch the dead hiding among the living — then decide where each soul truly belongs.**
+*Where Do You Belong?* is a **mystery game set on a ghost train, where you inspect documents, catch the dead hiding among the living, and decide where each soul belongs.**
 
-You are a newly dead intern conductor on a train that runs between the human world and the realm of the dead. During the day, you check passenger documents, issue stamps, and keep things moving — just like any regular conductor.
+You play as a newly dead intern conductor. During the day, the job looks normal — walk the carriages, check documents, stamp tickets, keep the train on schedule. Except some of the passengers shouldn't be here. They're dead, and they're pretending not to be.
 
-But when the train reaches the end of its daytime route, the real shift begins.
+When the route ends and the living step off, the ones you kept stay behind. That's when the real work starts.
 
-The living passengers step off. What remains are the **anomalies** — souls who disguised themselves as the living, who passed through your inspection, who you chose to hold back. Now, in the dark, you have to figure out where each one of them actually belongs.
+The theme is "After the End" — and it runs through everything:
 
-The theme is "After the End" — and it operates on three levels simultaneously:
-
-| Layer | What Ends | What Comes After |
+| | What Ends | What's Still Left to Do |
 |---|---|---|
-| **The Protagonist** | Their life — cut short by an angel's mistake | Five days of work to earn their place in the afterlife |
-| **The Day Shift** | The route reaches its last stop. Stamps are done. | The souls are still there. The night puzzle begins. |
-| **Each Anomaly** | Their life in the human world | They don't know where they belong — the player decides |
+| **The Protagonist** | Their life — cut short by an angel's mistake | Five days of work to earn a place in the afterlife |
+| **The Day Shift** | The route ends. Stamps done. Train stops. | The souls are still on board. Night begins. |
+| **Each Anomaly** | Their life in the human world | They don't know where they're going — you decide |
 
 ### The World
 
-The train runs a fixed daytime route:
-**Alderwick → Brambleford → Cinderfield → Dunmere**
+Fixed daytime route: **Alderwick → Brambleford → Cinderfield → Dunmere**
 
-- **Day / Mortal Realm** — Warm sepia. Victorian formality. Passengers with ID cards, train tickets, and daily newspapers. The air smells like tea and bureaucracy.
-- **Night / Soul Line** — The living step off. Cold blue-purple fills the carriages. Constellation particles drift past the windows. The only ones left are the ones you kept.
+- **Day / Mortal Realm** — Warm sepia. Victorian interiors. Passengers with ID cards, train tickets, and newspapers. Busy and bureaucratic.
+- **Night / Soul Line** — The living are gone. Cold blue-purple. Constellation particles outside the windows. Just you, the dark, and the souls you held back.
 
 ### What Does It Feel Like?
 
 | | Day Shift | Night Shift |
 |---|---|---|
-| **Mood** | Busy, bureaucratic, under time pressure | Quiet, investigative, contemplative |
-| **Player Action** | Inspect ID · Ticket · Newspaper. Stamp the living. Hold the anomalies back. | Read Soul Records. Collect clue statements. Place each soul on the Constellation Map. |
-| **Stakes** | Instant penalty per wrong call | All-or-nothing reward — correct placement for all souls, or nothing |
-| **What ends here** | The route. The stamps. The living world. | The shift — only when every soul has a place. |
+| **Mood** | Busy, under pressure, no time to second-guess | Quiet, slow, investigative |
+| **What you do** | Inspect IDs, tickets, newspapers · Stamp the living · Hold back the dead | Read Soul Records · Find clues · Place each soul on the Constellation Map |
+| **Stakes** | Wrong call = immediate penalty | Get everyone right, or you get nothing |
 
 ---
 
@@ -257,56 +253,55 @@ Anomalies get harder to catch. Repeat.
 
 ---
 
-**Persona A — The Logic Puzzle Player** *(Core Audience)*
+**Persona 1 — The Thoughtful Player** *(Core Audience)*
 
-> *"I want to feel smart when I figure it out — not just lucky."*
+> *"I want a game that trusts me enough to let me figure things out myself."*
 
-- **Age:** 18–30
-- **Plays:** Papers, Please · Obra Dinn · Baba Is You · Suzerain
-- **Platform:** PC / Steam
-- **Motivation:** The satisfaction of reaching a correct answer through evidence, not guessing.
-- **Frustration:** Puzzles that are arbitrary; narratives that feel disconnected from mechanics.
-- **Why this game:** Two-phase structure means every deduction has a consequence they can trace back to their own choices.
+| | |
+|---|---|
+| **Age** | 18–35 |
+| **Platform** | PC (Steam / Itch.io) |
+| **Session Length** | 1–4 hours — tends to lose track of time when the atmosphere is strong |
+| **Play Frequency** | 2–5x per week, usually evenings or late night |
+| **Favourite Titles** | Papers, Please · Return of the Obra Dinn · Disco Elysium · Outer Wilds · Pentiment · Heaven's Vault · Suzerain |
 
----
+**Demographics:**
+Usually in their 20s or early 30s, studying or working in something creative or analytical. Reads books too — not instead of games, but alongside them. Has a backlog, doesn't feel guilty about it. The kind of person who recommends games like they're recommending films.
 
-**Persona B — The Story-First Gamer** *(Secondary Audience)*
+**Psychographics:**
+- Prefers one good game over five okay ones
+- Pays attention to things most players skip — environmental details, document text, optional dialogue
+- Genuinely enjoys the moment of figuring something out, not being told the answer
+- Slow to start a new game, but hard to pull away once they're in
+- Talks about finished games for months — word-of-mouth is how they share everything
 
-> *"If the world feels real, I'll spend an hour just reading documents."*
+**Play Habits:**
+Reads every document. Takes notes. Backtracks when they realize they missed something. Doesn't rush the atmosphere. Wants to understand the world, not just complete it.
 
-- **Age:** 20–35
-- **Plays:** Disco Elysium · Heaven's Vault · 80 Days · Pentiment
-- **Platform:** PC / occasionally console
-- **Motivation:** Atmosphere, world-building, and a setting that rewards genuine curiosity.
-- **Frustration:** Great lore locked behind steep skill walls; puzzle games that interrupt the story.
-- **Why this game:** The world is told entirely through documents — no cutscenes, no hand-holding. Lore is found, not delivered.
+**How They Find Games:**
+YouTube deep-dives, Steam reviews, Reddit threads, trusted recommendations. A strong premise in two sentences gets them. Key art that feels intentional keeps them.
 
----
+**Frustration:**
+Puzzles that are arbitrary. Lore locked behind difficulty. Being nudged toward a solution they were about to find themselves. Mechanics that feel bolted onto the story instead of part of it.
 
-**Persona C — The Indie Explorer** *(Reach Audience)*
+**Why This Game:**
+Every call they make during the day shift echoes into the night puzzle — there's no reset, no undo. The world tells its story through documents, not cutscenes. And the two-phase structure means their attention always has somewhere to land.
 
-> *"My last five favorite games all came from Itch.io."*
-
-- **Age:** 16–25
-- **Plays:** Unpacking · Stardew Valley · game jam titles · short narrative games
-- **Platform:** Itch.io → Steam
-- **Motivation:** Distinctive aesthetic, manageable session length, emotional payoff.
-- **Frustration:** Games that are too long, too punishing, or require extensive setup before anything interesting happens.
-- **Why this game:** The vertical slice is completable in one session. The afterlife hook is immediately legible. The visual split between day and night is striking at a glance.
 
 ---
+
+
+
 
 ### Benchmark — Proof of Market
 
-| Title | Est. Copies Sold | Steam Rating | Price Point |
+| Title | Est. Copies Sold | Steam Rating | Avg. Playtime |
 |---|---|---|---|
-| *Papers, Please* (2013) | **2M – 4.9M** | 97% Positive | $9.99 |
-| *Return of the Obra Dinn* (2018) | **300K – 1.5M** | 97% Positive | $19.99 |
-| *Disco Elysium* (2019) | ~1M | 97% Positive | $39.99 |
+| *Papers, Please* (2013) | **2M – 4.9M** | 97% Positive | ~5–8 hrs |
+| *Return of the Obra Dinn* (2018) | **300K – 1.5M** | 97% Positive | ~8–10 hrs |
+| *Disco Elysium* (2019) | ~1M | 97% Positive | ~30–60 hrs |
 
-> **The "97% club" is not a coincidence.** Document-inspection and deductive games build audiences that are deeply committed — these are not impulse purchases. They generate long-tail word-of-mouth revenue years after release (*Papers, Please* still sells over a decade later).
->
-> Indie titles now account for ~48% of Steam's total game revenue. The premium single-player narrative segment has low competition volume and exceptionally high audience loyalty.
+> Games like *Papers, Please* and *Obra Dinn* both hit 97%+ ratings and have been selling for years. The audience for this genre is real, loyal, and doesn't leave after the first week. They finish the game. They talk about it. They recommend it.
 
 ---
 
@@ -322,25 +317,23 @@ Anomalies get harder to catch. Repeat.
 | Supernatural / Afterlife Setting | ✅ | ❌ | ⚠️ | ❌ |
 | Accessible Entry Point | ✅ | ⚠️ Steep | ⚠️ Steep | ❌ Very slow |
 
-> *Where Do You Belong?* is the only title in this tier where **the end of one phase is the literal starting condition of the next.** Your day-shift calls are not evaluated and discarded — they become the night-shift puzzle.
+> The one thing none of these games do: carry your daytime choices directly into a second phase and make you solve them there. That's the gap this game fills.
 
 ---
 
 ## Slide 8 — Why Now?
 
-### The Timing Is Right
+**The document inspection genre has an open lane.**
+*Papers, Please* (2013) and *Obra Dinn* (2018) proved the formula works. Neither went anywhere near the supernatural. Nobody has. That space is still empty.
 
-**① The "document inspection" genre is proven — but its supernatural lane is empty.**
-*Papers, Please* established the formula in 2013. *Obra Dinn* evolved it in 2018. Both hit 97%+ ratings. Both have long commercial tails. No significant entry has taken the formula into an afterlife / supernatural context. That gap has been open for years.
+**Short games are doing well right now.**
+*Unpacking*, *A Short Hike*, *Venba* — games with a clear identity and a runtime under six hours are consistently outperforming expectations. Players aren't looking for more content. They're looking for something that actually lands.
 
-**② Short, focused premium indie games are outperforming expectations.**
-*Unpacking*, *Norco*, *A Short Hike*, *Venba* — games with a clear thematic identity and a 2–6 hour runtime are consistently exceeding their commercial projections on Steam. Players are actively seeking focused, complete experiences over bloated open worlds.
+**The theme fits the moment.**
+"After the End" isn't abstract. It's about what still needs to be done after something finishes — and that's a question that doesn't go out of style.
 
-**③ "After the End" is a theme that lands right now.**
-The cultural appetite for stories about accountability, consequence, and what-comes-next is not going away. We're not pitching a game about death. We're pitching a game about **whether the work you do after everything ends still means something** — and that question resonates regardless of context.
-
-**④ Godot 4.x is now a credible shipping engine.**
-Our full system — document inspection, anomaly detection, night puzzle, market economy, tutorial — is built and running in Godot 4.7. We are not at prototype stage. We have a vertical slice.
+**We already have a working build.**
+Document inspection, anomaly detection, night puzzle, market economy, tutorial — all of it is in Godot 4.7 and running. This isn't a pitch for a concept. It's a pitch for a game that exists.
 
 ---
 

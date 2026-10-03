@@ -18,7 +18,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export var night_music_track: StringName = &"gameplay_night"
 @export_category("Day Progression")
 @export_range(1, 5, 1) var day_number: int = 1
-@export var day_pass_targets: PackedInt32Array = PackedInt32Array([350, 450])
+@export var day_pass_targets: PackedInt32Array = PackedInt32Array([450])
 @export_category("Day Route")
 @export var day_route: PackedStringArray
 @export_category("Station Service")
@@ -3302,11 +3302,10 @@ func _enter_night(enable_controls: bool = true, show_instruction: bool = true) -
 
 ## The two-day slice reuses the former day-4 and day-5 night constellations.
 ## The tutorial always teaches on the simple level-1 constellation.
-func _night_service_level_for_day(day: int) -> int:
+func _night_service_level_for_day(_day: int) -> int:
 	if is_tutorial_mode:
 		return 1
-	if day <= 1:
-		return 4
+	# The single-day build reuses the former day-2 constellation.
 	return 5
 
 
@@ -3755,23 +3754,23 @@ func _maintenance_minigames_enabled() -> bool:
 
 
 func _blocked_aisle_enabled_for_level() -> bool:
-	# Day 1 teaches luggage repacking.
-	return day_number == 1
+	# The single-day build includes luggage repacking alongside cleaning.
+	return true
 
 
 func _clean_seat_enabled_for_level() -> bool:
-	# Day 2 introduces cleaning.
-	return day_number == 2
+	# The single-day build includes cleaning alongside luggage repacking.
+	return true
 
 
-## Day 1 uses the guided luggage timing/reset behavior.
+## The merged single day keeps the former day-2 random luggage timing.
 func _blocked_aisle_difficulty_day() -> bool:
-	return day_number == 1
+	return false
 
 
-## Day 2 uses the guided cleaning timing/reset behavior.
+## The merged single day keeps the guided cleaning timing/reset behavior.
 func _clean_seat_difficulty_day() -> bool:
-	return day_number == 2
+	return true
 
 
 func _show_level_start_hint_if_needed() -> bool:

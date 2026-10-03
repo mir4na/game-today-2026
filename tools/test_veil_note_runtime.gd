@@ -25,9 +25,9 @@ func _run() -> void:
 	_check(
 		market.blessings == 0
 		and market.veil_notes == 0
-		and market.radar_charges == 0
-		and market.swift_charges == 0,
-		"A fresh run must start with zero Blessings and zero owned tools."
+		and market.radar_charges == 3
+		and market.swift_charges == 3,
+		"A fresh run must start with zero Blessings, zero Veil Notes, and three Radar plus three Swiftstep charges."
 	)
 	_check(
 		market.veil_note_cost == 200

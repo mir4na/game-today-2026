@@ -39,6 +39,9 @@ func _run() -> void:
 			service_level,
 			20260909
 		)
+		# The single-day campaign always fields five anomalies; the authored
+		# puzzle levels keep their own historical anomaly counts for this test.
+		daily_config.deceased_passenger_count = EXPECTED_ANOMALY_COUNTS[service_level - 1]
 		var manifest_rng := RandomNumberGenerator.new()
 		manifest_rng.seed = 5300 + service_level
 		var manifest: Array[PassengerData] = DailyManifestGenerator.generate(
