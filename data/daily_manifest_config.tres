@@ -20,5 +20,6 @@ invalid_service_dates_by_day_code = {
 "270607": "07 JUN 2027"
 }
 anomaly_types = PackedStringArray("shadowless", "unlisted_destination", "portrait_mismatch", "time_invalid_ticket", "ticket_name_mismatch", "newspaper_death")
+max_passengers_per_anomaly_trait = 1
 unlisted_destination_names = PackedStringArray("Greyhaven", "Hollowfen", "Larkspur")
 ai_behaviors = PackedStringArray("still", "wander", "carriage_roamer", "window_watcher", "restless")

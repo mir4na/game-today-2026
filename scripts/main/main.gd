@@ -41,9 +41,9 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export_category("Maintenance Distractions")
 @export var blocked_aisle_delay_range_seconds: Vector2 = Vector2(9.0, 16.0)
 @export var dirty_seat_delay_range_seconds: Vector2 = Vector2(24.0, 38.0)
-@export_range(0.1, 120.0, 0.5) var level_two_blocked_first_delay_seconds: float = 10.0
-@export_range(0.1, 180.0, 0.5) var level_two_blocked_repeat_delay_seconds: float = 50.0
-@export_range(0.1, 120.0, 0.5) var level_three_clean_first_delay_seconds: float = 35.0
+@export_range(0.1, 120.0, 0.5) var level_two_blocked_first_delay_seconds: float = 40.0
+@export_range(0.1, 180.0, 0.5) var level_two_blocked_repeat_delay_seconds: float = 40.0
+@export_range(0.1, 120.0, 0.5) var level_three_clean_first_delay_seconds: float = 60.0
 @export_range(0.1, 180.0, 0.5) var level_three_clean_second_delay_seconds: float = 60.0
 @export_range(0.0, 60.0, 0.5) var clean_seat_route_edge_clearance_seconds: float = 20.0
 @export_range(0.0, 80.0, 1.0) var maintenance_event_clearance: float = 14.0
@@ -1454,18 +1454,8 @@ func _next_blocked_aisle_delay() -> float:
 func _next_dirty_seat_delay() -> float:
 	if not _clean_seat_difficulty_day():
 		return _random_delay(dirty_seat_delay_range_seconds)
-	if _route_index == 0:
-		if _dirty_seat_spawns_this_route == 0:
-			return level_three_clean_first_delay_seconds
-		if _dirty_seat_spawns_this_route == 1:
-			return level_three_clean_second_delay_seconds
-		return -1.0
-	if _route_index != 1 or _dirty_seat_spawns_this_route > 0:
-		return -1.0
-	var route_duration: float = _get_station_travel_seconds(_route_index)
-	var maximum_clearance: float = maxf(route_duration * 0.5 - 0.1, 0.1)
-	var clearance: float = minf(clean_seat_route_edge_clearance_seconds, maximum_clearance)
-	return _daily_rng.randf_range(clearance, maxf(clearance, route_duration - clearance))
+	# The single campaign day keeps a steady clean-seat cadence.
+	return level_three_clean_first_delay_seconds
 
 
 func _random_delay(delay_range: Vector2) -> float:

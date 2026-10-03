@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3]
+[gd_resource type="Resource" script_class="PassengerIdentityProfile" format=3 uid="uid://dufp875idcfiw"]
 
-[ext_resource type="Texture2D" path="res://assets/characters/Where Do You Belong_/NPC15.png" id="1_ooonn"]
-[ext_resource type="PackedScene" path="res://scenes/passengers/npc_18.tscn" id="2_jejxc"]
-[ext_resource type="Script" path="res://scripts/passenger/passenger_identity_profile.gd" id="3_rcur3"]
+[ext_resource type="Texture2D" uid="uid://cev8gcx6qiayl" path="res://assets/characters/Group 28.png" id="1_ooonn"]
+[ext_resource type="PackedScene" uid="uid://c2wcclpelai6x" path="res://scenes/passengers/npc_18.tscn" id="2_jejxc"]
+[ext_resource type="Script" uid="uid://3debkn280uwm" path="res://scripts/passenger/passenger_identity_profile.gd" id="3_rcur3"]
 
 [resource]
 script = ExtResource("3_rcur3")

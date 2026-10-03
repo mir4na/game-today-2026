@@ -36,6 +36,7 @@
 [ext_resource type="Texture2D" uid="uid://bg5km7i8p8o1r" path="res://assets/ui/guidebook/paycheck 1 (1).png" id="30_paycheck_art"]
 [ext_resource type="Texture2D" uid="uid://das3t3h8hbe6c" path="res://assets/ui/guidebook/night 1 (1).png" id="31_night_art"]
 [ext_resource type="Texture2D" uid="uid://cu0rsf2u3vtsp" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 11-22-24.png" id="33_wdqcv"]
+[ext_resource type="Texture2D" uid="uid://c0wxp7pf8kf2k" path="res://assets/characters/Where Do You Belong_/NPC15.png" id="34_os5ud"]
 [ext_resource type="Texture2D" uid="uid://du1umrmwigf0k" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 12-04-23-1.png" id="35_jbx2b"]
 [ext_resource type="Texture2D" uid="uid://fi8341eivf3m" path="res://assets/ui/guidebook/Screenshot From 2026-09-11 12-04-43.png" id="36_qvavt"]
 [ext_resource type="Texture2D" uid="uid://cqrq781qjxcua" path="res://assets/ui/guidebook/ticket_name.png" id="37_ticket"]
@@ -1328,11 +1329,11 @@ scale = Vector2(0.22402598, 0.22402598)
 
 [node name="PhotoB" type="Sprite2D" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/PhotoFrame/PhotoClip/PhotoContent" index="0" unique_id=771854729]
 editor_description = "Second static photo for two-image evidence. Pick a texture; it stays where placed."
-visible = false
 texture_filter = 1
 position = Vector2(-173.47559, 185.21558)
 rotation = 3.1415927
 scale = Vector2(1, -1)
+texture = ExtResource("34_os5ud")
 
 [node name="Photo" parent="Center/BookStage/Page/AnomalyList/Entries/LeftPageEntries/PortraitMismatch/PhotoFrame/PhotoClip/PhotoContent" index="1" unique_id=328331925]
 position = Vector2(150.60617, 69.03522)
