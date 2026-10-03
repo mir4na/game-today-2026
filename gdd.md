@@ -31,7 +31,7 @@
 
 > Kamu mati karena kesalahan administratif malaikat — padahal belum waktunya.
 > Masalahnya: pas ditimbang, dosa lebih berat dari kebaikan.
-> Sekarang ada satu tawaran — kerja sebagai **konduktor intern** di kereta penyeberangan antar dunia selama 5 hari.
+> Sekarang ada satu tawaran — selesaikan **shift terakhir sebagai konduktor intern** di kereta penyeberangan antar dunia.
 > **Berhasil → Surga. Gagal → Neraka.**
 
 *Where Do You Belong?* adalah game 2D deductive puzzle side-view. Player memeriksa dokumen penumpang, mendeteksi anomali (penumpang yang sudah meninggal tapi menyamar), dan memandu jiwa-jiwa tersesat ke stasiun yang tepat — dalam satu kereta yang sama.
@@ -89,9 +89,9 @@ Seorang pelamar kerja meninggal di tengah jalan menuju interview — bukan karen
 
 Masalahnya, saat jiwa ditimbang, **dosa lebih berat dari kebaikan**. Jadi dia tidak bisa langsung naik ke surga.
 
-Malaikat, yang merasa punya tanggung jawab atas kesalahannya, menawarkan satu jalan keluar: bekerja sebagai **konduktor intern di kereta penyeberangan antar dunia selama 5 hari**. Kalau berhasil menyelesaikan internship — masuk surga. Kalau gagal — neraka.
+Malaikat, yang merasa punya tanggung jawab atas kesalahannya, menawarkan satu jalan keluar: menyelesaikan **shift terakhir sebagai konduktor intern di kereta penyeberangan antar dunia**. Kalau berhasil — masuk surga. Kalau gagal — neraka.
 
-Tidak ada pilihan lain. Player mulai bekerja dari Hari 1.
+Campaign yang dimainkan langsung dimulai pada Hari 2.
 
 ---
 
@@ -124,14 +124,14 @@ flowchart LR
     E --> A
 ```
 
-Setiap hari terdiri dari dua fase: **shift siang** dan **shift malam**. Shift siang berfokus pada inspeksi dan pengelolaan penumpang, sementara shift malam berfokus pada penyelesaian teka-teki jiwa. Kedua fase ini harus diselesaikan untuk melanjutkan ke hari berikutnya.
+Hari 2 terdiri dari dua fase: **shift siang** dan **shift malam**. Shift siang berfokus pada inspeksi dan pengelolaan penumpang, sementara shift malam berfokus pada penyelesaian teka-teki jiwa. Menyelesaikan keduanya menutup campaign.
 
 ---
 
 ### Game Objective
 
-- **Jangka pendek** — Selesaikan setiap shift siang dengan net earnings yang memenuhi daily target. Target naik tiap hari: 100 / 120 / 140 / 160 / 180 Blessings.
-- **Jangka panjang** — Selesaikan 5 hari internship untuk mendapat ending yang baik.
+- **Jangka pendek** — Selesaikan shift siang Hari 2 dengan net earnings minimal 350 Blessings.
+- **Jangka panjang** — Tempatkan seluruh jiwa dengan benar pada shift malam untuk mendapat ending yang baik.
 
 ---
 
@@ -206,7 +206,7 @@ Sebelum shift malam dimulai, player masuk ke Night Market dan bisa menggunakan B
 | **Radar Charge** | 150 Blessings | Membantu mendeteksi anomali yang sulit ditemukan |
 | **Swiftstep** | 75 Blessings | Menambah kecepatan jalan player selama 10 detik |
 
-Tool yang tidak terpakai terbawa ke hari berikutnya. Jika shift siang gagal, semua pembelian dibatalkan.
+Tool dibeli menggunakan Blessings dari shift siang sebelum shift malam dimulai.
 
 ---
 
@@ -238,13 +238,9 @@ Di akhir shift siang, player mendapat laporan kinerja yang menampilkan total Ble
 
 | Hari | Daily Target |
 |---|---|
-| Day 1 | 100 Blessings |
-| Day 2 | 120 Blessings |
-| Day 3 | 140 Blessings |
-| Day 4 | 160 Blessings |
-| Day 5 | 180 Blessings |
+| Day 1 | 350 Blessings |
 
-Target naik tiap hari. Seiring berjalannya hari, jumlah penumpang bertambah dan anomali yang muncul semakin sulit untuk dideteksi.
+Day 1 adalah satu-satunya hari campaign yang dimainkan (memakai konten shift kedua dari rancangan lama): 16 profil penumpang, 5 anomali, obstacle luggage dan kursi kotor, lalu puzzle penempatan jiwa pada shift malam. Sebelum shift dimulai, petunjuk luggage tampil lebih dulu; klik pemain menampilkan petunjuk clean seat.
 
 ---
 

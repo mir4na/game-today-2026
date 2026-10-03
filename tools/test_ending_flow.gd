@@ -49,13 +49,13 @@ func _run() -> void:
 		_check(music_manager.get("_current_track") == &"ending_bad", "Hell must start the scene-authored bad-ending outro.")
 
 	game._hell_ending_ui.hide()
-	game.day_number = 5
+	game.day_number = 2
 	game._day_blessing_award = {"earned": 500}
 	game._night_blessing_award = {"earned": 750, "correct_night_dropoffs": 5}
 	game._show_heaven_ending()
-	_check(game.state == AfterTheEndGame.GameState.HEAVEN_ENDING, "Day 5 success must enter Heaven.")
+	_check(game.state == AfterTheEndGame.GameState.HEAVEN_ENDING, "Day 2 success must enter Heaven.")
 	_check(game._heaven_ending_ui.visible and not game._pause_ui.visible, "Heaven must remain separate from Pause UI.")
-	_check("DAYS COMPLETED     5 / 5" in game._heaven_ending_ui.get_node("%Summary").text, "The final paycheck must summarize all five days.")
+	_check("DAYS COMPLETED     1 / 1" in game._heaven_ending_ui.get_node("%Summary").text, "The final paycheck must summarize the single playable day.")
 	if music_manager != null:
 		_check(music_manager.get("_current_track") == &"ending_good", "Heaven must start the scene-authored Heaven outro.")
 

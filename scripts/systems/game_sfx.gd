@@ -15,6 +15,7 @@ const SOUNDS: Dictionary = {
 	&"paper_rustle": preload("res://assets/sfx/paper_rustle.mp3"),
 	&"radar_ping": preload("res://assets/sfx/radar_ping.ogg"),
 	&"speed_woosh": preload("res://assets/sfx/speed_woosh.ogg"),
+	&"star_night": preload("res://assets/sfx/star_night.mp3"),
 	&"stamp_impact": preload("res://assets/sfx/stamp_impact.ogg"),
 	&"success": preload("res://assets/sfx/success.ogg"),
 	&"time_warp": preload("res://assets/sfx/time_warp.ogg"),

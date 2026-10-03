@@ -2,6 +2,7 @@ extends SceneTree
 ## Verifies the tutorial launch plumbing and first onboarding control gates.
 
 const MainMenuScene = preload("res://scenes/menu/main_menu.tscn")
+const IntroScene = preload("res://scenes/ui/intro_cutscene.tscn")
 const MainScene = preload("res://scenes/main/main.tscn")
 
 var _failures: int = 0
@@ -36,7 +37,18 @@ func _run() -> void:
 		run_context.call(&"request_tutorial")
 		_check(bool(run_context.call(&"consume_tutorial_requested")), "RunContext must return a requested tutorial once.")
 		_check(not bool(run_context.call(&"consume_tutorial_requested")), "RunContext tutorial request must be one-shot.")
+		run_context.call(&"request_standard_game")
+	var intro := IntroScene.instantiate() as IntroCutscene
+	root.add_child(intro)
+	await process_frame
+	intro._open_game_scene()
+	if run_context != null:
+		_check(
+			bool(run_context.call(&"consume_tutorial_requested")),
+			"Finishing the story intro must request the interactive tutorial."
+		)
 		run_context.call(&"request_tutorial")
+	intro.free()
 
 	var game := MainScene.instantiate() as AfterTheEndGame
 	root.add_child(game)
@@ -58,7 +70,7 @@ func _run() -> void:
 	tutorial.use_empty_coach_flow = true
 	_check(tutorial.get_node_or_null("%SkipPrompt") is Control, "Tutorial must expose its scene-authored hold-to-skip prompt.")
 	_check(tutorial.get_node_or_null("%SkipHoldRing") is IntroHoldRing, "Tutorial skip must expose radial hold progress.")
-	_check(tutorial.get_node_or_null("%LoadingScreenUI") is LoadingScreenUI, "Tutorial must own the loading transition into Day 1.")
+	_check(tutorial.get_node_or_null("%LoadingScreenUI") is LoadingScreenUI, "Tutorial must own the loading transition into the campaign day.")
 	tutorial._begin_skip_hold()
 	tutorial._update_skip_hold(tutorial.hold_to_skip_seconds * 0.5)
 	_check(tutorial._skip_hold_ring.progress > 0.0 and not tutorial._skip_transitioning, "A short tutorial skip hold must show progress without leaving.")

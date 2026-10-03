@@ -1,9 +1,11 @@
 class_name HeavenEndingUI
 extends Control
-## Five-day finale. The authored layers remain independent so rays, fog and MC
+## Campaign finale. The authored layers remain independent so rays, fog and MC
 ## can move without baking animation into the illustration.
 
 signal credits_requested
+
+const ShiftProgress = preload("res://scripts/systems/shift_progress.gd")
 
 @export_category("Music")
 @export var music_track: StringName = &"ending_good"
@@ -110,8 +112,10 @@ func _on_continue_pressed() -> void:
 
 
 func _format_summary(summary: Dictionary) -> String:
-	return "DAYS COMPLETED     %d / 5\nSOULS DELIVERED    %d\nSOULS MISROUTED    %d\nANOMALIES HELD     %d\nNIGHT SOULS FREED  %d\n\nBLESSINGS EARNED   %d\nFINAL BALANCE      %d" % [
-		int(summary.get("days_completed", 5)),
+	var playable_days: int = ShiftProgress.DAY_COUNT - ShiftProgress.START_DAY + 1
+	return "DAYS COMPLETED     %d / %d\nSOULS DELIVERED    %d\nSOULS MISROUTED    %d\nANOMALIES HELD     %d\nNIGHT SOULS FREED  %d\n\nBLESSINGS EARNED   %d\nFINAL BALANCE      %d" % [
+		int(summary.get("days_completed", playable_days)),
+		playable_days,
 		int(summary.get("correct_dropoffs", 0)),
 		int(summary.get("wrong_dropoffs", 0)),
 		int(summary.get("anomalies_retained", 0)),

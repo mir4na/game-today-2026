@@ -328,6 +328,11 @@ func _assign_passenger_to_station(station_name: String, passenger_name: String) 
 		return
 	if not _passenger_data_by_name.has(passenger_name) or not _is_statement_found(passenger_name):
 		return
+	_selected_passenger = passenger_name
+	_selection_label.text = _current_instruction
+	_error_label.text = ""
+	if _station_for_passenger(passenger_name) == station_name:
+		return
 	# Each soul has one destination, while a station may hold any number of
 	# souls. Re-dropping a soul moves it without displacing the existing stack.
 	for old_station: String in _assignments.keys():
@@ -341,10 +346,8 @@ func _assign_passenger_to_station(station_name: String, passenger_name: String) 
 	if not station_passengers.has(passenger_name):
 		station_passengers.append(passenger_name)
 	_assignments[station_name] = station_passengers
-	_selected_passenger = passenger_name
-	_selection_label.text = _current_instruction
-	_error_label.text = ""
 	_update_assignment_visuals()
+	GameSFX.play(&"star_night")
 
 
 func _update_assignment_visuals() -> void:

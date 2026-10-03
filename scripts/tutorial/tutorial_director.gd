@@ -339,7 +339,7 @@ func finish_tutorial() -> void:
 		_set_controls(true, true)
 	_reset_visuals()
 	tutorial_finished.emit()
-	_start_day_one()
+	_start_campaign_day()
 
 
 func _process(delta: float) -> void:
@@ -444,10 +444,10 @@ func _update_skip_hold(delta: float) -> void:
 	_skip_elapsed = minf(_skip_elapsed + delta, hold_to_skip_seconds)
 	_skip_hold_ring.progress = _skip_elapsed / maxf(hold_to_skip_seconds, 0.001)
 	if _skip_elapsed >= hold_to_skip_seconds:
-		_start_day_one()
+		_start_campaign_day()
 
 
-func _start_day_one() -> void:
+func _start_campaign_day() -> void:
 	if _skip_transitioning:
 		return
 	_skip_transitioning = true
@@ -466,7 +466,7 @@ func _start_day_one() -> void:
 		_skip_transitioning = false
 		_skip_hold_ring.progress = 0.0
 		_skip_prompt.show()
-		push_error("Tutorial could not reset the run to Day 1.")
+		push_error("Tutorial could not reset the run to the campaign day.")
 		return
 	if not is_instance_valid(_loading_screen):
 		_skip_transitioning = false

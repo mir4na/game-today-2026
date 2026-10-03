@@ -7,16 +7,22 @@ const VERSION: int = 4
 const LEGACY_STARTER_RADAR_VERSION: int = 1
 const AUDIT_SLIP_VERSION: int = 2
 const SWIFT_STOCK_VERSION: int = 3
+const START_DAY: int = 2
 const DAY_COUNT: int = 2
 const RADAR_CARRY_LIMIT: int = 3
 const SWIFT_CARRY_LIMIT: int = 5
+
+
+## The retained second-shift content is presented as the campaign's first day.
+static func display_day(day: int) -> int:
+	return maxi(1, day - START_DAY + 1)
 
 
 ## Creates the only checkpoint that replaces an existing campaign from scratch.
 ## Continue and normal application exit never call this function.
 static func start_new_run(path: String = "") -> Dictionary:
 	path = _resolve_save_path(path)
-	var checkpoint: Dictionary = make_checkpoint(1, {}, new_seed())
+	var checkpoint: Dictionary = make_checkpoint(START_DAY, {}, new_seed())
 	if not save_checkpoint(checkpoint, path):
 		return {}
 	return checkpoint
@@ -54,6 +60,10 @@ static func load_checkpoint(path: String = "") -> Dictionary:
 		checkpoint = _migrate_audit_slip(checkpoint)
 	if saved_version < VERSION:
 		checkpoint = _migrate_swift_stock(checkpoint)
+		save_checkpoint(checkpoint, path)
+	if int(checkpoint.day) < START_DAY:
+		checkpoint.day = START_DAY
+		checkpoint.campaign_summary = {}
 		save_checkpoint(checkpoint, path)
 	return checkpoint.duplicate(true)
 
@@ -122,7 +132,7 @@ static func make_checkpoint(
 			1
 		)
 	return {
-		"day": clampi(day, 1, DAY_COUNT),
+		"day": clampi(day, START_DAY, DAY_COUNT),
 		"seed": seed_value,
 		"inventory": saved_inventory,
 		"completed": false,
