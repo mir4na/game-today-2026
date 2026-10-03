@@ -175,8 +175,7 @@ func _open_game_scene() -> void:
 		push_error("IntroCutscene/LoadingScreenUI scene instance is missing.")
 		_finishing = false
 		return
-	# A new run always continues into the interactive tutorial. Continue from
-	# the main menu bypasses this scene and therefore remains normal gameplay.
+	# A new run keeps the story introduction and interactive tutorial before the campaign.
 	var run_context := get_node_or_null("/root/RunContext")
 	if run_context != null and run_context.has_method(&"request_tutorial"):
 		run_context.call(&"request_tutorial")

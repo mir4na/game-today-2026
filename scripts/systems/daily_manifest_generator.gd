@@ -248,10 +248,9 @@ static func _assign_living_destinations(
 			if origin_index >= 0 and origin_index < destination_index:
 				eligible.append(data)
 		_shuffle_passengers(eligible, rng)
-		if eligible.size() < station_dropoff_count:
-			push_error("Not enough living passengers can be assigned to %s." % route[destination_index])
-			continue
-		for assignment_index: int in range(station_dropoff_count):
+		# With five anomalies, some seeds leave fewer living riders than the
+		# planned exchange. Send those available here and route the rest onward.
+		for assignment_index: int in range(mini(station_dropoff_count, eligible.size())):
 			var assigned_data: PassengerData = eligible[assignment_index]
 			assigned_data.destination_station = route[destination_index]
 			assigned[assigned_data] = true

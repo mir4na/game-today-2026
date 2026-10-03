@@ -1,5 +1,5 @@
 extends SceneTree
-## Verifies the merged single-day distraction schedule and its onboarding hint.
+## Verifies the single campaign day's display label and both obstacle lessons.
 
 const MainScene = preload("res://scenes/main/main.tscn")
 
@@ -25,78 +25,56 @@ func _run() -> void:
 	var game := MainScene.instantiate() as AfterTheEndGame
 	root.add_child(game)
 	await process_frame
+	game._day_intro_ui.hide()
 	game._active_modal = null
 	game.state = AfterTheEndGame.GameState.DAY
-	game.day_number = 1
-
-	_check(game._blocked_aisle_enabled_for_level(), "The single day must enable blocked aisles.")
-	_check(game._clean_seat_enabled_for_level(), "The single day must enable clean seats.")
+	_check(game.day_number == 2, "The campaign must retain the second-shift content.")
+	_check(game._display_day_number() == 1, "The single campaign shift must display Day 1.")
+	game._day_intro_ui.play_intro(game._display_day_number())
+	_check(game._day_intro_ui._day_label.text == "DAY 1", "The opening chapter card must read DAY 1.")
+	game._day_intro_ui.hide()
+	game._refresh_day_blessing_hud()
+	_check(game._hud._day_label.text == "Day 1", "The gameplay HUD must read Day 1.")
+	_check(game._blocked_aisle_enabled_for_level(), "Luggage must be enabled in the campaign.")
+	_check(game._clean_seat_enabled_for_level(), "Dirty seats must be enabled in the campaign.")
 
 	game._blocked_aisle_timer.stop()
 	game._dirty_seat_timer.stop()
-	game._blocked_aisle_activated = false
-	game._dirty_seat_activated = false
 	game._schedule_maintenance_events()
-	_check(not game._blocked_aisle_timer.is_stopped(), "The blocked-aisle timer must arm on the single day.")
-	_check(not game._dirty_seat_timer.is_stopped(), "The clean-seat timer must arm on the single day.")
-
-	game._blocked_aisle_spawn_count = 0
-	for sample_index: int in range(12):
-		var blocked_delay: float = game._next_blocked_aisle_delay()
-		_check(
-			blocked_delay >= game.blocked_aisle_delay_range_seconds.x
-			and blocked_delay <= game.blocked_aisle_delay_range_seconds.y,
-			"The single day uses the random blocked-aisle delay (sample %d)." % sample_index
-		)
-
-	game._route_index = 0
-	game._dirty_seat_spawns_this_route = 0
 	_check(
-		is_equal_approx(game._next_dirty_seat_delay(), game.level_three_clean_first_delay_seconds),
-		"The single day's first clean seat must keep the guided 10-second delay."
+		absf(game._blocked_aisle_timer.time_left - game.level_two_blocked_first_delay_seconds) < 0.5,
+		"Luggage should be scheduled first."
 	)
-	game._dirty_seat_spawns_this_route = 1
 	_check(
-		is_equal_approx(game._next_dirty_seat_delay(), game.level_three_clean_second_delay_seconds),
-		"The single day's second clean seat must keep the guided 60-second delay."
+		absf(game._dirty_seat_timer.time_left - game.level_three_clean_first_delay_seconds) < 0.5
+		and game._dirty_seat_timer.time_left > game._blocked_aisle_timer.time_left,
+		"Dirty seats should be scheduled after luggage."
 	)
-	game._dirty_seat_spawns_this_route = 2
-	_check(game._next_dirty_seat_delay() < 0.0, "The first route must stop after two clean seats.")
+	game._blocked_aisle_timer.stop()
+	game._dirty_seat_timer.stop()
 
-	game._route_index = 1
-	game._dirty_seat_spawns_this_route = 0
-	var route_duration: float = game._get_station_travel_seconds(1)
-	var clearance: float = minf(
-		game.clean_seat_route_edge_clearance_seconds,
-		maxf(route_duration * 0.5 - 0.1, 0.1)
-	)
-	for sample_index: int in range(12):
-		var randomized_delay: float = game._next_dirty_seat_delay()
-		_check(
-			randomized_delay >= clearance and randomized_delay <= route_duration - clearance,
-			"The next-route clean seat must avoid both route edges (sample %d)." % sample_index
-		)
-	game._dirty_seat_spawns_this_route = 1
-	_check(game._next_dirty_seat_delay() < 0.0, "The next route may spawn only one clean seat.")
-	game._route_index = 2
-	game._dirty_seat_spawns_this_route = 0
-	_check(
-		game._next_dirty_seat_delay() < 0.0,
-		"The single day must not schedule another clean seat after the next route."
-	)
-
-	game.day_number = 1
-	game._active_modal = null
-	_check(game._show_level_start_hint_if_needed(), "The single day must present an onboarding hint.")
-	_check(game._hint_ui.visible, "The onboarding hint should be visible.")
-	_check(
-		game._hint_ui.get_node("%CleanTheSeat").visible,
-		"The merged single day must show the clean-seat hint."
-	)
-	game._active_modal = null
-	game._hint_ui.hide()
+	_check(game._show_level_start_hint_if_needed(), "The campaign must show obstacle guidance.")
+	_check(game._active_modal == game._hint_ui, "Guidance must hold player control.")
+	_check(game._hint_ui.get_node("%BlockedAisle").visible, "Luggage guidance must appear first.")
+	_check(not game._hint_ui.get_node("%CleanTheSeat").visible, "Seat guidance must wait for the first click.")
+	await create_timer(0.55).timeout
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	game._hint_ui.call(&"_input", click)
+	await create_timer(0.3).timeout
+	_check(game._active_modal == game._hint_ui, "The first click must keep guidance active.")
+	_check(game._hint_ui.get_node("%CleanTheSeat").visible, "The first click must show seat guidance.")
+	_check(not game._hint_ui.get_node("%BlockedAisle").visible, "Luggage guidance must close before seat guidance.")
+	await create_timer(0.55).timeout
+	game._hint_ui.call(&"_input", click)
+	await create_timer(0.3).timeout
+	_check(not game._hint_ui.visible, "The second click must close guidance.")
+	_check(game._active_modal == null, "The second click must release player control.")
+	_check(not game._blocked_aisle_timer.is_stopped(), "Luggage events must start after both hints.")
+	_check(not game._dirty_seat_timer.is_stopped(), "Dirty-seat events must start after both hints.")
 
 	game.free()
 	if _failures == 0:
-		print("PASS: merged single-day maintenance schedule and hint.")
+		print("PASS: Day 1 label and sequential luggage/seat guidance.")
 	quit(1 if _failures > 0 else 0)

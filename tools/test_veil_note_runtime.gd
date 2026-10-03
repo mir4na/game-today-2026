@@ -67,7 +67,7 @@ func _run() -> void:
 	var legacy_save := ConfigFile.new()
 	legacy_save.set_value("progress", "version", ShiftProgress.AUDIT_SLIP_VERSION)
 	legacy_save.set_value("progress", "checkpoint", {
-		"day": 2,
+		"day": 1,
 		"seed": 90210,
 		"inventory": {
 			"blessings": 12,

@@ -32,7 +32,7 @@ func show_hint(hint_id: StringName) -> void:
 	_content.scale = Vector2(0.94, 0.94)
 	show()
 	# The dimmed world arrives first, then the instruction card settles in. This
-	# makes the Day 2/3 onboarding read as one deliberate sequence.
+	# makes each obstacle introduction read as one deliberate sequence.
 	var reveal := create_tween()
 	reveal.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	reveal.tween_property(_shade, ^"modulate:a", 1.0, 0.22)

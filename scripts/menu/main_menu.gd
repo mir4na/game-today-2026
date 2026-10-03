@@ -71,7 +71,7 @@ func _ready() -> void:
 	var checkpoint: Dictionary = ShiftProgress.load_checkpoint()
 	var can_continue: bool = not checkpoint.is_empty() and not bool(checkpoint.get("completed", false))
 	_continue_button.disabled = not can_continue
-	_continue_button.text = "CONTINUE — DAY %d" % int(checkpoint.day) if can_continue else "CONTINUE"
+	_continue_button.text = "CONTINUE — DAY %d" % ShiftProgress.display_day(int(checkpoint.day)) if can_continue else "CONTINUE"
 	_refresh_mirrored_button_art(_continue_button)
 	_refresh_mirrored_button_art(_quit_button)
 	if can_continue:
@@ -210,7 +210,7 @@ func _open_game(
 
 func _quit_game() -> void:
 	# Shift progress already lives in user:// and must survive application exit.
-	# Only _start_game() replaces it with a fresh Day 1 checkpoint.
+	# Only _start_game() replaces it with a fresh campaign checkpoint.
 	get_tree().quit()
 
 func _set_menu_buttons_disabled(value: bool) -> void:

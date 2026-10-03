@@ -17,8 +17,8 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export var day_music_track: StringName = &"gameplay_day"
 @export var night_music_track: StringName = &"gameplay_night"
 @export_category("Day Progression")
-@export_range(1, 5, 1) var day_number: int = 1
-@export var day_pass_targets: PackedInt32Array = PackedInt32Array([450])
+@export_range(1, 5, 1) var day_number: int = 2
+@export_range(0, 9999, 10) var day_pass_target: int = 350
 @export_category("Day Route")
 @export var day_route: PackedStringArray
 @export_category("Station Service")
@@ -43,7 +43,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export var dirty_seat_delay_range_seconds: Vector2 = Vector2(24.0, 38.0)
 @export_range(0.1, 120.0, 0.5) var level_two_blocked_first_delay_seconds: float = 10.0
 @export_range(0.1, 180.0, 0.5) var level_two_blocked_repeat_delay_seconds: float = 50.0
-@export_range(0.1, 120.0, 0.5) var level_three_clean_first_delay_seconds: float = 10.0
+@export_range(0.1, 120.0, 0.5) var level_three_clean_first_delay_seconds: float = 35.0
 @export_range(0.1, 180.0, 0.5) var level_three_clean_second_delay_seconds: float = 60.0
 @export_range(0.0, 60.0, 0.5) var clean_seat_route_edge_clearance_seconds: float = 20.0
 @export_range(0.0, 80.0, 1.0) var maintenance_event_clearance: float = 14.0
@@ -144,6 +144,7 @@ var _blocked_aisle_activated: bool = false
 var _dirty_seat_activated: bool = false
 var _blocked_aisle_spawn_count: int = 0
 var _dirty_seat_spawns_this_route: int = 0
+var _pending_level_hints: Array[StringName] = []
 var _maintenance_schedule_route_index: int = -1
 var _service_seal_active: bool = false
 var _day_blessing_award: Dictionary = {}
@@ -275,18 +276,17 @@ func _ready() -> void:
 	_update_passenger_minimap()
 	_set_passenger_ai_enabled(false)
 	_active_modal = _day_intro_ui
-	_day_intro_ui.play_intro(day_number)
+	_day_intro_ui.play_intro(_display_day_number())
 
 
 func _prepare_tutorial_clean_start() -> void:
 	if tutorial_day_route.size() >= 2:
 		day_route = tutorial_day_route.duplicate()
-	# Tutorial always demonstrates an untouched first shift. Reset through the
-	# scene-owned MarketToolState so its authored starting inventory remains the
-	# single source of truth, then persist that clean checkpoint for Day 1.
+	# Tutorial is a separate lesson. Keep its checkpoint at the campaign's
+	# starting day so Continue cannot enter the removed Day 1 shift.
 	_market_tool_state.call(&"reset_inventory")
 	_shift_checkpoint = ShiftProgress.make_checkpoint(
-		1,
+		ShiftProgress.START_DAY,
 		_market_tool_state.call(&"get_snapshot"),
 		_daily_seed,
 		{}
@@ -2732,7 +2732,7 @@ func _open_guidebook() -> void:
 	_hud.set_prompt("")
 	_guidebook_ui.set_night_mode(state == GameState.NIGHT)
 	_guidebook_ui.open_guidebook(
-		day_number,
+		_display_day_number(),
 		manifest_config.service_train_number,
 		manifest_config.service_date_text,
 		manifest_config.ticket_day_code,
@@ -2881,13 +2881,11 @@ func _finalize_day_shift() -> void:
 	_active_modal = _shift_report_ui
 	if _shift_report_ui.has_method(&"set_external_input_locked"):
 		_shift_report_ui.call(&"set_external_input_locked", is_tutorial_mode)
-	_shift_report_ui.open_report(day_number, _retained_anomalies, _get_dead_passenger_data().size(), _penalty_log, _day_blessing_award)
+	_shift_report_ui.open_report(_display_day_number(), _retained_anomalies, _get_dead_passenger_data().size(), _penalty_log, _day_blessing_award)
 	_emit_tutorial_event(&"shift_report_opened")
 
 func _get_day_pass_target() -> int:
-	if day_pass_targets.is_empty():
-		return 100
-	return maxi(0, day_pass_targets[clampi(day_number - 1, 0, day_pass_targets.size() - 1)])
+	return maxi(0, day_pass_target)
 
 func _on_shift_report_presentation_finished() -> void:
 	_emit_tutorial_event(&"shift_report_revealed")
@@ -3302,10 +3300,11 @@ func _enter_night(enable_controls: bool = true, show_instruction: bool = true) -
 
 ## The two-day slice reuses the former day-4 and day-5 night constellations.
 ## The tutorial always teaches on the simple level-1 constellation.
-func _night_service_level_for_day(_day: int) -> int:
+func _night_service_level_for_day(day: int) -> int:
 	if is_tutorial_mode:
 		return 1
-	# The single-day build reuses the former day-2 constellation.
+	if day <= 1:
+		return 4
 	return 5
 
 
@@ -3577,7 +3576,7 @@ func _complete_night_service(assignments: Dictionary) -> void:
 			_show_heaven_ending()
 			return
 	_shift_report_ui.open_night_report(
-		day_number,
+		_display_day_number(),
 		total_count,
 		_night_blessing_award,
 		int(snapshot.get("blessings", 0))
@@ -3682,10 +3681,14 @@ func _refresh_day_blessing_hud() -> void:
 		return
 	var earnings: Dictionary = _get_day_blessing_preview()
 	_hud.set_service_progress(
-		day_number,
+		_display_day_number(),
 		int(earnings.get("net_earnings", 0)),
 		_get_day_pass_target()
 	)
+
+
+func _display_day_number() -> int:
+	return ShiftProgress.display_day(day_number)
 
 
 func _set_player_control_for_state() -> void:
@@ -3754,45 +3757,46 @@ func _maintenance_minigames_enabled() -> bool:
 
 
 func _blocked_aisle_enabled_for_level() -> bool:
-	# The single-day build includes luggage repacking alongside cleaning.
-	return true
+	return day_number == ShiftProgress.START_DAY
 
 
 func _clean_seat_enabled_for_level() -> bool:
-	# The single-day build includes cleaning alongside luggage repacking.
-	return true
+	return day_number == ShiftProgress.START_DAY
 
 
-## The merged single day keeps the former day-2 random luggage timing.
+## The campaign's first day uses the guided luggage timing/reset behavior.
 func _blocked_aisle_difficulty_day() -> bool:
-	return false
+	return day_number == ShiftProgress.START_DAY
 
 
-## The merged single day keeps the guided cleaning timing/reset behavior.
+## The same day also uses the guided cleaning timing/reset behavior.
 func _clean_seat_difficulty_day() -> bool:
-	return true
+	return day_number == ShiftProgress.START_DAY
 
 
 func _show_level_start_hint_if_needed() -> bool:
 	if not is_instance_valid(_hint_ui):
 		return false
-	var hint_id: StringName = &""
+	_pending_level_hints.clear()
 	if _blocked_aisle_difficulty_day():
-		hint_id = &"blocked_aisle"
-	elif _clean_seat_difficulty_day():
-		hint_id = &"clean_the_seat"
-	if hint_id.is_empty():
+		_pending_level_hints.append(&"blocked_aisle")
+	if _clean_seat_difficulty_day():
+		_pending_level_hints.append(&"clean_the_seat")
+	if _pending_level_hints.is_empty():
 		return false
 	_active_modal = _hint_ui
 	_player.movement_enabled = false
 	_player.interaction_enabled = false
 	_hud.set_prompt("")
-	_hint_ui.call(&"show_hint", hint_id)
+	_hint_ui.call(&"show_hint", _pending_level_hints.pop_front())
 	return true
 
 
 func _on_level_start_hint_dismissed() -> void:
 	if _active_modal != _hint_ui:
+		return
+	if not _pending_level_hints.is_empty():
+		_hint_ui.call(&"show_hint", _pending_level_hints.pop_front())
 		return
 	_active_modal = null
 	if state in [GameState.DAY, GameState.SUNSET]:
@@ -3909,7 +3913,10 @@ func _campaign_summary_with_current_day() -> Dictionary:
 	var previous: Variant = _shift_checkpoint.get("campaign_summary", {})
 	var summary: Dictionary = previous.duplicate(true) if previous is Dictionary else {}
 	var snapshot: Dictionary = _market_tool_state.call(&"get_snapshot")
-	summary["days_completed"] = maxi(int(summary.get("days_completed", 0)), day_number)
+	summary["days_completed"] = maxi(
+		int(summary.get("days_completed", 0)),
+		_display_day_number()
+	)
 	summary["correct_dropoffs"] = int(summary.get("correct_dropoffs", 0)) + _correct_drop_offs
 	summary["wrong_dropoffs"] = int(summary.get("wrong_dropoffs", 0)) + _wrong_drop_offs
 	summary["anomalies_retained"] = int(summary.get("anomalies_retained", 0)) + _retained_anomalies

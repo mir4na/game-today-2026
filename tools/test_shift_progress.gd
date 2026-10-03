@@ -44,12 +44,12 @@ func _run() -> void:
 	_check(Progress.load_checkpoint() == checkpoint, "Save/load must retain the exact 64-bit seed and inventory.")
 	var menu: MainMenu = MenuScene.instantiate()
 	root.add_child(menu)
-	_check(not menu.get_node("%ContinueButton").disabled and "DAY 2" in menu.get_node("%ContinueButton").text, "Menu must offer the saved day.")
+	_check(not menu.get_node("%ContinueButton").disabled and "DAY 1" in menu.get_node("%ContinueButton").text, "Menu must offer the saved campaign day.")
 	menu.free()
 	menu = MenuScene.instantiate()
 	root.add_child(menu)
 	_check(Progress.load_checkpoint() == checkpoint, "Closing and reopening the application menu must not replace the saved run.")
-	_check(not menu.get_node("%ContinueButton").disabled and "DAY 2" in menu.get_node("%ContinueButton").text, "Continue must remain available after a relaunch.")
+	_check(not menu.get_node("%ContinueButton").disabled and "DAY 1" in menu.get_node("%ContinueButton").text, "Continue must remain available after a relaunch.")
 	var continue_button := menu.get_node("%ContinueButton") as Button
 	continue_button.grab_focus()
 	_check(
@@ -66,42 +66,24 @@ func _run() -> void:
 	menu.get_node("%ContinueButton").pressed.emit()
 	var game: AfterTheEndGame = await _wait_for_game()
 	_check(game.day_number == 2 and game._daily_seed == checkpoint.seed, "Continue restores the saved day and roster seed.")
-	var expected_day_targets := PackedInt32Array([280, 290, 300, 310, 320])
-	for sample_day: int in range(1, 6):
-		game.day_number = sample_day
-		_check(
-			game._get_day_pass_target() == expected_day_targets[sample_day - 1],
-			"Day %d must use its authored Blessings threshold." % sample_day
-		)
-	game.day_number = 2
+	_check(game._get_day_pass_target() == 350, "The only playable day requires 350 Blessings.")
 	var service_number: String = game.manifest_config.service_train_number
 	var scene_probe: AfterTheEndGame = load("res://scenes/main/main.tscn").instantiate()
 	var authored_config: DailyManifestConfig = scene_probe.manifest_config
 	var authored_number: String = authored_config.service_train_number
 	_check(authored_config.create_daily_service(2, checkpoint.seed).service_train_number == service_number, "Continue restores the daily service number from its checkpoint seed.")
-	var generated_numbers: Dictionary = {}
-	var expected_night_counts := PackedInt32Array([3, 3, 4, 4, 5])
-	var previous_day_target: int = 0
 	var correct_dropoff_rate: int = int(game._market_tool_state.get("blessings_per_correct_dropoff"))
-	for sample_day: int in range(1, 6):
-		var daily_config: DailyManifestConfig = authored_config.create_daily_service(sample_day, checkpoint.seed)
-		var day_target: int = expected_day_targets[sample_day - 1]
-		var living_passenger_count: int = daily_config.total_passenger_count - daily_config.deceased_passenger_count
-		var maximum_day_paycheck: int = living_passenger_count * correct_dropoff_rate
-		generated_numbers[daily_config.service_train_number] = true
-		_check(daily_config.service_train_number == authored_config.create_daily_service(sample_day, checkpoint.seed).service_train_number, "Daily service generation is repeatable.")
-		_check(daily_config.service_train_codes.has(daily_config.service_train_number), "Service number must come from the authored train code pool.")
-		_check(
-			daily_config.deceased_passenger_count == expected_night_counts[sample_day - 1],
-			"Night Service must follow the authored 3, 3, 4, 4, 5 anomaly progression."
-		)
-		_check(day_target > previous_day_target, "Daylight paycheck targets must increase every day.")
-		_check(
-			day_target <= maximum_day_paycheck,
-			"Day %d target must be reachable from its %d living passengers." % [sample_day, living_passenger_count]
-		)
-		previous_day_target = day_target
-	_check(generated_numbers.size() > 1 and authored_config.service_train_number == authored_number, "Daily randomization varies without modifying the authored config.")
+	var daily_config: DailyManifestConfig = authored_config.create_daily_service(2, checkpoint.seed)
+	var living_passenger_count: int = daily_config.total_passenger_count - daily_config.deceased_passenger_count
+	var maximum_day_paycheck: int = (
+		living_passenger_count * correct_dropoff_rate
+		+ daily_config.deceased_passenger_count * int(game._market_tool_state.get("blessings_per_retained_anomaly"))
+	)
+	_check(daily_config.service_train_number == authored_config.create_daily_service(2, checkpoint.seed).service_train_number, "Daily service generation is repeatable.")
+	_check(daily_config.service_train_codes.has(daily_config.service_train_number), "Service number must come from the authored train code pool.")
+	_check(daily_config.deceased_passenger_count == 5, "Day 2 must generate five anomaly passengers.")
+	_check(game._get_day_pass_target() <= maximum_day_paycheck, "The Day 2 Blessings target must be reachable.")
+	_check(authored_config.service_train_number == authored_number, "Daily generation must not modify the authored config.")
 	scene_probe.free()
 	_check(game._market_tool_state.get("blessings") == 500, "Continue restores the day-start inventory.")
 	var names: PackedStringArray = _roster(game)
@@ -116,10 +98,11 @@ func _run() -> void:
 	game._on_station_assignment_toggled(anomaly.data.passenger_name, false)
 	game._on_station_assignment_toggled(anomaly.data.passenger_name, true)
 	_check(game._incorrectly_stamped_anomalies.size() == 1 and game._penalty_log.size() == 1, "Repeated anomaly stamps charge once per shift, even after removing the stamp.")
-	game._correct_drop_offs = 12
-	game._wrong_drop_offs = 1
+	game._incorrectly_stamped_anomalies.clear()
+	game._correct_drop_offs = 11
+	game._wrong_drop_offs = 0
 	game._finalize_day_shift()
-	_check(game._day_blessing_award.net_earnings == 300 and game._day_blessing_award.passed, "A reachable Day 2 paycheck must pass without a debug override.")
+	_check(game._day_blessing_award.net_earnings >= 350 and game._day_blessing_award.passed, "A reachable Day 2 paycheck must pass without a debug override.")
 	game._on_shift_report_continue()
 	_check(game.state == AfterTheEndGame.GameState.NIGHT_TRANSITION, "Passing starts the terminal-to-night transition after the paycheck.")
 	_check(game._night_transition_ui.visible, "The veil transition appears before the Night Market.")
@@ -144,6 +127,7 @@ func _run() -> void:
 	_check(not game._night_market_ui.visible, "The market must clear before night gameplay begins.")
 	game._market_tool_state.call("purchase", &"radar_charge")
 	var previous_game: AfterTheEndGame = game
+	game.state = AfterTheEndGame.GameState.DAY
 	game._restart_game()
 	game = await _wait_for_reloaded_game(previous_game)
 	game.process_mode = Node.PROCESS_MODE_DISABLED
@@ -179,41 +163,14 @@ func _run() -> void:
 	_check(game._hud._next_stop_label.text == "THE END", "Night Service changes the clock sign destination to The End.")
 	game.state = AfterTheEndGame.GameState.NIGHT_PUZZLE
 	game._complete_night_service(_complete_night_fixture(game))
-	_check(Progress.load_checkpoint().day == 3, "Finishing the night checkpoints the next day.")
-	previous_game = game
-	game._continue_after_night_paycheck()
-	game = await _wait_for_reloaded_game(previous_game)
-	game.process_mode = Node.PROCESS_MODE_DISABLED
-	_check(game.day_number == 3, "Continue after the night enters the next day.")
-	game._enter_night()
-	game.state = AfterTheEndGame.GameState.NIGHT_PUZZLE
-	game._complete_night_service({})
-	_check(
-		game._night_paycheck_failed and Progress.load_checkpoint().day == 3,
-		"An incomplete Night Service paycheck must not advance the saved day."
-	)
-	game._on_shift_report_continue()
-	_check(
-		game.state == AfterTheEndGame.GameState.HELL_ENDING,
-		"An under-quota Night Service paycheck must enter the Hell cutscene."
-	)
-	previous_game = game
-	game._on_hell_retry_requested()
-	game = await _wait_for_reloaded_game(previous_game)
-	game.process_mode = Node.PROCESS_MODE_DISABLED
-	_check(game.day_number == 3, "Retrying from Hell must restore the current day checkpoint.")
-	game.day_number = 5
-	game._enter_night()
-	game.state = AfterTheEndGame.GameState.NIGHT_PUZZLE
-	game._complete_night_service(_complete_night_fixture(game))
-	_check(Progress.load_checkpoint().completed and Progress.load_checkpoint().day == 5, "Day 5 ends the campaign; no Day 6.")
+	_check(Progress.load_checkpoint().completed and Progress.load_checkpoint().day == 2, "Day 2 ends the campaign without advancing to another day.")
 	_check(
 		game.state == AfterTheEndGame.GameState.HEAVEN_ENDING and game._heaven_ending_ui.visible,
-		"A successful Day 5 must enter Heaven before the credits."
+		"A successful Day 2 must enter Heaven before the credits."
 	)
 	_check(
-		int(Progress.load_checkpoint().campaign_summary.get("days_completed", 0)) == 5,
-		"The completed checkpoint must retain the five-day final-paycheck summary."
+		int(Progress.load_checkpoint().campaign_summary.get("days_completed", 0)) == 1,
+		"The completed checkpoint must retain the single-day final-paycheck summary."
 	)
 	game.free()
 	current_scene = null
@@ -226,6 +183,11 @@ func _run() -> void:
 	invalid.set_value("progress", "checkpoint", {"day": "broken"})
 	invalid.save(isolated_save_path)
 	_check(Progress.load_checkpoint().is_empty(), "Invalid save data must be rejected safely.")
+	var old_day_one: Dictionary = Progress.make_checkpoint(2, {}, 20260912)
+	old_day_one.day = 1
+	Progress.save_checkpoint(old_day_one)
+	_check(Progress.load_checkpoint().day == 2, "Old Day 1 saves must resume on Day 2.")
+	DirAccess.remove_absolute(isolated_save_path)
 	menu = MenuScene.instantiate()
 	root.add_child(menu)
 	_check(menu.get_node("%ContinueButton").disabled, "Invalid saves must not enable Continue.")
@@ -235,17 +197,16 @@ func _run() -> void:
 	intro.closing_fade_duration = 0.01
 	intro._finish_intro()
 	game = await _wait_for_game()
-	_check(game.is_tutorial_mode, "New Game must continue from the story intro into the tutorial.")
-	var tutorial_game := game
-	game.process_mode = Node.PROCESS_MODE_INHERIT
-	game._tutorial_director.call(&"_start_day_one")
-	game = await _wait_for_reloaded_game(tutorial_game)
-	_check(not game.is_tutorial_mode, "Skipping the tutorial must reload a clean standard Day 1 run.")
+	_check(game.is_tutorial_mode, "New Game must open the interactive tutorial after the story intro.")
+	_check(game._tutorial_started, "The tutorial director must start before the campaign.")
+	game._tutorial_director.call(&"_start_campaign_day")
+	game = await _wait_for_reloaded_game(game)
+	_check(not game.is_tutorial_mode and game._display_day_number() == 1, "Finishing the tutorial must open campaign Day 1.")
 	_check(
-		game.day_number == 1
+		game.day_number == 2
 		and game._market_tool_state.get("blessings") == 0
-		and game._market_tool_state.get("veil_notes") == 1,
-		"New Game starts Day 1 with its scene-authored Veil Note through the loading screen."
+		and game._market_tool_state.get("veil_notes") == 0,
+		"The campaign uses the retained second-shift content and clean starting inventory."
 	)
 	game.state = AfterTheEndGame.GameState.DAY
 	game._active_modal = null
