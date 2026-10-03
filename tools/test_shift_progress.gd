@@ -66,7 +66,7 @@ func _run() -> void:
 	menu.get_node("%ContinueButton").pressed.emit()
 	var game: AfterTheEndGame = await _wait_for_game()
 	_check(game.day_number == 2 and game._daily_seed == checkpoint.seed, "Continue restores the saved day and roster seed.")
-	_check(game._get_day_pass_target() == 350, "The only playable day requires 350 Blessings.")
+	_check(game._get_day_pass_target() == 300, "The only playable day requires 300 Blessings.")
 	var service_number: String = game.manifest_config.service_train_number
 	var scene_probe: AfterTheEndGame = load("res://scenes/main/main.tscn").instantiate()
 	var authored_config: DailyManifestConfig = scene_probe.manifest_config
@@ -102,7 +102,7 @@ func _run() -> void:
 	game._correct_drop_offs = 11
 	game._wrong_drop_offs = 0
 	game._finalize_day_shift()
-	_check(game._day_blessing_award.net_earnings >= 350 and game._day_blessing_award.passed, "A reachable Day 2 paycheck must pass without a debug override.")
+	_check(game._day_blessing_award.net_earnings >= 300 and game._day_blessing_award.passed, "A reachable Day 2 paycheck must pass without a debug override.")
 	game._on_shift_report_continue()
 	_check(game.state == AfterTheEndGame.GameState.NIGHT_TRANSITION, "Passing starts the terminal-to-night transition after the paycheck.")
 	_check(game._night_transition_ui.visible, "The veil transition appears before the Night Market.")

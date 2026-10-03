@@ -18,7 +18,7 @@ enum NewspaperEditionMode { RANDOM, FORCE_NON_DEATH, FORCE_DEATH }
 @export var night_music_track: StringName = &"gameplay_night"
 @export_category("Day Progression")
 @export_range(1, 5, 1) var day_number: int = 2
-@export_range(0, 9999, 10) var day_pass_target: int = 350
+@export_range(0, 9999, 10) var day_pass_target: int = 300
 @export_category("Day Route")
 @export var day_route: PackedStringArray
 @export_category("Station Service")

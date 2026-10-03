@@ -32,7 +32,7 @@ func _run() -> void:
 		+ daily.deceased_passenger_count * retained_reward
 	)
 	_check(game.day_number == 2, "The playable campaign starts on Day 2.")
-	_check(game._get_day_pass_target() == 350, "Day 2 requires 350 Blessings.")
+	_check(game._get_day_pass_target() == 300, "Day 2 requires 300 Blessings.")
 	_check(
 		game._get_day_pass_target() <= maximum_paycheck,
 		"The Day 2 quota must be reachable from the authored passenger roster."
@@ -63,5 +63,5 @@ func _run() -> void:
 	game.free()
 	market.free()
 	if _failures == 0:
-		print("PASS: the Day 2 quota is 350 and 40 seeds generate valid passenger rosters.")
+		print("PASS: the Day 2 quota is 300 and 40 seeds generate valid passenger rosters.")
 	quit(1 if _failures > 0 else 0)
